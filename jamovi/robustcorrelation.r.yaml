@@ -1,0 +1,246 @@
+---
+name:  robustcorrelation
+title: Robust Correlation Methods
+jrs:   '1.1'
+
+clearWith:
+    - dep
+    - method
+    - matrix_type
+    - show_pvalues
+    - sig_level
+    - p_adjust_method
+    - outlier_detection
+    - outlier_method
+    - outlier_threshold
+    - bootstrap_ci
+    - n_bootstrap
+    - confidence_level
+    - show_heatmap
+    - heatmap_colors
+    - low_color
+    - mid_color
+    - high_color
+    - show_diagnostics
+    - plot_width
+    - plot_height
+    - decimal_places
+
+items:
+    - name:  instructions
+      title: Instructions
+      type:  Html
+
+    - name: correlation_table
+      title: Correlation Matrix
+      type: Table
+      description: Correlation coefficients and significance tests
+      visible: true
+      clearWith:
+        - dep
+        - method
+        - sig_level
+        - p_adjust_method
+        - decimal_places
+      columns:
+        - name: var1
+          title: Variable 1
+          type: text
+        - name: var2
+          title: Variable 2
+          type: text
+        - name: correlation
+          title: Correlation
+          type: number
+          format: zto
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+          visible: (show_pvalues)
+        - name: pvalue_adj
+          title: p-value (adj)
+          type: number
+          format: zto,pvalue
+          visible: (show_pvalues && p_adjust_method:none != true)
+        - name: n
+          title: N
+          type: integer
+
+    - name: bootstrap_table
+      title: Bootstrap Confidence Intervals
+      type: Table
+      description: Bootstrap confidence intervals for correlations
+      visible: (bootstrap_ci)
+      clearWith:
+        - dep
+        - method
+        - bootstrap_ci
+        - n_bootstrap
+        - confidence_level
+      columns:
+        - name: var1
+          title: Variable 1
+          type: text
+        - name: var2
+          title: Variable 2
+          type: text
+        - name: correlation
+          title: Correlation
+          type: number
+          format: zto
+        - name: ci_lower
+          title: CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: CI Upper
+          type: number
+          format: zto
+        - name: bias
+          title: Bias
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+
+    - name: outlier_table
+      title: Outlier Detection Results
+      type: Table
+      description: Identified outliers and their statistics
+      visible: (outlier_detection)
+      clearWith:
+        - dep
+        - outlier_detection
+        - outlier_method
+        - outlier_threshold
+      columns:
+        - name: observation
+          title: Observation
+          type: integer
+        - name: distance
+          title: Distance
+          type: number
+          format: zto
+        - name: threshold
+          title: Threshold
+          type: number
+          format: zto
+        - name: outlier
+          title: Outlier
+          type: text
+        - name: extreme_variable
+          title: Extreme Variable
+          type: text
+
+    - name: method_comparison_table
+      title: Method Comparison
+      type: Table
+      description: Comparison of different correlation methods
+      visible: false
+      clearWith:
+        - dep
+        - method
+      columns:
+        - name: var1
+          title: Variable 1
+          type: text
+        - name: var2
+          title: Variable 2
+          type: text
+        - name: pearson
+          title: Pearson
+          type: number
+          format: zto
+        - name: spearman
+          title: Spearman
+          type: number
+          format: zto
+        - name: kendall
+          title: Kendall
+          type: number
+          format: zto
+        - name: robust
+          title: Robust
+          type: number
+          format: zto
+
+    - name: correlation_heatmap
+      title: Correlation Heatmap
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot_heatmap
+      requiresData: true
+      visible: (show_heatmap)
+      clearWith:
+        - dep
+        - method
+        - matrix_type
+        - heatmap_colors
+        - low_color
+        - mid_color
+        - high_color
+        - plot_width
+        - plot_height
+
+    - name: outlier_plot
+      title: Outlier Detection Plot
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot_outliers
+      requiresData: true
+      visible: (outlier_detection)
+      clearWith:
+        - dep
+        - outlier_detection
+        - outlier_method
+        - outlier_threshold
+        - plot_width
+        - plot_height
+
+    - name: diagnostic_plots
+      title: Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_diagnostics
+      requiresData: true
+      visible: (show_diagnostics)
+      clearWith:
+        - dep
+        - method
+        - show_diagnostics
+        - plot_width
+        - plot_height
+
+    - name: scatterplot_matrix
+      title: Scatterplot Matrix
+      type: Image
+      width: 800
+      height: 800
+      renderFun: .plot_scatter_matrix
+      requiresData: true
+      visible: false
+      clearWith:
+        - dep
+        - method
+        - outlier_detection
+        - plot_width
+        - plot_height
+
+refs:
+    - Hmisc
+    - corrplot
+    - ggplot2
+    - ggcorrplot
+    - MASS
+    - robustbase
+    - WRS2
+    - boot
+    - ClinicoPathJamoviModule
+
+...

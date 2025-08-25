@@ -1,0 +1,297 @@
+---
+name:  robustcorrelation
+title: Robust Correlation Methods
+menuGroup: ClinicoPath Descriptives
+menuSubgroup: Continuous vs Continuous
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive robust correlation analysis with multiple correlation methods,
+        outlier detection, diagnostic plots, and bootstrap confidence intervals.
+        Includes Spearman, Kendall, Percentage Bend, Biweight Midcorrelation,
+        Minimum Volume Ellipsoid (MVE), and Minimum Covariance Determinant (MCD)
+        correlation methods.
+    R:
+        dontrun: true
+        usage: |
+            # Load test data
+            data("mtcars")
+            
+            # Basic robust correlation analysis
+            robustcorrelation(
+              data = mtcars,
+              dep = c("mpg", "hp", "wt", "qsec"),
+              method = "spearman"
+            )
+            
+            # Advanced robust correlation with outlier detection
+            robustcorrelation(
+              data = mtcars,
+              dep = c("mpg", "hp", "wt", "qsec", "disp"),
+              method = "percentage_bend",
+              outlier_detection = TRUE,
+              outlier_method = "mcd",
+              bootstrap_ci = TRUE,
+              n_bootstrap = 1000
+            )
+            
+            # Multiple robust methods comparison
+            robustcorrelation(
+              data = mtcars,
+              dep = c("mpg", "hp", "wt"),
+              method = "biweight",
+              show_heatmap = TRUE,
+              matrix_type = "lower"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: dep
+      title: Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            List of continuous variables for robust correlation analysis.
+            All variables must be numeric with sufficient variation.
+
+    - name: method
+      title: 'Correlation Method'
+      type: List
+      options:
+        - title: Spearman
+          name: spearman
+        - title: Kendall
+          name: kendall
+        - title: Percentage Bend
+          name: percentage_bend
+        - title: Biweight Midcorrelation
+          name: biweight
+        - title: Minimum Volume Ellipsoid (MVE)
+          name: mve
+        - title: Minimum Covariance Determinant (MCD)
+          name: mcd
+        - title: Pearson (for comparison)
+          name: pearson
+      default: spearman
+      description:
+          R: >
+            Robust correlation method to use. Spearman and Kendall are rank-based,
+            percentage bend and biweight are robust to outliers, MVE and MCD are
+            based on robust covariance estimation.
+
+    - name: matrix_type
+      title: Matrix Display
+      type: List
+      options:
+        - title: Upper Triangle
+          name: upper
+        - title: Lower Triangle
+          name: lower
+        - title: Full Matrix
+          name: full
+      default: upper
+      description:
+          R: >
+            Display type for correlation matrix.
+
+    - name: show_pvalues
+      title: Show P-values
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display significance p-values in correlation matrix.
+
+    - name: sig_level
+      title: Significance Level
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.2
+      description:
+          R: >
+            Significance level for correlation tests.
+
+    - name: p_adjust_method
+      title: P-value Adjustment
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: Hochberg
+          name: hochberg
+        - title: BH (FDR)
+          name: BH
+        - title: BY
+          name: BY
+      default: none
+      description:
+          R: >
+            Method for adjusting p-values for multiple testing.
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform outlier detection analysis.
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+        - title: Mahalanobis Distance
+          name: mahalanobis
+        - title: Minimum Covariance Determinant
+          name: mcd
+        - title: Z-score
+          name: zscore
+        - title: IQR Method
+          name: iqr
+      default: mcd
+      description:
+          R: >
+            Method for detecting outliers in the data.
+
+    - name: outlier_threshold
+      title: Outlier Threshold
+      type: Number
+      default: 2.5
+      min: 1.5
+      max: 5.0
+      description:
+          R: >
+            Threshold for outlier detection (in standard deviations or equivalent).
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for correlations.
+
+    - name: n_bootstrap
+      title: Bootstrap Iterations
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap iterations for confidence intervals.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          R: >
+            Confidence level for bootstrap intervals.
+
+    - name: show_heatmap
+      title: Show Correlation Heatmap
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display correlation matrix as a heatmap visualization.
+
+    - name: heatmap_colors
+      title: Heatmap Color Scheme
+      type: List
+      options:
+        - title: Blue-White-Red
+          name: blue_white_red
+        - title: Red-Yellow-Blue
+          name: red_yellow_blue
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: Custom
+          name: custom
+      default: blue_white_red
+      description:
+          R: >
+            Color scheme for correlation heatmap.
+
+    - name: low_color
+      title: Low Correlation Color
+      type: String
+      default: '#3B82C5'
+      description:
+          R: >
+            Color for low (negative) correlation values (when using custom colors).
+
+    - name: mid_color
+      title: Mid Correlation Color
+      type: String
+      default: 'white'
+      description:
+          R: >
+            Color for mid (zero) correlation values (when using custom colors).
+
+    - name: high_color
+      title: High Correlation Color
+      type: String
+      default: '#E74C3C'
+      description:
+          R: >
+            Color for high (positive) correlation values (when using custom colors).
+
+    - name: show_diagnostics
+      title: Show Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate diagnostic plots for robust correlation analysis.
+
+    - name: plot_width
+      title: Plot Width
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+      description:
+          R: >
+            Width of plots in pixels.
+
+    - name: plot_height
+      title: Plot Height
+      type: Integer
+      default: 450
+      min: 300
+      max: 800
+      description:
+          R: >
+            Height of plots in pixels.
+
+    - name: decimal_places
+      title: Decimal Places
+      type: Integer
+      default: 3
+      min: 2
+      max: 6
+      description:
+          R: >
+            Number of decimal places for correlation coefficients.
+
+...

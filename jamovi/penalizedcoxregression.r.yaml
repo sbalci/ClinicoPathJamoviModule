@@ -1,0 +1,96 @@
+---
+name: penalizedcoxregression
+title: Penalized Cox Regression
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: modelSummary
+    title: Model Summary
+    type: Table
+    visible: true
+    columns:
+      - name: parameter
+        title: Parameter
+        type: text
+      - name: value
+        title: Value
+        type: text
+
+  - name: selectedVariables
+    title: Selected Variables
+    type: Table
+    visible: (variableSelection)
+    columns:
+      - name: variable
+        title: Variable
+        type: text
+      - name: coefficient
+        title: Coefficient
+        type: number
+      - name: hazard_ratio
+        title: Hazard Ratio
+        type: number
+      - name: importance
+        title: Importance Score
+        type: number
+
+  - name: crossValidationResults
+    title: Cross-Validation Results
+    type: Table
+    visible: (crossValidation)
+    columns:
+      - name: lambda
+        title: Lambda
+        type: number
+      - name: cv_error
+        title: CV Error
+        type: number
+      - name: cv_se
+        title: CV SE
+        type: number
+      - name: n_variables
+        title: Number of Variables
+        type: integer
+
+  - name: penaltyPath
+    title: Regularization Path
+    type: Table
+    visible: true
+    columns:
+      - name: step
+        title: Step
+        type: integer
+      - name: lambda
+        title: Lambda
+        type: number
+      - name: df
+        title: Degrees of Freedom
+        type: number
+      - name: dev_ratio
+        title: Deviance Ratio
+        type: number
+
+  - name: coefficientPath
+    title: Coefficient Path Plot
+    type: Image
+    visible: (plotCoefficientPath)
+    width: 700
+    height: 500
+    renderFun: .coefficientPath
+
+  - name: crossValidationPlot
+    title: Cross-Validation Plot
+    type: Image
+    visible: (plotCrossValidation && crossValidation)
+    width: 600
+    height: 400
+    renderFun: .crossValidationPlot
+
+  - name: analysisReport
+    title: Analysis Report
+    type: Html
+    visible: true

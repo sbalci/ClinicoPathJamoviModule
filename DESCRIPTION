@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.31.43
-Date: 2025-08-24
+Version: 0.0.31.45
+Date: 2025-08-25
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -99,6 +99,12 @@ Imports:
     skimr,
     kappaSize,
     glmnet,
+    igraph,
+    qgraph,
+    ggraph,
+    visNetwork,
+    tidyr,
+    stringr,
     xml2,
     labelled,
     chisq.posthoc.test,
@@ -235,7 +241,32 @@ Imports:
     Icens,
     regplot,
     smcure,
-    flexsurvcure
+    flexsurvcure,
+    brms,
+    metaBMA,
+    robustbase,
+    WGCNA,
+    corrplot,
+    penalized,
+    mvtnorm,
+    corpcor,
+    spBayesSurv,
+    BoomSpikeSlab,
+    rstanarm,
+    MCMCglmm,
+    bayesplot,
+    rjags,
+    coda,
+    DT,
+    pscl,
+    lavaan,
+    huge,
+    parcor,
+    MBESS,
+    robust,
+    robustHD,
+    RANN,
+    fastICA
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -248,7 +279,8 @@ Remotes:
     CHOP-CGTInformatics/ggswim,
     alstockdale/sumvar,
     mlr-org/mlr3extralearners@v1.0.0,
-    CCICB/ggEDA
+    CCICB/ggEDA,
+    cran/parcor
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

@@ -4175,6 +4175,57 @@ analyses:
     menuSubgroup: ClinicoPath Survival
     menuTitle: Flexible Relative Survival Analysis
     menuSubtitle: Relative survival with spline smoothing (flexrsurv approach)
+  - title: Bayesian Meta-Analysis
+    name: bayesianmetaanalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Bayesian
+    menuTitle: Bayesian Meta-Analysis
+    menuSubtitle: Hierarchical models for evidence synthesis
+    description: |-
+      Performs Bayesian meta-analysis using hierarchical models for evidence 
+      synthesis across multiple studies. This approach accounts for both 
+      within-study and between-study variability using informative prior 
+      distributions and MCMC sampling methods.
+  - title: Penalized Cox Regression
+    name: penalizedcoxregression
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Penalized Cox Regression
+    menuSubtitle: L1/L2 penalized survival models for high-dimensional data
+    description: >-
+      Performs penalized Cox proportional hazards regression for
+      high-dimensional 
+
+      survival data using L1 (LASSO), L2 (Ridge), and Elastic Net
+      regularization.
+
+      This method is particularly useful when the number of covariates
+      approaches
+
+      or exceeds the number of observations, or when variable selection is
+      needed.
+  - title: Robust Correlation Methods
+    name: robustcorrelation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath Descriptives
+    menuSubgroup: Continuous vs Continuous
+    menuTitle: Robust Correlation Methods
+    description: >
+      Comprehensive robust correlation analysis with multiple correlation
+      methods,
+
+      outlier detection, diagnostic plots, and bootstrap confidence intervals.
+
+      Includes Spearman, Kendall, Percentage Bend, Biweight Midcorrelation,
+
+      Minimum Volume Ellipsoid (MVE), and Minimum Covariance Determinant (MCD)
+
+      correlation methods.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
