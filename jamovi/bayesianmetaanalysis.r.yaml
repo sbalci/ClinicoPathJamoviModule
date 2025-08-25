@@ -1,0 +1,133 @@
+---
+name: bayesianmetaanalysis
+title: Bayesian Meta-Analysis
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: modelSummary
+    title: Model Summary
+    type: Table
+    visible: true
+    columns:
+      - name: parameter
+        title: Parameter
+        type: text
+      - name: posterior_mean
+        title: Posterior Mean
+        type: number
+      - name: posterior_sd
+        title: Posterior SD
+        type: number
+      - name: credible_lower
+        title: Lower CI
+        type: number
+      - name: credible_upper
+        title: Upper CI
+        type: number
+      - name: effective_sample_size
+        title: ESS
+        type: number
+      - name: rhat
+        title: R-hat
+        type: number
+
+  - name: studyEffects
+    title: Study Effects
+    type: Table
+    visible: true
+    columns:
+      - name: study
+        title: Study
+        type: text
+      - name: observed_effect
+        title: Observed Effect
+        type: number
+      - name: posterior_effect
+        title: Posterior Effect
+        type: number
+      - name: credible_lower
+        title: Lower CI
+        type: number
+      - name: credible_upper
+        title: Upper CI
+        type: number
+
+  - name: mcmcDiagnostics
+    title: MCMC Diagnostics
+    type: Table
+    visible: true
+    columns:
+      - name: parameter
+        title: Parameter
+        type: text
+      - name: n_effective
+        title: Effective Sample Size
+        type: number
+      - name: rhat
+        title: R-hat
+        type: number
+      - name: mcmc_se
+        title: MCMC SE
+        type: number
+
+  - name: modelComparison
+    title: Model Comparison
+    type: Table
+    visible: (modelType:hierarchical)
+    columns:
+      - name: model
+        title: Model
+        type: text
+      - name: waic
+        title: WAIC
+        type: number
+      - name: looic
+        title: LOOIC
+        type: number
+      - name: effective_params
+        title: Effective Parameters
+        type: number
+
+  - name: publicationBiasResults
+    title: Publication Bias Assessment
+    type: Table
+    visible: (publicationBias)
+    columns:
+      - name: test
+        title: Test
+        type: text
+      - name: statistic
+        title: Statistic
+        type: number
+      - name: p_value
+        title: p-value
+        type: number
+        format: zto,pvalue
+      - name: interpretation
+        title: Interpretation
+        type: text
+
+  - name: forestPlot
+    title: Bayesian Forest Plot
+    type: Image
+    visible: (plotForest)
+    width: 700
+    height: 500
+    renderFun: .forestPlot
+
+  - name: posteriorPlot
+    title: Posterior Distributions
+    type: Image
+    visible: (plotPosterior)
+    width: 600
+    height: 400
+    renderFun: .posteriorPlot
+
+  - name: analysisReport
+    title: Analysis Report
+    type: Html
+    visible: true

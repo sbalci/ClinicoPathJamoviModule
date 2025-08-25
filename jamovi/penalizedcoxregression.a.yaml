@@ -1,0 +1,176 @@
+---
+name: penalizedcoxregression
+title: Penalized Cox Regression
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Survival
+menuTitle: Penalized Cox Regression
+menuSubtitle: L1/L2 penalized survival models for high-dimensional data
+
+description:
+    main: |
+        Performs penalized Cox proportional hazards regression for high-dimensional 
+        survival data using L1 (LASSO), L2 (Ridge), and Elastic Net regularization.
+        This method is particularly useful when the number of covariates approaches
+        or exceeds the number of observations, or when variable selection is needed.
+        
+        Key features:
+        - LASSO (L1) regularization for automatic variable selection
+        - Ridge (L2) regularization for correlated predictors
+        - Elastic Net combining L1 and L2 penalties
+        - Cross-validation for optimal penalty parameter selection
+        - Coefficient path visualization across penalty values
+        - Variable importance ranking and selection
+        - High-dimensional survival analysis capabilities
+        
+    R:
+        dontrun: false
+        usage: |
+            # Penalized Cox regression with LASSO
+            penalizedcoxregression(
+                data = data,
+                time = "time",
+                status = "status",
+                predictors = c("age", "gene1", "gene2", "treatment"),
+                penaltyType = "lasso",
+                crossValidation = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            the time variable for survival analysis
+
+    - name: status
+      title: Status Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            the status variable (0 = censored, 1 = event)
+
+    - name: predictors
+      title: Predictors
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            predictor variables for the penalized Cox model
+
+    - name: penaltyType
+      title: Penalty Type
+      type: List
+      options:
+        - lasso
+        - ridge
+        - elastic_net
+        - adaptive_lasso
+      default: lasso
+      description:
+          R: >
+            the type of penalty to apply in regularization
+
+    - name: alphaValue
+      title: Elastic Net Alpha
+      type: Number
+      min: 0
+      max: 1
+      default: 0.5
+      description:
+          R: >
+            mixing parameter for elastic net (0 = ridge, 1 = lasso)
+
+    - name: crossValidation
+      title: Cross-Validation
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to use cross-validation for penalty parameter selection
+
+    - name: cvFolds
+      title: CV Folds
+      type: Integer
+      min: 3
+      max: 20
+      default: 10
+      description:
+          R: >
+            number of folds for cross-validation
+
+    - name: lambdaSelection
+      title: Lambda Selection
+      type: List
+      options:
+        - lambda.min
+        - lambda.1se
+        - custom
+      default: lambda.1se
+      description:
+          R: >
+            criterion for selecting the regularization parameter
+
+    - name: customLambda
+      title: Custom Lambda Value
+      type: Number
+      min: 0.0001
+      max: 100
+      default: 0.01
+      description:
+          R: >
+            custom lambda value when using custom selection
+
+    - name: standardize
+      title: Standardize Predictors
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to standardize predictor variables
+
+    - name: plotCoefficientPath
+      title: Plot Coefficient Path
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to plot coefficient paths across lambda values
+
+    - name: plotCrossValidation
+      title: Plot Cross-Validation
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to plot cross-validation error curves
+
+    - name: variableSelection
+      title: Variable Selection Output
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to output selected variables and their importance

@@ -1,0 +1,202 @@
+---
+name: bayesianmetaanalysis
+title: Bayesian Meta-Analysis
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Bayesian
+menuTitle: Bayesian Meta-Analysis
+menuSubtitle: Hierarchical models for evidence synthesis
+
+description:
+    main: |
+        Performs Bayesian meta-analysis using hierarchical models for evidence 
+        synthesis across multiple studies. This approach accounts for both 
+        within-study and between-study variability using informative prior 
+        distributions and MCMC sampling methods.
+        
+        Key features:
+        - Random effects and fixed effects Bayesian meta-analysis
+        - Multiple outcome types (continuous, binary, time-to-event)
+        - Hierarchical modeling with informative and non-informative priors
+        - MCMC sampling with convergence diagnostics
+        - Posterior predictive checking and model comparison
+        - Meta-regression with study-level covariates
+        - Publication bias assessment and adjustment
+        
+    R:
+        dontrun: false
+        usage: |
+            # Bayesian meta-analysis of treatment effects
+            bayesianmetaanalysis(
+                data = data,
+                effectSize = "effect",
+                standardError = "se",
+                studyId = "study",
+                modelType = "random_effects",
+                outcomeType = "continuous"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: effectSize
+      title: Effect Size
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            the effect size variable (e.g., mean difference, log odds ratio)
+
+    - name: standardError
+      title: Standard Error
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            the standard error of the effect size
+
+    - name: studyId
+      title: Study Identifier
+      type: Variable
+      suggested:
+        - nominal
+        - id
+      permitted:
+        - factor
+        - id
+      description:
+          R: >
+            variable identifying individual studies
+
+    - name: covariates
+      title: Study-Level Covariates
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            study-level covariates for meta-regression
+
+    - name: modelType
+      title: Model Type
+      type: List
+      options:
+        - fixed_effects
+        - random_effects
+        - hierarchical
+      default: random_effects
+      description:
+          R: >
+            the type of meta-analysis model to fit
+
+    - name: outcomeType
+      title: Outcome Type
+      type: List
+      options:
+        - continuous
+        - binary
+        - time_to_event
+        - correlation
+      default: continuous
+      description:
+          R: >
+            the type of outcome being meta-analyzed
+
+    - name: priorType
+      title: Prior Type
+      type: List
+      options:
+        - non_informative
+        - weakly_informative
+        - informative
+        - empirical_bayes
+      default: weakly_informative
+      description:
+          R: >
+            the type of prior distribution to use
+
+    - name: mcmcChains
+      title: MCMC Chains
+      type: Integer
+      min: 1
+      max: 8
+      default: 4
+      description:
+          R: >
+            number of MCMC chains for posterior sampling
+
+    - name: mcmcIterations
+      title: MCMC Iterations
+      type: Integer
+      min: 1000
+      max: 50000
+      default: 5000
+      description:
+          R: >
+            number of MCMC iterations per chain
+
+    - name: warmupIterations
+      title: Warmup Iterations
+      type: Integer
+      min: 500
+      max: 25000
+      default: 2500
+      description:
+          R: >
+            number of warmup (burn-in) iterations per chain
+
+    - name: credibleInterval
+      title: Credible Interval
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            credible interval probability
+
+    - name: publicationBias
+      title: Publication Bias Assessment
+      type: Bool
+      default: false
+      description:
+          R: >
+            whether to assess and adjust for publication bias
+
+    - name: posteriorPredictive
+      title: Posterior Predictive Checks
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to perform posterior predictive model checking
+
+    - name: plotForest
+      title: Plot Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to create Bayesian forest plot
+
+    - name: plotPosterior
+      title: Plot Posterior Distributions
+      type: Bool
+      default: true
+      description:
+          R: >
+            whether to plot posterior distributions
