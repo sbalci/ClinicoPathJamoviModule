@@ -47,6 +47,8 @@ Function: **`$ARGUMENTS`**
 - User interface clarity
 - Help text and explanatory content
 - Accessibility considerations
+- Natural‑language summary of results (plain, copy‑ready).
+- Explanatory output panel: what the function does, when/how to use it, assumptions/caveats, and a short user guide.
 
 ### ⚡ **Performance & Scalability**
 
@@ -54,6 +56,39 @@ Function: **`$ARGUMENTS`**
 - Memory efficiency
 - Large dataset handling
 - Optimization opportunities
+
+### **Clinician‑Friendly (Pathologist/Oncologist) Additions**
+
+- Plain‑language labels and tooltips for each option (avoid jargon; show examples: e.g., “Select tumor grade (G1/G2/G3)”).
+- In‑app micro‑explanations for statistics (what the test answers clinically, assumptions, effect size meaning, minimal sample heuristics).
+- Glossary panel (AUC, OR, HR, RMST, FDR, ICC, kappa, DeLong, Fine–Gray, etc.) with 1–2 line clinical interpretations.
+- Guided mode (wizard): “Pick your outcome → choose groups → check assumptions → run → interpret outputs.”
+- Contextual warnings for misuse (e.g., “Paired test selected but groups are independent”).
+- Example interpretations beneath each key result (e.g., “An OR of 2.1 means the odds are ~2× higher in group A”).
+- One‑click report sentences (auto‑generated paragraphs with placeholders filled from results; copy to clipboard).
+- Defaults tuned to common clinical scenarios; show ‘Recommended’ badges.
+- Accessibility & readability: larger font option, color‑blind‑safe palettes, avoid red‑green only.
+- Internationalization hooks (TR/EN) for labels, help, and report templates.
+
+### 🩺 Clinician‑Friendly UX & Explanations
+
+| Area | Status | Notes |
+|---|---:|---|
+| Plain‑language labels/tooltips | ☐ | |
+| Micro‑explanations per option | ☐ | |
+| Glossary entries present | ☐ | |
+| Guided flow (wizard) | ☐ | |
+| Misuse warnings/guards | ☐ | |
+| Example interpretations in outputs | ☐ | |
+| Report sentence templates | ☐ | |
+| Sensible defaults & presets | ☐ | |
+| Accessibility (CB‑safe, font) | ☐ | |
+| i18n (TR/EN) coverage | ☐ | |
+| Natural‑language summary in output | ☐ | |
+| About/How‑to section present | ☐ | |
+| Caveats & assumptions panel | ☐ | |
+| Guidance links/examples | ☐ | |
+
 
 ## Review Response Format
 
@@ -66,7 +101,6 @@ Function: **`$ARGUMENTS`**
 **Performance**: EXCELLENT/GOOD/NEEDS_WORK  
 
 **User Experience**: EXCELLENT/GOOD/NEEDS_WORK  
-
 
 #### 🏆 **STRENGTHS**
 
@@ -92,6 +126,27 @@ Function: **`$ARGUMENTS`**
 2. [User experience enhancements]
 3. [Future-proofing recommendations]
 
+#### **Clinician‑Friendly Improvements:**
+
+- Add plain‑language **help** for each option; surface assumptions and when to choose a method.
+- Provide **Example interpretation** blocks under tables/plots.
+- Add **guided mode** that enforces a recommended sequence (variables → assumptions → run → interpret).
+- Include **copy‑ready report sentences** with placeholders auto‑filled from results.
+- Add **misuse detection** (e.g., warn if expected counts < 5 for chi‑square; suggest Fisher’s exact).
+- Offer **clinical presets** (e.g., “2×2 diagnostic test,” “KM survival with median & 95% CI,” “ROC with DeLong CI”).
+- Provide **TR/EN translations** and ensure medical terminology is consistent.
+- Use **color‑blind‑safe** default palettes and increase table readability (thousands separators, units).
+
+
+**Natural‑language summaries & Explanatory Outputs:**
+
+- Add a top‑level **Summary** box with a plain‑language paragraph that names the test/model, the comparison, key effect (with CI) and p‑value, and one clinical interpretation sentence.
+- Add an **About this analysis** panel that briefly explains what the function does, when to use it, inputs required, and typical outputs (with links to docs).
+- Add a **Caveats & assumptions** panel that lists assumptions, data requirements (e.g., expected counts, proportional hazards), and common pitfalls; surface contextual warnings if violated.
+- Provide a **How to use** checklist (variables → options → run → interpret), and, if possible, a mini example with mock numbers.
+
+
+
 #### 🔧 **SPECIFIC RECOMMENDATIONS**
 
 **Architecture:**
@@ -99,6 +154,24 @@ Function: **`$ARGUMENTS`**
 ```r
 # Suggested refactoring
 ```
+
+
+
+#### 📋 **ACTION ITEMS**
+
+- [ ] [Specific actionable item]
+- [ ] [Another specific item]
+- [ ] Add plain‑language tooltips and help for all options.
+- [ ] Insert example‑interpretation blocks for key outputs.
+- [ ] Implement misuse guards (e.g., switch to Fisher’s exact when expected counts < 5).
+- [ ] Add natural‑language **Summary** box with copy‑ready text.
+- [ ] Add **About this analysis** panel (what/when/how/outputs).
+- [ ] Add **Caveats & assumptions** panel with contextual warnings.
+- [ ] [Enhancement opportunity]
+- [ ] [Code quality improvement]
+
+
+
 
 **Performance:**
 
@@ -118,12 +191,76 @@ Function: **`$ARGUMENTS`**
 # UI improvements
 ```
 
+# .u.yaml (labels & tooltips)
+
+```yaml
+children:
+  - type: ComboBox
+    name: test
+    label: "Group comparison test"
+    help: "Choose the method. If data are not normally distributed or sample sizes are small, prefer Mann–Whitney U."
+    options:
+      - label: "t‑test (means)"
+        value: ttest
+      - label: "Mann–Whitney U (medians)"
+        value: wilcox
+      - label: "Welch t‑test (unequal variances)"
+        value: welch
+  - type: CheckBox
+    name: assume_equal_var
+    label: "Assume equal variances"
+
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Analysis Output
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummaries
+                label: Analysis Summary
+              - type: CheckBox
+                name: showExplanations
+                label: Show Explanations
+
+
+```
+
+```yaml
+# .r.yaml (report sentences)
+items:
+  - name: report
+    type: Html
+    title: "Report sentence"
+```
+
+
+```r
+# .b.R (auto‑generated interpretation)
+interp <- sprintf(
+  "The %s between %s and %s was %s (%.2f, 95%% CI %.2f–%.2f), p = %.3f.",
+  if (test == "ttest") "difference in means" else "difference in distributions",
+  g1, g2, stat_name, stat_value, ci_low, ci_high, pval
+)
+self$results$report$setContent(interp)
+```
+
+
 #### 📋 **ACTION ITEMS**
 
 **High Priority:**
 
 - [ ] [Specific actionable item]
 - [ ] [Another specific item]
+- [ ] Add plain‑language tooltips and help for all options.
+- [ ] Insert example‑interpretation blocks for key outputs.
+- [ ] Implement misuse guards (e.g., switch to Fisher’s exact when expected counts < 5).
 
 **Medium Priority:**
 

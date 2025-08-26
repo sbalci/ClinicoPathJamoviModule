@@ -29,8 +29,7 @@ echo "/document-function" | claude
 ## JJStatsPlotT (12 functions)
 
 - jwaffle - Waffle Charts
-echo "/check-function jwaffle" | claude
-echo "/review-function jwaffle" | claude
+
 echo "/fix-function jwaffle" | claude
 echo "/document-function jwaffle" | claude
 

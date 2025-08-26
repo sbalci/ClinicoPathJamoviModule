@@ -618,7 +618,7 @@ analyses:
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Hull Plot
     menuSubtitle: Cluster Visualization with ggforce
@@ -638,7 +638,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -789,7 +789,7 @@ analyses:
   - title: Group and Summarize
     name: groupsummary
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuTitle: Group and Summarize
     menuSubgroup: ClinicoPath Descriptives
     description: Group data by categorical variables and calculate summary statistics
@@ -849,7 +849,7 @@ analyses:
     name: ggprism
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: GraphPad Prism Style Plots
     description: >
@@ -944,7 +944,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -983,7 +983,7 @@ analyses:
   - title: Date Field Correction
     name: datecorrection
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Data Preparation
     menuTitle: Date Field Correction
     menuSubtitle: Multi-Package Date Standardization
@@ -1047,7 +1047,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1060,7 +1060,7 @@ analyses:
   - title: Power Analysis for Survival Studies
     name: powersurvival
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuTitle: Power Analysis for Survival Studies
     menuSubgroup: Design and Analysis
     menuSubtitle: Power analysis for survival studies
@@ -1084,7 +1084,7 @@ analyses:
   - title: Survival Analysis Power & Sample Size
     name: survivalpower
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuTitle: Survival Analysis Power & Sample Size
     menuSubgroup: Design and Analysis
     menuSubtitle: Power Analysis for Survival Studies
@@ -1128,7 +1128,7 @@ analyses:
   - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Drafts
     menuTitle: Overall, Cause Specific, and Competing Survival
     menuSubtitle: Survival for Different Outcomes
@@ -1352,7 +1352,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Analyze combined test results
@@ -1456,7 +1456,7 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Dendrogram
     menuSubgroup: Drafts
     ribbon: analyses
@@ -1584,8 +1584,13 @@ analyses:
     menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
-    description: |
-      'Creates waffle charts to visualize distributions and proportions'
+    description: >
+      'Creates waffle charts to visualize categorical distributions and
+      proportions using colored squares. Ideal for showing parts-of-whole
+      relationships in clinical data such as disease subtypes, treatment
+      outcomes, or risk category distributions. Each square represents a
+      proportion of the total sample, making it easy to see relative frequencies
+      across categories.'
     ribbon: analyses
     category: analyses
   - title: Automatic Plot Selection
@@ -1624,7 +1629,7 @@ analyses:
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Drafts
     menuTitle: Line Chart
     menuSubtitle: Time Series and Trend Analysis
@@ -1637,7 +1642,7 @@ analyses:
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Drafts
     menuTitle: Lollipop Chart
     ribbon: analyses
@@ -1681,7 +1686,7 @@ analyses:
   - title: Arc Diagram
     name: jjarcdiagram
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Network
     menuTitle: Arc Diagram
     description: >
@@ -1766,7 +1771,7 @@ analyses:
   - title: River Plots
     name: riverplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots
     menuSubtitle: Flow and Transition Visualization
@@ -1837,7 +1842,7 @@ analyses:
   - title: Segmented Total Bar Charts
     name: ggsegmentedtotalbar
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuTitle: Segmented Total Bar Charts
     menuSubgroup: ClinicoPath Advanced Plots
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
@@ -2069,7 +2074,7 @@ analyses:
     name: agepyramid2
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Age Pyramid
   - title: Alluvial Diagrams
@@ -2696,7 +2701,7 @@ analyses:
     name: mediansurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: ClinicoPathT
     menuSubgroup: Survival Analysis
     menuTitle: Median Survival Comparisons
     description: >-
@@ -4021,7 +4026,7 @@ analyses:
     name: poweranalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Specialized Survival Methods
     menuTitle: Power Analysis
     menuSubtitle: Comprehensive power and sample size calculations for survival studies
@@ -4527,6 +4532,18 @@ analyses:
       importance,
 
       SHAP values, and other interpretability methods.
+  - title: Power Analysis for Competing Risks Studies
+    name: powercomprisk
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: jsurvival Power Analysis
+    menuTitle: Power Analysis for Competing Risks Studies
+    description: >
+      Performs power analysis and sample size calculations for competing risks 
+      studies. Calculates power for testing differences in cumulative incidence 
+      functions between groups using Gray's test and subdistribution hazard
+      models.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

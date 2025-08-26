@@ -14,7 +14,9 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             color_palette = "default",
             show_legend = TRUE,
             mytitle = "",
-            legendtitle = "", ...) {
+            legendtitle = "",
+            showSummaries = FALSE,
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -80,6 +82,14 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "legendtitle",
                 legendtitle,
                 default="")
+            private$..showSummaries <- jmvcore::OptionBool$new(
+                "showSummaries",
+                showSummaries,
+                default=FALSE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
 
             self$.addOption(private$..counts)
             self$.addOption(private$..groups)
@@ -90,6 +100,8 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..show_legend)
             self$.addOption(private$..mytitle)
             self$.addOption(private$..legendtitle)
+            self$.addOption(private$..showSummaries)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         counts = function() private$..counts$value,
@@ -100,7 +112,9 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         color_palette = function() private$..color_palette$value,
         show_legend = function() private$..show_legend$value,
         mytitle = function() private$..mytitle$value,
-        legendtitle = function() private$..legendtitle$value),
+        legendtitle = function() private$..legendtitle$value,
+        showSummaries = function() private$..showSummaries$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..counts = NA,
         ..groups = NA,
@@ -110,7 +124,9 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..color_palette = NA,
         ..show_legend = NA,
         ..mytitle = NA,
-        ..legendtitle = NA)
+        ..legendtitle = NA,
+        ..showSummaries = NA,
+        ..showExplanations = NA)
 )
 
 jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -118,6 +134,8 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        analysisSummary = function() private$.items[["analysisSummary"]],
+        methodExplanation = function() private$.items[["methodExplanation"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -139,11 +157,23 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "color_palette",
                     "show_legend",
                     "mytitle",
-                    "legendtitle"))
+                    "legendtitle",
+                    "showSummaries",
+                    "showExplanations"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="analysisSummary",
+                title="Analysis Summary",
+                visible="(showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodExplanation",
+                title="Methodology",
+                visible="(showExplanations)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -176,22 +206,42 @@ jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Waffle Charts
 #'
-#' 'Creates waffle charts to visualize distributions and proportions'
+#' 'Creates waffle charts to visualize categorical distributions and 
+#' proportions using colored squares. Ideal for showing parts-of-whole 
+#' relationships in clinical data such as disease subtypes, treatment 
+#' outcomes, or risk category distributions. Each square represents a 
+#' proportion of the total sample, making it easy to see relative frequencies 
+#' across categories.'
 #' 
 #' @param data The data as a data frame.
-#' @param counts Optional numeric values to be represented in the waffle
-#'   chart. If not provided, will use number of cases.
-#' @param groups The grouping variable for the waffle squares
-#' @param facet Optional variable to create faceted waffle charts
+#' @param counts Optional numeric weight variable if cases have different
+#'   weights. Leave empty to count each row equally (recommended for most
+#'   clinical data). Only needed if your data is pre-aggregated or weighted.
+#' @param groups The categorical grouping variable for the waffle squares.
+#'   Each category will be displayed as proportional colored squares in a 10x10
+#'   grid. Examples: Tumor grade (G1/G2/G3), Treatment outcome
+#'   (Complete/Partial/No response), Risk categories (Low/Medium/High).
+#' @param facet Optional variable to split the waffle chart by another
+#'   categorical variable to compare distributions across subgroups (e.g., by
+#'   treatment arm, patient cohort, or time period). Creates separate waffle
+#'   charts for each level.
 #' @param rows Number of rows in the waffle chart
 #' @param flip Whether to flip the orientation of the waffle chart
 #' @param color_palette Color scheme for the waffle squares
 #' @param show_legend Whether to display the legend
 #' @param mytitle Custom title for the plot
 #' @param legendtitle Custom title for the legend
+#' @param showSummaries Generate natural language summary of waffle chart
+#'   results including proportions, dominant categories, and clinical
+#'   interpretation.
+#' @param showExplanations Show detailed methodology explanations about waffle
+#'   charts, when to use them, and how to interpret the results in clinical
+#'   contexts.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -206,7 +256,9 @@ jwaffle <- function(
     color_palette = "default",
     show_legend = TRUE,
     mytitle = "",
-    legendtitle = "") {
+    legendtitle = "",
+    showSummaries = FALSE,
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jwaffle requires jmvcore to be installed (restart may be required)")
@@ -233,7 +285,9 @@ jwaffle <- function(
         color_palette = color_palette,
         show_legend = show_legend,
         mytitle = mytitle,
-        legendtitle = legendtitle)
+        legendtitle = legendtitle,
+        showSummaries = showSummaries,
+        showExplanations = showExplanations)
 
     analysis <- jwaffleClass$new(
         options = options,

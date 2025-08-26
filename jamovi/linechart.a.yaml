@@ -1,10 +1,10 @@
 ---
 name: linechart
 title: Line Chart
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: Drafts
 menuSubtitle: 'Time Series and Trend Analysis'
-version: '1.0.0'
+version: '0.0.31'
 jas: '1.2'
 
 description:

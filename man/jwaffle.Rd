@@ -14,18 +14,27 @@ jwaffle(
   color_palette = "default",
   show_legend = TRUE,
   mytitle = "",
-  legendtitle = ""
+  legendtitle = "",
+  showSummaries = FALSE,
+  showExplanations = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{counts}{Optional numeric values to be represented in the waffle
-chart. If not provided, will use number of cases.}
+\item{counts}{Optional numeric weight variable if cases have different
+weights. Leave empty to count each row equally (recommended for most
+clinical data). Only needed if your data is pre-aggregated or weighted.}
 
-\item{groups}{The grouping variable for the waffle squares}
+\item{groups}{The categorical grouping variable for the waffle squares.
+Each category will be displayed as proportional colored squares in a 10x10
+grid. Examples: Tumor grade (G1/G2/G3), Treatment outcome
+(Complete/Partial/No response), Risk categories (Low/Medium/High).}
 
-\item{facet}{Optional variable to create faceted waffle charts}
+\item{facet}{Optional variable to split the waffle chart by another
+categorical variable to compare distributions across subgroups (e.g., by
+treatment arm, patient cohort, or time period). Creates separate waffle
+charts for each level.}
 
 \item{rows}{Number of rows in the waffle chart}
 
@@ -38,14 +47,29 @@ chart. If not provided, will use number of cases.}
 \item{mytitle}{Custom title for the plot}
 
 \item{legendtitle}{Custom title for the legend}
+
+\item{showSummaries}{Generate natural language summary of waffle chart
+results including proportions, dominant categories, and clinical
+interpretation.}
+
+\item{showExplanations}{Show detailed methodology explanations about waffle
+charts, when to use them, and how to interpret the results in clinical
+contexts.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
-'Creates waffle charts to visualize distributions and proportions'
+'Creates waffle charts to visualize categorical distributions and
+proportions using colored squares. Ideal for showing parts-of-whole
+relationships in clinical data such as disease subtypes, treatment
+outcomes, or risk category distributions. Each square represents a
+proportion of the total sample, making it easy to see relative frequencies
+across categories.'
 }

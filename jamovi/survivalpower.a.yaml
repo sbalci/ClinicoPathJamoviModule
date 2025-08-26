@@ -1,7 +1,7 @@
 ---
 name: survivalpower
 title: "Survival Analysis Power & Sample Size"
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: Design and Analysis
 menuSubtitle: "Power Analysis for Survival Studies"
 version: '0.0.3'
