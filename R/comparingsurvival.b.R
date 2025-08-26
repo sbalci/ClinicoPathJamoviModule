@@ -159,6 +159,16 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.populateLogRankTest(logrank_results)
                 private$.populateMedianEstimates(survfit_results)
                 
+                # Perform pairwise comparisons if requested
+                if (self$options$pairwise && length(unique(survData$group)) > 2) {
+                    private$.performPairwiseComparisons(survData)
+                }
+                
+                # Perform trend test if requested
+                if (self$options$trendTest) {
+                    private$.performTrendTest(survData)
+                }
+                
                 # Generate plots
                 private$.generateSurvivalPlots(survfit_results)
 
@@ -231,10 +241,68 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             survData <- survData[complete_cases, ]
             
+            # Apply landmark analysis if requested
+            if (self$options$landmarkTime > 0) {
+                survData <- private$.applyLandmark(survData)
+            }
+            
             # Check group sizes
             group_sizes <- table(survData$group)
             if (any(group_sizes < 3)) {
                 warning("Some groups have very few observations (< 3). Results may be unreliable.")
+            }
+            
+            return(survData)
+        },
+        
+        # Apply landmark analysis
+        .applyLandmark = function(survData) {
+            landmark <- self$options$landmarkTime
+            
+            # Convert landmark time to appropriate scale if needed
+            if (self$options$landmarkUnit != "same") {
+                # Assume time variable is in days by default for conversion
+                if (self$options$landmarkUnit == "years") {
+                    landmark <- landmark * 365.25
+                } else if (self$options$landmarkUnit == "months") {
+                    landmark <- landmark * 30.44
+                } else if (self$options$landmarkUnit == "days") {
+                    # Already in days, no conversion needed
+                    landmark <- landmark
+                }
+            }
+            
+            # Count exclusions before filtering
+            n_before <- nrow(survData)
+            n_early_events <- sum(survData$time <= landmark & survData$status == 1)
+            
+            # Filter data for landmark analysis
+            # Keep only patients alive at landmark time
+            survData <- survData[survData$time > landmark | 
+                                (survData$time <= landmark & survData$status == 0), ]
+            
+            # Adjust survival times from landmark
+            survData$time <- pmax(0, survData$time - landmark)
+            
+            # Report exclusions
+            n_after <- nrow(survData)
+            n_excluded <- n_before - n_after
+            
+            exclusion_msg <- paste0(
+                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<strong>Landmark Analysis Applied:</strong><br>",
+                "• Landmark time: ", self$options$landmarkTime, " ",
+                if (self$options$landmarkUnit != "same") self$options$landmarkUnit else "time units", "<br>",
+                "• Early events excluded: ", n_early_events, "<br>",
+                "• Total patients excluded: ", n_excluded, "<br>",
+                "• Patients remaining: ", n_after, " (", round(n_after/n_before * 100, 1), "%)",
+                "</div>"
+            )
+            
+            self$results$landmarkNote$setContent(exclusion_msg)
+            
+            if (n_after < 10) {
+                stop("Insufficient observations after landmark time for analysis")
             }
             
             return(survData)
@@ -436,6 +504,147 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot(plotData, fun = function(x) log(-log(x)), 
                      xlab = xlab, ylab = "log(-log(Survival))")
                 return(TRUE)
+            })
+        },
+        
+        # Perform pairwise comparisons
+        .performPairwiseComparisons = function(survData) {
+            
+            tryCatch({
+                # Get unique groups
+                groups <- levels(survData$group)
+                n_groups <- length(groups)
+                
+                if (n_groups < 3) {
+                    # Not enough groups for pairwise comparisons
+                    return()
+                }
+                
+                # Get all pairwise combinations
+                pairs <- combn(groups, 2, simplify = FALSE)
+                n_comparisons <- length(pairs)
+                
+                # Initialize results storage
+                pairwise_results <- list()
+                
+                # Perform pairwise log-rank tests
+                for (i in seq_along(pairs)) {
+                    pair <- pairs[[i]]
+                    
+                    # Subset data for this pair
+                    subset_data <- survData[survData$group %in% pair, ]
+                    subset_data$group <- droplevels(subset_data$group)
+                    
+                    # Perform log-rank test
+                    surv_formula <- survival::Surv(time, status) ~ group
+                    fit <- survival::survdiff(surv_formula, data = subset_data)
+                    
+                    # Extract p-value
+                    p_value <- 1 - pchisq(fit$chisq, df = 1)
+                    
+                    # Store results
+                    pairwise_results[[i]] <- list(
+                        comparison = paste(pair[1], "vs", pair[2]),
+                        chisq = fit$chisq,
+                        df = 1,
+                        p_value = p_value
+                    )
+                }
+                
+                # Apply multiple testing correction if requested
+                if (self$options$pairwiseCorrection != "none") {
+                    p_values <- sapply(pairwise_results, function(x) x$p_value)
+                    adj_p <- p.adjust(p_values, method = self$options$pairwiseCorrection)
+                    
+                    for (i in seq_along(pairwise_results)) {
+                        pairwise_results[[i]]$adj_p_value <- adj_p[i]
+                    }
+                }
+                
+                # Populate the pairwise table
+                table <- self$results$pairwiseTable
+                
+                for (i in seq_along(pairwise_results)) {
+                    row_values <- list(
+                        comparison = pairwise_results[[i]]$comparison,
+                        chisq = round(pairwise_results[[i]]$chisq, 4),
+                        df = pairwise_results[[i]]$df,
+                        p_value = pairwise_results[[i]]$p_value
+                    )
+                    
+                    if (self$options$pairwiseCorrection != "none") {
+                        row_values$adj_p_value <- pairwise_results[[i]]$adj_p_value
+                    }
+                    
+                    table$addRow(rowKey = i, values = row_values)
+                }
+                
+            }, error = function(e) {
+                warning(paste("Error in pairwise comparisons:", e$message))
+            })
+        },
+        
+        # Perform trend test
+        .performTrendTest = function(survData) {
+            
+            tryCatch({
+                # Ensure group is treated as ordered factor
+                groups <- levels(survData$group)
+                n_groups <- length(groups)
+                
+                if (n_groups < 2) {
+                    return()
+                }
+                
+                # Assign linear scores to groups (1, 2, 3, ...)
+                survData$trend_score <- as.numeric(survData$group)
+                
+                # Perform trend test using survdiff with rho=0 for standard log-rank
+                # and treating the trend score as continuous
+                surv_formula <- survival::Surv(time, status) ~ trend_score
+                
+                # Use Cox regression to test for trend
+                # This is more appropriate for ordered groups
+                trend_fit <- survival::coxph(surv_formula, data = survData)
+                
+                # Extract test statistics
+                trend_coef <- coef(trend_fit)
+                trend_se <- sqrt(vcov(trend_fit)[1,1])
+                trend_z <- trend_coef / trend_se
+                trend_p <- 2 * (1 - pnorm(abs(trend_z)))
+                
+                # Alternative: Use survdiff with linear weights
+                # This tests for ordered alternatives
+                surv_formula_groups <- survival::Surv(time, status) ~ group
+                trend_test_alt <- survival::survdiff(surv_formula_groups, data = survData)
+                
+                # Calculate trend chi-square statistic
+                # This uses the linear contrast
+                obs <- trend_test_alt$obs
+                exp <- trend_test_alt$exp
+                var_matrix <- trend_test_alt$var
+                
+                # Linear weights (1, 2, 3, ...)
+                weights <- 1:n_groups
+                
+                # Calculate weighted sum
+                weighted_obs_exp <- sum(weights * (obs - exp))
+                weighted_var <- t(weights) %*% var_matrix %*% weights
+                
+                trend_chisq <- weighted_obs_exp^2 / weighted_var
+                trend_p_alt <- 1 - pchisq(trend_chisq, df = 1)
+                
+                # Populate trend test table
+                table <- self$results$trendTestTable
+                table$setRow(rowNo = 1, values = list(
+                    method = "Test for Trend (Linear)",
+                    chisq = round(as.numeric(trend_chisq), 4),
+                    df = 1,
+                    p_value = as.numeric(trend_p_alt)
+                ))
+                
+            }, error = function(e) {
+                warning(paste("Error in trend test:", e$message))
             })
         }
     )

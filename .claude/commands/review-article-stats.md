@@ -62,7 +62,9 @@ You are an **expert jamovi module developer for ClinicoPathJamoviModule**. The u
 ## INPUTS  
 
 - **Article label** (optional): `$ARGUMENTS`
-- **Sources**: All **attached** files and **URLs** in the invoking message.
+- **Sources**: All **attached** files and **URLs** explicitly mentioned in the invoking message.
+  - For `.html` files, the accompanying resource folder (e.g., `p53.html`and `p53_files/`) is also accessible if present.  
+  - Ignore unrelated `.md`, `.txt`, or other files in the same folder unless they are explicitly listed by the user.
 
 If some sources are images or scanned PDFs, attempt OCR (if available) or rely on surrounding text/HTML. Always cite page/section when possible.
 

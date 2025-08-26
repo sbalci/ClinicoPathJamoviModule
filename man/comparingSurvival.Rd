@@ -11,7 +11,12 @@ comparingSurvival(
   groups = NULL,
   ciyn = FALSE,
   loglogyn = FALSE,
-  timeunits = "None"
+  timeunits = "None",
+  pairwise = FALSE,
+  pairwiseCorrection = "none",
+  trendTest = FALSE,
+  landmarkTime = 0,
+  landmarkUnit = "same"
 )
 }
 \arguments{
@@ -28,6 +33,18 @@ comparingSurvival(
 \item{loglogyn}{.}
 
 \item{timeunits}{.}
+
+\item{pairwise}{Perform pairwise log-rank comparisons between all groups}
+
+\item{pairwiseCorrection}{Method for adjusting p-values for multiple
+comparisons}
+
+\item{trendTest}{Test for trend across ordered groups (assumes groups are
+ordered)}
+
+\item{landmarkTime}{Exclude events before this time (0 = no exclusion)}
+
+\item{landmarkUnit}{Unit for landmark time}
 }
 \value{
 A results object containing:
@@ -38,6 +55,9 @@ A results object containing:
 \code{results$compsurvTable3} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$trendTestTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$landmarkNote} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -92,4 +92,70 @@ items:
       width:  600
       height: 500
       renderFun: .plot2
+
+    - name: pairwiseTable
+      title: Pairwise Log-rank Comparisons
+      type: Table
+      visible: (pairwise)
+      clearWith:
+        - times
+        - status
+        - groups
+        - pairwiseCorrection
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: chisq
+          title: 'Chi-square'
+          type: number
+          format: zto
+        - name: df
+          title: 'DF'
+          type: integer
+        - name: p_value
+          title: 'P-value'
+          type: number
+          format: zto,pvalue
+        - name: adj_p_value
+          title: 'Adjusted P-value'
+          type: number
+          format: zto,pvalue
+          visible: (pairwiseCorrection != "none")
+
+    - name: trendTestTable
+      title: Test for Trend
+      type: Table
+      visible: (trendTest)
+      rows: 1
+      clearWith:
+        - times
+        - status
+        - groups
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: chisq
+          title: 'Chi-square'
+          type: number
+          format: zto
+        - name: df
+          title: 'DF'
+          type: integer
+        - name: p_value
+          title: 'P-value'
+          type: number
+          format: zto,pvalue
+
+    - name: landmarkNote
+      title: Landmark Analysis
+      type: Html
+      visible: (landmarkTime > 0)
+      clearWith:
+        - times
+        - status
+        - groups
+        - landmarkTime
+        - landmarkUnit
 ...
