@@ -1,0 +1,336 @@
+---
+name: deeplearningprediction
+title: Deep Learning Image Prediction
+jrs: '1.1'
+
+items:
+    - name: modelSummary
+      title: Model Summary and Configuration
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: Dataset Information
+      type: Table
+      description: Summary of input data and preprocessing
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: trainingMetrics
+      title: Training Metrics
+      type: Group
+      items:
+        - name: trainingHistory
+          title: Training History
+          type: Table
+          description: Epoch-by-epoch training progress
+          columns:
+            - name: epoch
+              title: 'Epoch'
+              type: integer
+            - name: train_loss
+              title: 'Training Loss'
+              type: number
+            - name: train_accuracy
+              title: 'Training Accuracy'
+              type: number
+              format: pc
+            - name: val_loss
+              title: 'Validation Loss'
+              type: number
+            - name: val_accuracy
+              title: 'Validation Accuracy'
+              type: number
+              format: pc
+            - name: learning_rate
+              title: 'Learning Rate'
+              type: number
+
+        - name: finalMetrics
+          title: Final Performance Metrics
+          type: Table
+          description: Overall model performance assessment
+          columns:
+            - name: metric
+              title: 'Metric'
+              type: text
+            - name: training
+              title: 'Training'
+              type: number
+            - name: validation
+              title: 'Validation'
+              type: number
+            - name: test
+              title: 'Test'
+              type: number
+
+    - name: predictionResults
+      title: Prediction Results
+      type: Group
+      items:
+        - name: classificationResults
+          title: Classification Predictions
+          visible: (prediction_type:classification)
+          type: Table
+          columns:
+            - name: sample_id
+              title: 'Sample ID'
+              type: text
+            - name: image_path
+              title: 'Image Path'
+              type: text
+            - name: predicted_class
+              title: 'Predicted Class'
+              type: text
+            - name: confidence
+              title: 'Confidence'
+              type: number
+              format: pc
+            - name: true_class
+              title: 'True Class'
+              type: text
+
+        - name: cumulativeLogitResults
+          title: Cumulative Logit Predictions
+          visible: (prediction_type:cumulative_logit || prediction_type:cumulative_logit_grayzone)
+          type: Table
+          columns:
+            - name: sample_id
+              title: 'Sample ID'
+              type: text
+            - name: threshold
+              title: 'Threshold'
+              type: number
+            - name: cumulative_prob
+              title: 'Cumulative Probability'
+              type: number
+              format: pc
+            - name: predicted_level
+              title: 'Predicted Level'
+              type: text
+            - name: confidence
+              title: 'Confidence'
+              type: number
+              format: pc
+            - name: gray_zone_flag
+              title: 'In Gray Zone'
+              type: text
+              visible: (prediction_type:cumulative_logit_grayzone)
+
+    - name: performanceAnalysis
+      title: Performance Analysis
+      type: Group
+      items:
+        - name: confusionMatrix
+          title: Confusion Matrix
+          type: Table
+          description: Classification confusion matrix
+          clearWith: [target_var, model_type]
+          columns: []
+
+        - name: classificationReport
+          title: Per-Class Performance
+          type: Table
+          description: Precision, recall, F1-score per class
+          columns:
+            - name: class
+              title: 'Class'
+              type: text
+            - name: precision
+              title: 'Precision'
+              type: number
+              format: zto
+            - name: recall
+              title: 'Recall'
+              type: number
+              format: zto
+            - name: f1_score
+              title: 'F1-Score'
+              type: number
+              format: zto
+            - name: support
+              title: 'Support'
+              type: integer
+
+        - name: rocAnalysis
+          title: ROC Analysis
+          type: Table
+          description: ROC AUC scores for each class
+          columns:
+            - name: class
+              title: 'Class'
+              type: text
+            - name: auc
+              title: 'AUC'
+              type: number
+            - name: ci_lower
+              title: '95% CI Lower'
+              type: number
+            - name: ci_upper
+              title: '95% CI Upper'
+              type: number
+
+    - name: explainabilityAnalysis
+      title: Model Explainability
+      type: Group
+      visible: (attention_maps)
+      items:
+        - name: attentionSummary
+          title: Attention Analysis Summary
+          type: Table
+          description: Summary of attention patterns across samples
+          columns:
+            - name: region
+              title: 'Image Region'
+              type: text
+            - name: avg_attention
+              title: 'Average Attention'
+              type: number
+            - name: std_attention
+              title: 'Std Dev'
+              type: number
+            - name: samples_count
+              title: 'Sample Count'
+              type: integer
+
+        - name: featureImportance
+          title: Feature Importance
+          type: Table
+          description: Most important image features for prediction
+          columns:
+            - name: feature_type
+              title: 'Feature Type'
+              type: text
+            - name: importance_score
+              title: 'Importance Score'
+              type: number
+            - name: frequency
+              title: 'Frequency'
+              type: number
+              format: pc
+
+    - name: crossValidationResults
+      title: Cross-Validation Results
+      type: Group
+      visible: (cross_validation)
+      items:
+        - name: cvMetrics
+          title: Cross-Validation Metrics
+          type: Table
+          description: Performance across CV folds
+          columns:
+            - name: fold
+              title: 'Fold'
+              type: integer
+            - name: accuracy
+              title: 'Accuracy'
+              type: number
+              format: pc
+            - name: precision
+              title: 'Precision'
+              type: number
+            - name: recall
+              title: 'Recall'
+              type: number
+            - name: f1_score
+              title: 'F1-Score'
+              type: number
+            - name: auc
+              title: 'AUC'
+              type: number
+
+        - name: cvSummary
+          title: Cross-Validation Summary
+          type: Table
+          description: Mean and standard deviation of CV metrics
+          columns:
+            - name: metric
+              title: 'Metric'
+              type: text
+            - name: mean
+              title: 'Mean'
+              type: number
+            - name: std
+              title: 'Std Dev'
+              type: number
+            - name: ci_lower
+              title: '95% CI Lower'
+              type: number
+            - name: ci_upper
+              title: '95% CI Upper'
+              type: number
+
+    # Plots
+    - name: trainingCurvePlot
+      title: Training Curves
+      type: Image
+      description: Training and validation loss/accuracy over epochs
+      width: 800
+      height: 500
+      renderFun: .plotTrainingCurves
+
+    - name: confusionMatrixPlot
+      title: Confusion Matrix Visualization
+      type: Image
+      description: Heatmap of confusion matrix
+      width: 600
+      height: 500
+      renderFun: .plotConfusionMatrix
+
+    - name: rocCurvePlot
+      title: ROC Curves
+      type: Image
+      description: ROC curves for each class
+      width: 700
+      height: 500
+      renderFun: .plotROCCurves
+
+    - name: attentionHeatmapPlot
+      title: Attention Heatmaps
+      type: Image
+      description: Sample attention maps showing model focus areas
+      visible: (attention_maps)
+      width: 800
+      height: 600
+      renderFun: .plotAttentionHeatmaps
+
+    - name: predictionDistributionPlot
+      title: Prediction Confidence Distribution
+      type: Image
+      description: Distribution of prediction confidence scores
+      width: 600
+      height: 400
+      renderFun: .plotPredictionDistribution
+
+    - name: cumulativeLogitPlot
+      title: Cumulative Logit Analysis
+      type: Image
+      description: Cumulative probability plots for ordinal prediction
+      visible: (prediction_type:cumulative_logit || prediction_type:cumulative_logit_grayzone)
+      width: 700
+      height: 500
+      renderFun: .plotCumulativeLogit
+
+    - name: crossValidationPlot
+      title: Cross-Validation Performance
+      type: Image
+      description: Box plots of CV performance metrics
+      visible: (cross_validation)
+      width: 600
+      height: 400
+      renderFun: .plotCrossValidation
+
+    - name: modelArchitecturePlot
+      title: Model Architecture Visualization
+      type: Image
+      description: Visual representation of the neural network architecture
+      width: 900
+      height: 600
+      renderFun: .plotModelArchitecture
+
+...

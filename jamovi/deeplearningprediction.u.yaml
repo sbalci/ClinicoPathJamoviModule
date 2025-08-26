@@ -1,0 +1,146 @@
+title: Deep Learning Image Prediction
+name: deeplearningprediction
+jus: '3.0'
+stage: 2
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Image File Path Variable
+        children:
+          - type: VariablesListBox
+            name: image_path_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Target Variable
+        children:
+          - type: VariablesListBox
+            name: target_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    style: inline
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Model Configuration
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: ComboBox
+                    name: model_type
+                  - type: ComboBox
+                    name: prediction_type
+                  - type: TextBox
+                    name: patch_size
+                    format: number
+                  - type: TextBox
+                    name: batch_size
+                    format: number
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Training Parameters
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: TextBox
+                    name: learning_rate
+                    format: number
+                  - type: TextBox
+                    name: epochs
+                    format: number
+                  - type: TextBox
+                    name: validation_split
+                    format: number
+                  - type: TextBox
+                    name: dropout_rate
+                    format: number
+  - type: CollapseBox
+    label: Advanced Model Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: LayoutBox
+            children:
+              - type: CheckBox
+                name: pretrained_weights
+              - type: CheckBox
+                name: freeze_backbone
+              - type: CheckBox
+                name: data_augmentation
+              - type: CheckBox
+                name: early_stopping
+              - type: TextBox
+                name: weight_decay
+                format: number
+          - type: LayoutBox
+            children:
+              - type: CheckBox
+                name: gpu_acceleration
+              - type: CheckBox
+                name: save_model
+              - type: CheckBox
+                name: class_weights
+              - type: TextBox
+                name: confidence_threshold
+                format: number
+  - type: CollapseBox
+    label: Ordinal Regression Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: gray_zone_width
+            format: number
+            enable: (prediction_type:cumulative_logit_grayzone)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: model_path
+        format: string
+  - type: CollapseBox
+    label: Cross-Validation
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: cross_validation
+          - type: TextBox
+            name: cv_folds
+            format: number
+            enable: (cross_validation)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: thresholds
+        format: string
+  - type: CollapseBox
+    label: Explainability & Visualization
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: attention_maps

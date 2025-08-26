@@ -104,12 +104,14 @@
       "Read(//Users/serdarbalci/Documents/GitHub/JamoviTest/jamovi/js/**)",
       "Read(//Users/serdarbalci/Documents/GitHub/JamoviTest/**)",
       "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/R/**)",
-      "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/**)"
+      "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/**)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "additionalDirectories": [
       "/Users/serdarbalci/Documents/GitHub/conttablesplus",
-      "/Users/serdarbalci/Documents/GitHub/JamoviTest"
+      "/Users/serdarbalci/Documents/GitHub/JamoviTest",
+      "/private/tmp"
     ]
   }
 }

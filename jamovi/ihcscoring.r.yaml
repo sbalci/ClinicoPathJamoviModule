@@ -13,7 +13,34 @@ items:
       title: Individual Sample Scores
       type: Table
       description: Calculated H-scores, Allred scores, and binary classifications
-      columns: []
+      columns:
+        - name: sample_id
+          title: 'Sample ID'
+          type: integer
+        - name: intensity
+          title: 'Intensity'
+          type: number
+          format: zto
+        - name: proportion
+          title: 'Proportion (%)'
+          type: number
+          format: zto
+        - name: hscore
+          title: 'H-score'
+          type: number
+          format: zto
+        - name: allred_intensity
+          title: 'Allred Intensity'
+          type: integer
+        - name: allred_proportion
+          title: 'Allred Proportion'
+          type: integer
+        - name: allred_total
+          title: 'Allred Total'
+          type: integer
+        - name: binary_classification
+          title: 'Binary Result'
+          type: text
       clearWith:
           - intensity_var
           - proportion_var
@@ -25,7 +52,38 @@ items:
       title: Descriptive Statistics by Score Type
       type: Table
       description: Comprehensive statistical summary for each scoring method
-      columns: []
+      columns:
+        - name: score_type
+          title: 'Score Type'
+          type: text
+        - name: mean
+          title: 'Mean'
+          type: number
+          format: zto
+        - name: median
+          title: 'Median'
+          type: number
+          format: zto
+        - name: sd
+          title: 'SD'
+          type: number
+          format: zto
+        - name: min
+          title: 'Min'
+          type: number
+          format: zto
+        - name: max
+          title: 'Max'
+          type: number
+          format: zto
+        - name: q25
+          title: 'Q1'
+          type: number
+          format: zto
+        - name: q75
+          title: 'Q3'
+          type: number
+          format: zto
       clearWith:
           - intensity_var
           - proportion_var
@@ -36,7 +94,33 @@ items:
       title: Method Agreement Analysis
       type: Table
       description: Correlation and agreement statistics between scoring methods
-      columns: []
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: correlation
+          title: 'Correlation (r)'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'P-value'
+          type: number
+          format: zto,pvalue
+        - name: icc
+          title: 'ICC'
+          type: number
+          format: zto
+        - name: icc_ci_lower
+          title: 'ICC 95% CI Lower'
+          type: number
+          format: zto
+        - name: icc_ci_upper
+          title: 'ICC 95% CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Agreement Level'
+          type: text
       visible: (agreement_analysis)
       clearWith:
           - intensity_var
@@ -48,7 +132,24 @@ items:
       title: Quality Control Metrics
       type: Table
       description: Outlier detection and data quality assessment
-      columns: []
+      columns:
+        - name: metric
+          title: 'QC Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: threshold
+          title: 'Threshold'
+          type: number
+          format: zto
+        - name: status
+          title: 'Status'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
       visible: (quality_control)
       clearWith:
           - intensity_var
@@ -63,6 +164,7 @@ items:
       height: 400
       visible: (show_plots)
       requiresData: true
+      renderFun: .distributionplot
       clearWith:
           - intensity_var
           - proportion_var
@@ -77,6 +179,7 @@ items:
       height: 400
       visible: (show_plots)
       requiresData: true
+      renderFun: .correlationplot
       clearWith:
           - intensity_var
           - proportion_var
@@ -91,6 +194,7 @@ items:
       height: 400
       visible: (show_agreement_plots)
       requiresData: true
+      renderFun: .agreementplot
       clearWith:
           - intensity_var
           - proportion_var
@@ -105,6 +209,7 @@ items:
       height: 400
       visible: false
       requiresData: true
+      renderFun: .cutpointplot
 
     - name: biomarkerspecific
       title: Biomarker-Specific Analysis
@@ -115,13 +220,44 @@ items:
             title: Biomarker-Specific Results
             type: Table
             description: Analysis tailored to specific biomarker characteristics
-            columns: []
+            columns:
+              - name: parameter
+                title: 'Parameter'
+                type: text
+              - name: value
+                title: 'Value'
+                type: number
+                format: zto
+              - name: clinical_significance
+                title: 'Clinical Significance'
+                type: text
+              - name: reference_range
+                title: 'Reference Range'
+                type: text
 
           - name: clinicalcutpoints
             title: Clinical Cutpoint Analysis
             type: Table
             description: Established clinical thresholds and their performance
-            columns: []
+            columns:
+              - name: cutpoint_type
+                title: 'Cutpoint Type'
+                type: text
+              - name: threshold
+                title: 'Threshold'
+                type: number
+                format: zto
+              - name: sensitivity
+                title: 'Sensitivity'
+                type: number
+                format: pc
+              - name: specificity
+                title: 'Specificity'
+                type: number
+                format: pc
+              - name: clinical_context
+                title: 'Clinical Context'
+                type: text
 
     - name: digitalvalidation
       title: Digital Pathology Validation
@@ -132,17 +268,141 @@ items:
             title: Algorithm vs Manual Comparison
             type: Table
             description: Statistical comparison of digital vs manual scoring
-            columns: []
+            columns:
+              - name: metric
+                title: 'Metric'
+                type: text
+              - name: manual_mean
+                title: 'Manual Mean'
+                type: number
+              - name: automated_mean
+                title: 'Automated Mean'
+                type: number
+              - name: correlation
+                title: 'Correlation'
+                type: number
+              - name: bias
+                title: 'Bias'
+                type: number
 
           - name: batcheffects
             title: Batch Effect Assessment
             type: Table
             description: Analysis of systematic differences across batches
-            columns: []
+            columns:
+              - name: batch_id
+                title: 'Batch ID'
+                type: text
+              - name: sample_count
+                title: 'Sample Count'
+                type: integer
+              - name: mean_hscore
+                title: 'Mean H-Score'
+                type: number
+              - name: batch_effect_size
+                title: 'Effect Size'
+                type: number
+              - name: p_value
+                title: 'P-value'
+                type: number
+                format: zto,pvalue
 
           - name: validationplot
             title: Digital Validation Plot
             type: Image
+            width: 500
+            height: 400
+            renderFun: .validationplot
+
+    - name: automatedanalysis
+      title: Automated Image Analysis Results
+      type: Group
+      visible: (automated_analysis)
+      items:
+          - name: segmentationresults
+            title: Nuclear Segmentation Results
+            type: Table
+            description: Summary of automated nuclear segmentation
+            columns:
+              - name: image_name
+                title: Image Name
+                type: text
+              - name: total_nuclei
+                title: Total Nuclei
+                type: integer
+              - name: positive_nuclei
+                title: Positive Nuclei
+                type: integer
+              - name: percentage_positive
+                title: Percentage Positive
+                type: number
+                format: pc
+              - name: h_score
+                title: Automated H-Score
+                type: number
+
+          - name: intensityanalysis
+            title: DAB Intensity Analysis
+            type: Table
+            description: Distribution of DAB intensity levels
+            columns:
+              - name: intensity_level
+                title: Intensity Level
+                type: text
+              - name: nucleus_count
+                title: Nucleus Count
+                type: integer
+              - name: percentage
+                title: Percentage
+                type: number
+                format: pc
+              - name: mean_optical_density
+                title: Mean Optical Density
+                type: number
+
+          - name: validationcomparison
+            title: Manual vs Automated Validation
+            visible: (validation_metrics)
+            type: Table
+            description: Comparison between manual and automated scores
+            columns:
+              - name: metric
+                title: Metric
+                type: text
+              - name: manual_score
+                title: Manual Score
+                type: number
+              - name: automated_score
+                title: Automated Score
+                type: number
+              - name: difference
+                title: Difference
+                type: number
+              - name: correlation
+                title: Correlation
+                type: number
+
+          - name: segmentationplot
+            title: Nuclear Segmentation Visualization
+            type: Image
+            description: Overlay of detected nuclei on original image
+            width: 800
+            height: 600
+            renderFun: .segmentationplot
+
+          - name: intensityplot
+            title: DAB Intensity Distribution Plot
+            type: Image
+            description: Histogram of DAB optical density values
+            width: 600
+            height: 400
+            renderFun: .intensityplot
+
+          - name: validationplot
+            title: Manual vs Automated Correlation Plot
+            visible: (validation_metrics)
+            type: Image
+            description: Scatter plot of manual vs automated scores
             width: 500
             height: 400
 
@@ -155,20 +415,83 @@ items:
             title: Reliability Assessment
             type: Table
             description: Comprehensive reliability and consistency metrics
-            columns: []
+            columns:
+              - name: measure
+                title: 'Reliability Measure'
+                type: text
+              - name: value
+                title: 'Value'
+                type: number
+                format: zto
+              - name: ci_lower
+                title: '95% CI Lower'
+                type: number
+                format: zto
+              - name: ci_upper
+                title: '95% CI Upper'
+                type: number
+                format: zto
+              - name: interpretation
+                title: 'Interpretation'
+                type: text
 
           - name: distributionanalysis
             title: Distribution Analysis
             type: Table
             description: Normality testing and distribution characteristics
-            columns: []
+            columns:
+              - name: score_type
+                title: 'Score Type'
+                type: text
+              - name: normality_test
+                title: 'Normality Test'
+                type: text
+              - name: p_value
+                title: 'P-value'
+                type: number
+                format: zto,pvalue
+              - name: skewness
+                title: 'Skewness'
+                type: number
+                format: zto
+              - name: kurtosis
+                title: 'Kurtosis'
+                type: number
+                format: zto
+              - name: distribution
+                title: 'Distribution'
+                type: text
 
     - name: exportdata
       title: Export-Ready Data
       type: Table
       visible: (export_results)
       description: Formatted results for external analysis or reporting
-      columns: []
+      columns:
+        - name: sample_id
+          title: 'Sample ID'
+          type: text
+        - name: intensity
+          title: 'Intensity'
+          type: number
+          format: zto
+        - name: proportion
+          title: 'Proportion (%)'
+          type: number
+          format: zto
+        - name: hscore
+          title: 'H-score'
+          type: number
+          format: zto
+        - name: allred_total
+          title: 'Allred Total'
+          type: integer
+        - name: binary_result
+          title: 'Binary Result'
+          type: text
+        - name: group
+          title: 'Group'
+          type: text
       clearWith:
           - export_results
           - intensity_var

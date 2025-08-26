@@ -103,14 +103,102 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathologyagreementResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        interpretation = function() private$.items[["interpretation"]],
+        agreementtable = function() private$.items[["agreementtable"]],
+        correlationtable = function() private$.items[["correlationtable"]],
+        scatterplot = function() private$.items[["scatterplot"]],
+        blandaltmanplot = function() private$.items[["blandaltmanplot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Pathology Agreement Analysis")}))
+                title="Pathology Agreement Analysis")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation and Analysis Summary",
+                visible="(show_interpretation)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="agreementtable",
+                title="Agreement Statistics",
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Agreement Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="correlationtable",
+                title="Correlation Analysis",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Correlation Method", 
+                        `type`="text"),
+                    list(
+                        `name`="coefficient", 
+                        `title`="Coefficient", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Strength", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="scatterplot",
+                title="Method Comparison Scatter Plot",
+                width=600,
+                height=450,
+                visible="(show_plots)",
+                renderFun=".scatterplot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="blandaltmanplot",
+                title="Bland-Altman Agreement Plot",
+                width=600,
+                height=450,
+                visible="(show_plots)",
+                renderFun=".blandaltmanplot"))}))
 
 pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathologyagreementBase",
@@ -148,7 +236,18 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   statistics
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$agreementtable} \tab \tab \tab \tab \tab ICC, CCC, and Bland-Altman metrics \cr
+#'   \code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr
+#'   \code{results$scatterplot} \tab \tab \tab \tab \tab Scatter plot with line of perfect agreement \cr
+#'   \code{results$blandaltmanplot} \tab \tab \tab \tab \tab Bland-Altman plot showing bias and limits of agreement \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$agreementtable$asDF}
+#'
+#' \code{as.data.frame(results$agreementtable)}
 #'
 #' @export
 pathologyagreement <- function(

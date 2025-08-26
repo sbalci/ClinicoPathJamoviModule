@@ -43,9 +43,9 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             private$.populateAgreementTable()
             private$.populateCorrelationTable()
             
-            # Set plots visible
-            self$results$blandaltmanplot$setVisible(TRUE)
-            self$results$scatterplot$setVisible(TRUE)
+            # Set plots visible based on user option
+            self$results$blandaltmanplot$setVisible(self$options$show_plots)
+            self$results$scatterplot$setVisible(self$options$show_plots)
         },
         
         .run = function() {
@@ -93,14 +93,17 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             table$addColumn(name = 'method', title = 'Correlation Method', type = 'text')
             table$addColumn(name = 'coefficient', title = 'Coefficient', type = 'number', format = 'zto')
             table$addColumn(name = 'p_value', title = 'P-value', type = 'number', format = 'zto,pvalue')
+            table$addColumn(name = 'ci_lower', title = 'CI Lower', type = 'number', format = 'zto')
+            table$addColumn(name = 'ci_upper', title = 'CI Upper', type = 'number', format = 'zto')
             table$addColumn(name = 'interpretation', title = 'Strength', type = 'text')
         },
         
         .performAgreementAnalysis = function(method1, method2) {
-            # Calculate ICC
+            # Calculate ICC using user-selected type
             if (requireNamespace('psych', quietly = TRUE)) {
                 data_for_icc <- data.frame(Method1 = method1, Method2 = method2)
-                icc_result <- psych::ICC(data_for_icc, type = "consistency")
+                icc_type <- ifelse(self$options$icc_type == "consistency", "consistency", "agreement")
+                icc_result <- psych::ICC(data_for_icc, type = icc_type)
                 
                 icc_value <- icc_result$results$ICC[6]  # ICC(3,1)
                 icc_lower <- icc_result$results$`lower bound`[6]
@@ -116,7 +119,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             # Calculate Concordance Correlation Coefficient (CCC)
             if (requireNamespace('epiR', quietly = TRUE)) {
-                ccc_result <- epiR::epi.ccc(method1, method2, ci = "z-transform", conf.level = 0.95)
+                ccc_result <- epiR::epi.ccc(method1, method2, ci = "z-transform", conf.level = self$options$conf_level)
                 ccc_value <- ccc_result$rho.c$est
                 ccc_lower <- ccc_result$rho.c$lower
                 ccc_upper <- ccc_result$rho.c$upper
@@ -181,42 +184,75 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         },
         
         .performCorrelationAnalysis = function(method1, method2) {
-            # Spearman correlation
-            spearman_test <- cor.test(method1, method2, method = "spearman")
-            spearman_r <- spearman_test$estimate
-            spearman_p <- spearman_test$p.value
-            
-            spearman_strength <- ifelse(abs(spearman_r) >= 0.90, "Very strong",
-                                ifelse(abs(spearman_r) >= 0.70, "Strong",
-                                ifelse(abs(spearman_r) >= 0.50, "Moderate",
-                                ifelse(abs(spearman_r) >= 0.30, "Weak", "Very weak"))))
-            
-            # Pearson correlation
-            pearson_test <- cor.test(method1, method2, method = "pearson")
-            pearson_r <- pearson_test$estimate
-            pearson_p <- pearson_test$p.value
-            
-            pearson_strength <- ifelse(abs(pearson_r) >= 0.90, "Very strong",
-                               ifelse(abs(pearson_r) >= 0.70, "Strong",
-                               ifelse(abs(pearson_r) >= 0.50, "Moderate",
-                               ifelse(abs(pearson_r) >= 0.30, "Weak", "Very weak"))))
-            
-            # Populate correlation table
             table <- self$results$correlationtable
+            method_option <- self$options$correlation_method
+            row_key <- 1
             
-            table$addRow(rowKey = 1, values = list(
-                method = "Spearman rank correlation",
-                coefficient = spearman_r,
-                p_value = spearman_p,
-                interpretation = spearman_strength
-            ))
+            # Spearman correlation (if requested)
+            if (method_option %in% c("both", "spearman")) {
+                spearman_test <- cor.test(method1, method2, method = "spearman")
+                spearman_r <- spearman_test$estimate
+                spearman_p <- spearman_test$p.value
+                
+                # Bootstrap CI for Spearman
+                spearman_boot_ci <- private$.performBootstrapCI(method1, method2, "spearman")
+                
+                spearman_strength <- ifelse(abs(spearman_r) >= 0.90, "Very strong",
+                                    ifelse(abs(spearman_r) >= 0.70, "Strong",
+                                    ifelse(abs(spearman_r) >= 0.50, "Moderate",
+                                    ifelse(abs(spearman_r) >= 0.30, "Weak", "Very weak"))))
+                
+                table$addRow(rowKey = row_key, values = list(
+                    method = "Spearman rank correlation",
+                    coefficient = spearman_r,
+                    p_value = spearman_p,
+                    ci_lower = spearman_boot_ci$lower,
+                    ci_upper = spearman_boot_ci$upper,
+                    interpretation = spearman_strength
+                ))
+                row_key <- row_key + 1
+            }
             
-            table$addRow(rowKey = 2, values = list(
-                method = "Pearson correlation",
-                coefficient = pearson_r,
-                p_value = pearson_p,
-                interpretation = pearson_strength
-            ))
+            # Pearson correlation (if requested)
+            if (method_option %in% c("both", "pearson")) {
+                pearson_test <- cor.test(method1, method2, method = "pearson", conf.level = self$options$conf_level)
+                pearson_r <- pearson_test$estimate
+                pearson_p <- pearson_test$p.value
+                pearson_ci_lower <- pearson_test$conf.int[1]
+                pearson_ci_upper <- pearson_test$conf.int[2]
+                
+                pearson_strength <- ifelse(abs(pearson_r) >= 0.90, "Very strong",
+                                   ifelse(abs(pearson_r) >= 0.70, "Strong",
+                                   ifelse(abs(pearson_r) >= 0.50, "Moderate",
+                                   ifelse(abs(pearson_r) >= 0.30, "Weak", "Very weak"))))
+                
+                table$addRow(rowKey = row_key, values = list(
+                    method = "Pearson correlation",
+                    coefficient = pearson_r,
+                    p_value = pearson_p,
+                    ci_lower = pearson_ci_lower,
+                    ci_upper = pearson_ci_upper,
+                    interpretation = pearson_strength
+                ))
+            }
+        },
+        
+        .performBootstrapCI = function(method1, method2, method_type = "spearman") {
+            n_bootstrap <- self$options$bootstrap_n
+            conf_level <- self$options$conf_level
+            
+            bootstrap_results <- replicate(n_bootstrap, {
+                indices <- sample(length(method1), replace = TRUE)
+                boot_method1 <- method1[indices]
+                boot_method2 <- method2[indices]
+                cor(boot_method1, boot_method2, method = method_type, use = "complete.obs")
+            })
+            
+            alpha <- 1 - conf_level
+            list(
+                lower = quantile(bootstrap_results, alpha / 2, na.rm = TRUE),
+                upper = quantile(bootstrap_results, 1 - alpha / 2, na.rm = TRUE)
+            )
         },
         
         .generatePlots = function(method1, method2) {
@@ -361,7 +397,9 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 (Koo & Li 2016; Acs et al. 2019).</em></p>"
             )
             
-            self$results$interpretation$setContent(interpretation)
+            if (self$options$show_interpretation) {
+                self$results$interpretation$setContent(interpretation)
+            }
         }
     )
 )

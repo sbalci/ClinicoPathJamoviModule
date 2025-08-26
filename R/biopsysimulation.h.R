@@ -177,14 +177,187 @@ biopsysimulationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 biopsysimulationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "biopsysimulationResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        interpretation = function() private$.items[["interpretation"]],
+        reproducibilitytable = function() private$.items[["reproducibilitytable"]],
+        samplingbiastable = function() private$.items[["samplingbiastable"]],
+        variancetable = function() private$.items[["variancetable"]],
+        poweranalysistable = function() private$.items[["poweranalysistable"]],
+        spatialanalysistable = function() private$.items[["spatialanalysistable"]],
+        biopsyplot = function() private$.items[["biopsyplot"]],
+        variabilityplot = function() private$.items[["variabilityplot"]],
+        spatialplot = function() private$.items[["spatialplot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Biopsy Simulation Analysis")}))
+                title="Biopsy Simulation Analysis")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation and Analysis Summary",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="reproducibilitytable",
+                title="Reproducibility Assessment",
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Reproducibility Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="samplingbiastable",
+                title="Sampling Bias Analysis",
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_diff", 
+                        `title`="Mean Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size (Cohen's d)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="clinical_impact", 
+                        `title`="Clinical Impact", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="variancetable",
+                title="Variance Component Analysis",
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Variance Component", 
+                        `type`="text"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage (%)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="contribution", 
+                        `title`="Contribution to Total Variance", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="poweranalysistable",
+                title="Power Analysis Results",
+                visible="(power_analysis)",
+                columns=list(
+                    list(
+                        `name`="scenario", 
+                        `title`="Analysis Scenario", 
+                        `type`="text"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Expected Effect Size", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="power", 
+                        `title`="Statistical Power", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="required_n", 
+                        `title`="Required Sample Size", 
+                        `type`="integer"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="spatialanalysistable",
+                title="Spatial Heterogeneity Analysis",
+                visible="(spatial_id)",
+                columns=list(
+                    list(
+                        `name`="region", 
+                        `title`="Spatial Region", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="mean_value", 
+                        `title`="Mean Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="cv_percent", 
+                        `title`="CV (%)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="heterogeneity_level", 
+                        `title`="Heterogeneity Level", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="biopsyplot",
+                title="Biopsy vs Whole Section Comparison",
+                width=700,
+                height=500,
+                visible="(show_variability_plots)",
+                renderFun=".biopsyplot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="variabilityplot",
+                title="Sampling Variability Analysis",
+                width=600,
+                height=400,
+                visible="(show_variability_plots)",
+                renderFun=".variabilityplot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="spatialplot",
+                title="Spatial Heterogeneity Visualization",
+                width=600,
+                height=400,
+                visible="(spatial_id && show_variability_plots)",
+                renderFun=".spatialplot"))}))
 
 biopsysimulationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "biopsysimulationBase",
@@ -232,7 +405,22 @@ biopsysimulationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   sampling strategy
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
+#'   \code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
+#'   \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
+#'   \code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
+#'   \code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
+#'   \code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across methods \cr
+#'   \code{results$variabilityplot} \tab \tab \tab \tab \tab Coefficient of variation by case \cr
+#'   \code{results$spatialplot} \tab \tab \tab \tab \tab Spatial distribution of biomarker values \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$reproducibilitytable$asDF}
+#'
+#' \code{as.data.frame(results$reproducibilitytable)}
 #'
 #' @export
 biopsysimulation <- function(

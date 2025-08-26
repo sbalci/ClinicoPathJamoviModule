@@ -39,7 +39,18 @@ statistics}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$agreementtable} \tab \tab \tab \tab \tab ICC, CCC, and Bland-Altman metrics \cr
+\code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr
+\code{results$scatterplot} \tab \tab \tab \tab \tab Scatter plot with line of perfect agreement \cr
+\code{results$blandaltmanplot} \tab \tab \tab \tab \tab Bland-Altman plot showing bias and limits of agreement \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$agreementtable$asDF}
+
+\code{as.data.frame(results$agreementtable)}
 }
 \description{
 Pathology Agreement Analysis

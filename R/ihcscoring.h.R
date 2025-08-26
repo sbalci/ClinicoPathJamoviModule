@@ -24,7 +24,16 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             clinical_interpretation = TRUE,
             export_results = FALSE,
             confidence_level = 0.95,
-            bootstrap_n = 1000, ...) {
+            bootstrap_n = 1000,
+            automated_analysis = FALSE,
+            segmentation_method = "manual",
+            color_deconvolution = TRUE,
+            dab_thresholds = "0.1, 0.3, 0.6",
+            minimum_nuclear_area = 50,
+            maximum_nuclear_area = 2000,
+            batch_processing = FALSE,
+            image_format = "tiff",
+            validation_metrics = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -144,6 +153,57 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=100,
                 max=5000,
                 default=1000)
+            private$..automated_analysis <- jmvcore::OptionBool$new(
+                "automated_analysis",
+                automated_analysis,
+                default=FALSE)
+            private$..segmentation_method <- jmvcore::OptionList$new(
+                "segmentation_method",
+                segmentation_method,
+                options=list(
+                    "manual",
+                    "stardist",
+                    "cellpose",
+                    "watershed"),
+                default="manual")
+            private$..color_deconvolution <- jmvcore::OptionBool$new(
+                "color_deconvolution",
+                color_deconvolution,
+                default=TRUE)
+            private$..dab_thresholds <- jmvcore::OptionString$new(
+                "dab_thresholds",
+                dab_thresholds,
+                default="0.1, 0.3, 0.6")
+            private$..minimum_nuclear_area <- jmvcore::OptionNumber$new(
+                "minimum_nuclear_area",
+                minimum_nuclear_area,
+                min=10,
+                max=1000,
+                default=50)
+            private$..maximum_nuclear_area <- jmvcore::OptionNumber$new(
+                "maximum_nuclear_area",
+                maximum_nuclear_area,
+                min=100,
+                max=10000,
+                default=2000)
+            private$..batch_processing <- jmvcore::OptionBool$new(
+                "batch_processing",
+                batch_processing,
+                default=FALSE)
+            private$..image_format <- jmvcore::OptionList$new(
+                "image_format",
+                image_format,
+                options=list(
+                    "tiff",
+                    "jpg",
+                    "png",
+                    "svs",
+                    "ndpi"),
+                default="tiff")
+            private$..validation_metrics <- jmvcore::OptionBool$new(
+                "validation_metrics",
+                validation_metrics,
+                default=TRUE)
 
             self$.addOption(private$..intensity_var)
             self$.addOption(private$..proportion_var)
@@ -164,6 +224,15 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..export_results)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..bootstrap_n)
+            self$.addOption(private$..automated_analysis)
+            self$.addOption(private$..segmentation_method)
+            self$.addOption(private$..color_deconvolution)
+            self$.addOption(private$..dab_thresholds)
+            self$.addOption(private$..minimum_nuclear_area)
+            self$.addOption(private$..maximum_nuclear_area)
+            self$.addOption(private$..batch_processing)
+            self$.addOption(private$..image_format)
+            self$.addOption(private$..validation_metrics)
         }),
     active = list(
         intensity_var = function() private$..intensity_var$value,
@@ -184,7 +253,16 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         clinical_interpretation = function() private$..clinical_interpretation$value,
         export_results = function() private$..export_results$value,
         confidence_level = function() private$..confidence_level$value,
-        bootstrap_n = function() private$..bootstrap_n$value),
+        bootstrap_n = function() private$..bootstrap_n$value,
+        automated_analysis = function() private$..automated_analysis$value,
+        segmentation_method = function() private$..segmentation_method$value,
+        color_deconvolution = function() private$..color_deconvolution$value,
+        dab_thresholds = function() private$..dab_thresholds$value,
+        minimum_nuclear_area = function() private$..minimum_nuclear_area$value,
+        maximum_nuclear_area = function() private$..maximum_nuclear_area$value,
+        batch_processing = function() private$..batch_processing$value,
+        image_format = function() private$..image_format$value,
+        validation_metrics = function() private$..validation_metrics$value),
     private = list(
         ..intensity_var = NA,
         ..proportion_var = NA,
@@ -204,7 +282,16 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..clinical_interpretation = NA,
         ..export_results = NA,
         ..confidence_level = NA,
-        ..bootstrap_n = NA)
+        ..bootstrap_n = NA,
+        ..automated_analysis = NA,
+        ..segmentation_method = NA,
+        ..color_deconvolution = NA,
+        ..dab_thresholds = NA,
+        ..minimum_nuclear_area = NA,
+        ..maximum_nuclear_area = NA,
+        ..batch_processing = NA,
+        ..image_format = NA,
+        ..validation_metrics = NA)
 )
 
 ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -222,6 +309,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cutpointplot = function() private$.items[["cutpointplot"]],
         biomarkerspecific = function() private$.items[["biomarkerspecific"]],
         digitalvalidation = function() private$.items[["digitalvalidation"]],
+        automatedanalysis = function() private$.items[["automatedanalysis"]],
         advancedmetrics = function() private$.items[["advancedmetrics"]],
         exportdata = function() private$.items[["exportdata"]]),
     private = list(),
@@ -240,7 +328,42 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="scorestable",
                 title="Individual Sample Scores",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="sample_id", 
+                        `title`="Sample ID", 
+                        `type`="integer"),
+                    list(
+                        `name`="intensity", 
+                        `title`="Intensity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="proportion", 
+                        `title`="Proportion (%)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="hscore", 
+                        `title`="H-score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="allred_intensity", 
+                        `title`="Allred Intensity", 
+                        `type`="integer"),
+                    list(
+                        `name`="allred_proportion", 
+                        `title`="Allred Proportion", 
+                        `type`="integer"),
+                    list(
+                        `name`="allred_total", 
+                        `title`="Allred Total", 
+                        `type`="integer"),
+                    list(
+                        `name`="binary_classification", 
+                        `title`="Binary Result", 
+                        `type`="text")),
                 clearWith=list(
                     "intensity_var",
                     "proportion_var",
@@ -251,7 +374,46 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="statisticstable",
                 title="Descriptive Statistics by Score Type",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="score_type", 
+                        `title`="Score Type", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="min", 
+                        `title`="Min", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="max", 
+                        `title`="Max", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="q25", 
+                        `title`="Q1", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="q75", 
+                        `title`="Q3", 
+                        `type`="number", 
+                        `format`="zto")),
                 clearWith=list(
                     "intensity_var",
                     "proportion_var",
@@ -261,7 +423,40 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="agreementtable",
                 title="Method Agreement Analysis",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="correlation", 
+                        `title`="Correlation (r)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="icc", 
+                        `title`="ICC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="icc_ci_lower", 
+                        `title`="ICC 95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="icc_ci_upper", 
+                        `title`="ICC 95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Agreement Level", 
+                        `type`="text")),
                 visible="(agreement_analysis)",
                 clearWith=list(
                     "intensity_var",
@@ -272,7 +467,29 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="qualitycontroltable",
                 title="Quality Control Metrics",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="QC Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="status", 
+                        `title`="Status", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text")),
                 visible="(quality_control)",
                 clearWith=list(
                     "intensity_var",
@@ -286,6 +503,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=400,
                 visible="(show_plots)",
                 requiresData=TRUE,
+                renderFun=".distributionplot",
                 clearWith=list(
                     "intensity_var",
                     "proportion_var",
@@ -299,6 +517,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=400,
                 visible="(show_plots)",
                 requiresData=TRUE,
+                renderFun=".correlationplot",
                 clearWith=list(
                     "intensity_var",
                     "proportion_var",
@@ -312,6 +531,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=400,
                 visible="(show_agreement_plots)",
                 requiresData=TRUE,
+                renderFun=".agreementplot",
                 clearWith=list(
                     "intensity_var",
                     "proportion_var",
@@ -324,7 +544,8 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=500,
                 height=400,
                 visible=FALSE,
-                requiresData=TRUE))
+                requiresData=TRUE,
+                renderFun=".cutpointplot"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -341,12 +562,52 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="biomarkerresults",
                             title="Biomarker-Specific Results",
-                            columns=list()))
+                            columns=list(
+                                list(
+                                    `name`="parameter", 
+                                    `title`="Parameter", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="clinical_significance", 
+                                    `title`="Clinical Significance", 
+                                    `type`="text"),
+                                list(
+                                    `name`="reference_range", 
+                                    `title`="Reference Range", 
+                                    `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="clinicalcutpoints",
                             title="Clinical Cutpoint Analysis",
-                            columns=list()))}))$new(options=options))
+                            columns=list(
+                                list(
+                                    `name`="cutpoint_type", 
+                                    `title`="Cutpoint Type", 
+                                    `type`="text"),
+                                list(
+                                    `name`="threshold", 
+                                    `title`="Threshold", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="sensitivity", 
+                                    `title`="Sensitivity", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="specificity", 
+                                    `title`="Specificity", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="clinical_context", 
+                                    `title`="Clinical Context", 
+                                    `type`="text"))))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -364,16 +625,169 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="algorithmcomparison",
                             title="Algorithm vs Manual Comparison",
-                            columns=list()))
+                            columns=list(
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="manual_mean", 
+                                    `title`="Manual Mean", 
+                                    `type`="number"),
+                                list(
+                                    `name`="automated_mean", 
+                                    `title`="Automated Mean", 
+                                    `type`="number"),
+                                list(
+                                    `name`="correlation", 
+                                    `title`="Correlation", 
+                                    `type`="number"),
+                                list(
+                                    `name`="bias", 
+                                    `title`="Bias", 
+                                    `type`="number"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="batcheffects",
                             title="Batch Effect Assessment",
-                            columns=list()))
+                            columns=list(
+                                list(
+                                    `name`="batch_id", 
+                                    `title`="Batch ID", 
+                                    `type`="text"),
+                                list(
+                                    `name`="sample_count", 
+                                    `title`="Sample Count", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="mean_hscore", 
+                                    `title`="Mean H-Score", 
+                                    `type`="number"),
+                                list(
+                                    `name`="batch_effect_size", 
+                                    `title`="Effect Size", 
+                                    `type`="number"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="P-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="validationplot",
                             title="Digital Validation Plot",
+                            width=500,
+                            height=400,
+                            renderFun=".validationplot"))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    segmentationresults = function() private$.items[["segmentationresults"]],
+                    intensityanalysis = function() private$.items[["intensityanalysis"]],
+                    validationcomparison = function() private$.items[["validationcomparison"]],
+                    segmentationplot = function() private$.items[["segmentationplot"]],
+                    intensityplot = function() private$.items[["intensityplot"]],
+                    validationplot = function() private$.items[["validationplot"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="automatedanalysis",
+                            title="Automated Image Analysis Results")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="segmentationresults",
+                            title="Nuclear Segmentation Results",
+                            columns=list(
+                                list(
+                                    `name`="image_name", 
+                                    `title`="Image Name", 
+                                    `type`="text"),
+                                list(
+                                    `name`="total_nuclei", 
+                                    `title`="Total Nuclei", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="positive_nuclei", 
+                                    `title`="Positive Nuclei", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="percentage_positive", 
+                                    `title`="Percentage Positive", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="h_score", 
+                                    `title`="Automated H-Score", 
+                                    `type`="number"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="intensityanalysis",
+                            title="DAB Intensity Analysis",
+                            columns=list(
+                                list(
+                                    `name`="intensity_level", 
+                                    `title`="Intensity Level", 
+                                    `type`="text"),
+                                list(
+                                    `name`="nucleus_count", 
+                                    `title`="Nucleus Count", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="percentage", 
+                                    `title`="Percentage", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="mean_optical_density", 
+                                    `title`="Mean Optical Density", 
+                                    `type`="number"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="validationcomparison",
+                            title="Manual vs Automated Validation",
+                            visible="(validation_metrics)",
+                            columns=list(
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="manual_score", 
+                                    `title`="Manual Score", 
+                                    `type`="number"),
+                                list(
+                                    `name`="automated_score", 
+                                    `title`="Automated Score", 
+                                    `type`="number"),
+                                list(
+                                    `name`="difference", 
+                                    `title`="Difference", 
+                                    `type`="number"),
+                                list(
+                                    `name`="correlation", 
+                                    `title`="Correlation", 
+                                    `type`="number"))))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="segmentationplot",
+                            title="Nuclear Segmentation Visualization",
+                            width=800,
+                            height=600,
+                            renderFun=".segmentationplot"))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="intensityplot",
+                            title="DAB Intensity Distribution Plot",
+                            width=600,
+                            height=400,
+                            renderFun=".intensityplot"))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="validationplot",
+                            title="Manual vs Automated Correlation Plot",
+                            visible="(validation_metrics)",
                             width=500,
                             height=400))}))$new(options=options))
             self$add(R6::R6Class(
@@ -392,18 +806,99 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="reliabilitymetrics",
                             title="Reliability Assessment",
-                            columns=list()))
+                            columns=list(
+                                list(
+                                    `name`="measure", 
+                                    `title`="Reliability Measure", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="distributionanalysis",
                             title="Distribution Analysis",
-                            columns=list()))}))$new(options=options))
+                            columns=list(
+                                list(
+                                    `name`="score_type", 
+                                    `title`="Score Type", 
+                                    `type`="text"),
+                                list(
+                                    `name`="normality_test", 
+                                    `title`="Normality Test", 
+                                    `type`="text"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="P-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="skewness", 
+                                    `title`="Skewness", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="kurtosis", 
+                                    `title`="Kurtosis", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="distribution", 
+                                    `title`="Distribution", 
+                                    `type`="text"))))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="exportdata",
                 title="Export-Ready Data",
                 visible="(export_results)",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="sample_id", 
+                        `title`="Sample ID", 
+                        `type`="text"),
+                    list(
+                        `name`="intensity", 
+                        `title`="Intensity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="proportion", 
+                        `title`="Proportion (%)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="hscore", 
+                        `title`="H-score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="allred_total", 
+                        `title`="Allred Total", 
+                        `type`="integer"),
+                    list(
+                        `name`="binary_result", 
+                        `title`="Binary Result", 
+                        `type`="text"),
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text")),
                 clearWith=list(
                     "export_results",
                     "intensity_var",
@@ -456,6 +951,20 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param export_results format results for external analysis or reporting
 #' @param confidence_level confidence level for statistical intervals
 #' @param bootstrap_n number of bootstrap replicates for confidence intervals
+#' @param automated_analysis enable automated quantification from histological
+#'   images
+#' @param segmentation_method method for nuclear segmentation in automated
+#'   analysis
+#' @param color_deconvolution separate DAB and hematoxylin channels for better
+#'   quantification
+#' @param dab_thresholds optical density thresholds for weak, moderate, and
+#'   strong DAB staining (comma-separated)
+#' @param minimum_nuclear_area minimum area threshold for nuclear detection
+#' @param maximum_nuclear_area maximum area threshold for nuclear detection
+#' @param batch_processing process multiple image files in batch mode
+#' @param image_format format of input histological images
+#' @param validation_metrics compare automated results with manual scoring
+#'   when available
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
@@ -472,6 +981,12 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$digitalvalidation$algorithmcomparison} \tab \tab \tab \tab \tab Statistical comparison of digital vs manual scoring \cr
 #'   \code{results$digitalvalidation$batcheffects} \tab \tab \tab \tab \tab Analysis of systematic differences across batches \cr
 #'   \code{results$digitalvalidation$validationplot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$automatedanalysis$segmentationresults} \tab \tab \tab \tab \tab Summary of automated nuclear segmentation \cr
+#'   \code{results$automatedanalysis$intensityanalysis} \tab \tab \tab \tab \tab Distribution of DAB intensity levels \cr
+#'   \code{results$automatedanalysis$validationcomparison} \tab \tab \tab \tab \tab Comparison between manual and automated scores \cr
+#'   \code{results$automatedanalysis$segmentationplot} \tab \tab \tab \tab \tab Overlay of detected nuclei on original image \cr
+#'   \code{results$automatedanalysis$intensityplot} \tab \tab \tab \tab \tab Histogram of DAB optical density values \cr
+#'   \code{results$automatedanalysis$validationplot} \tab \tab \tab \tab \tab Scatter plot of manual vs automated scores \cr
 #'   \code{results$advancedmetrics$reliabilitymetrics} \tab \tab \tab \tab \tab Comprehensive reliability and consistency metrics \cr
 #'   \code{results$advancedmetrics$distributionanalysis} \tab \tab \tab \tab \tab Normality testing and distribution characteristics \cr
 #'   \code{results$exportdata} \tab \tab \tab \tab \tab Formatted results for external analysis or reporting \cr
@@ -504,7 +1019,16 @@ ihcscoring <- function(
     clinical_interpretation = TRUE,
     export_results = FALSE,
     confidence_level = 0.95,
-    bootstrap_n = 1000) {
+    bootstrap_n = 1000,
+    automated_analysis = FALSE,
+    segmentation_method = "manual",
+    color_deconvolution = TRUE,
+    dab_thresholds = "0.1, 0.3, 0.6",
+    minimum_nuclear_area = 50,
+    maximum_nuclear_area = 2000,
+    batch_processing = FALSE,
+    image_format = "tiff",
+    validation_metrics = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcscoring requires jmvcore to be installed (restart may be required)")
@@ -542,7 +1066,16 @@ ihcscoring <- function(
         clinical_interpretation = clinical_interpretation,
         export_results = export_results,
         confidence_level = confidence_level,
-        bootstrap_n = bootstrap_n)
+        bootstrap_n = bootstrap_n,
+        automated_analysis = automated_analysis,
+        segmentation_method = segmentation_method,
+        color_deconvolution = color_deconvolution,
+        dab_thresholds = dab_thresholds,
+        minimum_nuclear_area = minimum_nuclear_area,
+        maximum_nuclear_area = maximum_nuclear_area,
+        batch_processing = batch_processing,
+        image_format = image_format,
+        validation_metrics = validation_metrics)
 
     analysis <- ihcscoringClass$new(
         options = options,

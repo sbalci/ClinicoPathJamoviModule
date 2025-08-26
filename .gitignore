@@ -42,6 +42,8 @@ ClinicoPath.code-workspace
 # docs
 pdfs
 temp
+temp2
+temp3
 _tododata
 # ^docs$
 inst/doc
@@ -54,3 +56,4 @@ backups/
 /Meta/
 /test_backups
 # /.claude_prompts
+_updateModules_config.yaml

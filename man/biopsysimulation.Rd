@@ -63,7 +63,22 @@ sampling strategy}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
+\code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
+\code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
+\code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
+\code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
+\code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across methods \cr
+\code{results$variabilityplot} \tab \tab \tab \tab \tab Coefficient of variation by case \cr
+\code{results$spatialplot} \tab \tab \tab \tab \tab Spatial distribution of biomarker values \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$reproducibilitytable$asDF}
+
+\code{as.data.frame(results$reproducibilitytable)}
 }
 \description{
 Biopsy Simulation Analysis

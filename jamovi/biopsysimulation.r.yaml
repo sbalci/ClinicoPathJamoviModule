@@ -1,0 +1,155 @@
+---
+name: biopsysimulation
+title: Biopsy Simulation Analysis
+jrs: '1.1'
+
+items:
+    - name: interpretation
+      title: Clinical Interpretation and Analysis Summary
+      type: Html
+      visible: true
+
+    - name: reproducibilitytable
+      title: Reproducibility Assessment
+      type: Table
+      description: Correlation and reliability metrics
+      columns:
+        - name: metric
+          title: 'Reproducibility Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Clinical Interpretation'
+          type: text
+
+    - name: samplingbiastable
+      title: Sampling Bias Analysis
+      type: Table
+      description: Systematic bias assessment between methods
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: mean_diff
+          title: 'Mean Difference'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'P-value'
+          type: number
+          format: zto,pvalue
+        - name: effect_size
+          title: 'Effect Size (Cohen''s d)'
+          type: number
+          format: zto
+        - name: clinical_impact
+          title: 'Clinical Impact'
+          type: text
+
+    - name: variancetable
+      title: Variance Component Analysis
+      type: Table
+      description: Sources of measurement variability
+      columns:
+        - name: component
+          title: 'Variance Component'
+          type: text
+        - name: variance
+          title: 'Variance'
+          type: number
+          format: zto
+        - name: percentage
+          title: 'Percentage (%)'
+          type: number
+          format: zto
+        - name: contribution
+          title: 'Contribution to Total Variance'
+          type: text
+
+    - name: poweranalysistable
+      title: Power Analysis Results
+      type: Table
+      visible: (power_analysis)
+      description: Sample size recommendations and power calculations
+      columns:
+        - name: scenario
+          title: 'Analysis Scenario'
+          type: text
+        - name: effect_size
+          title: 'Expected Effect Size'
+          type: number
+          format: zto
+        - name: power
+          title: 'Statistical Power'
+          type: number
+          format: pc
+        - name: required_n
+          title: 'Required Sample Size'
+          type: integer
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: spatialanalysistable
+      title: Spatial Heterogeneity Analysis
+      type: Table
+      visible: (spatial_id)
+      description: Variability across spatial regions
+      columns:
+        - name: region
+          title: 'Spatial Region'
+          type: text
+        - name: n_cases
+          title: 'Cases'
+          type: integer
+        - name: mean_value
+          title: 'Mean Value'
+          type: number
+          format: zto
+        - name: cv_percent
+          title: 'CV (%)'
+          type: number
+          format: zto
+        - name: heterogeneity_level
+          title: 'Heterogeneity Level'
+          type: text
+
+    - name: biopsyplot
+      title: Biopsy vs Whole Section Comparison
+      type: Image
+      description: Distribution comparison across methods
+      width: 700
+      height: 500
+      visible: (show_variability_plots)
+      renderFun: .biopsyplot
+
+    - name: variabilityplot
+      title: Sampling Variability Analysis
+      type: Image
+      description: Coefficient of variation by case
+      width: 600
+      height: 400
+      visible: (show_variability_plots)
+      renderFun: .variabilityplot
+
+    - name: spatialplot
+      title: Spatial Heterogeneity Visualization
+      type: Image
+      description: Spatial distribution of biomarker values
+      width: 600
+      height: 400
+      visible: (spatial_id && show_variability_plots)
+      renderFun: .spatialplot
+
+...

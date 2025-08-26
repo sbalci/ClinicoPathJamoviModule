@@ -85,10 +85,6 @@ options:
       type: Number
       default: 20
 
-    - name: minBucket
-      title: Min. bucket
-      type: Number
-      default: 0
 
     - name: complexity
       title: Complexity

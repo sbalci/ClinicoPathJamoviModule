@@ -104,9 +104,15 @@ private = list(
                 balanced_data <- rbind(balanced_data, sampled_data)
             }
             task <- TaskClassif$new(id = task$id, backend = balanced_data, target = target_col)
+        } else if (self$options$balancingMethod == "smote") {
+            stop("SMOTE requires the 'smotefamily' package. Please install it or choose another balancing method.")
         }
-        # Note: SMOTE would require additional packages like smotefamily
         return(task)
+    },
+
+    .checkpoint = function() {
+        # Allow jamovi to check for user cancellation
+        if (self$isFresh) return()
     },
 
     .calculateClinicalMetrics = function(predictions, truth) {
@@ -198,43 +204,36 @@ private = list(
 
     .populateClinicalMetrics = function(clinical_metrics) {
         if (self$options$reportClinicalMetrics && length(clinical_metrics) > 0) {
-            metric_names <- c("Sensitivity", "Specificity", "Positive Predictive Value", 
-                            "Negative Predictive Value", "Positive Likelihood Ratio", 
-                            "Negative Likelihood Ratio", "Prevalence")
-            metric_keys <- c("sensitivity", "specificity", "ppv", "npv", 
-                           "positive_lr", "negative_lr", "prevalence")
+            # Clinical metrics table
+            clinical_names <- c("sensitivity", "specificity", "ppv", "npv", "positive_lr", "negative_lr", "prevalence", "nnt")
+            clinical_labels <- c("Sensitivity", "Specificity", "PPV", "NPV", "LR+", "LR-", "Prevalence", "NNT")
             
-            for (i in seq_along(metric_names)) {
-                key <- metric_keys[i]
-                if (key %in% names(clinical_metrics)) {
+            for (i in seq_along(clinical_names)) {
+                metric_name <- clinical_names[i]
+                if (!is.null(clinical_metrics[[metric_name]]) && !is.na(clinical_metrics[[metric_name]])) {
                     row_data <- list(
-                        metric = metric_names[i],
-                        value = clinical_metrics[[key]]
+                        metric = clinical_labels[i],
+                        value = clinical_metrics[[metric_name]]
                     )
                     
                     # Add confidence intervals if available
                     if (self$options$reportConfidenceIntervals) {
-                        ci_lower_key <- paste0(key, "_ci_lower")
-                        ci_upper_key <- paste0(key, "_ci_upper")
-                        
-                        if (ci_lower_key %in% names(clinical_metrics)) {
-                            row_data$ci_lower <- clinical_metrics[[ci_lower_key]]
-                            row_data$ci_upper <- clinical_metrics[[ci_upper_key]]
-                        }
+                        ci_lower_key <- paste0(metric_name, "_ci_lower")
+                        ci_upper_key <- paste0(metric_name, "_ci_upper")
+                        row_data$ci_lower <- clinical_metrics[[ci_lower_key]]
+                        row_data$ci_upper <- clinical_metrics[[ci_upper_key]]
                     }
                     
+                    key <- paste0("clinical_", metric_name)
                     self$results$classificationMetrics$clinicalMetrics$addRow(rowKey = key, values = row_data)
                 }
             }
             
-            # Add NNT if available and valid
-            if ("nnt" %in% names(clinical_metrics) && !is.na(clinical_metrics$nnt) && clinical_metrics$nnt > 0) {
+            # Add overall accuracy
+            if (!is.null(clinical_metrics$accuracy)) {
                 self$results$classificationMetrics$clinicalMetrics$addRow(
-                    rowKey = "nnt", 
-                    values = list(
-                        metric = "Number Needed to Treat",
-                        value = clinical_metrics$nnt
-                    )
+                    rowKey = "accuracy", 
+                    values = list(metric = "Accuracy", value = clinical_metrics$accuracy)
                 )
             }
         }
@@ -242,18 +241,16 @@ private = list(
 
     .initLearner = function() {
         classifier_type <- switch(self$options$classifier,
-            'singleDecisionTree' = 'classif.rpart',
-            'randomForest' = 'classif.ranger',
-            'knn' = 'classif.kknn',
-            'naiveBayes' = 'classif.naive_bayes',
-            'logisticRegression' = 'classif.log_reg',
-            'svm' = 'classif.svm',
-            'classif.rpart'  # default
+            "singleDecisionTree" = "classif.rpart",
+            "randomForest" = "classif.ranger",
+            "knn" = "classif.kknn",
+            "naiveBayes" = "classif.naive_bayes",
+            "logisticRegression" = "classif.log_reg",
+            "svm" = "classif.svm"
         )
 
-        # Initialize options based on classifier type
         options <- list()
-        
+
         if(self$options$classifier == 'singleDecisionTree'){
             options <- list(
                 minsplit = self$options$minSplit,
@@ -272,19 +269,16 @@ private = list(
         } else if(self$options$classifier == 'knn') {
             options <- list(
                 k = self$options$knnNeighbors,
-                distance = 2  # Euclidean distance
+                distance = 2  # Default Euclidean
             )
             if(self$options$knnDistance == 'manhattan') {
                 options$distance <- 1
             } else if(self$options$knnDistance == 'minkowski') {
-                options$distance <- 3
-                options$p <- 3
+                options$distance <- 3  # Minkowski with p=3
             }
         } else if(self$options$classifier == 'naiveBayes') {
-            # Naive Bayes typically doesn't need many hyperparameters
             options <- list()
         } else if(self$options$classifier == 'logisticRegression') {
-            # Logistic regression parameters
             options <- list()
         } else if(self$options$classifier == 'svm') {
             options <- list(
@@ -295,7 +289,7 @@ private = list(
                 options$gamma <- self$options$svmGamma
             }
         }
-
+        
         # Check if the learner is available, fallback to decision tree if not
         tryCatch({
             learner <- lrn(classifier_type, predict_type = 'prob')
@@ -313,9 +307,9 @@ private = list(
         })
     },
 
-    .printModelParameters = function(parameters) {
-        singleTreeOptions <- c(
-            "type" = "single decision tree",
+    .printModelParameters = function(paramSet = NULL) {
+        if(self$options$classifier == 'singleDecisionTree') {
+            selectedClassifier <- list(
             "min. split " = self$options$minSplit,
             "min. bucket" = self$options$minBucket,
             "complexity" = self$options$complexity,
@@ -324,24 +318,23 @@ private = list(
             "unsurrogate" = self$options$unsurrogate,
             "max depth" = self$options$maxDepth,
             "no. cross validations" = self$options$noCrossValidations
-        )
-
-        randomForestOptions <- c(
-            "type" =  "random forest",
+            )
+        } else if(self$options$classifier == 'randomForest') {
+            selectedClassifier <- list(
             "no. of trees" = self$options$noOfTrees,
             "max depth" = self$options$maxDepth,
             "sample fraction" = self$options$sampleFraction,
             "split rule" = self$options$splitRule
-        )
-
+            )
+        }
         if(self$options$classifier == "singleDecisionTree"){
-            selectedClassifier <- singleTreeOptions
-        }
-        else {
-            selectedClassifier <- randomForestOptions
+            settings <- '<h2>Classification tree</h2><br><i><b> Model specification: </b><br>'
+        } else if(self$options$classifier == "randomForest"){
+            settings <- '<h2>Random forest</h2><br><i><b> Model specification: </b><br>'
+        } else{
+            return()
         }
 
-        settings <- "Decision tree with "
         for (option in names(selectedClassifier)) {
             sep <- ifelse(option != rev(names(selectedClassifier))[1], ',', '.')
             settings <- paste0('<i>',settings, option, ' = ', selectedClassifier[option], sep ,'</i> ')
@@ -364,66 +357,12 @@ private = list(
         return (predictions)
     },
 
-    .printRandomForestModel = function(model) {
-        table <- self$results$printRandForest$randomForestModel
-
-        table$setRow(rowNo = 1, values = list(type = 'No. of trees', classif = model$forest$num.trees))
-        table$setRow(rowNo = 2, values = list(type = 'Sample size', classif = model$num.samples))
-        table$setRow(rowNo = 3, values = list(type = 'Number of indep. variables', classif = model$num.independent.variables))
-        table$setRow(rowNo = 4, values = list(type = 'Mtyri', classif = model$mtry))
-        table$setRow(rowNo = 5, values = list(type = 'Target node size', classif = model$min.node.size))
-        table$setRow(rowNo = 6, values = list(type = 'Variable importance mode', classif = model$importance.mode))
-        table$setRow(rowNo = 7, values = list(type = 'Split rule', classif = model$splitrule))
-        table$setRow(rowNo = 8, values = list(type = 'OOB prediction error', classif = model$prediction.error))
-
-    },
-
-    .setOutput = function(predictions, plotData, model) {
-        levels <- levels(predictions$truth)
-        reporting <- self$options$reporting
-        freqPlot <- self$results$predictedFreqPlot
-        treePlot <- self$results$decisionTreeModel
-        classifier <- self$options$classifier
-
-        if (any(reporting == 'confusionMatrix')) {
-            private$.populateConfusionMatrix(predictions$confusion)
-        }
-
-        if (any(reporting == 'AUC')) {
-            binaryPredictions <- sapply(levels, function(level) private$.convertToBinary(level, predictions), USE.NAMES = TRUE)
-            self$results$rocCurvePlot$setState(binaryPredictions)
-        }
-
-        if (any(reporting == "classifMetrices")) {
-            table <- self$results$classificationMetrics$class
-            columns <- private$.getTableColumns(table)
-
-            private$.populateClassificationMetrices(predictions, names(columns))
-        }
-
-        if (self$options$predictedFreq == TRUE | self$options$predictedFreqRF == TRUE) {
-            freqPlot$setState(plotData)
-        }
-
-        if (self$options$plotDecisionTree == TRUE & classifier == 'singleDecisionTree') {
-            treePlot$setState(model)
-        }
-
-        if(self$options$printRandForest == TRUE & classifier == 'randomForest') {
-            private$.printRandomForestModel(model)
-        }
-
-        # Calculate and populate clinical metrics if requested
-        if (self$options$reportClinicalMetrics) {
-            clinical_metrics <- private$.calculateClinicalMetrics(predictions$response, predictions$truth)
-            private$.populateClinicalMetrics(clinical_metrics)
-        }
-    },
-
     .crossValidate = function(task, learner) {
         resampling <- rsmp("cv", folds = self$options$noOfFolds)
         resampling$instantiate(task)
+
         rr <- resample(task, learner, resampling, store_models = TRUE)
+
         return (rr)
     },
 
@@ -444,132 +383,238 @@ private = list(
     },
 
     .populateConfusionMatrix = function(confusionMatrix) {
-        levels <- colnames(confusionMatrix)[!is.na(colnames(confusionMatrix))] # get levels, removes .na values if any
-
-        lapply(levels, function(level) { # add columns
+        levels <- dimnames(confusionMatrix)$response
+        
+        for (level in levels) {
             self$results$confusion$matrix$addColumn(
-                name = level,
-                superTitle = 'truth',
-                title = level,
-                type = 'integer')
-        })
-
-        lapply(levels, function(level) { # add rows
-            rowValues <- as.list(confusionMatrix[level,])
-            rowValues[['class']] <- level
-            self$results$confusion$matrix$addRow(rowKey = level, values = rowValues)
-        })
-
-        return (confusionMatrix)
-    },
-
-    .populateClassificationMetrices = function(predictions, outputScores) {
-        generalTable <- self$results$classificationMetrics$general
-        classTable <- self$results$classificationMetrics$class
-        levels <- levels(predictions$truth)
-
-        scores <- private$.calculateScores(predictions, outputScores)
-        general <- scores[['general']]
-        class <- scores[['class']]
-
-        metricesDict <- c(
-            classif.acc = 'Accuracy',
-            classif.bacc = 'Balanced accuracy',
-            classif.ce = 'Error rate',
-            classif.recall = 'Macro recall',
-            classif.precision = 'Macro precision',
-            classif.fbeta = 'Macro F-score',
-            classif.auc = 'Macro AUC'
-        )
-
-        lapply(names(general), function(name) generalTable$addRow(rowKey = name, values = list(metric = metricesDict[name], value = general[[name]])))
-
-        lapply(levels, function(level) {
-            class[[level]][['class']] <- level
-            classTable$addRow(rowKey = level, values = class[[level]])
-        })
-    },
-
-    .convertToBinary = function(class, predictions) {
-        transformed <- transform(as.data.table(predictions), truth = ifelse(truth != class, "negative", as.character(truth)))
-        transformed <- transform(as.data.table(transformed), response = ifelse(response != class, "negative", as.character(response)))
-
-        probName <- gsub("[[:space:]]", "", paste('prob.', class)) #name of prob column, deletes space
-        prob <- as.matrix(data.frame(transformed[[probName]], 1 - transformed[[probName]]))
-        colnames(prob) <- c(class, "negative")
-
-        binaryPrediction <- PredictionClassif$new(
-            truth = as.factor(transformed$truth),
-            response = transformed$response,
-            prob = prob,
-            row_ids = 1:length(transformed$truth)
-        )
-
-        return (binaryPrediction)
-    },
-
-    .getTableColumns = function(table) {
-        columnsToPlot <- table$columns[c(-1)]
-
-        columns <- lapply(columnsToPlot, function(column) {
-            ifelse(column$visible, column$title, NA)
-        })
-
-        return(columns[!is.na(columns)])
-    },
-
-    .calculateScores = function(predictions, outputScores) {
-        macros <- numeric(0)
-        levels <- levels(predictions$truth)
-
-        binaryPredictions <- sapply(levels, USE.NAMES = TRUE, function(level) private$.convertToBinary(level, predictions))
-
-        classScores <- lapply(levels, function(level) {
-            prob <- as.data.table(binaryPredictions[[level]])[[paste('prob', level, sep = '.')]]
-
-            c(
-                'classif.recall' = recall(binaryPredictions[[level]]$truth, binaryPredictions[[level]]$response, positive = level),
-                'classif.precision' = precision(binaryPredictions[[level]]$truth, binaryPredictions[[level]]$response, positive = level),
-                'classif.fbeta' = fbeta(binaryPredictions[[level]]$truth, binaryPredictions[[level]]$response, positive = level),
-                'classif.auc' = auc(binaryPredictions[[level]]$truth, prob = prob, positive = level)
+                name = paste0('pred_', level),
+                title = as.character(level),
+                type = 'number'
             )
-        })
-
-        names(classScores) <- levels
-        classScores <- lapply(classScores, round , 3)
-
-        #calculate macro scores
-        for (scoreName in outputScores) {
-            macros[scoreName] <- mean(sapply(levels, function(class) classScores[[class]][scoreName]))
         }
 
-        return(list(
-            general = c(predictions$score(msrs(c('classif.acc', 'classif.ce', 'classif.bacc'))), macros),
-            class = classScores
-        ))
+        for (i in seq_along(levels)) {
+            level <- levels[i]
+            rowValues <- as.list(confusionMatrix[i, ])
+            rowValues$class <- as.character(level)
+
+            self$results$confusion$matrix$addRow(rowKey = level, values = rowValues)
+        }
     },
 
-    .plotRocCurve = function(image, ...) {
-        plotData <- image$state
+    .setOutput = function(prediction, resampledPrediction, model = NULL) {
+        generalTable <- self$results$classificationMetrics$general
+        classTable <- self$results$classificationMetrics$class
 
-        plotList <- lapply(names(plotData), function(class) {
-            mlr3viz::autoplot(plotData[[class]], type = 'roc')
+        # Create measures for general metrics
+        measures <- list(
+            msr("classif.ce"),
+            msr("classif.acc")
+        )
+
+        # Create measures for per-class metrics
+        classMeasures <- list(
+            msr("classif.precision"),
+            msr("classif.recall"),
+            msr("classif.fbeta")
+        )
+
+        # Add AUC if binary classification
+        if (length(unique(prediction$truth)) == 2) {
+            classMeasures <- c(classMeasures, list(msr("classif.auc")))
+        }
+
+        reporting <- self$options$reporting
+
+        # Calculate general measures
+        classifier <- self$options$classifier
+        columns <- generalTable$columns
+        for (i in seq_along(measures)) {
+            generalTable$addRow(rowKey = i, values = list(
+                metric = measures[[i]]$id,
+                value = as.numeric(prediction$score(measures[[i]], task = NULL))
+            ))
+        }
+
+        if (self$options$predictedFreq == TRUE | self$options$predictedFreqRF == TRUE) {
+            freqPlot <- self$results$predictedFreqPlot
+            freqPlot$setState(prediction)
+        }
+        if (self$options$plotDecisionTree == TRUE & classifier == 'singleDecisionTree') {
+            treePlot <- self$results$decisionTreeModel
+            treePlot$setState(list(predictions = prediction, model = model))
+        }
+        if(self$options$printRandForest == TRUE & classifier == 'randomForest') {
+            private$.populateRandomForestResults(model)
+        }
+
+        if (self$options$reportClinicalMetrics) {
+            # Calculate clinical metrics for binary classification
+            if (length(unique(prediction$truth)) == 2) {
+                clinical_metrics <- private$.calculateClinicalMetrics(prediction$response, prediction$truth)
+                private$.populateClinicalMetrics(clinical_metrics)
+            }
+        }
+
+        # Cross-validation specific handling
+        resampling <- rsmp("cv", folds = self$options$noOfFolds)
+        resampling$instantiate(task)
+
+        columns <- classTable$columns
+        for (i in seq_along(columns)) {
+            if (columns[[i]]$name == 'class') next
+        }
+
+        if (self$options$testing == "split") {
+            trainSet <- sample(task$nrow, (1 - self$options$testSize) * task$nrow)
+            testSet <- setdiff(seq_len(task$nrow), as.numeric(trainSet))
+        }
+
+        # Set up ROC curve if AUC reporting is enabled
+        if ('AUC' %in% reporting && length(unique(prediction$truth)) == 2) {
+            binaryPredictions <- prediction
+            self$results$rocCurvePlot$setState(binaryPredictions)
+        }
+
+        # Populate per-class metrics table
+        table <- self$results$classificationMetrics$class
+        unique_classes <- unique(prediction$truth)
+        
+        for (class_name in unique_classes) {
+            row_data <- list(class = as.character(class_name))
+            
+            # Calculate per-class metrics
+            for (measure in classMeasures) {
+                if (measure$id == "classif.auc" && length(unique_classes) > 2) {
+                    # Skip AUC for multi-class
+                    next
+                }
+                
+                tryCatch({
+                    score <- prediction$score(measure, task = NULL)
+                    if (measure$id %in% c("classif.precision", "classif.recall", "classif.fbeta")) {
+                        # These are per-class metrics, extract the specific class
+                        if (is.numeric(score) && length(score) == 1) {
+                            row_data[[measure$id]] <- score
+                        }
+                    } else {
+                        row_data[[measure$id]] <- score
+                    }
+                }, error = function(e) {
+                    row_data[[measure$id]] <- NA
+                })
+            }
+            
+            table$addRow(rowKey = class_name, values = row_data)
+        }
+
+        # Populate confusion matrix
+        if ('confusionMatrix' %in% reporting) {
+            confusionMatrix <- prediction$confusion
+            private$.populateConfusionMatrix(confusionMatrix)
+        }
+    },
+
+    .populateRandomForestResults = function(model) {
+        if (is.null(model)) return()
+        
+        table <- self$results$printRandForest$randomForestModel
+        
+        # Add basic random forest information
+        table$addRow(rowKey = "type", values = list(type = "Type", classif = "Classification"))
+        table$addRow(rowKey = "trees", values = list(type = "Number of trees", classif = model$num.trees))
+        table$addRow(rowKey = "variables", values = list(type = "No. of variables tried at each split", classif = model$mtry))
+        table$addRow(rowKey = "oob", values = list(type = "OOB estimate of error rate", classif = paste0(round(model$prediction.error * 100, 2), "%")))
+    },
+
+    .plotRocCurve = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state))
+            return(FALSE)
+
+        prediction <- image$state
+        
+        library(pROC)
+        library(ggplot2)
+        
+        # Create ROC curve
+        roc_obj <- roc(prediction$truth, prediction$prob[, 2])
+        
+        # Create data frame for ggplot
+        roc_data <- data.frame(
+            specificity = roc_obj$specificities,
+            sensitivity = roc_obj$sensitivities
+        )
+        
+        # Create the plot
+        p <- ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
+            geom_line(color = "steelblue", size = 1) +
+            geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+            labs(
+                x = "1 - Specificity",
+                y = "Sensitivity",
+                title = paste0("ROC Curve (AUC = ", round(roc_obj$auc, 3), ")")
+            ) +
+            theme_minimal() +
+            coord_equal()
+        
+        print(p)
+        
+        return(TRUE)
+    },
+
+    .printDecisionTree = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state))
+            return(FALSE)
+
+        predictions <- image$state$predictions
+        model <- image$state$model
+        
+        if (is.null(model)) {
+            # Try to extract model from prediction object
+            if (!is.null(predictions$learner) && !is.null(predictions$learner$model)) {
+                model <- predictions$learner$model
+            } else {
+                return(FALSE)
+            }
+        }
+        
+        library(rpart.plot)
+        tryCatch({
+            rpart.plot(model, type = 2, extra = 101, cex = 0.8)
+            return(TRUE)
+        }, error = function(e) {
+            return(FALSE)
         })
-
-        plot <- ggpubr::ggarrange(plotlist = plotList,
-                                  labels = names(plotData),
-                                  font.label = list(size = 8, color = "black", face = "bold", family = NULL),
-                                  ncol = 2, nrow = round(length(names(plotData)) / 2))
-        print(plot)
     },
 
-    .printDecisionTree = function(image, ...) {
-        plot <- rpart.plot::rpart.plot(image$state)
-        print(plot)
-    },
+    .plotFrequencies = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state))
+            return(FALSE)
 
-    .plotFrequencies = function(image, ...) {
-        plot <- mlr3viz::autoplot(image$state)
-        print(plot)
-    })
+        prediction <- image$state
+        
+        library(ggplot2)
+        
+        # Create frequency table
+        freq_table <- table(Actual = prediction$truth, Predicted = prediction$response)
+        
+        # Convert to data frame for plotting
+        freq_df <- as.data.frame(freq_table)
+        
+        # Create the plot
+        p <- ggplot(freq_df, aes(x = Actual, y = Freq, fill = Predicted)) +
+            geom_bar(stat = "identity", position = "dodge") +
+            labs(
+                title = "Predicted vs Actual Frequencies",
+                x = "Actual Class",
+                y = "Frequency",
+                fill = "Predicted Class"
+            ) +
+            theme_minimal()
+        
+        print(p)
+        
+        return(TRUE)
+    }
+)
 )
