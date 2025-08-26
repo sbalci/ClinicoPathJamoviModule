@@ -1,7 +1,7 @@
 ---
 name: raincloud
 title: Raincloud Plot
-menuGroup: ExplorationD
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Descriptive Plots
 version: '0.0.3'
 jas: '1.2'

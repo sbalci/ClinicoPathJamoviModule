@@ -1,10 +1,10 @@
 ---
 name: lollipop
 title: Lollipop Chart
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: Drafts
 menuSubtitle: 'Categorical Data Visualization'
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

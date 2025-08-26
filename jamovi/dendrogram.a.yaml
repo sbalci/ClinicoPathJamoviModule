@@ -2,7 +2,7 @@
 ---
 name:  dendrogram
 title: Dendrogram
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Drafts
 version: '0.0.31'
 jas: '1.2'

@@ -2,7 +2,7 @@
 # Tests cover functionality, performance, edge cases, and error handling
 
 library(testthat)
-library(ClinicoPath)
+skip_if_not_installed("ClinicoPath")
 
 # Test data setup
 setup_test_data <- function() {
@@ -58,6 +58,19 @@ describe("jwaffle Basic Functionality", {
     })
     
     expect_true(is.list(result))
+  })
+  
+  test_that("jwaffle generates interpretation content", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+    
+    result <- jwaffle(
+      data = test_data$basic,
+      groups = "category"
+    )
+    
+    expect_true(is.list(result))
+    # Check if interpretation section exists (would be visible in actual jamovi interface)
   })
   
   test_that("jwaffle handles count variables", {

@@ -1,7 +1,7 @@
 ---
 name: poweranalysis
 title: Power Analysis & Sample Size Calculation
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: Specialized Survival Methods
 menuTitle: Power Analysis
 menuSubtitle: Comprehensive power and sample size calculations for survival studies
