@@ -11,7 +11,12 @@ comparingSurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             groups = NULL,
             ciyn = FALSE,
             loglogyn = FALSE,
-            timeunits = "None", ...) {
+            timeunits = "None",
+            pairwise = FALSE,
+            pairwiseCorrection = "none",
+            trendTest = FALSE,
+            landmarkTime = 0,
+            landmarkUnit = "same", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -55,6 +60,40 @@ comparingSurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "Months",
                     "Years"),
                 default="None")
+            private$..pairwise <- jmvcore::OptionBool$new(
+                "pairwise",
+                pairwise,
+                default=FALSE)
+            private$..pairwiseCorrection <- jmvcore::OptionList$new(
+                "pairwiseCorrection",
+                pairwiseCorrection,
+                options=list(
+                    "none",
+                    "bonferroni",
+                    "holm",
+                    "BH",
+                    "BY",
+                    "hochberg",
+                    "hommel"),
+                default="none")
+            private$..trendTest <- jmvcore::OptionBool$new(
+                "trendTest",
+                trendTest,
+                default=FALSE)
+            private$..landmarkTime <- jmvcore::OptionNumber$new(
+                "landmarkTime",
+                landmarkTime,
+                min=0,
+                default=0)
+            private$..landmarkUnit <- jmvcore::OptionList$new(
+                "landmarkUnit",
+                landmarkUnit,
+                options=list(
+                    "same",
+                    "days",
+                    "months",
+                    "years"),
+                default="same")
 
             self$.addOption(private$..times)
             self$.addOption(private$..status)
@@ -62,6 +101,11 @@ comparingSurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..ciyn)
             self$.addOption(private$..loglogyn)
             self$.addOption(private$..timeunits)
+            self$.addOption(private$..pairwise)
+            self$.addOption(private$..pairwiseCorrection)
+            self$.addOption(private$..trendTest)
+            self$.addOption(private$..landmarkTime)
+            self$.addOption(private$..landmarkUnit)
         }),
     active = list(
         times = function() private$..times$value,
@@ -69,14 +113,24 @@ comparingSurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         groups = function() private$..groups$value,
         ciyn = function() private$..ciyn$value,
         loglogyn = function() private$..loglogyn$value,
-        timeunits = function() private$..timeunits$value),
+        timeunits = function() private$..timeunits$value,
+        pairwise = function() private$..pairwise$value,
+        pairwiseCorrection = function() private$..pairwiseCorrection$value,
+        trendTest = function() private$..trendTest$value,
+        landmarkTime = function() private$..landmarkTime$value,
+        landmarkUnit = function() private$..landmarkUnit$value),
     private = list(
         ..times = NA,
         ..status = NA,
         ..groups = NA,
         ..ciyn = NA,
         ..loglogyn = NA,
-        ..timeunits = NA)
+        ..timeunits = NA,
+        ..pairwise = NA,
+        ..pairwiseCorrection = NA,
+        ..trendTest = NA,
+        ..landmarkTime = NA,
+        ..landmarkUnit = NA)
 )
 
 comparingSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -88,7 +142,10 @@ comparingSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         compsurvTable2 = function() private$.items[["compsurvTable2"]],
         compsurvTable3 = function() private$.items[["compsurvTable3"]],
         plot = function() private$.items[["plot"]],
-        plot2 = function() private$.items[["plot2"]]),
+        plot2 = function() private$.items[["plot2"]],
+        pairwiseTable = function() private$.items[["pairwiseTable"]],
+        trendTestTable = function() private$.items[["trendTestTable"]],
+        landmarkNote = function() private$.items[["landmarkNote"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -197,7 +254,82 @@ comparingSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Cumulative hazard function (log scale)",
                 width=600,
                 height=500,
-                renderFun=".plot2"))}))
+                renderFun=".plot2"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pairwiseTable",
+                title="Pairwise Log-rank Comparisons",
+                visible="(pairwise)",
+                clearWith=list(
+                    "times",
+                    "status",
+                    "groups",
+                    "pairwiseCorrection"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="DF", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="adj_p_value", 
+                        `title`="Adjusted P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(pairwiseCorrection != \"none\")"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="trendTestTable",
+                title="Test for Trend",
+                visible="(trendTest)",
+                rows=1,
+                clearWith=list(
+                    "times",
+                    "status",
+                    "groups"),
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="DF", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="landmarkNote",
+                title="Landmark Analysis",
+                visible="(landmarkTime > 0)",
+                clearWith=list(
+                    "times",
+                    "status",
+                    "groups",
+                    "landmarkTime",
+                    "landmarkUnit")))}))
 
 comparingSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "comparingSurvivalBase",
@@ -230,6 +362,13 @@ comparingSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param ciyn .
 #' @param loglogyn .
 #' @param timeunits .
+#' @param pairwise Perform pairwise log-rank comparisons between all groups
+#' @param pairwiseCorrection Method for adjusting p-values for multiple
+#'   comparisons
+#' @param trendTest Test for trend across ordered groups (assumes groups are
+#'   ordered)
+#' @param landmarkTime Exclude events before this time (0 = no exclusion)
+#' @param landmarkUnit Unit for landmark time
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
@@ -238,6 +377,9 @@ comparingSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$compsurvTable3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$trendTestTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$landmarkNote} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -254,7 +396,12 @@ comparingSurvival <- function(
     groups = NULL,
     ciyn = FALSE,
     loglogyn = FALSE,
-    timeunits = "None") {
+    timeunits = "None",
+    pairwise = FALSE,
+    pairwiseCorrection = "none",
+    trendTest = FALSE,
+    landmarkTime = 0,
+    landmarkUnit = "same") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("comparingSurvival requires jmvcore to be installed (restart may be required)")
@@ -276,7 +423,12 @@ comparingSurvival <- function(
         groups = groups,
         ciyn = ciyn,
         loglogyn = loglogyn,
-        timeunits = timeunits)
+        timeunits = timeunits,
+        pairwise = pairwise,
+        pairwiseCorrection = pairwiseCorrection,
+        trendTest = trendTest,
+        landmarkTime = landmarkTime,
+        landmarkUnit = landmarkUnit)
 
     analysis <- comparingSurvivalClass$new(
         options = options,

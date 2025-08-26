@@ -1,7 +1,7 @@
 ---
 name:  comparingSurvival
 title: Comparing Survival Outcomes
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: Drafts
 menuSubtitle: SimpleSurvival
 version: '0.0.3'
@@ -54,5 +54,60 @@ options:
         - name: Years
           title: Years
       default: None
+
+    - name: pairwise
+      title: Pairwise Comparisons
+      type: Bool
+      default: false
+      description: Perform pairwise log-rank comparisons between all groups
+
+    - name: pairwiseCorrection
+      title: P-value Adjustment Method
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm  
+        - title: Benjamini-Hochberg (FDR)
+          name: BH
+        - title: Benjamini-Yekutieli
+          name: BY
+        - title: Hochberg
+          name: hochberg
+        - title: Hommel
+          name: hommel
+      default: none
+      description: Method for adjusting p-values for multiple comparisons
+
+    - name: trendTest
+      title: Test for Trend
+      type: Bool
+      default: false
+      description: Test for trend across ordered groups (assumes groups are ordered)
+
+    - name: landmarkTime
+      title: Landmark Time
+      type: Number
+      min: 0
+      default: 0
+      description: Exclude events before this time (0 = no exclusion)
+      
+    - name: landmarkUnit
+      title: Landmark Time Unit
+      type: List
+      options:
+        - title: Same as time variable
+          name: same
+        - title: Days
+          name: days
+        - title: Months
+          name: months
+        - title: Years
+          name: years
+      default: same
+      description: Unit for landmark time
 
 ...

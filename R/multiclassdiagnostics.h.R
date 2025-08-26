@@ -373,7 +373,7 @@ multiclassdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 package = "ClinicoPath",
                 name = "multiclassdiagnostics",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = multiclassdiagnosticsResults$new(options=options),
                 data = data,

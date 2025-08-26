@@ -41,3 +41,29 @@ children:
     children:
       - type: ComboBox
         name: timeunits
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: pairwise
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: pairwiseCorrection
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: trendTest
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: landmarkTime
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: landmarkUnit

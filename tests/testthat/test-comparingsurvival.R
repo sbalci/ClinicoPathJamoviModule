@@ -602,3 +602,133 @@ test_that("comparingsurvival statistical accuracy", {
         )
     })
 })
+
+# Enhanced features tests for comparingsurvival
+
+test_that("Pairwise comparisons work with multiple groups", {
+  skip_if_not_installed("survival")
+  
+  # Create test data with 4 groups
+  set.seed(123)
+  n <- 200
+  test_data <- data.frame(
+    time = rexp(n, rate = 0.1),
+    status = rbinom(n, 1, 0.7),
+    group = factor(rep(c("Grade1", "Grade2", "Grade3", "Grade4"), each = n/4))
+  )
+  
+  # Add some differences between groups
+  test_data$time[test_data$group == "Grade3"] <- test_data$time[test_data$group == "Grade3"] * 0.7
+  test_data$time[test_data$group == "Grade4"] <- test_data$time[test_data$group == "Grade4"] * 0.5
+  
+  # Test pairwise comparisons
+  result <- ClinicoPath::comparingSurvival(
+    data = test_data,
+    times = "time",
+    status = "status",
+    groups = "group",
+    pairwise = TRUE,
+    pairwiseCorrection = "bonferroni"
+  )
+  
+  # Check pairwise table exists 
+  expect_true(!is.null(result$results$pairwiseTable))
+  
+  # Should have 6 pairwise comparisons for 4 groups (4 choose 2 = 6)
+  expect_equal(result$results$pairwiseTable$rowCount, 6)
+})
+
+test_that("Landmark analysis excludes early events", {
+  skip_if_not_installed("survival")
+  
+  # Create test data
+  set.seed(123)
+  n <- 100
+  test_data <- data.frame(
+    time = rexp(n, rate = 0.1),
+    status = rbinom(n, 1, 0.7),
+    group = factor(rep(c("A", "B"), each = n/2))
+  )
+  
+  # Test landmark analysis
+  result <- ClinicoPath::comparingSurvival(
+    data = test_data,
+    times = "time",
+    status = "status",
+    groups = "group",
+    landmarkTime = 2,
+    landmarkUnit = "same"
+  )
+  
+  # Check that landmark note is displayed
+  expect_true(!is.null(result$results$landmarkNote))
+})
+
+test_that("Trend test works for ordered groups", {
+  skip_if_not_installed("survival")
+  
+  # Create test data with ordered groups
+  set.seed(123)
+  n <- 150
+  test_data <- data.frame(
+    time = rexp(n, rate = 0.1),
+    status = rbinom(n, 1, 0.7),
+    group = factor(rep(c("Stage1", "Stage2", "Stage3"), each = n/3))
+  )
+  
+  # Test trend analysis
+  result <- ClinicoPath::comparingSurvival(
+    data = test_data,
+    times = "time",
+    status = "status",
+    groups = "group",
+    trendTest = TRUE
+  )
+  
+  # Check that trend test table exists
+  expect_true(!is.null(result$results$trendTestTable))
+})
+
+test_that("Multiple testing corrections work correctly", {
+  skip_if_not_installed("survival")
+  
+  # Create test data
+  set.seed(123)
+  n <- 120
+  test_data <- data.frame(
+    time = rexp(n, rate = 0.1),
+    status = rbinom(n, 1, 0.7),
+    group = factor(rep(c("A", "B", "C"), each = n/3))
+  )
+  
+  # Test Bonferroni correction
+  result <- ClinicoPath::comparingSurvival(
+    data = test_data,
+    times = "time",
+    status = "status",
+    groups = "group",
+    pairwise = TRUE,
+    pairwiseCorrection = "bonferroni"
+  )
+  
+  # Check that adjusted p-values are present
+  pairwise_df <- result$results$pairwiseTable$asDF
+  expect_true("adj_p_value" %in% names(pairwise_df))
+  
+  # Bonferroni adjustment should make adjusted p-values larger or equal
+  expect_true(all(pairwise_df$adj_p_value >= pairwise_df$p_value))
+  
+  # Test no correction
+  result_none <- ClinicoPath::comparingSurvival(
+    data = test_data,
+    times = "time",
+    status = "status",
+    groups = "group",
+    pairwise = TRUE,
+    pairwiseCorrection = "none"
+  )
+  
+  # No adjusted p-values when correction is "none"
+  pairwise_df_none <- result_none$results$pairwiseTable$asDF
+  expect_false("adj_p_value" %in% names(pairwise_df_none))
+})
