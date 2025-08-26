@@ -1,0 +1,329 @@
+---
+name: explainableai
+title: Explainable AI Analysis
+menuGroup: ExplorationT
+menuSubgroup: Advanced AI
+menuSubtitle: Model Interpretability
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive explainable AI toolkit for interpreting machine learning models
+        in medical and clinical applications. Provides attention maps, feature importance,
+        SHAP values, and other interpretability methods.
+    R:
+        dontrun: false
+        usage: |
+            # SHAP analysis for feature importance
+            explainableai(
+                data = model_data,
+                model_predictions = "predictions_var",
+                features = c("feature1", "feature2", "feature3"),
+                method = "shap",
+                plot_type = "summary"
+            )
+            
+            # Attention map analysis for image models
+            explainableai(
+                data = image_data,
+                image_paths = "image_path_var",
+                attention_maps = "attention_var",
+                method = "attention_analysis",
+                overlay_original = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+        - name: feature_importance
+          title: 'Feature Importance Analysis'
+        - name: shap_analysis
+          title: 'SHAP (SHapley Additive exPlanations)'
+        - name: lime_analysis
+          title: 'LIME (Local Interpretable Model-agnostic Explanations)'
+        - name: attention_analysis
+          title: 'Attention Map Analysis'
+        - name: permutation_importance
+          title: 'Permutation Feature Importance'
+        - name: partial_dependence
+          title: 'Partial Dependence Plots'
+      default: feature_importance
+      description:
+          R: >
+            type of explainability analysis to perform
+
+    - name: features
+      title: Feature Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            features/variables for importance analysis
+
+    - name: target_var
+      title: Target Variable
+      type: Variable
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            target variable or model predictions
+
+    - name: model_predictions
+      title: Model Predictions Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            variable containing model predictions or probabilities
+
+    - name: image_paths
+      title: Image Paths Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - id
+      description:
+          R: >
+            variable containing paths to image files
+
+    - name: attention_maps
+      title: Attention Maps Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            variable containing attention map data or file paths
+
+    - name: shap_method
+      title: SHAP Method
+      type: List
+      options:
+        - name: tree_explainer
+          title: 'Tree Explainer (for tree models)'
+        - name: linear_explainer
+          title: 'Linear Explainer (for linear models)'
+        - name: kernel_explainer
+          title: 'Kernel Explainer (model-agnostic)'
+        - name: deep_explainer
+          title: 'Deep Explainer (for neural networks)'
+      default: kernel_explainer
+      description:
+          R: >
+            SHAP explainer method based on model type
+
+    - name: lime_method
+      title: LIME Method
+      type: List
+      options:
+        - name: tabular
+          title: 'Tabular Data'
+        - name: image
+          title: 'Image Data'
+        - name: text
+          title: 'Text Data'
+      default: tabular
+      description:
+          R: >
+            LIME explanation method for different data types
+
+    - name: n_samples
+      title: Number of Samples for Analysis
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            number of samples to use for explanation analysis
+
+    - name: n_features
+      title: Top N Features to Display
+      type: Number
+      min: 5
+      max: 50
+      default: 20
+      description:
+          R: >
+            number of top important features to display
+
+    - name: plot_type
+      title: Visualization Type
+      type: List
+      options:
+        - name: summary
+          title: 'Summary Plot'
+        - name: waterfall
+          title: 'Waterfall Plot'
+        - name: force
+          title: 'Force Plot'
+        - name: heatmap
+          title: 'Heatmap'
+        - name: beeswarm
+          title: 'Beeswarm Plot'
+        - name: bar
+          title: 'Bar Plot'
+      default: summary
+      description:
+          R: >
+            type of visualization for explanations
+
+    - name: overlay_original
+      title: Overlay on Original Images
+      type: Bool
+      default: true
+      description:
+          R: >
+            overlay attention maps on original images
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            confidence level for statistical intervals
+
+    - name: background_samples
+      title: Background Samples
+      type: Number
+      min: 50
+      max: 500
+      default: 100
+      description:
+          R: >
+            number of background samples for SHAP baseline
+
+    - name: perturbation_method
+      title: Perturbation Method
+      type: List
+      options:
+        - name: random
+          title: 'Random Perturbation'
+        - name: systematic
+          title: 'Systematic Perturbation'
+        - name: gaussian_noise
+          title: 'Gaussian Noise'
+        - name: feature_ablation
+          title: 'Feature Ablation'
+      default: random
+      description:
+          R: >
+            method for perturbing features in permutation importance
+
+    - name: clustering_method
+      title: Feature Clustering Method
+      type: List
+      options:
+        - name: none
+          title: 'No Clustering'
+        - name: hierarchical
+          title: 'Hierarchical Clustering'
+        - name: kmeans
+          title: 'K-means Clustering'
+        - name: correlation
+          title: 'Correlation-based'
+      default: none
+      description:
+          R: >
+            method for grouping similar features
+
+    - name: interaction_analysis
+      title: Feature Interaction Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            analyze pairwise feature interactions
+
+    - name: local_explanations
+      title: Generate Local Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            create individual sample explanations
+
+    - name: global_explanations
+      title: Generate Global Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            create overall model explanations
+
+    - name: save_explanations
+      title: Save Explanation Results
+      type: Bool
+      default: false
+      description:
+          R: >
+            save explanation data for external use
+
+    - name: explanation_path
+      title: Save Path for Explanations
+      type: String
+      default: ""
+      description:
+          R: >
+            file path to save explanation results
+
+    - name: attention_threshold
+      title: Attention Threshold
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.1
+      description:
+          R: >
+            minimum attention value to display in visualizations
+
+    - name: colormap
+      title: Color Map for Visualizations
+      type: List
+      options:
+        - name: viridis
+          title: 'Viridis'
+        - name: plasma
+          title: 'Plasma'
+        - name: inferno
+          title: 'Inferno'
+        - name: magma
+          title: 'Magma'
+        - name: coolwarm
+          title: 'Cool-Warm'
+        - name: seismic
+          title: 'Seismic'
+      default: viridis
+      description:
+          R: >
+            color palette for explanation visualizations
+
+...

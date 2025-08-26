@@ -211,4 +211,101 @@ options:
           R: >
             number of bootstrap replicates for confidence intervals
 
+    # Automated Quantification Options
+    - name: automated_analysis
+      title: Enable Automated Image Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            enable automated quantification from histological images
+
+    - name: segmentation_method
+      title: Segmentation Method
+      type: List
+      options:
+        - name: manual
+          title: 'Manual Annotation'
+        - name: stardist
+          title: 'StarDist (Deep Learning)'
+        - name: cellpose
+          title: 'CellPose (Deep Learning)'
+        - name: watershed
+          title: 'Watershed Transform'
+      default: manual
+      description:
+          R: >
+            method for nuclear segmentation in automated analysis
+
+    - name: color_deconvolution
+      title: Apply Color Deconvolution
+      type: Bool
+      default: true
+      description:
+          R: >
+            separate DAB and hematoxylin channels for better quantification
+
+    - name: dab_thresholds
+      title: DAB Intensity Thresholds
+      type: String
+      default: "0.1, 0.3, 0.6"
+      description:
+          R: >
+            optical density thresholds for weak, moderate, and strong DAB staining (comma-separated)
+
+    - name: minimum_nuclear_area
+      title: Minimum Nuclear Area (pixels)
+      type: Number
+      min: 10
+      max: 1000
+      default: 50
+      description:
+          R: >
+            minimum area threshold for nuclear detection
+
+    - name: maximum_nuclear_area
+      title: Maximum Nuclear Area (pixels)
+      type: Number
+      min: 100
+      max: 10000
+      default: 2000
+      description:
+          R: >
+            maximum area threshold for nuclear detection
+
+    - name: batch_processing
+      title: Enable Batch Processing
+      type: Bool
+      default: false
+      description:
+          R: >
+            process multiple image files in batch mode
+
+    - name: image_format
+      title: Expected Image Format
+      type: List
+      options:
+        - name: tiff
+          title: 'TIFF'
+        - name: jpg
+          title: 'JPEG'
+        - name: png
+          title: 'PNG'
+        - name: svs
+          title: 'Aperio SVS'
+        - name: ndpi
+          title: 'Hamamatsu NDPI'
+      default: tiff
+      description:
+          R: >
+            format of input histological images
+
+    - name: validation_metrics
+      title: Calculate Validation Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            compare automated results with manual scoring when available
+
 ...

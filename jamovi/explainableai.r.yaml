@@ -1,0 +1,432 @@
+---
+name: explainableai
+title: Explainable AI Analysis
+jrs: '1.1'
+
+items:
+    - name: overview
+      title: Explainability Analysis Overview
+      type: Html
+      visible: true
+
+    - name: featureimportance
+      title: Feature Importance Analysis
+      type: Group
+      visible: (analysis_type:feature_importance || analysis_type:permutation_importance)
+      items:
+        - name: importancetable
+          title: Feature Importance Scores
+          type: Table
+          description: Ranked list of feature importance scores
+          columns:
+            - name: feature
+              title: 'Feature'
+              type: text
+            - name: importance
+              title: 'Importance Score'
+              type: number
+            - name: std_error
+              title: 'Standard Error'
+              type: number
+            - name: ci_lower
+              title: '95% CI Lower'
+              type: number
+            - name: ci_upper
+              title: '95% CI Upper'
+              type: number
+            - name: rank
+              title: 'Rank'
+              type: integer
+
+        - name: importanceplot
+          title: Feature Importance Plot
+          type: Image
+          description: Bar plot of feature importance scores
+          width: 700
+          height: 500
+          renderFun: .plotFeatureImportance
+
+    - name: shapanalysis
+      title: SHAP Analysis Results
+      type: Group
+      visible: (analysis_type:shap_analysis)
+      items:
+        - name: shapvaluestable
+          title: SHAP Values Summary
+          type: Table
+          description: Mean absolute SHAP values per feature
+          columns:
+            - name: feature
+              title: 'Feature'
+              type: text
+            - name: mean_shap_value
+              title: 'Mean |SHAP Value|'
+              type: number
+            - name: std_shap_value
+              title: 'Std Dev'
+              type: number
+            - name: min_shap_value
+              title: 'Min SHAP Value'
+              type: number
+            - name: max_shap_value
+              title: 'Max SHAP Value'
+              type: number
+
+        - name: shapwaterfalltable
+          title: SHAP Waterfall Analysis
+          visible: (local_explanations)
+          type: Table
+          description: Individual prediction explanations
+          columns:
+            - name: sample_id
+              title: 'Sample ID'
+              type: text
+            - name: feature
+              title: 'Feature'
+              type: text
+            - name: feature_value
+              title: 'Feature Value'
+              type: number
+            - name: shap_value
+              title: 'SHAP Value'
+              type: number
+            - name: cumulative_sum
+              title: 'Cumulative Sum'
+              type: number
+
+        - name: shapinteractiontable
+          title: SHAP Interaction Values
+          visible: (interaction_analysis)
+          type: Table
+          description: Feature interaction effects
+          columns:
+            - name: feature1
+              title: 'Feature 1'
+              type: text
+            - name: feature2
+              title: 'Feature 2'
+              type: text
+            - name: interaction_strength
+              title: 'Interaction Strength'
+              type: number
+            - name: p_value
+              title: 'P-value'
+              type: number
+              format: zto,pvalue
+
+        - name: shapsummaryplot
+          title: SHAP Summary Plot
+          type: Image
+          description: Overview of SHAP values for all features
+          width: 800
+          height: 600
+          renderFun: .plotSHAPSummary
+
+        - name: shapwaterfallplot
+          title: SHAP Waterfall Plot
+          visible: (local_explanations)
+          type: Image
+          description: Individual prediction explanation
+          width: 700
+          height: 500
+          renderFun: .plotSHAPWaterfall
+
+        - name: shapinteractionplot
+          title: SHAP Interaction Plot
+          visible: (interaction_analysis)
+          type: Image
+          description: Feature interaction heatmap
+          width: 600
+          height: 500
+          renderFun: .plotSHAPInteraction
+
+    - name: limeanalysis
+      title: LIME Analysis Results
+      type: Group
+      visible: (analysis_type:lime_analysis)
+      items:
+        - name: limeexplanationtable
+          title: LIME Explanations
+          type: Table
+          description: Local explanations for individual predictions
+          columns:
+            - name: sample_id
+              title: 'Sample ID'
+              type: text
+            - name: feature
+              title: 'Feature'
+              type: text
+            - name: feature_value
+              title: 'Feature Value'
+              type: text
+            - name: weight
+              title: 'Weight'
+              type: number
+            - name: prediction_local
+              title: 'Local Prediction'
+              type: number
+            - name: r_squared
+              title: 'Local R²'
+              type: number
+
+        - name: limeplot
+          title: LIME Explanation Plot
+          type: Image
+          description: Local explanation visualization
+          width: 700
+          height: 500
+          renderFun: .plotLIME
+
+    - name: attentionanalysis
+      title: Attention Map Analysis
+      type: Group
+      visible: (analysis_type:attention_analysis)
+      items:
+        - name: attentionstatstable
+          title: Attention Statistics
+          type: Table
+          description: Summary statistics of attention patterns
+          columns:
+            - name: region
+              title: 'Image Region'
+              type: text
+            - name: mean_attention
+              title: 'Mean Attention'
+              type: number
+            - name: std_attention
+              title: 'Std Dev'
+              type: number
+            - name: max_attention
+              title: 'Max Attention'
+              type: number
+            - name: attention_area
+              title: 'Attention Area (%)'
+              type: number
+              format: pc
+
+        - name: attentionpeakstable
+          title: Top Attention Peaks
+          type: Table
+          description: Highest attention regions across samples
+          columns:
+            - name: sample_id
+              title: 'Sample ID'
+              type: text
+            - name: peak_id
+              title: 'Peak ID'
+              type: integer
+            - name: x_coord
+              title: 'X Coordinate'
+              type: integer
+            - name: y_coord
+              title: 'Y Coordinate'
+              type: integer
+            - name: attention_value
+              title: 'Attention Value'
+              type: number
+            - name: region_size
+              title: 'Region Size (pixels)'
+              type: integer
+
+        - name: attentionheatmapplot
+          title: Attention Heatmaps
+          type: Image
+          description: Attention map overlays on original images
+          width: 900
+          height: 600
+          renderFun: .plotAttentionHeatmap
+
+        - name: attentiondistributionplot
+          title: Attention Distribution
+          type: Image
+          description: Distribution of attention values
+          width: 600
+          height: 400
+          renderFun: .plotAttentionDistribution
+
+    - name: partialdependence
+      title: Partial Dependence Analysis
+      type: Group
+      visible: (analysis_type:partial_dependence)
+      items:
+        - name: pdptable
+          title: Partial Dependence Values
+          type: Table
+          description: Partial dependence effect sizes
+          columns:
+            - name: feature
+              title: 'Feature'
+              type: text
+            - name: value_range
+              title: 'Value Range'
+              type: text
+            - name: pd_effect
+              title: 'PD Effect'
+              type: number
+            - name: ice_std
+              title: 'ICE Std Dev'
+              type: number
+            - name: interaction_strength
+              title: 'Interaction Strength'
+              type: number
+
+        - name: pdpplot
+          title: Partial Dependence Plots
+          type: Image
+          description: Effect of individual features on predictions
+          width: 800
+          height: 600
+          renderFun: .plotPartialDependence
+
+        - name: iceplot
+          title: Individual Conditional Expectation (ICE) Plot
+          type: Image
+          description: Individual conditional expectation curves
+          width: 700
+          height: 500
+          renderFun: .plotICE
+
+    - name: globalexplanations
+      title: Global Model Explanations
+      type: Group
+      visible: (global_explanations)
+      items:
+        - name: modelinsightstable
+          title: Model Insights Summary
+          type: Table
+          description: Overall model behavior insights
+          columns:
+            - name: insight_type
+              title: 'Insight Type'
+              type: text
+            - name: description
+              title: 'Description'
+              type: text
+            - name: importance_score
+              title: 'Importance Score'
+              type: number
+            - name: confidence
+              title: 'Confidence'
+              type: number
+              format: pc
+
+        - name: featureclusteringtable
+          title: Feature Clustering Results
+          visible: (!clustering_method:none)
+          type: Table
+          description: Groups of similar features
+          columns:
+            - name: cluster_id
+              title: 'Cluster ID'
+              type: integer
+            - name: features
+              title: 'Features in Cluster'
+              type: text
+            - name: cluster_importance
+              title: 'Cluster Importance'
+              type: number
+            - name: within_cluster_similarity
+              title: 'Within-Cluster Similarity'
+              type: number
+
+        - name: globalinsightplot
+          title: Global Model Insights
+          type: Image
+          description: Overall model behavior visualization
+          width: 800
+          height: 600
+          renderFun: .plotGlobalInsights
+
+        - name: featureclusterplot
+          title: Feature Clustering Visualization
+          visible: (!clustering_method:none)
+          type: Image
+          description: Dendrogram or cluster plot of features
+          width: 700
+          height: 500
+          renderFun: .plotFeatureClustering
+
+    - name: localexplanations
+      title: Local Sample Explanations
+      type: Group
+      visible: (local_explanations)
+      items:
+        - name: samplewiseexplanationtable
+          title: Sample-wise Explanations
+          type: Table
+          description: Detailed explanations for individual samples
+          columns:
+            - name: sample_id
+              title: 'Sample ID'
+              type: text
+            - name: prediction
+              title: 'Prediction'
+              type: number
+            - name: confidence
+              title: 'Confidence'
+              type: number
+              format: pc
+            - name: top_positive_feature
+              title: 'Top Positive Feature'
+              type: text
+            - name: top_negative_feature
+              title: 'Top Negative Feature'
+              type: text
+            - name: explanation_quality
+              title: 'Explanation Quality'
+              type: number
+
+        - name: localexplanationplot
+          title: Local Explanation Examples
+          type: Image
+          description: Individual sample explanation examples
+          width: 900
+          height: 700
+          renderFun: .plotLocalExplanations
+
+    - name: validationmetrics
+      title: Explanation Validation
+      type: Group
+      items:
+        - name: validationtable
+          title: Explanation Validation Metrics
+          type: Table
+          description: Quality metrics for explanations
+          columns:
+            - name: validation_metric
+              title: 'Validation Metric'
+              type: text
+            - name: score
+              title: 'Score'
+              type: number
+            - name: interpretation
+              title: 'Interpretation'
+              type: text
+
+        - name: stabilityanalysistable
+          title: Explanation Stability Analysis
+          type: Table
+          description: Consistency of explanations across perturbations
+          columns:
+            - name: feature
+              title: 'Feature'
+              type: text
+            - name: stability_score
+              title: 'Stability Score'
+              type: number
+            - name: variance
+              title: 'Variance'
+              type: number
+            - name: reliability
+              title: 'Reliability'
+              type: text
+
+        - name: validationplot
+          title: Explanation Validation Plot
+          type: Image
+          description: Validation metrics visualization
+          width: 600
+          height: 400
+          renderFun: .plotExplanationValidation
+
+...

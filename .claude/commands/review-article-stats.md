@@ -6,6 +6,10 @@ args:
   article_label:
     description: A short label for the article (optional; used in headings)
     required: false
+  skip_unreadable:
+    description: Skip files that cannot be read; report reason and continue
+    required: false
+    default: true
 usage: /review-article-stats [article_label]
 ---
 
@@ -68,6 +72,16 @@ You are an **expert jamovi module developer for ClinicoPathJamoviModule**. The u
 
 If some sources are images or scanned PDFs, attempt OCR (if available) or rely on surrounding text/HTML. Always cite page/section when possible.
 
+## FAILURE HANDLING & PARTIAL PROCESSING
+
+- Treat each provided source independently; **never abort** the run due to a single failing file.
+- If a source cannot be read or parsed:
+  - Emit a short entry under **Skipped Sources** with: (a) the path/URL, (b) a one‑line reason, and (c) a suggested conversion command (MarkItDown or pandoc) inside a fenced code block.
+  - Do **not** attempt to execute any command; print only.
+- Continue analyzing all other readable sources.
+- Common reasons to surface: unsupported extension, corrupted file, HTML requires resources folder, PDF extraction yielded < 150 tokens or mostly non‑alphanumeric, permission denied, file not found.
+- If *no* readable sources remain, produce a minimal report with just **Skipped Sources** and a short note asking for converted `.md` or a better copy.
+
 ---
 
 ## OUTPUT FORMAT  
@@ -77,6 +91,16 @@ If some sources are images or scanned PDFs, attempt OCR (if available) or rely o
 - **Title/Label**: `$ARGUMENTS` (or inferred)
 - **Design & Cohort**: [type, N, groups, endpoints]
 - **Key Analyses**: bullet list
+
+### 🚫 Skipped Sources (if any)
+
+Provide a tidy table of skipped items and reasons. For each row, also print a ready‑to‑run conversion snippet.
+
+| Source | Reason | Suggested command |
+|---|---|---|
+| /path/to/file.pdf | PDF text extraction too low (<150 tokens) | `markitdown "/path/to/file.pdf" > "/path/to/file.md" \|\| python -m markitdown "/path/to/file.pdf" > "/path/to/file.md"` |
+
+*Print commands only; do not execute.*
 
 ### 🧪 EXTRACTED STATISTICAL METHODS  
 

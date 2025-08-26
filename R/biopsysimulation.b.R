@@ -51,6 +51,15 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             
             # Initialize results tables
             private$.initializeTables()
+            
+            # Set plot visibility based on options
+            self$results$biopsyplot$setVisible(self$options$show_variability_plots)
+            self$results$variabilityplot$setVisible(self$options$show_variability_plots)
+            
+            # Set conditional table visibility
+            if (!is.null(self$options$spatial_id)) {
+                self$results$spatialplot$setVisible(self$options$show_variability_plots)
+            }
         },
         
         .run = function() {
@@ -77,9 +86,16 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 return()
             }
             
+            # Get optional spatial data
+            spatial_regions <- if (!is.null(self$options$spatial_id)) {
+                data[[self$options$spatial_id]]
+            } else {
+                NULL
+            }
+            
             # Perform comprehensive biopsy simulation analysis
-            private$.performBiopsyAnalysis(whole_section, biopsy_data)
-            private$.generateBiopsyPlots(whole_section, biopsy_data)
+            private$.performBiopsyAnalysis(whole_section, biopsy_data, spatial_regions)
+            private$.generateBiopsyPlots(whole_section, biopsy_data, spatial_regions)
             private$.generateBiopsyInterpretation(whole_section, biopsy_data)
         },
         
@@ -106,6 +122,26 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             variance_table$addColumn(name = 'variance', title = 'Variance', type = 'number', format = 'zto')
             variance_table$addColumn(name = 'percentage', title = 'Percentage (%)', type = 'number', format = 'zto')
             variance_table$addColumn(name = 'contribution', title = 'Contribution to Total Variance', type = 'text')
+            
+            # Power analysis table (if enabled)
+            if (self$options$power_analysis) {
+                power_table <- self$results$poweranalysistable
+                power_table$addColumn(name = 'scenario', title = 'Analysis Scenario', type = 'text')
+                power_table$addColumn(name = 'effect_size', title = 'Expected Effect Size', type = 'number', format = 'zto')
+                power_table$addColumn(name = 'power', title = 'Statistical Power', type = 'number', format = 'pc')
+                power_table$addColumn(name = 'required_n', title = 'Required Sample Size', type = 'integer')
+                power_table$addColumn(name = 'recommendation', title = 'Recommendation', type = 'text')
+            }
+            
+            # Spatial analysis table (if spatial data provided)
+            if (!is.null(self$options$spatial_id)) {
+                spatial_table <- self$results$spatialanalysistable
+                spatial_table$addColumn(name = 'region', title = 'Spatial Region', type = 'text')
+                spatial_table$addColumn(name = 'n_cases', title = 'Cases', type = 'integer')
+                spatial_table$addColumn(name = 'mean_value', title = 'Mean Value', type = 'number', format = 'zto')
+                spatial_table$addColumn(name = 'cv_percent', title = 'CV (%)', type = 'number', format = 'zto')
+                spatial_table$addColumn(name = 'heterogeneity_level', title = 'Heterogeneity Level', type = 'text')
+            }
         },
         
         .extractBiopsyData = function(data) {
@@ -134,21 +170,35 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             return(biopsy_data)
         },
         
-        .performBiopsyAnalysis = function(whole_section, biopsy_data) {
+        .performBiopsyAnalysis = function(whole_section, biopsy_data, spatial_regions = NULL) {
             n_cases <- length(whole_section)
             n_biopsies <- ncol(biopsy_data)
             
+            # Get user-defined thresholds
+            cv_threshold <- self$options$cv_threshold
+            correlation_threshold <- self$options$correlation_threshold
+            
             # 1. Reproducibility Analysis
-            private$.analyzeReproducibility(whole_section, biopsy_data)
+            private$.analyzeReproducibility(whole_section, biopsy_data, correlation_threshold, cv_threshold)
             
             # 2. Sampling Bias Analysis  
             private$.analyzeSamplingBias(whole_section, biopsy_data)
             
             # 3. Variance Component Analysis
             private$.analyzeVarianceComponents(whole_section, biopsy_data)
+            
+            # 4. Power Analysis (if enabled)
+            if (self$options$power_analysis) {
+                private$.performPowerAnalysis(whole_section, biopsy_data)
+            }
+            
+            # 5. Spatial Analysis (if spatial data provided)
+            if (!is.null(spatial_regions)) {
+                private$.analyzeSpatialHeterogeneity(whole_section, biopsy_data, spatial_regions)
+            }
         },
         
-        .analyzeReproducibility = function(whole_section, biopsy_data) {
+        .analyzeReproducibility = function(whole_section, biopsy_data, correlation_threshold = 0.80, cv_threshold = 20.0) {
             n_cases <- length(whole_section)
             n_biopsies <- ncol(biopsy_data)
             
@@ -210,7 +260,7 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 value = mean(correlations, na.rm = TRUE),
                 ci_lower = NA,
                 ci_upper = NA,
-                interpretation = ifelse(mean(correlations, na.rm = TRUE) >= 0.80, 
+                interpretation = ifelse(mean(correlations, na.rm = TRUE) >= correlation_threshold, 
                                        "Good representativeness", "Limited representativeness")
             ))
             
@@ -247,8 +297,8 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 value = mean_cv,
                 ci_lower = NA,
                 ci_upper = NA,
-                interpretation = ifelse(mean_cv <= 15, "Low variability", 
-                                       ifelse(mean_cv <= 30, "Moderate variability", "High variability"))
+                interpretation = ifelse(mean_cv <= cv_threshold/2, "Low variability", 
+                                       ifelse(mean_cv <= cv_threshold, "Moderate variability", "High variability"))
             ))
         },
         
@@ -387,17 +437,121 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             ))
         },
         
-        .generateBiopsyPlots = function(whole_section, biopsy_data) {
+        .performPowerAnalysis = function(whole_section, biopsy_data) {
+            # Perform power analysis for different scenarios
+            n_cases <- length(whole_section)
+            
+            # Calculate observed effect sizes
+            biopsy_means <- rowMeans(biopsy_data, na.rm = TRUE)
+            complete_pairs <- complete.cases(whole_section, biopsy_means)
+            
+            if (sum(complete_pairs) >= 3) {
+                # Observed correlation effect size
+                obs_correlation <- cor(whole_section[complete_pairs], biopsy_means[complete_pairs])
+                
+                # Convert correlation to effect size (Cohen's convention)
+                # Small: r = 0.1, Medium: r = 0.3, Large: r = 0.5
+                correlation_categories <- c(0.1, 0.3, 0.5, obs_correlation)
+                
+                power_table <- self$results$poweranalysistable
+                row_key <- 1
+                
+                for (effect_size in correlation_categories) {
+                    # Power calculation for correlation (Fisher's z transformation)
+                    z_effect <- 0.5 * log((1 + effect_size) / (1 - effect_size))
+                    se_z <- 1 / sqrt(n_cases - 3)
+                    z_score <- z_effect / se_z
+                    power <- pnorm(z_score - qnorm(0.975)) + pnorm(-z_score - qnorm(0.975))
+                    
+                    # Required sample size for 80% power
+                    z_alpha <- qnorm(0.975)  # two-tailed test
+                    z_beta <- qnorm(0.80)    # 80% power
+                    required_n <- ceiling(((z_alpha + z_beta) / z_effect)^2 + 3)
+                    
+                    scenario <- if (effect_size == obs_correlation) {
+                        "Observed Effect Size"
+                    } else if (effect_size == 0.1) {
+                        "Small Effect (r=0.1)"
+                    } else if (effect_size == 0.3) {
+                        "Medium Effect (r=0.3)"
+                    } else {
+                        "Large Effect (r=0.5)"
+                    }
+                    
+                    recommendation <- if (power >= 0.80) {
+                        "Adequate power achieved"
+                    } else if (required_n <= n_cases * 1.5) {
+                        "Consider moderate sample increase"
+                    } else {
+                        "Substantial sample increase recommended"
+                    }
+                    
+                    power_table$addRow(rowKey = row_key, values = list(
+                        scenario = scenario,
+                        effect_size = effect_size,
+                        power = power,
+                        required_n = pmax(required_n, 5),  # Minimum of 5
+                        recommendation = recommendation
+                    ))
+                    
+                    row_key <- row_key + 1
+                }
+            }
+        },
+        
+        .analyzeSpatialHeterogeneity = function(whole_section, biopsy_data, spatial_regions) {
+            # Analyze variability across spatial regions
+            unique_regions <- unique(spatial_regions)
+            unique_regions <- unique_regions[!is.na(unique_regions)]
+            
+            if (length(unique_regions) >= 2) {
+                spatial_table <- self$results$spatialanalysistable
+                
+                for (i in seq_along(unique_regions)) {
+                    region <- unique_regions[i]
+                    region_mask <- spatial_regions == region & !is.na(spatial_regions)
+                    
+                    if (sum(region_mask) >= 2) {
+                        region_whole_section <- whole_section[region_mask]
+                        region_biopsy_data <- biopsy_data[region_mask, , drop = FALSE]
+                        
+                        # Calculate regional statistics
+                        region_mean <- mean(region_whole_section, na.rm = TRUE)
+                        region_values <- c(region_whole_section, as.matrix(region_biopsy_data))
+                        region_cv <- sd(region_values, na.rm = TRUE) / mean(region_values, na.rm = TRUE) * 100
+                        
+                        # Categorize heterogeneity level
+                        heterogeneity_level <- ifelse(region_cv <= 15, "Low",
+                                                     ifelse(region_cv <= 30, "Moderate", "High"))
+                        
+                        spatial_table$addRow(rowKey = i, values = list(
+                            region = as.character(region),
+                            n_cases = sum(region_mask),
+                            mean_value = region_mean,
+                            cv_percent = region_cv,
+                            heterogeneity_level = heterogeneity_level
+                        ))
+                    }
+                }
+            }
+        },
+        
+        .generateBiopsyPlots = function(whole_section, biopsy_data, spatial_regions = NULL) {
             # Prepare comprehensive plot data
             plot_data <- list(
                 whole_section = whole_section,
                 biopsy_data = biopsy_data,
+                spatial_regions = spatial_regions,
                 n_cases = length(whole_section),
                 n_biopsies = ncol(biopsy_data)
             )
             
             self$results$biopsyplot$setState(plot_data)
             self$results$variabilityplot$setState(plot_data)
+            
+            if (!is.null(spatial_regions)) {
+                self$results$spatialplot$setState(plot_data)
+            }
         },
         
         .biopsyplot = function(image, ggtheme, theme, ...) {
@@ -483,9 +637,77 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             TRUE
         },
         
+        .spatialplot = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state) || is.null(image$state$spatial_regions))
+                return(FALSE)
+                
+            data <- image$state
+            library(ggplot2)
+            
+            # Create spatial heterogeneity visualization
+            spatial_regions <- data$spatial_regions
+            unique_regions <- unique(spatial_regions)
+            unique_regions <- unique_regions[!is.na(unique_regions)]
+            
+            if (length(unique_regions) >= 2) {
+                # Calculate regional means and CVs
+                region_stats <- data.frame(
+                    Region = character(),
+                    Mean_WS = numeric(),
+                    CV = numeric(),
+                    stringsAsFactors = FALSE
+                )
+                
+                for (region in unique_regions) {
+                    region_mask <- spatial_regions == region & !is.na(spatial_regions)
+                    if (sum(region_mask) >= 2) {
+                        region_ws <- data$whole_section[region_mask]
+                        region_biopsy <- data$biopsy_data[region_mask, , drop = FALSE]
+                        
+                        all_regional_values <- c(region_ws, as.matrix(region_biopsy))
+                        region_mean <- mean(all_regional_values, na.rm = TRUE)
+                        region_cv <- sd(all_regional_values, na.rm = TRUE) / region_mean * 100
+                        
+                        region_stats <- rbind(region_stats, data.frame(
+                            Region = as.character(region),
+                            Mean_WS = region_mean,
+                            CV = region_cv,
+                            stringsAsFactors = FALSE
+                        ))
+                    }
+                }
+                
+                if (nrow(region_stats) > 0) {
+                    p <- ggplot2::ggplot(region_stats, ggplot2::aes(x = Region, y = Mean_WS)) +
+                        ggplot2::geom_col(ggplot2::aes(fill = CV), alpha = 0.7) +
+                        ggplot2::geom_text(ggplot2::aes(label = paste("CV:", round(CV, 1), "%")), 
+                                          vjust = -0.5, size = 3) +
+                        ggplot2::scale_fill_gradient2(low = "green", mid = "yellow", high = "red",
+                                                     midpoint = 20, name = "CV (%)") +
+                        ggplot2::labs(
+                            title = "Spatial Heterogeneity Analysis",
+                            subtitle = "Mean biomarker values and variability by spatial region",
+                            x = "Spatial Region",
+                            y = "Mean Biomarker Value"
+                        ) +
+                        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+                        ggtheme
+                    
+                    print(p)
+                    return(TRUE)
+                }
+            }
+            
+            return(FALSE)
+        },
+        
         .generateBiopsyInterpretation = function(whole_section, biopsy_data) {
             n_cases <- length(whole_section)
             n_biopsies <- ncol(biopsy_data)
+            
+            # Get user-defined thresholds
+            cv_threshold <- self$options$cv_threshold
+            correlation_threshold <- self$options$correlation_threshold
             
             # Calculate key metrics for interpretation
             biopsy_means <- rowMeans(biopsy_data, na.rm = TRUE)
@@ -537,15 +759,18 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 
                 "<h4>Clinical Assessment:</h4>",
                 "<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff;'>",
-                if (!is.na(overall_corr) && overall_corr >= 0.80 && !is.na(mean_cv) && mean_cv <= 20) {
-                    "<p><strong>✓ ADEQUATE SAMPLING:</strong> Biopsy samples provide good representation of whole-section values. 
-                    <span style='color: green;'>Current sampling approach is suitable for clinical use.</span></p>"
-                } else if (!is.na(overall_corr) && overall_corr >= 0.60 && !is.na(mean_cv) && mean_cv <= 30) {
-                    "<p><strong>⚠ MODERATE SAMPLING:</strong> Biopsy samples show moderate agreement with whole-section values. 
-                    <span style='color: orange;'>Consider additional samples or sampling optimization.</span></p>"
+                if (!is.na(overall_corr) && overall_corr >= correlation_threshold && !is.na(mean_cv) && mean_cv <= cv_threshold) {
+                    paste0("<p><strong>✓ ADEQUATE SAMPLING:</strong> Biopsy samples provide good representation of whole-section values ",
+                           "(correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
+                           "<span style='color: green;'>Current sampling approach is suitable for clinical use.</span></p>")
+                } else if (!is.na(overall_corr) && overall_corr >= (correlation_threshold - 0.2) && !is.na(mean_cv) && mean_cv <= (cv_threshold * 1.5)) {
+                    paste0("<p><strong>⚠ MODERATE SAMPLING:</strong> Biopsy samples show moderate agreement with whole-section values ",
+                           "(thresholds: correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
+                           "<span style='color: orange;'>Consider additional samples or sampling optimization.</span></p>")
                 } else {
-                    "<p><strong>✗ INADEQUATE SAMPLING:</strong> Significant sampling variability detected. 
-                    <span style='color: red;'>Review sampling strategy and consider increased sampling.</span></p>"
+                    paste0("<p><strong>✗ INADEQUATE SAMPLING:</strong> Sampling does not meet quality thresholds ",
+                           "(correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
+                           "<span style='color: red;'>Review sampling strategy and consider increased sampling.</span></p>")
                 },
                 "</div>",
                 
@@ -553,12 +778,12 @@ biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<ul>",
                 "<li><strong>Sample Size:</strong> ",
                 if (!is.na(mean_cv)) {
-                    if (mean_cv <= 15) {
-                        "Current sampling appears adequate (CV ≤ 15%)"
-                    } else if (mean_cv <= 30) {
-                        paste0("Consider 2-3 additional samples to reduce variability (current CV = ", round(mean_cv, 1), "%)")
+                    if (mean_cv <= cv_threshold/2) {
+                        paste0("Current sampling appears adequate (CV = ", round(mean_cv, 1), "% ≤ ", cv_threshold/2, "%)")
+                    } else if (mean_cv <= cv_threshold) {
+                        paste0("Consider 2-3 additional samples to reduce variability (current CV = ", round(mean_cv, 1), "%, threshold = ", cv_threshold, "%)")
                     } else {
-                        paste0("Significant increase in sampling recommended (current CV = ", round(mean_cv, 1), "% indicates high variability)")
+                        paste0("Significant increase in sampling recommended (current CV = ", round(mean_cv, 1), "% > ", cv_threshold, "% threshold)")
                     }
                 } else {
                     "Insufficient data for sampling recommendation"

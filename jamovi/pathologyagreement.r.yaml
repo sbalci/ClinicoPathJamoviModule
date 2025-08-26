@@ -1,0 +1,83 @@
+---
+name: pathologyagreement
+title: Pathology Agreement Analysis
+jrs: '1.1'
+
+items:
+    - name: interpretation
+      title: Clinical Interpretation and Analysis Summary
+      type: Html
+      visible: (show_interpretation)
+
+    - name: agreementtable
+      title: Agreement Statistics
+      type: Table
+      description: ICC, CCC, and Bland-Altman metrics
+      columns:
+        - name: metric
+          title: 'Agreement Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number  
+          format: zto
+        - name: interpretation
+          title: 'Clinical Interpretation'
+          type: text
+
+    - name: correlationtable
+      title: Correlation Analysis
+      type: Table
+      description: Pearson and Spearman correlation coefficients
+      visible: true
+      columns:
+        - name: method
+          title: 'Correlation Method'
+          type: text
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'P-value'
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: 'CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 'CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Strength'
+          type: text
+
+    - name: scatterplot
+      title: Method Comparison Scatter Plot
+      type: Image
+      description: Scatter plot with line of perfect agreement
+      width: 600
+      height: 450
+      visible: (show_plots)
+      renderFun: .scatterplot
+
+    - name: blandaltmanplot
+      title: Bland-Altman Agreement Plot
+      type: Image
+      description: Bland-Altman plot showing bias and limits of agreement
+      width: 600
+      height: 450  
+      visible: (show_plots)
+      renderFun: .blandaltmanplot
+
+...

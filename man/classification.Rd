@@ -14,7 +14,6 @@ classification(
   reporting = list("classifMetrices"),
   classifier,
   minSplit = 20,
-  minBucket = 0,
   complexity = 0.01,
   maxCompete = 4,
   maxSurrogate = 5,
@@ -60,8 +59,6 @@ classification(
 \item{classifier}{.}
 
 \item{minSplit}{.}
-
-\item{minBucket}{.}
 
 \item{complexity}{.}
 

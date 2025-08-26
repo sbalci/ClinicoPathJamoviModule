@@ -24,7 +24,16 @@ ihcscoring(
   clinical_interpretation = TRUE,
   export_results = FALSE,
   confidence_level = 0.95,
-  bootstrap_n = 1000
+  bootstrap_n = 1000,
+  automated_analysis = FALSE,
+  segmentation_method = "manual",
+  color_deconvolution = TRUE,
+  dab_thresholds = "0.1, 0.3, 0.6",
+  minimum_nuclear_area = 50,
+  maximum_nuclear_area = 2000,
+  batch_processing = FALSE,
+  image_format = "tiff",
+  validation_metrics = TRUE
 )
 }
 \arguments{
@@ -70,6 +79,29 @@ metrics}
 \item{confidence_level}{confidence level for statistical intervals}
 
 \item{bootstrap_n}{number of bootstrap replicates for confidence intervals}
+
+\item{automated_analysis}{enable automated quantification from histological
+images}
+
+\item{segmentation_method}{method for nuclear segmentation in automated
+analysis}
+
+\item{color_deconvolution}{separate DAB and hematoxylin channels for better
+quantification}
+
+\item{dab_thresholds}{optical density thresholds for weak, moderate, and
+strong DAB staining (comma-separated)}
+
+\item{minimum_nuclear_area}{minimum area threshold for nuclear detection}
+
+\item{maximum_nuclear_area}{maximum area threshold for nuclear detection}
+
+\item{batch_processing}{process multiple image files in batch mode}
+
+\item{image_format}{format of input histological images}
+
+\item{validation_metrics}{compare automated results with manual scoring
+when available}
 }
 \value{
 A results object containing:
@@ -88,6 +120,12 @@ A results object containing:
 \code{results$digitalvalidation$algorithmcomparison} \tab \tab \tab \tab \tab Statistical comparison of digital vs manual scoring \cr
 \code{results$digitalvalidation$batcheffects} \tab \tab \tab \tab \tab Analysis of systematic differences across batches \cr
 \code{results$digitalvalidation$validationplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$automatedanalysis$segmentationresults} \tab \tab \tab \tab \tab Summary of automated nuclear segmentation \cr
+\code{results$automatedanalysis$intensityanalysis} \tab \tab \tab \tab \tab Distribution of DAB intensity levels \cr
+\code{results$automatedanalysis$validationcomparison} \tab \tab \tab \tab \tab Comparison between manual and automated scores \cr
+\code{results$automatedanalysis$segmentationplot} \tab \tab \tab \tab \tab Overlay of detected nuclei on original image \cr
+\code{results$automatedanalysis$intensityplot} \tab \tab \tab \tab \tab Histogram of DAB optical density values \cr
+\code{results$automatedanalysis$validationplot} \tab \tab \tab \tab \tab Scatter plot of manual vs automated scores \cr
 \code{results$advancedmetrics$reliabilitymetrics} \tab \tab \tab \tab \tab Comprehensive reliability and consistency metrics \cr
 \code{results$advancedmetrics$distributionanalysis} \tab \tab \tab \tab \tab Normality testing and distribution characteristics \cr
 \code{results$exportdata} \tab \tab \tab \tab \tab Formatted results for external analysis or reporting \cr

@@ -115,10 +115,6 @@ children:
                 enable: (classifier_singleDecisionTree)
                 format: number
               - type: TextBox
-                name: minBucket
-                format: number
-                enable: (classifier_singleDecisionTree)
-              - type: TextBox
                 name: complexity
                 format: number
                 enable: (classifier_singleDecisionTree)
@@ -233,31 +229,35 @@ children:
             name: reportClinicalMetrics
           - type: CheckBox
             name: reportConfidenceIntervals
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: K-Nearest Neighbors (KNN)
+    collapsed: true
     children:
-      - type: TextBox
-        name: knnNeighbors
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: knnNeighbors
+            format: number
+            enable: (classifier_knn)
+          - type: ComboBox
+            name: knnDistance
+            enable: (classifier_knn)
+  - type: CollapseBox
+    label: Support Vector Machine (SVM)
+    collapsed: true
     children:
-      - type: ComboBox
-        name: knnDistance
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: svmKernel
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: svmCost
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: svmGamma
-        format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: svmKernel
+            enable: (classifier_svm)
+          - type: TextBox
+            name: svmCost
+            format: number
+            enable: (classifier_svm)
+          - type: TextBox
+            name: svmGamma
+            format: number
+            enable: (classifier_svm)

@@ -1,0 +1,293 @@
+---
+name: deeplearningprediction
+title: Deep Learning Image Prediction
+menuGroup: ExplorationT
+menuSubgroup: Advanced AI
+menuSubtitle: Neural Network Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced deep learning prediction module for histopathological image analysis.
+        Implements Vision Transformer (ViT), ResNet, and other CNN architectures for 
+        biomarker prediction from H&E-stained tissue images.
+    R:
+        dontrun: false
+        usage: |
+            # Basic Vision Transformer prediction
+            deeplearningprediction(
+                data = image_data,
+                image_path_var = "image_file_path",
+                target_var = "biomarker_status",
+                model_type = "vision_transformer",
+                attention_maps = TRUE,
+                validation_split = 0.2
+            )
+            
+            # Cumulative logit with gray-zone
+            deeplearningprediction(
+                data = ordinal_data,
+                image_path_var = "image_paths",
+                target_var = "ki67_score",
+                model_type = "vision_transformer",
+                prediction_type = "cumulative_logit",
+                gray_zone_width = 5.0,
+                thresholds = c(5, 10, 15, 20)
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: image_path_var
+      title: Image File Path Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - id
+      description:
+          R: >
+            variable containing file paths to histological images
+
+    - name: target_var
+      title: Target Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            dependent variable to predict (biomarker status, classification)
+
+    - name: model_type
+      title: Deep Learning Model
+      type: List
+      options:
+        - name: vision_transformer
+          title: 'Vision Transformer (ViT)'
+        - name: resnet
+          title: 'ResNet CNN'
+        - name: efficientnet
+          title: 'EfficientNet'
+        - name: densenet
+          title: 'DenseNet'
+        - name: custom_cnn
+          title: 'Custom CNN'
+      default: vision_transformer
+      description:
+          R: >
+            deep learning architecture for image analysis
+
+    - name: prediction_type
+      title: Prediction Type
+      type: List
+      options:
+        - name: classification
+          title: 'Standard Classification'
+        - name: cumulative_logit
+          title: 'Cumulative Logit (Ordinal)'
+        - name: cumulative_logit_grayzone
+          title: 'Cumulative Logit with Gray-Zone'
+        - name: regression
+          title: 'Continuous Regression'
+      default: classification
+      description:
+          R: >
+            type of prediction task and output format
+
+    - name: patch_size
+      title: Image Patch Size
+      type: Number
+      min: 224
+      max: 1024
+      default: 384
+      description:
+          R: >
+            size of image patches for processing (pixels)
+
+    - name: batch_size
+      title: Batch Size
+      type: Number
+      min: 1
+      max: 32
+      default: 8
+      description:
+          R: >
+            number of images processed simultaneously
+
+    - name: validation_split
+      title: Validation Split Ratio
+      type: Number
+      min: 0.1
+      max: 0.5
+      default: 0.2
+      description:
+          R: >
+            proportion of data used for validation
+
+    - name: learning_rate
+      title: Learning Rate
+      type: Number
+      min: 0.00001
+      max: 0.1
+      default: 0.0001
+      description:
+          R: >
+            learning rate for model training
+
+    - name: epochs
+      title: Training Epochs
+      type: Number
+      min: 1
+      max: 100
+      default: 10
+      description:
+          R: >
+            number of training epochs
+
+    - name: attention_maps
+      title: Generate Attention Maps
+      type: Bool
+      default: true
+      description:
+          R: >
+            create attention/saliency maps for model explainability
+
+    - name: data_augmentation
+      title: Enable Data Augmentation
+      type: Bool
+      default: true
+      description:
+          R: >
+            apply image transformations during training
+
+    - name: gray_zone_width
+      title: Gray Zone Width (%)
+      type: Number
+      min: 0.0
+      max: 50.0
+      default: 5.0
+      description:
+          R: >
+            width of gray zone for cumulative logit models
+
+    - name: thresholds
+      title: Custom Thresholds
+      type: String
+      default: ""
+      description:
+          R: >
+            custom thresholds for ordinal prediction (comma-separated numbers)
+
+    - name: pretrained_weights
+      title: Use Pretrained Weights
+      type: Bool
+      default: true
+      description:
+          R: >
+            initialize with ImageNet pretrained weights
+
+    - name: freeze_backbone
+      title: Freeze Backbone Layers
+      type: Bool
+      default: false
+      description:
+          R: >
+            freeze pretrained backbone for fine-tuning
+
+    - name: dropout_rate
+      title: Dropout Rate
+      type: Number
+      min: 0.0
+      max: 0.8
+      default: 0.1
+      description:
+          R: >
+            dropout rate for regularization
+
+    - name: weight_decay
+      title: Weight Decay
+      type: Number
+      min: 0.0
+      max: 0.01
+      default: 0.0001
+      description:
+          R: >
+            L2 regularization weight decay
+
+    - name: early_stopping
+      title: Enable Early Stopping
+      type: Bool
+      default: true
+      description:
+          R: >
+            stop training when validation loss stops improving
+
+    - name: save_model
+      title: Save Trained Model
+      type: Bool
+      default: false
+      description:
+          R: >
+            save trained model for future use
+
+    - name: model_path
+      title: Model Save Path
+      type: String
+      default: ""
+      description:
+          R: >
+            file path to save trained model
+
+    - name: gpu_acceleration
+      title: Use GPU Acceleration
+      type: Bool
+      default: true
+      description:
+          R: >
+            utilize GPU for faster training if available
+
+    - name: cross_validation
+      title: Perform Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            perform k-fold cross-validation
+
+    - name: cv_folds
+      title: CV Folds
+      type: Number
+      min: 3
+      max: 10
+      default: 5
+      description:
+          R: >
+            number of cross-validation folds
+
+    - name: class_weights
+      title: Use Class Weights
+      type: Bool
+      default: true
+      description:
+          R: >
+            apply class balancing weights for imbalanced datasets
+
+    - name: confidence_threshold
+      title: Confidence Threshold
+      type: Number
+      min: 0.5
+      max: 1.0
+      default: 0.8
+      description:
+          R: >
+            minimum confidence threshold for predictions
+
+...

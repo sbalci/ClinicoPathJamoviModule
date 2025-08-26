@@ -3,7 +3,6 @@ name: ihcscoring
 jus: '3.0'
 stage: 0
 compilerMode: tame
-
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -17,25 +16,21 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
           - type: VariablesListBox
             name: proportion_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
           - type: VariablesListBox
             name: sample_id_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
           - type: VariablesListBox
             name: group_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
   - type: LayoutBox
     margin: large
     stretchFactor: 1
@@ -45,16 +40,12 @@ children:
         children:
           - type: Label
             label: Scoring Parameters
-            
           - type: ComboBox
             name: scoring_method
-
           - type: ComboBox
             name: biomarker_type
-
           - type: ComboBox
             name: intensity_scale
-
       - type: CollapseBox
         label: Cutpoint Settings
         collapsed: true
@@ -66,12 +57,10 @@ children:
                 name: binary_cutpoint
                 format: number
                 suffix: H-score units
-
               - type: TextBox
                 name: allred_cutpoint
-                format: number  
+                format: number
                 suffix: Allred units
-
       - type: CollapseBox
         label: Analysis Options
         collapsed: false
@@ -81,16 +70,12 @@ children:
             children:
               - type: CheckBox
                 name: include_statistics
-
               - type: CheckBox
                 name: agreement_analysis
-
               - type: CheckBox
                 name: quality_control
-
               - type: CheckBox
                 name: clinical_interpretation
-
       - type: CollapseBox
         label: Digital Pathology Validation
         collapsed: true
@@ -100,7 +85,6 @@ children:
             children:
               - type: CheckBox
                 name: include_digital_validation
-
       - type: CollapseBox
         label: Visualization Options
         collapsed: true
@@ -110,10 +94,8 @@ children:
             children:
               - type: CheckBox
                 name: show_plots
-
               - type: CheckBox
                 name: show_agreement_plots
-
       - type: CollapseBox
         label: Advanced Settings
         collapsed: true
@@ -125,13 +107,42 @@ children:
                 name: confidence_level
                 format: number
                 suffix: (0.80-0.99)
-
               - type: TextBox
                 name: bootstrap_n
                 format: number
                 suffix: replicates
-
               - type: CheckBox
                 name: export_results
-
-...
+  - type: CollapseBox
+    label: Automated Image Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: automated_analysis
+          - type: ComboBox
+            name: segmentation_method
+          - type: CheckBox
+            name: color_deconvolution
+          - type: TextBox
+            name: minimum_nuclear_area
+            format: number
+            suffix: pixels
+          - type: TextBox
+            name: maximum_nuclear_area
+            format: number
+            suffix: pixels
+          - type: CheckBox
+            name: batch_processing
+          - type: ComboBox
+            name: image_format
+          - type: CheckBox
+            name: validation_metrics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: dab_thresholds
+        format: string

@@ -7,6 +7,15 @@
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.pdf'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.md'
 
+
+claude --no-mcp --no-tools "/review-article-stats Deep-Learning-Based-Prediction" \
+  "/Users/.../Deep-Learning-Based-Prediction.md" \
+  "/Users/.../Deep-Learning-Based-Prediction.html" \
+  "/Users/.../Deep-Learning-Based-Prediction.pdf" \
+  "/Users/.../Deep-Learning-Based-Prediction.txt"
+
+
+
 ## check and update each function
 
 echo "/document-function reportcat" | claude

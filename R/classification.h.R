@@ -15,7 +15,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "classifMetrices"),
             classifier = NULL,
             minSplit = 20,
-            minBucket = 0,
             complexity = 0.01,
             maxCompete = 4,
             maxSurrogate = 5,
@@ -102,10 +101,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "minSplit",
                 minSplit,
                 default=20)
-            private$..minBucket <- jmvcore::OptionNumber$new(
-                "minBucket",
-                minBucket,
-                default=0)
             private$..complexity <- jmvcore::OptionNumber$new(
                 "complexity",
                 complexity,
@@ -246,7 +241,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..reporting)
             self$.addOption(private$..classifier)
             self$.addOption(private$..minSplit)
-            self$.addOption(private$..minBucket)
             self$.addOption(private$..complexity)
             self$.addOption(private$..maxCompete)
             self$.addOption(private$..maxSurrogate)
@@ -282,7 +276,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         reporting = function() private$..reporting$value,
         classifier = function() private$..classifier$value,
         minSplit = function() private$..minSplit$value,
-        minBucket = function() private$..minBucket$value,
         complexity = function() private$..complexity$value,
         maxCompete = function() private$..maxCompete$value,
         maxSurrogate = function() private$..maxSurrogate$value,
@@ -317,7 +310,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..reporting = NA,
         ..classifier = NA,
         ..minSplit = NA,
-        ..minBucket = NA,
         ..complexity = NA,
         ..maxCompete = NA,
         ..maxSurrogate = NA,
@@ -565,7 +557,6 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param reporting .
 #' @param classifier .
 #' @param minSplit .
-#' @param minBucket .
 #' @param complexity .
 #' @param maxCompete .
 #' @param maxSurrogate .
@@ -622,7 +613,6 @@ classification <- function(
                 "classifMetrices"),
     classifier,
     minSplit = 20,
-    minBucket = 0,
     complexity = 0.01,
     maxCompete = 4,
     maxSurrogate = 5,
@@ -671,7 +661,6 @@ classification <- function(
         reporting = reporting,
         classifier = classifier,
         minSplit = minSplit,
-        minBucket = minBucket,
         complexity = complexity,
         maxCompete = maxCompete,
         maxSurrogate = maxSurrogate,

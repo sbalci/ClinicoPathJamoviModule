@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.46
+version: 0.0.31.48
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-08-25'
+date: '2025-08-26'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1119,7 +1119,7 @@ analyses:
   - title: Comparing Survival Outcomes
     name: comparingSurvival
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuTitle: Comparing Survival Outcomes
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
@@ -4495,6 +4495,38 @@ analyses:
       Comprehensive evaluation of multi-class classification performance
       including per-class and overall metrics, ROC curves, confusion matrices,
       and model comparison capabilities.
+  - title: Deep Learning Image Prediction
+    name: deeplearningprediction
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationT
+    menuSubgroup: Advanced AI
+    menuTitle: Deep Learning Image Prediction
+    menuSubtitle: Neural Network Analysis
+    description: >
+      Advanced deep learning prediction module for histopathological image
+      analysis.
+
+      Implements Vision Transformer (ViT), ResNet, and other CNN architectures
+      for 
+
+      biomarker prediction from H&E-stained tissue images.
+  - title: Explainable AI Analysis
+    name: explainableai
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationT
+    menuSubgroup: Advanced AI
+    menuTitle: Explainable AI Analysis
+    menuSubtitle: Model Interpretability
+    description: >
+      Comprehensive explainable AI toolkit for interpreting machine learning
+      models
+
+      in medical and clinical applications. Provides attention maps, feature
+      importance,
+
+      SHAP values, and other interpretability methods.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
