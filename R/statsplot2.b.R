@@ -17,12 +17,54 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             .PLOT_DIMENSIONS = list(
                 default = list(width = 800, height = 600),
                 grouped_native = list(width_per_level = 400, height_per_level = 300, max_width = 1600, max_height = 1200),
-                grouped_manual = list(width = 1200, max_height = 1400)
+                grouped_manual = list(width = 1200, height_per_row = 450, max_height = 1400)
             ),
             
             # Method to invalidate cache when options change
             .invalidateCache = function() {
                 private$.cached_analysis <- NULL
+            },
+            
+            # Standardized validation method for plot data
+            .validatePlotData = function(prepared_data, plot_type) {
+                data <- prepared_data$data
+                x_var <- prepared_data$group
+                y_var <- prepared_data$dep
+                
+                # Basic data validation
+                if (nrow(data) < 2) {
+                    stop(glue::glue("Insufficient data for {plot_type} comparing {y_var} by {x_var}. Need at least 2 observations, got {nrow(data)}. Please check your data filtering."))
+                }
+                
+                # Variable-specific validation based on expected types
+                y_data_clean <- data[[y_var]][!is.na(data[[y_var]])]
+                x_data_clean <- data[[x_var]][!is.na(data[[x_var]])]
+                
+                # Check for sufficient non-missing values
+                if (length(y_data_clean) < 2) {
+                    stop(glue::glue("Dependent variable '{y_var}' has insufficient non-missing values for {plot_type}. Found {length(y_data_clean)} valid values (need ≥2). Check for missing data."))
+                }
+                
+                if (length(x_data_clean) < 2) {
+                    stop(glue::glue("Grouping variable '{x_var}' has insufficient non-missing values for {plot_type}. Found {length(x_data_clean)} valid values (need ≥2). Check for missing data."))
+                }
+                
+                # Factor-specific validation
+                if (is.factor(data[[y_var]])) {
+                    y_levels <- length(unique(y_data_clean))
+                    if (y_levels < 1) {
+                        stop(glue::glue("Factor variable '{y_var}' has no valid levels after removing missing values for {plot_type}. Check data for: {paste(unique(data[[y_var]]), collapse=', ')}"))
+                    }
+                }
+                
+                if (is.factor(data[[x_var]])) {
+                    x_levels <- length(unique(x_data_clean))
+                    if (x_levels < 1) {
+                        stop(glue::glue("Factor variable '{x_var}' has no valid levels after removing missing values for {plot_type}. Check data for: {paste(unique(data[[x_var]]), collapse=', ')}"))
+                    }
+                }
+                
+                return(TRUE)
             },
             
             # Private function to detect variable types and analysis parameters
@@ -151,6 +193,107 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 return(stat_exp)
             },
+            
+            # Generate clinical interpretation for results
+            .generateClinicalInterpretation = function(analysis_info) {
+                interpretation <- switch(analysis_info$plot_type,
+                    "independent_factor_continuous" = glue::glue(
+                        "Clinical Interpretation: This violin plot compares the distribution of {analysis_info$dep_var} between different {analysis_info$group_var} groups. Look for differences in medians (center lines) and spread (violin width). Wider violins indicate more variability. Statistical significance testing is included when applicable."
+                    ),
+                    "independent_continuous_continuous" = glue::glue(
+                        "Clinical Interpretation: This scatter plot examines the linear relationship between {analysis_info$group_var} and {analysis_info$dep_var}. The trend line shows the association with confidence bands (gray area). Positive slopes indicate that higher {analysis_info$group_var} values are associated with higher {analysis_info$dep_var} values."
+                    ),
+                    "independent_factor_factor" = glue::glue(
+                        "Clinical Interpretation: This bar chart compares the frequency distribution of {analysis_info$dep_var} categories across {analysis_info$group_var} groups. Height differences indicate varying proportions. Chi-square statistics test for independence between the variables."
+                    ),
+                    "repeated_factor_continuous" = glue::glue(
+                        "Clinical Interpretation: This paired violin plot compares {analysis_info$dep_var} between two time points or conditions ({analysis_info$group_var}). Connected points show individual changes. The statistical test evaluates whether the mean change is significantly different from zero."
+                    ),
+                    "repeated_factor_factor" = glue::glue(
+                        "Clinical Interpretation: This alluvial diagram shows how subjects transition between {analysis_info$dep_var} categories from {analysis_info$group_var}. Flow thickness represents the number of subjects. Useful for tracking changes in disease stages, treatment responses, or classifications over time."
+                    ),
+                    "independent_continuous_factor" = glue::glue(
+                        "Clinical Interpretation: This dot plot shows the distribution of {analysis_info$group_var} values within each {analysis_info$dep_var} category. Each dot represents individual observations. Compare the central tendency and spread between categories."
+                    ),
+                    # Default for unsupported combinations
+                    glue::glue("Clinical Interpretation: This basic plot shows the relationship between {analysis_info$dep_var} and {analysis_info$group_var}. While specialized statistical tests aren't available for this combination, the visualization can still provide valuable insights about patterns in your data.")
+                )
+                
+                # Add assumption notes based on statistical approach
+                assumption_notes <- ""
+                if (analysis_info$distribution == "p") {
+                    assumption_notes <- "\n\nParametric Approach: Assumes normally distributed data. Best for continuous variables with bell-shaped distributions."
+                } else if (analysis_info$distribution == "np") {
+                    assumption_notes <- "\n\nNonparametric Approach: Distribution-free method. Suitable for skewed data, ordinal scales, or when normality assumptions are violated."
+                } else if (analysis_info$distribution == "r") {
+                    assumption_notes <- "\n\nRobust Approach: Less sensitive to outliers. Good choice when your data contains extreme values that might affect standard statistical tests."
+                } else if (analysis_info$distribution == "bf") {
+                    assumption_notes <- "\n\nBayesian Approach: Provides evidence for or against the null hypothesis. Bayes factors > 3 suggest moderate evidence, > 10 suggest strong evidence."
+                }
+                
+                return(paste0(interpretation, assumption_notes))
+            },
+            
+            # Check statistical assumptions and provide warnings
+            .checkAssumptions = function(analysis_info, data) {
+                warnings <- character()
+                
+                dep_data <- data[[analysis_info$dep_var]]
+                group_data <- data[[analysis_info$group_var]]
+                
+                # Sample size checks
+                total_n <- sum(!is.na(dep_data) & !is.na(group_data))
+                if (total_n < 30) {
+                    warnings <- c(warnings, glue::glue("Small sample size (n={total_n}). Consider nonparametric approaches for more reliable results."))
+                }
+                
+                # Parametric assumption checks
+                if (analysis_info$distribution == "p" && analysis_info$dep_type == "continuous") {
+                    # Check for extreme outliers (beyond 3.5 IQR)
+                    if (length(dep_data) > 4) {
+                        Q1 <- quantile(dep_data, 0.25, na.rm = TRUE)
+                        Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
+                        IQR_val <- Q3 - Q1
+                        extreme_outliers <- sum(dep_data < (Q1 - 3.5 * IQR_val) | dep_data > (Q3 + 3.5 * IQR_val), na.rm = TRUE)
+                        if (extreme_outliers > 0) {
+                            warnings <- c(warnings, glue::glue("Detected {extreme_outliers} extreme outlier(s) in {analysis_info$dep_var}. Consider robust statistical approach."))
+                        }
+                    }
+                    
+                    # Basic normality warning for small samples
+                    if (total_n < 100) {
+                        warnings <- c(warnings, "With smaller samples, check data distribution visually. Consider nonparametric approach if data appears skewed.")
+                    }
+                }
+                
+                # Group size balance check for between-subjects designs
+                if (analysis_info$direction == "independent" && is.factor(group_data)) {
+                    group_sizes <- table(group_data)
+                    min_group <- min(group_sizes)
+                    max_group <- max(group_sizes)
+                    if (max_group / min_group > 4) {
+                        warnings <- c(warnings, glue::glue("Unbalanced group sizes (smallest: {min_group}, largest: {max_group}). Results may be less reliable."))
+                    }
+                    
+                    # Very small group sizes
+                    if (min_group < 5) {
+                        warnings <- c(warnings, glue::glue("Very small group size(s) detected (minimum: {min_group}). Consider combining groups or using exact statistical methods."))
+                    }
+                }
+                
+                # Repeated measures specific checks
+                if (analysis_info$direction == "repeated") {
+                    # Check for complete pairs
+                    if (is.factor(group_data) && length(levels(group_data)) == 2) {
+                        complete_pairs <- sum(complete.cases(dep_data, group_data))
+                        if (complete_pairs < total_n) {
+                            warnings <- c(warnings, glue::glue("Missing paired observations detected. {complete_pairs} complete pairs out of {total_n} total observations."))
+                        }
+                    }
+                }
+                
+                return(warnings)
+            },
 
             .run = function() {
 
@@ -198,12 +341,32 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Generate explanation message using the new function
                 stat_exp <- private$.generateExplanationMessage(analysis_info)
                 
+                # Generate clinical interpretation
+                clinical_interpretation <- private$.generateClinicalInterpretation(analysis_info)
+                
+                # Check assumptions and generate warnings
+                assumption_warnings <- private$.checkAssumptions(analysis_info, self$data)
+                warning_text <- ""
+                if (length(assumption_warnings) > 0) {
+                    warning_text <- paste("\n\n⚠️ STATISTICAL WARNINGS:\n", paste(assumption_warnings, collapse = "\n"), sep = "")
+                }
+                
+                # Combine all explanations
+                combined_explanation <- paste(stat_exp, "\n\n", clinical_interpretation, warning_text, sep = "")
+                
                 # Set the explanation message in results
-                self$results$ExplanationMessage$setContent(stat_exp)
+                self$results$ExplanationMessage$setContent(combined_explanation)
 
             },
             
             .init = function() {
+                # Centralized package dependency checking
+                required_packages <- c("ggstatsplot", "ggalluvial", "dplyr", "easyalluvial", "patchwork", "cowplot")
+                missing_packages <- required_packages[!sapply(required_packages, function(pkg) requireNamespace(pkg, quietly = TRUE))]
+                if (length(missing_packages) > 0) {
+                    warning(glue::glue("Optional packages missing for full functionality: {paste(missing_packages, collapse = ', ')}. Install with: install.packages(c({paste(shQuote(missing_packages), collapse = ', ')})). Basic functionality will still work."))
+                }
+                
                 # Initialize and set option visibility based on selected variables
                 
                 # Get analysis type information
@@ -355,6 +518,15 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     mydata <- jmvcore::naOmit(mydata)
                 }
                 
+                # Handle large dataset sampling if requested
+                original_nrow <- nrow(mydata)
+                if (self$options$sampleLarge && original_nrow > 10000) {
+                    set.seed(42)  # For reproducible sampling
+                    sample_size <- 5000
+                    mydata <- mydata[sample(nrow(mydata), sample_size), ]
+                    message(glue::glue("Large dataset detected ({original_nrow:,} rows). Sampled {sample_size:,} rows for visualization performance. Disable 'Sample Large Datasets' option to use full dataset."))
+                }
+                
                 # Prepare composed terms for use with ggstatsplot
                 # Note: We use simple strings instead of composed terms to avoid NSE issues
                 dep_var <- analysis_info$dep_var
@@ -413,6 +585,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Plot function for between-subjects comparisons (factor vs continuous)
             .plotBetweenStats = function(prepared_data) {
+                private$.validatePlotData(prepared_data, "violin plot")
+                
+                # Checkpoint before expensive plot generation
+                private$.checkpoint()
+                
                 plot <- ggstatsplot::ggbetweenstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$group),
@@ -424,6 +601,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Plot function for scatter plots (continuous vs continuous)
             .plotScatterStats = function(prepared_data) {
+                private$.validatePlotData(prepared_data, "scatter plot")
+                
+                # Checkpoint before expensive plot generation
+                private$.checkpoint()
+                
                 plot <- ggstatsplot::ggscatterstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$group),
@@ -435,6 +617,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Plot function for bar charts (factor vs factor)
             .plotBarStats = function(prepared_data) {
+                private$.validatePlotData(prepared_data, "bar chart")
+                
+                # Checkpoint before expensive plot generation
+                private$.checkpoint()
+                
                 plot <- ggstatsplot::ggbarstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$dep),
@@ -449,32 +636,16 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # The combination is "independent_continuous_factor" meaning:
                 # group is continuous, dep is factor
                 
-                # Validate data before plotting
-                data <- prepared_data$data
+                private$.validatePlotData(prepared_data, "dot plot")
+                
+                # Checkpoint before expensive plot generation
+                private$.checkpoint()
+                
                 x_var <- prepared_data$group  # continuous variable
                 y_var <- prepared_data$dep    # factor variable
                 
-                # Enhanced validation with full context
-                if (nrow(data) < 2) {
-                    stop(glue::glue("Insufficient data for dotplot comparing {y_var} (factor) by {x_var} (continuous). Need at least 2 observations, got {nrow(data)}. Please check your data filtering."))
-                }
-                
-                # Enhanced factor validation
-                y_data_clean <- data[[y_var]][!is.na(data[[y_var]])]
-                y_levels <- length(unique(y_data_clean))
-                if (y_levels < 1) {
-                    stop(glue::glue("Factor variable '{y_var}' has no valid levels after removing missing values. Check data for: {paste(unique(data[[y_var]]), collapse=', ')}"))
-                }
-                
-                # Enhanced continuous validation
-                x_valid <- sum(!is.na(data[[x_var]]))
-                x_total <- nrow(data)
-                if (x_valid < 2) {
-                    stop(glue::glue("Continuous variable '{x_var}' has insufficient non-missing values for dotplot analysis. Found {x_valid} valid values out of {x_total} total observations (need ≥2). Check for missing data or data filtering."))
-                }
-                
                 plot <- ggstatsplot::ggdotplotstats(
-                    data = data,
+                    data = prepared_data$data,
                     x = !!rlang::sym(x_var),  # continuous variable
                     y = !!rlang::sym(y_var)   # factor variable
                 )
@@ -483,6 +654,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Plot function for within-subjects comparisons (repeated measures)
             .plotWithinStats = function(prepared_data) {
+                private$.validatePlotData(prepared_data, "within-subjects violin plot")
+                
+                # Checkpoint before expensive plot generation
+                private$.checkpoint()
+                
                 plot <- ggstatsplot::ggwithinstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$group),
@@ -495,6 +671,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Plot function for alluvial diagrams (factor vs factor, repeated)
             .plotAlluvial = function(prepared_data) {
+                private$.validatePlotData(prepared_data, "alluvial diagram")
+                
                 if (prepared_data$alluvsty == "t1") {
                     # Use ggalluvial
                     plot <- private$.plotAlluvialGG(prepared_data)
@@ -520,6 +698,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     gr = prepared_data$data[[prepared_data$group]],
                     dp = prepared_data$data[[prepared_data$dep]]
                 )
+                
+                # Checkpoint before expensive data aggregation
+                private$.checkpoint(flush = FALSE)
                 
                 # Tally the combinations
                 mydata_changes <- plotData %>%
@@ -614,6 +795,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     
                     # Generate plot for each level of grouping variable
                     for (i in seq_along(grvar_levels)) {
+                        # Checkpoint before expensive grouped plot generation
+                        private$.checkpoint(flush = FALSE)
                         level <- grvar_levels[i]
                         
                         # Filter data for this level
@@ -689,6 +872,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     return()
                 }
                 
+                # Checkpoint before data preparation
+                private$.checkpoint()
+                
                 # Prepare data for plotting
                 prepared_data <- private$.prepareDataForPlot(analysis_info)
                 
@@ -715,7 +901,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         # Calculate width for 2-column layout
                         rows <- ceiling(num_levels / 2)
                         new_width <- dims$grouped_manual$width  # Fixed wider width
-                        new_height <- max(dims$default$height, min(rows * 450, dims$grouped_manual$max_height))  # Height based on rows
+                        new_height <- max(dims$default$height, min(rows * dims$grouped_manual$height_per_row, dims$grouped_manual$max_height))  # Height based on rows
                     }
                     
                     # Apply the new size
@@ -725,6 +911,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     dims <- private$.PLOT_DIMENSIONS
                     image$setSize(dims$default$width, dims$default$height)
                 }
+                
+                # Checkpoint before main plot generation
+                private$.checkpoint()
                 
                 # Generate the plot
                 plot <- private$.generatePlot(analysis_info, prepared_data)
