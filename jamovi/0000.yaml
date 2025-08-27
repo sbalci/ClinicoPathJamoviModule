@@ -1581,7 +1581,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >

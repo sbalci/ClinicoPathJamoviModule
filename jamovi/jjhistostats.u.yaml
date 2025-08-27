@@ -26,6 +26,17 @@ children:
     collapsed: true
     children:
       - type: Label
+        label: Clinical Presets
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clinicalPreset
+                events:
+                  change: ./jjhistostats.events::onChange_clinicalPreset
+      - type: Label
         label: Statistical Analysis
         fitToGrid: true
         children:
@@ -34,17 +45,25 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+                events:
+                  change: ./jjhistostats.events::onChange_typestatistics
               - type: TextBox
                 name: test.value
                 format: number
+                events:
+                  change: ./jjhistostats.events::onChange_test_value
               - type: TextBox
                 name: conf.level
                 format: number
+                events:
+                  change: ./jjhistostats.events::onChange_conf_level
               - type: CheckBox
                 name: bf.message
               - type: TextBox
                 name: digits
                 format: number
+                events:
+                  change: ./jjhistostats.events::onChange_digits
 
   - type: CollapseBox
     label: Plot Appearance
@@ -82,6 +101,8 @@ children:
             children:
               - type: CheckBox
                 name: resultssubtitle
+              - type: CheckBox
+                name: showInterpretation
 
   - type: CollapseBox
     label: Histogram Settings
@@ -101,6 +122,8 @@ children:
                     name: binwidth
                     format: number
                     enable: (changebinwidth)
+                    events:
+                      change: ./jjhistostats.events::onChange_binwidth
       - type: Label
         label: Histogram Aesthetics
         fitToGrid: true
@@ -112,6 +135,8 @@ children:
                 name: binfill
                 format: string
                 width: large
+                events:
+                  change: ./jjhistostats.events::onChange_binfill
               - type: TextBox
                 name: bincolor
                 format: string
@@ -119,6 +144,8 @@ children:
               - type: TextBox
                 name: binalpha
                 format: number
+                events:
+                  change: ./jjhistostats.events::onChange_binalpha
 
   - type: CollapseBox
     label: Centrality Line
@@ -151,6 +178,8 @@ children:
                 name: centralitylinewidth
                 format: number
                 enable: (centralityline)
+                events:
+                  change: ./jjhistostats.events::onChange_centralitylinewidth
               - type: ComboBox
                 name: centralitylinetype
                 enable: (centralityline)
@@ -169,6 +198,10 @@ children:
               - type: TextBox
                 name: plotwidth
                 format: number
+                events:
+                  change: ./jjhistostats.events::onChange_plotwidth
               - type: TextBox
                 name: plotheight
                 format: number
+                events:
+                  change: ./jjhistostats.events::onChange_plotheight

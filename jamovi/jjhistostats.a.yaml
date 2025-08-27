@@ -1,7 +1,7 @@
 ---
 name:  jjhistostats
 title: Histogram
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous
 # menuSubtitle: Histogram
 version: '0.0.31'
@@ -59,6 +59,9 @@ options:
           R: >
             One or more continuous numeric variables for which histograms will be
             created. Multiple variables will be displayed in separate panels.
+          ui: >
+            Select continuous variables to analyze (e.g., age, tumor size, biomarker levels, 
+            lab values). Each variable will show its distribution shape and statistical properties.
 
     - name: grvar
       title: 'Split By (Optional)'
@@ -69,6 +72,9 @@ options:
           R: >
             Optional grouping variable to create separate histograms for each
             level of this variable (grouped analysis).
+          ui: >
+            Optional: Compare distributions between groups (e.g., treatment arms, 
+            disease stages, patient subtypes). Creates separate histograms for each group.
 
 # Data ----
 
@@ -80,13 +86,13 @@ options:
       title: 'Type of Statistic'
       type: List
       options:
-        - title: Parametric
+        - title: Parametric (t-test, normal distribution)
           name: parametric
-        - title: Nonparametric
+        - title: Nonparametric (Mann-Whitney, no distribution assumption)
           name: nonparametric
-        - title: Robust
+        - title: Robust (trimmed mean, outlier-resistant)
           name: robust
-        - title: Bayes
+        - title: Bayes (Bayesian inference)
           name: bayes
       default: parametric
       description:
@@ -94,6 +100,10 @@ options:
             Type of statistical test for normality assessment. 'parametric' uses
             Shapiro-Wilk test, 'nonparametric' uses Anderson-Darling test,
             'robust' uses robust normality tests, 'bayes' provides Bayesian analysis.
+          ui: >
+            Choose statistical approach: Parametric (best for normally distributed lab values like cholesterol), 
+            Nonparametric (for skewed data or ordinal scales like tumor grades), 
+            Robust (when outliers are present), Bayes (for uncertainty quantification).
 
 
 
@@ -103,11 +113,14 @@ options:
     - name: centralityline
       title: Centrality Line
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display a vertical line indicating the measure of central
             tendency (mean for parametric, median for nonparametric).
+          ui: >
+            Show a vertical line at the center of the distribution (mean or median). 
+            Helpful for comparing typical values across groups or identifying distribution shifts.
 
     - name: changebinwidth
       title: Change Bin Width
@@ -117,6 +130,9 @@ options:
           R: >
             Whether to manually specify the bin width. If FALSE, automatic
             bin width calculation will be used.
+          ui: >
+            Enable to manually control histogram resolution. Useful for fine-tuning 
+            visualization of biomarker ranges or lab value distributions.
 
     - name: binwidth
       title: Bin Width (Default is max(x) - min(x) / sqrt(N))
@@ -133,11 +149,49 @@ options:
     - name: resultssubtitle
       title: Statistical Results
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display statistical test results as subtitle in the plot,
             including normality test results and descriptive statistics.
+          ui: >
+            Show statistical results directly on the plot (normality tests, descriptive statistics). 
+            Helpful for quick interpretation without switching between tabs.
+    
+    - name: showInterpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate clinical interpretation of histogram results including distribution shape, 
+            normality assessment, and practical implications for clinical data.
+          ui: >
+            Generate plain-language interpretation of results including what the distribution 
+            shape means for your clinical data and recommendations for further analysis.
+
+    - name: clinicalPreset
+      title: Clinical Analysis Preset
+      type: List
+      options:
+        - title: Custom (manual settings)
+          name: custom
+        - title: Lab Values Analysis (parametric, centrality line)
+          name: lab_values
+        - title: Biomarker Distribution (nonparametric, robust)
+          name: biomarkers
+        - title: Patient Characteristics (age, BMI - parametric)
+          name: patient_chars
+        - title: Pathology Scores (ordinal, nonparametric)
+          name: pathology_scores
+      default: custom
+      description:
+          R: >
+            Predefined configurations optimized for common clinical data types.
+            Automatically sets appropriate statistical methods and visualization options.
+          ui: >
+            Choose a preset optimized for your data type. Each preset automatically configures 
+            statistical methods and display options appropriate for that clinical context.
 
     - name: test.value
       title: Test Value
@@ -160,7 +214,7 @@ options:
     - name: bf.message
       title: Bayes Factor Message
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
