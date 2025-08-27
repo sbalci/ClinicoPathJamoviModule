@@ -135,8 +135,8 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         analysisSummary = function() private$.items[["analysisSummary"]],
-        methodExplanation = function() private$.items[["methodExplanation"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -169,11 +169,6 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="analysisSummary",
                 title="Analysis Summary",
                 visible="(showSummaries)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="methodExplanation",
-                title="Methodology",
-                visible="(showExplanations)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -181,7 +176,12 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=500,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodExplanation",
+                title="Methodology",
+                visible="(showExplanations)"))}))
 
 jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jwaffleBase",
@@ -241,8 +241,8 @@ jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

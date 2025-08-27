@@ -40,16 +40,20 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .cached_palette = NULL,
         
         .init = function() {
-            self$results$plot$setSize(600, 500)
-
-            if (!is.null(self$options$facet)) {
-                mydata <- self$data
+            base_width <- 600
+            base_height <- 500
+            
+            if (!is.null(self$options$facet) && !is.null(self$data)) {
                 facet_var <- self$options$facet
-                if (!is.null(mydata[[facet_var]])) {
-                    num_levels <- length(unique(mydata[[facet_var]]))
-                    if (num_levels > 1)
-                        self$results$plot$setSize(num_levels * 600, 500)
+                if (facet_var %in% names(self$data)) {
+                    num_levels <- length(unique(self$data[[facet_var]]))
+                    width <- max(base_width, num_levels * base_width)
+                    self$results$plot$setSize(width, base_height)
+                } else {
+                    self$results$plot$setSize(base_width, base_height)
                 }
+            } else {
+                self$results$plot$setSize(base_width, base_height)
             }
         },
 
@@ -88,6 +92,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 sep = "_"
             )
             
+            # Use digest for robust hashing if available
+            if (requireNamespace("digest", quietly = TRUE)) {
+                return(digest::digest(data_summary, algo = "md5"))
+            }
+            
             return(data_summary)
         },
         
@@ -102,7 +111,9 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 color_palette = self$options$color_palette,
                 legendtitle = self$options$legendtitle,
                 show_legend = self$options$show_legend,
-                mytitle = self$options$mytitle
+                mytitle = self$options$mytitle,
+                showSummaries = self$options$showSummaries,
+                showExplanations = self$options$showExplanations
             )
             
             return(paste(options_list, collapse = "_"))
@@ -160,6 +171,14 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .generateColorPalette = function(n_groups) {
+            # Early return for common cases
+            if (n_groups == 2 && self$options$color_palette == "default") {
+                return(c("#4DA6FF", "#FFB84D"))
+            }
+            if (n_groups == 3 && self$options$color_palette == "default") {
+                return(c("#4DA6FF", "#FF9966", "#FFB84D"))
+            }
+            
             current_hash <- paste(private$.calculateOptionsHash(), n_groups, sep = "_")
             
             if (is.null(private$.cached_palette) || attr(private$.cached_palette, "hash") != current_hash) {
@@ -187,6 +206,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .generateCaption = function(plotdata, total_cases) {
+            # Handle edge case where there's no data
+            if (total_cases == 0 || is.na(total_cases) || is.null(total_cases)) {
+                return("No data available for waffle chart")
+            }
+            
             # Calculate waffle chart statistics for caption
             n_squares <- 100  # Total number of squares in waffle chart
             cases_per_square <- total_cases / n_squares
@@ -201,6 +225,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .validateInputs = function() {
+            # Check for large datasets and warn user
+            if (nrow(self$data) > 100000) {
+                warning("Large dataset detected (", nrow(self$data), " rows). Performance may be affected. Consider sampling or aggregating your data.")
+            }
+            
             # Check if required groups variable exists
             if (is.null(self$options$groups) || self$options$groups == "") {
                 stop("Please specify a grouping variable for the waffle chart.")
@@ -236,10 +265,42 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           class(groups_data)[1]))
             }
             
-            # Check for minimum data requirements
-            if (length(unique(groups_data)) < 2) {
-                stop(paste("Grouping variable '", self$options$groups, 
-                          "' must have at least 2 categories for meaningful waffle chart."))
+            # Enhanced clinical validation checks
+            n_categories <- length(unique(groups_data))
+            n_total <- nrow(self$data)
+            
+            if (n_categories == 1) {
+                stop(paste(
+                    "Only one category found in '", self$options$groups, 
+                    "'. Waffle charts require multiple categories to show proportions.",
+                    "Consider using a different visualization for single-category data."
+                ))
+            }
+            
+            if (n_categories > 10) {
+                warning(sprintf(
+                    "Many categories (%d) detected in '%s'. Consider grouping rare categories as 'Other' for clarity in clinical presentation.",
+                    n_categories, self$options$groups
+                ))
+            }
+            
+            # Check sample size adequacy for clinical interpretation
+            if (n_total < 30) {
+                warning(sprintf(
+                    "Small sample size (n=%d). Proportions may be unstable for clinical interpretation. Consider combining categories or collecting more data.",
+                    n_total
+                ))
+            }
+            
+            # Check for very small category sizes
+            category_counts <- table(groups_data, useNA = "no")
+            min_count <- min(category_counts)
+            if (min_count < 5 && n_total >= 30) {
+                small_cats <- names(category_counts)[category_counts < 5]
+                warning(sprintf(
+                    "Some categories have very few cases (n<%d): %s. Consider combining rare categories for more reliable clinical interpretation.",
+                    5, paste(small_cats, collapse = ", ")
+                ))
             }
             
             # Validate counts variable if specified
@@ -256,6 +317,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .aggregateData = function(data, groups_var, facet_var = NULL, counts_var = NULL) {
+            # Pre-check for empty data
+            if (is.null(data) || nrow(data) == 0) {
+                stop("Cannot aggregate empty dataset. Please ensure your data contains valid rows.")
+            }
+            
             # Build grouping variables
             group_vars <- c(groups_var)
             if (!is.null(facet_var) && facet_var != "") {
@@ -282,6 +348,132 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           "Please check that your variables are properly formatted."))
             })
         },
+        
+        .generateSummary = function(plotdata, groups_var, facet_var = NULL, total_cases) {
+            # Generate natural language summary of waffle chart results
+            if (is.null(plotdata) || nrow(plotdata) == 0 || total_cases == 0) {
+                return("<b>No data available for analysis summary.</b>")
+            }
+            
+            if (!is.null(facet_var) && facet_var != "" && facet_var %in% names(plotdata)) {
+                # Faceted summary
+                summary_parts <- list()
+                
+                for (facet_level in unique(plotdata[[facet_var]])) {
+                    facet_data <- plotdata[plotdata[[facet_var]] == facet_level, ]
+                    facet_total <- sum(facet_data$count)
+                    proportions <- (facet_data$count / facet_total) * 100
+                    
+                    # Sort the data by groups_var to ensure consistent ordering
+                    facet_data <- facet_data[order(facet_data[[groups_var]]), ]
+                    proportions <- (facet_data$count / facet_total) * 100
+                    
+                    # Create breakdown showing all categories within this facet
+                    category_breakdown <- paste(
+                        sprintf("%s %s: %.1f%% (n=%d)", 
+                               groups_var,
+                               facet_data[[groups_var]], 
+                               proportions, 
+                               facet_data$count), 
+                        collapse = "; "
+                    )
+                    
+                    # Find the dominant category within this facet
+                    max_prop_idx <- which.max(proportions)
+                    dominant_category <- facet_data[[groups_var]][max_prop_idx]
+                    max_proportion <- proportions[max_prop_idx]
+                    
+                    summary_parts[[facet_level]] <- sprintf(
+                        "<b>Among %s %s</b> (n=%d): %s → <i>%s %s predominates (%.1f%%)</i>", 
+                        facet_var, facet_level, facet_total, category_breakdown, 
+                        groups_var, dominant_category, max_proportion
+                    )
+                }
+                
+                summary_text <- paste0(
+                    "<b>📊 Waffle Chart Summary by ", facet_var, ":</b><br><br>",
+                    paste(summary_parts, collapse = "<br><br>"),
+                    "<br><br><b>🔍 Overall Sample:</b> ", total_cases, " cases showing ", groups_var, 
+                    " distribution across ", length(unique(plotdata[[facet_var]])), " ", facet_var, " groups.",
+                    "<br><br><b>💡 Clinical Note:</b> Compare how ", groups_var, 
+                    " patterns differ between ", facet_var, " groups. Each square represents a fixed proportion of cases."
+                )
+                
+            } else {
+                # Simple summary
+                proportions <- (plotdata$count / total_cases) * 100
+                max_prop_idx <- which.max(proportions)
+                dominant_category <- plotdata[[groups_var]][max_prop_idx]
+                max_proportion <- proportions[max_prop_idx]
+                
+                # Create simple breakdown
+                breakdown_list <- paste(
+                    sprintf("%s: %.1f%% (n=%d)", 
+                           plotdata[[groups_var]], 
+                           proportions, 
+                           plotdata$count), 
+                    collapse = ", "
+                )
+                
+                summary_text <- sprintf(
+                    "<b>📊 Waffle Chart Summary:</b><br><br>
+                    The sample contains %d cases distributed as: %s.<br><br>
+                    <b>Key Finding:</b> %s represents the largest proportion (%.1f%% of cases).<br><br>
+                    <b>💡 Report Template:</b><br>
+                    <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%d) in our sample of %d cases.\"</i>",
+                    total_cases, breakdown_list, dominant_category, max_proportion,
+                    dominant_category, max_proportion, plotdata$count[max_prop_idx], total_cases
+                )
+            }
+            
+            return(summary_text)
+        },
+        
+        .generateExplanation = function() {
+            # Generate detailed methodology explanation for waffle charts
+            explanation <- paste0(
+                "<b>Waffle Chart Methodology</b><br><br>",
+                
+                "<b>What is a Waffle Chart?</b><br>",
+                "A waffle chart is a visual representation of categorical data using a grid of colored squares, ",
+                "where each square represents a fixed proportion of the total sample. The chart typically uses ",
+                "a 10×10 grid (100 squares) to represent percentages intuitively.<br><br>",
+                
+                "<b>Clinical Applications:</b><br>",
+                "• <b>Disease Classification:</b> Show distribution of tumor grades, cancer stages, or pathological subtypes<br>",
+                "• <b>Treatment Outcomes:</b> Display response rates (complete/partial/no response) across patient cohorts<br>",
+                "• <b>Demographic Analysis:</b> Present patient characteristics, risk factors, or comorbidity patterns<br>",
+                "• <b>Quality Metrics:</b> Visualize compliance rates, diagnostic accuracy, or safety outcomes<br><br>",
+                
+                "<b>Advantages over Other Charts:</b><br>",
+                "• <b>Intuitive Interpretation:</b> Each square = 1% makes percentages immediately clear<br>",
+                "• <b>Part-to-Whole Clarity:</b> Better than pie charts for showing proportions<br>",
+                "• <b>Multiple Categories:</b> Handles many categories better than bar charts<br>",
+                "• <b>Visual Impact:</b> Effective for presentations and publications<br><br>",
+                
+                "<b>Statistical Considerations:</b><br>",
+                "• <b>Sample Size:</b> Most effective with n≥30; smaller samples may show unstable proportions<br>",
+                "• <b>Category Balance:</b> Works best when no single category dominates (>80%)<br>",
+                "• <b>Precision:</b> Each square represents approximately 1% of the sample<br>",
+                "• <b>Statistical Testing:</b> Chi-square tests can evaluate proportion differences<br><br>",
+                
+                "<b>Interpretation Guidelines:</b><br>",
+                "• <b>Dominant Patterns:</b> Categories with >60% suggest clear predominance<br>",
+                "• <b>Balanced Distributions:</b> No category >40% indicates diverse sample<br>",
+                "• <b>Rare Categories:</b> <5% of sample may represent clinically significant subgroups<br>",
+                "• <b>Comparative Analysis:</b> Use faceting to compare across patient groups or time periods<br><br>",
+                
+                "<b>Best Practices for Clinical Research:</b><br>",
+                "• Use clear, standardized category labels (e.g., 'Grade 1', 'Grade 2', 'Grade 3')<br>",
+                "• Choose colorblind-friendly palettes for accessibility<br>",
+                "• Include sample sizes and confidence intervals when reporting<br>",
+                "• Consider combining rare categories (<5 cases) for statistical stability<br>",
+                "• Always report exact percentages and counts alongside visual representation"
+            )
+            
+            return(explanation)
+        },
+        
         
         .run = function() {
             if (is.null(self$options$groups)) {
@@ -326,7 +518,29 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop('Data contains no (complete) rows')
             }
             
-            todo <- glue::glue("<br>Creating waffle chart...<br><hr>")
+            # Generate analysis summary and explanations if requested
+            if (self$options$showSummaries || self$options$showExplanations) {
+                groups_var <- self$options$groups
+                facet_var <- self$options$facet
+                counts_var <- self$options$counts
+                
+                plotdata <- private$.aggregateData(mydata, groups_var, facet_var, counts_var)
+                total_cases <- sum(plotdata$count)
+                
+                # Generate summary if requested
+                if (self$options$showSummaries) {
+                    summary_content <- private$.generateSummary(plotdata, groups_var, facet_var, total_cases)
+                    self$results$analysisSummary$setContent(summary_content)
+                }
+                
+                # Generate explanation if requested
+                if (self$options$showExplanations) {
+                    explanation_content <- private$.generateExplanation()
+                    self$results$methodExplanation$setContent(explanation_content)
+                }
+            }
+            
+            todo <- glue::glue("<br>✅ Waffle chart created successfully. Enable 'Analysis Summary' or 'Show Explanations' in Output Options for detailed interpretations.<br><hr>")
             self$results$todo$setContent(todo)
         },
 
@@ -394,14 +608,17 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add labels in specific order
             if (!is.null(facet_var)) {
                 facet_title <- facet_var  # Store the facet variable name
+                # Combine title and caption with appropriate spacing
+                combined_caption <- if (self$options$mytitle != '' && nchar(self$options$mytitle) > 0) {
+                    paste0(self$options$mytitle, "\n", caption_text)
+                } else {
+                    caption_text
+                }
+                
                 p <- p +
                     ggplot2::labs(
                         tag = facet_title,  # Facet variable name
-                        caption = paste0(  # Combine caption and title
-                            self$options$mytitle,
-                            "\n\n",
-                            caption_text
-                        )
+                        caption = combined_caption
                     ) +
                     ggplot2::facet_wrap(
                         as.formula(paste0("~", facet_var)),
@@ -409,13 +626,14 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         strip.position = "bottom"
                     )
             } else {
-                p <- p + ggplot2::labs(
-                    caption = paste0(
-                        self$options$mytitle,
-                        "\n\n",
-                        caption_text
-                    )
-                )
+                # Combine title and caption with appropriate spacing
+                combined_caption <- if (self$options$mytitle != '' && nchar(self$options$mytitle) > 0) {
+                    paste0(self$options$mytitle, "\n", caption_text)
+                } else {
+                    caption_text
+                }
+                
+                p <- p + ggplot2::labs(caption = combined_caption)
             }
 
             # Handle legend
