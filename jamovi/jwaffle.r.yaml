@@ -13,12 +13,18 @@ clearWith:
     - show_legend
     - mytitle
     - legendtitle
+    - showSummaries
+    - showExplanations
 
 items:
     - name: todo
       title: To Do
       type: Html
 
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
     - name: plot
       title: Waffle Chart
       type: Image
@@ -26,6 +32,13 @@ items:
       height: 500
       renderFun: .plot
       requiresData: true
+
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)
+
 
 refs:
     - ggplot2

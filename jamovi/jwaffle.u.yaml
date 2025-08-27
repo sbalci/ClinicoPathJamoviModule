@@ -83,3 +83,21 @@ children:
                 format: string
                 label: Legend Title
                 width: large
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Analysis Output
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummaries
+                label: Analysis Summary
+              - type: CheckBox
+                name: showExplanations
+                label: Show Explanations

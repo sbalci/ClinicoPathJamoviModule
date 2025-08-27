@@ -1,14 +1,14 @@
 ---
 name:  jwaffle
 title: Waffle Charts
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Distribution'
 version: '0.0.31'
 jas: '1.2'
 
 description:
     main: |
-        'Creates waffle charts to visualize distributions and proportions'
+        'Creates waffle charts to visualize categorical distributions and proportions using colored squares. Ideal for showing parts-of-whole relationships in clinical data such as disease subtypes, treatment outcomes, or risk category distributions. Each square represents a proportion of the total sample, making it easy to see relative frequencies across categories.'
 
 options:
     - name: data
@@ -25,7 +25,7 @@ options:
       default: NULL
       description:
           R: >
-            Optional numeric values to be represented in the waffle chart. If not provided, will use number of cases.
+            Optional numeric weight variable if cases have different weights. Leave empty to count each row equally (recommended for most clinical data). Only needed if your data is pre-aggregated or weighted.
 
     - name: groups
       title: Groups
@@ -34,7 +34,7 @@ options:
       permitted: [ factor ]
       description:
           R: >
-            The grouping variable for the waffle squares
+            The categorical grouping variable for the waffle squares. Each category will be displayed as proportional colored squares in a 10x10 grid. Examples: Tumor grade (G1/G2/G3), Treatment outcome (Complete/Partial/No response), Risk categories (Low/Medium/High).
 
     - name: facet
       title: Facet By (Optional)
@@ -44,7 +44,7 @@ options:
       default: NULL
       description:
           R: >
-            Optional variable to create faceted waffle charts
+            Optional variable to split the waffle chart by another categorical variable to compare distributions across subgroups (e.g., by treatment arm, patient cohort, or time period). Creates separate waffle charts for each level.
 
     - name: rows
       title: Number of Rows
@@ -109,4 +109,20 @@ options:
       description:
           R: >
             Custom title for the legend
+
+    - name: showSummaries
+      title: Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summary of waffle chart results including proportions, dominant categories, and clinical interpretation.
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations about waffle charts, when to use them, and how to interpret the results in clinical contexts.
 ...
