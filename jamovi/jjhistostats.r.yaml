@@ -3,18 +3,6 @@ name:  jjhistostats
 title: Histogram
 jrs:   '1.1'
 
-# clearWith:
-#     - dep
-#     - group
-#     - grvar
-#     - excl
-#     - originaltheme
-#     - typestatistics
-#     - changebinwidth
-#     - binwidth
-#     - barmeasure
-#     - centralityparameter
-
 clearWith:
     - dep
     - grvar
@@ -40,6 +28,8 @@ clearWith:
     - subtitle
     - caption
     - digits
+    - showInterpretation
+    - clinicalPreset
 
 
 items:
@@ -78,6 +68,11 @@ items:
       # height: 600
       renderFun: .plot
       requiresData: true
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (showInterpretation)
 
     # - name:  e_stats
     #   title: e_stats

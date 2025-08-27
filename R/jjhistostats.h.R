@@ -9,13 +9,15 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             dep = NULL,
             grvar = NULL,
             typestatistics = "parametric",
-            centralityline = TRUE,
+            centralityline = FALSE,
             changebinwidth = FALSE,
             binwidth = 1.1,
-            resultssubtitle = TRUE,
+            resultssubtitle = FALSE,
+            showInterpretation = FALSE,
+            clinicalPreset = "custom",
             test.value = 0,
             conf.level = 0.95,
-            bf.message = TRUE,
+            bf.message = FALSE,
             digits = 2,
             xlab = "",
             title = "",
@@ -64,7 +66,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..centralityline <- jmvcore::OptionBool$new(
                 "centralityline",
                 centralityline,
-                default=TRUE)
+                default=FALSE)
             private$..changebinwidth <- jmvcore::OptionBool$new(
                 "changebinwidth",
                 changebinwidth,
@@ -76,7 +78,21 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
-                default=TRUE)
+                default=FALSE)
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
+                default=FALSE)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "custom",
+                    "lab_values",
+                    "biomarkers",
+                    "patient_chars",
+                    "pathology_scores"),
+                default="custom")
             private$..test.value <- jmvcore::OptionNumber$new(
                 "test.value",
                 test.value,
@@ -90,7 +106,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..bf.message <- jmvcore::OptionBool$new(
                 "bf.message",
                 bf.message,
-                default=TRUE)
+                default=FALSE)
             private$..digits <- jmvcore::OptionInteger$new(
                 "digits",
                 digits,
@@ -178,6 +194,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..changebinwidth)
             self$.addOption(private$..binwidth)
             self$.addOption(private$..resultssubtitle)
+            self$.addOption(private$..showInterpretation)
+            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..test.value)
             self$.addOption(private$..conf.level)
             self$.addOption(private$..bf.message)
@@ -204,6 +222,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         changebinwidth = function() private$..changebinwidth$value,
         binwidth = function() private$..binwidth$value,
         resultssubtitle = function() private$..resultssubtitle$value,
+        showInterpretation = function() private$..showInterpretation$value,
+        clinicalPreset = function() private$..clinicalPreset$value,
         test.value = function() private$..test.value$value,
         conf.level = function() private$..conf.level$value,
         bf.message = function() private$..bf.message$value,
@@ -229,6 +249,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..changebinwidth = NA,
         ..binwidth = NA,
         ..resultssubtitle = NA,
+        ..showInterpretation = NA,
+        ..clinicalPreset = NA,
         ..test.value = NA,
         ..conf.level = NA,
         ..bf.message = NA,
@@ -254,7 +276,8 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -290,7 +313,9 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "title",
                     "subtitle",
                     "caption",
-                    "digits"))
+                    "digits",
+                    "showInterpretation",
+                    "clinicalPreset"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -307,7 +332,12 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="plot",
                 title="Histogram",
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation",
+                visible="(showInterpretation)"))}))
 
 jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjhistostatsBase",
@@ -386,6 +416,12 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param resultssubtitle Whether to display statistical test results as
 #'   subtitle in the plot, including normality test results and descriptive
 #'   statistics.
+#' @param showInterpretation Generate clinical interpretation of histogram
+#'   results including distribution shape,  normality assessment, and practical
+#'   implications for clinical data.
+#' @param clinicalPreset Predefined configurations optimized for common
+#'   clinical data types. Automatically sets appropriate statistical methods and
+#'   visualization options.
 #' @param test.value Value to compare the sample against in one-sample test.
 #'   Default is 0.
 #' @param conf.level Confidence level for confidence intervals (between 0 and
@@ -417,6 +453,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -425,13 +462,15 @@ jjhistostats <- function(
     dep,
     grvar,
     typestatistics = "parametric",
-    centralityline = TRUE,
+    centralityline = FALSE,
     changebinwidth = FALSE,
     binwidth = 1.1,
-    resultssubtitle = TRUE,
+    resultssubtitle = FALSE,
+    showInterpretation = FALSE,
+    clinicalPreset = "custom",
     test.value = 0,
     conf.level = 0.95,
-    bf.message = TRUE,
+    bf.message = FALSE,
     digits = 2,
     xlab = "",
     title = "",
@@ -468,6 +507,8 @@ jjhistostats <- function(
         changebinwidth = changebinwidth,
         binwidth = binwidth,
         resultssubtitle = resultssubtitle,
+        showInterpretation = showInterpretation,
+        clinicalPreset = clinicalPreset,
         test.value = test.value,
         conf.level = conf.level,
         bf.message = bf.message,
