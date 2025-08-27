@@ -33,8 +33,7 @@ echo "/document-function" | claude
 
 
 - statsplot2 - Automatic Plot Selection
-echo "/check-function statsplot2" | claude
-echo "/checkpoint statsplot2" | claude
+
 echo "/review-function statsplot2" | claude
 echo "/fix-function statsplot2" | claude
 echo "/document-function statsplot2" | claude

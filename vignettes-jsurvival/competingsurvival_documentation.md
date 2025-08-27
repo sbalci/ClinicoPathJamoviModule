@@ -36,3 +36,49 @@ The following table provides a detailed mapping of the module's features, from t
 | Cumulative Incidence Function    | (N/A)                          | Cumulative Incidence Function          | `cuminc`                            | `.formatCumulativeIncidence`         |
 | Competing Risks Plot             | (N/A)                          | Competing Risks Plot                   | `comprisksPlot`                     | `.plotCompetingRisks`                |
 | Clinical Interpretation          | (N/A)                          | Clinical Interpretation                | `interpretation`                    | `.generateInterpretation`            |
+
+## R Function Details
+
+### Core Functions
+
+#### `.performAnalysis()`
+
+*   **Purpose:** This is the main function that controls the entire analysis. It reads the user's selections from the UI and calls the appropriate functions to perform the selected analysis type (Overall Survival, Cause-Specific Survival, or Competing Risks).
+
+### Analysis-Specific Functions
+
+#### Overall Survival
+
+*   **Functionality:** When the user selects "Overall Survival," this function treats all death events (both disease-specific and other causes) as a single event type. It then uses the standard `survival` package to perform a Kaplan-Meier analysis and Cox proportional hazards regression.
+
+#### Cause-Specific Survival
+
+*   **Functionality:** When the user selects "Cause-Specific Survival," this function treats only the disease-specific deaths as events. Deaths from other causes are treated as censored observations. It then uses the standard `survival` package to perform the analysis.
+
+#### Competing Risks
+
+*   **Functionality:** When the user selects "Competing Risks," this function uses the `cmprsk` package to perform a competing risks analysis. It calculates the cumulative incidence function for each event type and performs a Fine-Gray subdistribution hazard regression.
+
+### Formatting and Plotting Functions
+
+#### `.formatSurvivalResults()`
+
+*   **Purpose:** To format the results of the overall and cause-specific survival analyses into a user-friendly table.
+
+#### `.formatCompetingRisksResults()`
+
+*   **Purpose:** To format the results of the competing risks analysis, including the subdistribution hazard ratios, into a table.
+
+#### `.formatCumulativeIncidence()`
+
+*   **Purpose:** To format the cumulative incidence estimates at different time points into a table.
+
+#### `.plotCompetingRisks()`
+
+*   **Purpose:** To generate the cumulative incidence function plot, which shows the probability of each event type occurring over time.
+
+### Helper Functions
+
+#### `.generateInterpretation()`
+
+*   **Purpose:** To provide a textual interpretation of the results, guiding the user on how to understand the output of the selected analysis.
