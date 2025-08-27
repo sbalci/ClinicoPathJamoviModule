@@ -26,12 +26,8 @@ echo "/review-function" | claude
 echo "/fix-function" | claude
 echo "/document-function" | claude
 
-## JJStatsPlotT (12 functions)
+## JJStatsPlotT
 
-- jwaffle - Waffle Charts
-
-echo "/fix-function jwaffle" | claude
-echo "/document-function jwaffle" | claude
 
 - jjhistostats - Histogram
 echo "/check-function jjhistostats" | claude
