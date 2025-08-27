@@ -39,6 +39,30 @@ library(knitr)
 library(forcats)
 ```
 
+## Threshold Calculator (p_t)
+
+Use this quick snippet to compute your clinical threshold probability from your own harm/benefit assumptions.
+
+```{r threshold-calculator, eval=FALSE}
+# Enter your assumptions
+harm_false_positive   <- 1   # e.g., biopsy risk/harm units
+benefit_true_positive <- 4   # e.g., benefit units of early treatment
+
+# Basic validation
+stopifnot(harm_false_positive >= 0)
+stopifnot(benefit_true_positive > 0)
+
+# Threshold probability p_t = harm / (harm + benefit)
+p_t <- harm_false_positive / (harm_false_positive + benefit_true_positive)
+
+cat(sprintf("Recommended threshold p_t = %.2f (%.0f%%)\n", p_t, 100 * p_t))
+
+# Tip: Try a sensitivity range to see how p_t changes
+benefit_seq <- c(2, 4, 6, 8)
+pt_seq <- harm_false_positive / (harm_false_positive + benefit_seq)
+data.frame(benefit_true_positive = benefit_seq, p_t = round(pt_seq, 2))
+```
+
 
 
 ```{r include=FALSE}

@@ -40,3 +40,52 @@ The following table provides a detailed mapping of the module's features, from t
 | Missing Data Handling            | `missingDataHandling`          | Missing Data Handling                  | `advancedOptions`                   | `.handleMissingData`                 |
 | Export Results                   | `exportResults`                | Export Results                         | `exportOptions`                     | `.exportSurvivalComparisonResults`   |
 | Export Plot                      | `exportPlot`                   | Export Plot                            | `exportOptions`                     | `.exportSurvivalComparisonPlot`      |
+
+## R Function Details
+
+### Core Functions
+
+#### `.calculateSurvivalComparison()`
+
+*   **Purpose:** This is the main function that drives the survival comparison analysis. It takes the survival time, event, and grouping variables as input and calculates the necessary statistics for comparing the survival curves.
+
+#### `.performLogRankTest()`
+
+*   **Purpose:** To perform the log-rank test, which is a non-parametric test used to compare the survival distributions of two or more groups.
+*   **Details:** It uses the `survdiff` function from the `survival` package.
+
+#### `.calculateHazardRatio()`
+
+*   **Purpose:** To calculate the hazard ratio, which is a measure of the relative risk of an event between two groups.
+*   **Details:** It fits a Cox proportional hazards model using the `coxph` function from the `survival` package.
+
+### Plotting Functions
+
+#### `.plotKaplanMeier()`
+
+*   **Purpose:** To generate the Kaplan-Meier survival plot, which is a graphical representation of the survival probability over time.
+*   **Customization:** It allows for various customizations, such as showing confidence intervals and a risk table.
+
+### Cox Regression Functions
+
+#### `.performUnivariableCox()`
+
+*   **Purpose:** To perform a univariable Cox proportional hazards regression for each covariate specified by the user.
+
+#### `.performMultivariableCox()`
+
+*   **Purpose:** To perform a multivariable Cox proportional hazards regression, which allows for adjusting for multiple covariates simultaneously.
+
+### Helper Functions
+
+#### `.handleMissingData()`
+
+*   **Purpose:** To handle missing data in the input variables based on the user's selection.
+
+#### `.exportSurvivalComparisonResults()`
+
+*   **Purpose:** To export the results of the survival comparison analysis to a file.
+
+#### `.exportSurvivalComparisonPlot()`
+
+*   **Purpose:** To save the Kaplan-Meier plot to a file in various formats (e.g., PNG, PDF).

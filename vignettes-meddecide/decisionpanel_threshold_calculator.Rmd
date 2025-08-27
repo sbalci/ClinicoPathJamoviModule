@@ -1,0 +1,101 @@
+---
+title: "Decision Panel Threshold Calculator (p_t)"
+author: "meddecide Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Decision Panel Threshold Calculator (p_t)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", echo = TRUE, eval = FALSE)
+```
+
+## Purpose (Clinician-Friendly)
+Use your own harm/benefit assumptions to calculate the threshold probability p_t at which you would switch from “no treatment” to “treat”. Then read the Decision Curve at that p_t.
+
+Formula: p_t = harm_false_positive / (harm_false_positive + benefit_true_positive)
+
+Tips: Only the ratio matters; you can measure “harm” and “benefit” in any consistent units (risk, cost, discomfort, etc.).
+
+## Quick Calculator
+
+```{r pt-calculator}
+# Enter your assumptions
+harm_false_positive   <- 1   # e.g., biopsy harm units
+benefit_true_positive <- 4   # e.g., benefit units of early treatment
+
+# Basic validation
+stopifnot(harm_false_positive >= 0)
+stopifnot(benefit_true_positive > 0)
+
+# Threshold probability p_t = harm / (harm + benefit)
+p_t <- harm_false_positive / (harm_false_positive + benefit_true_positive)
+
+cat(sprintf("Recommended threshold p_t = %.2f (%.0f%%)\n", p_t, 100 * p_t))
+```
+
+## Sensitivity Check (Optional)
+
+```{r pt-sensitivity}
+# Explore how p_t changes if benefit varies
+benefit_seq <- c(2, 3, 4, 6, 8)
+pt_seq <- harm_false_positive / (harm_false_positive + benefit_seq)
+
+result <- data.frame(benefit_true_positive = benefit_seq,
+                     p_t = round(pt_seq, 2),
+                     p_t_pct = paste0(round(100*pt_seq), "%"))
+result
+```
+
+## Next Steps
+- In jamovi, open the `meddecide` menu > Decision Panel > Decision Curve, set a threshold range that includes your p_t (e.g., 0.20), and pick the strategy with the highest net benefit at that p_t.
+- See also: `decisionpanel_clinician_guide.md` and `START-HERE.md`.
+
+## Visualizing p_t vs Benefit
+
+```{r pt-plot, eval=FALSE}
+benefit_seq <- seq(1, 10, by = 1)
+pt_seq <- harm_false_positive / (harm_false_positive + benefit_seq)
+df <- data.frame(benefit_true_positive = benefit_seq,
+                 p_t = pt_seq)
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  library(ggplot2)
+  ggplot(df, aes(x = benefit_true_positive, y = p_t)) +
+    geom_line(color = "#2C7FB8", linewidth = 1) +
+    geom_point(color = "#2C7FB8") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(x = "Benefit of a True Positive (units)",
+         y = "Threshold probability p_t",
+         title = "Threshold p_t decreases as benefit increases",
+         subtitle = "p_t = harm_false_positive / (harm_false_positive + benefit_true_positive)") +
+    theme_minimal(base_size = 12)
+}
+```
+
+## Visualizing p_t vs Harm (benefit fixed)
+
+```{r pt-plot-harm, eval=FALSE}
+# Fix the benefit and vary harm
+benefit_true_positive <- if (!exists("benefit_true_positive")) 4 else benefit_true_positive
+harm_seq <- seq(0, 10, by = 1)
+pt_seq_harm <- harm_seq / (harm_seq + benefit_true_positive)
+df_harm <- data.frame(harm_false_positive = harm_seq,
+                      p_t = pt_seq_harm)
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  library(ggplot2)
+  ggplot(df_harm, aes(x = harm_false_positive, y = p_t)) +
+    geom_line(color = "#D95F02", linewidth = 1) +
+    geom_point(color = "#D95F02") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(x = "Harm of a False Positive (units)",
+         y = "Threshold probability p_t",
+         title = "Threshold p_t increases as harm increases",
+         subtitle = paste0("Benefit fixed at ", benefit_true_positive, " units")) +
+    theme_minimal(base_size = 12)
+}
+```

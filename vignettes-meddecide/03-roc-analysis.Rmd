@@ -49,3 +49,10 @@ pROC::ci.thresholds(roc_obj)
 ```
 
 These methods provide statistically sound confidence intervals for your ROC analysis.
+
+## Threshold Selection (Clinician-Friendly)
+
+- Youden’s J: Choose the cutpoint that maximizes Sensitivity + Specificity − 1. Good for overall discrimination, not always aligned with clinical priorities.
+- Rule‑out goal: Choose the lowest threshold achieving high Sensitivity (e.g., ≥0.95); accept lower Specificity to minimize missed disease.
+- Rule‑in goal: Choose the highest threshold achieving high Specificity (e.g., ≥0.95); accept lower Sensitivity to minimize false positives.
+- Prevalence and consequences: Prefer thresholds that maximize expected clinical utility in your setting (consider prevalence and harms/benefits). In practice, review the cutpoint table and select the row that meets your clinical constraint (e.g., Sens ≥0.90) with the best complementary metric.
