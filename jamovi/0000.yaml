@@ -1481,7 +1481,7 @@ analyses:
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Continuous
     menuTitle: Histogram
     description: |

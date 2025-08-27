@@ -34,8 +34,6 @@ echo "/document-function" | claude
 
 - statsplot2 - Automatic Plot Selection
 
-echo "/review-function statsplot2" | claude
-echo "/fix-function statsplot2" | claude
 echo "/document-function statsplot2" | claude
 
 - jjdotplotstats - Dot Chart
