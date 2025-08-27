@@ -68,23 +68,23 @@ library(pROC)
 
 ## Installation and Setup
 
-meddecide is part of the comprehensive ClinicoPath suite and provides specialized tools for medical decision analysis.
+The meddecide module is installed separately and provides specialized tools for medical decision analysis.
 
 ### In jamovi:
-1. Install the ClinicoPath module from the jamovi library
-2. Navigate to **meddecide** in the analysis menu
-3. Choose from: Agreement, Decision, ROC, or Power Analysis
+1. Install the meddecide module from the jamovi Library
+2. Open the **meddecide** menu from the Modules toolbar
+3. Choose from: Agreement, Decision Panel, ROC, Screening Calculator, or Power Analysis
 
-### In R:
+### In R (optional):
 ```{r installation, eval=FALSE}
-# Install from GitHub
+# Install meddecide from GitHub
 if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
 devtools::install_github("sbalci/meddecide")
 
 # Load the package
-library(ClinicoPath)
+library(meddecide)
 ```
 
 ## Sample Datasets
@@ -119,7 +119,7 @@ Foundation for biomarker validation and diagnostic test assessment.
 
 ```{r roc-analysis}
 # ROC Analysis Example
-# In jamovi: meddecide > ROC > ROC Analysis
+# In jamovi: meddecide > ROC Curve
 
 # Using precision oncology data for biomarker evaluation
 data(precision_oncology_data)
@@ -168,13 +168,19 @@ cat("PD-L1 ≥50% prevalence:", prevalence, "%\n")
 cat("Sample size:", n_total, "patients\n")
 ```
 
+### Threshold Selection
+
+- For rule‑out (don’t miss disease): choose a threshold with very high Sensitivity (e.g., ≥0.95), accepting lower Specificity.
+- For rule‑in (avoid overtreatment): choose a threshold with very high Specificity (e.g., ≥0.95), accepting lower Sensitivity.
+- Consider prevalence and clinical consequences when selecting cutpoints; Youden’s J maximizes overall discrimination but may not reflect your clinical goal.
+
 ## 2. Simple Decision Tree Analysis
 
 Evaluate treatment alternatives with immediate outcomes.
 
 ```{r decision-tree}
 # Decision Tree Analysis Example
-# In jamovi: meddecide > Decision > Decision Tree Graph
+# In jamovi: meddecide > Decision Tree Graph
 
 # Using basic decision data
 data(basic_decision_data)
@@ -235,7 +241,7 @@ Long-term disease progression modeling for chronic conditions.
 
 ```{r markov-analysis}
 # Markov Model Analysis Example
-# In jamovi: meddecide > Decision > Decision Tree Graph (Markov Model Tree)
+# In jamovi: meddecide > Decision Tree Graph (Markov Model Tree)
 
 # Using markov decision data
 data(markov_decision_data)

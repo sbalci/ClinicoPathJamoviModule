@@ -1,0 +1,131 @@
+---
+title: "A Step-by-Step Guide to Survival Analysis in jamovi with jSurvival"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE
+)
+```
+
+# Introduction
+
+This guide will walk you through a complete survival analysis workflow using the jSurvival module in jamovi. We will start with a simple research question and go through all the steps, from preparing the data to interpreting the final results. Our goal is to provide a practical, hands-on example of how to use jSurvival for your own research.
+
+**Our Research Question:**
+
+*Does a new drug treatment improve survival for patients with a certain type of cancer compared to the standard treatment?*
+
+# Step 1: Data Preparation
+
+Before we can start our analysis, we need to make sure our data is in the correct format. For this example, our dataset contains the following columns:
+
+*   `PatientID`: A unique identifier for each patient.
+*   `Months_Followup`: The number of months each patient was followed.
+*   `Event_Status`: Whether the patient is "Alive" or "Deceased".
+*   `Treatment_Group`: Which treatment the patient received ("New Drug" or "Standard Care").
+*   `Age`: The patient's age at the start of the study.
+*   `Tumor_Grade`: The grade of the patient's tumor ("I", "II", or "III").
+
+***
+
+**[Screenshot Placeholder: A screenshot of the data in jamovi.]**
+
+***
+
+# Step 2: Single-Arm Survival Analysis
+
+Before we compare the treatment groups, let's first look at the overall survival of all patients in our study. This is called a "single-arm" survival analysis.
+
+1.  Go to **Analyses > jSurvival > Survival Analysis**.
+2.  In the **Time Elapsed** box, put the `Months_Followup` variable.
+3.  In the **Outcome** box, put the `Event_Status` variable.
+4.  For **Outcome Level**, select "Deceased" as the event.
+
+***
+
+**[Screenshot Placeholder: A screenshot of the single-arm survival analysis setup in jamovi.]**
+
+***
+
+**Interpretation:**
+
+The output will show you a single Kaplan-Meier curve for all patients. You will also get the median survival time for the entire cohort. This gives you a baseline understanding of the survival characteristics of your study population.
+
+# Step 3: Comparing the Treatment Groups
+
+Now, let's address our main research question: does the new drug improve survival?
+
+1.  In the same analysis window, add the `Treatment_Group` variable to the **Explanatory Variable** box.
+
+***
+
+**[Screenshot Placeholder: A screenshot of the two-group survival analysis setup in jamovi.]**
+
+***
+
+**Interpretation:**
+
+*   **The Plot:** You will now see two survival curves on the Kaplan-Meier plot, one for each treatment group. Is the curve for the "New Drug" group above the curve for the "Standard Care" group?
+*   **The p-value:** The log-rank test will give you a p-value. If it's less than 0.05, you can conclude that there is a statistically significant difference in survival between the two treatments.
+*   **Median Survival:** Compare the median survival times for the two groups. How big is the difference? Is it clinically meaningful?
+
+# Step 4: Adjusting for Other Factors (Multivariable Analysis)
+
+It's possible that the difference in survival we see between the treatment groups is not just due to the treatment itself, but also due to other factors, such as the age of the patients or their tumor grade. For example, if the patients in the "New Drug" group were younger on average, this could be confounding the results.
+
+To account for this, we can perform a **multivariable Cox regression analysis**. This allows us to look at the effect of the treatment while simultaneously adjusting for other variables.
+
+1.  Go to **Analyses > jSurvival > Cox Proportional Hazards Regression**.
+2.  Assign your **Time Elapsed** and **Outcome** variables as before.
+3.  In the **Covariates** box, add `Treatment_Group`, `Age`, and `Tumor_Grade`.
+
+***
+
+**[Screenshot Placeholder: A screenshot of the Cox regression setup in jamovi.]**
+
+***
+
+**Interpretation:**
+
+The main output of the Cox regression is the **Hazard Ratio (HR)**.
+
+*   **Hazard Ratio for Treatment:** Look at the hazard ratio for the `Treatment_Group`. A hazard ratio of less than 1 for the "New Drug" group would suggest that the new drug is associated with a lower risk of death, even after adjusting for age and tumor grade.
+*   **Other Variables:** You can also look at the hazard ratios for `Age` and `Tumor_Grade` to see if they are also significantly associated with survival.
+
+# Step 5: Checking the Proportional Hazards Assumption
+
+The Cox regression model has an important assumption called the **proportional hazards assumption**. This means that the effect of the covariates (e.g., treatment, age) on survival is constant over time. If this assumption is violated, the results of the Cox regression may not be reliable.
+
+The jSurvival module provides tools to check this assumption.
+
+1.  In the Cox regression analysis window, under **Assumption Checks**, select **Schoenfeld Residuals Plot**.
+
+***
+
+**[Screenshot Placeholder: A screenshot of the Schoenfeld residuals plot.]**
+
+***
+
+**Interpretation:**
+
+If the proportional hazards assumption is met, you should see a random scatter of points around a horizontal line in the Schoenfeld residuals plot. If you see a clear trend or pattern, this may indicate that the assumption is violated.
+
+# Conclusion
+
+This guide has walked you through a complete survival analysis workflow, from a simple single-arm analysis to a multivariable Cox regression model. By following these steps, you can use the jSurvival module in jamovi to analyze your own data and answer important clinical research questions.
+
+**Remember:**
+
+*   Always start with simple analyses and then move to more complex models.
+*   Always check the assumptions of your statistical models.
+*   Always think about the clinical significance of your results, not just the statistical significance.

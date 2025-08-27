@@ -33,3 +33,47 @@ The following table provides a detailed mapping of the module's features, from t
 | **Summary Statistics**           |                                |                                        |                                     |                                      |
 | Summary Statistics Table         | `summaryTable`                 | Summary Statistics                     | `summaryTable`                      | `.run`, `.calculateStats`            |
 | Survival Statistics Table        | `survivalStats`                | Survival Statistics                    | `survivalStats`                     | `.run`, `.calculateSurvivalStats`    |
+
+## R Function Details
+
+### Core Functions
+
+#### `.run()`
+
+*   **Purpose:** The main function that orchestrates the entire analysis. It calls the other functions in the correct order to validate the data, prepare it for plotting, generate the plots, and calculate the summary statistics.
+
+#### `.validateData()`
+
+*   **Purpose:** To ensure that the data is in the correct format for the analysis. It checks for missing values and ensures that the time, stage, treatment, and patient ID variables are of the correct type.
+
+#### `.prepareAlluvialData()`
+
+*   **Purpose:** To transform the raw longitudinal data into the format required for creating an alluvial plot. This involves creating a data frame where each row represents a patient at a specific time point, with their corresponding stage and treatment.
+
+#### `.prepareSurvivalData()`
+
+*   **Purpose:** To prepare the data for the optional survival analysis. This involves creating a survival object from the time and event variables.
+
+### Plotting Functions
+
+#### `.plot()`
+
+*   **Purpose:** To generate the main alluvial plot using the `ggplot2` and `ggalluvial` packages.
+
+#### `.plotSurvival()`
+
+*   **Purpose:** To generate the Kaplan-Meier survival plot if the user has requested it.
+
+### Helper Functions
+
+#### `.calculateStats()`
+
+*   **Purpose:** To calculate the summary statistics for the alluvial plot, such as the number of patients in each stage and treatment at each time point.
+
+#### `.calculateSurvivalStats()`
+
+*   **Purpose:** To calculate the summary statistics for the survival analysis, such as the median survival time.
+
+#### `.getColorScheme()`
+
+*   **Purpose:** To retrieve the color scheme selected by the user for the alluvial plot.

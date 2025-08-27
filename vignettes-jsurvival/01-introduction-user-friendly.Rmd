@@ -1,0 +1,135 @@
+---
+title: "A Clinician's Guide to Survival Analysis with jSurvival in jamovi"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Welcome to the jSurvival module in jamovi! This guide is designed for clinicians and researchers who are new to survival analysis. We will walk you through the essential concepts of survival analysis and show you how to use the jSurvival module to analyze your own data, without needing to write any code.
+
+**What is Survival Analysis?**
+
+In clinical research, we often want to know how long it takes for a specific event to happen. This event could be anything from the recurrence of a tumor to the time until a patient is discharged from the hospital. Survival analysis is a set of statistical methods used to analyze this "time-to-event" data.
+
+**Learning Objectives:**
+
+By the end of this guide, you will be able to:
+
+*   Understand the basic concepts of survival analysis, such as "time-to-event" and "censoring."
+*   Perform a simple survival analysis using the jSurvival module in jamovi.
+*   Interpret the results of a Kaplan-Meier survival curve.
+*   Understand what a p-value means in the context of comparing survival between groups.
+
+## Getting Started: Your Data
+
+To perform a survival analysis, you need two key pieces of information for each patient:
+
+1.  **Time:** The duration of follow-up for each patient. This could be in days, months, or years.
+2.  **Event:** Whether the event of interest occurred during the follow-up time. This is usually recorded as a "1" if the event happened and a "0" if it did not.
+
+### What is "Censoring"?
+
+In many clinical studies, we don't get to observe the event for every patient. This can happen for several reasons:
+
+*   The study ends before the event has occurred for all patients.
+*   A patient is lost to follow-up.
+*   A patient dies from a cause other than the one being studied.
+
+When we have a follow-up time for a patient, but the event has not occurred, we call this "censored" data. The jSurvival module is specifically designed to handle censored data correctly.
+
+# Performing a Survival Analysis in jamovi
+
+Let's walk through an example. We will use a sample dataset to compare the survival of patients with and without a specific gene mutation.
+
+**Step 1: Open the jSurvival Module**
+
+1.  Open your data in jamovi.
+2.  Click on the "Analyses" tab in the top ribbon.
+3.  Find the "jSurvival" module and click on it.
+4.  Select "Survival Analysis."
+
+***
+
+**[Screenshot Placeholder: A screenshot of the jamovi interface showing how to navigate to the jSurvival module.]**
+
+***
+
+**Step 2: Assign Your Variables**
+
+Now, you will see the user interface for the survival analysis. You need to tell jamovi which columns in your data correspond to the time and event variables.
+
+1.  **Time Elapsed:** Drag and drop the column containing the follow-up time into this box.
+2.  **Outcome:** Drag and drop the column containing the event information into this box.
+3.  **Explanatory Variable:** Drag and drop the column that defines your groups (e.g., "Gene Mutation Status") into this box.
+
+***
+
+**[Screenshot Placeholder: A screenshot of the jSurvival user interface showing the variable assignment.]**
+
+***
+
+**Step 3: Interpret the Results**
+
+Once you have assigned your variables, jamovi will automatically generate the results. The key components of the output are the Kaplan-Meier plot and the statistical tests.
+
+## The Kaplan-Meier Plot
+
+The Kaplan-Meier plot is a graph that shows the probability of survival over time.
+
+*   The **y-axis** shows the probability of survival (from 0 to 1, or 0% to 100%).
+*   The **x-axis** shows the time.
+*   You will see a separate line for each of your groups.
+
+***
+
+**[Screenshot Placeholder: An example of a Kaplan-Meier plot with two survival curves.]**
+
+***
+
+**How to Read the Plot:**
+
+*   At the beginning (time = 0), the survival probability is 100% for all groups.
+*   As time goes on, the lines on the plot will go down as more patients experience the event.
+*   If one line is consistently above another, it means that group has a better survival probability.
+*   The small vertical ticks on the lines represent the "censored" patients.
+
+## Statistical Significance: The Log-Rank Test
+
+The Kaplan-Meier plot gives you a visual representation of the survival difference between your groups. But is this difference "statistically significant"? To answer this, we use the **log-rank test**.
+
+The log-rank test gives you a **p-value**.
+
+*   **A small p-value (typically less than 0.05)** suggests that the difference in survival between the groups is unlikely to be due to chance. In this case, you can conclude that there is a statistically significant difference in survival.
+*   **A large p-value (greater than 0.05)** suggests that there is not enough evidence to say that there is a difference in survival between the groups.
+
+***
+
+**[Screenshot Placeholder: A screenshot of the jamovi output showing the log-rank test results and the p-value.]**
+
+***
+
+# Conclusion
+
+Congratulations! You have now learned the basics of survival analysis and how to perform a simple analysis using the jSurvival module in jamovi.
+
+**Key Takeaways:**
+
+*   Survival analysis is used to study "time-to-event" data.
+*   The Kaplan-Meier plot is a powerful way to visualize survival data.
+*   The log-rank test tells you if the difference in survival between groups is statistically significant.
+
+This guide has only scratched the surface of what you can do with the jSurvival module. As you become more comfortable with the basics, you can explore the other features of the module to perform more advanced analyses.

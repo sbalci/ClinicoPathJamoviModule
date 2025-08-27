@@ -89,7 +89,6 @@ Function: **`$ARGUMENTS`**
 | Caveats & assumptions panel | ☐ | |
 | Guidance links/examples | ☐ | |
 
-
 ## Review Response Format
 
 ### 🔍 CODE REVIEW: `$ARGUMENTS`
@@ -128,7 +127,6 @@ Function: **`$ARGUMENTS`**
 
 #### **Clinician‑Friendly Improvements:**
 
-- Add plain‑language **help** for each option; surface assumptions and when to choose a method.
 - Provide **Example interpretation** blocks under tables/plots.
 - Add **guided mode** that enforces a recommended sequence (variables → assumptions → run → interpret).
 - Include **copy‑ready report sentences** with placeholders auto‑filled from results.
@@ -137,15 +135,12 @@ Function: **`$ARGUMENTS`**
 - Provide **TR/EN translations** and ensure medical terminology is consistent.
 - Use **color‑blind‑safe** default palettes and increase table readability (thousands separators, units).
 
-
 **Natural‑language summaries & Explanatory Outputs:**
 
 - Add a top‑level **Summary** box with a plain‑language paragraph that names the test/model, the comparison, key effect (with CI) and p‑value, and one clinical interpretation sentence.
 - Add an **About this analysis** panel that briefly explains what the function does, when to use it, inputs required, and typical outputs (with links to docs).
 - Add a **Caveats & assumptions** panel that lists assumptions, data requirements (e.g., expected counts, proportional hazards), and common pitfalls; surface contextual warnings if violated.
 - Provide a **How to use** checklist (variables → options → run → interpret), and, if possible, a mini example with mock numbers.
-
-
 
 #### 🔧 **SPECIFIC RECOMMENDATIONS**
 
@@ -155,13 +150,11 @@ Function: **`$ARGUMENTS`**
 # Suggested refactoring
 ```
 
-
-
 #### 📋 **ACTION ITEMS**
 
 - [ ] [Specific actionable item]
 - [ ] [Another specific item]
-- [ ] Add plain‑language tooltips and help for all options.
+- [ ] Add plain‑language tooltips.
 - [ ] Insert example‑interpretation blocks for key outputs.
 - [ ] Implement misuse guards (e.g., switch to Fisher’s exact when expected counts < 5).
 - [ ] Add natural‑language **Summary** box with copy‑ready text.
@@ -169,9 +162,6 @@ Function: **`$ARGUMENTS`**
 - [ ] Add **Caveats & assumptions** panel with contextual warnings.
 - [ ] [Enhancement opportunity]
 - [ ] [Code quality improvement]
-
-
-
 
 **Performance:**
 
@@ -198,7 +188,6 @@ children:
   - type: ComboBox
     name: test
     label: "Group comparison test"
-    help: "Choose the method. If data are not normally distributed or sample sizes are small, prefer Mann–Whitney U."
     options:
       - label: "t‑test (means)"
         value: ttest
@@ -240,7 +229,6 @@ items:
     title: "Report sentence"
 ```
 
-
 ```r
 # .b.R (auto‑generated interpretation)
 interp <- sprintf(
@@ -251,14 +239,13 @@ interp <- sprintf(
 self$results$report$setContent(interp)
 ```
 
-
 #### 📋 **ACTION ITEMS**
 
 **High Priority:**
 
 - [ ] [Specific actionable item]
 - [ ] [Another specific item]
-- [ ] Add plain‑language tooltips and help for all options.
+- [ ] Add plain‑language tooltips.
 - [ ] Insert example‑interpretation blocks for key outputs.
 - [ ] Implement misuse guards (e.g., switch to Fisher’s exact when expected counts < 5).
 
