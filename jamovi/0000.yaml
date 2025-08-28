@@ -1516,7 +1516,7 @@ analyses:
   - title: Dot Chart
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart
     ribbon: analyses

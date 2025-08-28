@@ -26,15 +26,10 @@ echo "/document-function" | claude
 
 ## JJStatsPlotT
 
-- jjdotplotstats - Dot Chart
-
-echo "/document-function jjdotplotstats" | claude
 
 - jjscatterstats - Scatter Plot
-echo "/check-function jjscatterstats" | claude
-echo "/checkpoint jjscatterstats" | claude
-echo "/review-function jjscatterstats" | claude
-echo "/fix-function jjscatterstats" | claude
+
+
 echo "/document-function jjscatterstats" | claude
 
 - jjbetweenstats - Box-Violin Plots to Compare Between Groups

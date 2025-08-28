@@ -14,11 +14,11 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = TRUE,
+            resultssubtitle = FALSE,
             conflevel = 0.95,
-            bfmessage = TRUE,
+            bfmessage = FALSE,
             k = 2,
-            marginal = TRUE,
+            marginal = FALSE,
             xsidefill = "#009E73",
             ysidefill = "#D55E00",
             pointsize = 3,
@@ -51,6 +51,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
                 grvar,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -84,7 +85,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
-                default=TRUE)
+                default=FALSE)
             private$..conflevel <- jmvcore::OptionNumber$new(
                 "conflevel",
                 conflevel,
@@ -94,7 +95,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..bfmessage <- jmvcore::OptionBool$new(
                 "bfmessage",
                 bfmessage,
-                default=TRUE)
+                default=FALSE)
             private$..k <- jmvcore::OptionInteger$new(
                 "k",
                 k,
@@ -104,7 +105,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..marginal <- jmvcore::OptionBool$new(
                 "marginal",
                 marginal,
-                default=TRUE)
+                default=FALSE)
             private$..xsidefill <- jmvcore::OptionString$new(
                 "xsidefill",
                 xsidefill,
@@ -238,7 +239,6 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "dep",
                     "group",
                     "grvar",
-                    "excl",
                     "originaltheme",
                     "typestatistics",
                     "conflevel",
@@ -265,8 +265,8 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="plot2",
                 title="`${dep} vs {group} by {grvar}`",
-                width=1600,
-                height=600,
+                width=1200,
+                height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 visible="(grvar)"))
@@ -274,8 +274,8 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="plot",
                 title="`${dep} vs {group}`",
-                width=800,
-                height=600,
+                width=600,
+                height=450,
                 renderFun=".plot",
                 requiresData=TRUE))}))
 
@@ -348,10 +348,21 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' )
 #'}
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param grvar .
-#' @param typestatistics .
+#' @param dep First continuous variable for correlation analysis (e.g.,
+#'   biomarker levels, age, tumor size).  This will appear on the horizontal
+#'   axis. Use numeric variables like lab values, measurements, or scores.
+#' @param group Second continuous variable for correlation analysis (e.g.,
+#'   expression levels, treatment response, survival time).  This will appear on
+#'   the vertical axis. Use numeric variables that you want to correlate with
+#'   the x-axis variable.
+#' @param grvar Optional categorical variable to create separate correlation
+#'   plots for each group  (e.g., by treatment group, tumor stage, or gender).
+#'   Creates multiple panels for comparison.
+#' @param typestatistics Choose based on your data distribution. Pearson
+#'   assumes normality (common for lab values after transformation).  Spearman
+#'   works for any monotonic relationship (tumor grades, symptom scores).
+#'   Robust methods handle outlying patients. Bayesian analysis quantifies
+#'   evidence strength for clinical decision-making.
 #' @param mytitle .
 #' @param xtitle .
 #' @param ytitle .
@@ -385,17 +396,17 @@ jjscatterstats <- function(
     data,
     dep,
     group,
-    grvar,
+    grvar = NULL,
     typestatistics = "parametric",
     mytitle = "",
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = TRUE,
+    resultssubtitle = FALSE,
     conflevel = 0.95,
-    bfmessage = TRUE,
+    bfmessage = FALSE,
     k = 2,
-    marginal = TRUE,
+    marginal = FALSE,
     xsidefill = "#009E73",
     ysidefill = "#D55E00",
     pointsize = 3,
