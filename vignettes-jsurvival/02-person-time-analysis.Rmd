@@ -1,10 +1,10 @@
 ---
-title: "Person-Time Analysis in jsurvival Module"
+title: "Person-Time Analysis in jSurvival Module"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Person-Time Analysis in jsurvival Module}
+  %\VignetteIndexEntry{Person-Time Analysis in jSurvival Module}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Person-time analysis is a fundamental concept in epidemiology and survival analysis that accounts for the varying observation periods of study participants. The jsurvival module in ClinicoPath provides comprehensive person-time calculations and incidence rate analysis across its survival analysis functions.
+Person-time analysis is a fundamental concept in epidemiology and survival analysis that accounts for the varying observation periods of study participants. The jSurvival module in ClinicoPath provides comprehensive person-time calculations and incidence rate analysis across its survival analysis functions.
 
 ## What is Person-Time?
 
@@ -42,9 +42,9 @@ Person-time analysis is a fundamental concept in epidemiology and survival analy
 4. **Kaplan-Meier Foundation**: Forms the basis for survival curve estimation
 5. **Cox Model Integration**: Essential for hazard ratio calculations
 
-# Person-Time in jsurvival Modules
+# Person-Time in jSurvival Modules
 
-The ClinicoPath jsurvival module includes person-time analysis in four key functions:
+The ClinicoPath jSurvival module includes person-time analysis in four key functions:
 
 ## 1. Time Interval Calculator
 
@@ -372,7 +372,7 @@ Total          295    43       8,350        0.51         0.37-0.69
 
 # Conclusion
 
-Person-time analysis is essential for proper epidemiological and survival analysis. The jsurvival module provides comprehensive person-time functionality that:
+Person-time analysis is essential for proper epidemiological and survival analysis. The jSurvival module provides comprehensive person-time functionality that:
 
 1. **Educates users** about person-time concepts
 2. **Calculates accurate rates** with appropriate confidence intervals  

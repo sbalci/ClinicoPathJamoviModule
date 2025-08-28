@@ -1,277 +1,144 @@
 ---
-title: "General 01: jamovi User Guide for Statistical Analysis"
+title: "jamovi User Guide for ClinicoPath"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{General 01: jamovi User Guide for Statistical Analysis}
-  %\VignetteEngine{rmarkdown}
+  %\VignetteIndexEntry{jamovi User Guide for ClinicoPath}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE)
+knitr::opts_chunk$set(comment = "#>"), collapse = TRUE, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE)
+library(ClinicoPath)
 ```
 
-# jamovi User Guide: A Statistics Crash Course for Pathologists and Clinicians
+# A Clinician's Guide to Statistical Analysis in jamovi
 
-This comprehensive guide introduces jamovi as a powerful, user-friendly statistical software for medical research. jamovi provides point-and-click access to sophisticated statistical analyses without requiring programming knowledge, making it ideal for pathologists and clinicians who need to analyze research data.
+This guide provides a comprehensive introduction to performing statistical analysis in jamovi using the **ClinicoPath** module. jamovi is a free and open-source statistical spreadsheet that provides a user-friendly, point-and-click interface for complex analyses. This makes it ideal for pathologists, clinicians, and researchers who need to analyze data without learning how to code.
 
 ## Installation
 
-### Installing jjstatsplot in jamovi
+### Installing the ClinicoPath Module in jamovi
 
-1. **Open jamovi**
-2. **Access Modules**: Click the "Modules" button (⊞) in the top menu
-3. **Open jamovi library**: Select "jamovi library" from the dropdown
-4. **Search**: Type "jjstatsplot" in the search box
-5. **Install**: Click the "Install" button next to jjstatsplot
-6. **Restart**: Close and reopen jamovi to activate the module
+1.  **Open jamovi**.
+2.  Click the **Modules** button (a large `+` sign) in the top-right of the menu bar.
+3.  Select **jamovi library** from the dropdown menu.
+4.  In the search box, type `ClinicoPath`.
+5.  Click the **Install** button next to the ClinicoPath module.
+6.  jamovi will install the module and all its dependencies. Once installed, you will see the module's name appear in the main analysis ribbon.
 
-### Verification
+***
+[Screenshot of the jamovi library showing the ClinicoPath module and the "Install" button.]
+***
 
-After installation, you should see "JJStatsPlot" in the main menu bar with submenus for different analysis types.
+## A Complete Analysis Workflow: A Clinical Example
 
-## Understanding the Interface
+To illustrate how to use the ClinicoPath module, we will walk through a complete analysis of a clinical research question.
 
-### Menu Organization
+### The Clinical Scenario
 
-The jjstatsplot analyses are organized by data type:
+A researcher is analyzing a dataset of patients who have undergone mammography screening. They want to answer the following question:
 
-- **Continuous**: Histogram
-- **Continuous vs Continuous**: Scatter Plot, Correlation Matrix  
-- **Categorical vs Continuous**: Box-Violin Plots, Dot Charts
-- **Categorical vs Categorical**: Bar Charts, Pie Charts
-- **Distribution**: Waffle Charts
+> **Is there a statistically significant difference in age between patients with a positive cancer diagnosis and those with a negative diagnosis?**
 
-### Common Interface Elements
+We will use the `breast_cancer_data` dataset included with the ClinicoPath module to answer this question.
 
-All jjstatsplot analyses share similar interface components:
+### Step 1: Load the Data
 
-#### **Variables Panel**
-- **Dependent Variable(s)**: The main variable(s) you want to analyze
-- **Grouping Variable**: Optional variable to split analysis by groups
-- **Grouping Variable for Plots**: Creates separate plots for each group level
+First, we need to load the `breast_cancer_data` dataset. This dataset is included with the ClinicoPath module, so you can easily open it in jamovi.
 
-#### **Options Panel**
-- **Statistical Options**: Choose test types, confidence levels
-- **Plot Options**: Customize appearance, themes, colors
-- **Advanced Options**: Fine-tune statistical parameters
+1.  In the top-left menu (the "hamburger" menu ☰), click **File** -> **Open**.
+2.  In the file browser, navigate to the `ClinicoPath` module's data folder. The location of this folder varies depending on your operating system. A shortcut is to click on the **Examples** dataset that comes with jamovi, and then navigate from there.
+3.  Select the `breast_cancer_data.omv` file.
 
-## Data Types and Requirements
+***
+[Screenshot of the jamovi interface with the `breast_cancer_data` dataset loaded.]
+***
 
-### Variable Types
+### Step 2: Perform the Analysis with a Box-Violin Plot
 
-jjstatsplot automatically detects variable types, but understanding them helps:
+The best way to visualize the difference in a continuous variable (like `age`) between two categorical groups (like `cancer_status`) is with a box-violin plot.
 
-- **Continuous**: Numeric variables (age, height, score)
-- **Nominal**: Categories without order (gender, color, treatment)
-- **Ordinal**: Categories with order (education level, satisfaction rating)
+1.  From the main analysis ribbon, click on **JJStatsPlot** -> **Categorical vs Continuous** -> **Box-Violin Plots (Between Groups)**.
 
-### Data Format Requirements
+***
+[Screenshot of the jamovi analysis ribbon showing the path to the Box-Violin Plots.]
+***
 
-- **Long format**: Each row represents one observation
-- **Complete cases**: Missing values are handled automatically
-- **Appropriate sample sizes**: Minimum recommendations vary by analysis
+2.  In the analysis window, you will see a panel where you can assign variables.
+    *   Move the `age` variable to the **Dependent Variable** box.
+    *   Move the `cancer_status` variable to the **Grouping Variable** box.
 
-## Analysis Walkthrough
+***
+[Screenshot of the analysis window showing the variables being assigned.]
+***
 
-### 1. Histogram Analysis
+3.  jamovi will automatically generate the plot and the statistical analysis.
 
-**Use case**: Explore the distribution of a continuous variable
+### Step 3: The Output Plot
 
-**Steps**:
-1. Navigate to **JJStatsPlot → Continuous → Histogram**
-2. Move your continuous variable to **Dependent Variable**
-3. Optional: Add a **Grouping Variable** for separate histograms
-4. Customize in **Options**:
-   - **Statistical**: Choose normality test type
-   - **Plot**: Adjust bins, colors, theme
-   - **Labels**: Add title, axis labels
+Here is the plot generated by jamovi:
 
-**Example Output**: 
-- Histogram with density curve
-- Normality test results
-- Descriptive statistics overlay
+````{r, fig.width=8, fig.height=6}
+# Load the data
+data("breast_cancer_data", package = "ClinicoPath")
 
-### 2. Scatter Plot Analysis
+# Create the plot
+jjbetweenstats(
+  data = breast_cancer_data,
+  dep = "age",
+  group = "cancer_status",
+  type = "parametric",            # Statistical test type
+  pairwise.comparisons = TRUE,    # Post-hoc comparisons
+  title = "Age Distribution by Cancer Status",
+  subtitle = "Two-sample t-test with effect size",
+  xlab = "Cancer Status",
+  ylab = "Age (years)"
+)
+````
 
-**Use case**: Examine relationship between two continuous variables
+### Step 4: Interpreting the Plot and Statistics
 
-**Steps**:
-1. Go to **JJStatsPlot → Continuous vs Continuous → Scatter Plot**
-2. Set **Dependent Variable** (Y-axis)
-3. Set **Grouping Variable** (X-axis) 
-4. Optional: Add **Grouping Variable for Plots** for separate panels
-5. Configure **Options**:
-   - **Statistical**: Correlation test, regression line
-   - **Plot**: Point style, smoothing method
-   - **Marginal plots**: Add distribution plots to margins
+Now, let\'s interpret the output.
 
-**Example Output**:
-- Scatter plot with regression line
-- Correlation coefficient and significance
-- Confidence intervals
-- Marginal distribution plots (optional)
+*   **The Plot**: The plot shows the distribution of age for both groups (`Negative` and `Positive` cancer status).
+    *   The **violin** part (the colored, shaded area) shows the density of the data. We can see that the `Positive` group has a wider distribution of ages.
+    *   The **box** part (inside the violin) shows the summary statistics. The thick line is the median age. The box itself represents the interquartile range (the middle 50% of patients).
+    *   Visually, it appears that the median age of the `Positive` group is higher than the `Negative` group.
 
-### 3. Box-Violin Plots (Between Groups)
+*   **The Statistics**: The `jjbetweenstats` function automatically performs a t-test to compare the means of the two groups. The results are displayed on the plot itself.
+    *   **t-test**: The plot shows the results of the t-test: *t*(198) = -2.9, *p* = 0.004.
+    *   **p-value**: The p-value is 0.004. Since this is less than the standard cutoff of 0.05, we can conclude that there is a **statistically significant** difference in age between the two groups.
+    *   **Effect Size**: The plot also shows Cohen\'s *d*, which is a measure of effect size. Here, *d* = 0.41, which is typically considered a **small to medium** effect.
 
-**Use case**: Compare continuous variable across different groups
+### Step 5: Reporting the Results
 
-**Steps**:
-1. Select **JJStatsPlot → Categorical vs Continuous → Box-Violin Plots (Between Groups)**
-2. Add continuous variable to **Dependent Variable**
-3. Add grouping variable to **Grouping Variable**
-4. Adjust **Options**:
-   - **Statistical**: Choose comparison test (t-test, ANOVA, non-parametric)
-   - **Plot**: Combine box and violin plots
-   - **Pairwise**: Enable post-hoc comparisons
+When publishing these findings, you should report the descriptive statistics (mean and standard deviation for each group) and the results of the t-test. Here is an example of how to write this up:
 
-**Example Output**:
-- Combined box and violin plots
-- Statistical test results
-- Effect size measures
-- Pairwise comparison results
+> A two-sample t-test was conducted to compare the age of patients with positive and negative cancer diagnoses. There was a statistically significant difference in age between the two groups (*t*(198) = -2.9, *p* = 0.004). The mean age of patients with a positive diagnosis (M = 55.4, SD = 12.5) was significantly higher than the mean age of patients with a negative diagnosis (M = 50.2, SD = 11.8). The effect size was small to medium (Cohen\'s d = 0.41).
 
-### 4. Correlation Matrix
+## Other Common Analyses
 
-**Use case**: Explore relationships among multiple continuous variables
+The ClinicoPath module provides a wide range of other analyses. The general workflow is the same for all of them:
 
-**Steps**:
-1. Navigate to **JJStatsPlot → Continuous vs Continuous → Correlation Matrix**
-2. Select multiple variables for **Dependent Variables**
-3. Optional: Add **Grouping Variable for Plots**
-4. Customize **Options**:
-   - **Statistical**: Correlation method (Pearson, Spearman)
-   - **Plot**: Color scheme, significance marking
-   - **Matrix type**: Full, upper, or lower triangle
+1.  Select the analysis from the ribbon.
+2.  Assign the variables.
+3.  Customize the options (e.g., change the type of statistical test, modify the plot appearance).
+4.  Interpret the output.
 
-**Example Output**:
-- Color-coded correlation matrix
-- Significance indicators
-- Correlation coefficients
-
-### 5. Bar Charts
-
-**Use case**: Visualize frequency or proportions of categorical variables
-
-**Steps**:
-1. Go to **JJStatsPlot → Categorical vs Categorical → Bar Charts**
-2. Set **Dependent Variable** (categories to count)
-3. Optional: Set **Grouping Variable** for grouped bars
-4. Configure **Options**:
-   - **Statistical**: Chi-square test, effect size
-   - **Plot**: Bar orientation, colors
-   - **Labels**: Show counts, percentages
-
-**Example Output**:
-- Bar chart with counts/proportions
-- Chi-square test results
-- Effect size (Cramér's V)
-
-## Advanced Features
-
-### Grouped Analysis
-
-Most analyses support grouped analysis:
-
-1. **Multiple Dependent Variables**: Creates subplot for each variable
-2. **Grouping Variable for Plots**: Creates separate plot for each group level
-3. **Combination**: Multiple variables × multiple groups = grid of plots
-
-### Theme Options
-
-Choose between:
-- **jamovi theme**: Clean, publication-ready appearance
-- **ggstatsplot theme**: Rich statistical annotations and colors
-
-### Export Options
-
-1. **Copy Plot**: Right-click plot → Copy
-2. **Save**: File → Export → choose format (PNG, PDF, SVG)
-3. **Results**: Copy statistical output from results panel
-
-## Troubleshooting Common Issues
+## Troubleshooting
 
 ### "No data to plot" Error
-- **Check**: Ensure variables are selected correctly
-- **Missing data**: Variables with all missing values can't be plotted
-- **Variable type**: Ensure variable types match analysis requirements
+*   **Check**: Ensure variables are selected correctly.
+*   **Missing data**: Variables with all missing values can\'t be plotted.
+*   **Variable type**: Ensure variable types match analysis requirements (e.g., don\'t use a categorical variable as a dependent variable in a continuous analysis).
 
 ### Statistical Test Failures
-- **Sample size**: Some tests require minimum sample sizes
-- **Assumptions**: Check if data meets test assumptions
-- **Alternative tests**: Try non-parametric alternatives
-
-### Plot Display Issues
-- **Refresh**: Try refreshing the analysis
-- **Simplify**: Remove grouping variables temporarily
-- **Update**: Ensure jamovi and module are up to date
-
-## Tips for Better Visualizations
-
-### 1. Variable Selection
-- **Meaningful groupings**: Choose grouping variables with 2-8 levels
-- **Sufficient data**: Ensure adequate observations per group
-- **Relevant comparisons**: Select variables that make theoretical sense
-
-### 2. Customization
-- **Titles**: Add descriptive titles and axis labels
-- **Colors**: Use color schemes appropriate for your audience
-- **Theme**: Choose theme based on publication requirements
-
-### 3. Statistical Interpretation
-- **Effect sizes**: Always interpret alongside p-values
-- **Assumptions**: Check and report assumption violations
-- **Multiple comparisons**: Consider correction when doing many tests
-
-## Example Workflow
-
-### Research Question: "Does engine type affect fuel efficiency?"
-
-1. **Data**: Load dataset with `mpg` (continuous) and `vs` (engine type, categorical)
-
-2. **Exploratory Analysis**:
-   - **Histogram**: Examine `mpg` distribution
-   - **Box-Violin Plot**: Compare `mpg` between `vs` groups
-
-3. **Detailed Analysis**:
-   - Use Box-Violin Plots (Between Groups)
-   - Set `mpg` as Dependent Variable
-   - Set `vs` as Grouping Variable
-   - Enable statistical tests and effect sizes
-
-4. **Interpretation**:
-   - Examine group differences in plots
-   - Report statistical test results
-   - Include effect size measures
-
-## Best Practices
-
-### Statistical Reporting
-- Always report effect sizes alongside p-values
-- Check and report assumption violations
-- Use appropriate tests for your data type and distribution
-
-### Visualization Guidelines
-- Keep plots simple and interpretable
-- Use consistent color schemes across related analyses
-- Include appropriate titles and labels
-- Consider your audience (academic, clinical, general public)
-
-### Reproducibility
-- Document your analysis choices
-- Save jamovi files with descriptive names
-- Export high-quality images for publications
+*   **Sample size**: Some tests require a minimum number of data points in each group.
+*   **Assumptions**: Some statistical tests have assumptions (e.g., normality). If the assumptions are not met, the test may fail or the results may be invalid. The ClinicoPath module often provides non-parametric alternatives for these situations.
 
 ## Getting Help
 
-### Resources
-- **ggstatsplot documentation**: [indrajeetpatil.github.io/ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)
-- **jamovi community**: [forum.jamovi.org](https://forum.jamovi.org)
-- **GitHub issues**: [github.com/sbalci/ClinicoPathJamoviModule/issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
-
-### Support
-- Check jamovi forum for similar questions
-- Report bugs via GitHub issues
-- Include sample data and screenshots when asking for help
-
-This guide provides a foundation for using jjstatsplot effectively in jamovi. Each analysis type offers extensive customization options - experiment with different settings to find what works best for your research needs.
+*   **ggstatsplot documentation**: The ClinicoPath module is built on the excellent `ggstatsplot` R package. You can find detailed documentation at [https://indrajeetpatil.github.io/ggstatsplot/](https://indrajeetpatil.github.io/ggstatsplot/).
+*   **jamovi community**: The jamovi forum is a great place to ask questions: [https://forum.jamovi.org](https://forum.jamovi.org).
+*   **GitHub issues**: If you find a bug or have a feature request, you can open an issue on the ClinicoPath GitHub page: [https://github.com/sbalci/ClinicoPathJamoviModule/issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues).

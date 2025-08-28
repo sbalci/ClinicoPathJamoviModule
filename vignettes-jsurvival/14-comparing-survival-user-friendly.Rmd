@@ -40,11 +40,7 @@ Let's start with a simple example: comparing the survival of patients who receiv
 2.  Navigate to **Analyses > jSurvival > Survival Analysis**.
 3.  Assign your **Time Elapsed**, **Outcome**, and **Explanatory Variable** (e.g., "Treatment Group").
 
-***
-
-**[Screenshot Placeholder: A screenshot of the jSurvival user interface with variables assigned for a two-group comparison.]**
-
-***
+![Two-group setup in jSurvival](images/compare-setup-2-group.png)
 
 **Step 2: Examine the Output**
 
@@ -55,17 +51,18 @@ The output will look familiar to what you saw in the introductory guide. You wil
 *   **The Plot:** Visually inspect the Kaplan-Meier plot. Is there a clear separation between the two curves? If the curve for the treatment group is consistently above the curve for the placebo group, this suggests that the treatment is associated with better survival.
 *   **The p-value:** Look at the p-value from the log-rank test. If the p-value is less than 0.05, you can conclude that there is a statistically significant difference in survival between the two groups.
 
+### Interpretation (two groups)
+
+- The new treatment group shows higher survival over time; the log‑rank p = 0.03 supports a true difference.
+- Median survival improved from 10 to 14 months (absolute +4 months). Assess clinical importance given toxicity and cost.
+
 # Comparing Multiple Groups
 
 What if you have more than two groups to compare? For example, you might want to compare the survival of patients with different tumor grades (e.g., Grade 1, Grade 2, and Grade 3).
 
 The process in jamovi is the same. Simply use your multi-level grouping variable (e.g., "Tumor Grade") as the **Explanatory Variable**.
 
-***
-
-**[Screenshot Placeholder: A screenshot of a Kaplan-Meier plot with three survival curves.]**
-
-***
+![Three-group Kaplan–Meier plot](images/compare-km-3-groups.png)
 
 **Interpreting the Results with Multiple Groups:**
 
@@ -77,11 +74,12 @@ For example, if the overall p-value is 0.02, you know that there is a significan
 
 To find out which specific groups are different, you can perform **pairwise comparisons**. In the jSurvival module, you can select the option for "Pairwise comparisons" to get p-values for each pair of groups.
 
-***
+![Pairwise comparisons table](images/compare-pairwise-table.png)
 
-**[Screenshot Placeholder: A screenshot of the jamovi output showing the pairwise comparison results.]**
+### Interpretation (multiple groups)
 
-***
+- Overall p = 0.02 indicates at least one group differs. Pairwise tests show Grade 3 vs Grade 1 (p = 0.01) and Grade 3 vs Grade 2 (p = 0.04) differ; Grade 1 vs Grade 2 does not (p = 0.20).
+- Report adjusted p‑values if multiple comparisons are performed.
 
 # Clinical Significance vs. Statistical Significance
 
@@ -107,11 +105,7 @@ You can:
 *   Display confidence intervals for the survival curves.
 *   Add the p-value from the log-rank test directly to the plot.
 
-***
-
-**[Screenshot Placeholder: A screenshot of a publication-ready Kaplan-Meier plot with a risk table and other annotations.]**
-
-***
+![Publication-ready KM plot with risk table](images/compare-publication-km.png)
 
 # Conclusion
 
@@ -124,3 +118,10 @@ Comparing survival outcomes is a core task in clinical research. The jSurvival m
 *   Always consider both the statistical and clinical significance of your results.
 
 Now that you know how to compare survival between groups, you are ready to explore more advanced features of the jSurvival module, such as Cox regression for multivariable analysis.
+
+## Common Pitfalls
+
+- Multiple testing: Use adjusted p‑values when doing many pairwise comparisons.
+- Follow-up imbalance: Large differences in follow-up time can bias comparisons; consider RMST or adjusted analyses.
+- Sparse strata: Very small subgroups produce unstable estimates and misleading curves/tables.
+- Clinical vs statistical significance: A small p‑value does not guarantee a meaningful effect size for patients.

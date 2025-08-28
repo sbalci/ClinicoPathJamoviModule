@@ -1,5 +1,5 @@
 ---
-title: "Clinical Research Examples with jsurvival"
+title: "Clinical Research Examples with jSurvival"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
 output: html_document
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 # Overview
 
-This vignette provides practical examples of using jsurvival for common clinical research scenarios. Each example demonstrates a complete workflow from data preparation to interpretation of results.
+This vignette provides practical examples of using jSurvival for common clinical research scenarios. Each example demonstrates a complete workflow from data preparation to interpretation of results.
 
 # Example 1: Cancer Treatment Comparison Study
 
@@ -313,7 +313,7 @@ What is the treatment effect after accounting for baseline differences between g
 ## Analysis Workflow
 
 ```{r propensity-matching}
-# Step 1: Create matched dataset (outside jsurvival)
+# Step 1: Create matched dataset (outside jSurvival)
 # matched_data <- created using propensity score matching
 
 # Step 2: Analyze matched cohort
@@ -382,7 +382,7 @@ sensitivity_result <- multisurvival(
 
 # Conclusion
 
-These examples demonstrate the versatility of jsurvival for clinical research applications. The key to successful survival analysis is:
+These examples demonstrate the versatility of jSurvival for clinical research applications. The key to successful survival analysis is:
 
 1. **Clear research questions** with appropriate study design
 2. **Careful data preparation** and quality control
@@ -390,4 +390,4 @@ These examples demonstrate the versatility of jsurvival for clinical research ap
 4. **Comprehensive reporting** following established guidelines
 5. **Clinical interpretation** that considers both statistical and practical significance
 
-For additional support and examples, visit the [jsurvival website](https://www.serdarbalci.com/jsurvival/) and [ClinicoPath documentation](https://sbalci.github.io/ClinicoPathJamoviModule/).
+For additional support and examples, visit the [jSurvival website](https://www.serdarbalci.com/jsurvival/) and [ClinicoPath documentation](https://sbalci.github.io/ClinicoPathJamoviModule/).

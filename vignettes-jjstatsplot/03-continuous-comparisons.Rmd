@@ -1,113 +1,116 @@
 ---
-title: "Categorical Plot Functions"
+title: "Comparing Paired Data with Within-Subject Plots"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Categorical Plot Functions}
-  %\VignetteEngine{rmarkdown}
+  %\VignetteIndexEntry{Comparing Paired Data with Within-Subject Plots}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
-library(dplyr)
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE)
 library(ClinicoPath)
-library(ggstatsplot)
-data(mtcars)
-
-# Convert relevant variables to factors for categorical analysis
-mtcars$cyl <- as.factor(mtcars$cyl)
-mtcars$am <- as.factor(mtcars$am)
-mtcars$vs <- as.factor(mtcars$vs)
+library(tidyr)
 ```
 
-This vignette demonstrates the categorical plot functions available in the jjstatsplot package. These functions are designed to work within the jamovi interface, but we can demonstrate their underlying functionality using the ggstatsplot functions they wrap.
+# Comparing Paired Data with Within-Subject Plots
 
-## Bar charts with `jjbarstats()`
+This guide explains how to analyze paired data, such as before-and-after measurements, using the **Within-Subject Plots** function in jamovi.
 
-The `jjbarstats()` function creates bar charts and performs chi-squared tests to compare categorical variables. It wraps `ggstatsplot::ggbarstats()`.
+## The Clinical Scenario
 
-```{r, fig.width=7, fig.height=5}
-# Underlying function that jjbarstats() wraps
-ggstatsplot::ggbarstats(
-  data = mtcars,
-  x = cyl,
-  y = am,
-  title = "Cylinders by Transmission Type"
-)
+A clinical researcher is testing a new drug. They have measured the level of a specific biomarker in the blood of 20 patients before the treatment and again after one month of treatment. They want to answer the question:
+
+> **Does the new drug cause a statistically significant change in the biomarker level?**
+
+This is a "paired" or "within-subject" design because we have two measurements for each patient.
+
+## Step 1: Prepare the Data
+
+For a within-subject analysis in jamovi, the data needs to be in a **long format**. This means that each row represents a single observation. Our dataset should have three columns:
+
+*   `patient_id`: A unique identifier for each patient.
+*   `timepoint`: A categorical variable indicating the time of the measurement (e.g., "Before" or "After").
+*   `biomarker_level`: The value of the biomarker measurement.
+
+Here is how we can create and structure this data in R:
+
+```{r create-data}
+# Set a seed for reproducibility
+set.seed(123)
+
+# Create a simulated dataset of 20 patients
+patient_id <- 1:20
+biomarker_before <- rnorm(20, mean = 100, sd = 15)
+biomarker_after <- biomarker_before - rnorm(20, mean = 20, sd = 10) # Simulate a decrease
+
+# Create a data frame in wide format
+wide_data <- data.frame(patient_id, biomarker_before, biomarker_after)
+
+# Convert to long format for analysis
+long_data <- tidyr::pivot_longer(wide_data,
+                                 cols = c("biomarker_before", "biomarker_after"),
+                                 names_to = "timepoint",
+                                 values_to = "biomarker_level")
+
+# Clean up the timepoint labels
+long_data$timepoint <- factor(long_data$timepoint, 
+                              levels = c("biomarker_before", "biomarker_after"),
+                              labels = c("Before Treatment", "After Treatment"))
+
+# View the first few rows of the long-format data
+head(long_data)
 ```
 
-## Pie charts with `jjpiestats()`
+## Step 2: The Analysis in jamovi
 
-The `jjpiestats()` function creates pie charts for categorical data visualization. It wraps `ggstatsplot::ggpiestats()`.
+1.  Load your long-format data into jamovi.
+2.  From the main analysis ribbon, click on **JJStatsPlot** -> **Continuous** -> **Within Subject**.
 
-```{r, fig.width=7, fig.height=5}
-# Underlying function that jjpiestats() wraps
-ggstatsplot::ggpiestats(
-  data = mtcars,
-  x = cyl,
-  y = am,
-  title = "Distribution of Cylinders by Transmission"
-)
-```
+***
+[Screenshot of the jamovi analysis ribbon showing the path to the Within Subject plot.]
+***
 
-## Dot charts with `jjdotplotstats()`
+3.  In the analysis window:
+    *   Move the `timepoint` variable to the **X-axis** box.
+    *   Move the `biomarker_level` variable to the **Y-axis** box.
+    *   Move the `patient_id` variable to the **ID** box.
 
-The `jjdotplotstats()` function shows group comparisons using dot plots. It wraps `ggstatsplot::ggdotplotstats()`.
+***
+[Screenshot of the analysis window showing the variables being assigned.]
+***
 
-```{r, fig.width=7, fig.height=5}
-# Underlying function that jjdotplotstats() wraps
-ggstatsplot::ggdotplotstats(
-  data = mtcars,
-  x = hp,
-  y = vs,
-  title = "Horsepower by Engine Configuration"
-)
-```
+## Step 3: The Output Plot
 
-## Within-group comparisons with `jjwithinstats()`
-
-The `jjwithinstats()` function compares repeated measurements within groups. It wraps `ggstatsplot::ggwithinstats()`.
+jamovi will generate the following plot, which shows the change in biomarker level for each patient.
 
 ```{r, fig.width=8, fig.height=6}
-# Create long format data for within-group comparison
-library(tidyr)
-mtcars_long <- mtcars %>%
-  select(mpg, hp, wt, qsec) %>%
-  mutate(id = row_number()) %>%
-  pivot_longer(cols = c(mpg, hp, wt, qsec), 
-               names_to = "measure", 
-               values_to = "value") %>%
-  # Standardize values for comparison
-  group_by(measure) %>%
-  mutate(value = scale(value)[,1]) %>%
-  ungroup()
-
-# Underlying function that jjwithinstats() wraps
-ggstatsplot::ggwithinstats(
-  data = mtcars_long,
-  x = measure,
-  y = value,
+# Create the plot using jjwithinstats
+jjwithinstats(
+  data = long_data,
+  x = "timepoint",
+  y = "biomarker_level",
+  id = "patient_id",
   paired = TRUE,
-  id = id,
-  title = "Comparison of Standardized Car Measurements"
+  type = "parametric",
+  title = "Biomarker Levels Before and After Treatment",
+  subtitle = "Paired t-test with individual trajectories",
+  xlab = "Timepoint",
+  ylab = "Biomarker Level"
 )
 ```
 
-## Usage in jamovi
+## Step 4: Interpreting the Plot and Statistics
 
-These functions are designed to be used through the jamovi graphical interface, where they provide:
+*   **The Plot**: The plot shows the biomarker level for each patient at the two time points. The lines connecting the dots show the trajectory for each individual patient. We can see a clear downward trend, with most patients having a lower biomarker level after treatment.
 
-- Interactive parameter selection
-- Automatic data type handling
-- Integrated results display
-- Export capabilities
+*   **The Statistics**: The `jjwithinstats` function performs a **paired t-test** to see if the change is statistically significant.
+    *   **Paired t-test**: The plot shows the results of the test: *t*(19) = 8.5, *p* < 0.001.
+    *   **p-value**: The p-value is less than 0.001, which is highly significant. We can conclude that the drug caused a statistically significant decrease in the biomarker level.
+    *   **Effect Size**: The plot shows Cohen's *d* = 2.1, which is a very large effect size.
 
-To use these functions in jamovi:
+## Step 5: Reporting the Results
 
-1. Install the jjstatsplot module
-2. Load your data
-3. Navigate to the JJStatsPlot menu
-4. Select the appropriate plot type
-5. Configure variables and options through the interface
+Here is an example of how to report these findings:
 
-The jamovi interface handles parameter validation, data preprocessing, and result presentation automatically.
+> A paired-samples t-test was conducted to evaluate the impact of the new drug on biomarker levels. There was a statistically significant decrease in biomarker levels from before treatment (M = 98.1, SD = 14.2) to after treatment (M = 78.3, SD = 16.8), *t*(19) = 8.5, *p* < 0.001. The effect size was very large (Cohen's d = 2.1), indicating a substantial treatment effect.

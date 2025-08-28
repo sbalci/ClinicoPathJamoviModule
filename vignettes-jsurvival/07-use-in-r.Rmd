@@ -1,5 +1,5 @@
 ---
-title: "Use jsurvival in R"
+title: "Use jSurvival in R"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
 output: html_document
@@ -10,9 +10,7 @@ knitr::opts_chunk$set(
   echo = TRUE,
   eval = FALSE,
   collapse = TRUE,
-  comment = "#>",
-    echo = TRUE,
-  eval = FALSE
+  comment = "#>"
 )
 ```
 
@@ -21,7 +19,7 @@ library(ClinicoPath)
 ```
 
 
-```{r data histopathology}
+```{r data-histopathology}
 data("histopathology")
 ```
 
@@ -37,10 +35,10 @@ ClinicoPath::survival(
     data = histopathology,
     elapsedtime = "OverallTime",
     tint = TRUE,
-    dxdate = SurgeryDate,
-    fudate = LastFollowUpDate,
-    explanatory = LVI,
-    outcome = Outcome,
+    dxdate = "SurgeryDate",
+    fudate = "LastFollowUpDate",
+    explanatory = "LVI",
+    outcome = "Outcome",
     outcomeLevel = NULL,
     dod = NULL,
     dooc = NULL,
@@ -57,15 +55,14 @@ ClinicoPath::survival(
 
 
 ```{r}
-overall_survival <-
-ClinicoPath::survival(
+overall_survival <- ClinicoPath::survival(
     data = histopathology,
     elapsedtime = "OverallTime",
     tint = TRUE,
-    dxdate = SurgeryDate,
-    fudate = LastFollowUpDate,
-    explanatory = LVI,
-    outcome = Outcome,
+    dxdate = "SurgeryDate",
+    fudate = "LastFollowUpDate",
+    explanatory = "LVI",
+    outcome = "Outcome",
     outcomeLevel = NULL,
     dod = NULL,
     dooc = NULL,
@@ -158,97 +155,22 @@ overall_survival$coxSummary
 
 ```{r}
 overall_survival$plot
-
 ```
 
 
 ```{r}
+# Tip: Save a high-resolution PNG
 # overall_survival$plot$saveAs("overall_survival.png")
-# 
-# overall_survival <- png::readPNG("overall_survival.png")
-# 
-# tiff::writeTIFF(what = overall_survival, where = "overall_survival.tiff", compression = "none")
+# Convert to TIFF if needed for journals:
+# img <- png::readPNG("overall_survival.png")
+# tiff::writeTIFF(what = img, where = "overall_survival.tiff", compression = "none")
 ```
  
  
 
 
 
-```{r}
-# htmlTable::htmlTable(
-#   kableExtra::kable(
-#     overall_survival$coxTable$asDF
-#     ))
-
-
-```
-
-
-
-
-All functions
-
-histopathology
-	
-
-histopathology
-
-jsurvival-package _PACKAGE jsurvival
-	
-
-jsurvival: Analysis for jsurvivalological Research
-
-multisurvival()
-	
-
-Multivariable Survival Analysis
-
-multisurvivalClass
-	
-
-Multivariable Survival Analysis
-
-oddsratio()
-	
-
-Odds Ratio Table and Plot
-
-oddsratioClass
-	
-
-Odds Ratio Table and Plot
-
-singlearm()
-	
-
-Single Arm Survival
-
-singlearmClass
-	
-
-Single Arm Survival
-
-survival()
-	
-
-Survival Analysis
-
-survivalClass
-	
-
-Survival Analysis
-
-survivalcont()
-	
-
-Survival Analysis for Continuous Variable
-
-survivalcontClass
-	
-
-Survival Analysis for Continuous Explanatory Variable
-Contents
-
-    Reference
-
-
+Notes
+-----
+- This vignette shows how to call the same analysis from R that you access in jamovi’s GUI.
+- Keep event coding and time units consistent with your dataset.
