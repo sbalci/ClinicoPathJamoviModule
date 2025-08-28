@@ -1,7 +1,7 @@
 ---
 name:  jjdotplotstats
 title: Dot Chart
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 # menuSubtitle: Dot Chart
 version: '0.0.31'
@@ -107,105 +107,138 @@ options:
 
 
     - name: typestatistics
-      title: 'Type of Statistic'
+      title: 'Statistical Test Type'
       type: List
       options:
-        - title: Parametric
+        - title: Parametric (t-test, assumes normal distribution)
           name: parametric
-        - title: Nonparametric
+        - title: Nonparametric (Mann-Whitney U, no distribution assumptions)
           name: nonparametric
-        - title: Robust
+        - title: Robust (trimmed means, handles outliers)
           name: robust
-        - title: Bayes
+        - title: Bayesian (provides evidence strength)
           name: bayes
       default: parametric
       description:
           R: >
-            Type of statistical test to perform. 'parametric' for t-tests,
-            'nonparametric' for Mann-Whitney U test, 'robust' for robust tests,
-            'bayes' for Bayesian analysis.
+            Choose the appropriate statistical test: Parametric (t-test) assumes
+            normal distribution and equal variances; Nonparametric (Mann-Whitney U)
+            makes no distribution assumptions; Robust uses trimmed means to handle
+            outliers; Bayesian provides evidence strength via Bayes factors.
 
     - name: effsizetype
-      title: 'Effect Size Needed for Parametric Tests'
+      title: 'Effect Size Measure'
       type: List
       options:
-        - title: biased
+        - title: Cohen's d (standardized mean difference)
           name: biased
-        - title: unbiased
+        - title: Hedge's g (unbiased, small samples)
           name: unbiased
-        - title: eta
+        - title: Eta-squared (variance explained)
           name: eta
-        - title: omega
+        - title: Omega-squared (adjusted variance explained)
           name: omega
       default: biased
       description:
           R: >
-            Type of effect size calculation for parametric tests. 'biased' for
-            Cohen's d, 'unbiased' for Hedge's g, 'eta' for eta-squared,
-            'omega' for omega-squared.
+            Effect size quantifies practical significance: Cohen's d shows standardized
+            difference between groups (small=0.2, medium=0.5, large=0.8); Hedge's g
+            corrects for small samples; Eta/Omega-squared show proportion of variance
+            explained (small=0.01, medium=0.06, large=0.14).
 
 
     - name: centralityplotting
-      title: Show Centrality
+      title: Central Tendency Lines
       type: Bool
       default: false
+      description:
+          R: >
+            Display lines showing the central tendency (mean, median, or trimmed mean)
+            for each group. Helps visualize group differences at a glance.
 
     - name: centralitytype
-      title: 'Centrality Type'
+      title: 'Central Tendency Measure'
       type: List
       options:
-        - title: mean (parametric)
+        - title: Mean (average value, sensitive to outliers)
           name: parametric
-        - title: median (nonparametric)
+        - title: Median (middle value, robust to outliers)
           name: nonparametric
-        - title: robust (trimmed mean)
+        - title: Trimmed Mean (average excluding extreme values)
           name: robust
-        - title: bayes (MAP estimator)
+        - title: Bayesian Estimate (MAP estimator)
           name: bayes 
       default: parametric
+      description:
+          R: >
+            Type of central tendency to display: Mean is the average but sensitive
+            to outliers; Median is the middle value and robust to outliers; Trimmed
+            mean excludes extreme values; Bayesian provides probabilistic estimate.
 
     - name: mytitle
-      title: Title
+      title: Plot Title
       type: String
       default: ''
+      description:
+          R: >
+            Main title for the plot. Leave blank for automatic title generation
+            based on your variables.
 
     - name: xtitle
-      title: X-Title
+      title: X-axis Label (Values)
       type: String
       default: ''
+      description:
+          R: >
+            Label for the horizontal axis showing the continuous variable values.
+            Leave blank to use variable name.
 
     - name: ytitle
-      title: Y-Title
+      title: Y-axis Label (Groups)
       type: String
       default: ''
+      description:
+          R: >
+            Label for the vertical axis showing the group categories.
+            Leave blank to use variable name.
 
 
     - name: originaltheme
-      title: Add GGStatsPlot Layer
+      title: Original ggstatsplot Theme
       type: Bool
       default: false
+      description:
+          R: >
+            Use the original ggstatsplot theme instead of jamovi's default theme.
+            The original theme may be more suitable for publications.
 
 
     - name: resultssubtitle
-      title: Statistical Results
+      title: Statistical Results in Plot
       type: Bool
-      default: true
+      default: false
+      description:
+          R: >
+            Display statistical test results (p-value, effect size, confidence interval)
+            as a subtitle below the plot. Recommended for most analyses.
 
     - name: testvalue
-      title: Test Value
+      title: Reference Value for Testing
       type: Number
       default: 0
       description:
           R: >
-            A number specifying the value of the null hypothesis for one-sample tests.
+            Reference value for hypothesis testing (usually 0 for group comparisons).
+            Can be changed to test against a specific clinically meaningful value.
 
     - name: bfmessage
-      title: Bayes Factor Message
+      title: Bayes Factor Interpretation
       type: Bool
-      default: true
+      default: false
       description:
           R: >
-            Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
+            Display Bayes Factor interpretation (evidence strength) when using
+            Bayesian analysis. BF > 3 indicates moderate evidence, BF > 10 strong evidence.
 
     - name: conflevel
       title: Confidence Level
@@ -215,466 +248,106 @@ options:
       max: 1
       description:
           R: >
-            Confidence level for confidence intervals.
+            Confidence level for intervals (0.95 = 95% confidence interval).
+            This represents the probability that the true population parameter
+            lies within the calculated interval. 95% is standard for most analyses.
 
     - name: k
-      title: Decimal Places
+      title: Statistical Precision (Decimal Places)
       type: Integer
       default: 2
       min: 0
       max: 5
       description:
           R: >
-            Number of decimal places for displaying statistics in the subtitle.
+            Number of decimal places for statistical results (p-values, effect sizes).
+            More decimal places show greater precision but may not be clinically meaningful.
 
     - name: testvalueline
-      title: Show Test Value Line
+      title: Show Reference Value Line
       type: Bool
       default: false
       description:
           R: >
-            Whether to display a vertical line at the test value.
+            Display a vertical reference line at the test value. Useful for showing
+            clinically significant thresholds or normal reference ranges.
 
     - name: centralityparameter
-      title: Centrality Parameter
+      title: Central Tendency Display
       type: List
       options:
-        - title: Mean
+        - title: Mean (average, affected by outliers)
           name: mean
-        - title: Median
+        - title: Median (middle value, robust to outliers)
           name: median
-        - title: None
+        - title: None (no central line)
           name: none
       default: mean
       description:
           R: >
-            Which measure of central tendency to display as a vertical line.
+            Which central tendency measure to show as a vertical line on the plot.
+            Mean is sensitive to outliers; median is more robust for skewed data.
 
     - name: centralityk
-      title: Centrality Decimal Places
+      title: Central Tendency Precision
       type: Integer
       default: 2
       min: 0
       max: 5
       description:
           R: >
-            Number of decimal places for centrality parameter label.
+            Decimal places for central tendency values displayed on the plot.
+            Should match the precision meaningful for your measurement scale.
 
     - name: plotwidth
-      title: Plot Width
+      title: Plot Width (pixels)
       type: Integer
       default: 650
       min: 300
       max: 1200
       description:
           R: >
-            Width of the plot in pixels. Default is 650.
+            Width of the plot in pixels. Larger values provide more detail but
+            may not fit well in reports. Default: 650 pixels.
 
     - name: plotheight
-      title: Plot Height
+      title: Plot Height (pixels)
       type: Integer
       default: 450
       min: 300
       max: 800
       description:
           R: >
-            Height of the plot in pixels. Default is 450.
+            Height of the plot in pixels. Adjust based on number of groups
+            to ensure readability. Default: 450 pixels.
+
+    - name: guidedMode
+      title: Guided Analysis Mode
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable step-by-step guidance for clinical researchers. Provides
+            recommendations for test selection and interpretation.
+
+    - name: clinicalPreset
+      title: Clinical Analysis Presets
+      type: List
+      options:
+        - title: Basic Comparison (recommended for beginners)
+          name: basic
+        - title: Publication Ready (formatted for journals)
+          name: publication
+        - title: Clinical Report (optimized for medical reports)
+          name: clinical
+        - title: Custom Settings (advanced users)
+          name: custom
+      default: basic
+      description:
+          R: >
+            Pre-configured analysis settings optimized for different use cases.
+            Basic: Simple comparison with key statistics; Publication: Journal-ready
+            formatting; Clinical: Medical report optimization; Custom: Full control.
 
 ...
-
-# ggdotplotstats(
-#   data,
-#   x,
-#   y,
-#   xlab = NULL,
-#   ylab = NULL,
-#   title = NULL,
-#   subtitle = NULL,
-#   caption = NULL,
-#   type = "parametric",
-#   test.value = 0,
-#   bf.prior = 0.707,
-#   bf.message = TRUE,
-#   effsize.type = "g",
-#   conf.level = 0.95,
-#   nboot = 100,
-#   k = 2,
-#   results.subtitle = TRUE,
-#   point.args = list(color = "black", size = 3, shape = 16),
-#   test.k = 0,
-#   test.value.line = FALSE,
-#   test.value.line.args = list(size = 1),
-#   test.value.label.args = list(size = 3),
-#   centrality.parameter = "mean",
-#   centrality.k = 2,
-#   centrality.line.args = list(color = "blue", size = 1),
-#   centrality.label.args = list(color = "blue", size = 3),
-#   ggplot.component = NULL,
-#   ggtheme = ggplot2::theme_bw(),
-#   ggstatsplot.layer = TRUE,
-#   output = "plot",
-#   ...
-# )
-# Arguments
-# data
-# A dataframe (or a tibble) from which variables specified are to be taken. A matrix or tables will not be accepted.
-#
-# x
-# A numeric variable from the dataframe data.
-#
-# y
-# Label or grouping variable.
-#
-# xlab
-# Labels for x and y axis variables. If NULL (default), variable names for x and y will be used.
-#
-# ylab
-# Labels for x- and y- axis variables, respectively (Defaults: "regression coefficient" and "term").
-#
-# title
-# The text for the plot title.
-#
-# subtitle
-# The text for the plot subtitle. Will work only if results.subtitle = FALSE.
-#
-# caption
-# The text for the plot caption.
-#
-# type
-# Type of statistic expected ("parametric" or "nonparametric" or "robust" or "bayes").Corresponding abbreviations are also accepted: "p" (for parametric), "np" (nonparametric), "r" (robust), or "bf"resp.
-#
-# test.value
-# A number specifying the value of the null hypothesis (Default: 0).
-#
-# bf.prior
-# A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
-#
-# bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
-#
-# effsize.type
-# Type of effect size needed for parametric tests. The argument can be "d" (for Cohen's d) or "g" (for Hedge's g).
-#
-# conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
-#
-# nboot
-# Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).
-#
-# k
-# Number of digits after decimal point (should be an integer) (Default: k = 2L).
-#
-# results.subtitle
-# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
-#
-# point.args
-# A list of additional aesthetic arguments passed to geom_point.
-#
-# test.k
-# Integer denoting the number of decimal places expected for test.value label. (Default: 0 ).
-#
-# test.value.line
-# Logical that decides whether a line corresponding to the test.value should be superimposed on the plot.
-#
-# test.value.line.args
-# A list of additional aesthetic arguments to be passed to the geom_line used to display the lines corresponding to the centrality parameter and test value.
-#
-# test.value.label.args
-# A list of additional aesthetic arguments to be passed to the geom_label used to display the label corresponding to the centrality parameter and test value.
-#
-# centrality.parameter
-# Decides which measure of central tendency ("mean" or "median") is to be displayed as a vertical line. To not show any parameter, set this to "none".
-#
-# centrality.k
-# Integer denoting the number of decimal places expected for centrality parameter label. (Default: 2).
-#
-# centrality.line.args
-# A list of additional aesthetic arguments to be passed to the geom_line used to display the lines corresponding to the centrality parameter and test value.
-#
-# centrality.label.args
-# A list of additional aesthetic arguments to be passed to the geom_label used to display the label corresponding to the centrality parameter and test value.
-#
-# ggplot.component
-# A ggplot component to be added to the plot prepared by ggstatsplot. This argument is primarily helpful for grouped_ variant of the current function. Default is NULL. The argument should be entered as a function.
-#
-# ggtheme
-# A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
-#
-# ggstatsplot.layer
-# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
-#
-# output
-# If "expression", will return expression with statistical details, while "dataframe" will return a dataframe containing the results.
-#
-#
-#
-# grouped_ggdotplotstats(
-#   data,
-#   x,
-#   y,
-#   grouping.var,
-#   title.prefix = NULL,
-#   output = "plot",
-#   ...,
-#   plotgrid.args = list(),
-#   title.text = NULL,
-#   title.args = list(size = 16, fontface = "bold"),
-#   caption.text = NULL,
-#   caption.args = list(size = 10),
-#   sub.text = NULL,
-#   sub.args = list(size = 12)
-# )
-# Arguments
-# data
-# A dataframe (or a tibble) from which variables specified are to be taken. A matrix or tables will not be accepted.
-#
-# x
-# A numeric variable from the dataframe data.
-#
-# y
-# Label or grouping variable.
-#
-# grouping.var
-# A single grouping variable (can be entered either as a bare name x or as a string "x").
-#
-# title.prefix
-# Character string specifying the prefix text for the fixed plot title (name of each factor level) (Default: NULL). If NULL, the variable name entered for grouping.var will be used.
-#
-# output
-# If "expression", will return expression with statistical details, while "dataframe" will return a dataframe containing the results.
-#
-# ...
-# Arguments passed on to ggdotplotstats
-#
-# point.args
-# A list of additional aesthetic arguments passed to geom_point.
-#
-# test.value
-# A number specifying the value of the null hypothesis (Default: 0).
-#
-# test.k
-# Integer denoting the number of decimal places expected for test.value label. (Default: 0 ).
-#
-# test.value.line
-# Logical that decides whether a line corresponding to the test.value should be superimposed on the plot.
-#
-# test.value.line.args
-# A list of additional aesthetic arguments to be passed to the geom_line used to display the lines corresponding to the centrality parameter and test value.
-#
-# test.value.label.args
-# A list of additional aesthetic arguments to be passed to the geom_label used to display the label corresponding to the centrality parameter and test value.
-#
-# centrality.parameter
-# Decides which measure of central tendency ("mean" or "median") is to be displayed as a vertical line. To not show any parameter, set this to "none".
-#
-# centrality.k
-# Integer denoting the number of decimal places expected for centrality parameter label. (Default: 2).
-#
-# centrality.line.args
-# A list of additional aesthetic arguments to be passed to the geom_line used to display the lines corresponding to the centrality parameter and test value.
-#
-# centrality.label.args
-# A list of additional aesthetic arguments to be passed to the geom_label used to display the label corresponding to the centrality parameter and test value.
-#
-# xlab
-# Labels for x and y axis variables. If NULL (default), variable names for x and y will be used.
-#
-# subtitle
-# The text for the plot subtitle. Will work only if results.subtitle = FALSE.
-#
-# caption
-# The text for the plot caption.
-#
-# type
-# Type of statistic expected ("parametric" or "nonparametric" or "robust" or "bayes").Corresponding abbreviations are also accepted: "p" (for parametric), "np" (nonparametric), "r" (robust), or "bf"resp.
-#
-# bf.prior
-# A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
-#
-# bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
-#
-# effsize.type
-# Type of effect size needed for parametric tests. The argument can be "d" (for Cohen's d) or "g" (for Hedge's g).
-#
-# conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
-#
-# nboot
-# Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).
-#
-# k
-# Number of digits after decimal point (should be an integer) (Default: k = 2L).
-#
-# results.subtitle
-# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
-#
-# ggplot.component
-# A ggplot component to be added to the plot prepared by ggstatsplot. This argument is primarily helpful for grouped_ variant of the current function. Default is NULL. The argument should be entered as a function.
-#
-# ggtheme
-# A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
-#
-# ggstatsplot.layer
-# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
-#
-# ylab
-# Labels for x- and y- axis variables, respectively (Defaults: "regression coefficient" and "term").
-#
-# plotgrid.args
-# A list of additional arguments to cowplot::plot_grid.
-#
-# title.text
-# String or plotmath expression to be drawn as title for the combined plot.
-#
-# title.args
-# A list of additional arguments provided to title, caption and sub, resp.
-#
-# caption.text
-# String or plotmath expression to be drawn as the caption for the combined plot.
-#
-# caption.args
-# A list of additional arguments provided to title, caption and sub, resp.
-#
-# sub.text
-# The label with which the combined plot should be annotated. Can be a plotmath expression.
-#
-# sub.args
-# A list of additional arguments provided to title, caption and sub, resp.
-#
-#
-#
-# grouped_ggdotplotstats(
-#   data,
-#   x,
-#   y,
-#   grouping.var,
-#   title.prefix = NULL,
-#   output = "plot",
-#   ...,
-#   plotgrid.args = list(),
-#   title.text = NULL,
-#   title.args = list(size = 16, fontface = "bold"),
-#   caption.text = NULL,
-#   caption.args = list(size = 10),
-#   sub.text = NULL,
-#   sub.args = list(size = 12)
-# )
-# Arguments
-# data
-# A dataframe (or a tibble) from which variables specified are to be taken. A matrix or tables will not be accepted.
-#
-# x
-# A numeric variable from the dataframe data.
-#
-# y
-# Label or grouping variable.
-#
-# grouping.var
-# A single grouping variable (can be entered either as a bare name x or as a string "x").
-#
-# title.prefix
-# Character string specifying the prefix text for the fixed plot title (name of each factor level) (Default: NULL). If NULL, the variable name entered for grouping.var will be used.
-#
-# output
-# If "expression", will return expression with statistical details, while "dataframe" will return a dataframe containing the results.
-#
-# ...
-# Arguments passed on to ggdotplotstats
-#
-# point.args
-# A list of additional aesthetic arguments passed to geom_point.
-#
-# test.value
-# A number specifying the value of the null hypothesis (Default: 0).
-#
-# test.k
-# Integer denoting the number of decimal places expected for test.value label. (Default: 0 ).
-#
-# test.value.line
-# Logical that decides whether a line corresponding to the test.value should be superimposed on the plot.
-#
-# test.value.line.args
-# A list of additional aesthetic arguments to be passed to the geom_line used to display the lines corresponding to the centrality parameter and test value.
-#
-# test.value.label.args
-# A list of additional aesthetic arguments to be passed to the geom_label used to display the label corresponding to the centrality parameter and test value.
-#
-# centrality.parameter
-# Decides which measure of central tendency ("mean" or "median") is to be displayed as a vertical line. To not show any parameter, set this to "none".
-#
-# centrality.k
-# Integer denoting the number of decimal places expected for centrality parameter label. (Default: 2).
-#
-# centrality.line.args
-# A list of additional aesthetic arguments to be passed to the geom_line used to display the lines corresponding to the centrality parameter and test value.
-#
-# centrality.label.args
-# A list of additional aesthetic arguments to be passed to the geom_label used to display the label corresponding to the centrality parameter and test value.
-#
-# xlab
-# Labels for x and y axis variables. If NULL (default), variable names for x and y will be used.
-#
-# subtitle
-# The text for the plot subtitle. Will work only if results.subtitle = FALSE.
-#
-# caption
-# The text for the plot caption.
-#
-# type
-# Type of statistic expected ("parametric" or "nonparametric" or "robust" or "bayes").Corresponding abbreviations are also accepted: "p" (for parametric), "np" (nonparametric), "r" (robust), or "bf"resp.
-#
-# bf.prior
-# A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
-#
-# bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
-#
-# effsize.type
-# Type of effect size needed for parametric tests. The argument can be "d" (for Cohen's d) or "g" (for Hedge's g).
-#
-# conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
-#
-# nboot
-# Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).
-#
-# k
-# Number of digits after decimal point (should be an integer) (Default: k = 2L).
-#
-# results.subtitle
-# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
-#
-# ggplot.component
-# A ggplot component to be added to the plot prepared by ggstatsplot. This argument is primarily helpful for grouped_ variant of the current function. Default is NULL. The argument should be entered as a function.
-#
-# ggtheme
-# A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
-#
-# ggstatsplot.layer
-# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
-#
-# ylab
-# Labels for x- and y- axis variables, respectively (Defaults: "regression coefficient" and "term").
-#
-# plotgrid.args
-# A list of additional arguments to cowplot::plot_grid.
-#
-# title.text
-# String or plotmath expression to be drawn as title for the combined plot.
-#
-# title.args
-# A list of additional arguments provided to title, caption and sub, resp.
-#
-# caption.text
-# String or plotmath expression to be drawn as the caption for the combined plot.
-#
-# caption.args
-# A list of additional arguments provided to title, caption and sub, resp.
-#
-# sub.text
-# The label with which the combined plot should be annotated. Can be a plotmath expression.
-#
-# sub.args
-# A list of additional arguments provided to title, caption and sub, resp.
 

@@ -26,6 +26,8 @@ clearWith:
     - centralityk
     - plotwidth
     - plotheight
+    - guidedMode
+    - clinicalPreset
 
 
 
@@ -34,10 +36,6 @@ items:
     - name:  todo
       title: To Do
       type:  Html
-
-
-
-
 
     - name: plot2
       title: '`${dep} - {group} by {grvar}`'
@@ -55,6 +53,26 @@ items:
       height: 300
       renderFun: .plot
       requiresData: true
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+
+    - name: assumptions
+      title: Data Assessment & Recommendations
+      type: Html
+
+    - name: reportSentence
+      title: Report Template
+      type: Html
+
+    - name: guidedSteps
+      title: Analysis Steps
+      type: Html
+
+    - name: recommendations
+      title: Next Steps
+      type: Html
 
 
 refs:
