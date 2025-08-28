@@ -62,11 +62,7 @@ Let's walk through an example. We will use a sample dataset to compare the survi
 3.  Find the "jSurvival" module and click on it.
 4.  Select "Survival Analysis."
 
-***
-
-**[Screenshot Placeholder: A screenshot of the jamovi interface showing how to navigate to the jSurvival module.]**
-
-***
+![Navigate to jSurvival in jamovi](images/intro-nav-jSurvival.png)
 
 **Step 2: Assign Your Variables**
 
@@ -76,11 +72,7 @@ Now, you will see the user interface for the survival analysis. You need to tell
 2.  **Outcome:** Drag and drop the column containing the event information into this box.
 3.  **Explanatory Variable:** Drag and drop the column that defines your groups (e.g., "Gene Mutation Status") into this box.
 
-***
-
-**[Screenshot Placeholder: A screenshot of the jSurvival user interface showing the variable assignment.]**
-
-***
+![Assign variables (Time, Outcome, Group)](images/intro-assign-variables.png)
 
 **Step 3: Interpret the Results**
 
@@ -94,11 +86,7 @@ The Kaplan-Meier plot is a graph that shows the probability of survival over tim
 *   The **x-axis** shows the time.
 *   You will see a separate line for each of your groups.
 
-***
-
-**[Screenshot Placeholder: An example of a Kaplan-Meier plot with two survival curves.]**
-
-***
+![Kaplan–Meier plot example](images/intro-km-example.png)
 
 **How to Read the Plot:**
 
@@ -106,6 +94,12 @@ The Kaplan-Meier plot is a graph that shows the probability of survival over tim
 *   As time goes on, the lines on the plot will go down as more patients experience the event.
 *   If one line is consistently above another, it means that group has a better survival probability.
 *   The small vertical ticks on the lines represent the "censored" patients.
+
+### Interpretation (example wording)
+
+- Patients with Mutation A show better survival than those without, as the Mutation A curve remains higher over time.
+- The log-rank p-value of 0.02 suggests the difference is unlikely due to chance.
+- Median survival is 18 months in Mutation A vs 12 months in Mutation B. Consider whether a 6‑month difference is clinically meaningful in this disease.
 
 ## Statistical Significance: The Log-Rank Test
 
@@ -116,11 +110,7 @@ The log-rank test gives you a **p-value**.
 *   **A small p-value (typically less than 0.05)** suggests that the difference in survival between the groups is unlikely to be due to chance. In this case, you can conclude that there is a statistically significant difference in survival.
 *   **A large p-value (greater than 0.05)** suggests that there is not enough evidence to say that there is a difference in survival between the groups.
 
-***
-
-**[Screenshot Placeholder: A screenshot of the jamovi output showing the log-rank test results and the p-value.]**
-
-***
+![Log-rank test output](images/intro-logrank-output.png)
 
 # Conclusion
 
@@ -133,3 +123,10 @@ Congratulations! You have now learned the basics of survival analysis and how to
 *   The log-rank test tells you if the difference in survival between groups is statistically significant.
 
 This guide has only scratched the surface of what you can do with the jSurvival module. As you become more comfortable with the basics, you can explore the other features of the module to perform more advanced analyses.
+
+## Common Pitfalls
+
+- Event coding mismatches: Confirm event = 1, no event/censored = 0.
+- Time unit confusion: Keep a consistent unit (months or days) across variables and reports.
+- Negative/implausible times: When deriving time from dates, check for errors and remove impossible values.
+- Small groups: For multi-group comparisons, ensure adequate sample sizes per group before relying on p‑values.

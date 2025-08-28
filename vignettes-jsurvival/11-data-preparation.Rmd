@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 # Overview
 
-Proper data preparation is crucial for reliable survival analysis. This vignette provides comprehensive guidance on preparing data for use with jsurvival, covering common data issues and their solutions.
+Proper data preparation is crucial for reliable survival analysis. This vignette provides comprehensive guidance on preparing data for use with jSurvival, covering common data issues and their solutions.
 
 # Essential Data Components
 
@@ -41,7 +41,7 @@ Every survival analysis requires at minimum:
 
 ### Using Built-in Time Interval Calculator
 
-The jsurvival module includes a time interval calculator:
+The jSurvival module includes a time interval calculator:
 
 ```{r time-calculator}
 # In jamovi: Survival → Data Preparation → Time Interval Calculator
@@ -497,4 +497,4 @@ Proper data preparation is essential for reliable survival analysis results. Key
 4. **Appropriate handling of missing data** based on missingness patterns
 5. **Proper preparation of explanatory variables** with attention to clinical meaning
 
-Taking time for thorough data preparation will ensure more reliable and interpretable survival analysis results in jsurvival.
+Taking time for thorough data preparation will ensure more reliable and interpretable survival analysis results in jSurvival.

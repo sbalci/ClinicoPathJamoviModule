@@ -1,5 +1,5 @@
 ---
-title: "Using jsurvival in jamovi: Complete Workflow"
+title: "Using jSurvival in jamovi: Complete Workflow"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
 output: html_document
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 # Overview
 
-This vignette demonstrates how to use the jsurvival module within jamovi for comprehensive survival analysis. The jsurvival module is part of the ClinicoPath suite and provides a user-friendly interface for conducting survival analyses without programming.
+This vignette demonstrates how to use the jSurvival module within jamovi for comprehensive survival analysis. The jSurvival module is part of the ClinicoPath suite and provides a user-friendly interface for conducting survival analyses without programming.
 
 # Installation in jamovi
 
@@ -24,7 +24,7 @@ This vignette demonstrates how to use the jsurvival module within jamovi for com
 1. Open jamovi
 2. Click on the **+** button in the top-right corner
 3. Select **jamovi library**
-4. Search for "ClinicoPath" or "jsurvival"
+4. Search for "ClinicoPath" or "jSurvival"
 5. Click **Install**
 
 ## Option 2: Manual Installation
@@ -240,7 +240,7 @@ Patient_ID | Time_months | Death | Treatment | Age | Grade
 
 ## Getting Help
 
-- **Documentation**: Visit [jsurvival website](https://www.serdarbalci.com/jsurvival/)
+- **Documentation**: Visit [jSurvival website](https://www.serdarbalci.com/jsurvival/)
 - **Issues**: Report bugs at [GitHub Issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues/)
 - **Contact**: serdarbalci@serdarbalci.com
 

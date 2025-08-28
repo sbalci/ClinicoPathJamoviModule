@@ -1,726 +1,92 @@
 ---
-title: "Forest Plots from Regression Models with jforestmodel"
-subtitle: "Professional Forest Plot Visualization for Linear, Logistic, and Cox Regression Models"
-author: "ClinicoPath"
-date: "`r Sys.Date()`"
-output: html_document
+title: "Visualizing Regression Models with Forest Plots"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Visualizing Regression Models with Forest Plots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 10,
-  fig.height = 8,
-  warning = FALSE,
-  message = FALSE,
-  eval = FALSE
-)
-```
-
-```{r}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE, fig.width=10, fig.height=8)
 library(ClinicoPath)
 library(ggplot2)
-library(dplyr)
 ```
 
-# Introduction
+# Visualizing Regression Models with Forest Plots
 
-The `jforestmodel` function provides comprehensive forest plot visualization capabilities for regression models including linear regression, logistic regression, and Cox proportional hazards models. Unlike traditional forest plots that display pre-calculated effect sizes, this function fits regression models directly from raw data and creates publication-ready forest plots of the model coefficients.
+A forest plot is a powerful way to visualize the results of a statistical model. It allows you to see the effect of several different predictors on an outcome all at once. In clinical research, forest plots are often used to display the results of regression models, showing the odds ratios or hazard ratios for various risk factors.
 
-Forest plots from regression models are essential tools in medical research for:
+## The Clinical Scenario
 
-- Visualizing the effect of multiple predictors simultaneously
-- Comparing the relative importance of different risk factors
-- Presenting odds ratios, hazard ratios, or linear coefficients with confidence intervals
-- Creating publication-ready figures for medical journals
-- Communicating statistical findings to clinical audiences
+A researcher is working with the `BreastCancer` dataset and wants to understand which cellular characteristics are most strongly associated with a tumor being malignant. The research question is:
 
-# Key Features
+> **What are the risk factors for a breast tumor being malignant, and what is the strength of their association?**
 
-The `jforestmodel` function supports:
+We will build a logistic regression model to answer this question and then visualize the results with a forest plot.
 
-- **Multiple Model Types**: Linear regression (lm), logistic regression (glm), and Cox proportional hazards (coxph)
-- **Automatic Model Fitting**: Fits models directly from your data
-- **Professional Visualization**: Uses the forestmodel package for high-quality plots
-- **Flexible Customization**: Colors, fonts, sizes, and layout options
-- **Clinical Interpretation**: Automatic interpretation guidance
-- **Export Options**: Multiple formats for publication
+## What is a Logistic Regression?
 
-# Basic Linear Regression
+Before we make the plot, it's helpful to understand the model behind it. A **logistic regression** is a statistical method used to predict a binary outcome (an outcome with only two possibilities, like "benign" or "malignant") from a set of predictor variables. The model calculates an **odds ratio** for each predictor, which tells us how the odds of the outcome change with a one-unit increase in the predictor.
 
-## Simple Linear Model
+## Step 1: The Analysis in jamovi
 
-Let's start with a basic linear regression using the histopathology dataset:
+1.  Load the `BreastCancer.omv` dataset into jamovi.
+2.  From the main analysis ribbon, click on **JJStatsPlot** -> **Advanced** -> **Forest Plot from Regression Model**.
 
-```{r}
-# Load histopathology data
-data(histopathology, package = "ClinicoPath")
+***
+[Screenshot of the jamovi analysis ribbon showing the path to the Forest Plot.]
+***
 
-# Display the first few rows
-head(histopathology[c("Age", "Grade", "TStage", "LVI", "PNI")])
-```
+3.  In the analysis window:
+    *   Move the `Class` variable (which contains "benign" and "malignant") to the **Dependent Variable** box. This is the outcome we want to predict.
+    *   Move the predictor variables, such as `Cl.thickness`, `Cell.size`, and `Cell.shape`, to the **Predictor Variables** box.
+    *   Under **Model Type**, select **Logistic Regression (glm)**.
 
-```{r}
-# Create a basic linear regression forest plot
-linear_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Age",
-  predictor_vars = c("Grade", "TStage", "LVI", "PNI"),
-  model_type = "lm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  plot_title = "Linear Regression: Predictors of Age",
-  x_axis_label = "Beta Coefficient (Years)",
-  show_summary = TRUE,
-  show_interpretation = TRUE
-)
+***
+[Screenshot of the analysis window showing the variables being assigned.]
+***
 
-# The plot will be displayed in jamovi interface
-```
+## Step 2: The Output Plot
 
-## Understanding Linear Regression Forest Plots
+jamovi will first fit a logistic regression model behind the scenes and then generate the following forest plot of the results:
 
-In linear regression forest plots:
-
-- **Beta coefficients** represent the change in the dependent variable for a one-unit increase in each predictor
-- **Confidence intervals** that don't cross zero indicate statistically significant associations
-- **Point estimates** show the direction and magnitude of the effect
-- **Reference line** at zero represents no effect
-
-# Logistic Regression
-
-## Binary Outcome Models
-
-Logistic regression is commonly used for binary outcomes. Let's predict lymphovascular invasion (LVI):
-
-```{r}
-# Logistic regression with odds ratios
-logistic_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  plot_title = "Logistic Regression: Predictors of Lymphovascular Invasion",
-  x_axis_label = "Odds Ratio (95% CI)",
-  show_summary = TRUE,
-  confidence_level = 0.95
-)
-```
-
-## Working with the Wisconsin Breast Cancer Dataset
-
-Let's use the classic Wisconsin Breast Cancer dataset for cancer diagnosis prediction:
-
-```{r}
-# Load breast cancer data
+```{r forest-plot}
+# Load the data
 data(BreastCancer, package = "ClinicoPath")
 
-# Display dataset structure
-str(BreastCancer[c("Class", "Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion")])
-```
-
-```{r}
-# Comprehensive breast cancer prediction model
-breast_cancer_model <- jforestmodel(
+# The jforestmodel function fits the model and creates the plot
+jforestmodel(
   data = BreastCancer,
   dependent_var = "Class",
   predictor_vars = c("Cl.thickness", "Cell.size", "Cell.shape", 
                     "Marg.adhesion", "Epith.c.size", "Bare.nuclei"),
   model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
   family = "binomial",
   exponentiate = TRUE,
-  plot_title = "Breast Cancer Diagnosis Prediction Model",
-  x_axis_label = "Odds Ratio (95% CI)",
-  color_scheme = "blue",
-  factor_separate_line = TRUE,
-  show_p_values = TRUE,
-  show_confidence_intervals = TRUE
-)
-```
-
-## Different GLM Families
-
-The function supports various GLM families:
-
-```{r}
-# Poisson regression example
-poisson_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Age",  # Treating age as count for demonstration
-  predictor_vars = c("Grade", "TStage", "LVI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "poisson",
-  exponentiate = TRUE,
-  plot_title = "Poisson Regression Model",
-  x_axis_label = "Rate Ratio"
-)
-
-# Gaussian GLM (equivalent to linear regression)
-gaussian_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Age",
-  predictor_vars = c("Grade", "TStage", "LVI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "gaussian",
-  exponentiate = FALSE,
-  plot_title = "Gaussian GLM Model",
-  x_axis_label = "Coefficient"
-)
-```
-
-# Cox Proportional Hazards Models
-
-## Survival Analysis with Colon Cancer Data
-
-Cox regression is used for time-to-event analysis. Let's use the colon cancer dataset:
-
-```{r}
-# Load colon cancer survival data
-data(colon, package = "ClinicoPath")
-
-# Display relevant variables
-head(colon[c("time", "status", "age", "sex", "obstruct", "perfor", "adhere")])
-```
-
-```{r}
-# Cox proportional hazards model
-cox_model <- jforestmodel(
-  data = colon,
-  dependent_var = "status",  # Required by interface but not used directly
-  predictor_vars = c("age", "sex", "obstruct", "perfor", "adhere"),
-  model_type = "coxph",
-  time_var = "time",
-  event_var = "status",
-  covariates = NULL,
-  exponentiate = TRUE,
-  plot_title = "Cox Regression: Colon Cancer Survival",
-  x_axis_label = "Hazard Ratio (95% CI)",
-  confidence_level = 0.95,
-  show_summary = TRUE
-)
-```
-
-## Melanoma Survival Analysis
-
-Let's also examine melanoma survival data:
-
-```{r}
-# Load melanoma data
-data(melanoma, package = "ClinicoPath")
-
-# Display melanoma variables
-head(melanoma[c("time", "status", "age", "sex", "thickness", "ulcer")])
-```
-
-```{r}
-# Melanoma survival model
-melanoma_model <- jforestmodel(
-  data = melanoma,
-  dependent_var = "status",
-  predictor_vars = c("age", "sex", "thickness", "ulcer"),
-  model_type = "coxph",
-  time_var = "time",
-  event_var = "status",
-  covariates = NULL,
-  exponentiate = TRUE,
-  plot_title = "Melanoma Survival Analysis",
-  x_axis_label = "Hazard Ratio (95% CI)",
-  color_scheme = "red",
-  show_interpretation = TRUE
-)
-```
-
-# Advanced Customization
-
-## Color Schemes and Visual Options
-
-The function provides multiple color schemes and visual customization:
-
-```{r}
-# Custom color scheme
-custom_color_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  color_scheme = "custom",
-  custom_color = "#FF5722",
-  point_size = 3.0,
-  line_size = 1.2,
-  plot_title = "Custom Styled Forest Plot"
-)
-
-# Professional medical color scheme
-medical_style_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  color_scheme = "green",
-  plot_title = "Medical Style Forest Plot",
-  show_reference_line = TRUE,
-  reference_value = 1
-)
-```
-
-## Confidence Levels and Statistical Options
-
-```{r}
-# 99% confidence intervals
-high_confidence_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  confidence_level = 0.99,
-  plot_title = "High Confidence Model (99% CI)"
-)
-
-# 90% confidence intervals
-low_confidence_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  confidence_level = 0.90,
-  plot_title = "Conservative Model (90% CI)"
-)
-```
-
-## Factor Variable Handling
-
-```{r}
-# Factor variables on separate lines (default)
-factor_separate_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Death",
-  predictor_vars = c("Age", "Grade", "TStage", "LVI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  factor_separate_line = TRUE,
-  plot_title = "Factor Levels on Separate Lines"
-)
-
-# Factor variables on same line
-factor_together_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Death",
-  predictor_vars = c("Age", "Grade", "TStage", "LVI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  factor_separate_line = FALSE,
-  plot_title = "Factor Levels Together"
-)
-```
-
-# Variable Sorting and Selection
-
-## Sorting Options
-
-The function provides several sorting options for variables:
-
-```{r}
-# Sort by coefficient size
-coefficient_sorted_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  sort_variables = "coefficient",
-  plot_title = "Sorted by Coefficient Size"
-)
-
-# Sort by p-value
-pvalue_sorted_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  sort_variables = "pvalue",
-  plot_title = "Sorted by P-value"
-)
-
-# Alphabetical sorting
-alphabetical_sorted_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  sort_variables = "alphabetical",
-  plot_title = "Alphabetically Sorted"
-)
-```
-
-## Covariate Selection
-
-You can specify which covariates to display in the plot:
-
-```{r}
-# Display only specific covariates
-selected_covariates_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = c("Age", "Grade"),  # Only show these in plot
-  family = "binomial",
-  exponentiate = TRUE,
-  plot_title = "Selected Covariates Only"
-)
-```
-
-# Model Diagnostics and Interpretation
-
-## Model Summary Statistics
-
-```{r}
-# Comprehensive model with full reporting
-comprehensive_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  show_summary = TRUE,
-  show_interpretation = TRUE,
-  plot_title = "Comprehensive Model Analysis"
-)
-```
-
-## Linear Model Diagnostics
-
-For linear models, additional diagnostic information is provided:
-
-```{r}
-# Linear model with diagnostics
-linear_diagnostics_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Age",
-  predictor_vars = c("Grade", "TStage", "LVI", "PNI"),
-  model_type = "lm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  show_summary = TRUE,
-  plot_title = "Linear Model with Diagnostics"
-)
-```
-
-# Publication-Ready Examples
-
-## High-Quality Clinical Example
-
-```{r}
-# Publication-ready breast cancer model
-publication_model <- jforestmodel(
-  data = BreastCancer,
-  dependent_var = "Class",
-  predictor_vars = c("Cl.thickness", "Cell.size", "Cell.shape", 
-                    "Marg.adhesion", "Epith.c.size"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  confidence_level = 0.95,
   plot_title = "Predictors of Breast Cancer Malignancy",
-  x_axis_label = "Odds Ratio (95% Confidence Interval)",
-  color_scheme = "blue",
-  point_size = 2.5,
-  line_size = 0.8,
-  factor_separate_line = TRUE,
-  show_p_values = TRUE,
-  show_confidence_intervals = TRUE,
-  show_reference_line = TRUE,
-  reference_value = 1,
-  show_summary = TRUE,
-  show_interpretation = TRUE
+  x_axis_label = "Odds Ratio (95% Confidence Interval)"
 )
 ```
 
-## Multi-Model Comparison
+## Step 3: Interpreting the Forest Plot
 
-You can create multiple models for comparison:
+The forest plot shows the **odds ratio** for each predictor variable.
 
-```{r}
-# Model 1: Basic predictors
-basic_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Death",
-  predictor_vars = c("Age", "Grade"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  plot_title = "Basic Model: Age and Grade Only"
-)
+*   **The Vertical Line**: The vertical line at an odds ratio of 1.0 represents "no effect". If a predictor's confidence interval crosses this line, it is not statistically significant.
+*   **The Points**: Each point represents the odds ratio for that predictor. This is the "best guess" for the effect of that variable.
+*   **The Horizontal Lines**: The horizontal lines represent the **95% confidence interval** for the odds ratio. This gives us a range of plausible values for the true odds ratio.
 
-# Model 2: Extended predictors
-extended_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Death",
-  predictor_vars = c("Age", "Grade", "TStage", "LVI", "PNI"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  plot_title = "Extended Model: Multiple Predictors"
-)
-```
+**How to read the results:**
 
-# Layout and Panel Customization
+*   **Cl.thickness (Clump Thickness)**: The odds ratio is greater than 1, and the confidence interval does not cross 1. This means that for every one-unit increase in clump thickness, the odds of the tumor being malignant increase significantly.
+*   **Cell.size (Uniformity of Cell Size)**: This variable also has an odds ratio greater than 1, and its confidence interval does not cross 1, indicating that larger cell sizes are associated with higher odds of malignancy.
+*   All the variables in this plot are statistically significant predictors of malignancy because none of their confidence intervals cross the vertical line at 1.0.
 
-## Panel Width Ratios
+## Step 4: Reporting the Results
 
-```{r}
-# Custom panel width ratios
-custom_layout_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  panel_width_ratio = "2:3:1",
-  plot_title = "Custom Panel Layout"
-)
-```
+When reporting the results from a forest plot, you should describe the model and then report the odds ratios and confidence intervals for the key predictors.
 
-## Reference Lines and Values
+> A logistic regression model was built to predict the likelihood of a malignant diagnosis based on cellular characteristics. The results are displayed in a forest plot. Several factors were found to be significantly associated with the odds of malignancy. For example, for each one-unit increase in clump thickness, the odds of the tumor being malignant increased by a factor of X (OR = X, 95% CI [Y, Z]). Similarly, uniformity of cell size was also a significant predictor (OR = A, 95% CI [B, C]).
 
-```{r}
-# Custom reference line for linear model
-linear_reference_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "Age",
-  predictor_vars = c("Grade", "TStage", "LVI"),
-  model_type = "lm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  show_reference_line = TRUE,
-  reference_value = 0,
-  plot_title = "Linear Model with Zero Reference"
-)
-
-# Custom reference line for logistic model
-logistic_reference_model <- jforestmodel(
-  data = histopathology,
-  dependent_var = "LVI",
-  predictor_vars = c("Age", "Grade", "TStage"),
-  model_type = "glm",
-  time_var = NULL,
-  event_var = NULL,
-  covariates = NULL,
-  family = "binomial",
-  exponentiate = TRUE,
-  show_reference_line = TRUE,
-  reference_value = 1,
-  plot_title = "Logistic Model with OR=1 Reference"
-)
-```
-
-# Interpretation Guidelines
-
-## Understanding Different Effect Measures
-
-### Linear Regression Coefficients
-- **Interpretation**: Change in dependent variable per unit increase in predictor
-- **Significance**: Confidence intervals not including zero
-- **Clinical relevance**: Consider magnitude along with statistical significance
-
-### Odds Ratios (Logistic Regression)
-- **OR = 1**: No association
-- **OR > 1**: Increased odds of outcome
-- **OR < 1**: Decreased odds of outcome
-- **95% CI**: Must not include 1 for statistical significance
-
-### Hazard Ratios (Cox Regression)
-- **HR = 1**: No effect on hazard
-- **HR > 1**: Increased hazard (worse survival)
-- **HR < 1**: Decreased hazard (better survival)
-- **Interpretation**: Instantaneous risk at any given time
-
-## Model Assessment Guidelines
-
-### Model Fit Assessment
-1. **R-squared** (linear): Proportion of variance explained
-2. **AIC** (all models): Lower values indicate better fit
-3. **Residual analysis** (linear/GLM): Check model assumptions
-4. **Proportional hazards assumption** (Cox): Verify with diagnostics
-
-### Clinical Interpretation
-1. **Statistical vs Clinical Significance**: Large effects may not be clinically meaningful
-2. **Confidence Intervals**: Wide intervals suggest uncertainty
-3. **Multiple Comparisons**: Consider adjustment for multiple testing
-4. **Model Limitations**: Remember unmeasured confounders
-
-# Best Practices
-
-## Model Building
-1. **Variable Selection**: Use clinical knowledge and statistical criteria
-2. **Sample Size**: Ensure adequate power for the number of predictors
-3. **Missing Data**: Handle appropriately before modeling
-4. **Assumption Checking**: Verify model assumptions
-
-## Visualization
-1. **Appropriate Scale**: Use exponentiation for ratios, raw coefficients for linear
-2. **Clear Labeling**: Descriptive titles and axis labels
-3. **Consistent Formatting**: Use standard conventions
-4. **Color Choices**: Consider accessibility and journal requirements
-
-## Reporting
-1. **Model Details**: Report model type, sample size, and selection criteria
-2. **Assumption Testing**: Document assumption verification
-3. **Effect Sizes**: Include both point estimates and confidence intervals
-4. **Clinical Context**: Interpret findings in clinical context
-
-# Troubleshooting Common Issues
-
-## Data Preparation
-```r
-# Ensure variables are properly formatted
-data$outcome <- as.factor(data$outcome)  # For binary outcomes
-data$time <- as.numeric(data$time)       # For survival time
-data$event <- as.numeric(data$event)     # For event indicator
-```
-
-## Model Convergence Issues
-```r
-# For convergence problems, try:
-# 1. Check for perfect separation in logistic regression
-# 2. Scale continuous variables
-# 3. Check for multicollinearity
-# 4. Reduce number of predictors
-```
-
-## Missing Data Handling
-```r
-# Remove incomplete cases or use multiple imputation
-complete_data <- data[complete.cases(data[c("outcome", "pred1", "pred2")]), ]
-```
-
-# Advanced Features
-
-## Custom Model Objects
-
-The function also supports custom model objects (future enhancement):
-
-```{r, eval=FALSE}
-# Fit your own model first
-my_model <- glm(LVI ~ Age + Grade + TStage, 
-               data = histopathology, 
-               family = binomial())
-
-# Then create forest plot
-custom_model_plot <- jforestmodel(
-  model_object = my_model,  # Future feature
-  model_type = "custom",
-  exponentiate = TRUE,
-  plot_title = "Custom Model Forest Plot"
-)
-```
-
-## Integration with Other Packages
-
-The forest plots can be integrated with other R packages for enhanced analysis:
-
-- **broom**: For model tidying and extraction
-- **performance**: For model performance metrics
-- **see**: For additional visualization options
-- **report**: For automated interpretation
-
-# Conclusion
-
-The `jforestmodel` function provides a comprehensive solution for creating professional forest plots directly from regression models. Key benefits include:
-
-- **Direct Model Fitting**: No need to pre-calculate effect sizes
-- **Multiple Model Types**: Support for linear, logistic, and Cox regression
-- **Professional Quality**: Publication-ready outputs
-- **Extensive Customization**: Colors, layouts, and formatting options
-- **Clinical Integration**: Appropriate for medical research applications
-
-Forest plots from regression models are powerful tools for communicating statistical findings in medical research. The `jforestmodel` function makes it easy to create high-quality visualizations that meet publication standards and effectively communicate your research findings.
-
-For advanced statistical modeling considerations, consult with a biostatistician and refer to specialized statistical texts and guidelines from your research domain.
-
-# References
-
-1. Lewis S, Clarke M. Forest plots: trying to see the wood and the trees. BMJ. 2001;322(7300):1479-80.
-2. Wickham H. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
-3. Therneau T. A Package for Survival Analysis in R. 2023.
-4. Harrell FE. Regression Modeling Strategies. Springer, 2015.
-5. Steyerberg EW. Clinical Prediction Models. Springer, 2019.
+(Note: You would fill in the X, Y, Z, A, B, and C values from the output table in jamovi.)

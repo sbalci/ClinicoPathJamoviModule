@@ -36,11 +36,7 @@ Before we can start our analysis, we need to make sure our data is in the correc
 *   `Age`: The patient's age at the start of the study.
 *   `Tumor_Grade`: The grade of the patient's tumor ("I", "II", or "III").
 
-***
-
-**[Screenshot Placeholder: A screenshot of the data in jamovi.]**
-
-***
+![Example dataset in jamovi](images/workflow-data-table.png)
 
 # Step 2: Single-Arm Survival Analysis
 
@@ -51,11 +47,7 @@ Before we compare the treatment groups, let's first look at the overall survival
 3.  In the **Outcome** box, put the `Event_Status` variable.
 4.  For **Outcome Level**, select "Deceased" as the event.
 
-***
-
-**[Screenshot Placeholder: A screenshot of the single-arm survival analysis setup in jamovi.]**
-
-***
+![Single-arm survival setup](images/workflow-singlearm-setup.png)
 
 **Interpretation:**
 
@@ -67,17 +59,17 @@ Now, let's address our main research question: does the new drug improve surviva
 
 1.  In the same analysis window, add the `Treatment_Group` variable to the **Explanatory Variable** box.
 
-***
-
-**[Screenshot Placeholder: A screenshot of the two-group survival analysis setup in jamovi.]**
-
-***
+![Two-group survival setup](images/workflow-2-group-setup.png)
 
 **Interpretation:**
 
 *   **The Plot:** You will now see two survival curves on the Kaplan-Meier plot, one for each treatment group. Is the curve for the "New Drug" group above the curve for the "Standard Care" group?
 *   **The p-value:** The log-rank test will give you a p-value. If it's less than 0.05, you can conclude that there is a statistically significant difference in survival between the two treatments.
 *   **Median Survival:** Compare the median survival times for the two groups. How big is the difference? Is it clinically meaningful?
+
+### Interpretation (example wording)
+
+- New Drug shows higher survival with log‑rank p = 0.04. Median OS improves from 11 to 15 months (+4 months). Weigh benefits against adverse effects and cost.
 
 # Step 4: Adjusting for Other Factors (Multivariable Analysis)
 
@@ -89,11 +81,7 @@ To account for this, we can perform a **multivariable Cox regression analysis**.
 2.  Assign your **Time Elapsed** and **Outcome** variables as before.
 3.  In the **Covariates** box, add `Treatment_Group`, `Age`, and `Tumor_Grade`.
 
-***
-
-**[Screenshot Placeholder: A screenshot of the Cox regression setup in jamovi.]**
-
-***
+![Cox regression setup in jSurvival](images/workflow-cox-setup.png)
 
 **Interpretation:**
 
@@ -101,6 +89,11 @@ The main output of the Cox regression is the **Hazard Ratio (HR)**.
 
 *   **Hazard Ratio for Treatment:** Look at the hazard ratio for the `Treatment_Group`. A hazard ratio of less than 1 for the "New Drug" group would suggest that the new drug is associated with a lower risk of death, even after adjusting for age and tumor grade.
 *   **Other Variables:** You can also look at the hazard ratios for `Age` and `Tumor_Grade` to see if they are also significantly associated with survival.
+
+### Interpretation (Cox model)
+
+- Treatment HR = 0.72 (95% CI 0.55–0.95, p = 0.02): 28% lower hazard after adjusting for age and grade.
+- Confirm proportional hazards; if violated, consider stratification or time‑varying effects.
 
 # Step 5: Checking the Proportional Hazards Assumption
 
@@ -110,11 +103,7 @@ The jSurvival module provides tools to check this assumption.
 
 1.  In the Cox regression analysis window, under **Assumption Checks**, select **Schoenfeld Residuals Plot**.
 
-***
-
-**[Screenshot Placeholder: A screenshot of the Schoenfeld residuals plot.]**
-
-***
+![Schoenfeld residuals plot](images/workflow-schoenfeld-plot.png)
 
 **Interpretation:**
 
@@ -129,3 +118,9 @@ This guide has walked you through a complete survival analysis workflow, from a 
 *   Always start with simple analyses and then move to more complex models.
 *   Always check the assumptions of your statistical models.
 *   Always think about the clinical significance of your results, not just the statistical significance.
+
+## Common Pitfalls
+
+- Confounding: Apparent group differences may be explained by age, stage, or other factors—verify with Cox regression.
+- Proportional hazards: Check assumptions; if violated, consider stratification, time‑varying effects, or RMST.
+- Data preparation: Validate event coding and time derivations when using dates.

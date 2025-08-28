@@ -1,5 +1,5 @@
 ---
-title: "Advanced Survival Analysis with jsurvival"
+title: "Advanced Survival Analysis with jSurvival"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
 output: html_document
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 # Overview
 
-This vignette covers advanced survival analysis techniques and methodological considerations when using jsurvival. It addresses complex scenarios that researchers commonly encounter in clinical and epidemiological studies.
+This vignette covers advanced survival analysis techniques and methodological considerations when using jSurvival. It addresses complex scenarios that researchers commonly encounter in clinical and epidemiological studies.
 
 # Advanced Cox Regression Topics
 
@@ -237,7 +237,7 @@ tertile_analysis <- survival(
 ```{r spline-concept}
 # For truly continuous relationships
 # Consider restricted cubic splines or other flexible approaches
-# This would require additional implementation beyond basic jsurvival
+# This would require additional implementation beyond basic jSurvival
 ```
 
 # Time-Dependent Covariates
@@ -327,7 +327,7 @@ other_death <- survival(
 # but keeps subjects in the risk set
 
 # Implementation would require specialized competing risks functions
-# Currently beyond basic jsurvival functionality
+# Currently beyond basic jSurvival functionality
 ```
 
 # Sample Size and Power Calculations
@@ -489,7 +489,7 @@ Key principles for advanced analysis:
 - **Report limitations** and assumptions clearly
 - **Collaborate with statisticians** for complex analyses
 
-For complex analyses beyond the scope of basic jsurvival functions, consider:
+For complex analyses beyond the scope of basic jSurvival functions, consider:
 - Specialized R packages (survival, survminer, rms, cmprsk)
 - Statistical software with advanced survival capabilities
 - Consultation with biostatisticians

@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-jsurvival provides comprehensive survival analysis tools specifically designed for clinical research and oncology studies. This module offers user-friendly interfaces for time-to-event analysis, from basic Kaplan-Meier curves to advanced competing risks and multivariate Cox regression models.
+jSurvival provides comprehensive survival analysis tools specifically designed for clinical research and oncology studies. This module offers user-friendly interfaces for time-to-event analysis, from basic Kaplan-Meier curves to advanced competing risks and multivariate Cox regression models.
 
 **Learning Objectives:**
 
@@ -32,7 +32,7 @@ jsurvival provides comprehensive survival analysis tools specifically designed f
 
 ## Module Overview
 
-jsurvival encompasses four main areas of survival analysis:
+jSurvival encompasses four main areas of survival analysis:
 
 ### 1. **Basic Survival Analysis**
 - **Kaplan-Meier Curves**: Non-parametric survival estimation
@@ -109,7 +109,7 @@ Foundation of survival analysis for time-to-event data.
 
 ```{r kaplan-meier}
 # Kaplan-Meier Analysis Example
-# In jamovi: jsurvival > Survival Analysis
+# In jamovi: jSurvival > Survival Analysis
 
 cat("Kaplan-Meier Survival Analysis\n")
 cat("==============================\n\n")
@@ -154,7 +154,7 @@ Multivariable analysis accounting for multiple prognostic factors.
 
 ```{r cox-regression}
 # Cox Regression Analysis Example
-# In jamovi: jsurvival > Cox Diagnostics
+# In jamovi: jSurvival > Cox Diagnostics
 
 cat("\nCox Proportional Hazards Regression\n")
 cat("===================================\n\n")
@@ -198,7 +198,7 @@ Handle situations where multiple types of events can occur.
 
 ```{r competing-risks}
 # Competing Risks Analysis Example
-# In jamovi: jsurvival > Competing Survival
+# In jamovi: jSurvival > Competing Survival
 
 cat("\nCompeting Risks Analysis\n")
 cat("=======================\n\n")
@@ -440,7 +440,7 @@ if(requireNamespace("survival", quietly = TRUE)) {
 
 # Integration with Other Modules
 
-jsurvival works seamlessly with other ClinicoPath modules:
+jSurvival works seamlessly with other ClinicoPath modules:
 
 ## Connection to ClinicoPathDescriptives
 - Baseline characteristics inform survival model covariates
@@ -485,7 +485,7 @@ jsurvival works seamlessly with other ClinicoPath modules:
 
 # Conclusion
 
-jsurvival provides comprehensive tools for modern survival analysis in clinical research, from basic Kaplan-Meier curves to sophisticated prognostic modeling. The integration with molecular biomarker data and other ClinicoPath modules makes it essential for contemporary oncology research and precision medicine applications.
+jSurvival provides comprehensive tools for modern survival analysis in clinical research, from basic Kaplan-Meier curves to sophisticated prognostic modeling. The integration with molecular biomarker data and other ClinicoPath modules makes it essential for contemporary oncology research and precision medicine applications.
 
 ## Next Steps
 
@@ -498,4 +498,4 @@ To explore specific survival analysis techniques:
 
 ---
 
-*This introduction provides the foundation for using jsurvival in clinical research. Explore the detailed vignettes for specific techniques and advanced applications.*
+*This introduction provides the foundation for using jSurvival in clinical research. Explore the detailed vignettes for specific techniques and advanced applications.*

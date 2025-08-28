@@ -56,27 +56,24 @@ For a competing risks analysis, your outcome variable needs to have at least thr
 3.  Assign your multi-level **Outcome** variable.
 4.  You will need to tell jamovi which level of your outcome variable corresponds to which event type.
 
-***
-
-**[Screenshot Placeholder: A screenshot of the competing risks analysis setup in jamovi.]**
-
-***
+![Competing risks setup in jSurvival](images/competing-setup.png)
 
 # Step 3: Interpret the Results
 
 The main output of a competing risks analysis is the **cumulative incidence function (CIF) plot**.
 
-***
-
-**[Screenshot Placeholder: An example of a cumulative incidence plot.]**
-
-***
+![Cumulative incidence (CIF) plot example](images/competing-cif-example.png)
 
 **How to Read the CIF Plot:**
 
 *   The y-axis shows the **cumulative incidence**, which is the probability that an event has occurred by a certain time.
 *   The x-axis shows the time.
 *   You will see a separate curve for each event type.
+
+### Interpretation (example wording)
+
+- By 24 months, disease‑specific death reaches 18%, while death from other causes is 10%.
+- This indicates a meaningful burden from competing events; report both CIFs rather than a single KM estimate.
 
 For example, the curve for "Death from Prostate Cancer" will show you the probability of a patient dying from prostate cancer by a certain time, taking into account that they could have died from other causes.
 
@@ -94,3 +91,9 @@ Competing risks are a common issue in clinical research, especially when studyin
 *   Use a competing risks analysis when patients can experience events that prevent the event of interest from occurring.
 *   The cumulative incidence function (CIF) plot is the main tool for visualizing the results of a competing risks analysis.
 *   A CIF plot shows the probability of an event occurring over time, accounting for competing risks.
+
+## Common Pitfalls
+
+- Treating competing events as censored in KM analyses overestimates disease‑specific survival.
+- Outcome labelling: Ensure outcome levels are clearly mapped (no event, event of interest, competing event[s]).
+- Interpretation: CIF curves go up (probability of event), unlike KM curves which go down (probability of survival).

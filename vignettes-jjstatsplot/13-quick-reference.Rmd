@@ -1,233 +1,164 @@
 ---
-title: "Quick Reference Guide for jjstatsplot"
-author: "ClinicoPath Development Team"
-date: "`r Sys.Date()`"
-output: html_document
+title: "jjstatsplot Plot Gallery"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{jjstatsplot Plot Gallery}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE)
-```
-
-# jjstatsplot Quick Reference
-
-This quick reference provides essential information for using jjstatsplot efficiently in both jamovi and R.
-
-## Function Overview
-
-| Function | Purpose | Data Type | jamovi Location |
-|----------|---------|-----------|-----------------|
-| `jjhistostats()` | Distribution analysis | 1 continuous | Continuous → Histogram |
-| `jjscatterstats()` | Bivariate relationships | 2 continuous | Continuous vs Continuous → Scatter Plot |
-| `jjcorrmat()` | Multiple correlations | 2+ continuous | Continuous vs Continuous → Correlation Matrix |
-| `jjbetweenstats()` | Group comparisons | 1 continuous + 1 categorical | Categorical vs Continuous → Box-Violin (Between) |
-| `jjdotplotstats()` | Group means | 1 continuous + 1 categorical | Categorical vs Continuous → Dot Chart |
-| `jjwithinstats()` | Paired comparisons | 2+ continuous (paired) | Categorical vs Continuous → Box-Violin (Within) |
-| `jjbarstats()` | Categorical associations | 1-2 categorical | Categorical vs Categorical → Bar Charts |
-| `jjpiestats()` | Proportional data | 1 categorical | Categorical vs Categorical → Pie Charts |
-| `waffle()` | Distribution visualization | 1 categorical | Distribution → Waffle Charts |
-
-## Quick Start Templates
-
-### jamovi Workflow
-```
-1. Data → Open file
-2. JJStatsPlot → [Category] → [Analysis]
-3. Drag variables to appropriate boxes
-4. Adjust options as needed
-5. Export → Copy/Save plot
-```
-
-### R Workflow
-```{r r-workflow}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE, fig.width=8, fig.height=6)
 library(ClinicoPath)
-
-# Basic pattern
-result <- jj[function](data = your_data, dep = "variable")
-result$plot  # Main plot
-
-# With grouping
-result <- jj[function](data = your_data, dep = "variable", grvar = "group")
-result$plot2  # Grouped plots
+library(ggplot2)
 ```
 
-## Essential R Code Snippets
+# jjstatsplot Plot Gallery
 
-### Data Preparation
-```{r data-prep}
-# Load and check data
-library(ClinicoPath)
-data(mtcars)
-str(mtcars)
+This gallery provides a quick visual reference for the main plots you can create with the `ClinicoPath` jamovi module. Each entry includes a brief description of when to use the plot and an example using clinical data.
 
-# Convert to factors
-mtcars$cyl <- factor(mtcars$cyl)
-mtcars$am <- factor(mtcars$am, labels = c("Auto", "Manual"))
+---
 
-# Check missing data
-summary(mtcars)
-```
+## Histogram
 
-### Single Variable Analysis
-```{r single-var}
-# Histogram
-hist_result <- jjhistostats(data = mtcars, dep = "mpg", grvar = NULL)
-hist_result$plot
+**When to use it:** To explore the distribution of a single continuous variable (e.g., age, lab value).
 
-# Multiple variables
-multi_hist <- jjhistostats(data = mtcars, dep = c("mpg", "hp", "wt"), grvar = NULL)
-multi_hist$plot
-```
-
-### Bivariate Analysis
-```{r bivariate}
-# Scatter plot
-scatter_result <- jjscatterstats(data = mtcars, dep = "mpg", group = "hp")
-scatter_result$plot
-
-# Correlation matrix
-corr_result <- jjcorrmat(data = mtcars, dep = c("mpg", "hp", "wt"))
-corr_result$plot
-```
-
-### Group Comparisons
-```{r group-comparisons}
-# Between groups
-between_result <- jjbetweenstats(data = mtcars, dep = "mpg", group = "cyl")
-between_result$plot
-
-# Dot chart
-dot_result <- jjdotplotstats(data = mtcars, dep = "mpg", group = "cyl")
-dot_result$plot
-```
-
-### Categorical Analysis
-```{r categorical}
-# Bar chart
-bar_result <- jjbarstats(data = mtcars, dep = "cyl", group = "am")
-bar_result$plot
-
-# Pie chart
-pie_result <- jjpiestats(data = mtcars, dep = "cyl")
-pie_result$plot
-```
-
-### Grouped Analysis
-```{r grouped}
-# Any function with grvar parameter
-grouped_result <- jjhistostats(
-  data = mtcars, 
-  dep = "mpg", 
-  grvar = "cyl"
-)
-grouped_result$plot2  # Note: plot2 for grouped plots
-```
-
-## Common Options and Customizations
-
-### jamovi Interface Elements
-- **Dependent Variable(s)**: Main variables to analyze
-- **Grouping Variable**: Split data by categories
-- **Grouping Variable for Plots**: Create separate plots
-- **Statistical Options**: Test types, confidence levels
-- **Plot Options**: Themes, colors, labels
-
-### R Function Parameters
-```{r parameters}
-# Common parameters across functions
-jj[function](
-  data = your_data,           # Data frame
-  dep = "variable",           # Dependent variable(s)
-  group = "grouping_var",     # Grouping variable
-  grvar = "plot_grouping",    # Separate plots by group
-  # Function-specific options vary
+```{r histogram}
+data("breast_cancer_data", package = "ClinicoPath")
+jjhistostats(
+  data = breast_cancer_data,
+  dep = "age",
+  title = "Distribution of Patient Age",
+  xlab = "Age (years)"
 )
 ```
 
-## Statistical Tests by Function
+**jamovi Location:** `JJStatsPlot` -> `Continuous` -> `Histogram`
 
-| Function | Default Test | Alternative Tests |
-|----------|--------------|-------------------|
-| `jjhistostats()` | Shapiro-Wilk normality | Anderson-Darling, Kolmogorov-Smirnov |
-| `jjscatterstats()` | Pearson correlation | Spearman, robust correlation |
-| `jjbetweenstats()` | Welch's ANOVA | Student's t-test, Kruskal-Wallis |
-| `jjdotplotstats()` | Similar to between-stats | Non-parametric alternatives |
-| `jjwithinstats()` | Paired t-test | Wilcoxon signed-rank |
-| `jjbarstats()` | Chi-square test | Fisher's exact test |
-| `jjcorrmat()` | Pearson correlations | Spearman, partial correlations |
+---
 
-## Troubleshooting Checklist
+## Box-Violin Plot (Between Groups)
 
-### Before Analysis
-- [ ] Check variable types (`str(data)`)
-- [ ] Verify sufficient sample sizes (`table(group_var)`)
-- [ ] Handle missing values (`summary(data)`)
-- [ ] Ensure appropriate data format
+**When to use it:** To compare a continuous variable between two or more independent groups.
 
-### Common Errors
-- **"No data to plot"**: Check variable selection and missing values
-- **"Object not found"**: Verify variable names (case-sensitive)
-- **Blank plots**: Use `result$plot2` for grouped analyses
-- **Statistical test failures**: Check assumptions and sample sizes
-
-### Performance Issues
-- Large datasets: Sample or subset data
-- Complex grouping: Reduce number of groups
-- Memory problems: Clean workspace with `rm()` and `gc()`
-
-## Export and Reporting
-
-### jamovi Export
-```
-Right-click plot → Copy
-File → Export → [Format]
-Results panel → Copy statistical output
+```{r box-violin}
+data("breast_cancer_data", package = "ClinicoPath")
+jjbetweenstats(
+  data = breast_cancer_data,
+  dep = "age",
+  group = "cancer_status",
+  title = "Age Distribution by Cancer Status",
+  xlab = "Cancer Status",
+  ylab = "Age (years)"
+)
 ```
 
-### R Export
-```{r export}
-# Save plot
-result <- jjhistostats(data = mtcars, dep = "mpg")
-ggsave("histogram.png", result$plot, width = 8, height = 6, dpi = 300)
+**jamovi Location:** `JJStatsPlot` -> `Categorical vs Continuous` -> `Box-Violin Plots (Between Groups)`
 
-# Extract for further modification
-my_plot <- result$plot + 
-  ggplot2::labs(title = "Custom Title") +
-  ggplot2::theme_minimal()
+---
+
+## Bar Chart
+
+**When to use it:** To show the relationship between two categorical variables.
+
+```{r bar-chart}
+data("breast_cancer_data", package = "ClinicoPath")
+jjbarstats(
+  data = breast_cancer_data,
+  dep = "mammography",
+  group = "cancer_status",
+  title = "Mammography Results by Cancer Status",
+  xlab = "Cancer Status"
+)
 ```
 
-## Statistical Reporting Template
+**jamovi Location:** `JJStatsPlot` -> `Categorical vs Categorical` -> `Bar Charts`
 
-When reporting results, include:
+---
 
-1. **Sample size**: n = X
-2. **Test type**: "Welch's ANOVA was conducted..."
-3. **Test statistic**: F(df1, df2) = X.XX
-4. **p-value**: p < .001 or exact value
-5. **Effect size**: η² = .XX or Cohen's d = X.XX
-6. **Confidence intervals**: 95% CI [X.XX, X.XX]
+## Scatter Plot
 
-Example: "A Welch's ANOVA revealed a significant difference in fuel efficiency across cylinder groups, F(2, 18.03) = 39.70, p < .001, η² = .70, suggesting a large effect."
+**When to use it:** To explore the relationship and correlation between two continuous variables.
 
-## Documentation Links
+```{r scatter-plot}
+data("melanoma", package = "boot")
+jjscatterstats(
+  data = melanoma,
+  x = "age",
+  y = "thickness",
+  title = "Correlation between Age and Tumor Thickness",
+  xlab = "Age (years)",
+  ylab = "Tumor Thickness (mm)"
+)
+```
 
-- **Complete jamovi Guide**: `vignette("jamovi-user-guide", package = "jjstatsplot")`
-- **R Programming Guide**: `vignette("r-programming-guide", package = "jjstatsplot")`
-- **Analysis Gallery**: `vignette("analysis-gallery", package = "jjstatsplot")`
-- **Troubleshooting**: `vignette("troubleshooting-faq", package = "jjstatsplot")`
-- **ggstatsplot Documentation**: [indrajeetpatil.github.io/ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)
+**jamovi Location:** `JJStatsPlot` -> `Continuous vs Continuous` -> `Scatter Plot`
 
-## Getting Help
+---
 
-### Quick Checks
-1. Try with built-in data (e.g., `mtcars`, `iris`)
-2. Simplify analysis (remove grouping variables)
-3. Check for recent updates
-4. Restart jamovi/R session
+## Correlation Matrix
 
-### Report Issues
-- Include data example, error message, and steps
-- GitHub: [sbalci/ClinicoPathJamoviModule/issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
-- Email: serdarbalci@serdarbalci.com
+**When to use it:** To visualize the correlations between multiple continuous variables at once.
 
-This quick reference covers the essentials for efficient jjstatsplot usage. For detailed examples and advanced usage, consult the comprehensive vignettes listed above.
+```{r corr-matrix}
+data("melanoma", package = "boot")
+jjcorrmat(
+  data = melanoma,
+  dep = c("age", "thickness", "time"),
+  title = "Correlation Matrix of Melanoma Variables"
+)
+```
+
+**jamovi Location:** `JJStatsPlot` -> `Continuous vs Continuous` -> `Correlation Matrix`
+
+---
+
+## Within-Subject Plot (Paired Data)
+
+**When to use it:** To compare a continuous variable in the same subjects at two or more time points (e.g., before and after treatment).
+
+```{r within-subject}
+# Create simulated paired data
+set.seed(123)
+long_data <- data.frame(
+  patient_id = rep(1:20, 2),
+  timepoint = rep(c("Before", "After"), each = 20),
+  biomarker = c(rnorm(20, 100, 15), rnorm(20, 80, 15))
+)
+
+jjwithinstats(
+  data = long_data,
+  x = "timepoint",
+  y = "biomarker",
+  id = "patient_id",
+  paired = TRUE,
+  title = "Biomarker Levels Before and After Treatment",
+  ylab = "Biomarker Level"
+)
+```
+
+**jamovi Location:** `JJStatsPlot` -> `Continuous` -> `Within Subject`
+
+---
+
+## Raincloud Plot
+
+**When to use it:** To show the distribution, individual data points, and summary statistics all in one plot. It is an enhanced version of a violin or box plot.
+
+```{r raincloud-plot}
+# Load raincloud data
+data("advancedraincloud_data", package = "ClinicoPath")
+
+# Ensure the grouping variable is a factor
+advancedraincloud_data$group <- factor(advancedraincloud_data$group)
+
+advancedraincloud(
+  data = advancedraincloud_data,
+  dep = "score",
+  group = "group",
+  title = "Score Distribution by Group with Raincloud Plot"
+)
+
+```
+
+**jamovi Location:** `JJStatsPlot` -> `Advanced` -> `Raincloud Plot`
