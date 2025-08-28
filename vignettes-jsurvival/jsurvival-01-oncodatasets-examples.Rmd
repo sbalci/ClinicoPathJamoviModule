@@ -1,10 +1,10 @@
 ---
-title: "jsurvival: Survival Analysis with Oncology Data"
+title: "jSurvival: Survival Analysis with Oncology Data"
 author: "ClinicoPath Team"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{jsurvival: Survival Analysis with Oncology Data}
+  %\VignetteIndexEntry{jSurvival: Survival Analysis with Oncology Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-This vignette demonstrates survival analysis capabilities of the jsurvival module using real oncology datasets from the `OncoDataSets` package. We'll cover Kaplan-Meier analysis, Cox regression, competing risks, and advanced survival modeling.
+This vignette demonstrates survival analysis capabilities of the jSurvival module using real oncology datasets from the `OncoDataSets` package. We'll cover Kaplan-Meier analysis, Cox regression, competing risks, and advanced survival modeling.
 
 ## Loading Required Packages
 
@@ -64,7 +64,7 @@ table(Melanoma_df$status_label)
 
 ```{r km-sex, eval=FALSE}
 # In jamovi:
-# 1. Select Analyses → jsurvival → Survival Analysis
+# 1. Select Analyses → jSurvival → Survival Analysis
 # 2. Set 'time' as survival time
 # 3. Set 'status' as event (with 1 = died from melanoma)
 # 4. Add 'sex_label' as grouping factor
@@ -79,7 +79,7 @@ Analyze multiple prognostic factors simultaneously:
 
 ```{r cox-model, eval=FALSE}
 # In jamovi:
-# 1. Select Analyses → jsurvival → Survival Analysis
+# 1. Select Analyses → jSurvival → Survival Analysis
 # 2. Set up time and status as before
 # 3. Add covariates: age, sex, thickness, ulcer
 # 4. Enable Cox regression
@@ -93,7 +93,7 @@ Since patients can die from other causes:
 
 ```{r competing-risks, eval=FALSE}
 # In jamovi:
-# 1. Select Analyses → jsurvival → Competing Risks
+# 1. Select Analyses → jSurvival → Competing Risks
 # 2. Set 'time' as survival time
 # 3. Set 'status' with:
 #    - 0 = censored
@@ -124,7 +124,7 @@ table(LeukemiaSurvival_df$treatment, LeukemiaSurvival_df$status)
 
 ```{r treatment-analysis, eval=FALSE}
 # In jamovi:
-# 1. Select Analyses → jsurvival → Survival Analysis
+# 1. Select Analyses → jSurvival → Survival Analysis
 # 2. Time variable: 'time'
 # 3. Event variable: 'status'
 # 4. Group by: 'treatment'
@@ -164,7 +164,7 @@ table(ProstateSurvival_df$status)
 
 ```{r stratified-analysis, eval=FALSE}
 # In jamovi:
-# 1. Select Analyses → jsurvival → Survival Analysis
+# 1. Select Analyses → jSurvival → Survival Analysis
 # 2. Basic setup with survTime and status
 # 3. Compare by 'grade' (moderate vs poor)
 # 4. Stratify by 'stage' and 'ageGroup'
@@ -231,7 +231,7 @@ table(OvarianCancer_df$rx)
 
 ```{r power-analysis, eval=FALSE}
 # In jamovi:
-# 1. Select Analyses → jsurvival → Survival Power
+# 1. Select Analyses → jSurvival → Survival Power
 # 2. Input observed effect size from pilot data
 # 3. Calculate power for different sample sizes
 # 4. Plan for future trials
@@ -318,7 +318,7 @@ table(OvarianCancer_df$rx)
 
 ## Conclusion
 
-The jsurvival module provides comprehensive tools for analyzing time-to-event data in oncology research. Combined with the `OncoDataSets` package, researchers can:
+The jSurvival module provides comprehensive tools for analyzing time-to-event data in oncology research. Combined with the `OncoDataSets` package, researchers can:
 
 - Perform standard and advanced survival analyses
 - Handle complex scenarios like competing risks
@@ -328,5 +328,5 @@ The jsurvival module provides comprehensive tools for analyzing time-to-event da
 ## References
 
 - OncoDataSets package: https://cran.r-project.org/package=OncoDataSets
-- jsurvival documentation: https://www.serdarbalci.com/jsurvival/
+- jSurvival documentation: https://www.serdarbalci.com/jsurvival/
 - Survival analysis in R: https://cran.r-project.org/package=survival

@@ -23,6 +23,12 @@ ihcscoring(
   quality_control = TRUE,
   clinical_interpretation = TRUE,
   export_results = FALSE,
+  multiple_cutoffs = FALSE,
+  cutoff_values = "1, 5, 10, 25, 50",
+  cps_analysis = FALSE,
+  immune_cells_var,
+  tumor_cells_var,
+  cutoff_comparison = TRUE,
   confidence_level = 0.95,
   bootstrap_n = 1000,
   automated_analysis = FALSE,
@@ -33,7 +39,18 @@ ihcscoring(
   maximum_nuclear_area = 2000,
   batch_processing = FALSE,
   image_format = "tiff",
-  validation_metrics = TRUE
+  validation_metrics = TRUE,
+  molecular_classification = FALSE,
+  classification_system = "bladder_mibc",
+  primary_marker1,
+  primary_marker2,
+  secondary_marker,
+  classification_cutoffs = "20, 20, 70",
+  pd1_marker,
+  pdl1_marker,
+  checkpoint_cutoffs = "1, 10",
+  subtype_statistics = TRUE,
+  subtype_visualization = TRUE
 )
 }
 \arguments{
@@ -76,6 +93,23 @@ metrics}
 
 \item{export_results}{format results for external analysis or reporting}
 
+\item{multiple_cutoffs}{analyze biomarker positivity across multiple
+pre-specified cut-off values}
+
+\item{cutoff_values}{comma-separated list of percentage cut-off values for
+positivity analysis}
+
+\item{cps_analysis}{calculate Combined Positive Score for PD-L1 assessment}
+
+\item{immune_cells_var}{percentage of PD-L1+ immune cells (required for CPS
+calculation)}
+
+\item{tumor_cells_var}{percentage of PD-L1+ tumor cells (required for CPS
+calculation)}
+
+\item{cutoff_comparison}{perform statistical comparisons across different
+cut-off values}
+
 \item{confidence_level}{confidence level for statistical intervals}
 
 \item{bootstrap_n}{number of bootstrap replicates for confidence intervals}
@@ -102,6 +136,33 @@ strong DAB staining (comma-separated)}
 
 \item{validation_metrics}{compare automated results with manual scoring
 when available}
+
+\item{molecular_classification}{perform molecular subtype classification
+based on marker combinations}
+
+\item{classification_system}{molecular classification system to apply}
+
+\item{primary_marker1}{first primary marker for molecular classification}
+
+\item{primary_marker2}{second primary marker for molecular classification}
+
+\item{secondary_marker}{secondary marker for subtype refinement}
+
+\item{classification_cutoffs}{comma-separated cut-off values for each
+marker in order (primary1, primary2, secondary)}
+
+\item{pd1_marker}{PD-1 expression scores for immune checkpoint analysis}
+
+\item{pdl1_marker}{PD-L1 expression scores for immune checkpoint analysis}
+
+\item{checkpoint_cutoffs}{comma-separated cut-off values for PD-1/PD-L1
+positivity analysis}
+
+\item{subtype_statistics}{calculate statistical comparisons between
+molecular subtypes}
+
+\item{subtype_visualization}{create plots showing molecular subtype
+distributions and associations}
 }
 \value{
 A results object containing:
@@ -128,6 +189,19 @@ A results object containing:
 \code{results$automatedanalysis$validationplot} \tab \tab \tab \tab \tab Scatter plot of manual vs automated scores \cr
 \code{results$advancedmetrics$reliabilitymetrics} \tab \tab \tab \tab \tab Comprehensive reliability and consistency metrics \cr
 \code{results$advancedmetrics$distributionanalysis} \tab \tab \tab \tab \tab Normality testing and distribution characteristics \cr
+\code{results$multiplecutoffs$cutoffresults} \tab \tab \tab \tab \tab Positivity rates across different cut-off thresholds \cr
+\code{results$multiplecutoffs$comparisonstats} \tab \tab \tab \tab \tab Statistical tests comparing groups across different cut-off values \cr
+\code{results$cutoffplot} \tab \tab \tab \tab \tab Biomarker positivity rates across different thresholds \cr
+\code{results$cpsanalysis$cpsresults} \tab \tab \tab \tab \tab Combined Positive Score analysis for PD-L1 assessment \cr
+\code{results$cpsanalysis$cpsstatistics} \tab \tab \tab \tab \tab Summary statistics for Combined Positive Score \cr
+\code{results$cpsanalysis$cpscomparison} \tab \tab \tab \tab \tab Statistical comparison of CPS between groups \cr
+\code{results$cpsplot} \tab \tab \tab \tab \tab Distribution of CPS scores with clinical thresholds \cr
+\code{results$molecularclassification$classificationtable} \tab \tab \tab \tab \tab Molecular subtype classification based on marker combinations \cr
+\code{results$molecularclassification$subtypedistribution} \tab \tab \tab \tab \tab Frequency and percentage of each molecular subtype \cr
+\code{results$molecularclassification$subtypestatistics} \tab \tab \tab \tab \tab Statistical comparisons between molecular subtypes \cr
+\code{results$molecularclassification$checkpointanalysis} \tab \tab \tab \tab \tab PD-1/PD-L1 expression patterns across molecular subtypes \cr
+\code{results$subtypeplot} \tab \tab \tab \tab \tab Visual representation of molecular subtype frequencies \cr
+\code{results$checkpointplot} \tab \tab \tab \tab \tab PD-1/PD-L1 expression patterns across molecular subtypes \cr
 \code{results$exportdata} \tab \tab \tab \tab \tab Formatted results for external analysis or reporting \cr
 }
 

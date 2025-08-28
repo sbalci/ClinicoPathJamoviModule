@@ -9,13 +9,15 @@ jjhistostats(
   dep,
   grvar,
   typestatistics = "parametric",
-  centralityline = TRUE,
+  centralityline = FALSE,
   changebinwidth = FALSE,
   binwidth = 1.1,
-  resultssubtitle = TRUE,
+  resultssubtitle = FALSE,
+  showInterpretation = FALSE,
+  clinicalPreset = "custom",
   test.value = 0,
   conf.level = 0.95,
-  bf.message = TRUE,
+  bf.message = FALSE,
   digits = 2,
   xlab = "",
   title = "",
@@ -60,6 +62,14 @@ create fewer bins.}
 \item{resultssubtitle}{Whether to display statistical test results as
 subtitle in the plot, including normality test results and descriptive
 statistics.}
+
+\item{showInterpretation}{Generate clinical interpretation of histogram
+results including distribution shape,  normality assessment, and practical
+implications for clinical data.}
+
+\item{clinicalPreset}{Predefined configurations optimized for common
+clinical data types. Automatically sets appropriate statistical methods and
+visualization options.}
 
 \item{test.value}{Value to compare the sample against in one-sample test.
 Default is 0.}
@@ -110,6 +120,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

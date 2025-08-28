@@ -12,7 +12,8 @@ statsplot2(
   direction = "independent",
   distribution = "p",
   alluvsty = "t1",
-  excl = FALSE
+  excl = FALSE,
+  sampleLarge = TRUE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ nonparametric,  "r" = robust, "bf" = Bayes factor.}
 labels,  "t2" = easyalluvial with automatic variable selection.}
 
 \item{excl}{If TRUE, excludes rows with missing values before analysis.}
+
+\item{sampleLarge}{If TRUE, automatically samples large datasets (>10,000
+rows) to 5,000 rows for improved performance.}
 }
 \value{
 A results object containing:

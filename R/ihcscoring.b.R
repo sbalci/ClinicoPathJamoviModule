@@ -145,6 +145,16 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Advanced metrics
             private$.performAdvancedMetrics(intensity, proportion)
             
+            # Multiple cut-off analysis
+            if (self$options$multiple_cutoffs) {
+                private$.performMultipleCutoffAnalysis(intensity, proportion, groups)
+            }
+            
+            # CPS analysis
+            if (self$options$cps_analysis) {
+                private$.performCPSAnalysis(intensity, proportion, groups)
+            }
+            
             # Biomarker-specific analysis
             if (self$options$biomarker_type != "other") {
                 private$.performBiomarkerSpecificAnalysis(intensity, proportion)
@@ -153,6 +163,11 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Export data preparation
             if (self$options$export_results) {
                 private$.prepareExportData(intensity, proportion, sample_ids, groups)
+            }
+            
+            # Molecular classification analysis
+            if (self$options$molecular_classification) {
+                private$.performMolecularClassification()
             }
             
             private$.generatePlots(intensity, proportion)
@@ -1166,6 +1181,644 @@ def segment_nuclei(image_path):
             }, error = function(e) {
                 warning("Color deconvolution failed: ", e$message)
                 return(NULL)
+            })
+        },
+        
+        .performMultipleCutoffAnalysis = function(intensity, proportion, groups) {
+            # Parse cutoff values from string
+            cutoff_string <- self$options$cutoff_values
+            cutoffs <- as.numeric(strsplit(cutoff_string, ",")[[1]])
+            cutoffs <- cutoffs[!is.na(cutoffs)]
+            
+            if (length(cutoffs) == 0) {
+                warning("No valid cutoff values provided")
+                return()
+            }
+            
+            # Initialize multiple cutoff tables
+            if (is.null(self$results$multiplecutoffs)) return()
+            
+            # Calculate positivity at each cutoff
+            n <- length(proportion)
+            results_data <- data.frame()
+            
+            for (cutoff in cutoffs) {
+                positive_cases <- sum(proportion >= cutoff, na.rm = TRUE)
+                positive_rate <- (positive_cases / n) * 100
+                
+                # Group-wise analysis if groups provided
+                if (!is.null(groups)) {
+                    group_results <- by(proportion, groups, function(x) {
+                        pos_cases <- sum(x >= cutoff, na.rm = TRUE)
+                        pos_rate <- (pos_cases / length(x)) * 100
+                        return(list(positive_cases = pos_cases, positive_rate = pos_rate, n = length(x)))
+                    })
+                    
+                    for (group_name in names(group_results)) {
+                        results_data <- rbind(results_data, data.frame(
+                            cutoff = cutoff,
+                            group = group_name,
+                            positive_cases = group_results[[group_name]]$positive_cases,
+                            total_cases = group_results[[group_name]]$n,
+                            positive_rate = group_results[[group_name]]$positive_rate,
+                            stringsAsFactors = FALSE
+                        ))
+                    }
+                    
+                    # Chi-square test if groups provided and cutoff comparison enabled
+                    if (self$options$cutoff_comparison && length(unique(groups)) > 1) {
+                        group_pos <- tapply(proportion >= cutoff, groups, sum, na.rm = TRUE)
+                        group_total <- tapply(proportion, groups, length)
+                        
+                        # Create contingency table
+                        cont_table <- rbind(group_pos, group_total - group_pos)
+                        
+                        if (all(cont_table >= 5)) {
+                            chi_result <- tryCatch({
+                                chisq.test(cont_table)
+                            }, error = function(e) NULL)
+                            
+                            if (!is.null(chi_result)) {
+                                # Add statistical comparison result
+                                comp_table <- self$results$multiplecutoffs$comparisonstats
+                                comp_table$addRow(values = list(
+                                    cutoff = paste0(cutoff, "%"),
+                                    test_statistic = "Chi-Square",
+                                    statistic_value = chi_result$statistic,
+                                    p_value = chi_result$p.value,
+                                    interpretation = ifelse(chi_result$p.value < 0.05, 
+                                                           "Significant group difference", 
+                                                           "No significant group difference")
+                                ))
+                            }
+                        }
+                    }
+                } else {
+                    # Overall results when no groups
+                    results_data <- rbind(results_data, data.frame(
+                        cutoff = cutoff,
+                        group = "All",
+                        positive_cases = positive_cases,
+                        total_cases = n,
+                        positive_rate = positive_rate,
+                        stringsAsFactors = FALSE
+                    ))
+                }
+            }
+            
+            # Populate cutoff results table
+            cutoff_table <- self$results$multiplecutoffs$cutoffresults
+            for (i in seq_len(nrow(results_data))) {
+                cutoff_table$addRow(values = list(
+                    cutoff_threshold = paste0(results_data$cutoff[i], "%"),
+                    group_name = results_data$group[i],
+                    positive_count = results_data$positive_cases[i],
+                    total_count = results_data$total_cases[i],
+                    positive_percentage = results_data$positive_rate[i],
+                    confidence_interval = paste0(
+                        round(binom.test(results_data$positive_cases[i], 
+                                       results_data$total_cases[i])$conf.int[1] * 100, 1),
+                        " - ",
+                        round(binom.test(results_data$positive_cases[i], 
+                                       results_data$total_cases[i])$conf.int[2] * 100, 1),
+                        "%"
+                    )
+                ))
+            }
+            
+            # Generate cutoff comparison plot if enabled
+            if (self$options$show_plots) {
+                self$results$cutoffplot$setState(results_data)
+            }
+        },
+        
+        .performCPSAnalysis = function(intensity, proportion, groups) {
+            # Get CPS-specific variables
+            data <- self$data
+            
+            if (is.null(self$options$tumor_cells_var) || is.null(self$options$immune_cells_var)) {
+                warning("CPS analysis requires both tumor cells and immune cells variables")
+                return()
+            }
+            
+            tumor_cells <- data[[self$options$tumor_cells_var]]
+            immune_cells <- data[[self$options$immune_cells_var]]
+            
+            # Remove missing values
+            complete_cases <- complete.cases(tumor_cells, immune_cells, proportion)
+            tumor_cells <- tumor_cells[complete_cases]
+            immune_cells <- immune_cells[complete_cases]
+            proportion <- proportion[complete_cases]
+            
+            if (length(tumor_cells) == 0) {
+                warning("No complete CPS data available")
+                return()
+            }
+            
+            # Calculate CPS: (PD-L1+ tumor cells + PD-L1+ immune cells) / total viable tumor cells × 100
+            cps_scores <- ((tumor_cells + immune_cells) / proportion) * 100
+            cps_scores[proportion == 0] <- 0  # Handle division by zero
+            cps_scores[is.infinite(cps_scores)] <- 0
+            
+            # Standard CPS cutoffs for PD-L1
+            cps_cutoffs <- c(1, 10, 20)
+            
+            # Initialize CPS results table
+            cps_table <- self$results$cpsanalysis$cpsresults
+            
+            # Calculate results for each CPS cutoff
+            for (cutoff in cps_cutoffs) {
+                positive_cases <- sum(cps_scores >= cutoff, na.rm = TRUE)
+                positive_rate <- (positive_cases / length(cps_scores)) * 100
+                
+                # Get confidence interval
+                ci_result <- binom.test(positive_cases, length(cps_scores))
+                
+                cps_table$addRow(values = list(
+                    cps_cutoff = paste0("CPS ≥", cutoff),
+                    positive_count = positive_cases,
+                    total_count = length(cps_scores),
+                    positive_percentage = positive_rate,
+                    confidence_interval = paste0(
+                        round(ci_result$conf.int[1] * 100, 1), " - ",
+                        round(ci_result$conf.int[2] * 100, 1), "%"
+                    ),
+                    clinical_significance = switch(as.character(cutoff),
+                        "1" = "Eligible for immunotherapy combination",
+                        "10" = "Eligible for immunotherapy monotherapy", 
+                        "20" = "High PD-L1 expression threshold",
+                        "Other threshold"
+                    )
+                ))
+            }
+            
+            # Calculate descriptive statistics for CPS
+            cps_stats_table <- self$results$cpsanalysis$cpsstatistics
+            cps_stats_table$addRow(values = list(
+                statistic = "Mean CPS",
+                value = mean(cps_scores, na.rm = TRUE),
+                interpretation = "Average Combined Positive Score"
+            ))
+            cps_stats_table$addRow(values = list(
+                statistic = "Median CPS",
+                value = median(cps_scores, na.rm = TRUE),
+                interpretation = "Median Combined Positive Score"
+            ))
+            cps_stats_table$addRow(values = list(
+                statistic = "CPS Range",
+                value = paste(round(min(cps_scores, na.rm = TRUE), 1), "-", 
+                             round(max(cps_scores, na.rm = TRUE), 1)),
+                interpretation = "Minimum to Maximum CPS values"
+            ))
+            
+            # Group comparison for CPS if groups provided
+            if (!is.null(groups) && self$options$cutoff_comparison) {
+                groups_complete <- groups[complete_cases]
+                
+                # Mann-Whitney U test or Kruskal-Wallis for group differences
+                if (length(unique(groups_complete)) == 2) {
+                    group_test <- wilcox.test(cps_scores ~ groups_complete)
+                    test_name <- "Mann-Whitney U"
+                } else {
+                    group_test <- kruskal.test(cps_scores ~ groups_complete)
+                    test_name <- "Kruskal-Wallis"
+                }
+                
+                # Add group comparison result
+                cps_comp_table <- self$results$cpsanalysis$cpscomparison
+                cps_comp_table$addRow(values = list(
+                    comparison_type = "CPS Group Differences",
+                    test_statistic = test_name,
+                    statistic_value = ifelse(test_name == "Mann-Whitney U", 
+                                           group_test$statistic, 
+                                           group_test$statistic),
+                    p_value = group_test$p.value,
+                    interpretation = ifelse(group_test$p.value < 0.05,
+                                          "Significant CPS differences between groups",
+                                          "No significant CPS differences between groups")
+                ))
+            }
+            
+            # Store CPS data for plotting
+            if (self$options$show_plots) {
+                cps_plot_data <- data.frame(
+                    Sample = seq_along(cps_scores),
+                    CPS_Score = cps_scores,
+                    Group = if (!is.null(groups)) groups[complete_cases] else "All"
+                )
+                self$results$cpsplot$setState(cps_plot_data)
+            }
+        },
+        
+        .cutoffplot = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            
+            data <- image$state
+            
+            p <- ggplot2::ggplot(data, ggplot2::aes(x = factor(cutoff), y = positive_rate, fill = group)) +
+                ggplot2::geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+                ggplot2::labs(
+                    title = "Multiple Cut-off Analysis",
+                    subtitle = "Biomarker positivity rates across different thresholds",
+                    x = "Cut-off Threshold (%)",
+                    y = "Positive Rate (%)",
+                    fill = "Group"
+                ) +
+                ggplot2::scale_y_continuous(limits = c(0, 100)) +
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+                ggtheme
+            
+            print(p)
+            TRUE
+        },
+        
+        .cpsplot = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            
+            data <- image$state
+            
+            # Create CPS distribution plot
+            if (length(unique(data$Group)) > 1) {
+                p <- ggplot2::ggplot(data, ggplot2::aes(x = Group, y = CPS_Score, fill = Group)) +
+                    ggplot2::geom_boxplot(alpha = 0.7) +
+                    ggplot2::geom_point(position = ggplot2::position_jitter(width = 0.2), alpha = 0.5) +
+                    ggplot2::geom_hline(yintercept = c(1, 10, 20), linetype = "dashed", color = "red") +
+                    ggplot2::labs(
+                        title = "Combined Positive Score (CPS) Distribution",
+                        subtitle = "PD-L1 CPS across groups with clinical thresholds",
+                        x = "Group",
+                        y = "CPS Score",
+                        fill = "Group"
+                    )
+            } else {
+                p <- ggplot2::ggplot(data, ggplot2::aes(x = CPS_Score)) +
+                    ggplot2::geom_histogram(bins = 30, alpha = 0.7, fill = "steelblue") +
+                    ggplot2::geom_vline(xintercept = c(1, 10, 20), linetype = "dashed", color = "red") +
+                    ggplot2::labs(
+                        title = "Combined Positive Score (CPS) Distribution",
+                        subtitle = "PD-L1 CPS histogram with clinical thresholds",
+                        x = "CPS Score",
+                        y = "Frequency"
+                    )
+            }
+            
+            p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+        
+        # Molecular classification methods
+        .performMolecularClassification = function() {
+            data <- self$data
+            if (nrow(data) == 0) return()
+            
+            # Get molecular classification markers
+            if (is.null(self$options$primary_marker1) || is.null(self$options$primary_marker2)) {
+                return()
+            }
+            
+            marker1 <- data[[self$options$primary_marker1]]
+            marker2 <- data[[self$options$primary_marker2]]
+            secondary <- if (!is.null(self$options$secondary_marker)) {
+                data[[self$options$secondary_marker]]
+            } else {
+                NULL
+            }
+            
+            # Parse cutoffs
+            cutoffs <- private$.parseCutoffs(self$options$classification_cutoffs, c(20, 20, 70))
+            
+            # Perform classification based on system
+            classification_results <- private$.classifyMolecularSubtypes(
+                marker1, marker2, secondary, cutoffs, self$options$classification_system
+            )
+            
+            # Populate classification results table
+            private$.populateClassificationTable(classification_results)
+            
+            # Calculate subtype distribution
+            private$.populateSubtypeDistribution(classification_results$molecular_subtype)
+            
+            # Perform statistical analysis if requested
+            if (self$options$subtype_statistics) {
+                private$.performSubtypeStatistics(classification_results)
+            }
+            
+            # Analyze checkpoint inhibitor expression if available
+            if (!is.null(self$options$pd1_marker) || !is.null(self$options$pdl1_marker)) {
+                private$.analyzeCheckpointExpression(classification_results$molecular_subtype)
+            }
+            
+            # Generate plots
+            if (self$options$subtype_visualization) {
+                private$.generateSubtypePlots(classification_results)
+            }
+        },
+        
+        .classifyMolecularSubtypes = function(marker1, marker2, secondary, cutoffs, system) {
+            n <- length(marker1)
+            
+            # Apply cutoffs
+            marker1_pos <- marker1 >= cutoffs[1]
+            marker2_pos <- marker2 >= cutoffs[2]
+            secondary_pos <- if (!is.null(secondary)) secondary >= cutoffs[3] else rep(FALSE, n)
+            
+            # Initialize results
+            molecular_subtype <- character(n)
+            confidence_score <- numeric(n)
+            
+            if (system == "bladder_mibc") {
+                # Bladder MIBC classification (GATA3/CK5/6/p16)
+                # Luminal: GATA3+, CK5/6-
+                luminal <- marker1_pos & !marker2_pos
+                molecular_subtype[luminal & secondary_pos] <- "Luminal Unstable (LumU)"
+                molecular_subtype[luminal & !secondary_pos] <- "Luminal Papillary (LumP)"
+                
+                # Basal: GATA3-, CK5/6+
+                molecular_subtype[!marker1_pos & marker2_pos] <- "Basal"
+                
+                # Other: GATA3-, CK5/6-
+                molecular_subtype[!marker1_pos & !marker2_pos] <- "Other"
+                
+                # Calculate confidence scores based on marker levels
+                confidence_score <- pmin(
+                    abs(marker1 - cutoffs[1]) / cutoffs[1],
+                    abs(marker2 - cutoffs[2]) / cutoffs[2]
+                ) * 100
+                
+            } else if (system == "breast_cancer") {
+                # Breast cancer subtypes (example implementation)
+                # This would need specific marker combinations
+                molecular_subtype[] <- "Not Implemented"
+                confidence_score[] <- 0
+                
+            } else if (system == "custom") {
+                # Custom classification logic
+                molecular_subtype[] <- "Custom Classification"
+                confidence_score[] <- 50
+            }
+            
+            return(data.frame(
+                sample_id = 1:n,
+                marker1_status = ifelse(marker1_pos, "Positive", "Negative"),
+                marker2_status = ifelse(marker2_pos, "Positive", "Negative"),
+                secondary_status = if (!is.null(secondary)) ifelse(secondary_pos, "Positive", "Negative") else "N/A",
+                molecular_subtype = molecular_subtype,
+                confidence_score = confidence_score,
+                stringsAsFactors = FALSE
+            ))
+        },
+        
+        .populateClassificationTable = function(results) {
+            table <- self$results$molecularclassification$classificationtable
+            
+            for (i in 1:nrow(results)) {
+                row <- list()
+                row$sample_id <- results$sample_id[i]
+                row$marker1_status <- results$marker1_status[i]
+                row$marker2_status <- results$marker2_status[i]
+                row$secondary_status <- results$secondary_status[i]
+                row$molecular_subtype <- results$molecular_subtype[i]
+                row$confidence_score <- results$confidence_score[i]
+                
+                table$addRow(rowKey = i, values = row)
+            }
+        },
+        
+        .populateSubtypeDistribution = function(subtypes) {
+            table <- self$results$molecularclassification$subtypedistribution
+            
+            # Calculate frequencies
+            subtype_counts <- table(subtypes)
+            total <- length(subtypes)
+            
+            for (subtype in names(subtype_counts)) {
+                count <- subtype_counts[[subtype]]
+                percentage <- round((count / total) * 100, 2)
+                
+                # Calculate 95% CI for proportion
+                prop_test <- binom.test(count, total)
+                ci_lower <- round(prop_test$conf.int[1] * 100, 2)
+                ci_upper <- round(prop_test$conf.int[2] * 100, 2)
+                ci_text <- paste0("[", ci_lower, "%, ", ci_upper, "%]")
+                
+                row <- list(
+                    subtype = subtype,
+                    count = count,
+                    percentage = percentage,
+                    confidence_interval = ci_text
+                )
+                
+                table$addRow(rowKey = subtype, values = row)
+            }
+        },
+        
+        .performSubtypeStatistics = function(results) {
+            table <- self$results$molecularclassification$subtypestatistics
+            
+            # Chi-square test for subtype distribution
+            subtype_counts <- table(results$molecular_subtype)
+            if (length(subtype_counts) > 1) {
+                chi_test <- chisq.test(subtype_counts)
+                
+                row <- list(
+                    comparison = "Overall subtype distribution",
+                    test_statistic = "Chi-square",
+                    statistic_value = round(chi_test$statistic, 3),
+                    p_value = chi_test$p.value,
+                    effect_size = round(sqrt(chi_test$statistic / sum(subtype_counts)), 3),
+                    interpretation = ifelse(chi_test$p.value < 0.05, 
+                        "Subtypes differ significantly", 
+                        "No significant difference")
+                )
+                
+                table$addRow(rowKey = "chi_square", values = row)
+            }
+        },
+        
+        .analyzeCheckpointExpression = function(subtypes) {
+            table <- self$results$molecularclassification$checkpointanalysis
+            data <- self$data
+            
+            # Analyze PD-1 expression
+            if (!is.null(self$options$pd1_marker)) {
+                pd1_data <- data[[self$options$pd1_marker]]
+                private$.analyzeCheckpointBySubtype(pd1_data, subtypes, "PD-1", table)
+            }
+            
+            # Analyze PD-L1 expression
+            if (!is.null(self$options$pdl1_marker)) {
+                pdl1_data <- data[[self$options$pdl1_marker]]
+                private$.analyzeCheckpointBySubtype(pdl1_data, subtypes, "PD-L1", table)
+            }
+        },
+        
+        .analyzeCheckpointBySubtype = function(marker_data, subtypes, marker_name, table) {
+            # Parse checkpoint cutoffs
+            cutoffs <- private$.parseCutoffs(self$options$checkpoint_cutoffs, c(1, 10))
+            
+            for (cutoff in cutoffs) {
+                positive <- marker_data >= cutoff
+                
+                # Calculate positivity rates by subtype
+                subtype_levels <- unique(subtypes)
+                
+                for (subtype in subtype_levels) {
+                    subtype_mask <- subtypes == subtype
+                    positive_count <- sum(positive[subtype_mask], na.rm = TRUE)
+                    total_count <- sum(subtype_mask, na.rm = TRUE)
+                    positive_rate <- round((positive_count / total_count) * 100, 2)
+                    
+                    # Chi-square test comparing this subtype to others
+                    other_positive <- sum(positive[!subtype_mask], na.rm = TRUE)
+                    other_total <- sum(!subtype_mask, na.rm = TRUE)
+                    
+                    if (other_total > 0) {
+                        contingency_table <- matrix(c(
+                            positive_count, total_count - positive_count,
+                            other_positive, other_total - other_positive
+                        ), nrow = 2)
+                        
+                        fisher_test <- fisher.test(contingency_table)
+                        p_value <- fisher_test$p.value
+                    } else {
+                        p_value <- NA
+                    }
+                    
+                    row <- list(
+                        molecular_subtype = subtype,
+                        marker = marker_name,
+                        cutoff = paste0(cutoff, "%"),
+                        positive_count = positive_count,
+                        total_count = total_count,
+                        positive_rate = positive_rate,
+                        p_value = p_value
+                    )
+                    
+                    row_key <- paste(marker_name, cutoff, subtype, sep = "_")
+                    table$addRow(rowKey = row_key, values = row)
+                }
+            }
+        },
+        
+        .generateSubtypePlots = function(results) {
+            # Store data for subtype distribution plot
+            subtype_data <- data.frame(
+                subtype = results$molecular_subtype,
+                confidence = results$confidence_score
+            )
+            self$results$subtypeplot$setState(subtype_data)
+            
+            # Store data for checkpoint expression plot if available
+            if (!is.null(self$options$pd1_marker) || !is.null(self$options$pdl1_marker)) {
+                data <- self$data
+                checkpoint_data <- list(
+                    subtypes = results$molecular_subtype,
+                    pd1 = if (!is.null(self$options$pd1_marker)) data[[self$options$pd1_marker]] else NULL,
+                    pdl1 = if (!is.null(self$options$pdl1_marker)) data[[self$options$pdl1_marker]] else NULL
+                )
+                self$results$checkpointplot$setState(checkpoint_data)
+            }
+        },
+        
+        .subtypeplot = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            
+            data <- image$state
+            
+            # Create subtype distribution plot
+            subtype_counts <- table(data$subtype)
+            plot_data <- data.frame(
+                Subtype = names(subtype_counts),
+                Count = as.numeric(subtype_counts),
+                Percentage = round(as.numeric(subtype_counts) / nrow(data) * 100, 1)
+            )
+            
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = reorder(Subtype, Count), y = Count, fill = Subtype)) +
+                ggplot2::geom_bar(stat = "identity", alpha = 0.7) +
+                ggplot2::geom_text(ggplot2::aes(label = paste0(Count, "\n(", Percentage, "%)")), 
+                                  vjust = -0.5) +
+                ggplot2::labs(
+                    title = "Molecular Subtype Distribution",
+                    subtitle = "Frequency and percentage of each molecular subtype",
+                    x = "Molecular Subtype",
+                    y = "Count",
+                    fill = "Subtype"
+                ) +
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+                ggtheme
+            
+            print(p)
+            TRUE
+        },
+        
+        .checkpointplot = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            
+            data <- image$state
+            cutoffs <- private$.parseCutoffs(self$options$checkpoint_cutoffs, c(1, 10))
+            
+            plot_data <- data.frame()
+            
+            # Process PD-1 data
+            if (!is.null(data$pd1)) {
+                for (cutoff in cutoffs) {
+                    subtype_rates <- tapply(data$pd1 >= cutoff, data$subtypes, function(x) mean(x, na.rm = TRUE) * 100)
+                    
+                    temp_data <- data.frame(
+                        Subtype = names(subtype_rates),
+                        PositiveRate = as.numeric(subtype_rates),
+                        Marker = "PD-1",
+                        Cutoff = paste0(cutoff, "%")
+                    )
+                    plot_data <- rbind(plot_data, temp_data)
+                }
+            }
+            
+            # Process PD-L1 data
+            if (!is.null(data$pdl1)) {
+                for (cutoff in cutoffs) {
+                    subtype_rates <- tapply(data$pdl1 >= cutoff, data$subtypes, function(x) mean(x, na.rm = TRUE) * 100)
+                    
+                    temp_data <- data.frame(
+                        Subtype = names(subtype_rates),
+                        PositiveRate = as.numeric(subtype_rates),
+                        Marker = "PD-L1", 
+                        Cutoff = paste0(cutoff, "%")
+                    )
+                    plot_data <- rbind(plot_data, temp_data)
+                }
+            }
+            
+            if (nrow(plot_data) > 0) {
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Subtype, y = PositiveRate, fill = Marker)) +
+                    ggplot2::geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+                    ggplot2::facet_wrap(~ Cutoff, scales = "free_y") +
+                    ggplot2::labs(
+                        title = "Checkpoint Inhibitor Expression by Molecular Subtype",
+                        subtitle = "PD-1/PD-L1 positivity rates across different cutoffs",
+                        x = "Molecular Subtype",
+                        y = "Positive Rate (%)",
+                        fill = "Marker"
+                    ) +
+                    ggplot2::scale_y_continuous(limits = c(0, 100)) +
+                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+                    ggtheme
+                
+                print(p)
+            }
+            
+            TRUE
+        },
+        
+        .parseCutoffs = function(cutoff_string, defaults) {
+            tryCatch({
+                cutoffs <- as.numeric(unlist(strsplit(cutoff_string, ",")))
+                cutoffs <- cutoffs[!is.na(cutoffs)]
+                if (length(cutoffs) == 0) cutoffs <- defaults
+                return(cutoffs)
+            }, error = function(e) {
+                return(defaults)
             })
         }
     )

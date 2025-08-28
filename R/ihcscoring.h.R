@@ -23,6 +23,12 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             quality_control = TRUE,
             clinical_interpretation = TRUE,
             export_results = FALSE,
+            multiple_cutoffs = FALSE,
+            cutoff_values = "1, 5, 10, 25, 50",
+            cps_analysis = FALSE,
+            immune_cells_var = NULL,
+            tumor_cells_var = NULL,
+            cutoff_comparison = TRUE,
             confidence_level = 0.95,
             bootstrap_n = 1000,
             automated_analysis = FALSE,
@@ -33,7 +39,18 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             maximum_nuclear_area = 2000,
             batch_processing = FALSE,
             image_format = "tiff",
-            validation_metrics = TRUE, ...) {
+            validation_metrics = TRUE,
+            molecular_classification = FALSE,
+            classification_system = "bladder_mibc",
+            primary_marker1 = NULL,
+            primary_marker2 = NULL,
+            secondary_marker = NULL,
+            classification_cutoffs = "20, 20, 70",
+            pd1_marker = NULL,
+            pdl1_marker = NULL,
+            checkpoint_cutoffs = "1, 10",
+            subtype_statistics = TRUE,
+            subtype_visualization = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -141,6 +158,36 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "export_results",
                 export_results,
                 default=FALSE)
+            private$..multiple_cutoffs <- jmvcore::OptionBool$new(
+                "multiple_cutoffs",
+                multiple_cutoffs,
+                default=FALSE)
+            private$..cutoff_values <- jmvcore::OptionString$new(
+                "cutoff_values",
+                cutoff_values,
+                default="1, 5, 10, 25, 50")
+            private$..cps_analysis <- jmvcore::OptionBool$new(
+                "cps_analysis",
+                cps_analysis,
+                default=FALSE)
+            private$..immune_cells_var <- jmvcore::OptionVariable$new(
+                "immune_cells_var",
+                immune_cells_var,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..tumor_cells_var <- jmvcore::OptionVariable$new(
+                "tumor_cells_var",
+                tumor_cells_var,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..cutoff_comparison <- jmvcore::OptionBool$new(
+                "cutoff_comparison",
+                cutoff_comparison,
+                default=TRUE)
             private$..confidence_level <- jmvcore::OptionNumber$new(
                 "confidence_level",
                 confidence_level,
@@ -204,6 +251,70 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "validation_metrics",
                 validation_metrics,
                 default=TRUE)
+            private$..molecular_classification <- jmvcore::OptionBool$new(
+                "molecular_classification",
+                molecular_classification,
+                default=FALSE)
+            private$..classification_system <- jmvcore::OptionList$new(
+                "classification_system",
+                classification_system,
+                options=list(
+                    "bladder_mibc",
+                    "breast_cancer",
+                    "lung_cancer",
+                    "custom"),
+                default="bladder_mibc")
+            private$..primary_marker1 <- jmvcore::OptionVariable$new(
+                "primary_marker1",
+                primary_marker1,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..primary_marker2 <- jmvcore::OptionVariable$new(
+                "primary_marker2",
+                primary_marker2,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..secondary_marker <- jmvcore::OptionVariable$new(
+                "secondary_marker",
+                secondary_marker,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..classification_cutoffs <- jmvcore::OptionString$new(
+                "classification_cutoffs",
+                classification_cutoffs,
+                default="20, 20, 70")
+            private$..pd1_marker <- jmvcore::OptionVariable$new(
+                "pd1_marker",
+                pd1_marker,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..pdl1_marker <- jmvcore::OptionVariable$new(
+                "pdl1_marker",
+                pdl1_marker,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..checkpoint_cutoffs <- jmvcore::OptionString$new(
+                "checkpoint_cutoffs",
+                checkpoint_cutoffs,
+                default="1, 10")
+            private$..subtype_statistics <- jmvcore::OptionBool$new(
+                "subtype_statistics",
+                subtype_statistics,
+                default=TRUE)
+            private$..subtype_visualization <- jmvcore::OptionBool$new(
+                "subtype_visualization",
+                subtype_visualization,
+                default=TRUE)
 
             self$.addOption(private$..intensity_var)
             self$.addOption(private$..proportion_var)
@@ -222,6 +333,12 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..quality_control)
             self$.addOption(private$..clinical_interpretation)
             self$.addOption(private$..export_results)
+            self$.addOption(private$..multiple_cutoffs)
+            self$.addOption(private$..cutoff_values)
+            self$.addOption(private$..cps_analysis)
+            self$.addOption(private$..immune_cells_var)
+            self$.addOption(private$..tumor_cells_var)
+            self$.addOption(private$..cutoff_comparison)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..bootstrap_n)
             self$.addOption(private$..automated_analysis)
@@ -233,6 +350,17 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..batch_processing)
             self$.addOption(private$..image_format)
             self$.addOption(private$..validation_metrics)
+            self$.addOption(private$..molecular_classification)
+            self$.addOption(private$..classification_system)
+            self$.addOption(private$..primary_marker1)
+            self$.addOption(private$..primary_marker2)
+            self$.addOption(private$..secondary_marker)
+            self$.addOption(private$..classification_cutoffs)
+            self$.addOption(private$..pd1_marker)
+            self$.addOption(private$..pdl1_marker)
+            self$.addOption(private$..checkpoint_cutoffs)
+            self$.addOption(private$..subtype_statistics)
+            self$.addOption(private$..subtype_visualization)
         }),
     active = list(
         intensity_var = function() private$..intensity_var$value,
@@ -252,6 +380,12 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         quality_control = function() private$..quality_control$value,
         clinical_interpretation = function() private$..clinical_interpretation$value,
         export_results = function() private$..export_results$value,
+        multiple_cutoffs = function() private$..multiple_cutoffs$value,
+        cutoff_values = function() private$..cutoff_values$value,
+        cps_analysis = function() private$..cps_analysis$value,
+        immune_cells_var = function() private$..immune_cells_var$value,
+        tumor_cells_var = function() private$..tumor_cells_var$value,
+        cutoff_comparison = function() private$..cutoff_comparison$value,
         confidence_level = function() private$..confidence_level$value,
         bootstrap_n = function() private$..bootstrap_n$value,
         automated_analysis = function() private$..automated_analysis$value,
@@ -262,7 +396,18 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         maximum_nuclear_area = function() private$..maximum_nuclear_area$value,
         batch_processing = function() private$..batch_processing$value,
         image_format = function() private$..image_format$value,
-        validation_metrics = function() private$..validation_metrics$value),
+        validation_metrics = function() private$..validation_metrics$value,
+        molecular_classification = function() private$..molecular_classification$value,
+        classification_system = function() private$..classification_system$value,
+        primary_marker1 = function() private$..primary_marker1$value,
+        primary_marker2 = function() private$..primary_marker2$value,
+        secondary_marker = function() private$..secondary_marker$value,
+        classification_cutoffs = function() private$..classification_cutoffs$value,
+        pd1_marker = function() private$..pd1_marker$value,
+        pdl1_marker = function() private$..pdl1_marker$value,
+        checkpoint_cutoffs = function() private$..checkpoint_cutoffs$value,
+        subtype_statistics = function() private$..subtype_statistics$value,
+        subtype_visualization = function() private$..subtype_visualization$value),
     private = list(
         ..intensity_var = NA,
         ..proportion_var = NA,
@@ -281,6 +426,12 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..quality_control = NA,
         ..clinical_interpretation = NA,
         ..export_results = NA,
+        ..multiple_cutoffs = NA,
+        ..cutoff_values = NA,
+        ..cps_analysis = NA,
+        ..immune_cells_var = NA,
+        ..tumor_cells_var = NA,
+        ..cutoff_comparison = NA,
         ..confidence_level = NA,
         ..bootstrap_n = NA,
         ..automated_analysis = NA,
@@ -291,7 +442,18 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..maximum_nuclear_area = NA,
         ..batch_processing = NA,
         ..image_format = NA,
-        ..validation_metrics = NA)
+        ..validation_metrics = NA,
+        ..molecular_classification = NA,
+        ..classification_system = NA,
+        ..primary_marker1 = NA,
+        ..primary_marker2 = NA,
+        ..secondary_marker = NA,
+        ..classification_cutoffs = NA,
+        ..pd1_marker = NA,
+        ..pdl1_marker = NA,
+        ..checkpoint_cutoffs = NA,
+        ..subtype_statistics = NA,
+        ..subtype_visualization = NA)
 )
 
 ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -311,6 +473,13 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         digitalvalidation = function() private$.items[["digitalvalidation"]],
         automatedanalysis = function() private$.items[["automatedanalysis"]],
         advancedmetrics = function() private$.items[["advancedmetrics"]],
+        multiplecutoffs = function() private$.items[["multiplecutoffs"]],
+        cutoffplot = function() private$.items[["cutoffplot"]],
+        cpsanalysis = function() private$.items[["cpsanalysis"]],
+        cpsplot = function() private$.items[["cpsplot"]],
+        molecularclassification = function() private$.items[["molecularclassification"]],
+        subtypeplot = function() private$.items[["subtypeplot"]],
+        checkpointplot = function() private$.items[["checkpointplot"]],
         exportdata = function() private$.items[["exportdata"]]),
     private = list(),
     public=list(
@@ -862,6 +1031,356 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="distribution", 
                                     `title`="Distribution", 
                                     `type`="text"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    cutoffresults = function() private$.items[["cutoffresults"]],
+                    comparisonstats = function() private$.items[["comparisonstats"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="multiplecutoffs",
+                            title="Multiple Cut-off Analysis")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="cutoffresults",
+                            title="Cut-off Analysis Results",
+                            columns=list(
+                                list(
+                                    `name`="cutoff_threshold", 
+                                    `title`="Cut-off Threshold", 
+                                    `type`="text"),
+                                list(
+                                    `name`="group_name", 
+                                    `title`="Group", 
+                                    `type`="text"),
+                                list(
+                                    `name`="positive_count", 
+                                    `title`="Positive Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="total_count", 
+                                    `title`="Total Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="positive_percentage", 
+                                    `title`="Positive Rate (%)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="confidence_interval", 
+                                    `title`="95% CI", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="comparisonstats",
+                            title="Statistical Comparisons Across Cut-offs",
+                            visible="(cutoff_comparison)",
+                            columns=list(
+                                list(
+                                    `name`="cutoff", 
+                                    `title`="Cut-off", 
+                                    `type`="text"),
+                                list(
+                                    `name`="test_statistic", 
+                                    `title`="Test Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="statistic_value", 
+                                    `title`="Statistic Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="P-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))}))$new(options=options))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="cutoffplot",
+                title="Multiple Cut-off Analysis Plot",
+                width=600,
+                height=400,
+                visible="(multiple_cutoffs && show_plots)",
+                requiresData=TRUE,
+                renderFun=".cutoffplot",
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "cutoff_values",
+                    "show_plots",
+                    "group_var")))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    cpsresults = function() private$.items[["cpsresults"]],
+                    cpsstatistics = function() private$.items[["cpsstatistics"]],
+                    cpscomparison = function() private$.items[["cpscomparison"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="cpsanalysis",
+                            title="Combined Positive Score (CPS) Analysis")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="cpsresults",
+                            title="CPS Analysis Results",
+                            columns=list(
+                                list(
+                                    `name`="cps_cutoff", 
+                                    `title`="CPS Cut-off", 
+                                    `type`="text"),
+                                list(
+                                    `name`="positive_count", 
+                                    `title`="Positive Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="total_count", 
+                                    `title`="Total Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="positive_percentage", 
+                                    `title`="Positive Rate (%)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="confidence_interval", 
+                                    `title`="95% CI", 
+                                    `type`="text"),
+                                list(
+                                    `name`="clinical_significance", 
+                                    `title`="Clinical Significance", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="cpsstatistics",
+                            title="CPS Descriptive Statistics",
+                            columns=list(
+                                list(
+                                    `name`="statistic", 
+                                    `title`="Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="text"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="cpscomparison",
+                            title="CPS Group Comparison",
+                            visible="(group_var && cutoff_comparison)",
+                            columns=list(
+                                list(
+                                    `name`="comparison_type", 
+                                    `title`="Comparison Type", 
+                                    `type`="text"),
+                                list(
+                                    `name`="test_statistic", 
+                                    `title`="Test Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="statistic_value", 
+                                    `title`="Statistic Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="P-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))}))$new(options=options))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="cpsplot",
+                title="Combined Positive Score Distribution Plot",
+                width=600,
+                height=400,
+                visible="(cps_analysis && show_plots)",
+                requiresData=TRUE,
+                renderFun=".cpsplot",
+                clearWith=list(
+                    "cps_analysis",
+                    "tumor_cells_var",
+                    "immune_cells_var",
+                    "show_plots",
+                    "group_var")))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    classificationtable = function() private$.items[["classificationtable"]],
+                    subtypedistribution = function() private$.items[["subtypedistribution"]],
+                    subtypestatistics = function() private$.items[["subtypestatistics"]],
+                    checkpointanalysis = function() private$.items[["checkpointanalysis"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="molecularclassification",
+                            title="Molecular Subtyping Analysis")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="classificationtable",
+                            title="Molecular Classification Results",
+                            columns=list(
+                                list(
+                                    `name`="sample_id", 
+                                    `title`="Sample ID", 
+                                    `type`="text"),
+                                list(
+                                    `name`="marker1_status", 
+                                    `title`="Marker 1 Status", 
+                                    `type`="text"),
+                                list(
+                                    `name`="marker2_status", 
+                                    `title`="Marker 2 Status", 
+                                    `type`="text"),
+                                list(
+                                    `name`="secondary_status", 
+                                    `title`="Secondary Marker", 
+                                    `type`="text"),
+                                list(
+                                    `name`="molecular_subtype", 
+                                    `title`="Molecular Subtype", 
+                                    `type`="text"),
+                                list(
+                                    `name`="confidence_score", 
+                                    `title`="Confidence Score", 
+                                    `type`="number", 
+                                    `format`="zto"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="subtypedistribution",
+                            title="Molecular Subtype Distribution",
+                            columns=list(
+                                list(
+                                    `name`="subtype", 
+                                    `title`="Molecular Subtype", 
+                                    `type`="text"),
+                                list(
+                                    `name`="count", 
+                                    `title`="Count", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="percentage", 
+                                    `title`="Percentage (%)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="confidence_interval", 
+                                    `title`="95% CI", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="subtypestatistics",
+                            title="Subtype Statistical Comparison",
+                            visible="(subtype_statistics)",
+                            columns=list(
+                                list(
+                                    `name`="comparison", 
+                                    `title`="Comparison", 
+                                    `type`="text"),
+                                list(
+                                    `name`="test_statistic", 
+                                    `title`="Test Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="statistic_value", 
+                                    `title`="Statistic Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="P-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="effect_size", 
+                                    `title`="Effect Size", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="checkpointanalysis",
+                            title="Checkpoint Inhibitor Expression by Subtype",
+                            visible="(pd1_marker || pdl1_marker)",
+                            columns=list(
+                                list(
+                                    `name`="molecular_subtype", 
+                                    `title`="Molecular Subtype", 
+                                    `type`="text"),
+                                list(
+                                    `name`="marker", 
+                                    `title`="Marker", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cutoff", 
+                                    `title`="Cut-off (%)", 
+                                    `type`="text"),
+                                list(
+                                    `name`="positive_count", 
+                                    `title`="Positive Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="total_count", 
+                                    `title`="Total Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="positive_rate", 
+                                    `title`="Positive Rate (%)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="P-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))}))$new(options=options))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="subtypeplot",
+                title="Molecular Subtype Distribution Plot",
+                width=600,
+                height=400,
+                visible="(molecular_classification && subtype_visualization)",
+                requiresData=TRUE,
+                renderFun=".subtypeplot",
+                clearWith=list(
+                    "molecular_classification",
+                    "classification_system",
+                    "subtype_visualization")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="checkpointplot",
+                title="Checkpoint Inhibitor Expression Plot",
+                width=700,
+                height=500,
+                visible="(molecular_classification && (pd1_marker || pdl1_marker) && subtype_visualization)",
+                requiresData=TRUE,
+                renderFun=".checkpointplot",
+                clearWith=list(
+                    "molecular_classification",
+                    "pd1_marker",
+                    "pdl1_marker",
+                    "checkpoint_cutoffs",
+                    "subtype_visualization")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="exportdata",
@@ -896,13 +1415,18 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Binary Result", 
                         `type`="text"),
                     list(
+                        `name`="molecular_subtype", 
+                        `title`="Molecular Subtype", 
+                        `type`="text"),
+                    list(
                         `name`="group", 
                         `title`="Group", 
                         `type`="text")),
                 clearWith=list(
                     "export_results",
                     "intensity_var",
-                    "proportion_var")))}))
+                    "proportion_var",
+                    "molecular_classification")))}))
 
 ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ihcscoringBase",
@@ -949,6 +1473,17 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param quality_control perform quality control checks and outlier detection
 #' @param clinical_interpretation provide clinical context and interpretation
 #' @param export_results format results for external analysis or reporting
+#' @param multiple_cutoffs analyze biomarker positivity across multiple
+#'   pre-specified cut-off values
+#' @param cutoff_values comma-separated list of percentage cut-off values for
+#'   positivity analysis
+#' @param cps_analysis calculate Combined Positive Score for PD-L1 assessment
+#' @param immune_cells_var percentage of PD-L1+ immune cells (required for CPS
+#'   calculation)
+#' @param tumor_cells_var percentage of PD-L1+ tumor cells (required for CPS
+#'   calculation)
+#' @param cutoff_comparison perform statistical comparisons across different
+#'   cut-off values
 #' @param confidence_level confidence level for statistical intervals
 #' @param bootstrap_n number of bootstrap replicates for confidence intervals
 #' @param automated_analysis enable automated quantification from histological
@@ -965,6 +1500,22 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param image_format format of input histological images
 #' @param validation_metrics compare automated results with manual scoring
 #'   when available
+#' @param molecular_classification perform molecular subtype classification
+#'   based on marker combinations
+#' @param classification_system molecular classification system to apply
+#' @param primary_marker1 first primary marker for molecular classification
+#' @param primary_marker2 second primary marker for molecular classification
+#' @param secondary_marker secondary marker for subtype refinement
+#' @param classification_cutoffs comma-separated cut-off values for each
+#'   marker in order (primary1, primary2, secondary)
+#' @param pd1_marker PD-1 expression scores for immune checkpoint analysis
+#' @param pdl1_marker PD-L1 expression scores for immune checkpoint analysis
+#' @param checkpoint_cutoffs comma-separated cut-off values for PD-1/PD-L1
+#'   positivity analysis
+#' @param subtype_statistics calculate statistical comparisons between
+#'   molecular subtypes
+#' @param subtype_visualization create plots showing molecular subtype
+#'   distributions and associations
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
@@ -989,6 +1540,19 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$automatedanalysis$validationplot} \tab \tab \tab \tab \tab Scatter plot of manual vs automated scores \cr
 #'   \code{results$advancedmetrics$reliabilitymetrics} \tab \tab \tab \tab \tab Comprehensive reliability and consistency metrics \cr
 #'   \code{results$advancedmetrics$distributionanalysis} \tab \tab \tab \tab \tab Normality testing and distribution characteristics \cr
+#'   \code{results$multiplecutoffs$cutoffresults} \tab \tab \tab \tab \tab Positivity rates across different cut-off thresholds \cr
+#'   \code{results$multiplecutoffs$comparisonstats} \tab \tab \tab \tab \tab Statistical tests comparing groups across different cut-off values \cr
+#'   \code{results$cutoffplot} \tab \tab \tab \tab \tab Biomarker positivity rates across different thresholds \cr
+#'   \code{results$cpsanalysis$cpsresults} \tab \tab \tab \tab \tab Combined Positive Score analysis for PD-L1 assessment \cr
+#'   \code{results$cpsanalysis$cpsstatistics} \tab \tab \tab \tab \tab Summary statistics for Combined Positive Score \cr
+#'   \code{results$cpsanalysis$cpscomparison} \tab \tab \tab \tab \tab Statistical comparison of CPS between groups \cr
+#'   \code{results$cpsplot} \tab \tab \tab \tab \tab Distribution of CPS scores with clinical thresholds \cr
+#'   \code{results$molecularclassification$classificationtable} \tab \tab \tab \tab \tab Molecular subtype classification based on marker combinations \cr
+#'   \code{results$molecularclassification$subtypedistribution} \tab \tab \tab \tab \tab Frequency and percentage of each molecular subtype \cr
+#'   \code{results$molecularclassification$subtypestatistics} \tab \tab \tab \tab \tab Statistical comparisons between molecular subtypes \cr
+#'   \code{results$molecularclassification$checkpointanalysis} \tab \tab \tab \tab \tab PD-1/PD-L1 expression patterns across molecular subtypes \cr
+#'   \code{results$subtypeplot} \tab \tab \tab \tab \tab Visual representation of molecular subtype frequencies \cr
+#'   \code{results$checkpointplot} \tab \tab \tab \tab \tab PD-1/PD-L1 expression patterns across molecular subtypes \cr
 #'   \code{results$exportdata} \tab \tab \tab \tab \tab Formatted results for external analysis or reporting \cr
 #' }
 #'
@@ -1018,6 +1582,12 @@ ihcscoring <- function(
     quality_control = TRUE,
     clinical_interpretation = TRUE,
     export_results = FALSE,
+    multiple_cutoffs = FALSE,
+    cutoff_values = "1, 5, 10, 25, 50",
+    cps_analysis = FALSE,
+    immune_cells_var,
+    tumor_cells_var,
+    cutoff_comparison = TRUE,
     confidence_level = 0.95,
     bootstrap_n = 1000,
     automated_analysis = FALSE,
@@ -1028,7 +1598,18 @@ ihcscoring <- function(
     maximum_nuclear_area = 2000,
     batch_processing = FALSE,
     image_format = "tiff",
-    validation_metrics = TRUE) {
+    validation_metrics = TRUE,
+    molecular_classification = FALSE,
+    classification_system = "bladder_mibc",
+    primary_marker1,
+    primary_marker2,
+    secondary_marker,
+    classification_cutoffs = "20, 20, 70",
+    pd1_marker,
+    pdl1_marker,
+    checkpoint_cutoffs = "1, 10",
+    subtype_statistics = TRUE,
+    subtype_visualization = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcscoring requires jmvcore to be installed (restart may be required)")
@@ -1037,13 +1618,27 @@ ihcscoring <- function(
     if ( ! missing(proportion_var)) proportion_var <- jmvcore::resolveQuo(jmvcore::enquo(proportion_var))
     if ( ! missing(sample_id_var)) sample_id_var <- jmvcore::resolveQuo(jmvcore::enquo(sample_id_var))
     if ( ! missing(group_var)) group_var <- jmvcore::resolveQuo(jmvcore::enquo(group_var))
+    if ( ! missing(immune_cells_var)) immune_cells_var <- jmvcore::resolveQuo(jmvcore::enquo(immune_cells_var))
+    if ( ! missing(tumor_cells_var)) tumor_cells_var <- jmvcore::resolveQuo(jmvcore::enquo(tumor_cells_var))
+    if ( ! missing(primary_marker1)) primary_marker1 <- jmvcore::resolveQuo(jmvcore::enquo(primary_marker1))
+    if ( ! missing(primary_marker2)) primary_marker2 <- jmvcore::resolveQuo(jmvcore::enquo(primary_marker2))
+    if ( ! missing(secondary_marker)) secondary_marker <- jmvcore::resolveQuo(jmvcore::enquo(secondary_marker))
+    if ( ! missing(pd1_marker)) pd1_marker <- jmvcore::resolveQuo(jmvcore::enquo(pd1_marker))
+    if ( ! missing(pdl1_marker)) pdl1_marker <- jmvcore::resolveQuo(jmvcore::enquo(pdl1_marker))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(intensity_var), intensity_var, NULL),
             `if`( ! missing(proportion_var), proportion_var, NULL),
             `if`( ! missing(sample_id_var), sample_id_var, NULL),
-            `if`( ! missing(group_var), group_var, NULL))
+            `if`( ! missing(group_var), group_var, NULL),
+            `if`( ! missing(immune_cells_var), immune_cells_var, NULL),
+            `if`( ! missing(tumor_cells_var), tumor_cells_var, NULL),
+            `if`( ! missing(primary_marker1), primary_marker1, NULL),
+            `if`( ! missing(primary_marker2), primary_marker2, NULL),
+            `if`( ! missing(secondary_marker), secondary_marker, NULL),
+            `if`( ! missing(pd1_marker), pd1_marker, NULL),
+            `if`( ! missing(pdl1_marker), pdl1_marker, NULL))
 
     for (v in group_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -1065,6 +1660,12 @@ ihcscoring <- function(
         quality_control = quality_control,
         clinical_interpretation = clinical_interpretation,
         export_results = export_results,
+        multiple_cutoffs = multiple_cutoffs,
+        cutoff_values = cutoff_values,
+        cps_analysis = cps_analysis,
+        immune_cells_var = immune_cells_var,
+        tumor_cells_var = tumor_cells_var,
+        cutoff_comparison = cutoff_comparison,
         confidence_level = confidence_level,
         bootstrap_n = bootstrap_n,
         automated_analysis = automated_analysis,
@@ -1075,7 +1676,18 @@ ihcscoring <- function(
         maximum_nuclear_area = maximum_nuclear_area,
         batch_processing = batch_processing,
         image_format = image_format,
-        validation_metrics = validation_metrics)
+        validation_metrics = validation_metrics,
+        molecular_classification = molecular_classification,
+        classification_system = classification_system,
+        primary_marker1 = primary_marker1,
+        primary_marker2 = primary_marker2,
+        secondary_marker = secondary_marker,
+        classification_cutoffs = classification_cutoffs,
+        pd1_marker = pd1_marker,
+        pdl1_marker = pdl1_marker,
+        checkpoint_cutoffs = checkpoint_cutoffs,
+        subtype_statistics = subtype_statistics,
+        subtype_visualization = subtype_visualization)
 
     analysis <- ihcscoringClass$new(
         options = options,

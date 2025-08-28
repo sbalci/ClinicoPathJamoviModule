@@ -11,7 +11,18 @@ crosstable(
   sty = "nejm",
   excl = FALSE,
   cont = "mean",
-  pcat = "chisq"
+  pcat = "chisq",
+  pairwise = FALSE,
+  p_adjust = "none",
+  posthoc_method = "none",
+  effect_size_measures = FALSE,
+  residual_analysis = FALSE,
+  mosaic_plot = FALSE,
+  correspondence_analysis = FALSE,
+  exact_tests = TRUE,
+  confidence_level = 0.95,
+  simulation_based = FALSE,
+  monte_carlo_replicates = 10000
 )
 }
 \arguments{
@@ -29,6 +40,38 @@ table.}
 \item{cont}{.}
 
 \item{pcat}{.}
+
+\item{pairwise}{Perform all pairwise comparisons between groups when there
+are more than 2 groups.}
+
+\item{p_adjust}{Method for adjusting p-values for multiple comparisons.}
+
+\item{posthoc_method}{Advanced post-hoc analysis methods for categorical
+associations}
+
+\item{effect_size_measures}{Calculate comprehensive effect size measures
+for categorical associations}
+
+\item{residual_analysis}{Analyze standardized and adjusted residuals for
+cell contributions}
+
+\item{mosaic_plot}{Generate mosaic plot for visualizing association
+patterns}
+
+\item{correspondence_analysis}{Perform correspondence analysis for
+dimensional reduction}
+
+\item{exact_tests}{Use exact statistical tests for small sample sizes or
+sparse tables}
+
+\item{confidence_level}{Confidence level for effect size confidence
+intervals}
+
+\item{simulation_based}{Use Monte Carlo simulation for p-values when exact
+computation is not feasible}
+
+\item{monte_carlo_replicates}{Number of Monte Carlo replicates for
+simulation-based tests}
 }
 \value{
 A results object containing:
@@ -42,7 +85,21 @@ A results object containing:
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
+\code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairwiseNote} \tab \tab \tab \tab \tab a html \cr
+\code{results$effectsizes} \tab \tab \tab \tab \tab Comprehensive effect size measures for categorical associations \cr
+\code{results$residuals} \tab \tab \tab \tab \tab Standardized and adjusted residuals for cell contributions \cr
+\code{results$posthocstats} \tab \tab \tab \tab \tab Advanced post-hoc statistical analysis results \cr
+\code{results$correspondenceanalysis} \tab \tab \tab \tab \tab Correspondence analysis results for dimensional reduction \cr
+\code{results$mosaicplot} \tab \tab \tab \tab \tab Mosaic plot visualization of association patterns \cr
+\code{results$correspondenceplot} \tab \tab \tab \tab \tab Correspondence analysis biplot \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$pairwiseTable$asDF}
+
+\code{as.data.frame(results$pairwiseTable)}
 }
 \description{
 Function for making Cross Tables.
