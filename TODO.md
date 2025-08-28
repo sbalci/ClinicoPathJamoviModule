@@ -28,7 +28,6 @@ echo "/document-function" | claude
 
 - jjdotplotstats - Dot Chart
 
-echo "/fix-function jjdotplotstats" | claude
 echo "/document-function jjdotplotstats" | claude
 
 - jjscatterstats - Scatter Plot

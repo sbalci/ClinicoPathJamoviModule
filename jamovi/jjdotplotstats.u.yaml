@@ -80,7 +80,9 @@ children:
               - type: TextBox
                 name: centralityk
                 format: number
-                enable: (centralityparameter:mean || centralityparameter:median)
+                enable: >-
+                  ((centralityparameter:mean || centralityparameter:median) &&
+                  centralityplotting)
   - type: CollapseBox
     label: Centrality Options
     collapsed: true
@@ -131,7 +133,6 @@ children:
                 name: ytitle
                 format: string
                 width: large
-
   - type: CollapseBox
     label: Plot Configuration
     collapsed: true
@@ -149,3 +150,17 @@ children:
               - type: TextBox
                 name: plotheight
                 format: number
+  - type: CollapseBox
+    label: Clinical Assistance
+    collapsed: false
+    children:
+      - type: Label
+        label: Analysis Guidance
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clinicalPreset
+              - type: CheckBox
+                name: guidedMode
