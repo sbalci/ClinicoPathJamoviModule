@@ -1,7 +1,7 @@
 ---
 name:  jjscatterstats
 title: Scatter Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
 version: '0.0.31'
@@ -64,38 +64,56 @@ options:
 
 
     - name: dep
-      title: 'x-axis'
+      title: 'x-axis (First Variable)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            First continuous variable for correlation analysis (e.g., biomarker levels, age, tumor size). 
+            This will appear on the horizontal axis. Use numeric variables like lab values, measurements, or scores.
 
     - name: group
-      title: 'y-axis'
+      title: 'y-axis (Second Variable)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            Second continuous variable for correlation analysis (e.g., expression levels, treatment response, survival time). 
+            This will appear on the vertical axis. Use numeric variables that you want to correlate with the x-axis variable.
 
     - name: grvar
       title: 'Split By (Optional)'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Optional categorical variable to create separate correlation plots for each group 
+            (e.g., by treatment group, tumor stage, or gender). Creates multiple panels for comparison.
 
 
 
     - name: typestatistics
-      title: 'Type of Statistic'
+      title: 'Statistical Test Type'
       type: List
       options:
-        - title: Parametric
+        - title: Parametric (Pearson) - for normally distributed data
           name: parametric
-        - title: Nonparametric
+        - title: Nonparametric (Spearman) - for skewed data or ordinal scales
           name: nonparametric
-        - title: Robust
+        - title: Robust (bend correlation) - handles outliers well
           name: robust
-        - title: Bayes
+        - title: Bayesian - provides evidence strength
           name: bayes
       default: parametric
+      description:
+          R: >
+            Choose based on your data distribution. Pearson assumes normality (common for lab values after transformation). 
+            Spearman works for any monotonic relationship (tumor grades, symptom scores). 
+            Robust methods handle outlying patients. Bayesian analysis quantifies evidence strength for clinical decision-making.
 
 
     - name: mytitle
@@ -122,7 +140,7 @@ options:
     - name: resultssubtitle
       title: Statistical Results
       type: Bool
-      default: true
+      default: false
 
     - name: conflevel
       title: Confidence Level
@@ -137,7 +155,7 @@ options:
     - name: bfmessage
       title: Bayes Factor Message
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
@@ -155,7 +173,7 @@ options:
     - name: marginal
       title: Show Marginal Histograms
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display marginal histogram plots on the axes using ggside.
@@ -298,7 +316,7 @@ options:
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
 #
 # bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
+# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (default: false).
 #
 # beta
 # bending constant (Default: 0.1). For more, see WRS2::pbcor().
@@ -365,7 +383,7 @@ options:
 # List of extra parameters to use only for the marginal plot along the y axis.
 #
 # results.subtitle
-# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
+# Decides whether the results of statistical tests are to be displayed as a subtitle (default: false). If set to FALSE, only the plot will be returned.
 #
 # xlab
 # Labels for x and y axis variables. If NULL (default), variable names for x and y will be used.
@@ -386,7 +404,7 @@ options:
 # A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
 #
 # ggstatsplot.layer
-# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
+# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (default: false). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
 #
 # ggplot.component
 # A ggplot component to be added to the plot prepared by ggstatsplot. This argument is primarily helpful for grouped_ variant of the current function. Default is NULL. The argument should be entered as a function.
@@ -507,13 +525,13 @@ options:
 # A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
 #
 # ggstatsplot.layer
-# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
+# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (default: false). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
 #
 # bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
+# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (default: false).
 #
 # results.subtitle
-# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
+# Decides whether the results of statistical tests are to be displayed as a subtitle (default: false). If set to FALSE, only the plot will be returned.
 #
 # xlab
 # Labels for x and y axis variables. If NULL (default), variable names for x and y will be used.
