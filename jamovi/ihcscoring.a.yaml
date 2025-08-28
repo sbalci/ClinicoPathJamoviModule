@@ -191,6 +191,61 @@ options:
           R: >
             format results for external analysis or reporting
 
+    # Multiple Cut-off Analysis Options
+    - name: multiple_cutoffs
+      title: Enable Multiple Cut-off Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            analyze biomarker positivity across multiple pre-specified cut-off values
+
+    - name: cutoff_values
+      title: Cut-off Values (%)
+      type: String
+      default: "1, 5, 10, 25, 50"
+      description:
+          R: >
+            comma-separated list of percentage cut-off values for positivity analysis
+
+    - name: cps_analysis
+      title: Enable CPS (Combined Positive Score) Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate Combined Positive Score for PD-L1 assessment
+
+    - name: immune_cells_var
+      title: Immune Cells Variable (for CPS)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            percentage of PD-L1+ immune cells (required for CPS calculation)
+
+    - name: tumor_cells_var
+      title: Tumor Cells Variable (for CPS)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            percentage of PD-L1+ tumor cells (required for CPS calculation)
+
+    - name: cutoff_comparison
+      title: Compare Across Cut-offs
+      type: Bool
+      default: true
+      description:
+          R: >
+            perform statistical comparisons across different cut-off values
+
     - name: confidence_level
       title: Confidence Level
       type: Number
@@ -307,5 +362,118 @@ options:
       description:
           R: >
             compare automated results with manual scoring when available
+
+    # Molecular Classification Options
+    - name: molecular_classification
+      title: Enable Molecular Subtyping
+      type: Bool
+      default: false
+      description:
+          R: >
+            perform molecular subtype classification based on marker combinations
+
+    - name: classification_system
+      title: Classification System
+      type: List
+      options:
+        - name: bladder_mibc
+          title: 'Bladder MIBC (GATA3/CK5/6/p16)'
+        - name: breast_cancer
+          title: 'Breast Cancer Subtypes'
+        - name: lung_cancer
+          title: 'Lung Cancer Subtypes'
+        - name: custom
+          title: 'Custom Classification'
+      default: bladder_mibc
+      description:
+          R: >
+            molecular classification system to apply
+
+    - name: primary_marker1
+      title: Primary Marker 1 (e.g., GATA3)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            first primary marker for molecular classification
+
+    - name: primary_marker2
+      title: Primary Marker 2 (e.g., CK5/6)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            second primary marker for molecular classification
+
+    - name: secondary_marker
+      title: Secondary Marker (e.g., p16)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            secondary marker for subtype refinement
+
+    - name: classification_cutoffs
+      title: Classification Cut-off Values (%)
+      type: String
+      default: "20, 20, 70"
+      description:
+          R: >
+            comma-separated cut-off values for each marker in order (primary1, primary2, secondary)
+
+    - name: pd1_marker
+      title: PD-1 Expression Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            PD-1 expression scores for immune checkpoint analysis
+
+    - name: pdl1_marker
+      title: PD-L1 Expression Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            PD-L1 expression scores for immune checkpoint analysis
+
+    - name: checkpoint_cutoffs
+      title: Checkpoint Inhibitor Cut-offs (%)
+      type: String
+      default: "1, 10"
+      description:
+          R: >
+            comma-separated cut-off values for PD-1/PD-L1 positivity analysis
+
+    - name: subtype_statistics
+      title: Perform Subtype Statistical Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate statistical comparisons between molecular subtypes
+
+    - name: subtype_visualization
+      title: Generate Subtype Visualization
+      type: Bool
+      default: true
+      description:
+          R: >
+            create plots showing molecular subtype distributions and associations
 
 ...

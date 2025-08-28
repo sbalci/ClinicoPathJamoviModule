@@ -113,6 +113,8 @@ children:
                 suffix: replicates
               - type: CheckBox
                 name: export_results
+              - type: CheckBox
+                name: multiple_cutoffs
   - type: CollapseBox
     label: Automated Image Analysis
     collapsed: true
@@ -144,5 +146,100 @@ children:
     margin: large
     children:
       - type: TextBox
+        name: cutoff_values
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
         name: dab_thresholds
         format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: cps_analysis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Immune Cells Variable (for CPS)
+        children:
+          - type: VariablesListBox
+            name: immune_cells_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Tumor Cells Variable (for CPS)
+        children:
+          - type: VariablesListBox
+            name: tumor_cells_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: cutoff_comparison
+  - type: CollapseBox
+    label: Molecular Subtyping
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: molecular_classification
+          - type: ComboBox
+            name: classification_system
+          - type: TextBox
+            name: classification_cutoffs
+            format: string
+            suffix: (comma-separated %)
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Molecular Classification Markers
+            children:
+              - type: VariablesListBox
+                name: primary_marker1
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+              - type: VariablesListBox
+                name: primary_marker2
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+              - type: VariablesListBox
+                name: secondary_marker
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+          - type: TargetLayoutBox
+            label: Checkpoint Inhibitor Markers
+            children:
+              - type: VariablesListBox
+                name: pd1_marker
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+              - type: VariablesListBox
+                name: pdl1_marker
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: checkpoint_cutoffs
+            format: string
+            suffix: (comma-separated %)
+          - type: CheckBox
+            name: subtype_statistics
+          - type: CheckBox
+            name: subtype_visualization

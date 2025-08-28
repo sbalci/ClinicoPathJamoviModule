@@ -1596,7 +1596,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Auto Visualization
     menuTitle: Automatic Plot Selection
     description: >-

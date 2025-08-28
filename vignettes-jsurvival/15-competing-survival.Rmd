@@ -110,7 +110,7 @@ Analyze all-cause mortality treating any death as an event.
 
 ```{r overall-survival}
 # Overall Survival Analysis Example
-# In jamovi: jsurvival > Competing Survival > Analysis Type: Overall
+# In jamovi: Survival > Competing Survival > Analysis Type: Overall
 
 cat("Overall Survival Analysis\n")
 cat("========================\n\n")
@@ -166,7 +166,7 @@ Focus exclusively on disease-specific deaths, treating other deaths as censored.
 
 ```{r cause-specific-survival}
 # Cause-Specific Survival Analysis Example
-# In jamovi: jsurvival > Competing Survival > Analysis Type: Cause Specific
+# In jamovi: jSurvival > Competing Survival > Analysis Type: Cause Specific
 
 cat("\nCause-Specific Survival Analysis\n")
 cat("=================================\n\n")
@@ -226,7 +226,7 @@ Account for multiple competing events using Fine-Gray subdistribution hazard mod
 
 ```{r competing-risks}
 # Competing Risks Analysis Example  
-# In jamovi: jsurvival > Competing Survival > Analysis Type: Competing Risk
+# In jamovi: jSurvival > Competing Survival > Analysis Type: Competing Risk
 
 cat("\nCompeting Risks Analysis\n")
 cat("=======================\n\n")

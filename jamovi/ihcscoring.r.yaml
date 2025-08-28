@@ -462,6 +462,297 @@ items:
                 title: 'Distribution'
                 type: text
 
+    - name: multiplecutoffs
+      title: Multiple Cut-off Analysis
+      type: Group
+      visible: (multiple_cutoffs)
+      items:
+          - name: cutoffresults
+            title: Cut-off Analysis Results
+            type: Table
+            description: Positivity rates across different cut-off thresholds
+            columns:
+              - name: cutoff_threshold
+                title: 'Cut-off Threshold'
+                type: text
+              - name: group_name
+                title: 'Group'
+                type: text
+              - name: positive_count
+                title: 'Positive Cases'
+                type: integer
+              - name: total_count
+                title: 'Total Cases'
+                type: integer
+              - name: positive_percentage
+                title: 'Positive Rate (%)'
+                type: number
+                format: zto
+              - name: confidence_interval
+                title: '95% CI'
+                type: text
+
+          - name: comparisonstats
+            title: Statistical Comparisons Across Cut-offs
+            visible: (cutoff_comparison)
+            type: Table
+            description: Statistical tests comparing groups across different cut-off values
+            columns:
+              - name: cutoff
+                title: 'Cut-off'
+                type: text
+              - name: test_statistic
+                title: 'Test Statistic'
+                type: text
+              - name: statistic_value
+                title: 'Statistic Value'
+                type: number
+                format: zto
+              - name: p_value
+                title: 'P-value'
+                type: number
+                format: zto,pvalue
+              - name: interpretation
+                title: 'Interpretation'
+                type: text
+
+    - name: cutoffplot
+      title: Multiple Cut-off Analysis Plot
+      type: Image
+      description: Biomarker positivity rates across different thresholds
+      width: 600
+      height: 400
+      visible: (multiple_cutoffs && show_plots)
+      requiresData: true
+      renderFun: .cutoffplot
+      clearWith:
+          - multiple_cutoffs
+          - cutoff_values
+          - show_plots
+          - group_var
+
+    - name: cpsanalysis
+      title: Combined Positive Score (CPS) Analysis
+      type: Group
+      visible: (cps_analysis)
+      items:
+          - name: cpsresults
+            title: CPS Analysis Results
+            type: Table
+            description: Combined Positive Score analysis for PD-L1 assessment
+            columns:
+              - name: cps_cutoff
+                title: 'CPS Cut-off'
+                type: text
+              - name: positive_count
+                title: 'Positive Cases'
+                type: integer
+              - name: total_count
+                title: 'Total Cases'
+                type: integer
+              - name: positive_percentage
+                title: 'Positive Rate (%)'
+                type: number
+                format: zto
+              - name: confidence_interval
+                title: '95% CI'
+                type: text
+              - name: clinical_significance
+                title: 'Clinical Significance'
+                type: text
+
+          - name: cpsstatistics
+            title: CPS Descriptive Statistics
+            type: Table
+            description: Summary statistics for Combined Positive Score
+            columns:
+              - name: statistic
+                title: 'Statistic'
+                type: text
+              - name: value
+                title: 'Value'
+                type: text
+              - name: interpretation
+                title: 'Interpretation'
+                type: text
+
+          - name: cpscomparison
+            title: CPS Group Comparison
+            visible: (group_var && cutoff_comparison)
+            type: Table
+            description: Statistical comparison of CPS between groups
+            columns:
+              - name: comparison_type
+                title: 'Comparison Type'
+                type: text
+              - name: test_statistic
+                title: 'Test Statistic'
+                type: text
+              - name: statistic_value
+                title: 'Statistic Value'
+                type: number
+                format: zto
+              - name: p_value
+                title: 'P-value'
+                type: number
+                format: zto,pvalue
+              - name: interpretation
+                title: 'Interpretation'
+                type: text
+
+    - name: cpsplot
+      title: Combined Positive Score Distribution Plot
+      type: Image
+      description: Distribution of CPS scores with clinical thresholds
+      width: 600
+      height: 400
+      visible: (cps_analysis && show_plots)
+      requiresData: true
+      renderFun: .cpsplot
+      clearWith:
+          - cps_analysis
+          - tumor_cells_var
+          - immune_cells_var
+          - show_plots
+          - group_var
+
+    - name: molecularclassification
+      title: Molecular Subtyping Analysis
+      type: Group
+      visible: (molecular_classification)
+      items:
+          - name: classificationtable
+            title: Molecular Classification Results
+            type: Table
+            description: Molecular subtype classification based on marker combinations
+            columns:
+              - name: sample_id
+                title: 'Sample ID'
+                type: text
+              - name: marker1_status
+                title: 'Marker 1 Status'
+                type: text
+              - name: marker2_status
+                title: 'Marker 2 Status'
+                type: text
+              - name: secondary_status
+                title: 'Secondary Marker'
+                type: text
+              - name: molecular_subtype
+                title: 'Molecular Subtype'
+                type: text
+              - name: confidence_score
+                title: 'Confidence Score'
+                type: number
+                format: zto
+
+          - name: subtypedistribution
+            title: Molecular Subtype Distribution
+            type: Table
+            description: Frequency and percentage of each molecular subtype
+            columns:
+              - name: subtype
+                title: 'Molecular Subtype'
+                type: text
+              - name: count
+                title: 'Count'
+                type: integer
+              - name: percentage
+                title: 'Percentage (%)'
+                type: number
+                format: zto
+              - name: confidence_interval
+                title: '95% CI'
+                type: text
+
+          - name: subtypestatistics
+            title: Subtype Statistical Comparison
+            visible: (subtype_statistics)
+            type: Table
+            description: Statistical comparisons between molecular subtypes
+            columns:
+              - name: comparison
+                title: 'Comparison'
+                type: text
+              - name: test_statistic
+                title: 'Test Statistic'
+                type: text
+              - name: statistic_value
+                title: 'Statistic Value'
+                type: number
+                format: zto
+              - name: p_value
+                title: 'P-value'
+                type: number
+                format: zto,pvalue
+              - name: effect_size
+                title: 'Effect Size'
+                type: number
+                format: zto
+              - name: interpretation
+                title: 'Interpretation'
+                type: text
+
+          - name: checkpointanalysis
+            title: Checkpoint Inhibitor Expression by Subtype
+            visible: (pd1_marker || pdl1_marker)
+            type: Table
+            description: PD-1/PD-L1 expression patterns across molecular subtypes
+            columns:
+              - name: molecular_subtype
+                title: 'Molecular Subtype'
+                type: text
+              - name: marker
+                title: 'Marker'
+                type: text
+              - name: cutoff
+                title: 'Cut-off (%)'
+                type: text
+              - name: positive_count
+                title: 'Positive Cases'
+                type: integer
+              - name: total_count
+                title: 'Total Cases'
+                type: integer
+              - name: positive_rate
+                title: 'Positive Rate (%)'
+                type: number
+                format: zto
+              - name: p_value
+                title: 'P-value'
+                type: number
+                format: zto,pvalue
+
+    - name: subtypeplot
+      title: Molecular Subtype Distribution Plot
+      type: Image
+      description: Visual representation of molecular subtype frequencies
+      width: 600
+      height: 400
+      visible: (molecular_classification && subtype_visualization)
+      requiresData: true
+      renderFun: .subtypeplot
+      clearWith:
+          - molecular_classification
+          - classification_system
+          - subtype_visualization
+
+    - name: checkpointplot
+      title: Checkpoint Inhibitor Expression Plot
+      type: Image
+      description: PD-1/PD-L1 expression patterns across molecular subtypes
+      width: 700
+      height: 500
+      visible: (molecular_classification && (pd1_marker || pdl1_marker) && subtype_visualization)
+      requiresData: true
+      renderFun: .checkpointplot
+      clearWith:
+          - molecular_classification
+          - pd1_marker
+          - pdl1_marker
+          - checkpoint_cutoffs
+          - subtype_visualization
+
     - name: exportdata
       title: Export-Ready Data
       type: Table
@@ -489,6 +780,9 @@ items:
         - name: binary_result
           title: 'Binary Result'
           type: text
+        - name: molecular_subtype
+          title: 'Molecular Subtype'
+          type: text
         - name: group
           title: 'Group'
           type: text
@@ -496,5 +790,6 @@ items:
           - export_results
           - intensity_var
           - proportion_var
+          - molecular_classification
 
 ...

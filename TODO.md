@@ -7,19 +7,16 @@
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.pdf'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.md'
 
-
 claude --no-mcp --no-tools "/review-article-stats Deep-Learning-Based-Prediction" \
   "/Users/.../Deep-Learning-Based-Prediction.md" \
   "/Users/.../Deep-Learning-Based-Prediction.html" \
   "/Users/.../Deep-Learning-Based-Prediction.pdf" \
   "/Users/.../Deep-Learning-Based-Prediction.txt"
 
-
-
 ## check and update each function
 
-echo "/document-function reportcat" | claude
-claude "/document-function reportcat"
+echo "/document-function " | claude
+claude "/document-function "
 
 echo "/check-function" | claude
 echo "/review-function" | claude
@@ -29,17 +26,8 @@ echo "/document-function" | claude
 
 ## JJStatsPlotT
 
-
-
-
-- statsplot2 - Automatic Plot Selection
-
-echo "/document-function statsplot2" | claude
-
 - jjdotplotstats - Dot Chart
-echo "/check-function jjdotplotstats" | claude
-echo "/checkpoint jjdotplotstats" | claude
-echo "/review-function jjdotplotstats" | claude
+
 echo "/fix-function jjdotplotstats" | claude
 echo "/document-function jjdotplotstats" | claude
 
