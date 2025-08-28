@@ -1,6 +1,6 @@
 ---
 name: review-article-stats
-description: Extract statistical methods from an article and map them to ClinicoPathJamoviModule coverage with an implementation roadmap
+description: Extract statistical methods from an article, critically evaluate their use, and map them to ClinicoPathJamoviModule coverage with an implementation roadmap
 interactive: true
 args:
   article_label:
@@ -11,6 +11,7 @@ args:
     required: false
     default: true
 usage: /review-article-stats [article_label]
+output_file: literature/$ARGUMENTS-citation-review.md
 ---
 
 # Jamovi Coverage Review for Research Articles
@@ -27,6 +28,10 @@ You are an **expert jamovi module developer for ClinicoPathJamoviModule**. The u
      - Multiple-testing & post-hoc procedures
      - Effect size metrics, CIs, calibration, discrimination, validation
      - Assumption checks & diagnostics (normality, variance homogeneity, multicollinearity, PH assumption, etc.)
+     - Citation metadata (from inline content only):
+       - Title, Journal, Year, Volume, Issue, Pages
+       - DOI (patterns like 10.x/xxxxx), PMID (patterns like PMID: or numeric in PubMed links)
+       - If not present in inline text, leave blank and add a TODO in the citation table
 
 2) **BUILD A LOCAL CATALOG OF CURRENT JAMOVI FUNCTIONS**  
    - **Auto-scan the repo** (relative to this command file):
@@ -61,6 +66,18 @@ You are an **expert jamovi module developer for ClinicoPathJamoviModule**. The u
      - Effort vs. impact
      - Reusability across module functions
 
+5) **CRITICALLY EVALUATE THE USE OF STATISTICAL METHODS**
+   - Assess **design–method alignment**: does each method match study design, endpoints, and measurement scales?
+   - Check **assumptions & diagnostics** actually reported (normality, variance homogeneity, independence, proportional hazards, linearity of logit, multicollinearity, influential points).
+   - Review **sample size & power** rationale (a priori/retrospective), and whether precision (CIs) is adequate.
+   - Examine **multiplicity control** (post‑hoc tests, familywise/FDR corrections) and whether it fits the analysis plan.
+   - Evaluate **model specification**: confounder adjustment, variable selection risks (overfitting, data‑driven selection), interaction terms, non‑linearity handling (splines, transformations).
+   - Inspect **missing data handling**: complete‑case vs. imputation (method, assumptions), sensitivity analyses.
+   - Prefer **effect sizes with confidence intervals** over p‑values alone; note any over‑reliance on thresholds.
+   - Verify **validation & calibration** for predictive models (internal/external, cross‑validation/bootstrapping, calibration slope/intercept, C‑index/AUC).
+   - Check **reproducibility & transparency**: reporting of software/packages, versions, seeds, code/data availability.
+   - Summarize **strengths, weaknesses, and risks of bias** with actionable recommendations for improvement.
+
 ---
 
 ## INPUTS  
@@ -92,6 +109,25 @@ If some sources are images or scanned PDFs, attempt OCR (if available) or rely o
 - **Design & Cohort**: [type, N, groups, endpoints]
 - **Key Analyses**: bullet list
 
+### 📑 ARTICLE CITATION
+
+| Field   | Value |
+|---------|-------|
+| Title   |       |
+| Journal |       |
+| Year    |       |
+| Volume  |       |
+| Issue   |       |
+| Pages   |       |
+| DOI     |       |
+| PMID    |       |
+| Publisher |       |
+| ISSN      |       |
+
+Always attempt to capture these fields if visible; otherwise leave blank with TODO.
+
+If unavailable in provided text, leave blank and add TODO.
+
 ### 🚫 Skipped Sources (if any)
 
 Provide a tidy table of skipped items and reasons. For each row, also print a ready‑to‑run conversion snippet.
@@ -117,6 +153,47 @@ Scan functions from the repo and map methods:
 |---|---|:---:|---|
 
 Legend: ✅ covered · 🟡 partial · ❌ not covered
+
+### 🧠 CRITICAL EVALUATION OF STATISTICAL METHODS
+
+Provide a succinct critique with an overall rating (✅ appropriate / 🟡 minor issues / ❌ major concerns), a checklist table, and targeted recommendations.
+
+**Overall Rating**: [✅ / 🟡 / ❌]  
+**Summary (2–4 sentences)**: [key appropriateness points]
+
+**Checklist**
+
+| Aspect | Assessment | Evidence (section/page) | Recommendation |
+|---|:--:|---|---|
+| Design–method alignment |  |  |  |
+| Assumptions & diagnostics |  |  |  |
+| Sample size & power |  |  |  |
+| Multiplicity control |  |  |  |
+| Model specification & confounding |  |  |  |
+| Missing data handling |  |  |  |
+| Effect sizes & CIs |  |  |  |
+| Validation & calibration |  |  |  |
+| Reproducibility/transparency |  |  |  |
+
+**Scoring Rubric (0–2 per aspect, total 0–18)**
+
+| Aspect | Score (0–2) | Badge |
+|---|:---:|:---:|
+| Design–method alignment |  | 🟢/🟡/🔴 |
+| Assumptions & diagnostics |  | 🟢/🟡/🔴 |
+| Sample size & power |  | 🟢/🟡/🔴 |
+| Multiplicity control |  | 🟢/🟡/🔴 |
+| Model specification & confounding |  | 🟢/🟡/🔴 |
+| Missing data handling |  | 🟢/🟡/🔴 |
+| Effect sizes & CIs |  | 🟢/🟡/🔴 |
+| Validation & calibration |  | 🟢/🟡/🔴 |
+| Reproducibility/transparency |  | 🟢/🟡/🔴 |
+
+**Legend**: 🟢 = 2 (good), 🟡 = 1 (minor issues), 🔴 = 0 (major concerns)
+
+**Total Score**: [sum/18] → Overall Badge: 🟢 Robust / 🟡 Moderate / 🔴 Weak
+
+**Red flags to note (if present):** chi‑square with expected counts < 5; unadjusted multiple pairwise tests; stepwise regression without validation; PH violations; separation in logistic models; overfitting (events‑per‑variable too low); reporting only p‑values without effect sizes.
 
 ### 🔎 GAP ANALYSIS (WHAT’S MISSING)  
 
@@ -254,7 +331,16 @@ ARTICLE_METHODS ||--o{ JAMOVI_FUNCTIONS : mapped_by
 
 1. Article Summary & Methods Table
 2. Coverage Matrix (✅/🟡/❌)
-3. Gap Analysis
-4. Roadmap with concrete YAML/R edits
-5. Test Plan & Dependencies
-6. Prioritized Backlog
+3. Critical Evaluation of Statistical Methods
+4. Gap Analysis
+5. Roadmap with concrete YAML/R edits
+6. Test Plan & Dependencies
+7. Prioritized Backlog
+
+---
+
+## Save Final Deliverable
+
+Return a single Markdown document containing all output.
+
+Save the markdown file to `literature/$ARGUMENTS-citation-review.md`.
