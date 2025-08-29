@@ -16,25 +16,18 @@ jjbetweenstats(
   pairwisedisplay = "significant",
   padjustmethod = "holm",
   effsizetype = "biased",
-  violin = TRUE,
-  boxplot = TRUE,
-  point = TRUE,
   mytitle = "Within Group Comparison",
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
-  resultssubtitle = TRUE,
-  plottype = "boxviolin",
-  bfmessage = TRUE,
+  resultssubtitle = FALSE,
+  bfmessage = FALSE,
   k = 2,
   conflevel = 0.95,
   varequal = FALSE,
-  meanplotting = TRUE,
-  meanci = FALSE,
-  notch = FALSE,
-  samplesizeLabel = TRUE,
   plotwidth = 650,
-  plotheight = 450
+  plotheight = 450,
+  colorblindSafe = FALSE
 )
 }
 \arguments{
@@ -60,12 +53,6 @@ jjbetweenstats(
 
 \item{effsizetype}{.}
 
-\item{violin}{.}
-
-\item{boxplot}{.}
-
-\item{point}{.}
-
 \item{mytitle}{.}
 
 \item{xtitle}{.}
@@ -75,9 +62,6 @@ jjbetweenstats(
 \item{originaltheme}{.}
 
 \item{resultssubtitle}{.}
-
-\item{plottype}{Type of plot to display - combination of box and violin
-plots,  box plots only, or violin plots only.}
 
 \item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
 Bayesian analysis.}
@@ -90,18 +74,12 @@ subtitle.}
 \item{varequal}{Whether to assume equal variances across groups for
 parametric tests.}
 
-\item{meanplotting}{Whether to highlight and display mean values.}
-
-\item{meanci}{Whether to display 95\\% confidence interval for the mean.}
-
-\item{notch}{Whether to use notched box plots for comparing medians.}
-
-\item{samplesizeLabel}{Whether to display sample size information for each
-group.}
-
 \item{plotwidth}{Width of the plot in pixels. Default is 650.}
 
 \item{plotheight}{Height of the plot in pixels. Default is 450.}
+
+\item{colorblindSafe}{Whether to use colorblind-safe color palette for plot
+elements.}
 }
 \value{
 A results object containing:
@@ -132,7 +110,6 @@ jjbetweenstats(
     data = mtcars,
     dep = c("mpg", "hp", "wt"),
     group = "cyl",
-    plottype = "boxviolin",
     typestatistics = "nonparametric",
     pairwisecomparisons = TRUE,
     pairwisedisplay = "significant",
@@ -148,9 +125,6 @@ jjbetweenstats(
     typestatistics = "robust",
     centralityplotting = TRUE,
     centralitytype = "robust",
-    meanplotting = TRUE,
-    meanci = TRUE,
-    notch = TRUE
 )
 
 # Bayesian analysis with custom aesthetics
@@ -161,9 +135,6 @@ jjbetweenstats(
     grvar = "dose",
     typestatistics = "bayes",
     bfmessage = TRUE,
-    violin = TRUE,
-    boxplot = TRUE,
-    point = FALSE,
     mytitle = "Tooth Growth by Supplement Type",
     xtitle = "Supplement",
     ytitle = "Tooth Length"
