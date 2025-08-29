@@ -1,6 +1,6 @@
 ---
 name:  jjbetweenstats
-title: Violin Plots to Compare Between Groups
+title: Box-Violin Plots to Compare Between Groups
 jrs:   '1.1'
 
 clearWith:
@@ -14,18 +14,10 @@ clearWith:
     - effsizetype
     - centralityplotting
     - centralitytype
-    - violin
-    - boxplot
-    - point
-    - plottype
     - bfmessage
     - k
     - conflevel
     - varequal
-    - meanplotting
-    - meanci
-    - notch
-    - samplesizeLabel
     - mytitle
     - xtitle
     - ytitle
@@ -33,6 +25,7 @@ clearWith:
     - resultssubtitle
     - plotwidth
     - plotheight
+    - colorblindSafe
 
 
 
@@ -44,27 +37,18 @@ items:
 
     - name: plot2
       title: '`Violin Plot by ${grvar}`'
-      # title: '`${group} - {dep} by {grvar}`'
       type: Image
-      # width:  800
-      # height: 600
       renderFun: .plot2
       requiresData: true
       visible: (grvar)
 
     - name: plot
       title: 'Violin Plot'
-      # title: '`${group} - {dep}`'
       type: Image
-      # width:  800
-      # height: 600
       renderFun: .plot
       requiresData: true
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
 
 
 

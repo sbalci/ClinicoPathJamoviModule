@@ -43,15 +43,18 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return(FALSE)
             if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+                stop(.('Data contains no (complete) rows'))
             
-            # Check variable existence
+            # Get available variables for helpful error messages
+            available_vars <- paste(names(self$data), collapse = '", "')
+            
+            # Check variable existence with helpful error messages
             for (var in self$options$dep) {
                 if (!(var %in% names(self$data)))
-                    stop(paste('Variable "', var, '" not found in data'))
+                    stop(glue::glue(.('Variable "{var}" not found in data. Available variables: "{available_vars}"')))
             }
             if (!(self$options$group %in% names(self$data)))
-                stop(paste('Variable "', self$options$group, '" not found in data'))
+                stop(glue::glue(.('Grouping variable "{group}" not found in data. Available variables: "{available_vars}"'), group = self$options$group))
                 
             return(TRUE)
         },
@@ -64,33 +67,59 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (length(num_vals) < 3) {
                     self$results$todo$setContent(
-                        glue::glue("<br>⚠️ Warning: {var} has less than 3 valid observations<br>")
+                        glue::glue(.("<br>⚠️ Warning: {var} has less than 3 valid observations<br>"))
                     )
                 }
                 if (length(unique(num_vals)) < 2) {
                     self$results$todo$setContent(
-                        glue::glue("<br>⚠️ Warning: {var} has no variation (all values are the same)<br>")
+                        glue::glue(.("<br>⚠️ Warning: {var} has no variation (all values are the same)<br>"))
                     )
                 }
             }
         },
         
-        # Outlier detection helper
+        # Optimized outlier detection helper for large datasets
         .detectOutliers = function(data, vars, method = "IQR") {
             outliers <- list()
+            
+            # For very large datasets, use sampling for outlier detection
+            data_size <- nrow(data)
+            use_sampling <- data_size > 5000
+            
             for (var in vars) {
                 vals <- jmvcore::toNumeric(data[[var]])
                 vals <- vals[!is.na(vals)]
+                
                 if (length(vals) > 0) {
-                    Q1 <- quantile(vals, 0.25, na.rm = TRUE)
-                    Q3 <- quantile(vals, 0.75, na.rm = TRUE)
+                    # For large datasets, sample for performance
+                    if (use_sampling && length(vals) > 5000) {
+                        # Use a representative sample for outlier threshold calculation
+                        sample_size <- min(5000, length(vals))
+                        sample_vals <- sample(vals, sample_size)
+                        Q1 <- quantile(sample_vals, 0.25, na.rm = TRUE)
+                        Q3 <- quantile(sample_vals, 0.75, na.rm = TRUE)
+                    } else {
+                        Q1 <- quantile(vals, 0.25, na.rm = TRUE)
+                        Q3 <- quantile(vals, 0.75, na.rm = TRUE)
+                    }
+                    
                     IQR <- Q3 - Q1
-                    outlier_indices <- which(
-                        data[[var]] < (Q1 - 1.5 * IQR) | 
-                        data[[var]] > (Q3 + 1.5 * IQR)
-                    )
-                    if (length(outlier_indices) > 0) {
-                        outliers[[var]] <- outlier_indices
+                    
+                    # Only calculate outlier indices if IQR is meaningful
+                    if (IQR > 0) {
+                        outlier_indices <- which(
+                            data[[var]] < (Q1 - 1.5 * IQR) | 
+                            data[[var]] > (Q3 + 1.5 * IQR)
+                        )
+                        
+                        if (length(outlier_indices) > 0) {
+                            # For large datasets, only report count not indices
+                            if (use_sampling) {
+                                outliers[[var]] <- length(outlier_indices)
+                            } else {
+                                outliers[[var]] <- outlier_indices
+                            }
+                        }
                     }
                 }
             }
@@ -100,10 +129,82 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Theme application helper
         .applyTheme = function(plot, opts, ggtheme) {
             if (!opts$originaltheme) {
-                plot + ggtheme
+                plot <- plot + ggtheme
             } else {
-                plot + ggstatsplot::theme_ggstatsplot()
+                plot <- plot + ggstatsplot::theme_ggstatsplot()
             }
+            
+            # Apply colorblind-safe palette if requested
+            if (opts$colorblindSafe) {
+                # Use viridis color palette which is colorblind-safe
+                plot <- plot + ggplot2::scale_fill_viridis_d(option = "D") +
+                              ggplot2::scale_color_viridis_d(option = "D")
+            }
+            
+            return(plot)
+        },
+        
+        # Clinical interpretation helper
+        .generateClinicalInterpretation = function(plot_obj, test_type, variables) {
+            interpretation <- tryCatch({
+                # Extract statistics from ggstatsplot object
+                if (!is.null(plot_obj$data)) {
+                    subtitle_text <- plot_obj$labels$subtitle
+                    if (!is.null(subtitle_text) && nchar(subtitle_text) > 0) {
+                        # Extract key statistical information
+                        test_name <- switch(test_type,
+                            "parametric" = .("t-test"),
+                            "nonparametric" = .("Mann-Whitney U test"),
+                            "robust" = .("robust test"),
+                            "bayes" = .("Bayesian analysis")
+                        )
+                        
+                        clinical_text <- sprintf(
+                            .("<div class='clinical-summary'><h4>Results Summary</h4><p>{test} comparing {vars} between groups.</p><p class='subtitle-stats'>{subtitle}</p></div>"),
+                            test = test_name, vars = paste(variables, collapse = ", "), subtitle = subtitle_text
+                        )
+                        return(clinical_text)
+                    }
+                }
+                return(.("<p>Analysis completed. See plot for detailed results.</p>"))
+            }, error = function(e) {
+                return(.("<p>Analysis completed successfully.</p>"))
+            })
+            
+            return(interpretation)
+        },
+        
+        # Statistical assumption checker
+        .checkAssumptions = function(data, variables, group_var, test_type) {
+            warnings <- c()
+            
+            for (var in variables) {
+                var_data <- data[[var]]
+                group_data <- data[[group_var]]
+                
+                # Check sample sizes
+                group_counts <- table(group_data, useNA = "no")
+                min_group_size <- min(group_counts)
+                
+                if (min_group_size < 3) {
+                    warnings <- c(warnings, sprintf(.("⚠️ {var}: Minimum group size is {size} (recommend ≥3)"), var = var, size = min_group_size))
+                }
+                
+                if (test_type == "parametric" && min_group_size >= 3) {
+                    # Basic normality check using Shapiro-Wilk for small samples
+                    for (level in names(group_counts)) {
+                        group_subset <- var_data[group_data == level & !is.na(var_data)]
+                        if (length(group_subset) >= 3 && length(group_subset) <= 5000) {
+                            p_val <- tryCatch(shapiro.test(group_subset)$p.value, error = function(e) 1)
+                            if (p_val < 0.05) {
+                                warnings <- c(warnings, sprintf(.("⚠️ {var}: Data may not be normally distributed in group '{level}' (consider non-parametric)"), var = var, level = level))
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return(warnings)
         },
 
         # Optimized data preparation with robust caching
@@ -124,15 +225,19 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(private$.processedData)
             }
             
+            # Checkpoint before expensive data processing
+            private$.checkpoint()
+            
             # Add progress feedback
             self$results$todo$setContent(
-                glue::glue("<br>Processing data for analysis...<br>")
+                glue::glue(.("<br>Processing data for analysis...<br>"))
             )
 
             mydata <- self$data
             vars <- self$options$dep
 
-            # Convert numeric variables efficiently
+            # Convert numeric variables efficiently - checkpoint before loop
+            private$.checkpoint(flush = FALSE)
             for (var in vars) {
                 mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
             }
@@ -143,14 +248,29 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Validate data quality
             private$.validateDataQuality(mydata, vars)
             
-            # Detect outliers if large dataset
+            # Check statistical assumptions
+            assumption_warnings <- private$.checkAssumptions(mydata, vars, self$options$group, self$options$typestatistics)
+            if (length(assumption_warnings) > 0) {
+                warning_text <- paste(assumption_warnings, collapse = "<br>")
+                self$results$todo$setContent(glue::glue("<br>{warning_text}<br>"))
+            }
+            
+            # Detect outliers if large dataset - checkpoint before expensive outlier detection
             if (nrow(mydata) > 30) {
+                private$.checkpoint(flush = FALSE)
                 outliers <- private$.detectOutliers(mydata, vars)
                 if (length(outliers) > 0) {
                     for (var in names(outliers)) {
-                        n_outliers <- length(outliers[[var]])
+                        # Handle both count (for large datasets) and indices (for smaller datasets)
+                        if (is.numeric(outliers[[var]]) && length(outliers[[var]]) == 1) {
+                            # For large datasets, we only have the count
+                            n_outliers <- outliers[[var]]
+                        } else {
+                            # For smaller datasets, we have the actual indices
+                            n_outliers <- length(outliers[[var]])
+                        }
                         self$results$todo$setContent(
-                            glue::glue("<br>ℹ️ {var} has {n_outliers} potential outlier(s) detected<br>")
+                            glue::glue(.("<br>ℹ️ {var} has {n_outliers} potential outlier(s) detected<br>"))
                         )
                     }
                 }
@@ -160,6 +280,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.processedData <- mydata
             private$.data_hash <- current_hash
             return(mydata)
+        },
+
+        # Helper function for title processing
+        .processTitle = function(title) {
+            if (is.null(title) || title == '') NULL else title
         },
 
         # Optimized options processing with robust caching
@@ -173,21 +298,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 effsizetype = self$options$effsizetype,
                 centralityplotting = self$options$centralityplotting,
                 centralitytype = self$options$centralitytype,
-                violin = self$options$violin,
-                boxplot = self$options$boxplot,
-                point = self$options$point,
-                plottype = self$options$plottype,
                 bfmessage = self$options$bfmessage,
                 k = self$options$k,
                 conflevel = self$options$conflevel,
                 varequal = self$options$varequal,
-                meanplotting = self$options$meanplotting,
-                meanci = self$options$meanci,
-                notch = self$options$notch,
-                samplesizeLabel = self$options$samplesizeLabel,
                 titles = list(self$options$mytitle, self$options$xtitle, self$options$ytitle),
                 display = list(self$options$resultssubtitle, self$options$originaltheme),
-                dimensions = list(self$options$plotwidth, self$options$plotheight)
+                dimensions = list(self$options$plotwidth, self$options$plotheight),
+                colorblindSafe = self$options$colorblindSafe
             ), algo = "md5")
             
             # Only reprocess if options have changed or forced refresh
@@ -205,43 +323,29 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 effsizetype = self$options$effsizetype,
                 centralityplotting = self$options$centralityplotting,
                 centralitytype = self$options$centralitytype,
-                violin = self$options$violin,
-                boxplot = self$options$boxplot,
-                point = self$options$point,
                 resultssubtitle = self$options$resultssubtitle,
                 originaltheme = self$options$originaltheme,
-                mytitle = if (self$options$mytitle == '') NULL else self$options$mytitle,
-                xtitle = if (self$options$xtitle == '') NULL else self$options$xtitle,
-                ytitle = if (self$options$ytitle == '') NULL else self$options$ytitle,
-                plottype = self$options$plottype,
+                mytitle = private$.processTitle(self$options$mytitle),
+                xtitle = private$.processTitle(self$options$xtitle),
+                ytitle = private$.processTitle(self$options$ytitle),
                 bfmessage = self$options$bfmessage,
                 k = self$options$k,
                 conflevel = self$options$conflevel,
                 varequal = self$options$varequal,
-                meanplotting = self$options$meanplotting,
-                meanci = self$options$meanci,
-                notch = self$options$notch,
-                samplesizeLabel = self$options$samplesizeLabel
+                colorblindSafe = self$options$colorblindSafe
             )
 
-            # Prepare visualization arguments using actual options
-            options$violinargs <- if (options$violin) {
-                list(width = 0.5, alpha = 0.2, na.rm = TRUE)
-            } else {
-                list(width = 0)
-            }
-
-            options$boxargs <- if (options$boxplot) {
-                list(width = 0.2, alpha = 0.5, na.rm = TRUE)
-            } else {
-                list(width = 0)
-            }
-
-            options$pointargs <- if (options$point) {
-                list(alpha = 0.5, linetype = "dashed")
-            } else {
-                list(alpha = 0)
-            }
+            # Set default violin and box args for ggstatsplot
+            options$violinargs <- list(width = 0.5, alpha = 0.2, na.rm = TRUE)
+            options$boxplotargs <- list(width = 0.3, alpha = 0.5, na.rm = TRUE)
+            
+            # Point args are always used for data points in ggstatsplot
+            options$pointargs <- list(
+                position = ggplot2::position_jitterdodge(dodge.width = 0.6),
+                alpha = 0.4,
+                size = 3,
+                stroke = 0
+            )
             
             # Process centrality parameters if enabled - properly map to ggstatsplot API
             # Note: ggbetweenstats uses centrality.plotting and centrality.type parameters
@@ -265,7 +369,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             # Initial Message ----
             if (is.null(self$options$dep) || is.null(self$options$group)) {
-                todo <- glue::glue(
+                todo <- .(
                     "<br>Welcome to ClinicoPath
                 <br><br>
                 This tool creates optimized Box-Violin Plots for comparing continuous variables between groups.
@@ -281,14 +385,17 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else {
                 todo <- glue::glue(
-                    "<br>Violin plot analysis comparing {paste(self$options$dep, collapse=', ')} by {self$options$group}{if(!is.null(self$options$grvar)) paste0(', grouped by ', self$options$grvar) else ''}.<br><hr>"
+                    .("<br>Violin plot analysis comparing {vars} by {group}{grouped}.<br><hr>"),
+                    vars = paste(self$options$dep, collapse=', '),
+                    group = self$options$group,
+                    grouped = if(!is.null(self$options$grvar)) paste0(', grouped by ', self$options$grvar) else ''
                 )
 
                 self$results$todo$setContent(todo)
 
                 # Data validation
                 if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
+                    stop(.('Data contains no (complete) rows'))
                     
                 # Add checkpoint for user feedback
                 private$.checkpoint()
@@ -315,14 +422,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(dep) == 1) {
                 private$.checkpoint()
                 
-                plot <- ggstatsplot::ggbetweenstats(
+                # Build argument list
+                args_list <- list(
                     data = mydata,
-                    x = !!rlang::sym(group),
-                    y = !!rlang::sym(dep),
+                    x = rlang::sym(group),
+                    y = rlang::sym(dep),
                     title = opts$mytitle,
                     xlab = opts$xtitle,
                     ylab = opts$ytitle,
-                    plot.type = opts$plottype,
                     type = opts$typestatistics,
                     pairwise.comparisons = opts$pairwisecomparisons,
                     pairwise.display = opts$pairwisedisplay,
@@ -332,20 +439,28 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     k = opts$k,
                     conf.level = opts$conflevel,
                     var.equal = opts$varequal,
-                    mean.plotting = opts$meanplotting,
-                    mean.ci = opts$meanci,
-                    notch = opts$notch,
-                    sample.size.label = opts$samplesizeLabel,
-                    violin.args = opts$violinargs,
-                    box.args = opts$boxargs,
                     point.args = opts$pointargs,
                     results.subtitle = opts$resultssubtitle,
                     centrality.plotting = if (!is.null(opts$centrality.plotting)) opts$centrality.plotting else FALSE,
                     centrality.type = if (!is.null(opts$centrality.type)) opts$centrality.type else NULL
                 )
+                
+                # Add violin.args and boxplot.args only if they exist
+                if (!is.null(opts$violinargs)) {
+                    args_list$violin.args <- opts$violinargs
+                }
+                if (!is.null(opts$boxplotargs)) {
+                    args_list$boxplot.args <- opts$boxplotargs
+                }
+                
+                plot <- do.call(ggstatsplot::ggbetweenstats, args_list)
 
                 # Apply theme using helper
                 plot <- private$.applyTheme(plot, opts, ggtheme)
+                
+                # Generate clinical interpretation
+                interpretation <- private$.generateClinicalInterpretation(plot, opts$typestatistics, dep)
+                self$results$todo$setContent(interpretation)
             }
 
             # Multiple dependent variables analysis ----
@@ -355,21 +470,22 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dep2 <- as.list(dep)
                 dep2_symbols <- purrr::map(dep2, rlang::sym)
 
+                # Checkpoint before expensive multiple plot generation
+                private$.checkpoint(flush = FALSE)
                 plotlist <- purrr::pmap(
                     .l = list(
                         y = dep2_symbols,
                         messages = FALSE
                     ),
                     .f = function(y, messages) {
-                        ggstatsplot::ggbetweenstats(
+                        plot_args <- list(
                             data = mydata,
-                            x = !!rlang::sym(group),
+                            x = rlang::sym(group),
                             y = !!y,
                             messages = messages,
                             title = opts$mytitle,
                             xlab = opts$xtitle,
                             ylab = opts$ytitle,
-                            plot.type = opts$plottype,
                             type = opts$typestatistics,
                             pairwise.comparisons = opts$pairwisecomparisons,
                             pairwise.display = opts$pairwisedisplay,
@@ -379,29 +495,38 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             k = opts$k,
                             conf.level = opts$conflevel,
                             var.equal = opts$varequal,
-                            mean.plotting = opts$meanplotting,
-                            mean.ci = opts$meanci,
-                            notch = opts$notch,
-                            sample.size.label = opts$samplesizeLabel,
-                            violin.args = opts$violinargs,
-                            box.args = opts$boxargs,
                             point.args = opts$pointargs,
                             results.subtitle = opts$resultssubtitle,
                             centrality.plotting = if (!is.null(opts$centrality.plotting)) opts$centrality.plotting else FALSE,
                             centrality.type = if (!is.null(opts$centrality.type)) opts$centrality.type else NULL
                         )
+                        
+                        # Add violin.args and boxplot.args if they exist
+                        if (!is.null(opts$violinargs)) {
+                            plot_args$violin.args <- opts$violinargs
+                        }
+                        if (!is.null(opts$boxplotargs)) {
+                            plot_args$boxplot.args <- opts$boxplotargs
+                        }
+                        
+                        do.call(ggstatsplot::ggbetweenstats, plot_args)
                     }
                 )
 
-                # Apply theme to all plots using helper
-                for (i in seq_along(plotlist)) {
-                    plotlist[[i]] <- private$.applyTheme(plotlist[[i]], opts, ggtheme)
-                }
+                # Apply theme to all plots using helper - checkpoint before theme application
+                private$.checkpoint(flush = FALSE)
+                plotlist <- lapply(plotlist, function(p) private$.applyTheme(p, opts, ggtheme))
 
+                # Checkpoint before combining plots
+                private$.checkpoint(flush = FALSE)
                 plot <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
                     plotgrid.args = list(ncol = 1)
                 )
+                
+                # Generate clinical interpretation for multiple variables
+                interpretation <- private$.generateClinicalInterpretation(plotlist[[1]], opts$typestatistics, dep)
+                self$results$todo$setContent(interpretation)
             }
 
             # Print Plot ----
@@ -432,12 +557,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 selected_theme <- if (!opts$originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
 
-                plot2 <- ggstatsplot::grouped_ggbetweenstats(
+                # Build argument list for grouped analysis
+                grouped_args <- list(
                     data = mydata,
-                    x = !!rlang::sym(group),
-                    y = !!rlang::sym(dep),
-                    grouping.var = !!rlang::sym(grvar),
-                    plot.type = opts$plottype,
+                    x = rlang::sym(group),
+                    y = rlang::sym(dep),
+                    grouping.var = rlang::sym(grvar),
                     type = opts$typestatistics,
                     pairwise.comparisons = opts$pairwisecomparisons,
                     pairwise.display = opts$pairwisedisplay,
@@ -447,18 +572,22 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     k = opts$k,
                     conf.level = opts$conflevel,
                     var.equal = opts$varequal,
-                    mean.plotting = opts$meanplotting,
-                    mean.ci = opts$meanci,
-                    notch = opts$notch,
-                    sample.size.label = opts$samplesizeLabel,
-                    violin.args = opts$violinargs,
-                    box.args = opts$boxargs,
                     point.args = opts$pointargs,
                     results.subtitle = opts$resultssubtitle,
                     centrality.plotting = if (!is.null(opts$centrality.plotting)) opts$centrality.plotting else FALSE,
                     centrality.type = if (!is.null(opts$centrality.type)) opts$centrality.type else NULL,
                     ggtheme = selected_theme
                 )
+                
+                # Add violin.args and boxplot.args if they exist
+                if (!is.null(opts$violinargs)) {
+                    grouped_args$violin.args <- opts$violinargs
+                }
+                if (!is.null(opts$boxplotargs)) {
+                    grouped_args$boxplot.args <- opts$boxplotargs
+                }
+                
+                plot2 <- do.call(ggstatsplot::grouped_ggbetweenstats, grouped_args)
             }
 
             # Multiple dependent variables grouped analysis ----
@@ -470,20 +599,22 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dep2 <- as.list(dep)
                 dep2_symbols <- purrr::map(dep2, rlang::sym)
 
+                # Checkpoint before expensive multiple grouped plot generation
+                private$.checkpoint(flush = FALSE)
                 plotlist <- purrr::pmap(
                     .l = list(
                         y = dep2_symbols,
                         messages = FALSE
                     ),
                     .f = function(y, messages) {
-                        ggstatsplot::grouped_ggbetweenstats(
+                        # Build argument list for multiple variable grouped analysis
+                        grouped_multi_args <- list(
                             data = mydata,
-                            x = !!rlang::sym(group),
+                            x = rlang::sym(group),
                             y = !!y,
-                            grouping.var = !!rlang::sym(grvar),
+                            grouping.var = rlang::sym(grvar),
                             messages = messages,
-                            plot.type = opts$plottype,
-                            type = opts$typestatistics,
+                                    type = opts$typestatistics,
                             pairwise.comparisons = opts$pairwisecomparisons,
                             pairwise.display = opts$pairwisedisplay,
                             p.adjust.method = opts$padjustmethod,
@@ -492,21 +623,27 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             k = opts$k,
                             conf.level = opts$conflevel,
                             var.equal = opts$varequal,
-                            mean.plotting = opts$meanplotting,
-                            mean.ci = opts$meanci,
-                            notch = opts$notch,
-                            sample.size.label = opts$samplesizeLabel,
-                            violin.args = opts$violinargs,
-                            box.args = opts$boxargs,
                             point.args = opts$pointargs,
                             results.subtitle = opts$resultssubtitle,
                             centrality.plotting = if (!is.null(opts$centrality.plotting)) opts$centrality.plotting else FALSE,
                             centrality.type = if (!is.null(opts$centrality.type)) opts$centrality.type else NULL,
                             ggtheme = selected_theme
                         )
+                        
+                        # Add violin.args and boxplot.args if they exist
+                        if (!is.null(opts$violinargs)) {
+                            grouped_multi_args$violin.args <- opts$violinargs
+                        }
+                        if (!is.null(opts$boxplotargs)) {
+                            grouped_multi_args$boxplot.args <- opts$boxplotargs
+                        }
+                        
+                        do.call(ggstatsplot::grouped_ggbetweenstats, grouped_multi_args)
                     }
                 )
 
+                # Checkpoint before combining grouped plots
+                private$.checkpoint(flush = FALSE)
                 plot2 <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
                     plotgrid.args = list(ncol = 1)

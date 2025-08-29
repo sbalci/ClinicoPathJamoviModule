@@ -16,25 +16,18 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             pairwisedisplay = "significant",
             padjustmethod = "holm",
             effsizetype = "biased",
-            violin = TRUE,
-            boxplot = TRUE,
-            point = TRUE,
             mytitle = "Within Group Comparison",
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = TRUE,
-            plottype = "boxviolin",
-            bfmessage = TRUE,
+            resultssubtitle = FALSE,
+            bfmessage = FALSE,
             k = 2,
             conflevel = 0.95,
             varequal = FALSE,
-            meanplotting = TRUE,
-            meanci = FALSE,
-            notch = FALSE,
-            samplesizeLabel = TRUE,
             plotwidth = 650,
-            plotheight = 450, ...) {
+            plotheight = 450,
+            colorblindSafe = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -122,18 +115,6 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eta",
                     "omega"),
                 default="biased")
-            private$..violin <- jmvcore::OptionBool$new(
-                "violin",
-                violin,
-                default=TRUE)
-            private$..boxplot <- jmvcore::OptionBool$new(
-                "boxplot",
-                boxplot,
-                default=TRUE)
-            private$..point <- jmvcore::OptionBool$new(
-                "point",
-                point,
-                default=TRUE)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -153,19 +134,11 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
-                default=TRUE)
-            private$..plottype <- jmvcore::OptionList$new(
-                "plottype",
-                plottype,
-                options=list(
-                    "boxviolin",
-                    "box",
-                    "violin"),
-                default="boxviolin")
+                default=FALSE)
             private$..bfmessage <- jmvcore::OptionBool$new(
                 "bfmessage",
                 bfmessage,
-                default=TRUE)
+                default=FALSE)
             private$..k <- jmvcore::OptionInteger$new(
                 "k",
                 k,
@@ -182,22 +155,6 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "varequal",
                 varequal,
                 default=FALSE)
-            private$..meanplotting <- jmvcore::OptionBool$new(
-                "meanplotting",
-                meanplotting,
-                default=TRUE)
-            private$..meanci <- jmvcore::OptionBool$new(
-                "meanci",
-                meanci,
-                default=FALSE)
-            private$..notch <- jmvcore::OptionBool$new(
-                "notch",
-                notch,
-                default=FALSE)
-            private$..samplesizeLabel <- jmvcore::OptionBool$new(
-                "samplesizeLabel",
-                samplesizeLabel,
-                default=TRUE)
             private$..plotwidth <- jmvcore::OptionInteger$new(
                 "plotwidth",
                 plotwidth,
@@ -210,6 +167,10 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 default=450,
                 min=300,
                 max=800)
+            private$..colorblindSafe <- jmvcore::OptionBool$new(
+                "colorblindSafe",
+                colorblindSafe,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -221,25 +182,18 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
             self$.addOption(private$..effsizetype)
-            self$.addOption(private$..violin)
-            self$.addOption(private$..boxplot)
-            self$.addOption(private$..point)
             self$.addOption(private$..mytitle)
             self$.addOption(private$..xtitle)
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..resultssubtitle)
-            self$.addOption(private$..plottype)
             self$.addOption(private$..bfmessage)
             self$.addOption(private$..k)
             self$.addOption(private$..conflevel)
             self$.addOption(private$..varequal)
-            self$.addOption(private$..meanplotting)
-            self$.addOption(private$..meanci)
-            self$.addOption(private$..notch)
-            self$.addOption(private$..samplesizeLabel)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
+            self$.addOption(private$..colorblindSafe)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -252,25 +206,18 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
         effsizetype = function() private$..effsizetype$value,
-        violin = function() private$..violin$value,
-        boxplot = function() private$..boxplot$value,
-        point = function() private$..point$value,
         mytitle = function() private$..mytitle$value,
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value,
         resultssubtitle = function() private$..resultssubtitle$value,
-        plottype = function() private$..plottype$value,
         bfmessage = function() private$..bfmessage$value,
         k = function() private$..k$value,
         conflevel = function() private$..conflevel$value,
         varequal = function() private$..varequal$value,
-        meanplotting = function() private$..meanplotting$value,
-        meanci = function() private$..meanci$value,
-        notch = function() private$..notch$value,
-        samplesizeLabel = function() private$..samplesizeLabel$value,
         plotwidth = function() private$..plotwidth$value,
-        plotheight = function() private$..plotheight$value),
+        plotheight = function() private$..plotheight$value,
+        colorblindSafe = function() private$..colorblindSafe$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -282,25 +229,18 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
         ..effsizetype = NA,
-        ..violin = NA,
-        ..boxplot = NA,
-        ..point = NA,
         ..mytitle = NA,
         ..xtitle = NA,
         ..ytitle = NA,
         ..originaltheme = NA,
         ..resultssubtitle = NA,
-        ..plottype = NA,
         ..bfmessage = NA,
         ..k = NA,
         ..conflevel = NA,
         ..varequal = NA,
-        ..meanplotting = NA,
-        ..meanci = NA,
-        ..notch = NA,
-        ..samplesizeLabel = NA,
         ..plotwidth = NA,
-        ..plotheight = NA)
+        ..plotheight = NA,
+        ..colorblindSafe = NA)
 )
 
 jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -316,7 +256,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Violin Plots to Compare Between Groups",
+                title="Box-Violin Plots to Compare Between Groups",
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
@@ -332,25 +272,18 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "effsizetype",
                     "centralityplotting",
                     "centralitytype",
-                    "violin",
-                    "boxplot",
-                    "point",
-                    "plottype",
                     "bfmessage",
                     "k",
                     "conflevel",
                     "varequal",
-                    "meanplotting",
-                    "meanci",
-                    "notch",
-                    "samplesizeLabel",
                     "mytitle",
                     "xtitle",
                     "ytitle",
                     "originaltheme",
                     "resultssubtitle",
                     "plotwidth",
-                    "plotheight"))
+                    "plotheight",
+                    "colorblindSafe"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -413,7 +346,6 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     data = mtcars,
 #'     dep = c("mpg", "hp", "wt"),
 #'     group = "cyl",
-#'     plottype = "boxviolin",
 #'     typestatistics = "nonparametric",
 #'     pairwisecomparisons = TRUE,
 #'     pairwisedisplay = "significant",
@@ -429,9 +361,6 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     typestatistics = "robust",
 #'     centralityplotting = TRUE,
 #'     centralitytype = "robust",
-#'     meanplotting = TRUE,
-#'     meanci = TRUE,
-#'     notch = TRUE
 #' )
 #'
 #' # Bayesian analysis with custom aesthetics
@@ -442,9 +371,6 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     grvar = "dose",
 #'     typestatistics = "bayes",
 #'     bfmessage = TRUE,
-#'     violin = TRUE,
-#'     boxplot = TRUE,
-#'     point = FALSE,
 #'     mytitle = "Tooth Growth by Supplement Type",
 #'     xtitle = "Supplement",
 #'     ytitle = "Tooth Length"
@@ -461,16 +387,11 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param pairwisedisplay .
 #' @param padjustmethod .
 #' @param effsizetype .
-#' @param violin .
-#' @param boxplot .
-#' @param point .
 #' @param mytitle .
 #' @param xtitle .
 #' @param ytitle .
 #' @param originaltheme .
 #' @param resultssubtitle .
-#' @param plottype Type of plot to display - combination of box and violin
-#'   plots,  box plots only, or violin plots only.
 #' @param bfmessage Whether to display Bayes Factor in the subtitle when using
 #'   Bayesian analysis.
 #' @param k Number of decimal places for displaying statistics in the
@@ -478,13 +399,10 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param conflevel Confidence level for confidence intervals.
 #' @param varequal Whether to assume equal variances across groups for
 #'   parametric tests.
-#' @param meanplotting Whether to highlight and display mean values.
-#' @param meanci Whether to display 95\% confidence interval for the mean.
-#' @param notch Whether to use notched box plots for comparing medians.
-#' @param samplesizeLabel Whether to display sample size information for each
-#'   group.
 #' @param plotwidth Width of the plot in pixels. Default is 650.
 #' @param plotheight Height of the plot in pixels. Default is 450.
+#' @param colorblindSafe Whether to use colorblind-safe color palette for plot
+#'   elements.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -505,25 +423,18 @@ jjbetweenstats <- function(
     pairwisedisplay = "significant",
     padjustmethod = "holm",
     effsizetype = "biased",
-    violin = TRUE,
-    boxplot = TRUE,
-    point = TRUE,
     mytitle = "Within Group Comparison",
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = TRUE,
-    plottype = "boxviolin",
-    bfmessage = TRUE,
+    resultssubtitle = FALSE,
+    bfmessage = FALSE,
     k = 2,
     conflevel = 0.95,
     varequal = FALSE,
-    meanplotting = TRUE,
-    meanci = FALSE,
-    notch = FALSE,
-    samplesizeLabel = TRUE,
     plotwidth = 650,
-    plotheight = 450) {
+    plotheight = 450,
+    colorblindSafe = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbetweenstats requires jmvcore to be installed (restart may be required)")
@@ -552,25 +463,18 @@ jjbetweenstats <- function(
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,
         effsizetype = effsizetype,
-        violin = violin,
-        boxplot = boxplot,
-        point = point,
         mytitle = mytitle,
         xtitle = xtitle,
         ytitle = ytitle,
         originaltheme = originaltheme,
         resultssubtitle = resultssubtitle,
-        plottype = plottype,
         bfmessage = bfmessage,
         k = k,
         conflevel = conflevel,
         varequal = varequal,
-        meanplotting = meanplotting,
-        meanci = meanci,
-        notch = notch,
-        samplesizeLabel = samplesizeLabel,
         plotwidth = plotwidth,
-        plotheight = plotheight)
+        plotheight = plotheight,
+        colorblindSafe = colorblindSafe)
 
     analysis <- jjbetweenstatsClass$new(
         options = options,

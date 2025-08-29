@@ -82,21 +82,6 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Plot Configuration
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: plottype
-              - type: CheckBox
-                name: violin
-              - type: CheckBox
-                name: boxplot
-              - type: CheckBox
-                name: point
-      - type: Label
         label: Statistical Features
         fitToGrid: true
         children:
@@ -109,15 +94,6 @@ children:
                   - type: ComboBox
                     name: centralitytype
                     enable: (centralityplotting)
-              - type: CheckBox
-                name: meanplotting
-              - type: CheckBox
-                name: meanci
-                enable: (meanplotting)
-              - type: CheckBox
-                name: notch
-              - type: CheckBox
-                name: samplesizeLabel
 
   - type: CollapseBox
     label: Plot Appearance
@@ -134,6 +110,8 @@ children:
                 name: resultssubtitle
               - type: CheckBox
                 name: originaltheme
+              - type: CheckBox
+                name: colorblindSafe
       - type: Label
         label: Plot Labels
         fitToGrid: true
