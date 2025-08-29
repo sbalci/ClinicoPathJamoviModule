@@ -8,17 +8,17 @@ jjscatterstats(
   data,
   dep,
   group,
-  grvar,
+  grvar = NULL,
   typestatistics = "parametric",
   mytitle = "",
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
-  resultssubtitle = TRUE,
+  resultssubtitle = FALSE,
   conflevel = 0.95,
-  bfmessage = TRUE,
+  bfmessage = FALSE,
   k = 2,
-  marginal = TRUE,
+  marginal = FALSE,
   xsidefill = "#009E73",
   ysidefill = "#D55E00",
   pointsize = 3,
@@ -32,13 +32,24 @@ jjscatterstats(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{First continuous variable for correlation analysis (e.g.,
+biomarker levels, age, tumor size).  This will appear on the horizontal
+axis. Use numeric variables like lab values, measurements, or scores.}
 
-\item{group}{.}
+\item{group}{Second continuous variable for correlation analysis (e.g.,
+expression levels, treatment response, survival time).  This will appear on
+the vertical axis. Use numeric variables that you want to correlate with
+the x-axis variable.}
 
-\item{grvar}{.}
+\item{grvar}{Optional categorical variable to create separate correlation
+plots for each group  (e.g., by treatment group, tumor stage, or gender).
+Creates multiple panels for comparison.}
 
-\item{typestatistics}{.}
+\item{typestatistics}{Choose based on your data distribution. Pearson
+assumes normality (common for lab values after transformation).  Spearman
+works for any monotonic relationship (tumor grades, symptom scores).
+Robust methods handle outlying patients. Bayesian analysis quantifies
+evidence strength for clinical decision-making.}
 
 \item{mytitle}{.}
 

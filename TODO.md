@@ -27,13 +27,9 @@ echo "/document-function" | claude
 ## JJStatsPlotT
 
 
-- jjscatterstats - Scatter Plot
-
-
-echo "/document-function jjscatterstats" | claude
 
 - jjbetweenstats - Box-Violin Plots to Compare Between Groups
-echo "/check-function jjbetweenstats" | claude
+
 echo "/checkpoint jjbetweenstats" | claude
 echo "/review-function jjbetweenstats" | claude
 echo "/fix-function jjbetweenstats" | claude
