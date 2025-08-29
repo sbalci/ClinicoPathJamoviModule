@@ -30,8 +30,7 @@ echo "/document-function" | claude
 
 - jjbetweenstats - Box-Violin Plots to Compare Between Groups
 
-echo "/checkpoint jjbetweenstats" | claude
-echo "/review-function jjbetweenstats" | claude
+
 echo "/fix-function jjbetweenstats" | claude
 echo "/document-function jjbetweenstats" | claude
 

@@ -17,16 +17,18 @@ jjdotplotstats(
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
-  resultssubtitle = TRUE,
+  resultssubtitle = FALSE,
   testvalue = 0,
-  bfmessage = TRUE,
+  bfmessage = FALSE,
   conflevel = 0.95,
   k = 2,
   testvalueline = FALSE,
   centralityparameter = "mean",
   centralityk = 2,
   plotwidth = 650,
-  plotheight = 450
+  plotheight = 450,
+  guidedMode = FALSE,
+  clinicalPreset = "basic"
 )
 }
 \arguments{
@@ -41,49 +43,83 @@ Each level will be displayed as a separate group in the dot plot.}
 \item{grvar}{Optional grouping variable to create separate dot plots for
 each level of this variable (grouped analysis).}
 
-\item{typestatistics}{Type of statistical test to perform. 'parametric' for
-t-tests, 'nonparametric' for Mann-Whitney U test, 'robust' for robust
-tests, 'bayes' for Bayesian analysis.}
+\item{typestatistics}{Choose the appropriate statistical test: Parametric
+(t-test) assumes normal distribution and equal variances; Nonparametric
+(Mann-Whitney U) makes no distribution assumptions; Robust uses trimmed
+means to handle outliers; Bayesian provides evidence strength via Bayes
+factors.}
 
-\item{effsizetype}{Type of effect size calculation for parametric tests.
-'biased' for Cohen's d, 'unbiased' for Hedge's g, 'eta' for eta-squared,
-'omega' for omega-squared.}
+\item{effsizetype}{Effect size quantifies practical significance: Cohen's d
+shows standardized difference between groups (small=0.2, medium=0.5,
+large=0.8); Hedge's g corrects for small samples; Eta/Omega-squared show
+proportion of variance explained (small=0.01, medium=0.06, large=0.14).}
 
-\item{centralityplotting}{.}
+\item{centralityplotting}{Display lines showing the central tendency (mean,
+median, or trimmed mean) for each group. Helps visualize group differences
+at a glance.}
 
-\item{centralitytype}{.}
+\item{centralitytype}{Type of central tendency to display: Mean is the
+average but sensitive to outliers; Median is the middle value and robust to
+outliers; Trimmed mean excludes extreme values; Bayesian provides
+probabilistic estimate.}
 
-\item{mytitle}{.}
+\item{mytitle}{Main title for the plot. Leave blank for automatic title
+generation based on your variables.}
 
-\item{xtitle}{.}
+\item{xtitle}{Label for the horizontal axis showing the continuous variable
+values. Leave blank to use variable name.}
 
-\item{ytitle}{.}
+\item{ytitle}{Label for the vertical axis showing the group categories.
+Leave blank to use variable name.}
 
-\item{originaltheme}{.}
+\item{originaltheme}{Use the original ggstatsplot theme instead of jamovi's
+default theme. The original theme may be more suitable for publications.}
 
-\item{resultssubtitle}{.}
+\item{resultssubtitle}{Display statistical test results (p-value, effect
+size, confidence interval) as a subtitle below the plot. Recommended for
+most analyses.}
 
-\item{testvalue}{A number specifying the value of the null hypothesis for
-one-sample tests.}
+\item{testvalue}{Reference value for hypothesis testing (usually 0 for
+group comparisons). Can be changed to test against a specific clinically
+meaningful value.}
 
-\item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
-Bayesian analysis.}
+\item{bfmessage}{Display Bayes Factor interpretation (evidence strength)
+when using Bayesian analysis. BF > 3 indicates moderate evidence, BF > 10
+strong evidence.}
 
-\item{conflevel}{Confidence level for confidence intervals.}
+\item{conflevel}{Confidence level for intervals (0.95 = 95\\% confidence
+interval). This represents the probability that the true population
+parameter lies within the calculated interval. 95\\% is standard for most
+analyses.}
 
-\item{k}{Number of decimal places for displaying statistics in the
-subtitle.}
+\item{k}{Number of decimal places for statistical results (p-values, effect
+sizes). More decimal places show greater precision but may not be
+clinically meaningful.}
 
-\item{testvalueline}{Whether to display a vertical line at the test value.}
+\item{testvalueline}{Display a vertical reference line at the test value.
+Useful for showing clinically significant thresholds or normal reference
+ranges.}
 
-\item{centralityparameter}{Which measure of central tendency to display as
-a vertical line.}
+\item{centralityparameter}{Which central tendency measure to show as a
+vertical line on the plot. Mean is sensitive to outliers; median is more
+robust for skewed data.}
 
-\item{centralityk}{Number of decimal places for centrality parameter label.}
+\item{centralityk}{Decimal places for central tendency values displayed on
+the plot. Should match the precision meaningful for your measurement scale.}
 
-\item{plotwidth}{Width of the plot in pixels. Default is 650.}
+\item{plotwidth}{Width of the plot in pixels. Larger values provide more
+detail but may not fit well in reports. Default: 650 pixels.}
 
-\item{plotheight}{Height of the plot in pixels. Default is 450.}
+\item{plotheight}{Height of the plot in pixels. Adjust based on number of
+groups to ensure readability. Default: 450 pixels.}
+
+\item{guidedMode}{Enable step-by-step guidance for clinical researchers.
+Provides recommendations for test selection and interpretation.}
+
+\item{clinicalPreset}{Pre-configured analysis settings optimized for
+different use cases. Basic: Simple comparison with key statistics;
+Publication: Journal-ready formatting; Clinical: Medical report
+optimization; Custom: Full control.}
 }
 \value{
 A results object containing:
@@ -91,6 +127,11 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+\code{results$guidedSteps} \tab \tab \tab \tab \tab a html \cr
+\code{results$recommendations} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
