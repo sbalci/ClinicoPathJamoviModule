@@ -1,7 +1,7 @@
 ---
 name: jjarcdiagram
 title: Arc Diagram
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Network
 version: '0.0.31'
 jas: '1.2'
@@ -12,7 +12,63 @@ description:
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Basic social network visualization
+            data(jjarcdiagram_social_network, package = "ClinicoPath")
+            jjarcdiagram(
+                data = social_network_data,
+                source = "source",
+                target = "target",
+                weight = "weight",
+                group = "group",
+                showNodes = TRUE,
+                nodeSize = "degree",
+                sortNodes = "group"
+            )
+            
+            # Gene regulatory network
+            data(jjarcdiagram_gene_network, package = "ClinicoPath")
+            jjarcdiagram(
+                data = gene_network_data,
+                source = "regulator",
+                target = "target",
+                weight = "regulation_score",
+                group = "pathway",
+                nodeSize = "degree",
+                sortNodes = "group"
+            )
+            
+            # Academic collaboration network
+            data(jjarcdiagram_academic_network, package = "ClinicoPath")
+            jjarcdiagram(
+                data = academic_network_data,
+                source = "author1",
+                target = "author2",
+                weight = "publications",
+                group = "department",
+                showNodes = TRUE,
+                nodeSize = "degree"
+            )
+            
+            # Organizational hierarchy
+            data(jjarcdiagram_org_hierarchy, package = "ClinicoPath")
+            jjarcdiagram(
+                data = org_hierarchy_data,
+                source = "employee",
+                target = "reports_to",
+                weight = "relationship_strength",
+                group = "department",
+                nodeSize = "fixed",
+                nodeSizeValue = 3
+            )
+            
+            # Simple minimal network
+            data(jjarcdiagram_minimal_network, package = "ClinicoPath")
+            jjarcdiagram(
+                data = minimal_network_data,
+                source = "from",
+                target = "to",
+                weight = "strength"
+            )
 
 options:
     - name: data
@@ -22,35 +78,76 @@ options:
             The data as a data frame.
 
     - name: source
-      title: Source Node
+      title: Source Node (From)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Starting point of each relationship or connection. Examples: Gene A regulating Gene B, 
+            Patient X similar to Patient Y, or Disease A co-occurring with Disease B.
 
     - name: target
-      title: Target Node
+      title: Target Node (To)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Endpoint of each relationship or connection. This represents what is being regulated, 
+            influenced, or connected to by the source entity.
 
     - name: weight
-      title: Edge Weight (Optional)
+      title: Edge Weight (Strength)
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
       default: NULL
+      description:
+          R: >
+            Optional numeric measure of connection strength. Examples: Correlation coefficient, 
+            interaction score, similarity index, or co-occurrence frequency. Higher values indicate 
+            stronger relationships.
 
     - name: group
-      title: Node Groups (Optional)
+      title: Node Categories (Color Coding)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
       default: NULL
+      description:
+          R: >
+            Optional grouping variable for color-coding entities. Examples: Gene families, 
+            patient subtypes, disease categories, or functional classifications.
+
+    - name: analysisPreset
+      title: Analysis Type
+      type: List
+      options:
+        - name: custom
+          title: Custom Network
+        - name: gene_interaction  
+          title: Gene Interaction Network (🧬 Recommended)
+        - name: patient_network
+          title: Patient Similarity Network (👥 Clinical)
+        - name: pathway_network
+          title: Biological Pathway Network (🔬 Research)
+        - name: comorbidity_network
+          title: Disease Co-occurrence Network (🏥 Epidemiology)
+      default: custom
+      description:
+          R: >
+            Choose a preset configuration optimized for specific clinical or research scenarios. 
+            Gene networks focus on regulatory relationships, patient networks on similarity patterns, 
+            pathway networks on biological processes, and comorbidity networks on disease associations.
 
     - name: showNodes
       title: Show Nodes
       type: Bool
-      default: true
+      default: false
+      description:
+          R: >
+            Whether to display node points along the arc baseline. When enabled, nodes are shown as circles at their sorted positions.
 
     - name: nodeSize
       title: Node Size
@@ -61,6 +158,9 @@ options:
         - title: By Degree
           name: degree
       default: fixed
+      description:
+          R: >
+            Method for determining node sizes. 'Fixed' uses constant size, 'By Degree' scales nodes proportionally to their connectivity (number of connections).
 
     - name: nodeSizeValue
       title: Fixed Node Size
@@ -68,6 +168,9 @@ options:
       default: 2
       min: 0.1
       max: 10
+      description:
+          R: >
+            Size of nodes when using fixed sizing, or base size multiplier when using degree-based sizing. Range: 0.1 to 10.
 
     - name: sortNodes
       title: Sort Nodes
@@ -82,16 +185,25 @@ options:
         - title: By Degree
           name: degree
       default: none
+      description:
+          R: >
+            Order in which nodes are arranged along the baseline. 'None' preserves original order, 'By Name' sorts alphabetically, 'By Group' clusters by categories, 'By Degree' orders by connectivity.
 
     - name: sortDecreasing
       title: Sort Decreasing
       type: Bool
       default: false
+      description:
+          R: >
+            When sorting nodes, whether to use descending order. Only applies when Sort Nodes is not 'None'.
 
     - name: horizontal
       title: Horizontal Layout
       type: Bool
-      default: true
+      default: false
+      description:
+          R: >
+            Layout orientation of the arc diagram. When TRUE, nodes are arranged horizontally with arcs above. When FALSE, nodes are arranged vertically with arcs to the side.
 
     - name: arcWidth
       title: Arc Width
@@ -102,6 +214,9 @@ options:
         - title: By Weight
           name: weight
       default: fixed
+      description:
+          R: >
+            Method for determining arc line widths. 'Fixed' uses constant width, 'By Weight' scales arc thickness proportionally to edge weights.
 
     - name: arcWidthValue
       title: Fixed Arc Width
@@ -109,6 +224,9 @@ options:
       default: 1
       min: 0.1
       max: 5
+      description:
+          R: >
+            Width of arcs when using fixed sizing, or base width when using weight-based sizing. Range: 0.1 to 5.
 
     - name: arcTransparency
       title: Arc Transparency
@@ -116,26 +234,41 @@ options:
       default: 0.5
       min: 0
       max: 1
+      description:
+          R: >
+            Transparency level of arc lines. 0 = fully transparent (invisible), 1 = fully opaque. Lower values reduce visual clutter in dense networks.
 
     - name: directed
       title: Directed Network
       type: Bool
-      default: true
+      default: false
+      description:
+          R: >
+            Whether to treat the network as directed (edges have direction from source to target) or undirected (edges represent bidirectional relationships).
 
     - name: colorByGroup
       title: Color Nodes by Group
       type: Bool
-      default: true
+      default: false
+      description:
+          R: >
+            When a grouping variable is specified, whether to color-code nodes by their group membership. Requires a group variable.
 
     - name: showStats
       title: Show Network Statistics
       type: Bool
-      default: true
+      default: false
+      description:
+          R: >
+            Whether to display network statistics including number of nodes, edges, density, and centrality measures.
 
     - name: showLegend
       title: Show Legend
       type: Bool
-      default: true
+      default: false
+      description:
+          R: >
+            Whether to display a color legend when nodes are colored by groups. Only appears when grouping variable is specified and color by group is enabled.
 
     - name: labelSize
       title: Label Size
@@ -143,10 +276,16 @@ options:
       default: 0.8
       min: 0.1
       max: 2
+      description:
+          R: >
+            Size of node labels (text). 0.8 is standard size, values above 1.0 increase label size, below 1.0 decrease it. Range: 0.1 to 2.0.
 
     - name: plotTitle
       title: Plot Title
       type: String
       default: ""
+      description:
+          R: >
+            Optional title to display above the arc diagram. Leave empty for no title.
 
 ...

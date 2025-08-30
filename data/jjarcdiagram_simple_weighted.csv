@@ -1,0 +1,11 @@
+"from_node","to_node","connection_weight"
+"Central","Node_A",10.5
+"Central","Node_B",8.3
+"Node_A","Node_B",6.7
+"Node_A","Node_C",9.2
+"Node_B","Node_C",7.8
+"Node_B","Node_D",5.4
+"Node_C","Node_D",8.9
+"Node_C","Central",6.1
+"Node_D","Central",7.5
+"Node_D","Node_A",4.9
