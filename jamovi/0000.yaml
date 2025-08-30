@@ -1018,12 +1018,12 @@ analyses:
       and heterogeneity testing.
     ribbon: analyses
     category: analyses
-  - title: Raincloud Plot
+  - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
     menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
-    menuTitle: Raincloud Plot
+    menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
     description: >
       Creates advanced raincloud plots with longitudinal connections using
@@ -1686,7 +1686,7 @@ analyses:
   - title: Arc Diagram
     name: jjarcdiagram
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Network
     menuTitle: Arc Diagram
     description: >

@@ -681,4 +681,11 @@
         `title`="ggoncoplot: Create Oncoplots with ggplot2", 
         `publisher`="GitHub", 
         `url`="https://github.com/selkamand/ggoncoplot", 
-        `version`=""))
+        `version`=""), 
+    `ggrain`=list(
+        `type`="software", 
+        `author`="Nicholas Judd, Jordy van Langen, Micah Allen, Rogier Kievit", 
+        `year`=2024, 
+        `title`="ggrain: A Rainclouds Geom for ggplot2", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggrain", 
+        `url`="https://CRAN.R-project.org/package=ggrain"))

@@ -43,7 +43,6 @@ children:
             name: cov_var
             maxItemCount: 1
             isTarget: true
-  
   - type: CollapseBox
     label: Plot Configuration
     collapsed: false
@@ -57,7 +56,6 @@ children:
             name: likert_mode
           - type: CheckBox
             name: show_longitudinal
-
   - type: CollapseBox
     label: Clinical Significance
     collapsed: true
@@ -80,7 +78,6 @@ children:
             name: mcid_value
             format: number
             enable: show_mcid
-
   - type: CollapseBox
     label: Effect Size & Comparisons
     collapsed: true
@@ -103,7 +100,6 @@ children:
             name: responder_threshold
             format: number
             enable: show_change_scores
-
   - type: CollapseBox
     label: Sample Size & Data Info
     collapsed: true
@@ -115,7 +111,6 @@ children:
             name: show_sample_size
           - type: CheckBox
             name: show_missing_info
-
   - type: CollapseBox
     label: Clinical Trial Settings
     collapsed: true
@@ -131,7 +126,6 @@ children:
             format: string
           - type: ComboBox
             name: population_type
-
   - type: CollapseBox
     label: Biomarker Analysis
     collapsed: true
@@ -151,9 +145,8 @@ children:
             enable: show_cv_bands
           - type: TextBox
             name: cv_band_2
-            format: number  
+            format: number
             enable: show_cv_bands
-
   - type: CollapseBox
     label: Visual Appearance
     collapsed: true
@@ -175,7 +168,6 @@ children:
             format: number
           - type: ComboBox
             name: color_palette
-
   - type: CollapseBox
     label: Labels & Titles
     collapsed: true
@@ -192,7 +184,12 @@ children:
           - type: TextBox
             name: y_label
             format: string
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: jitter_seed
+        format: number
   - type: CollapseBox
     label: Publication & Export
     collapsed: true
@@ -208,7 +205,6 @@ children:
             name: generate_report
           - type: CheckBox
             name: include_methods
-
   - type: CollapseBox
     label: Analysis & Output
     collapsed: false

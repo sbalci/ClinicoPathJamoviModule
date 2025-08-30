@@ -8,6 +8,14 @@ msgstr ""
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
+#: R/advancedraincloud.b.R
+msgid " observations with missing ID values ("
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid " subjects with repeated measures."
+msgstr ""
+
 #: multisurvival/options/td_suffix_pattern.default
 msgid "_t{time}"
 msgstr ""
@@ -26,6 +34,10 @@ msgstr ""
 #: decisionpanel/results/resultImportance.columns.title
 #: psychopdaroc/results/thresholdTable.columns.title
 msgid "-LR"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "' not found in complete data. Available groups: "
 msgstr ""
 
 #: package/analyses/jjstreamgraph.description
@@ -109,6 +121,18 @@ msgstr ""
 msgid "(O-E)^2/V"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid ") after data cleaning. Longitudinal connections may not be meaningful."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid ") observations"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid ") observations ("
+msgstr ""
+
 #: enhancedcrosstable/options/percent_pattern/col_percent.title
 msgid "{n} ({p_col})"
 msgstr ""
@@ -131,6 +155,10 @@ msgstr ""
 
 #: ggprism/options/pvalue_format/stars.title
 msgid "*** / ** / *"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "/"
 msgstr ""
 
 #: ppv/options/alpha.title
@@ -298,6 +326,10 @@ msgstr ""
 
 #: factoranalysis/results/results/eigenvaluesTable.columns.title
 msgid "% Variance"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "%)"
 msgstr ""
 
 #: jjdotplotstats/results/plot2.title
@@ -512,6 +544,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "<br><b>Error creating network:</b> Invalid edge structure<br><hr>"
+msgstr ""
+
+#: R/jjarcdiagram.b.R
+msgid "<br><b>Error creating plot:</b>"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -921,6 +957,10 @@ msgstr ""
 
 #: R/jjbetweenstats.b.R
 msgid "⚠️ {var}: Minimum group size is {size} (recommend ≥3)"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "📊 Advanced Raincloud Statistics"
 msgstr ""
 
 #: advancedimputation/options/delta_values.default
@@ -4392,6 +4432,10 @@ msgstr ""
 msgid "All Nodes"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "All observations excluded due to missing ID values. Longitudinal connections disabled."
+msgstr ""
+
 #: bayesiannetworkma/results/pairwiseComparisons.title
 msgid "All Pairwise Comparisons"
 msgstr ""
@@ -4763,7 +4807,7 @@ msgstr ""
 msgid "Analysis"
 msgstr ""
 
-#: advancedraincloud/ui[10].label
+#: advancedraincloud/ui[11].label
 msgid "Analysis & Output"
 msgstr ""
 
@@ -4773,6 +4817,10 @@ msgstr ""
 
 #: jjarcdiagram/results/assumptions.title
 msgid "Analysis Assumptions & Guidelines"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Analysis based on complete paired observations. Change scores calculated as (Follow-up - Baseline) values."
 msgstr ""
 
 #: stagemigration/results/comparativeAnalysisDashboard.columns.title
@@ -4810,6 +4858,10 @@ msgstr ""
 
 #: effectsize/options/analysis_context.title
 msgid "Analysis Context"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Analysis dataset:"
 msgstr ""
 
 #: survival/ui[8].label
@@ -4995,6 +5047,7 @@ msgstr ""
 msgid "Analysis Overview and Clinical Context"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: effectsize/ui[1][2][0].label
 msgid "Analysis Parameters"
 msgstr ""
@@ -5400,6 +5453,10 @@ msgstr ""
 #: advancedanova/options/model_type/ancova.title
 #: qualityoflife/options/statistical_test/ancova.title
 msgid "ANCOVA"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "and"
 msgstr ""
 
 #: recurrentsurvival/options/model_type/ag_model.title
@@ -6947,8 +7004,16 @@ msgstr ""
 msgid "Baseline Function"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Baseline group '"
+msgstr ""
+
 #: advancedraincloud/options/baseline_group.title
 msgid "Baseline Group Identifier"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Baseline group:"
 msgstr ""
 
 #: continuousmarkov/options/baseline_hazard.title
@@ -9501,6 +9566,10 @@ msgstr ""
 msgid "Boxplot Width"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Boxplot width"
+msgstr ""
+
 #: haralicktexture/results/boxplot.description
 msgid "Boxplots comparing texture features across groups"
 msgstr ""
@@ -11558,6 +11627,10 @@ msgstr ""
 msgid "Change Analysis Plot"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Change analysis requires both a longitudinal ID variable and a baseline group specification."
+msgstr ""
+
 #: patientreported/results/change_analysis_results.title
 msgid "Change Analysis Results"
 msgstr ""
@@ -11592,6 +11665,10 @@ msgstr ""
 
 #: advancedraincloud/results/change_analysis.title
 msgid "Change Score Analysis"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Change Score Summary"
 msgstr ""
 
 #: simonmakuch/ui[1][0][0]/timeDepTime.label
@@ -12730,6 +12807,10 @@ msgstr ""
 
 #: clinicalvalidation/results/costreduction.title
 msgid "Clinical Cost-Benefit Analysis"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Clinical cutoff"
 msgstr ""
 
 #: qualityoflife/options/clinical_cutoffs.title
@@ -14867,6 +14948,10 @@ msgstr ""
 msgid "Color palette for visualization"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Color palette generation failed, using default colors: "
+msgstr ""
+
 #: ggprism/results/palette_information.title
 msgid "Color Palette Information"
 msgstr ""
@@ -15917,6 +16002,14 @@ msgstr ""
 msgid "Complete Case Analysis"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Complete case analysis performed - observations with missing ID, group, or outcome values were excluded."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Complete case analysis performed. Observations with missing values in any required variable were excluded."
+msgstr ""
+
 #: partialcorrelation/results/diagnostics.columns.title
 msgid "Complete Cases"
 msgstr ""
@@ -15941,6 +16034,10 @@ msgstr ""
 #: ihccluster/options/handleMissing/complete.title
 #: modelbuilder/options/missingDataMethod/complete_cases.title
 msgid "Complete cases only"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Complete cases:"
 msgstr ""
 
 #: package/analyses/effectsize.menuSubtitle
@@ -16924,6 +17021,10 @@ msgstr ""
 
 #: bayesiandiagnostic/options/compute_specificity.title
 msgid "Compute Specificity"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Computing effect sizes"
 msgstr ""
 
 #: methodvalidation/options/concentration_level.title
@@ -19030,6 +19131,10 @@ msgstr ""
 msgid "Covariate Balance Threshold"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Covariate color scale generation failed, using defaults: "
+msgstr ""
+
 #: flexparametricadvanced/results/covariate_effects.title
 #: frailtysurvival/results/covariate_effects.title
 #: intervalsurvival/results/covariate_effects.title
@@ -19062,6 +19167,10 @@ msgstr ""
 
 #: spatialbayesiansurvival/options/covariate_priors.title
 msgid "Covariate Prior Type"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Covariate variable contains NA values. Covariate mapping disabled."
 msgstr ""
 
 #: bayesianclinical/options/covariates.title
@@ -21469,8 +21578,16 @@ msgstr ""
 msgid "CV Band 1 Percentage"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "CV Band 1 percentage"
+msgstr ""
+
 #: advancedraincloud/options/cv_band_2.title
 msgid "CV Band 2 Percentage"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "CV Band 2 percentage"
 msgstr ""
 
 #: modelbuilder/results/validationResults.columns.title
@@ -21685,6 +21802,10 @@ msgstr ""
 msgid "Data Classification"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Data Cleaning Summary"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 #: R/jjbetweenstats.b.R
 msgid "Data contains no (complete) rows"
@@ -21692,6 +21813,10 @@ msgstr ""
 
 #: advancedtrials/results/interim_monitoring_guidelines.columns.title
 msgid "Data Cutoff Rule"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Data Exclusions"
 msgstr ""
 
 #: modelbuilder/ui[7][2][0].label
@@ -22480,6 +22605,10 @@ msgstr ""
 #: package/analyses/decisiongraph.menuSubgroup
 #: decisiongraph/options.menuSubgroup
 msgid "DecisionD"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Declined:"
 msgstr ""
 
 #: idi/options/decompose_idi.title
@@ -25768,6 +25897,14 @@ msgstr ""
 msgid "Documentation Requirements"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "does not match number of groups ("
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "does not match number of time points ("
+msgstr ""
+
 #: retracted/results/summary.columns.title
 msgid "DOI"
 msgstr ""
@@ -27994,6 +28131,14 @@ msgstr ""
 msgid "Error Variance Ratio (λ)"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Error: No complete cases found for the selected variables."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Error: The provided dataset contains no complete rows. Please check your data and try again."
+msgstr ""
+
 #: jsummarytools/options/escape_pipe.title
 msgid "Escape Pipe Characters"
 msgstr ""
@@ -29196,6 +29341,14 @@ msgstr ""
 
 #: modelbuilder/options/missingDataMethod/exclude_missing.title
 msgid "Exclude variables with >20% missing"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Excluded (incomplete):"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Excluded (missing data):"
 msgstr ""
 
 #: metaanalysis/results/sensitivityAnalysis.columns.title
@@ -30616,6 +30769,10 @@ msgstr ""
 msgid "Failed"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Failed to create base plot: "
+msgstr ""
+
 #: semimarkov/results/reliabilityAnalysis.columns.title
 msgid "Failure Rate"
 msgstr ""
@@ -31522,6 +31679,14 @@ msgstr ""
 msgid "Flanking (Both Sides)"
 msgstr ""
 
+#: advancedraincloud/options/rain_side/f1x1.title
+msgid "Flanking 1x1"
+msgstr ""
+
+#: advancedraincloud/options/rain_side/f2x2.title
+msgid "Flanking 2x2"
+msgstr ""
+
 #: agreement/options/fleissCI.title
 msgid "Fleiss Kappa Confidence Intervals"
 msgstr ""
@@ -31914,6 +32079,10 @@ msgstr ""
 
 #: statsplot2/options/sampleLarge.description.ui
 msgid "For datasets >10,000 rows, randomly sample 5,000 rows for faster visualization while maintaining statistical validity"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "for pairwise comparisons. Limiting to first "
 msgstr ""
 
 #: ihccluster/options/seed.description
@@ -33645,6 +33814,10 @@ msgstr ""
 msgid "ggplot2 theme style"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "ggrain failed with error: "
+msgstr ""
+
 #: package/analyses/jggstats.menuSubtitle
 msgid "ggstats Integration for Advanced Statistical Graphics"
 msgstr ""
@@ -34130,6 +34303,7 @@ msgstr ""
 msgid "Grid Search"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: advancedanova/results/descriptives.columns.title
 #: condsurvival/results/conditionalSurvivalTable.columns.title
 #: condsurvival/results/conditionalImprovementTable.columns.title
@@ -34713,6 +34887,10 @@ msgstr ""
 #: grouplasso/results/nestedCVResults.columns.title
 #: sparsegrouplasso/results/comparisonTable.columns.title
 msgid "Groups Selected"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "groups."
 msgstr ""
 
 #: tumorgrowth/results/growthParametersTable.title
@@ -37202,6 +37380,10 @@ msgstr ""
 msgid "Important Warnings"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Improved:"
+msgstr ""
+
 #: condsurvival/results/conditionalImprovementTable.columns.title
 #: decisionpanel/results/panelBuilding.columns.title
 #: stagemigration/results/dcaResults.columns.title
@@ -39489,6 +39671,10 @@ msgstr ""
 msgid "Intuitive survival analysis using the iwillsurvive package with user-friendly interface, automatic data preparation, and comprehensive visualization options."
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Invalid rain.side value. Using default 'l' (left)."
+msgstr ""
+
 #: outbreakanalysis/results/data_quality_report.columns.title
 msgid "Invalid Values (N)"
 msgstr ""
@@ -39782,6 +39968,14 @@ msgstr ""
 msgid "Jitter Points"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Jitter seed"
+msgstr ""
+
+#: advancedraincloud/options/jitter_seed.title
+msgid "Jitter Seed"
+msgstr ""
+
 #: ggprism/options/jitter_width.title
 #: grafify/options/jitter_width.title
 msgid "Jitter Width"
@@ -39797,6 +39991,8 @@ msgstr ""
 #: package/analyses/jjbetweenstats.menuGroup
 #: package/analyses/jwaffle.menuGroup
 #: package/analyses/statsplot2.menuGroup
+#: package/analyses/jjarcdiagram.menuGroup
+#: jjarcdiagram/options.menuGroup
 #: jjbetweenstats/options.menuGroup
 #: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
@@ -39865,12 +40061,10 @@ msgstr ""
 #: package/analyses/jjpiestats.menuGroup
 #: package/analyses/linechart.menuGroup
 #: package/analyses/lollipop.menuGroup
-#: package/analyses/jjarcdiagram.menuGroup
 #: package/analyses/riverplot.menuGroup
 #: package/analyses/ggsegmentedtotalbar.menuGroup
 #: advancedraincloud/options.menuGroup
 #: ggsegmentedtotalbar/options.menuGroup
-#: jjarcdiagram/options.menuGroup
 #: jjbarstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
 #: jjpiestats/options.menuGroup
@@ -40961,6 +41155,10 @@ msgstr ""
 #: effectsize/options/large_effect_threshold.title
 #: effectsize/results/results/clinicalSignificance.columns.title
 msgid "Large Effect Threshold"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Large number of groups ("
 msgstr ""
 
 #: spatialbayesiansurvival/options/covariate_priors/lasso.title
@@ -42414,6 +42612,14 @@ msgstr ""
 
 #: patientreported/results/longitudinal_results.title
 msgid "Longitudinal Analysis Results"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Longitudinal Analysis: Excluded "
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Longitudinal connections enabled for "
 msgstr ""
 
 #: advancedraincloud/options/id_var.title
@@ -43909,6 +44115,10 @@ msgstr ""
 msgid "Maximum Width"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "may cause display issues. Consider grouping your data."
+msgstr ""
+
 #: bayesianma/options/mcmc_method/mc3.title
 msgid "MC³ (Metropolis-Coupled MCMC)"
 msgstr ""
@@ -43923,6 +44133,10 @@ msgstr ""
 
 #: advancedraincloud/options/mcid_value.title
 msgid "MCID Value"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "MCID value"
 msgstr ""
 
 #: frailtysurvival/options/estimation_method/mcmc.title
@@ -44108,6 +44322,7 @@ msgstr ""
 msgid "mdy"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/mean.title
 #: alluvial/options/bin/mean.title
@@ -44246,6 +44461,10 @@ msgstr ""
 #: patientreported/results/responder_analysis_results.columns.title
 #: qualityoflife/results/change_analysis_results.columns.title
 msgid "Mean Change"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Mean change:"
 msgstr ""
 
 #: treeadvanced/results/clinicalimportance.columns.title
@@ -44614,6 +44833,7 @@ msgstr ""
 msgid "meddecideT"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/median.title
 #: alluvial/options/bin/median.title
@@ -44679,6 +44899,10 @@ msgstr ""
 
 #: stagemigration/results/informativeCensoringByStage.columns.title
 msgid "Median Censoring Time"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Median change:"
 msgstr ""
 
 #: economistplots/options/median_color.title
@@ -46386,8 +46610,16 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Missing (%)"
+msgstr ""
+
 #: outbreakanalysis/results/data_quality_report.columns.title
 msgid "Missing (N)"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Missing (n)"
 msgstr ""
 
 #: advancedimputation/results/missing_summary.columns.title
@@ -46428,6 +46660,10 @@ msgstr ""
 msgid "Missing Data Analysis and Imputation"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Missing Data by Variable"
+msgstr ""
+
 #: package/analyses/missingdataexplorer.menuTitle
 #: missingdataexplorer/options.menuTitle
 msgid "Missing Data Explorer"
@@ -46460,6 +46696,10 @@ msgstr ""
 
 #: qualityoflife/options/imputation_method.title
 msgid "Missing Data Imputation"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Missing Data Information"
 msgstr ""
 
 #: ihccluster/options/handleMissing.title
@@ -48633,6 +48873,18 @@ msgstr ""
 msgid "Multivariate Spatial Analysis"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "must be a numeric value"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "must be a numeric value between"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "must be a positive numeric value"
+msgstr ""
+
 #: ggoncoplot/results/mutationSummary.columns.title
 msgid "Mutated Samples"
 msgstr ""
@@ -48686,6 +48938,7 @@ msgstr ""
 msgid "mydataview2"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: adaptivelasso/results/riskGroups.columns.title
 #: advancedanova/results/descriptives.columns.title
 #: alluvialSurvival/results/survivalStats.columns.title
@@ -49645,12 +49898,20 @@ msgstr ""
 msgid "No CV"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "No data available for plotting"
+msgstr ""
+
 #: ggsegmentedtotalbar/options/percentage_format/integer.title
 msgid "No Decimals (80%)"
 msgstr ""
 
 #: advancedtrials/options/beta_spending/none.title
 msgid "No Futility Boundary"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "No groups found in the data"
 msgstr ""
 
 #: qualityoflife/options/imputation_method/none.title
@@ -49679,6 +49940,10 @@ msgstr ""
 msgid "No Outlier Detection"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "No paired observations found for change analysis in complete data."
+msgstr ""
+
 #: jsummarytools/options/cross_proportions/none.title
 msgid "No Proportions"
 msgstr ""
@@ -49689,6 +49954,14 @@ msgstr ""
 
 #: qualityoflife/options/reference_population/none.title
 msgid "No Reference Population"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "No repeated IDs found after data cleaning. Longitudinal connections require subjects with multiple observations."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "No repeated observations found in complete data. Change analysis requires subjects with multiple measurements."
 msgstr ""
 
 #: parallelplot/options/scaling/none.title
@@ -51250,6 +51523,10 @@ msgstr ""
 msgid "Number of Time Intervals"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Number of time point labels ("
+msgstr ""
+
 #: enhancedfactorvariable/options/maxTopFactors.description
 msgid "Number of top factor levels to display when limiting output"
 msgstr ""
@@ -51277,6 +51554,10 @@ msgstr ""
 
 #: stagemigration/options/forestNTrees.description
 msgid "Number of trees in the random forest. More trees generally improve  performance but increase computation time. 500 trees provide good  balance between accuracy and speed for most applications."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Number of trial arm labels ("
 msgstr ""
 
 #: tidydensity/options/binomial_size.title
@@ -51415,6 +51696,10 @@ msgstr ""
 #: enhancedfactorvariable/results/results/nominalSummary.columns.title
 #: eurostatmap/results/info.columns.title
 msgid "Observations"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "observations"
 msgstr ""
 
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
@@ -52391,6 +52676,10 @@ msgstr ""
 #: decisioncompare/results/text1.title
 #: decisioncompare/results/text2.title
 msgid "Original Data"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Original dataset:"
 msgstr ""
 
 #: stagemigration/results/cureModelBootstrap.columns.title
@@ -53943,6 +54232,10 @@ msgstr ""
 #: contTablesPaired/ui.title
 #: contTablesPaired/results.title
 msgid "Paired Samples Contingency Tables"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Paired subjects:"
 msgstr ""
 
 #: clinicaltrialdesign/options/test_type/paired_ttest.title
@@ -56672,6 +56965,10 @@ msgstr ""
 msgid "Plausibility Score"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Please check your variable selections."
+msgstr ""
+
 #: tidyplots/results/plot.title
 msgid "Plot"
 msgstr ""
@@ -57585,6 +57882,10 @@ msgstr ""
 msgid "Point Size"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Point size"
+msgstr ""
+
 #: jforester/options/point_size_range.title
 msgid "Point Size Range"
 msgstr ""
@@ -57614,6 +57915,10 @@ msgstr ""
 #: jjscatterstats/options/pointalpha.title
 #: jviolin/options/point_alpha.title
 msgid "Point Transparency"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Point transparency"
 msgstr ""
 
 #: basegraphics/options/point_type.title
@@ -60817,7 +61122,7 @@ msgstr ""
 msgid "Publication"
 msgstr ""
 
-#: advancedraincloud/ui[9].label
+#: advancedraincloud/ui[10].label
 msgid "Publication & Export"
 msgstr ""
 
@@ -61889,6 +62194,7 @@ msgstr ""
 msgid "Randomized Block"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: decisiongraph/results/sensitivityTable.columns.title
 #: ihccluster/results/markerSummary.columns.title
 #: qualityoflife/results/health_utilities_summary.columns.title
@@ -62772,8 +63078,20 @@ msgstr ""
 msgid "Reference Range Maximum"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Reference range maximum"
+msgstr ""
+
 #: advancedraincloud/options/reference_range_min.title
 msgid "Reference Range Minimum"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Reference range minimum"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Reference range minimum must be less than maximum"
 msgstr ""
 
 #: labinterpret/options/reference_source.title
@@ -63742,12 +64060,24 @@ msgstr ""
 msgid "Responder Threshold"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Responder threshold"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Responders (≥"
+msgstr ""
+
 #: classification/results/confusion/matrix.columns.title
 msgid "response"
 msgstr ""
 
 #: swimmerplot/options/milestone3Name.default
 msgid "Response Assessment"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Response Categories"
 msgstr ""
 
 #: waterfall/results/summaryTable.title
@@ -63817,6 +64147,10 @@ msgstr ""
 
 #: advancedraincloud/options/responder_threshold.title
 msgid "Response Threshold (%)"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Response threshold:"
 msgstr ""
 
 #: patientdashboard/results/activeAlertsTable.columns.title
@@ -66186,6 +66520,7 @@ msgstr ""
 msgid "Screening Test Type"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: advancedanova/results/descriptives.columns.title
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
 #: biomarkerresponse/results/groupComparison.columns.title
@@ -72236,6 +72571,10 @@ msgstr ""
 msgid "Stable Selection"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Stable:"
+msgstr ""
+
 #: advancedbarplot/options/bar_position/stack.title
 msgid "Stacked"
 msgstr ""
@@ -74772,6 +75111,10 @@ msgstr ""
 
 #: jscattermore/results/summary.description
 msgid "Summary statistics and performance information"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Summary statistics for advanced raincloud plot groups."
 msgstr ""
 
 #: enhancedfactorvariable/results/results/nominalSummary.description
@@ -79429,6 +79772,10 @@ msgstr ""
 msgid "Tolerance for algorithm convergence"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Too many groups ("
+msgstr ""
+
 #: package/analyses/toolssummary.title
 #: package/analyses/toolssummary.menuTitle
 #: toolssummary/options.title
@@ -82745,6 +83092,18 @@ msgstr ""
 msgid "Using Dates to Calculate Survival Time"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Using default labels."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Using standard geom fallback due to data structure that may cause ggrain issues."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Using standard geom fallback."
+msgstr ""
+
 #: datecorrection/options/timezone.default
 msgid "UTC"
 msgstr ""
@@ -83305,6 +83664,7 @@ msgstr ""
 msgid "Variability Assessment"
 msgstr ""
 
+#: R/advancedraincloud.b.R
 #: aalenhazard/results/coefficientsTable.columns.title
 #: aalenhazard/results/constantEffectsTest.columns.title
 #: adaptivelasso/results/coefficients.columns.title
@@ -84480,6 +84840,10 @@ msgstr ""
 msgid "Vertical Bars"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid "Very few subjects with repeated measures ("
+msgstr ""
+
 #: netreclassification/results/reclassification.columns.title
 msgid "Very High Risk"
 msgstr ""
@@ -84560,6 +84924,10 @@ msgstr ""
 #: jviolin/options/violin_alpha.title
 #: raincloud/options/alpha_violin.title
 msgid "Violin Transparency"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid "Violin transparency"
 msgstr ""
 
 #: jviolin/options/violin_width.title

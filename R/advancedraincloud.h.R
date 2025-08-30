@@ -18,6 +18,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             point_alpha = 0.7,
             violin_alpha = 0.7,
             boxplot_width = 0.1,
+            jitter_seed = 42,
             color_palette = "clinical",
             plot_title = "Advanced Raincloud Plot",
             x_label = "",
@@ -110,7 +111,9 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=list(
                     "l",
                     "r",
-                    "f"),
+                    "f",
+                    "f1x1",
+                    "f2x2"),
                 default="l")
             private$..likert_mode <- jmvcore::OptionBool$new(
                 "likert_mode",
@@ -144,6 +147,10 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 min=0.1,
                 max=1,
                 default=0.1)
+            private$..jitter_seed <- jmvcore::OptionNumber$new(
+                "jitter_seed",
+                jitter_seed,
+                default=42)
             private$..color_palette <- jmvcore::OptionList$new(
                 "color_palette",
                 color_palette,
@@ -317,6 +324,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..point_alpha)
             self$.addOption(private$..violin_alpha)
             self$.addOption(private$..boxplot_width)
+            self$.addOption(private$..jitter_seed)
             self$.addOption(private$..color_palette)
             self$.addOption(private$..plot_title)
             self$.addOption(private$..x_label)
@@ -362,6 +370,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         point_alpha = function() private$..point_alpha$value,
         violin_alpha = function() private$..violin_alpha$value,
         boxplot_width = function() private$..boxplot_width$value,
+        jitter_seed = function() private$..jitter_seed$value,
         color_palette = function() private$..color_palette$value,
         plot_title = function() private$..plot_title$value,
         x_label = function() private$..x_label$value,
@@ -406,6 +415,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..point_alpha = NA,
         ..violin_alpha = NA,
         ..boxplot_width = NA,
+        ..jitter_seed = NA,
         ..color_palette = NA,
         ..plot_title = NA,
         ..x_label = NA,
@@ -459,6 +469,10 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="",
                 title="Advanced Raincloud Plot",
+                refs=list(
+                    "ggplot2",
+                    "ggrain",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "y_var",
                     "x_var",
@@ -472,6 +486,7 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "point_alpha",
                     "violin_alpha",
                     "boxplot_width",
+                    "jitter_seed",
                     "color_palette",
                     "plot_title",
                     "x_label",
@@ -572,7 +587,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 weightsSupport = 'auto')
         }))
 
-#' Raincloud Plot
+#' Advanced Raincloud Plot
 #'
 #' Creates advanced raincloud plots with longitudinal connections using ggrain 
 #' package.
@@ -604,6 +619,8 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param cov_var Optional variable for remapping point colors based on
 #'   covariate values.
 #' @param rain_side Position of the raincloud relative to the data points.
+#'   Options include left (l), right (r), flanking both sides (f), 1x1 flanking
+#'   (f1x1), and 2x2 flanking (f2x2).
 #' @param likert_mode If TRUE, adds Y-axis jittering for Likert scale or
 #'   ordinal data.
 #' @param show_longitudinal If TRUE, connects repeated observations using the
@@ -612,6 +629,8 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param point_alpha Transparency level for data points.
 #' @param violin_alpha Transparency level for violin plots.
 #' @param boxplot_width Width of the boxplot component.
+#' @param jitter_seed Random seed for consistent point jittering across plot
+#'   updates.
 #' @param color_palette Color palette for different groups.
 #' @param plot_title Title for the raincloud plot.
 #' @param x_label Custom label for X-axis. If empty, uses variable name.
@@ -681,6 +700,7 @@ advancedraincloud <- function(
     point_alpha = 0.7,
     violin_alpha = 0.7,
     boxplot_width = 0.1,
+    jitter_seed = 42,
     color_palette = "clinical",
     plot_title = "Advanced Raincloud Plot",
     x_label = "",
@@ -744,6 +764,7 @@ advancedraincloud <- function(
         point_alpha = point_alpha,
         violin_alpha = violin_alpha,
         boxplot_width = boxplot_width,
+        jitter_seed = jitter_seed,
         color_palette = color_palette,
         plot_title = plot_title,
         x_label = x_label,

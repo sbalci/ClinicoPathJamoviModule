@@ -16,6 +16,7 @@ clearWith:
     - point_alpha
     - violin_alpha
     - boxplot_width
+    - jitter_seed
     - color_palette
     - plot_title
     - x_label
@@ -95,5 +96,12 @@ items:
       title: Methods Section
       type: Html
       visible: (include_methods)
+
+
+refs:
+    - ggplot2
+    - ggrain
+    - ClinicoPathJamoviModule
+
 
 ...

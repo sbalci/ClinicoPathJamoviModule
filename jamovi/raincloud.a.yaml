@@ -1,8 +1,8 @@
 ---
 name: raincloud
 title: Raincloud Plot
-menuGroup: ExplorationT
-menuSubgroup: ClinicoPath Descriptive Plots
+menuGroup: JJStatsPlotT
+menuSubgroup: Categorical vs Continuous
 version: '0.0.3'
 jas: '1.2'
 

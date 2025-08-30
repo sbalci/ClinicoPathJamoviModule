@@ -19,11 +19,22 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
         
         .analysis_data = NULL,
         
+        # Constants for maintainability
+        .constants = list(
+            OUTLIER_PERCENTILES = list(lower = 0.05, upper = 0.95),
+            IQR_MULTIPLIER = 1.5,
+            CONFIDENCE_LEVEL = 0.95,
+            MAX_GROUPS_FOR_PAIRWISE = 10,
+            MAX_GROUPS_FOR_DISPLAY = 20,
+            PROGRESS_REPORT_INTERVAL = 20,
+            HTML_PREALLOC_SIZE = 1000
+        ),
+        
         # Validation helper functions
         .validate_numeric_range = function(value, name, min, max) {
             if (!is.null(value)) {
                 if (!is.numeric(value) || value < min || value > max) {
-                    jmvcore::reject(paste(name, "must be a numeric value between", min, "and", max), code = "")
+                    jmvcore::reject(paste(name, .("must be a numeric value between"), min, .("and"), max), code = "")
                 }
             }
         },
@@ -31,89 +42,116 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
         .validate_numeric_positive = function(value, name) {
             if (!is.null(value)) {
                 if (!is.numeric(value) || value <= 0) {
-                    jmvcore::reject(paste(name, "must be a positive numeric value"), code = "")
+                    jmvcore::reject(paste(name, .("must be a positive numeric value")), code = "")
                 }
             }
         },
         
         .validate_numeric_type = function(value, name) {
             if (!is.null(value) && !is.numeric(value)) {
-                jmvcore::reject(paste(name, "must be a numeric value"), code = "")
+                jmvcore::reject(paste(name, .("must be a numeric value")), code = "")
             }
         },
         
-        # Memory-efficient HTML generation helper
+        # Optimized HTML generation helper
         .build_html_table = function(data_frame, title, headers, bg_color = "#f8f9fa", title_color = "#495057") {
             if (nrow(data_frame) == 0) return("")
             
-            # Pre-allocate string vector for better memory efficiency
-            html_parts <- vector("character", nrow(data_frame) + 10)
-            idx <- 1
+            # Vectorized HTML generation for better performance
+            header_html <- paste0("<th style='padding: 8px; border: 1px solid #dee2e6;'>", headers, "</th>", collapse = "")
             
-            html_parts[idx] <- paste0("<div style='background-color: ", bg_color, "; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>"); idx <- idx + 1
-            html_parts[idx] <- paste0("<h3 style='color: ", title_color, "; margin-top: 0;'>", title, "</h3>"); idx <- idx + 1
-            html_parts[idx] <- "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>"; idx <- idx + 1
+            # Generate rows using vectorized approach
+            row_colors <- ifelse(seq_len(nrow(data_frame)) %% 2 == 0, "#ffffff", "#f8f9fa")
             
-            # Headers
-            html_parts[idx] <- paste0("<thead><tr style='background-color: #6c757d; color: white;'>", 
-                paste0("<th style='padding: 8px; border: 1px solid #dee2e6;'>", headers, "</th>", collapse = ""),
-                "</tr></thead><tbody>"); idx <- idx + 1
+            rows_html <- vapply(seq_len(nrow(data_frame)), function(i) {
+                row_data <- paste0("<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", 
+                                 data_frame[i, ], "</td>", collapse = "")
+                paste0("<tr style='background-color: ", row_colors[i], ";'>", row_data, "</tr>")
+            }, character(1))
             
-            # Rows
-            for (i in 1:nrow(data_frame)) {
-                row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
-                html_parts[idx] <- paste0("<tr style='background-color: ", row_bg, ";'>")
-                idx <- idx + 1
-            }
-            
-            html_parts[idx] <- "</tbody></table></div>"
-            
-            return(paste(html_parts[1:idx], collapse = ""))
+            # Combine all parts efficiently
+            paste0(
+                "<div style='background-color: ", bg_color, "; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<h3 style='color: ", title_color, "; margin-top: 0;'>", title, "</h3>",
+                "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
+                "<thead><tr style='background-color: #6c757d; color: white;'>", header_html, "</tr></thead>",
+                "<tbody>", paste(rows_html, collapse = ""), "</tbody></table></div>"
+            )
         },
         
-        .init = function() {
-            # Use validation helpers for cleaner, more maintainable code
-            private$.validate_numeric_range(self$options$point_alpha, "Point transparency", 0, 1)
-            private$.validate_numeric_range(self$options$violin_alpha, "Violin transparency", 0, 1)
-            private$.validate_numeric_range(self$options$point_size, "Point size", 0.1, 5)
-            private$.validate_numeric_range(self$options$boxplot_width, "Boxplot width", 0.1, 1)
-            
-            # Validate responder threshold only when change scores are enabled
-            if (self$options$show_change_scores) {
-                private$.validate_numeric_range(self$options$responder_threshold, "Responder threshold", 0, 100)
-            }
-            
-            # Validate CV bands only when enabled
-            if (self$options$show_cv_bands) {
-                private$.validate_numeric_range(self$options$cv_band_1, "CV Band 1 percentage", 1, 50)
-                private$.validate_numeric_range(self$options$cv_band_2, "CV Band 2 percentage", 1, 50)
-            }
-            
-            # Validate numeric types
-            private$.validate_numeric_type(self$options$clinical_cutoff, "Clinical cutoff")
-            private$.validate_numeric_type(self$options$reference_range_min, "Reference range minimum")
-            private$.validate_numeric_type(self$options$reference_range_max, "Reference range maximum")
-            
-            # Validate positive values only when relevant options are enabled
-            if (self$options$show_mcid) {
-                private$.validate_numeric_positive(self$options$mcid_value, "MCID value")
-            }
-            
-            # Validate reference range logic only when both values are set and non-zero
-            if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max)) {
-                if (is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
-                    self$options$reference_range_min != 0 && self$options$reference_range_max != 0) {
-                    if (self$options$reference_range_min >= self$options$reference_range_max) {
-                        jmvcore::reject("Reference range minimum must be less than maximum", code = "")
+        # Enhanced checkpoint with progress reporting
+        .checkpoint_with_progress = function(message = "", current = 0, total = 1, flush = TRUE) {
+            if (total > 1 && current > 0) {
+                progress_pct <- round((current / total) * 100)
+                if (progress_pct %% private$.constants$PROGRESS_REPORT_INTERVAL == 0) {
+                    if (message != "") {
+                        cat(paste0(message, " (", progress_pct, "% complete)\n"))
                     }
                 }
             }
+            private$.checkpoint(flush = flush)
+        },
+        
+        .init = function() {
+            # Only perform validation if we have data - otherwise just return to show welcome message
+            if (is.null(self$data) || nrow(self$data) == 0  || 
+                self$options$y_var == "" || self$options$x_var == "" ||
+                length(self$options$y_var) == 0 || length(self$options$x_var) == 0) {
+                return()
+            }
+            
+            # Use validation helpers for cleaner, more maintainable code
+            tryCatch({
+                private$.validate_numeric_range(self$options$point_alpha, .("Point transparency"), 0, 1)
+                private$.validate_numeric_range(self$options$violin_alpha, .("Violin transparency"), 0, 1)
+                private$.validate_numeric_range(self$options$point_size, .("Point size"), 0.1, 5)
+                private$.validate_numeric_range(self$options$boxplot_width, .("Boxplot width"), 0.1, 1)
+                
+                # Validate jitter seed is numeric
+                private$.validate_numeric_type(self$options$jitter_seed, .("Jitter seed"))
+                
+                # Validate responder threshold only when change scores are enabled
+                if (self$options$show_change_scores) {
+                    private$.validate_numeric_range(self$options$responder_threshold, .("Responder threshold"), 0, 100)
+                }
+                
+                # Validate CV bands only when enabled
+                if (self$options$show_cv_bands) {
+                    private$.validate_numeric_range(self$options$cv_band_1, .("CV Band 1 percentage"), 1, 50)
+                    private$.validate_numeric_range(self$options$cv_band_2, .("CV Band 2 percentage"), 1, 50)
+                }
+                
+                # Validate numeric types
+                private$.validate_numeric_type(self$options$clinical_cutoff, .("Clinical cutoff"))
+                private$.validate_numeric_type(self$options$reference_range_min, .("Reference range minimum"))
+                private$.validate_numeric_type(self$options$reference_range_max, .("Reference range maximum"))
+                
+                # Validate positive values only when relevant options are enabled
+                if (self$options$show_mcid) {
+                    private$.validate_numeric_positive(self$options$mcid_value, .("MCID value"))
+                }
+                
+                # Validate reference range logic only when both values are set and non-zero
+                if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max)) {
+                    if (is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
+                        self$options$reference_range_min != 0 && self$options$reference_range_max != 0) {
+                        if (self$options$reference_range_min >= self$options$reference_range_max) {
+                            jmvcore::reject(.("Reference range minimum must be less than maximum"), code = "")
+                        }
+                    }
+                }
+            }, error = function(e) {
+                # If validation fails in init, just return - errors will be caught in .run()
+                return()
+            })
         },
 
         .run = function() {
 
             # Check if required variables have been selected
-            if (is.null(self$options$y_var) || is.null(self$options$x_var)) {
+            if (is.null(self$options$y_var) || is.null(self$options$x_var) || 
+                self$options$y_var == "" || self$options$x_var == "" ||
+                length(self$options$y_var) == 0 || length(self$options$x_var) == 0) {
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                 <h3 style='color: #1976d2; margin-top: 0;'>🌧️ Welcome to Advanced Raincloud Plots!</h3>
@@ -165,7 +203,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
+                stop(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
             }
 
             # Safely require ggrain
@@ -204,7 +242,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
             if (nrow(analysis_data) == 0) {
-                stop("Error: No complete cases found for the selected variables.")
+                stop(.("Error: No complete cases found for the selected variables."))
             }
 
             # Convert variables to appropriate types
@@ -233,11 +271,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Handle outliers if requested
             if (self$options$outlier_method != "none") {
+                private$.checkpoint()  # Before outlier processing
                 analysis_data <- private$.handle_outliers(analysis_data, y_var, self$options$outlier_method)
             }
 
             # Generate summary statistics if requested
             if (self$options$show_statistics) {
+                private$.checkpoint()  # Before statistics generation
                 stats_html <- private$.generate_statistics(analysis_data, y_var, x_var, fill_var)
                 
                 # Add missing data information if requested
@@ -251,6 +291,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Generate group comparisons if requested
             if (self$options$show_comparisons) {
+                private$.checkpoint()  # Before comparison tests
                 comparison_html <- private$.generate_comparisons(analysis_data, y_var, x_var, fill_var)
                 self$results$comparisons$setContent(comparison_html)
             }
@@ -263,6 +304,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Generate effect size analysis if requested
             if (self$options$show_effect_size) {
+                private$.checkpoint()  # Before effect size calculations
                 start_time <- Sys.time()
                 effect_size_html <- private$.generate_effect_sizes(analysis_data, y_var, x_var, self$options$effect_size_type)
                 elapsed <- round(difftime(Sys.time(), start_time, units = "secs"), 2)
@@ -278,6 +320,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Generate change analysis if requested
             if (self$options$show_change_scores) {
+                private$.checkpoint()  # Before change score analysis
                 change_html <- private$.generate_change_analysis(
                     analysis_data, y_var, x_var, id_var, 
                     self$options$baseline_group, self$options$responder_threshold
@@ -287,6 +330,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Generate clinical report if requested
             if (self$options$generate_report) {
+                private$.checkpoint()  # Before clinical report generation
                 report_html <- private$.generate_clinical_report(
                     analysis_data, y_var, x_var, 
                     self$options$population_type
@@ -322,13 +366,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             # Validate that we have groups
             n_groups <- length(unique(analysis_data[[x_var]]))
             if (n_groups == 0) {
-                warning("No groups found in the data")
+                warning(.("No groups found in the data"))
                 return()
             }
             
             # Validate data structure
             if (nrow(analysis_data) == 0) {
-                warning("No data available for plotting")
+                warning(.("No data available for plotting"))
                 return()
             }
             
@@ -340,6 +384,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
             
             # Create base plot with error handling
+            private$.checkpoint(flush = FALSE)  # Before plot creation
             tryCatch({
                 p <- ggplot2::ggplot(analysis_data, ggplot2::aes(
                     x = .data[[x_var]], 
@@ -347,7 +392,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     fill = .data[[fill_mapping]]
                 ))
             }, error = function(e) {
-                stop("Failed to create base plot: ", e$message, ". Please check your variable selections.")
+                stop(.("Failed to create base plot: "), e$message, .("Please check your variable selections."))
             })
             
             # Add covariate mapping if specified
@@ -357,8 +402,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Validate data structure for ggrain compatibility
             n_groups <- length(unique(analysis_data[[x_var]]))
-            if (n_groups > 20) {
-                warning("Large number of groups (", n_groups, ") may cause display issues. Consider grouping your data.")
+            if (n_groups > private$.constants$MAX_GROUPS_FOR_DISPLAY) {
+                warning(.("Large number of groups ("), n_groups, .("may cause display issues. Consider grouping your data."))
             }
             
             # Ensure no NA values in grouping variable
@@ -367,6 +412,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             # Create geom_rain with enhanced error handling and validation
             rain_params <- list(
                 rain.side = self$options$rain_side,
+                seed = self$options$jitter_seed,  # For consistent jittering
                 point.args = list(
                     size = self$options$point_size,
                     alpha = self$options$point_alpha
@@ -381,12 +427,50 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Add longitudinal connections if requested and valid
             if (self$options$show_longitudinal && !is.null(id_var) && id_var != "" && id_var %in% names(analysis_data)) {
-                # Ensure ID variable has no NAs for connections
-                if (!any(is.na(analysis_data[[id_var]]))) {
-                    rain_params$id.long.var <- id_var
-                } else {
-                    warning("ID variable contains NA values. Longitudinal connections disabled.")
+                # Check for NA values and handle appropriately
+                original_n <- nrow(analysis_data)
+                
+                if (any(is.na(analysis_data[[id_var]]))) {
+                    # Use complete.cases to remove rows with NA in ID variable
+                    complete_rows <- complete.cases(analysis_data[[id_var]])
+                    analysis_data <- analysis_data[complete_rows, ]
+                    excluded_n <- original_n - nrow(analysis_data)
+                    
+                    # Inform user about exclusions
+                    if (excluded_n > 0) {
+                        message(paste0(
+                            .("Longitudinal Analysis: Excluded "), excluded_n, 
+                            .(" observations with missing ID values ("), 
+                            round((excluded_n/original_n)*100, 1), .("%)")))
+                    }
                 }
+                
+                # Validate ID structure for meaningful longitudinal connections
+                if (nrow(analysis_data) > 0) {
+                    id_counts <- table(analysis_data[[id_var]])
+                    repeated_ids <- sum(id_counts > 1)
+                    total_ids <- length(id_counts)
+                    
+                    if (repeated_ids == 0) {
+                        warning(.("No repeated IDs found after data cleaning. Longitudinal connections require subjects with multiple observations."))
+                    } else if (repeated_ids < 3) {
+                        warning(paste0(
+                            .("Very few subjects with repeated measures ("), repeated_ids, 
+                            .(") after data cleaning. Longitudinal connections may not be meaningful.")))
+                        rain_params$id.long.var <- id_var
+                    } else {
+                        # Proper longitudinal structure detected
+                        rain_params$id.long.var <- id_var
+                        message(paste0(
+                            .("Longitudinal connections enabled for "), repeated_ids, 
+                            .("/"), total_ids, .(" subjects with repeated measures.")))
+                    }
+                } else {
+                    warning(.("All observations excluded due to missing ID values. Longitudinal connections disabled."))
+                }
+                
+                # Update stored analysis data after cleaning
+                private$.analysis_data <- analysis_data
             }
             
             # Add Likert mode if requested
@@ -400,7 +484,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 if (!any(is.na(analysis_data[[cov_var]]))) {
                     rain_params$cov <- cov_var
                 } else {
-                    warning("Covariate variable contains NA values. Covariate mapping disabled.")
+                    warning(.("Covariate variable contains NA values. Covariate mapping disabled."))
                 }
             }
             
@@ -412,24 +496,25 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 (!is.null(fill_var) && fill_var != "" && length(unique(analysis_data[[fill_var]])) > 3) ||
                 any(table(analysis_data[[x_var]]) < 3)) {  # Groups with very few observations
                 use_fallback <- TRUE
-                warning("Using standard geom fallback due to data structure that may cause ggrain issues.")
+                warning(.("Using standard geom fallback due to data structure that may cause ggrain issues."))
             }
             
             # Try ggrain first, with immediate fallback on any error
             if (!use_fallback) {
+                private$.checkpoint(flush = FALSE)  # Before expensive ggrain operation
                 tryCatch({
-                    # Validate rain.side parameter
-                    valid_sides <- c("l", "r", "f")
+                    # Validate rain.side parameter with all official options
+                    valid_sides <- c("l", "r", "f", "f1x1", "f2x2")
                     if (!self$options$rain_side %in% valid_sides) {
                         rain_params$rain.side <- "l"  # Default fallback
-                        warning("Invalid rain.side value. Using default 'l' (left).")
+                        warning(.("Invalid rain.side value. Using default 'l' (left)."))
                     }
                     
                     p <- p + do.call(ggrain::geom_rain, rain_params)
                 }, error = function(e) {
                     # Set fallback flag for any ggrain error
                     use_fallback <<- TRUE
-                    warning("ggrain failed with error: ", e$message, ". Using standard geom fallback.")
+                    warning(.("ggrain failed with error: "), e$message, .("Using standard geom fallback."))
                 })
             }
             
@@ -437,6 +522,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             if (use_fallback) {
                 tryCatch({
                     # Create sophisticated fallback that mimics raincloud appearance
+                    # Set consistent jittering with seed for reproducible results
+                    set.seed(self$options$jitter_seed)
                     dodge_width <- 0.8
                     jitter_width <- 0.15
                     
@@ -479,8 +566,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                                 position = ggplot2::position_nudge(x = 0.2),
                                 trim = FALSE
                             )
-                    } else {  # flanking
-                        # Flanking: violin split or centered
+                    } else if (self$options$rain_side %in% c("f", "f1x1", "f2x2")) {
+                        # Flanking: violin split or centered - handle different flanking types
                         p <- p + 
                             ggplot2::geom_violin(
                                 alpha = self$options$violin_alpha, 
@@ -530,7 +617,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 p <- p + ggplot2::scale_fill_manual(values = colors)
             }, error = function(e) {
                 # Fallback to default ggplot2 colors if palette generation fails
-                warning("Color palette generation failed, using default colors: ", e$message)
+                warning(.("Color palette generation failed, using default colors: "), e$message)
                 # ggplot2 will use default colors automatically
             })
             
@@ -544,7 +631,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                         p <- p + ggplot2::scale_color_manual(values = cov_colors)
                     }
                 }, error = function(e) {
-                    warning("Covariate color scale generation failed, using defaults: ", e$message)
+                    warning(.("Covariate color scale generation failed, using defaults: "), e$message)
                     # ggplot2 will use default colors automatically
                 })
             }
@@ -703,9 +790,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     names(arm_labels) <- x_levels
                     p <- p + ggplot2::scale_x_discrete(labels = arm_labels)
                 } else {
-                    warning(paste("Number of trial arm labels (", length(arm_labels), 
-                                ") does not match number of groups (", length(x_levels), 
-                                "). Using default labels."))
+                    warning(paste(.("Number of trial arm labels ("), length(arm_labels), 
+                                .("does not match number of groups ("), length(x_levels), 
+                                .("Using default labels.")))
                 }
             }
             
@@ -721,9 +808,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                         names(time_labels) <- x_levels
                         p <- p + ggplot2::scale_x_discrete(labels = time_labels)
                     } else {
-                        warning(paste("Number of time point labels (", length(time_labels), 
-                                    ") does not match number of time points (", length(x_levels), 
-                                    "). Using default labels."))
+                        warning(paste(.("Number of time point labels ("), length(time_labels), 
+                                    .("does not match number of time points ("), length(x_levels), 
+                                    .("Using default labels.")))
                     }
                 }
             }
@@ -833,39 +920,31 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 .groups = 'drop'
             )
             
-            stats_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #495057; margin-top: 0;'>📊 Advanced Raincloud Statistics</h3>",
-                "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
-                "<thead><tr style='background-color: #6c757d; color: white;'>",
-                "<th style='padding: 8px; border: 1px solid #dee2e6;'>Group</th>",
-                "<th style='padding: 8px; border: 1px solid #dee2e6;'>N</th>",
-                "<th style='padding: 8px; border: 1px solid #dee2e6;'>Mean</th>",
-                "<th style='padding: 8px; border: 1px solid #dee2e6;'>Median</th>",
-                "<th style='padding: 8px; border: 1px solid #dee2e6;'>SD</th>",
-                "<th style='padding: 8px; border: 1px solid #dee2e6;'>Range</th>",
-                "</tr></thead><tbody>"
+            # Use optimized HTML table generation
+            headers <- c(.("Group"), .("N"), .("Mean"), .("Median"), .("SD"), .("Range"))
+            
+            # Prepare data for table generation
+            table_data <- data.frame(
+                Group = paste0("<strong>", stats_summary[[group_var]], "</strong>"),
+                N = stats_summary$n,
+                Mean = stats_summary$mean,
+                Median = stats_summary$median,
+                SD = stats_summary$sd,
+                Range = paste0(stats_summary$min_val, " - ", stats_summary$max_val),
+                stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(stats_summary)) {
-                row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
-                stats_html <- paste0(stats_html,
-                    "<tr style='background-color: ", row_bg, ";'>",
-                    "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>", stats_summary[[group_var]][i], "</strong></td>",
-                    "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$n[i], "</td>",
-                    "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$mean[i], "</td>",
-                    "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$median[i], "</td>",
-                    "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$sd[i], "</td>",
-                    "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$min_val[i], " - ", stats_summary$max_val[i], "</td>",
-                    "</tr>"
-                )
-            }
+            stats_html <- private$.build_html_table(
+                table_data, 
+                .("📊 Advanced Raincloud Statistics"), 
+                headers
+            )
             
+            # Add summary note
             stats_html <- paste0(stats_html, 
-                "</tbody></table>",
                 "<p style='font-size: 12px; color: #6c757d; margin-top: 15px;'>",
-                "<em>Summary statistics for advanced raincloud plot groups.</em>",
-                "</p></div>"
+                "<em>", .("Summary statistics for advanced raincloud plot groups."), "</em>",
+                "</p>"
             )
             
             return(stats_html)
@@ -997,22 +1076,22 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             y_values <- data[[y_var]]
             
             if (method == "winsorize") {
-                # Winsorize at 5th and 95th percentiles
-                lower <- quantile(y_values, 0.05, na.rm = TRUE)
-                upper <- quantile(y_values, 0.95, na.rm = TRUE)
+                # Winsorize using constants
+                lower <- quantile(y_values, private$.constants$OUTLIER_PERCENTILES$lower, na.rm = TRUE)
+                upper <- quantile(y_values, private$.constants$OUTLIER_PERCENTILES$upper, na.rm = TRUE)
                 data[[y_var]] <- pmax(pmin(y_values, upper), lower)
             } else if (method == "trim") {
-                # Trim values outside 5th and 95th percentiles
-                lower <- quantile(y_values, 0.05, na.rm = TRUE)
-                upper <- quantile(y_values, 0.95, na.rm = TRUE)
+                # Trim using constants
+                lower <- quantile(y_values, private$.constants$OUTLIER_PERCENTILES$lower, na.rm = TRUE)
+                upper <- quantile(y_values, private$.constants$OUTLIER_PERCENTILES$upper, na.rm = TRUE)
                 data <- data[y_values >= lower & y_values <= upper, ]
             } else if (method == "iqr") {
-                # IQR method
+                # IQR method using constants
                 Q1 <- quantile(y_values, 0.25, na.rm = TRUE)
                 Q3 <- quantile(y_values, 0.75, na.rm = TRUE)
                 IQR <- Q3 - Q1
-                lower <- Q1 - 1.5 * IQR
-                upper <- Q3 + 1.5 * IQR
+                lower <- Q1 - private$.constants$IQR_MULTIPLIER * IQR
+                upper <- Q3 + private$.constants$IQR_MULTIPLIER * IQR
                 data <- data[y_values >= lower & y_values <= upper, ]
             }
             
@@ -1025,6 +1104,14 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             if (n_groups < 2) {
                 return("<p>Effect size calculation requires at least 2 groups.</p>")
+            }
+            
+            # Implement performance optimization: limit pairwise comparisons
+            if (n_groups > private$.constants$MAX_GROUPS_FOR_PAIRWISE) {
+                warning(.("Too many groups ("), n_groups, .("for pairwise comparisons. Limiting to first "), 
+                       private$.constants$MAX_GROUPS_FOR_PAIRWISE, .("groups."))
+                groups <- groups[1:private$.constants$MAX_GROUPS_FOR_PAIRWISE]
+                n_groups <- length(groups)
             }
             
             html <- paste0(
@@ -1040,9 +1127,20 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 "</tr></thead><tbody>"
             )
             
-            # Calculate pairwise effect sizes
+            # Calculate pairwise effect sizes with progress tracking
+            total_comparisons <- (n_groups * (n_groups - 1)) / 2
+            comparison_count <- 0
+            
             for (i in 1:(n_groups-1)) {
                 for (j in (i+1):n_groups) {
+                    comparison_count <- comparison_count + 1
+                    private$.checkpoint_with_progress(
+                        .("Computing effect sizes"), 
+                        comparison_count, 
+                        total_comparisons, 
+                        flush = FALSE
+                    )
+                    
                     group1_data <- data[data[[x_var]] == groups[i], y_var]
                     group2_data <- data[data[[x_var]] == groups[j], y_var]
                     
@@ -1098,10 +1196,11 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 effect_size <- (mean1 - mean2) / sd2
             }
             
-            # Calculate confidence intervals (approximate)
+            # Calculate confidence intervals using constants
+            z_value <- qnorm(1 - (1 - private$.constants$CONFIDENCE_LEVEL) / 2)  # 1.96 for 95% CI
             se <- sqrt((n1 + n2) / (n1 * n2) + effect_size^2 / (2 * (n1 + n2)))
-            ci_lower <- effect_size - 1.96 * se
-            ci_upper <- effect_size + 1.96 * se
+            ci_lower <- effect_size - z_value * se
+            ci_upper <- effect_size + z_value * se
             
             return(list(
                 effect_size = effect_size,
@@ -1118,24 +1217,149 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
         },
         
         .generate_change_analysis = function(data, y_var, x_var, id_var, baseline_group, threshold) {
-            if (is.null(id_var) || id_var == "") {
-                return("<p>Change analysis requires a longitudinal ID variable.</p>")
+            if (is.null(id_var) || id_var == "" || is.null(baseline_group) || baseline_group == "") {
+                return(paste0(
+                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                    "<p>", .("Change analysis requires both a longitudinal ID variable and a baseline group specification."), "</p>",
+                    "</div>"
+                ))
             }
             
-            # Calculate change scores
-            baseline_data <- data[data[[x_var]] == baseline_group, ]
+            # Clean data using complete.cases for change analysis
+            original_n <- nrow(data)
+            required_vars <- c(id_var, x_var, y_var)
+            complete_data <- data[complete.cases(data[required_vars]), ]
+            excluded_n <- original_n - nrow(complete_data)
+            
+            # Report data cleaning if exclusions occurred
+            cleaning_report <- ""
+            if (excluded_n > 0) {
+                cleaning_report <- paste0(
+                    "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'>📊 ", .("Data Cleaning Summary"), "</h4>",
+                    "<p><strong>", .("Original dataset:"), "</strong> ", original_n, .(") observations"), "</p>",
+                    "<p><strong>", .("Complete cases:"), "</strong> ", nrow(complete_data), .(") observations"), "</p>",
+                    "<p><strong>", .("Excluded (missing data):"), "</strong> ", excluded_n, .(") observations ("), 
+                    round((excluded_n/original_n)*100, 1), "%)</p>",
+                    "<p style='font-size: 12px; color: #1976d2;'><em>", 
+                    .("Complete case analysis performed - observations with missing ID, group, or outcome values were excluded."), 
+                    "</em></p></div>"
+                )
+            }
+            
+            # Validate baseline group exists in clean data
+            if (!baseline_group %in% unique(complete_data[[x_var]])) {
+                available_groups <- paste(unique(complete_data[[x_var]]), collapse = ", ")
+                return(paste0(
+                    cleaning_report,
+                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                    "<p>", .("Baseline group '"), baseline_group, .("' not found in complete data. Available groups: "), available_groups, "</p>",
+                    "</div>"
+                ))
+            }
+            
+            # Validate ID structure for longitudinal analysis
+            id_counts <- table(complete_data[[id_var]])
+            if (all(id_counts == 1)) {
+                return(paste0(
+                    cleaning_report,
+                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                    "<p>", .("No repeated observations found in complete data. Change analysis requires subjects with multiple measurements."), "</p>",
+                    "</div>"
+                ))
+            }
+            
+            # Perform actual change score analysis on complete data
+            paired_data <- complete_data %>%
+                dplyr::filter(.data[[id_var]] %in% names(id_counts[id_counts > 1])) %>%
+                dplyr::select(dplyr::all_of(c(id_var, x_var, y_var))) %>%
+                dplyr::arrange(.data[[id_var]], .data[[x_var]])
+            
+            # Calculate change scores for paired observations
+            change_results <- paired_data %>%
+                dplyr::group_by(.data[[id_var]]) %>%
+                dplyr::filter(dplyr::n() >= 2) %>%
+                dplyr::arrange(.data[[x_var]]) %>%
+                dplyr::summarise(
+                    baseline_value = dplyr::first(.data[[y_var]]),
+                    followup_value = dplyr::last(.data[[y_var]]),
+                    change_score = dplyr::last(.data[[y_var]]) - dplyr::first(.data[[y_var]]),
+                    percent_change = (dplyr::last(.data[[y_var]]) - dplyr::first(.data[[y_var]])) / abs(dplyr::first(.data[[y_var]])) * 100,
+                    .groups = 'drop'
+                )
+            
+            if (nrow(change_results) == 0) {
+                return(paste0(
+                    cleaning_report,
+                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                    "<p>", .("No paired observations found for change analysis in complete data."), "</p>",
+                    "</div>"
+                ))
+            }
+            
+            # Responder analysis
+            responders <- change_results %>%
+                dplyr::mutate(
+                    responder = abs(.data$percent_change) >= threshold,
+                    improver = .data$change_score > 0,
+                    decliner = .data$change_score < 0,
+                    stable = .data$change_score == 0
+                )
+            
+            n_total <- nrow(responders)
+            n_responders <- sum(responders$responder, na.rm = TRUE)
+            n_improvers <- sum(responders$improver, na.rm = TRUE)
+            n_decliners <- sum(responders$decliner, na.rm = TRUE)
+            n_stable <- sum(responders$stable, na.rm = TRUE)
+            
+            mean_change <- round(mean(responders$change_score, na.rm = TRUE), 3)
+            median_change <- round(median(responders$change_score, na.rm = TRUE), 3)
+            sd_change <- round(sd(responders$change_score, na.rm = TRUE), 3)
             
             html <- paste0(
+                cleaning_report,
                 "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
                 "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
-                "<p>Baseline group: <strong>", baseline_group, "</strong></p>",
-                "<p>Response threshold: <strong>", threshold, "%</strong></p>"
+                
+                "<h4>", .("Analysis Parameters"), "</h4>",
+                "<table style='width: 100%; border-collapse: collapse;'>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Baseline group:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", baseline_group, "</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Response threshold:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", threshold, "%</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Paired subjects:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_total, "</td></tr>",
+                "</table>",
+                
+                "<h4>", .("Change Score Summary"), "</h4>",
+                "<table style='width: 100%; border-collapse: collapse;'>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Mean change:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", mean_change, " ± ", sd_change, "</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Median change:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", median_change, "</td></tr>",
+                "</table>",
+                
+                "<h4>", .("Response Categories"), "</h4>",
+                "<table style='width: 100%; border-collapse: collapse;'>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Responders (≥"), threshold, "% change):</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_responders, " (", round(n_responders/n_total*100, 1), "%)</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Improved:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_improvers, " (", round(n_improvers/n_total*100, 1), "%)</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Declined:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_decliners, " (", round(n_decliners/n_total*100, 1), "%)</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Stable:"), "</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_stable, " (", round(n_stable/n_total*100, 1), "%)</td></tr>",
+                "</table>",
+                
+                "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
+                "<em>", .("Analysis based on complete paired observations. Change scores calculated as (Follow-up - Baseline) values."), "</em>",
+                "</p></div>"
             )
             
-            # Calculate responder analysis
-            # This is a simplified version - in practice would need proper pairing
-            
-            html <- paste0(html, "</div>")
             return(html)
         },
         
@@ -1268,21 +1492,21 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             html <- paste0(
                 "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; margin-top: 20px;'>",
-                "<h3 style='color: #e65100; margin-top: 0;'>📊 Missing Data Information</h3>",
-                "<h4>Data Exclusions</h4>",
-                "<p><strong>Original dataset:</strong> ", n_original, " observations</p>",
-                "<p><strong>Analysis dataset:</strong> ", n_analysis, " observations</p>",
-                "<p><strong>Excluded (incomplete):</strong> ", n_excluded, " observations (", 
+                "<h3 style='color: #e65100; margin-top: 0;'>📊 ", .("Missing Data Information"), "</h3>",
+                "<h4>", .("Data Exclusions"), "</h4>",
+                "<p><strong>", .("Original dataset:"), "</strong> ", n_original, " ", .("observations"), "</p>",
+                "<p><strong>", .("Analysis dataset:"), "</strong> ", n_analysis, " ", .("observations"), "</p>",
+                "<p><strong>", .("Excluded (incomplete):"), "</strong> ", n_excluded, " ", .("observations"), " (", 
                 round((n_excluded / n_original) * 100, 1), "%)</p>"
             )
             
             if (length(missing_info) > 0) {
-                html <- paste0(html, "<h4>Missing Data by Variable</h4>",
+                html <- paste0(html, "<h4>", .("Missing Data by Variable"), "</h4>",
                     "<table style='width: 100%; border-collapse: collapse;'>",
                     "<thead><tr style='background-color: #ff9800; color: white;'>",
-                    "<th style='padding: 8px; border: 1px solid #ddd;'>Variable</th>",
-                    "<th style='padding: 8px; border: 1px solid #ddd;'>Missing (n)</th>",
-                    "<th style='padding: 8px; border: 1px solid #ddd;'>Missing (%)</th>",
+                    "<th style='padding: 8px; border: 1px solid #ddd;'>", .("Variable"), "</th>",
+                    "<th style='padding: 8px; border: 1px solid #ddd;'>", .("Missing (n)"), "</th>",
+                    "<th style='padding: 8px; border: 1px solid #ddd;'>", .("Missing (%)"), "</th>",
                     "</tr></thead><tbody>"
                 )
                 
@@ -1302,7 +1526,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             html <- paste0(html, 
                 "<p style='font-size: 12px; color: #e65100; margin-top: 15px;'>",
-                "<em>Complete case analysis performed. Observations with missing values in any required variable were excluded.</em>",
+                "<em>", .("Complete case analysis performed. Observations with missing values in any required variable were excluded."), "</em>",
                 "</p></div>"
             )
             
