@@ -2,7 +2,7 @@ title: Raincloud Plot
 name: raincloud
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -36,104 +36,132 @@ children:
             name: color_var
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Plot Components
+    collapsed: false
     children:
-      - type: CheckBox
-        name: show_violin
-      - type: CheckBox
-        name: show_boxplot
-      - type: CheckBox
-        name: show_dots
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_violin
+            label: "Show Half-Violin (Density)"
+          - type: CheckBox
+            name: show_boxplot
+            label: "Show Box Plot"
+          - type: CheckBox
+            name: show_dots
+            label: "Show Data Points"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: dots_side
+            label: "Dots Position"
+          - type: ComboBox
+            name: orientation
+            label: "Plot Orientation"
+
+  - type: CollapseBox
+    label: Component Sizes
+    collapsed: true
     children:
-      - type: ComboBox
-        name: dots_side
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: violin_width
+            format: number
+            label: "Violin Width"
+          - type: TextBox
+            name: box_width
+            format: number
+            label: "Box Plot Width"
+          - type: TextBox
+            name: dots_size
+            format: number
+            label: "Dots Size"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: alpha_violin
+            format: number
+            label: "Violin Transparency"
+          - type: TextBox
+            name: alpha_dots
+            format: number
+            label: "Dots Transparency"
+
+  - type: CollapseBox
+    label: Colors & Themes
+    collapsed: true
     children:
-      - type: TextBox
-        name: violin_width
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: color_palette
+            label: "Color Palette"
+          - type: ComboBox
+            name: plot_theme
+            label: "Plot Theme"
+
+  - type: CollapseBox
+    label: Labels & Titles
+    collapsed: true
     children:
-      - type: TextBox
-        name: box_width
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plot_title
+            format: string
+            label: "Plot Title"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: x_label
+            format: string
+            label: "X-Axis Label"
+          - type: TextBox
+            name: y_label
+            format: string
+            label: "Y-Axis Label"
+
+  - type: CollapseBox
+    label: Statistical Analysis
+    collapsed: true
     children:
-      - type: TextBox
-        name: dots_size
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: alpha_violin
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: alpha_dots
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: orientation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: color_palette
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: plot_theme
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plot_title
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: x_label
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: y_label
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_statistics
-      - type: CheckBox
-        name: show_outliers
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: outlier_method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: normality_test
-      - type: CheckBox
-        name: comparison_test
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: comparison_method
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_statistics
+            label: "Show Summary Statistics"
+          - type: CheckBox
+            name: show_outliers
+            label: "Highlight Outliers"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: outlier_method
+            label: "Outlier Detection Method"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: normality_test
+            label: "Test for Normality"
+          - type: CheckBox
+            name: comparison_test
+            label: "Group Comparison Test"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: comparison_method
+            label: "Comparison Method"

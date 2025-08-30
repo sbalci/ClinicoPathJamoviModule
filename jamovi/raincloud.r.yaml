@@ -7,7 +7,6 @@ items:
     - name: todo
       title: Instructions
       type: Html
-      visible: false
 
     - name: plot
       title: Raincloud Plot

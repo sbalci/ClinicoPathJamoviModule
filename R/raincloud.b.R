@@ -20,6 +20,39 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
     inherit = raincloudBase,
     private = list(
 
+        .init = function() {
+            # Input validation for numeric parameters
+            if (!is.null(self$options$alpha_violin)) {
+                if (self$options$alpha_violin < 0 || self$options$alpha_violin > 1) {
+                    jmvcore::reject(.("Violin transparency must be between 0 and 1"), code = "")
+                }
+            }
+            
+            if (!is.null(self$options$alpha_dots)) {
+                if (self$options$alpha_dots < 0 || self$options$alpha_dots > 1) {
+                    jmvcore::reject(.("Dots transparency must be between 0 and 1"), code = "")
+                }
+            }
+            
+            if (!is.null(self$options$violin_width)) {
+                if (self$options$violin_width < 0.1 || self$options$violin_width > 2) {
+                    jmvcore::reject(.("Violin width must be between 0.1 and 2"), code = "")
+                }
+            }
+            
+            if (!is.null(self$options$box_width)) {
+                if (self$options$box_width < 0.05 || self$options$box_width > 1) {
+                    jmvcore::reject(.("Box plot width must be between 0.05 and 1"), code = "")
+                }
+            }
+            
+            if (!is.null(self$options$dots_size)) {
+                if (self$options$dots_size < 0.1 || self$options$dots_size > 5) {
+                    jmvcore::reject(.("Dots size must be between 0.1 and 5"), code = "")
+                }
+            }
+        },
+
         .run = function() {
 
             # Check if required variables have been selected
@@ -65,7 +98,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
+                stop(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
             }
 
             # Safely require ggdist
@@ -100,7 +133,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
             if (nrow(analysis_data) == 0) {
-                stop("Error: No complete cases found for the selected variables.")
+                stop(.("Error: No complete cases found for the selected variables."))
             }
 
             # Convert variables to appropriate types
@@ -116,24 +149,28 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
             # Generate summary statistics if requested
             if (self$options$show_statistics) {
+                private$.checkpoint()  # Checkpoint before statistics calculation
                 stats_html <- private$.generate_statistics(analysis_data, dep_var, group_var)
                 self$results$statistics$setContent(stats_html)
             }
             
             # Generate outlier analysis if requested
             if (self$options$show_outliers) {
+                private$.checkpoint()  # Checkpoint before outlier detection
                 outlier_html <- private$.generate_outlier_analysis(analysis_data, dep_var, group_var)
                 self$results$outliers$setContent(outlier_html)
             }
             
             # Generate normality tests if requested
             if (self$options$normality_test) {
+                private$.checkpoint()  # Checkpoint before normality tests
                 normality_html <- private$.generate_normality_tests(analysis_data, dep_var, group_var)
                 self$results$normality$setContent(normality_html)
             }
             
             # Generate group comparisons if requested
             if (self$options$comparison_test) {
+                private$.checkpoint()  # Checkpoint before group comparison tests
                 comparison_html <- private$.generate_group_comparisons(analysis_data, dep_var, group_var)
                 self$results$comparison$setContent(comparison_html)
             }
@@ -142,19 +179,19 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             interpretation_html <- private$.generate_interpretation_guide(analysis_data, dep_var, group_var)
             self$results$interpretation$setContent(interpretation_html)
 
-            # Store data for plotting
-            private$.analysis_data <- analysis_data
+            # Store data for plotting using setState
+            image <- self$results$plot
+            image$setState(analysis_data)
 
         },
 
         .plot = function(image, ggtheme, theme, ...) {
             
-            # Check if analysis was performed
-            if (is.null(private$.analysis_data)) {
+            # Get data from setState
+            analysis_data <- image$state
+            if (is.null(analysis_data)) {
                 return()
             }
-            
-            analysis_data <- private$.analysis_data
             dep_var <- self$options$dep_var
             group_var <- self$options$group_var
             facet_var <- self$options$facet_var
@@ -221,7 +258,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                       if (self$options$orientation == "horizontal") dep_var else group_var
             y_label <- if (self$options$y_label != "") self$options$y_label else 
                       if (self$options$orientation == "horizontal") group_var else dep_var
-            plot_title <- if (self$options$plot_title != "") self$options$plot_title else "Raincloud Plot - Distribution Visualization"
+            plot_title <- if (self$options$plot_title != "") self$options$plot_title else .("Raincloud Plot - Distribution Visualization")
             
             p <- p + ggplot2::labs(
                 title = plot_title,
@@ -411,6 +448,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 }
             }
             
+            private$.checkpoint()  # Checkpoint before calculating statistics for all groups
             stats_summary <- data %>%
                 dplyr::group_by(.data[[group_var]]) %>%
                 dplyr::summarise(
@@ -478,6 +516,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             outliers_list <- list()
             
             for (group in levels(data[[group_var]])) {
+                private$.checkpoint(flush = FALSE)  # Poll for changes without re-pushing results
                 group_data <- data[data[[group_var]] == group, dep_var]
                 
                 if (outlier_method == "iqr") {
@@ -546,17 +585,18 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             )
             
             for (group in levels(data[[group_var]])) {
+                private$.checkpoint(flush = FALSE)  # Poll for changes without re-pushing results
                 group_data <- data[data[[group_var]] == group, dep_var]
                 
                 if (length(group_data) >= 3 && length(group_data) <= 5000) {
                     sw_test <- shapiro.test(group_data)
                     w_stat <- round(sw_test$statistic, 4)
                     p_val <- round(sw_test$p.value, 4)
-                    interpretation <- if (p_val > 0.05) "Normal" else "Non-normal"
+                    interpretation <- if (p_val > 0.05) .("Normal") else .("Non-normal")
                 } else {
                     w_stat <- "N/A"
                     p_val <- "N/A"
-                    interpretation <- "Sample size not suitable"
+                    interpretation <- .("Sample size not suitable")
                 }
                 
                 normality_html <- paste0(normality_html,
@@ -600,12 +640,13 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                         use_parametric <- FALSE
                     }
                     
-                    test_method <- if (use_parametric) "t-test" else "Wilcoxon"
+                    test_method <- if (use_parametric) .("t-test") else .("Wilcoxon")
                 } else {
                     # Multiple groups - use ANOVA or Kruskal-Wallis
                     # Simple heuristic: check overall normality
                     overall_normal <- TRUE
                     for (group in levels(data[[group_var]])) {
+                        private$.checkpoint(flush = FALSE)  # Poll for changes without re-pushing results
                         group_data <- data[data[[group_var]] == group, dep_var]
                         if (length(group_data) >= 3 && length(group_data) <= 5000) {
                             if (shapiro.test(group_data)$p.value <= 0.05) {
@@ -614,14 +655,14 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                             }
                         }
                     }
-                    test_method <- if (overall_normal) "ANOVA" else "Kruskal-Wallis"
+                    test_method <- if (overall_normal) .("ANOVA") else .("Kruskal-Wallis")
                 }
             } else {
                 test_method <- switch(comparison_method,
-                    "ttest" = "t-test",
-                    "wilcoxon" = "Wilcoxon",
-                    "anova" = "ANOVA",
-                    "kruskal" = "Kruskal-Wallis"
+                    "ttest" = .("t-test"),
+                    "wilcoxon" = .("Wilcoxon"),
+                    "anova" = .("ANOVA"),
+                    "kruskal" = .("Kruskal-Wallis")
                 )
             }
             
@@ -667,9 +708,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
             
             # Create results HTML
-            significance <- if (p_value < 0.001) "Highly significant (***)" else 
-                          if (p_value < 0.01) "Very significant (**)" else
-                          if (p_value < 0.05) "Significant (*)" else "Not significant"
+            significance <- if (p_value < 0.001) .("Highly significant (***)") else 
+                          if (p_value < 0.01) .("Very significant (**)") else
+                          if (p_value < 0.05) .("Significant (*)") else .("Not significant")
             
             comparison_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
@@ -682,9 +723,13 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 "</table>",
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
                 "<em>* p < 0.05, ** p < 0.01, *** p < 0.001. ",
-                if (comparison_method == "auto") paste0("Automatically selected ", test_method, " based on data characteristics.") else "",
+                if (comparison_method == "auto") paste0(.("Automatically selected {test_method} based on data characteristics"), ".") else "",
                 "</em></p></div>"
             )
+            
+            # Add copy-ready report sentence
+            report_sentence <- private$.generate_report_sentence(test_method, p_value, levels(data[[group_var]]))
+            comparison_html <- paste0(comparison_html, report_sentence)
             
             return(comparison_html)
         },
@@ -743,10 +788,32 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             )
             
             return(interpretation_html)
+        },
+        
+        .generate_report_sentence = function(test_method, p_value, groups) {
+            significance <- if (p_value < 0.001) "highly significant" else 
+                           if (p_value < 0.01) "very significant" else
+                           if (p_value < 0.05) "significant" else "not significant"
+            
+            report_text <- sprintf(
+                "The %s test comparing %s showed %s differences (p = %.3f). %s",
+                test_method,
+                paste(groups, collapse = " vs "),
+                significance,
+                p_value,
+                if (p_value < 0.05) "Groups differ significantly in their distributions." else "No significant differences detected between groups."
+            )
+            
+            return(paste0(
+                "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<h4 style='margin-top: 0; color: #1976d2;'>📝 Copy-Ready Result</h4>",
+                "<p style='font-family: monospace; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 3px;'>",
+                report_text,
+                "</p>",
+                "<small style='color: #666;'>💡 This sentence is ready to copy into your research report</small>",
+                "</div>"
+            ))
         }
 
     )
 )
-
-# Store analysis data for plotting
-.analysis_data <- NULL
