@@ -176,6 +176,7 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
         correlation = function() private$.items[["correlation"]],
+        assumptions = function() private$.items[["assumptions"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -222,12 +223,17 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Statistical Assumptions & Guidelines",
+                visible="(trendline)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Line Chart: `${yvar}` by `${xvar}`",
-                width=700,
-                height=500,
+                title="`Line Chart: {yvar} by {xvar}`",
+                width=800,
+                height=600,
                 renderFun=".plot",
                 requiresData=TRUE))}))
 
@@ -304,6 +310,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$correlation} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

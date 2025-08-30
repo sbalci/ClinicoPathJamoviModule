@@ -1,8 +1,8 @@
 ---
 name: linechart
 title: Line Chart
-menuGroup: JJStatsPlotT
-menuSubgroup: Drafts
+menuGroup: JJStatsPlot
+menuSubgroup: Lines
 menuSubtitle: 'Time Series and Trend Analysis'
 version: '0.0.31'
 jas: '1.2'

@@ -2,93 +2,143 @@ title: Line Chart
 name: linechart
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: X-axis Variable
+        label: X-axis Variable (Time/Sequence)
         children:
           - type: VariablesListBox
             name: xvar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Y-axis Variable
+        label: Y-axis Variable (Outcome)
         children:
           - type: VariablesListBox
             name: yvar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Group By
+        label: Group By (Optional)
         children:
           - type: VariablesListBox
             name: groupby
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: "Analysis Options"
+    collapsed: false
     children:
-      - type: CheckBox
-        name: confidence
-      - type: CheckBox
-        name: trendline
-      - type: CheckBox
-        name: points
-      - type: CheckBox
-        name: smooth
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: points
+            label: "Show Individual Data Points"
+          - type: CheckBox
+            name: smooth
+            label: "Smooth Trend Lines"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: confidence
+            label: "Show Confidence Intervals"
+          - type: CheckBox
+            name: trendline
+            label: "Add Linear Trend Analysis"
+
+  - type: CollapseBox
+    label: "Clinical Reference"
+    collapsed: true
     children:
-      - type: TextBox
-        name: refline
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: refline
+            format: number
+            label: "Reference Value"
+          - type: TextBox
+            name: reflineLabel
+            format: string
+            label: "Reference Label"
+
+  - type: CollapseBox
+    label: "Visual Appearance"
+    collapsed: true
     children:
-      - type: TextBox
-        name: reflineLabel
-        format: string
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: theme
+            label: "Plot Theme"
+            options:
+              - name: default
+                title: "Clinical (Recommended)"
+              - name: publication
+                title: "Publication Ready"
+              - name: minimal
+                title: "Minimal Clean"
+              - name: classic
+                title: "Classic"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: colorPalette
+            label: "Color Scheme"
+            options:
+              - name: clinical
+                title: "Clinical (Colorblind Safe)"
+              - name: default
+                title: "Default"
+              - name: colorblind
+                title: "Colorblind Safe"
+              - name: viridis
+                title: "Viridis"
+
+  - type: CollapseBox
+    label: "Labels & Titles"
+    collapsed: true
     children:
-      - type: ComboBox
-        name: colorPalette
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: title
+            format: string
+            label: "Chart Title"
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: xlabel
+            format: string
+            label: "X-axis Label"
+          - type: TextBox
+            name: ylabel
+            format: string
+            label: "Y-axis Label"
+
+  - type: CollapseBox
+    label: "Plot Size"
+    collapsed: true
     children:
-      - type: ComboBox
-        name: theme
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: xlabel
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ylabel
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: title
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: width
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: height
-        format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: width
+            format: number
+            label: "Width (pixels)"
+          - type: TextBox
+            name: height
+            format: number
+            label: "Height (pixels)"

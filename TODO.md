@@ -32,6 +32,9 @@ echo "/document-function FUNC_NAME" | claude
 ## JJStatsPlotT
 
 
+ggsegmentedtotalbar
+riverplot
+lollipop
 
 
 - jjwithinstats - Box-Violin Plots to Compare Within Groups
