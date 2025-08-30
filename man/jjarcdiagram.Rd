@@ -10,6 +10,7 @@ jjarcdiagram(
   target,
   weight = NULL,
   group = NULL,
+  analysisPreset = "custom",
   showNodes = TRUE,
   nodeSize = "fixed",
   nodeSizeValue = 2,
@@ -30,43 +31,77 @@ jjarcdiagram(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{source}{.}
+\item{source}{Starting point of each relationship or connection. Examples:
+Gene A regulating Gene B,  Patient X similar to Patient Y, or Disease A
+co-occurring with Disease B.}
 
-\item{target}{.}
+\item{target}{Endpoint of each relationship or connection. This represents
+what is being regulated,  influenced, or connected to by the source entity.}
 
-\item{weight}{.}
+\item{weight}{Optional numeric measure of connection strength. Examples:
+Correlation coefficient,  interaction score, similarity index, or
+co-occurrence frequency. Higher values indicate  stronger relationships.}
 
-\item{group}{.}
+\item{group}{Optional grouping variable for color-coding entities.
+Examples: Gene families,  patient subtypes, disease categories, or
+functional classifications.}
 
-\item{showNodes}{.}
+\item{analysisPreset}{Choose a preset configuration optimized for specific
+clinical or research scenarios.  Gene networks focus on regulatory
+relationships, patient networks on similarity patterns,  pathway networks
+on biological processes, and comorbidity networks on disease associations.}
 
-\item{nodeSize}{.}
+\item{showNodes}{Whether to display node points along the arc baseline.
+When enabled, nodes are shown as circles at their sorted positions.}
 
-\item{nodeSizeValue}{.}
+\item{nodeSize}{Method for determining node sizes. 'Fixed' uses constant
+size, 'By Degree' scales nodes proportionally to their connectivity (number
+of connections).}
 
-\item{sortNodes}{.}
+\item{nodeSizeValue}{Size of nodes when using fixed sizing, or base size
+multiplier when using degree-based sizing. Range: 0.1 to 10.}
 
-\item{sortDecreasing}{.}
+\item{sortNodes}{Order in which nodes are arranged along the baseline.
+'None' preserves original order, 'By Name' sorts alphabetically, 'By Group'
+clusters by categories, 'By Degree' orders by connectivity.}
 
-\item{horizontal}{.}
+\item{sortDecreasing}{When sorting nodes, whether to use descending order.
+Only applies when Sort Nodes is not 'None'.}
 
-\item{arcWidth}{.}
+\item{horizontal}{Layout orientation of the arc diagram. When TRUE, nodes
+are arranged horizontally with arcs above. When FALSE, nodes are arranged
+vertically with arcs to the side.}
 
-\item{arcWidthValue}{.}
+\item{arcWidth}{Method for determining arc line widths. 'Fixed' uses
+constant width, 'By Weight' scales arc thickness proportionally to edge
+weights.}
 
-\item{arcTransparency}{.}
+\item{arcWidthValue}{Width of arcs when using fixed sizing, or base width
+when using weight-based sizing. Range: 0.1 to 5.}
 
-\item{directed}{.}
+\item{arcTransparency}{Transparency level of arc lines. 0 = fully
+transparent (invisible), 1 = fully opaque. Lower values reduce visual
+clutter in dense networks.}
 
-\item{colorByGroup}{.}
+\item{directed}{Whether to treat the network as directed (edges have
+direction from source to target) or undirected (edges represent
+bidirectional relationships).}
 
-\item{showStats}{.}
+\item{colorByGroup}{When a grouping variable is specified, whether to
+color-code nodes by their group membership. Requires a group variable.}
 
-\item{showLegend}{.}
+\item{showStats}{Whether to display network statistics including number of
+nodes, edges, density, and centrality measures.}
 
-\item{labelSize}{.}
+\item{showLegend}{Whether to display a color legend when nodes are colored
+by groups. Only appears when grouping variable is specified and color by
+group is enabled.}
 
-\item{plotTitle}{.}
+\item{labelSize}{Size of node labels (text). 0.8 is standard size, values
+above 1.0 increase label size, below 1.0 decrease it. Range: 0.1 to 2.0.}
+
+\item{plotTitle}{Optional title to display above the arc diagram. Leave
+empty for no title.}
 }
 \value{
 A results object containing:
@@ -75,6 +110,8 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$networkStats} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
@@ -83,6 +120,62 @@ package.'
 }
 \examples{
 \donttest{
-# example will be added
+# Basic social network visualization
+data(jjarcdiagram_social_network, package = "ClinicoPath")
+jjarcdiagram(
+    data = social_network_data,
+    source = "source",
+    target = "target",
+    weight = "weight",
+    group = "group",
+    showNodes = TRUE,
+    nodeSize = "degree",
+    sortNodes = "group"
+)
+
+# Gene regulatory network
+data(jjarcdiagram_gene_network, package = "ClinicoPath")
+jjarcdiagram(
+    data = gene_network_data,
+    source = "regulator",
+    target = "target",
+    weight = "regulation_score",
+    group = "pathway",
+    nodeSize = "degree",
+    sortNodes = "group"
+)
+
+# Academic collaboration network
+data(jjarcdiagram_academic_network, package = "ClinicoPath")
+jjarcdiagram(
+    data = academic_network_data,
+    source = "author1",
+    target = "author2",
+    weight = "publications",
+    group = "department",
+    showNodes = TRUE,
+    nodeSize = "degree"
+)
+
+# Organizational hierarchy
+data(jjarcdiagram_org_hierarchy, package = "ClinicoPath")
+jjarcdiagram(
+    data = org_hierarchy_data,
+    source = "employee",
+    target = "reports_to",
+    weight = "relationship_strength",
+    group = "department",
+    nodeSize = "fixed",
+    nodeSizeValue = 3
+)
+
+# Simple minimal network
+data(jjarcdiagram_minimal_network, package = "ClinicoPath")
+jjarcdiagram(
+    data = minimal_network_data,
+    source = "from",
+    target = "to",
+    weight = "strength"
+)
 }
 }

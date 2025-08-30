@@ -67,6 +67,11 @@ children:
               - type: CheckBox
                 name: sortDecreasing
                 enable: (sortNodes !== "none")
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: analysisPreset
   - type: CollapseBox
     label: Arcs
     collapsed: true

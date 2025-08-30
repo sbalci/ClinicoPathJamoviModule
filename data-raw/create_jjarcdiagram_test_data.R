@@ -8,16 +8,16 @@ set.seed(123)
 
 # Create basic network test data (social network)
 social_network_data <- data.frame(
-  source = c("Alice", "Alice", "Bob", "Bob", "Bob", "Charlie", "Charlie", 
+  source = c("Alice", "Alice", "Bob", "Bob", "Bob", "Charlie", "Charlie",
              "Diana", "Diana", "Eva", "Eva", "Frank", "Frank", "Grace", "Grace",
              "Henry", "Henry", "Ivy", "Ivy", "Jack"),
   target = c("Bob", "Charlie", "Charlie", "Diana", "Eva", "Diana", "Frank",
              "Eva", "Grace", "Frank", "Henry", "Grace", "Ivy", "Henry", "Jack",
              "Ivy", "Jack", "Jack", "Alice", "Alice"),
-  weight = c(8.5, 3.2, 4.1, 5.7, 2.9, 3.8, 6.4, 4.5, 7.2, 5.1, 
+  weight = c(8.5, 3.2, 4.1, 5.7, 2.9, 3.8, 6.4, 4.5, 7.2, 5.1,
              3.6, 8.9, 2.3, 6.7, 4.8, 5.4, 7.1, 3.9, 6.2, 4.6),
   group = c("Family", "Friend", "Family", "Friend", "Colleague", "Friend", "Colleague",
-            "Friend", "Family", "Colleague", "Family", "Colleague", "Friend", 
+            "Friend", "Family", "Colleague", "Family", "Colleague", "Friend",
             "Family", "Friend", "Colleague", "Family", "Friend", "Colleague", "Family"),
   interaction_type = c("Daily", "Weekly", "Daily", "Monthly", "Weekly", "Monthly", "Daily",
                       "Weekly", "Daily", "Monthly", "Weekly", "Daily", "Monthly",
@@ -33,7 +33,7 @@ academic_network_data <- data.frame(
               "Wilson_R", "Taylor_S", "Taylor_S", "Anderson_P", "Anderson_P", "Thomas_C",
               "Thomas_C", "Jackson_D", "Jackson_D", "Smith_J", "Smith_J", "Johnson_M"),
   publications = c(5, 3, 8, 2, 6, 4, 7, 3, 9, 5, 4, 6, 2, 8, 3, 7, 5, 4),
-  department = c("Biology", "Biology", "Biology", "Chemistry", "Chemistry", "Physics", 
+  department = c("Biology", "Biology", "Biology", "Chemistry", "Chemistry", "Physics",
                  "Physics", "Mathematics", "Mathematics", "Biology", "Biology", "Chemistry",
                  "Chemistry", "Physics", "Physics", "Mathematics", "Mathematics", "Biology"),
   collaboration_years = c(3, 2, 5, 1, 4, 2, 6, 2, 7, 3, 2, 4, 1, 5, 2, 6, 3, 4)
@@ -118,14 +118,14 @@ large_network_data <- large_network_data[large_network_data$source != large_netw
 
 # Create weighted network without groups for testing
 simple_weighted_network <- data.frame(
-  from_node = c("Central", "Central", "Node_A", "Node_A", "Node_B", "Node_B", 
+  from_node = c("Central", "Central", "Node_A", "Node_A", "Node_B", "Node_B",
                 "Node_C", "Node_C", "Node_D", "Node_D"),
   to_node = c("Node_A", "Node_B", "Node_B", "Node_C", "Node_C", "Node_D",
               "Node_D", "Central", "Central", "Node_A"),
   connection_weight = c(10.5, 8.3, 6.7, 9.2, 7.8, 5.4, 8.9, 6.1, 7.5, 4.9)
 )
 
-# Save all datasets
+# Save all datasets as .rda files
 save(social_network_data, file = "../data/jjarcdiagram_social_network.rda")
 save(academic_network_data, file = "../data/jjarcdiagram_academic_network.rda")
 save(org_hierarchy_data, file = "../data/jjarcdiagram_org_hierarchy.rda")
@@ -135,6 +135,17 @@ save(minimal_network_data, file = "../data/jjarcdiagram_minimal_network.rda")
 save(selfloop_network_data, file = "../data/jjarcdiagram_selfloop_network.rda")
 save(large_network_data, file = "../data/jjarcdiagram_large_network.rda")
 save(simple_weighted_network, file = "../data/jjarcdiagram_simple_weighted.rda")
+
+# Export all datasets as CSV files
+write.csv(social_network_data, file = "../data/jjarcdiagram_social_network.csv", row.names = FALSE)
+write.csv(academic_network_data, file = "../data/jjarcdiagram_academic_network.csv", row.names = FALSE)
+write.csv(org_hierarchy_data, file = "../data/jjarcdiagram_org_hierarchy.csv", row.names = FALSE)
+write.csv(gene_network_data, file = "../data/jjarcdiagram_gene_network.csv", row.names = FALSE)
+write.csv(supply_chain_data, file = "../data/jjarcdiagram_supply_chain.csv", row.names = FALSE)
+write.csv(minimal_network_data, file = "../data/jjarcdiagram_minimal_network.csv", row.names = FALSE)
+write.csv(selfloop_network_data, file = "../data/jjarcdiagram_selfloop_network.csv", row.names = FALSE)
+write.csv(large_network_data, file = "../data/jjarcdiagram_large_network.csv", row.names = FALSE)
+write.csv(simple_weighted_network, file = "../data/jjarcdiagram_simple_weighted.csv", row.names = FALSE)
 
 # Display summaries
 cat("=== jjarcdiagram Test Data Summary ===\n")

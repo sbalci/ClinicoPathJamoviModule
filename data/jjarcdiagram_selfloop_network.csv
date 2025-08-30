@@ -1,0 +1,7 @@
+"node1","node2","weight","type"
+"A","A",5,"Self"
+"A","B",8,"Connection"
+"B","B",6,"Self"
+"B","C",7,"Connection"
+"C","C",4,"Self"
+"C","A",9,"Connection"

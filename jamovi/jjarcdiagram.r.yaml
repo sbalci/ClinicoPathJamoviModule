@@ -31,6 +31,15 @@ items:
       type: Html
       visible: (showStats)
 
+    - name: assumptions
+      title: Analysis Assumptions & Guidelines
+      type: Html
+
+    - name: reportSentence
+      title: Copy-Ready Summary
+      type: Html
+      visible: (showStats)
+
 refs:
     - arcdiagram
     - igraph

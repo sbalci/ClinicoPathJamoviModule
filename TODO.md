@@ -18,11 +18,14 @@ claude --no-mcp --no-tools "/review-article-stats Deep-Learning-Based-Prediction
 echo "/document-function " | claude
 claude "/document-function "
 
-echo "/check-function" | claude
-echo "/review-function" | claude
-echo "/fix-function" | claude
-echo "/checkpoint" | claude
-echo "/document-function" | claude
+
+echo "/check-function FUNC_NAME" | claude
+echo "/checkpoint FUNC_NAME" | claude
+echo "/prepare-translation FUNC_NAME" | claude
+echo "/review-function FUNC_NAME" | claude
+echo "/fix-function FUNC_NAME" | claude
+echo "/document-function FUNC_NAME" | claude
+
 
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
@@ -30,9 +33,7 @@ echo "/document-function" | claude
 
 ## JJStatsPlotT
 
-- jjbetweenstats - Box-Violin Plots to Compare Between Groups
 
-echo "/document-function jjbetweenstats" | claude
 
 - advancedraincloud - Raincloud Plot
 echo "/check-function advancedraincloud" | claude

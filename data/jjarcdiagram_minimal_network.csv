@@ -1,0 +1,4 @@
+"from","to","strength","category"
+"A","B",1,"Type1"
+"B","C",2,"Type2"
+"C","A",3,"Type1"
