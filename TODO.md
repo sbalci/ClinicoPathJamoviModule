@@ -18,7 +18,6 @@ claude --no-mcp --no-tools "/review-article-stats Deep-Learning-Based-Prediction
 echo "/document-function " | claude
 claude "/document-function "
 
-
 echo "/check-function FUNC_NAME" | claude
 echo "/checkpoint FUNC_NAME" | claude
 echo "/prepare-translation FUNC_NAME" | claude
@@ -26,22 +25,20 @@ echo "/review-function FUNC_NAME" | claude
 echo "/fix-function FUNC_NAME" | claude
 echo "/document-function FUNC_NAME" | claude
 
-
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
 ***
 
 ## JJStatsPlotT
 
+- raincloud - Raincloud Plot
 
-
-- advancedraincloud - Raincloud Plot
-echo "/check-function advancedraincloud" | claude
-echo "/checkpoint advancedraincloud" | claude
-echo "/prepare-translation advancedraincloud" | claude
-echo "/review-function advancedraincloud" | claude
-echo "/fix-function advancedraincloud" | claude
-echo "/document-function advancedraincloud" | claude
+echo "/check-function raincloud" | claude
+echo "/checkpoint raincloud" | claude
+echo "/prepare-translation raincloud" | claude
+echo "/review-function raincloud" | claude
+echo "/fix-function raincloud" | claude
+echo "/document-function raincloud" | claude
 
 - jjwithinstats - Box-Violin Plots to Compare Within Groups
 echo "/check-function jjwithinstats" | claude

@@ -1,7 +1,7 @@
 ---
 name: advancedraincloud
-title: Raincloud Plot
-menuGroup: JJStatsPlotT
+title: Advanced Raincloud Plot
+menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 version: '0.0.31'
 jas: '1.2'
@@ -109,10 +109,14 @@ options:
           name: r
         - title: "Flanking (Both Sides)"
           name: f
+        - title: "Flanking 1x1"
+          name: f1x1
+        - title: "Flanking 2x2" 
+          name: f2x2
       default: l
       description:
         R: >
-          Position of the raincloud relative to the data points.
+          Position of the raincloud relative to the data points. Options include left (l), right (r), flanking both sides (f), 1x1 flanking (f1x1), and 2x2 flanking (f2x2).
 
     - name: likert_mode
       title: Likert Scale Mode
@@ -169,6 +173,14 @@ options:
       description:
         R: >
           Width of the boxplot component.
+
+    - name: jitter_seed
+      title: Jitter Seed
+      type: Number
+      default: 42
+      description:
+        R: >
+          Random seed for consistent point jittering across plot updates.
 
     - name: color_palette
       title: Color Palette
