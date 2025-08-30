@@ -31,14 +31,8 @@ echo "/document-function FUNC_NAME" | claude
 
 ## JJStatsPlotT
 
-- raincloud - Raincloud Plot
 
-echo "/check-function raincloud" | claude
-echo "/checkpoint raincloud" | claude
-echo "/prepare-translation raincloud" | claude
-echo "/review-function raincloud" | claude
-echo "/fix-function raincloud" | claude
-echo "/document-function raincloud" | claude
+
 
 - jjwithinstats - Box-Violin Plots to Compare Within Groups
 echo "/check-function jjwithinstats" | claude

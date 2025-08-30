@@ -638,8 +638,8 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: ExplorationT
-    menuSubgroup: ClinicoPath Descriptive Plots
+    menuGroup: JJStatsPlotT
+    menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
     description: >
@@ -1021,7 +1021,7 @@ analyses:
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
