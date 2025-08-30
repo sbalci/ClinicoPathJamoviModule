@@ -2,7 +2,7 @@
 % Please edit documentation in R/advancedraincloud.h.R
 \name{advancedraincloud}
 \alias{advancedraincloud}
-\title{Raincloud Plot}
+\title{Advanced Raincloud Plot}
 \usage{
 advancedraincloud(
   data,
@@ -18,6 +18,7 @@ advancedraincloud(
   point_alpha = 0.7,
   violin_alpha = 0.7,
   boxplot_width = 0.1,
+  jitter_seed = 42,
   color_palette = "clinical",
   plot_title = "Advanced Raincloud Plot",
   x_label = "",
@@ -66,7 +67,9 @@ across groups.}
 \item{cov_var}{Optional variable for remapping point colors based on
 covariate values.}
 
-\item{rain_side}{Position of the raincloud relative to the data points.}
+\item{rain_side}{Position of the raincloud relative to the data points.
+Options include left (l), right (r), flanking both sides (f), 1x1 flanking
+(f1x1), and 2x2 flanking (f2x2).}
 
 \item{likert_mode}{If TRUE, adds Y-axis jittering for Likert scale or
 ordinal data.}
@@ -81,6 +84,9 @@ ID variable.}
 \item{violin_alpha}{Transparency level for violin plots.}
 
 \item{boxplot_width}{Width of the boxplot component.}
+
+\item{jitter_seed}{Random seed for consistent point jittering across plot
+updates.}
 
 \item{color_palette}{Color palette for different groups.}
 
