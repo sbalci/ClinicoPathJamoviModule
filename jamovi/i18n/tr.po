@@ -8,12 +8,28 @@ msgstr ""
 "Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
+#: R/linechart.b.R
+msgid " in Y on average."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid " observations with missing ID values ("
 msgstr ""
 
+#: R/linechart.b.R
+msgid " observations. "
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid " subjects with repeated measures."
+msgstr ""
+
+#: R/linechart.b.R
+msgid " unit decrease"
+msgstr ""
+
+#: R/linechart.b.R
+msgid " unit increase"
 msgstr ""
 
 #: multisurvival/options/td_suffix_pattern.default
@@ -73,13 +89,6 @@ msgstr ""
 msgid "'Creates waffle charts to visualize categorical distributions and proportions using colored squares. Ideal for showing parts-of-whole relationships in clinical data such as disease subtypes, treatment outcomes, or risk category distributions. Each square represents a proportion of the total sample, making it easy to see relative frequencies across categories.'"
 msgstr ""
 
-#: package/analyses/riverplot.description
-#: riverplot/options.description.main
-msgid "'Function for generating river plots (alluvial diagrams) to visualize\n"
-"flows and transitions over time or between categories. Supports alluvial \n"
-"diagrams, Sankey diagrams, and stream graphs with customizable aesthetics.'"
-msgstr ""
-
 #: package/analyses/jjriverplot.description
 #: jjriverplot/options.description.main
 msgid "'Function for generating river plots (alluvial diagrams) to visualize\n"
@@ -133,6 +142,10 @@ msgstr ""
 msgid ") observations ("
 msgstr ""
 
+#: R/linechart.b.R
+msgid "). Consider reducing groups or using faceting for clarity."
+msgstr ""
+
 #: enhancedcrosstable/options/percent_pattern/col_percent.title
 msgid "{n} ({p_col})"
 msgstr ""
@@ -182,7 +195,7 @@ msgstr ""
 msgid "#18bc9c"
 msgstr ""
 
-#: agepyramid2/options/color1.default
+#: agepyramid/options/color1.default
 msgid "#1F77B4"
 msgstr ""
 
@@ -234,7 +247,7 @@ msgstr ""
 msgid "#FF0000"
 msgstr ""
 
-#: agepyramid2/options/color2.default
+#: agepyramid/options/color2.default
 msgid "#FF7F0E"
 msgstr ""
 
@@ -294,6 +307,14 @@ msgstr ""
 
 #: checkdata/results/duplicates.columns.title
 msgid "% of Data"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "% of the variance. "
+msgstr ""
+
+#: R/linechart.b.R
+msgid "% of variance explained. "
 msgstr ""
 
 #: enhancedtables/options/stats_categorical/percent_only.title
@@ -443,12 +464,20 @@ msgstr ""
 msgid "`KMunicate-Style Plot - ${explanatory}`"
 msgstr ""
 
+#: linechart/results/plot.title
+msgid "`Line Chart: {yvar} by {xvar}`"
+msgstr ""
+
 #: survivalcont/results/plot7.title
 msgid "`Log-Log Plot - ${contexpl} Grouped with New Cut-Off`"
 msgstr ""
 
 #: survival/results/plot7.title
 msgid "`Log-Log Plot - ${explanatory}`"
+msgstr ""
+
+#: lollipop/results/plot.title
+msgid "`Lollipop Chart {dep} vs {group}`"
 msgstr ""
 
 #: survivalcont/results/multipleMedianTable.title
@@ -938,6 +967,50 @@ msgstr ""
 msgid "<p>Analysis completed. See plot for detailed results.</p>"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "<strong>Continuous Y-variable:</strong> The outcome variable should be numeric and measurable."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>Homoscedasticity:</strong> Variance of residuals is constant across fitted values."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>Independence:</strong> Data points are independent of each other."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>Independence:</strong> Observations should be independent unless using appropriate methods for correlated data."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>Linearity:</strong> The relationship between variables is approximately linear."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>Normality:</strong> Residuals are approximately normally distributed."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>Ordered X-variable:</strong> Time points or sequence should have meaningful order."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>R² < 0.10:</strong> Very small effect - minimal clinical importance"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>R² = 0.10-0.24:</strong> Small effect - limited clinical significance"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>R² = 0.25-0.49:</strong> Medium effect - moderate clinical relevance"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "<strong>R² ≥ 0.50:</strong> Large effect - clinically significant relationship"
+msgstr ""
+
 #: bayesdca/options/directionIndicator/>=.title
 #: psychopdaroc/options/direction/>=.title
 msgid ">= (higher values indicate positive class)"
@@ -957,6 +1030,22 @@ msgstr ""
 
 #: R/jjbetweenstats.b.R
 msgid "⚠️ {var}: Minimum group size is {size} (recommend ≥3)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "⚠️ Potential non-linear relationship detected. Consider polynomial or spline fitting."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "⚠️ Residuals may not be normally distributed (Shapiro-Wilk p ≤ 0.05). Consider robust methods."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "✅ Linear relationship assumption appears reasonable."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "✅ Residuals appear normally distributed (Shapiro-Wilk p > 0.05)."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -1992,7 +2081,6 @@ msgid "a proportions table"
 msgstr ""
 
 #: agepyramid/options/female.description.jamovi
-#: agepyramid2/options/female.description.jamovi
 msgid "a string naming the level from `gender` that contains the level female"
 msgstr ""
 
@@ -2005,12 +2093,10 @@ msgid "A string naming the secondary variable from `data`."
 msgstr ""
 
 #: agepyramid/options/gender.description.jamovi
-#: agepyramid2/options/gender.description.jamovi
 msgid "a string naming the variable from `data` that contains the categorical values used for the report"
 msgstr ""
 
 #: agepyramid/options/age.description.jamovi
-#: agepyramid2/options/age.description.jamovi
 #: benford/options/var.description.jamovi
 #: benford2/options/var.description.jamovi
 msgid "a string naming the variable from `data` that contains the continuous values used for the report"
@@ -2318,6 +2404,10 @@ msgstr ""
 
 #: patientreported/options/acquiescence_analysis.title
 msgid "Acquiescence Response Analysis"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "across"
 msgstr ""
 
 #: stagemigration/results/stepwiseResults.columns.title
@@ -2677,12 +2767,20 @@ msgstr ""
 msgid "Add jittered points below ridges"
 msgstr ""
 
+#: alluvial/options/labelNodes.description.jamovi
+msgid "Add labels to nodes."
+msgstr ""
+
 #: basegraphics/options/add_legend.title
 msgid "Add Legend"
 msgstr ""
 
 #: basegraphics/options/add_legend.description.jamovi
 msgid "Add legend when grouping variable is used."
+msgstr ""
+
+#: linechart/ui[1][1]/trendline.label
+msgid "Add Linear Trend Analysis"
 msgstr ""
 
 #: jviolin/options/add_mean.title
@@ -3391,6 +3489,10 @@ msgstr ""
 msgid "Advanced Clinical Trials"
 msgstr ""
 
+#: lollipop/ui[3].label
+msgid "Advanced Coloring"
+msgstr ""
+
 #: stagemigration/options/performCompetingRisksAdvanced.title
 msgid "Advanced Competing Risks Analysis"
 msgstr ""
@@ -3692,6 +3794,9 @@ msgstr ""
 msgid "Advanced quality control for tabular data"
 msgstr ""
 
+#: package/analyses/advancedraincloud.title
+#: package/analyses/advancedraincloud.menuTitle
+#: advancedraincloud/options.title
 #: advancedraincloud/options/plot_title.default
 #: advancedraincloud/ui.title
 #: advancedraincloud/results.title
@@ -3899,8 +4004,6 @@ msgstr ""
 
 #: agepyramid/options/age.title
 #: agepyramid/ui[0][0].label
-#: agepyramid2/options/age.title
-#: agepyramid2/ui[0][0].label
 msgid "Age"
 msgstr ""
 
@@ -3922,6 +4025,7 @@ msgstr ""
 msgid "Age Decades"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: screeningevaluation/results/age_stratified_results.columns.title
 msgid "Age Group"
 msgstr ""
@@ -3938,20 +4042,14 @@ msgstr ""
 msgid "Age Interval"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: package/analyses/agepyramid.title
 #: package/analyses/agepyramid.menuTitle
-#: package/analyses/agepyramid2.title
-#: package/analyses/agepyramid2.menuTitle
 #: agepyramid/options.title
 #: agepyramid/options/plot_title.default
 #: agepyramid/ui.title
 #: agepyramid/results.title
 #: agepyramid/results/plot.title
-#: agepyramid2/options.title
-#: agepyramid2/options/plot_title.default
-#: agepyramid2/ui.title
-#: agepyramid2/results.title
-#: agepyramid2/results/plot.title
 msgid "Age Pyramid"
 msgstr ""
 
@@ -4610,22 +4708,24 @@ msgid "Allred units"
 msgstr ""
 
 #: jjriverplot/options/plotType/alluvial.title
-#: riverplot/options/plotType/alluvial.title
 msgid "Alluvial"
+msgstr ""
+
+#: package/analyses/alluvial.title
+#: package/analyses/alluvial.menuTitle
+#: alluvial/options.title
+#: alluvial/ui.title
+#: alluvial/results.title
+#: alluvial/results/plot.title
+msgid "Alluvial & Sankey Diagrams"
 msgstr ""
 
 #: jggsankeyfier/options/diagram_type/alluvial.title
 msgid "Alluvial Diagram"
 msgstr ""
 
-#: package/analyses/alluvial.title
-#: package/analyses/alluvial.menuTitle
 #: package/analyses/alluvial2.title
 #: package/analyses/alluvial2.menuTitle
-#: alluvial/options.title
-#: alluvial/ui.title
-#: alluvial/results.title
-#: alluvial/results/plot.title
 #: alluvial2/options.title
 #: alluvial2/ui.title
 #: alluvial2/results.title
@@ -4856,12 +4956,20 @@ msgstr ""
 msgid "Analysis Configuration"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Analysis Considerations"
+msgstr ""
+
 #: effectsize/options/analysis_context.title
 msgid "Analysis Context"
 msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "Analysis dataset:"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Analysis Error"
 msgstr ""
 
 #: survival/ui[8].label
@@ -5009,6 +5117,7 @@ msgstr ""
 #: jjhistostats/ui[1].label
 #: labcontrolcharts/ui[1][4].label
 #: labinterpret/ui[1][2].label
+#: linechart/ui[1].label
 #: mlpathology/ui[1][1].label
 #: modalitycomparison/ui[2].label
 #: nogoldstandard/ui[1].label
@@ -5038,6 +5147,7 @@ msgstr ""
 msgid "Analysis Output"
 msgstr ""
 
+#: R/lollipop.b.R
 #: causespecifichazards/results/overview.title
 #: parametricfrailty/results/overview.title
 msgid "Analysis Overview"
@@ -5098,6 +5208,10 @@ msgstr ""
 #: spikeslabpriors/results.title
 #: survivalbart/results.title
 msgid "Analysis Results"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Analysis revealed a "
 msgstr ""
 
 #: biopsysimulation/results/poweranalysistable.columns.title
@@ -5173,6 +5287,7 @@ msgstr ""
 msgid "Analysis Summaries"
 msgstr ""
 
+#: R/linechart.b.R
 #: aalenhazard/results/analysisSummary.title
 #: bayesdca/results/summary.title
 #: clinicalalerts/results/summary.title
@@ -5456,6 +5571,7 @@ msgid "ANCOVA"
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: R/linechart.b.R
 msgid "and"
 msgstr ""
 
@@ -5518,6 +5634,7 @@ msgstr ""
 msgid "Annual Utility"
 msgstr ""
 
+#: R/raincloud.b.R
 #: advancedbarplot/options/stat_method/anova.title
 #: bbcplots/options/stat_method/anova.title
 #: economistplots/options/stat_method/anova.title
@@ -5535,6 +5652,10 @@ msgstr ""
 
 #: advancedanova/results/anovaplot.title
 msgid "ANOVA Comparison Plot"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "ANOVA F-statistic"
 msgstr ""
 
 #: advancedanova/results/anova.title
@@ -5597,8 +5718,6 @@ msgstr ""
 #: jjridgestats/ui[1][0].label
 #: jjriverplot/ui[2].label
 #: jwaffle/ui[1][1].label
-#: lollipop/ui[0][1][1].label
-#: riverplot/ui[2].label
 msgid "Appearance"
 msgstr ""
 
@@ -5681,6 +5800,10 @@ msgstr ""
 
 #: decisiongraph/options/riskAdjustment.description.ui
 msgid "Apply risk adjustment to probabilities based on patient characteristics."
+msgstr ""
+
+#: alluvial/options/sankeyStyle.description.jamovi
+msgid "Apply Sankey diagram styling (narrow nodes, sigmoid curves)."
 msgstr ""
 
 #: intervalsurvival/options/baseline_hazard_smooth.description.ui
@@ -5768,6 +5891,10 @@ msgstr ""
 
 #: jjarcdiagram/ui[3].label
 msgid "Arcs"
+msgstr ""
+
+#: alluvial/options/curveType/arctangent.title
+msgid "Arctangent"
 msgstr ""
 
 #: bbcplots/options/chart_type/area.title
@@ -6078,6 +6205,10 @@ msgstr ""
 msgid "Assumption Checks"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Assumption Checks:"
+msgstr ""
+
 #: stagemigration/results/proportionalHazardsTest.columns.title
 msgid "Assumption Status"
 msgstr ""
@@ -6119,6 +6250,14 @@ msgstr ""
 
 #: idi/options/test_method/asymptotic.title
 msgid "Asymptotic Test"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "At least 2 complete observations are required for lollipop chart analysis."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "At least 3 complete observations are required for line chart analysis. "
 msgstr ""
 
 #: stagemigration/results/intervalCensoringNonparametric.columns.title
@@ -6563,6 +6702,10 @@ msgstr ""
 
 #: ihccluster/ui[1]/autoSelectK.label
 msgid "Automatically select optimal k"
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Automatically selected {test_method} based on data characteristics"
 msgstr ""
 
 #: statsplot2/results/plot.title
@@ -7122,6 +7265,8 @@ msgstr ""
 msgid "Baseline Survival"
 msgstr ""
 
+#: lollipop/options/baseline.title
+#: lollipop/ui[2][2]/baseline.label
 #: populationhealth/results/interventionAnalysisTable.columns.title
 msgid "Baseline Value"
 msgstr ""
@@ -7231,7 +7376,6 @@ msgid "basic_model"
 msgstr ""
 
 #: jjriverplot/options/curveType/basis.title
-#: riverplot/options/curveType/basis.title
 msgid "Basis"
 msgstr ""
 
@@ -8218,7 +8362,6 @@ msgid "Bin Width (for histogram)"
 msgstr ""
 
 #: agepyramid/options/bin_width.title
-#: agepyramid2/options/bin_width.title
 msgid "Bin Width (Years)"
 msgstr ""
 
@@ -9508,7 +9651,12 @@ msgid "Box Plot by Response"
 msgstr ""
 
 #: raincloud/options/box_width.title
+#: raincloud/ui[2][0]/box_width.label
 msgid "Box Plot Width"
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Box plot width must be between 0.05 and 1"
 msgstr ""
 
 #: nonparametric/results/boxPlots.title
@@ -9723,6 +9871,11 @@ msgstr ""
 msgid "BY"
 msgstr ""
 
+#: R/linechart.b.R
+#: R/lollipop.b.R
+msgid "by"
+msgstr ""
+
 #: jforestmodel/options/sort_variables/coefficient.title
 msgid "By coefficient size"
 msgstr ""
@@ -9738,7 +9891,6 @@ msgid "By First Variable"
 msgstr ""
 
 #: jjriverplot/options/fillType/frequency.title
-#: riverplot/options/fillType/frequency.title
 msgid "By Frequency"
 msgstr ""
 
@@ -10808,7 +10960,6 @@ msgid "Caption Text"
 msgstr ""
 
 #: jjriverplot/options/curveType/cardinal.title
-#: riverplot/options/curveType/cardinal.title
 msgid "Cardinal"
 msgstr ""
 
@@ -11035,6 +11186,12 @@ msgstr ""
 msgid "Categorical Over Time"
 msgstr ""
 
+#: R/riverplot.b.R
+#: riverplot/options/strata.title
+#: riverplot/ui[2][0].label
+msgid "Categorical Variable"
+msgstr ""
+
 #: desctools/options/group_var.description
 msgid "Categorical variable defining groups for effect size comparison. Should have exactly 2 levels for Cohen's D calculation."
 msgstr ""
@@ -11070,16 +11227,20 @@ msgstr ""
 msgid "Categorical vs Categorical"
 msgstr ""
 
+#: package/analyses/raincloud.menuSubgroup
 #: package/analyses/advancedraincloud.menuSubgroup
 #: package/analyses/jjdotplotstats.menuSubgroup
 #: package/analyses/jjbetweenstats.menuSubgroup
 #: package/analyses/jjwithinstats.menuSubgroup
+#: package/analyses/lollipop.menuSubgroup
 #: package/analyses/jjridgestats.menuSubgroup
 #: advancedraincloud/options.menuSubgroup
 #: jjbetweenstats/options.menuSubgroup
 #: jjdotplotstats/options.menuSubgroup
 #: jjridgestats/options.menuSubgroup
 #: jjwithinstats/options.menuSubgroup
+#: lollipop/options.menuSubgroup
+#: raincloud/options.menuSubgroup
 msgid "Categorical vs Continuous"
 msgstr ""
 
@@ -11088,6 +11249,10 @@ msgstr ""
 #: ggsegmentedtotalbar/results/summary.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 msgid "Categories"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Categories (patient IDs, treatments, conditions)"
 msgstr ""
 
 #: ggoncoplot/results/clinicalSummary.columns.title
@@ -11286,6 +11451,10 @@ msgstr ""
 
 #: outcomeorganizer/options/analysistype/cause.title
 msgid "Cause-Specific Survival"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Caution: Unbalanced group sizes detected."
 msgstr ""
 
 #: ihcstats/results/sterlacciTable.columns.title
@@ -11731,6 +11900,7 @@ msgid "Chart Approach & Style"
 msgstr ""
 
 #: labcontrolcharts/ui[1][0].label
+#: lollipop/ui[1].label
 msgid "Chart Configuration"
 msgstr ""
 
@@ -11748,8 +11918,11 @@ msgstr ""
 
 #: ggsegmentedtotalbar/ui[2].label
 #: jwaffle/ui[1].label
-#: lollipop/ui[0][1][0].label
 msgid "Chart Options"
+msgstr ""
+
+#: lollipop/ui[1][0]/orientation.label
+msgid "Chart Orientation"
 msgstr ""
 
 #: ggsegmentedtotalbar/options/chart_style.title
@@ -11770,6 +11943,8 @@ msgstr ""
 
 #: bbcplots/options/title_text.title
 #: jwaffle/ui[2][0][0]/mytitle.label
+#: linechart/ui[4][0]/title.label
+#: lollipop/ui[4][0]/title.label
 msgid "Chart Title"
 msgstr ""
 
@@ -11809,8 +11984,16 @@ msgstr ""
 msgid "Check for Duplicates"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Check for missing values and remove incomplete cases"
+msgstr ""
+
 #: adaptivelasso/options/proportional_hazards.title
 msgid "Check Proportional Hazards"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Check that all selected variables exist in your dataset."
 msgstr ""
 
 #: tableone/options/excl.description.jamovi
@@ -11991,6 +12174,10 @@ msgstr ""
 msgid "Choose correlation calculation method."
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Choose display options (confidence intervals, trend lines, reference lines)"
+msgstr ""
+
 #: jsjplot/options/family.description.jamovi
 msgid "Choose error distribution for generalized linear models."
 msgstr ""
@@ -12035,6 +12222,10 @@ msgstr ""
 msgid "Choose parametric distribution for survival modeling. Weibull is most common, while splines provide flexible hazard shapes. Different distributions make different assumptions about hazard function shape."
 msgstr ""
 
+#: alluvial/options/engine.description.jamovi
+msgid "Choose plotting engine: easyalluvial for automatic plots, ggalluvial for manual control."
+msgstr ""
+
 #: basegraphics/options/point_type.description.jamovi
 msgid "Choose point symbol type for scatter plots."
 msgstr ""
@@ -12077,6 +12268,10 @@ msgstr ""
 
 #: jscattermore/options/plot_type.description.jamovi
 msgid "Choose the plotting backend for optimal performance."
+msgstr ""
+
+#: agepyramid/options/plot_engine.description.jamovi
+msgid "Choose the plotting engine for creating the age pyramid."
 msgstr ""
 
 #: jvisr/options/fun_type.description.jamovi
@@ -12442,6 +12637,7 @@ msgstr ""
 #: jviolin/options/themex/classic.title
 #: jvisr/options/theme_style/classic.title
 #: linechart/options/theme/classic.title
+#: linechart/ui[3][0]/theme/classic.title
 #: lollipop/options/theme/classic.title
 #: multiclassdiagnostics/options/plotTheme/classic.title
 #: raincloud/options/plot_theme/classic.title
@@ -12573,12 +12769,20 @@ msgstr ""
 msgid "Clinical"
 msgstr ""
 
+#: linechart/ui[3][1]/colorPalette/clinical.title
+msgid "Clinical (Colorblind Safe)"
+msgstr ""
+
 #: hullplot/options/color_palette/clinical.title
 msgid "Clinical (Custom)"
 msgstr ""
 
 #: groupedforest/options/plot_theme/clinical.title
 msgid "Clinical (Default)"
+msgstr ""
+
+#: linechart/ui[3][0]/theme/default.title
+msgid "Clinical (Recommended)"
 msgstr ""
 
 #: decisioncombine/options/colorScheme/clinical.title
@@ -12687,6 +12891,10 @@ msgstr ""
 
 #: enhancedroc/results/results/clinicalApplicationMetrics.title
 msgid "Clinical Application Metrics"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Clinical Applications:"
 msgstr ""
 
 #: bayesianci/results/clinicalInterpretation.columns.title
@@ -13032,6 +13240,7 @@ msgstr ""
 msgid "Clinical Integration"
 msgstr ""
 
+#: R/lollipop.b.R
 #: bayesianci/options/clinical_interpretation.title
 #: bayesianci/results/clinicalInterpretation.columns.title
 #: bayesianclinical/options/clinical_interpretation.title
@@ -13241,6 +13450,7 @@ msgstr ""
 msgid "Clinical interpretation guide"
 msgstr ""
 
+#: R/linechart.b.R
 #: clinicalalerts/results/interpretationGuide.title
 #: cohenskappa/results/interpretationGuide.title
 #: referenceintervals/options/clinical_interpretation.title
@@ -13433,6 +13643,10 @@ msgstr ""
 msgid "Clinical Recommendations"
 msgstr ""
 
+#: linechart/ui[2].label
+msgid "Clinical Reference"
+msgstr ""
+
 #: biomarkerdiscovery/results/selected_biomarkers.columns.title
 #: biomarkerdiscovery/results/biomarker_interactions.columns.title
 #: differentialdiagnosis/results/clinicalContext.columns.title
@@ -13613,6 +13827,10 @@ msgstr ""
 
 #: clinicaldataintegration/ui[1][2].label
 msgid "Clinical Standards"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Clinical Summary"
 msgstr ""
 
 #: patientdashboard/results/clinicalSummaryReport.title
@@ -13811,7 +14029,6 @@ msgstr ""
 msgid "Clinically Significant"
 msgstr ""
 
-#: package/analyses/enhancedcorrelation.menuGroup
 #: package/analyses/exacttests.menuGroup
 #: package/analyses/partialcorrelation.menuGroup
 #: package/analyses/polychoriccorr.menuGroup
@@ -13825,7 +14042,6 @@ msgstr ""
 #: bayesianmetaanalysis/options.menuGroup
 #: clinicaldashboard/options.menuGroup
 #: clinicaldataintegration/options.menuGroup
-#: enhancedcorrelation/options.menuGroup
 #: enhancedtwowayfrequency/options.menuGroup
 #: exacttests/options.menuGroup
 #: excessmortality/options.menuGroup
@@ -13892,13 +14108,10 @@ msgstr ""
 #: package/analyses/eurostatmap.menuSubgroup
 #: package/analyses/coefplot.menuSubgroup
 #: package/analyses/hullplot.menuSubgroup
-#: package/analyses/raincloud.menuSubgroup
 #: package/analyses/ggprism.menuSubgroup
 #: package/analyses/parallelplot.menuSubgroup
-#: package/analyses/agepyramid2.menuSubgroup
 #: package/analyses/alluvial2.menuSubgroup
 #: agepyramid/options.menuSubgroup
-#: agepyramid2/options.menuSubgroup
 #: alluvial/options.menuSubgroup
 #: alluvial2/options.menuSubgroup
 #: coefplot/options.menuSubgroup
@@ -13906,7 +14119,6 @@ msgstr ""
 #: ggprism/options.menuSubgroup
 #: hullplot/options.menuSubgroup
 #: parallelplot/options.menuSubgroup
-#: raincloud/options.menuSubgroup
 #: vartree/options.menuSubgroup
 #: venn/options.menuSubgroup
 msgid "ClinicoPath Descriptive Plots"
@@ -14093,7 +14305,6 @@ msgstr ""
 msgid "ClinicoPath Survival"
 msgstr ""
 
-#: package/analyses/curemodels.menuGroup
 #: package/analyses/advancedanova.menuGroup
 #: package/analyses/optimalcutpoint.menuGroup
 #: package/analyses/categoricaladvanced.menuGroup
@@ -14102,7 +14313,6 @@ msgstr ""
 #: package/analyses/pseudosurvival.menuGroup
 #: package/analyses/intervalsurvival.menuGroup
 #: package/analyses/recurrentsurvival.menuGroup
-#: package/analyses/clinicalcalculators.menuGroup
 #: package/analyses/rmst.menuGroup
 #: package/analyses/permutationsurvival.menuGroup
 #: package/analyses/flexparametric.menuGroup
@@ -14122,7 +14332,6 @@ msgstr ""
 #: package/analyses/treatmentoptim.menuGroup
 #: package/analyses/differentialdiagnosis.menuGroup
 #: package/analyses/labinterpret.menuGroup
-#: package/analyses/imagingcorrelation.menuGroup
 #: package/analyses/patientdashboard.menuGroup
 #: package/analyses/populationhealth.menuGroup
 #: package/analyses/bayesianma.menuGroup
@@ -14135,7 +14344,6 @@ msgstr ""
 #: package/analyses/principalcox.menuGroup
 #: package/analyses/rmstregression.menuGroup
 #: package/analyses/treatmentswitching.menuGroup
-#: package/analyses/tumorgrowth.menuGroup
 #: package/analyses/robustcorrelation.menuGroup
 #: advancedanova/options.menuGroup
 #: assayoptimization/options.menuGroup
@@ -14143,10 +14351,8 @@ msgstr ""
 #: betabinomialdiagnostic/options.menuGroup
 #: categoricaladvanced/options.menuGroup
 #: clinicalalerts/options.menuGroup
-#: clinicalcalculators/options.menuGroup
 #: coxphw/options.menuGroup
 #: coxrobust/options.menuGroup
-#: curemodels/options.menuGroup
 #: differentialdiagnosis/options.menuGroup
 #: directregression/options.menuGroup
 #: distributionfit/options.menuGroup
@@ -14157,7 +14363,6 @@ msgstr ""
 #: frailtysurvival/options.menuGroup
 #: generalpseudo/options.menuGroup
 #: hierarchicalbayes/options.menuGroup
-#: imagingcorrelation/options.menuGroup
 #: intervalsurvival/options.menuGroup
 #: labinterpret/options.menuGroup
 #: optimalcutpoint/options.menuGroup
@@ -14180,7 +14385,6 @@ msgstr ""
 #: transformationmodels/options.menuGroup
 #: treatmentoptim/options.menuGroup
 #: treatmentswitching/options.menuGroup
-#: tumorgrowth/options.menuGroup
 msgid "ClinicoPathD"
 msgstr ""
 
@@ -14190,11 +14394,9 @@ msgid "ClinicoPathD Descriptives"
 msgstr ""
 
 #: package/analyses/survivalmodelvalidation.menuGroup
-#: package/analyses/clinicalnomograms.menuGroup
 #: package/analyses/smoothhazard.menuGroup
 #: package/analyses/mixedeffectscox.menuGroup
 #: package/analyses/emfrailty.menuGroup
-#: clinicalnomograms/options.menuGroup
 #: emfrailty/options.menuGroup
 #: mixedeffectscox/options.menuGroup
 #: smoothhazard/options.menuGroup
@@ -14215,7 +14417,6 @@ msgstr ""
 #: package/analyses/bayesianci.menuGroup
 #: package/analyses/labcontrolcharts.menuGroup
 #: package/analyses/sigmametrics.menuGroup
-#: package/analyses/methodvalidation.menuGroup
 #: package/analyses/referenceintervals.menuGroup
 #: package/analyses/measurementuncertainty.menuGroup
 #: package/analyses/spatialautocorrelation.menuGroup
@@ -14224,7 +14425,6 @@ msgstr ""
 #: friedmantest/options.menuGroup
 #: labcontrolcharts/options.menuGroup
 #: measurementuncertainty/options.menuGroup
-#: methodvalidation/options.menuGroup
 #: pagetrendtest/options.menuGroup
 #: referenceintervals/options.menuGroup
 #: sigmametrics/options.menuGroup
@@ -14232,9 +14432,21 @@ msgstr ""
 msgid "ClinicoPathDescriptivesD"
 msgstr ""
 
+#: package/analyses/curemodels.menuGroup
+#: package/analyses/clinicalcalculators.menuGroup
+#: package/analyses/clinicalnomograms.menuGroup
 #: package/analyses/mediansurvival.menuGroup
+#: package/analyses/imagingcorrelation.menuGroup
+#: package/analyses/tumorgrowth.menuGroup
+#: package/analyses/enhancedcorrelation.menuGroup
+#: clinicalcalculators/options.menuGroup
+#: clinicalnomograms/options.menuGroup
+#: curemodels/options.menuGroup
+#: enhancedcorrelation/options.menuGroup
+#: imagingcorrelation/options.menuGroup
 #: mediansurvival/options.menuGroup
-msgid "ClinicoPathT"
+#: tumorgrowth/options.menuGroup
+msgid "ClinicoPathT2"
 msgstr ""
 
 #: multistatesurvival/options/model_type/clock_forward.title
@@ -14925,6 +15137,7 @@ msgstr ""
 #: linechart/options/colorPalette.title
 #: parallelplot/options/colorPalette.title
 #: raincloud/options/color_palette.title
+#: raincloud/ui[3][0]/color_palette.label
 msgid "Color Palette"
 msgstr ""
 
@@ -14975,7 +15188,9 @@ msgstr ""
 #: jjridgestats/options/colorscheme.title
 #: jjridgestats/ui[1][0][0]/colorscheme.label
 #: jsjplot/options/colors.title
+#: linechart/ui[3][1]/colorPalette.label
 #: lollipop/options/colorScheme.title
+#: lollipop/ui[2][0]/colorScheme.label
 #: tidyplots/options/colorScheme.title
 #: tidyplots/ui[7][0].label
 #: waterfall/options/colorScheme.title
@@ -15008,6 +15223,11 @@ msgstr ""
 
 #: waterfall/options/colorScheme.description.jamovi
 msgid "Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring."
+msgstr ""
+
+#: lollipop/options/colorThreshold.title
+#: lollipop/ui[3][0]/colorThreshold.label
+msgid "Color Threshold"
 msgstr ""
 
 #: jggridges/options/color_var.title
@@ -15045,6 +15265,7 @@ msgstr ""
 #: jiwillsurvive/options/color_palette/colorblind.title
 #: jsjplot/options/colors/colorblind.title
 #: linechart/options/colorPalette/colorblind.title
+#: linechart/ui[3][1]/colorPalette/colorblind.title
 #: lollipop/options/colorScheme/colorblind.title
 msgid "Colorblind Safe"
 msgstr ""
@@ -15083,6 +15304,10 @@ msgstr ""
 
 #: tidyplots/ui[7].label
 msgid "Colors & Theme"
+msgstr ""
+
+#: raincloud/ui[3].label
+msgid "Colors & Themes"
 msgstr ""
 
 #: contTables/options/pcCol.title
@@ -15427,6 +15652,10 @@ msgstr ""
 msgid "Common Language Effect Sizes"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Common Solutions"
+msgstr ""
+
 #: clinicaltrialdesign/options/common_sd.title
 msgid "Common Standard Deviation"
 msgstr ""
@@ -15738,6 +15967,7 @@ msgstr ""
 #: methodcomparison/options/comparison_method.title
 #: patientreported/options/comparison_method.title
 #: raincloud/options/comparison_method.title
+#: raincloud/ui[5][3]/comparison_method.label
 msgid "Comparison Method"
 msgstr ""
 
@@ -16232,6 +16462,10 @@ msgstr ""
 #: plscox/results/componentSelection.title
 #: principalcox/results/componentSelection.title
 msgid "Component Selection Results"
+msgstr ""
+
+#: raincloud/ui[2].label
+msgid "Component Sizes"
 msgstr ""
 
 #: gradientboosting/options/algorithm/mboost.title
@@ -17171,6 +17405,10 @@ msgstr ""
 msgid "Conditional Average Treatment Effect"
 msgstr ""
 
+#: lollipop/options/conditionalColor.title
+msgid "Conditional Coloring"
+msgstr ""
+
 #: cotest/ui[2][0][1]/cond_dep_neg.label
 msgid "Conditional Dependence (Negative)"
 msgstr ""
@@ -17460,6 +17698,10 @@ msgstr ""
 #: ciSingle/results.title
 #: ciSingle/results/citable.title
 msgid "Confidence Intervals for Mean Values"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Confidence Intervals:"
 msgstr ""
 
 #: advancedanova/options/confidence_level.title
@@ -17884,8 +18126,24 @@ msgstr ""
 msgid "Conservative screening (avoid FN)"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Consider checking for missing values or selecting different variables."
+msgstr ""
+
 #: treemedical/options/cost_sensitive.description
 msgid "Consider different costs of false positives vs false negatives."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Consider grouping categories or using a different visualization."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Consider log transformation or outlier investigation."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Consider using confidence intervals for small sample sizes"
 msgstr ""
 
 #: netreclassification/results/sensitivityTable.columns.title
@@ -18521,6 +18779,7 @@ msgstr ""
 msgid "Copula Association"
 msgstr ""
 
+#: R/linechart.b.R
 #: jjarcdiagram/results/reportSentence.title
 msgid "Copy-Ready Summary"
 msgstr ""
@@ -18606,6 +18865,10 @@ msgstr ""
 msgid "Correlation"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "correlation"
+msgstr ""
+
 #: ihcscoring/results/agreementtable.columns.title
 #: imagingcorrelation/results/correlationTable.columns.title
 #: labinterpret/results/correlationAnalysisTable.columns.title
@@ -18667,6 +18930,10 @@ msgstr ""
 
 #: haralicktexture/results/correlationtable.description
 msgid "Correlation between texture features"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "correlation between the variables "
 msgstr ""
 
 #: metaanalysis/options/effect_measure/correlation.title
@@ -19762,7 +20029,7 @@ msgstr ""
 
 #: package/analyses/lollipop.description
 #: lollipop/options.description.main
-msgid "Creates lollipop charts for categorical data visualization with emphasis on clinical applications like patient timelines, treatment outcomes, and biomarker comparisons."
+msgid "Creates lollipop charts for categorical data visualization following R Graph Gallery best practices, with emphasis on clinical applications like patient timelines, treatment outcomes, and biomarker comparisons. Uses geom_segment() and geom_point() for optimal visual presentation."
 msgstr ""
 
 #: package/analyses/ggflowchart.description
@@ -19842,6 +20109,15 @@ msgstr ""
 
 #: package/analyses/jggridges.description
 msgid "Creates ridge plots (joy plots) for visualizing distributions across groups. Ridge plots are particularly useful for comparing distributions of continuous variables across multiple categories or time periods."
+msgstr ""
+
+#: package/analyses/riverplot.description
+#: riverplot/options.description.main
+msgid "Creates river plots to visualize how categorical variables change over time \n"
+"or sequential stages. Shows temporal flows of categories across time periods, \n"
+"ideal for tracking patient journeys, treatment progressions, disease stages, \n"
+"or any categorical changes over time. Requires a time/sequence variable and \n"
+"supports individual entity tracking."
 msgstr ""
 
 #: package/analyses/jggsankeyfier.description
@@ -20271,6 +20547,10 @@ msgstr ""
 msgid "Cubic (3)"
 msgstr ""
 
+#: alluvial/options/curveType/cubic.title
+msgid "Cubic (smooth)"
+msgstr ""
+
 #: nonparametricregression/options/gam_smoother/cubic_spline.title
 msgid "Cubic Regression Spline"
 msgstr ""
@@ -20680,6 +20960,10 @@ msgstr ""
 msgid "Current Approach Description"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Current dataset has "
+msgstr ""
+
 #: timeupdatesurvival/results/dynamicPredictions.columns.title
 msgid "Current Hazard Ratio"
 msgstr ""
@@ -20755,8 +21039,17 @@ msgstr ""
 msgid "Curve Fit"
 msgstr ""
 
+#: riverplot/ui[1][0]/curveType.label
+msgid "Curve Style"
+msgstr ""
+
+#: alluvial/options/curveType.description.jamovi
+msgid "Curve style for flows. Use sigmoid for Sankey-style appearance."
+msgstr ""
+
+#: alluvial/options/curveType.title
+#: alluvial/ui[2][0]/curveType.label
 #: jjriverplot/options/curveType.title
-#: riverplot/options/curveType.title
 msgid "Curve Type"
 msgstr ""
 
@@ -21783,6 +22076,7 @@ msgid "Dashboard Type"
 msgstr ""
 
 #: jjhistostats/options/centralitylinetype/dashed.title
+#: lollipop/options/lineType/dashed.title
 msgid "Dashed"
 msgstr ""
 
@@ -21806,9 +22100,14 @@ msgstr ""
 msgid "Data Cleaning Summary"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: R/jjarcdiagram.b.R
 #: R/jjbetweenstats.b.R
 msgid "Data contains no (complete) rows"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Data contains no complete rows. Please check your data for missing values."
 msgstr ""
 
 #: advancedtrials/results/interim_monitoring_guidelines.columns.title
@@ -21908,6 +22207,10 @@ msgstr ""
 #: biomarkerdiscovery/ui[2][0].label
 #: ihccluster/ui[2].label
 msgid "Data Preprocessing"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Data Quality Alerts:"
 msgstr ""
 
 #: package/analyses/dataquality.title
@@ -22109,6 +22412,10 @@ msgstr ""
 
 #: eurostatmap/results/info.columns.title
 msgid "Dataset Title"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Dataset:"
 msgstr ""
 
 #: advancedimputation/ui[1][0]/n_imputations.suffix
@@ -22619,6 +22926,10 @@ msgstr ""
 msgid "Decompose NRI"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "decreasing"
+msgstr ""
+
 #: coefplot/options/decreasing_sort.title
 msgid "Decreasing Sort Order"
 msgstr ""
@@ -22668,6 +22979,7 @@ msgstr ""
 #: jvisr/options/color_palette/default.title
 #: linechart/options/colorPalette/default.title
 #: linechart/options/theme/default.title
+#: linechart/ui[3][1]/colorPalette/default.title
 #: lollipop/options/colorScheme/default.title
 #: lollipop/options/theme/default.title
 #: multiclassdiagnostics/options/plotTheme/default.title
@@ -22948,6 +23260,7 @@ msgstr ""
 msgid "Density-based"
 msgstr ""
 
+#: R/lollipop.b.R
 #: advancedanova/options/dependent.title
 #: advancedanova/ui[0][0].label
 #: classification/options/dep.title
@@ -22978,7 +23291,7 @@ msgstr ""
 #: jviolin/options/dep.title
 #: jviolin/ui[0][0].label
 #: lollipop/options/dep.title
-#: lollipop/ui[0][0]/dep.label
+#: lollipop/ui[0][0].label
 #: pagetrendtest/options/dependent.title
 #: raincloud/options/dep_var.title
 #: raincloud/ui[0][0].label
@@ -22991,6 +23304,10 @@ msgstr ""
 
 #: jextractggstats/options/dep_var.description
 msgid "Dependent variable for analysis"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Dependent variable must be numeric (continuous variable)."
 msgstr ""
 
 #: crosstable/options/vars.title
@@ -24384,6 +24701,10 @@ msgstr ""
 msgid "Disease prevalence for calculating predictive values"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Disease progression analysis"
+msgstr ""
+
 #: package/analyses/multistatesurvival.menuSubtitle
 #: multistatesurvival/options.menuSubtitle
 msgid "Disease Progression and Transition Modeling"
@@ -24631,6 +24952,10 @@ msgstr ""
 
 #: decisiongraph/options/showCosts.description.ui
 msgid "Display cost values at terminal nodes."
+msgstr ""
+
+#: alluvial/options/showCounts.description.jamovi
+msgid "Display count values on nodes."
 msgstr ""
 
 #: flexcomprisk/options/showValidationResults.description
@@ -25120,7 +25445,7 @@ msgstr ""
 #: permutationsurvival/ui[3].label
 #: polychoriccorr/ui[1][2].label
 #: powercomprisk/ui[8].label
-#: riverplot/ui[1][1].label
+#: riverplot/ui[3].label
 #: rmst/ui[4].label
 #: screeningcalculator/ui[1].label
 #: semimarkov/ui[4].label
@@ -26035,6 +26360,10 @@ msgstr ""
 msgid "Dose-Response Relationship"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Dose-response relationships"
+msgstr ""
+
 #: treatmentoptim/results/doseOptimization.columns.title
 msgid "Dosing Frequency"
 msgstr ""
@@ -26084,19 +26413,35 @@ msgstr ""
 msgid "Dot-dash"
 msgstr ""
 
+#: lollipop/options/lineType/dotdash.title
+msgid "Dot-Dash"
+msgstr ""
+
 #: raincloud/options/dots_side.title
+#: raincloud/ui[1][1]/dots_side.label
 msgid "Dots Position"
 msgstr ""
 
 #: raincloud/options/dots_size.title
+#: raincloud/ui[2][0]/dots_size.label
 msgid "Dots Size"
 msgstr ""
 
+#: R/raincloud.b.R
+msgid "Dots size must be between 0.1 and 5"
+msgstr ""
+
 #: raincloud/options/alpha_dots.title
+#: raincloud/ui[2][1]/alpha_dots.label
 msgid "Dots Transparency"
 msgstr ""
 
+#: R/raincloud.b.R
+msgid "Dots transparency must be between 0 and 1"
+msgstr ""
+
 #: jjhistostats/options/centralitylinetype/dotted.title
+#: lollipop/options/lineType/dotted.title
 msgid "Dotted"
 msgstr ""
 
@@ -26137,13 +26482,9 @@ msgstr ""
 #: package/analyses/oneSurvival.menuSubgroup
 #: package/analyses/classification.menuSubgroup
 #: package/analyses/dendrogram.menuSubgroup
-#: package/analyses/linechart.menuSubgroup
-#: package/analyses/lollipop.menuSubgroup
 #: comparingSurvival/options.menuSubgroup
 #: competingsurvival/options.menuSubgroup
 #: dendrogram/options.menuSubgroup
-#: linechart/options.menuSubgroup
-#: lollipop/options.menuSubgroup
 #: oneSurvival/options.menuSubgroup
 msgid "Drafts"
 msgstr ""
@@ -26368,6 +26709,10 @@ msgstr ""
 msgid "E-values"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Each unit increase in X corresponds to "
+msgstr ""
+
 #: gradientboosting/options/early_stopping.title
 msgid "Early Stopping"
 msgstr ""
@@ -26382,6 +26727,10 @@ msgstr ""
 
 #: treatmenteffects/options/balance_methods/emd.title
 msgid "Earth Mover's Distance"
+msgstr ""
+
+#: alluvial/options/engine/easyalluvial.title
+msgid "Easy Alluvial (automatic)"
 msgstr ""
 
 #: package/analyses/grafify.menuSubtitle
@@ -26716,6 +27065,10 @@ msgstr ""
 
 #: effectsize/results/results/effectSizeGuide.title
 msgid "Effect Size Interpretation Guide"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Effect Size Interpretation:"
 msgstr ""
 
 #: crosstable/results/effectsizes.columns.title
@@ -27736,6 +28089,18 @@ msgstr ""
 msgid "Ensemble Weights"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Ensure at least 3 observations are available for analysis"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Ensure the Y-axis variable contains numeric values. Convert text numbers if needed."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Ensure variables contain appropriate data types (numeric for Y-axis)"
+msgstr ""
+
 #: economistplots/options/x_title.description.jamovi
 msgid "Enter a custom label for the x-axis."
 msgstr ""
@@ -28131,11 +28496,17 @@ msgstr ""
 msgid "Error Variance Ratio (λ)"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Error:"
+msgstr ""
+
 #: R/advancedraincloud.b.R
+#: R/raincloud.b.R
 msgid "Error: No complete cases found for the selected variables."
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: R/raincloud.b.R
 msgid "Error: The provided dataset contains no complete rows. Please check your data and try again."
 msgstr ""
 
@@ -29814,7 +30185,6 @@ msgstr ""
 #: package/analyses/desctools.menuGroup
 #: package/analyses/autoeda.menuGroup
 #: package/analyses/dataquality.menuGroup
-#: package/analyses/outlierdetection.menuGroup
 #: package/analyses/batcheffect.menuGroup
 #: package/analyses/clinicaltrialdesign.menuGroup
 #: package/analyses/missingdataexplorer.menuGroup
@@ -29830,15 +30200,10 @@ msgstr ""
 #: package/analyses/enhancedtables.menuGroup
 #: package/analyses/tinytable.menuGroup
 #: package/analyses/toxicityprofile.menuGroup
-#: package/analyses/classification.menuGroup
 #: package/analyses/retracted.menuGroup
-#: package/analyses/checkdata.menuGroup
 #: package/analyses/ciSingle.menuGroup
-#: package/analyses/contTables.menuGroup
-#: package/analyses/contTablesPaired.menuGroup
 #: package/analyses/gtsummary.menuGroup
 #: package/analyses/toolssummary.menuGroup
-#: package/analyses/ggflowchart.menuGroup
 #: package/analyses/missingdata.menuGroup
 #: package/analyses/enhancedcrosstable.menuGroup
 #: package/analyses/jsummarytools.menuGroup
@@ -29861,15 +30226,11 @@ msgstr ""
 #: bayesianclinical/options.menuGroup
 #: benford2/options.menuGroup
 #: biomarkerdiscovery/options.menuGroup
-#: checkdata/options.menuGroup
 #: ciSingle/options.menuGroup
-#: classification/options.menuGroup
 #: clinicalprediction/options.menuGroup
 #: clinicaltrialdesign/options.menuGroup
 #: coefplot/options.menuGroup
 #: continuousrelationship/options.menuGroup
-#: contTables/options.menuGroup
-#: contTablesPaired/options.menuGroup
 #: crosstable2/options.menuGroup
 #: crosstablepivot/options.menuGroup
 #: dataquality/options.menuGroup
@@ -29880,14 +30241,12 @@ msgstr ""
 #: enhancedtables/options.menuGroup
 #: eurostatmap/options.menuGroup
 #: featurequality/options.menuGroup
-#: ggflowchart/options.menuGroup
 #: gtsummary/options.menuGroup
 #: jcorrelation/options.menuGroup
 #: jsummarytools/options.menuGroup
 #: missingdata/options.menuGroup
 #: missingdataexplorer/options.menuGroup
 #: outbreakanalysis/options.menuGroup
-#: outlierdetection/options.menuGroup
 #: patientreported/options.menuGroup
 #: qualityoflife/options.menuGroup
 #: reportcat2/options.menuGroup
@@ -29903,41 +30262,52 @@ msgstr ""
 msgid "ExplorationD"
 msgstr ""
 
+#: package/analyses/agepyramid.menuGroup
+#: agepyramid/options.menuGroup
+msgid "ExplorationT"
+msgstr ""
+
 #: package/analyses/tableone.menuGroup
 #: package/analyses/summarydata.menuGroup
 #: package/analyses/reportcat.menuGroup
 #: package/analyses/benford.menuGroup
-#: package/analyses/agepyramid.menuGroup
 #: package/analyses/alluvial.menuGroup
 #: package/analyses/venn.menuGroup
 #: package/analyses/vartree.menuGroup
 #: package/analyses/crosstable.menuGroup
+#: package/analyses/outlierdetection.menuGroup
+#: package/analyses/classification.menuGroup
 #: package/analyses/hullplot.menuGroup
-#: package/analyses/raincloud.menuGroup
+#: package/analyses/checkdata.menuGroup
+#: package/analyses/contTables.menuGroup
+#: package/analyses/contTablesPaired.menuGroup
+#: package/analyses/ggflowchart.menuGroup
 #: package/analyses/chisqposttest.menuGroup
 #: package/analyses/groupsummary.menuGroup
 #: package/analyses/ggprism.menuGroup
-#: package/analyses/agepyramid2.menuGroup
 #: package/analyses/deeplearningprediction.menuGroup
 #: package/analyses/explainableai.menuGroup
-#: agepyramid/options.menuGroup
-#: agepyramid2/options.menuGroup
 #: alluvial/options.menuGroup
 #: benford/options.menuGroup
+#: checkdata/options.menuGroup
 #: chisqposttest/options.menuGroup
+#: classification/options.menuGroup
+#: contTables/options.menuGroup
+#: contTablesPaired/options.menuGroup
 #: crosstable/options.menuGroup
 #: deeplearningprediction/options.menuGroup
 #: explainableai/options.menuGroup
+#: ggflowchart/options.menuGroup
 #: ggprism/options.menuGroup
 #: groupsummary/options.menuGroup
 #: hullplot/options.menuGroup
-#: raincloud/options.menuGroup
+#: outlierdetection/options.menuGroup
 #: reportcat/options.menuGroup
 #: summarydata/options.menuGroup
 #: tableone/options.menuGroup
 #: vartree/options.menuGroup
 #: venn/options.menuGroup
-msgid "ExplorationT"
+msgid "ExplorationT2"
 msgstr ""
 
 #: causespecifichazards/options/model_type/exponential.title
@@ -31194,7 +31564,6 @@ msgid "Features to Analyze"
 msgstr ""
 
 #: agepyramid/results/pyramidTable.columns.title
-#: agepyramid2/results/pyramidTable.columns.title
 msgid "Female"
 msgstr ""
 
@@ -31218,6 +31587,7 @@ msgstr ""
 
 #: jjriverplot/options/fillType.title
 #: riverplot/options/fillType.title
+#: riverplot/ui[1][0]/fillType.label
 msgid "Fill Pattern"
 msgstr ""
 
@@ -31401,11 +31771,15 @@ msgstr ""
 msgid "First categorical variable for contingency table analysis."
 msgstr ""
 
-#: agepyramid2/options/color1.title
+#: agepyramid/options/color1.title
 msgid "First Color"
 msgstr ""
 
-#: agepyramid2/options/color1.description.jamovi
+#: agepyramid/ui[1][3]/color1.label
+msgid "First Color (Female)"
+msgstr ""
+
+#: agepyramid/options/color1.description.jamovi
 msgid "First color for the pyramid chart bars."
 msgstr ""
 
@@ -31844,14 +32218,24 @@ msgid "Floral (12 colors)"
 msgstr ""
 
 #: package/analyses/jjriverplot.menuSubtitle
-#: package/analyses/riverplot.menuSubtitle
 #: jjriverplot/options.menuSubtitle
-#: riverplot/options.menuSubtitle
 msgid "Flow and Transition Visualization"
+msgstr ""
+
+#: riverplot/options/curveType.title
+msgid "Flow Curve Style"
 msgstr ""
 
 #: jggsankeyfier/results/datatab.title
 msgid "Flow Data"
+msgstr ""
+
+#: riverplot/options/plotType/flow.title
+msgid "Flow Diagram (tracks individual changes)"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Flow diagrams:"
 msgstr ""
 
 #: jggsankeyfier/options/flow_direction.title
@@ -33075,10 +33459,9 @@ msgstr ""
 msgid "Gelman-Rubin Diagnostic"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: agepyramid/options/gender.title
 #: agepyramid/ui[0][1].label
-#: agepyramid2/options/gender.title
-#: agepyramid2/ui[0][1].label
 msgid "Gender"
 msgstr ""
 
@@ -33764,8 +34147,20 @@ msgstr ""
 msgid "Geweke Z"
 msgstr ""
 
+#: alluvial/options/engine/ggalluvial.title
+msgid "GG Alluvial (manual control)"
+msgstr ""
+
 #: statsplot2/options/alluvsty/t1.title
 msgid "ggalluvial (detailed flow diagram)"
+msgstr ""
+
+#: agepyramid/options/plot_engine/ggcharts.title
+msgid "ggcharts (pyramid_chart)"
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "ggcharts package not available, falling back to ggplot2"
 msgstr ""
 
 #: autoeda/options/eda_engine/ggeda.title
@@ -33803,6 +34198,10 @@ msgstr ""
 
 #: jscattermore/options/plot_type/ggplot2.title
 msgid "ggplot2 (geom_scattermore)"
+msgstr ""
+
+#: agepyramid/options/plot_engine/ggplot2.title
+msgid "ggplot2 (manual construction)"
 msgstr ""
 
 #: jscattermore/options/plot_type/ggplot2_opt.title
@@ -34399,8 +34798,11 @@ msgid "Group and Summarize"
 msgstr ""
 
 #: linechart/options/groupby.title
-#: linechart/ui[0][2].label
 msgid "Group By"
+msgstr ""
+
+#: linechart/ui[0][2].label
+msgid "Group By (Optional)"
 msgstr ""
 
 #: groupsummary/options/groupVars.title
@@ -34432,6 +34834,7 @@ msgid "Group Comparison Results"
 msgstr ""
 
 #: raincloud/options/comparison_test.title
+#: raincloud/ui[5][2]/comparison_test.label
 msgid "Group Comparison Test"
 msgstr ""
 
@@ -34534,6 +34937,7 @@ msgstr ""
 msgid "Group Name"
 msgstr ""
 
+#: R/linechart.b.R
 #: groupsummary/options/sortBy/groups.title
 msgid "Group Names"
 msgstr ""
@@ -34722,6 +35126,7 @@ msgstr ""
 msgid "Grouping variable"
 msgstr ""
 
+#: R/lollipop.b.R
 #: clinicaldashboard/ui[0][3].label
 #: comparingSurvival/options/groups.title
 #: comparingSurvival/ui[0][2].label
@@ -34772,7 +35177,7 @@ msgstr ""
 #: jviolin/options/group.title
 #: jviolin/ui[0][1].label
 #: lollipop/options/group.title
-#: lollipop/ui[0][0]/group.label
+#: lollipop/ui[0][1].label
 #: mediansurvival/options/explanatory.title
 #: mediansurvival/ui[0][2].label
 #: nonparametric/options/groups.title
@@ -34846,6 +35251,18 @@ msgstr ""
 msgid "Grouping variable for separate ridges"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Grouping variable has more than 10 levels. Consider reducing groups for clarity."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Grouping variable has more than 50 levels. Consider reducing categories for better visualization."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Grouping variable must have at least 2 different categories."
+msgstr ""
+
 #: enhancedcrosstable/options/by_var.description.ui
 msgid "Grouping variable that defines the table columns."
 msgstr ""
@@ -34863,6 +35280,8 @@ msgstr ""
 msgid "Groups"
 msgstr ""
 
+#: R/linechart.b.R
+#: R/lollipop.b.R
 #: clinicalprediction/ui[8][0]/n_risk_groups.suffix
 msgid "groups"
 msgstr ""
@@ -34887,6 +35306,14 @@ msgstr ""
 #: grouplasso/results/nestedCVResults.columns.title
 #: sparsegrouplasso/results/comparisonTable.columns.title
 msgid "Groups Selected"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Groups show similar mean values."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Groups:"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -35523,6 +35950,11 @@ msgstr ""
 msgid "Height"
 msgstr ""
 
+#: linechart/ui[5][0]/height.label
+#: lollipop/ui[5][0]/height.label
+msgid "Height (pixels)"
+msgstr ""
+
 #: jcomplexupset/options/base_annotations_height.description
 msgid "Height of annotation panels"
 msgstr ""
@@ -36002,6 +36434,14 @@ msgstr ""
 msgid "Highest Posterior Probability"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Highest Value Group"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Highest values found in"
+msgstr ""
+
 #: economistplots/options/show_quartiles.description.jamovi
 msgid "Highlight 25th, 50th, and 75th percentiles."
 msgstr ""
@@ -36016,8 +36456,12 @@ msgid "Highlight clusters"
 msgstr ""
 
 #: lollipop/options/highlight.title
-#: lollipop/ui[0][0]/highlight.label
+#: lollipop/ui[0][1]/highlight.label
 msgid "Highlight Level"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Highlight level"
 msgstr ""
 
 #: enhancedroc/options/showCutoffPoints.description
@@ -36026,6 +36470,7 @@ msgstr ""
 
 #: biomarkerresponse/options/outlierHandling/highlight.title
 #: raincloud/options/show_outliers.title
+#: raincloud/ui[5][0]/show_outliers.label
 msgid "Highlight Outliers"
 msgstr ""
 
@@ -36063,6 +36508,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "highly connected"
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Highly significant (***)"
 msgstr ""
 
 #: package/analyses/jjhistostats.title
@@ -36834,10 +37283,19 @@ msgstr ""
 msgid "ICU Critical Thresholds"
 msgstr ""
 
+#: R/riverplot.b.R
+#: alluvial/ui[0][2]/id.label
+msgid "ID Variable"
+msgstr ""
+
+#: riverplot/ui[0][1]/id.label
+msgid "ID Variable (for tracking entities)"
+msgstr ""
+
+#: alluvial/options/id.title
 #: jjriverplot/options/id.title
 #: jjriverplot/ui[0][0].label
 #: riverplot/options/id.title
-#: riverplot/ui[0][0].label
 msgid "ID Variable (optional)"
 msgstr ""
 
@@ -38231,6 +38689,10 @@ msgstr ""
 msgid "Increase Factor"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "increasing"
+msgstr ""
+
 #: pagetrendtest/options/trend_direction/increasing.title
 msgid "Increasing Trend"
 msgstr ""
@@ -38705,6 +39167,10 @@ msgstr ""
 msgid "Insight Type"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Install required packages using the provided commands."
+msgstr ""
+
 #: stagemigration/options/institutionVariable.title
 #: stagemigration/ui[10][0].label
 msgid "Institution Variable"
@@ -38870,6 +39336,10 @@ msgstr ""
 
 #: treatmenteffects/options/causal_method/instrumental_variable.title
 msgid "Instrumental Variables"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Insufficient data for residual normality testing."
 msgstr ""
 
 #: advancedbarplot/options/value_format/integer.title
@@ -39462,6 +39932,10 @@ msgstr ""
 msgid "Interpretation Guide"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Interpretation should account for different sample sizes per group."
+msgstr ""
+
 #: simonmakuch/results/simonMakuchPlotExplanation.title
 msgid "Interpreting Simon-Makuch Plots"
 msgstr ""
@@ -39985,19 +40459,27 @@ msgstr ""
 msgid "Jittered"
 msgstr ""
 
+#: package/analyses/raincloud.menuGroup
+#: package/analyses/advancedraincloud.menuGroup
 #: package/analyses/jjhistostats.menuGroup
 #: package/analyses/jjscatterstats.menuGroup
 #: package/analyses/jjdotplotstats.menuGroup
 #: package/analyses/jjbetweenstats.menuGroup
 #: package/analyses/jwaffle.menuGroup
 #: package/analyses/statsplot2.menuGroup
+#: package/analyses/linechart.menuGroup
+#: package/analyses/lollipop.menuGroup
 #: package/analyses/jjarcdiagram.menuGroup
+#: advancedraincloud/options.menuGroup
 #: jjarcdiagram/options.menuGroup
 #: jjbetweenstats/options.menuGroup
 #: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
 #: jjscatterstats/options.menuGroup
 #: jwaffle/options.menuGroup
+#: linechart/options.menuGroup
+#: lollipop/options.menuGroup
+#: raincloud/options.menuGroup
 #: statsplot2/options.menuGroup
 msgid "JJStatsPlot"
 msgstr ""
@@ -40005,47 +40487,27 @@ msgstr ""
 #: package/analyses/jviolin.menuGroup
 #: package/analyses/parallelplot.menuGroup
 #: package/analyses/statsplot2.menuGroup
-#: package/analyses/jjridgestats.menuGroup
-#: package/analyses/jjstreamgraph.menuGroup
-#: package/analyses/jjtreemap.menuGroup
-#: package/analyses/jggridges.menuGroup
 #: package/analyses/tidyplots.menuGroup
-#: package/analyses/jjriverplot.menuGroup
-#: package/analyses/grafify.menuGroup
 #: package/analyses/basegraphics.menuGroup
 #: package/analyses/advancedbarplot.menuGroup
 #: package/analyses/economistplots.menuGroup
 #: package/analyses/bbcplots.menuGroup
 #: package/analyses/jscattermore.menuGroup
 #: package/analyses/jsjplot.menuGroup
-#: package/analyses/jggsankeyfier.menuGroup
 #: package/analyses/jggstats.menuGroup
 #: package/analyses/jggheatmap.menuGroup
-#: package/analyses/jcomplexupset.menuGroup
 #: package/analyses/jextractggstats.menuGroup
 #: package/analyses/jforestmodel.menuGroup
-#: package/analyses/jpps.menuGroup
 #: package/analyses/jforester.menuGroup
-#: package/analyses/jjradarplot.menuGroup
 #: advancedbarplot/options.menuGroup
 #: basegraphics/options.menuGroup
 #: bbcplots/options.menuGroup
 #: economistplots/options.menuGroup
-#: grafify/options.menuGroup
-#: jcomplexupset/options.menuGroup
 #: jextractggstats/options.menuGroup
 #: jforester/options.menuGroup
 #: jforestmodel/options.menuGroup
 #: jggheatmap/options.menuGroup
-#: jggridges/options.menuGroup
-#: jggsankeyfier/options.menuGroup
 #: jggstats/options.menuGroup
-#: jjradarplot/options.menuGroup
-#: jjridgestats/options.menuGroup
-#: jjriverplot/options.menuGroup
-#: jjstreamgraph/options.menuGroup
-#: jjtreemap/options.menuGroup
-#: jpps/options.menuGroup
 #: jscattermore/options.menuGroup
 #: jsjplot/options.menuGroup
 #: jviolin/options.menuGroup
@@ -40054,25 +40516,39 @@ msgstr ""
 msgid "JJStatsPlotD"
 msgstr ""
 
-#: package/analyses/advancedraincloud.menuGroup
 #: package/analyses/jjcorrmat.menuGroup
 #: package/analyses/jjwithinstats.menuGroup
 #: package/analyses/jjbarstats.menuGroup
 #: package/analyses/jjpiestats.menuGroup
-#: package/analyses/linechart.menuGroup
-#: package/analyses/lollipop.menuGroup
+#: package/analyses/jjridgestats.menuGroup
+#: package/analyses/jjstreamgraph.menuGroup
+#: package/analyses/jjtreemap.menuGroup
+#: package/analyses/jggridges.menuGroup
+#: package/analyses/jjriverplot.menuGroup
 #: package/analyses/riverplot.menuGroup
+#: package/analyses/grafify.menuGroup
 #: package/analyses/ggsegmentedtotalbar.menuGroup
-#: advancedraincloud/options.menuGroup
+#: package/analyses/jggsankeyfier.menuGroup
+#: package/analyses/jcomplexupset.menuGroup
+#: package/analyses/jpps.menuGroup
+#: package/analyses/jjradarplot.menuGroup
 #: ggsegmentedtotalbar/options.menuGroup
+#: grafify/options.menuGroup
+#: jcomplexupset/options.menuGroup
+#: jggridges/options.menuGroup
+#: jggsankeyfier/options.menuGroup
 #: jjbarstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
 #: jjpiestats/options.menuGroup
+#: jjradarplot/options.menuGroup
+#: jjridgestats/options.menuGroup
+#: jjriverplot/options.menuGroup
+#: jjstreamgraph/options.menuGroup
+#: jjtreemap/options.menuGroup
 #: jjwithinstats/options.menuGroup
-#: linechart/options.menuGroup
-#: lollipop/options.menuGroup
+#: jpps/options.menuGroup
 #: riverplot/options.menuGroup
-msgid "JJStatsPlotT"
+msgid "JJStatsPlotT2"
 msgstr ""
 
 #: package/analyses/jointfrailty.title
@@ -40172,11 +40648,6 @@ msgstr ""
 msgid "JSON Export"
 msgstr ""
 
-#: package/analyses/spatialbayesiansurvival.menuGroup
-#: spatialbayesiansurvival/options.menuGroup
-msgid "jsurvival"
-msgstr ""
-
 #: package/analyses/directbinomial.menuSubgroup
 #: package/analyses/flexcomprisk.menuSubgroup
 #: directbinomial/options.menuSubgroup
@@ -40201,11 +40672,9 @@ msgstr ""
 #: package/analyses/conditionalinference.menuGroup
 #: package/analyses/extratrees.menuGroup
 #: package/analyses/gradientboosting.menuGroup
-#: package/analyses/adaptivelasso.menuGroup
 #: package/analyses/grouplasso.menuGroup
 #: package/analyses/illnessdeath.menuGroup
 #: package/analyses/survivalbart.menuGroup
-#: adaptivelasso/options.menuGroup
 #: conditionalinference/options.menuGroup
 #: extratrees/options.menuGroup
 #: gradientboosting/options.menuGroup
@@ -40496,6 +40965,14 @@ msgstr ""
 msgid "Key assumptions for the selected statistical test"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Key Assumptions:"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Key features:"
+msgstr ""
+
 #: biomarkerdiscovery/results/clinical_interpretation.columns.title
 #: qualityoflife/results/clinical_interpretation_summary.columns.title
 #: stagemigration/results/multiStateSummary.columns.title
@@ -40508,6 +40985,10 @@ msgstr ""
 #: stagemigration/results/frailtyModelsSummary.columns.title
 #: stagemigration/results/clinicalUtilitySummary.columns.title
 msgid "Key Finding"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Key Findings"
 msgstr ""
 
 #: ihcscoring/options/biomarker_type/ki67.title
@@ -40626,6 +41107,7 @@ msgstr ""
 msgid "Krippendorff's Alpha Results"
 msgstr ""
 
+#: R/raincloud.b.R
 #: advancedbarplot/options/stat_method/kruskal.title
 #: bbcplots/options/stat_method/kruskal.title
 #: economistplots/options/stat_method/kruskal.title
@@ -40733,6 +41215,7 @@ msgstr ""
 msgid "Label Large Changes"
 msgstr ""
 
+#: alluvial/options/labelNodes.title
 #: jjriverplot/options/labelNodes.title
 #: riverplot/options/labelNodes.title
 msgid "Label Nodes"
@@ -40770,11 +41253,13 @@ msgstr ""
 #: jjridgestats/ui[6][0].label
 #: jjtreemap/ui[1][2].label
 #: jwaffle/ui[2].label
-#: lollipop/ui[0][2][0].label
 msgid "Labels"
 msgstr ""
 
 #: advancedraincloud/ui[8].label
+#: linechart/ui[4].label
+#: lollipop/ui[4].label
+#: raincloud/ui[4].label
 #: tidyplots/ui[8].label
 msgid "Labels & Titles"
 msgstr ""
@@ -40881,6 +41366,10 @@ msgstr ""
 #: labinterpret/results/interpretationTable.title
 #: labinterpret/results/interpretationPlot.title
 msgid "Laboratory Value Interpretation"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Laboratory value trends"
 msgstr ""
 
 #: labinterpret/options/labValues.title
@@ -41150,6 +41639,10 @@ msgstr ""
 
 #: jforester/options/point_size_range/large.title
 msgid "Large (4-8)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Large effect size - clinically meaningful association."
 msgstr ""
 
 #: effectsize/options/large_effect_threshold.title
@@ -41830,8 +42323,12 @@ msgstr ""
 msgid "Line Chart"
 msgstr ""
 
-#: linechart/results/plot.title
-msgid "Line Chart: `${yvar}` by `${xvar}`"
+#: R/linechart.b.R
+msgid "Line Chart Assumptions"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Line charts require variation in the Y variable. "
 msgstr ""
 
 #: jviolin/options/themex/linedraw.title
@@ -41862,6 +42359,8 @@ msgstr ""
 msgid "Line Transparency"
 msgstr ""
 
+#: lollipop/options/lineType.title
+#: lollipop/ui[2][2]/lineType.label
 #: tidyplots/options/lineType.title
 #: tidyplots/ui[1][2].label
 msgid "Line Type"
@@ -41872,12 +42371,16 @@ msgstr ""
 msgid "Line Width"
 msgstr ""
 
+#: lollipop/ui[2][1]/lineWidth.label
+msgid "Line Width (0.5-5)"
+msgstr ""
+
+#: alluvial/options/curveType/linear.title
 #: biomarkerresponse/options/trendMethod/lm.title
 #: classification/options/svmKernel/linear.title
 #: jjriverplot/options/curveType/linear.title
 #: jjstreamgraph/options/interpolate/linear.title
 #: jointmodeling/options/functional_form/linear.title
-#: riverplot/options/curveType/linear.title
 msgid "Linear"
 msgstr ""
 
@@ -41892,6 +42395,10 @@ msgstr ""
 
 #: continuousrelationship/options/modelType/linear.title
 msgid "Linear (for comparison)"
+msgstr ""
+
+#: riverplot/options/curveType/linear.title
+msgid "Linear connections"
 msgstr ""
 
 #: dendrogram/options/plotType/linear.title
@@ -41985,6 +42492,10 @@ msgstr ""
 msgid "Linearity Assessment"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Linearity assessment not applicable for categorical X-variable."
+msgstr ""
+
 #: methodvalidation/results/linearityPlot.title
 msgid "Linearity Assessment Plot"
 msgstr ""
@@ -41999,6 +42510,11 @@ msgstr ""
 
 #: methodvalidation/options/validation_type/linearity_only.title
 msgid "Linearity Study Only"
+msgstr ""
+
+#: package/analyses/linechart.menuSubgroup
+#: linechart/options.menuSubgroup
+msgid "Lines"
 msgstr ""
 
 #: dendrogram/options/edgeType/link.title
@@ -42580,8 +43096,11 @@ msgstr ""
 #: lollipop/options.title
 #: lollipop/ui.title
 #: lollipop/results.title
-#: lollipop/results/plot.title
 msgid "Lollipop Chart"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Lollipop Chart:"
 msgstr ""
 
 #: jjhistostats/options/centralitylinetype/longdash.title
@@ -42616,6 +43135,10 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "Longitudinal Analysis: Excluded "
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Longitudinal biomarker tracking"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -43008,6 +43531,14 @@ msgstr ""
 msgid "Lowest Expected Value for a fixed sample size."
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Lowest Value Group"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Lowest values found in"
+msgstr ""
+
 #: spatialbayesiansurvival/results/modelComparison.columns.title
 msgid "LPML"
 msgstr ""
@@ -43195,7 +43726,6 @@ msgid "Majority Rule (≥50%)"
 msgstr ""
 
 #: agepyramid/results/pyramidTable.columns.title
-#: agepyramid2/results/pyramidTable.columns.title
 msgid "Male"
 msgstr ""
 
@@ -44409,6 +44939,10 @@ msgstr ""
 msgid "Mean ± SD, Min-Max"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Mean ="
+msgstr ""
+
 #: explainableai/results/shapanalysis/shapvaluestable.columns.title
 msgid "Mean |SHAP Value|"
 msgstr ""
@@ -44601,9 +45135,14 @@ msgstr ""
 msgid "Mean Utility"
 msgstr ""
 
+#: R/lollipop.b.R
 #: biopsysimulation/results/spatialanalysistable.columns.title
 #: spatialautocorrelation/results/spatialClusters.columns.title
 msgid "Mean Value"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Mean value"
 msgstr ""
 
 #: crosstable/options/cont.title
@@ -44742,28 +45281,18 @@ msgstr ""
 msgid "meddecide"
 msgstr ""
 
-#: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/kappaSizeCI.menuGroup
 #: package/analyses/kappaSizeFixedN.menuGroup
 #: package/analyses/kappaSizePower.menuGroup
 #: package/analyses/screeningcalculator.menuGroup
 #: package/analyses/sequentialtests.menuGroup
-#: package/analyses/decisioncurve.menuGroup
 #: package/analyses/bayesdca.menuGroup
-#: package/analyses/icccoeff.menuGroup
 #: package/analyses/ppv.menuGroup
-#: package/analyses/treeadvanced.menuGroup
 #: package/analyses/treecompare.menuGroup
 #: package/analyses/treeensemble.menuGroup
-#: package/analyses/treemedical.menuGroup
-#: package/analyses/idi.menuGroup
-#: package/analyses/netreclassification.menuGroup
 #: package/analyses/cohenskappa.menuGroup
-#: package/analyses/methodcomparison.menuGroup
 #: package/analyses/likelihoodratio.menuGroup
 #: package/analyses/bayesiandiagnostic.menuGroup
-#: package/analyses/aivalidation.menuGroup
-#: package/analyses/clinicalvalidation.menuGroup
 #: package/analyses/clinicalvalidationinteractive.menuGroup
 #: package/analyses/nonparametric.menuGroup
 #: package/analyses/nonparametricregression.menuGroup
@@ -44771,66 +45300,81 @@ msgstr ""
 #: package/analyses/bayesiannetworkma.menuGroup
 #: package/analyses/spikeslabpriors.menuGroup
 #: adaptivetrialdesign/options.menuGroup
-#: aivalidation/options.menuGroup
 #: bayesdca/options.menuGroup
 #: bayesiandiagnostic/options.menuGroup
 #: bayesiannetworkma/options.menuGroup
-#: clinicalvalidation/options.menuGroup
 #: clinicalvalidationinteractive/options.menuGroup
 #: cohenskappa/options.menuGroup
-#: decisioncalculator/options.menuGroup
-#: decisioncurve/options.menuGroup
-#: icccoeff/options.menuGroup
-#: idi/options.menuGroup
 #: kappaSizeCI/options.menuGroup
 #: kappaSizeFixedN/options.menuGroup
 #: kappaSizePower/options.menuGroup
 #: likelihoodratio/options.menuGroup
-#: methodcomparison/options.menuGroup
-#: netreclassification/options.menuGroup
 #: nonparametric/options.menuGroup
 #: nonparametricregression/options.menuGroup
 #: ppv/options.menuGroup
 #: screeningcalculator/options.menuGroup
 #: sequentialtests/options.menuGroup
 #: spikeslabpriors/options.menuGroup
-#: treeadvanced/options.menuGroup
 #: treecompare/options.menuGroup
 #: treeensemble/options.menuGroup
-#: treemedical/options.menuGroup
 msgid "meddecideD"
+msgstr ""
+
+#: package/analyses/classification.menuGroup
+msgid "meddecideT"
 msgstr ""
 
 #: package/analyses/agreement.menuGroup
 #: package/analyses/decision.menuGroup
+#: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/nogoldstandard.menuGroup
 #: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaroc.menuGroup
 #: package/analyses/decisioncombine.menuGroup
 #: package/analyses/cotest.menuGroup
+#: package/analyses/decisioncurve.menuGroup
 #: package/analyses/modelbuilder.menuGroup
 #: package/analyses/decisiongraph.menuGroup
 #: package/analyses/decisionpanel.menuGroup
-#: package/analyses/classification.menuGroup
 #: package/analyses/dendrogram.menuGroup
+#: package/analyses/icccoeff.menuGroup
+#: package/analyses/treeadvanced.menuGroup
+#: package/analyses/treemedical.menuGroup
+#: package/analyses/idi.menuGroup
+#: package/analyses/netreclassification.menuGroup
+#: package/analyses/methodcomparison.menuGroup
+#: package/analyses/methodvalidation.menuGroup
+#: package/analyses/aivalidation.menuGroup
+#: package/analyses/clinicalvalidation.menuGroup
 #: package/analyses/modalitycomparison.menuGroup
 #: package/analyses/enhancedroc.menuGroup
 #: package/analyses/multiclassdiagnostics.menuGroup
 #: agreement/options.menuGroup
+#: aivalidation/options.menuGroup
+#: clinicalvalidation/options.menuGroup
 #: cotest/options.menuGroup
 #: decision/options.menuGroup
+#: decisioncalculator/options.menuGroup
 #: decisioncombine/options.menuGroup
 #: decisioncompare/options.menuGroup
+#: decisioncurve/options.menuGroup
 #: decisiongraph/options.menuGroup
 #: decisionpanel/options.menuGroup
 #: dendrogram/options.menuGroup
 #: enhancedroc/options.menuGroup
+#: icccoeff/options.menuGroup
+#: idi/options.menuGroup
+#: methodcomparison/options.menuGroup
+#: methodvalidation/options.menuGroup
 #: modalitycomparison/options.menuGroup
 #: modelbuilder/options.menuGroup
 #: multiclassdiagnostics/options.menuGroup
+#: netreclassification/options.menuGroup
 #: nogoldstandard/options.menuGroup
 #: psychopdaroc/options.menuGroup
-msgid "meddecideT"
+#: treeadvanced/options.menuGroup
+#: treemedical/options.menuGroup
+msgid "meddecideT2"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -45119,6 +45663,10 @@ msgstr ""
 msgid "Median Utility"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Median Value"
+msgstr ""
+
 #: clinicalnomograms/options/missing_data_handling/median_mode.title
 msgid "Median/Mode Imputation"
 msgstr ""
@@ -45210,6 +45758,10 @@ msgstr ""
 
 #: jforester/options/point_size_range/medium.title
 msgid "Medium (3-6)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Medium effect size - moderate practical significance."
 msgstr ""
 
 #: effectsize/options/medium_effect_threshold.title
@@ -46214,6 +46766,10 @@ msgstr ""
 msgid "Minimal"
 msgstr ""
 
+#: linechart/ui[3][0]/theme/minimal.title
+msgid "Minimal Clean"
+msgstr ""
+
 #: stagemigration/options/forestImportanceType/minimal_depth.title
 msgid "Minimal Depth"
 msgstr ""
@@ -46272,6 +46828,10 @@ msgstr ""
 #: methodcomparison/results/descriptiveStats.columns.title
 #: tidydensity/options/uniform_min.title
 msgid "Minimum"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Minimum 3 time points recommended for trend analysis"
 msgstr ""
 
 #: biopsysimulation/options/correlation_threshold.title
@@ -46491,6 +47051,10 @@ msgstr ""
 
 #: likelihoodratio/options/customPrevalenceMin.description
 msgid "Minimum prevalence for custom range"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Minimum recommendations: 10+ observations for basic trends, 30+ for reliable confidence intervals, 50+ for robust correlation analysis."
 msgstr ""
 
 #: clinicalvalidationinteractive/options/min_npv.title
@@ -46774,6 +47338,10 @@ msgstr ""
 
 #: datecorrection/options/day_impute.title
 msgid "Missing Day Imputation"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Missing Dependencies"
 msgstr ""
 
 #: qualityoflife/options/missing_domain_threshold.title
@@ -48026,6 +48594,10 @@ msgstr ""
 
 #: clinicalvalidation/options/comparison_models.title
 msgid "Models to Compare"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "moderate"
 msgstr ""
 
 #: qualityoflife/results/severity_classification.columns.title
@@ -49346,6 +49918,10 @@ msgstr ""
 msgid "Negative"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "negative"
+msgstr ""
+
 #: hierarchicalpathology/options/model_type/negative_binomial.title
 msgid "Negative Binomial (Overdispersed counts)"
 msgstr ""
@@ -49382,6 +49958,14 @@ msgstr ""
 #: decision/results/nTable.columns.title
 #: decisioncalculator/results/nTable.columns.title
 msgid "Negative Tests"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Negative trend: "
+msgstr ""
+
+#: R/linechart.b.R
+msgid "negligible"
 msgstr ""
 
 #: spatialbayesiansurvival/options/neighborhood_threshold.title
@@ -49883,6 +50467,11 @@ msgstr ""
 msgid "No Clustering"
 msgstr ""
 
+#: R/linechart.b.R
+#: R/lollipop.b.R
+msgid "No complete cases found. Please check for missing values in selected variables."
+msgstr ""
+
 #: multiplexanalysis/options/multiple_testing/none.title
 #: outbreakanalysis/options/multiple_testing_correction/none.title
 #: patientreported/options/multiple_comparisons/none.title
@@ -49970,6 +50559,10 @@ msgstr ""
 
 #: plscox/options/scaling_method/none.title
 msgid "No Scaling"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "No significant differences between groups detected (p ≥ 0.05). "
 msgstr ""
 
 #: advancedbarplot/options/sort_bars/none.title
@@ -50259,6 +50852,10 @@ msgstr ""
 msgid "Non-NAs"
 msgstr ""
 
+#: R/raincloud.b.R
+msgid "Non-normal"
+msgstr ""
+
 #: jextractggstats/options/statistical_test/nonparametric.title
 #: marginalrecurrent/options/baseline_type/nonparametric.title
 #: semimarkov/options/distributionType/nonparametric.title
@@ -50512,6 +51109,7 @@ msgstr ""
 msgid "Norm-Based Scoring"
 msgstr ""
 
+#: R/raincloud.b.R
 #: jjtreemap/options/labelFontFace/normal.title
 #: survivalbart/options/prior_distribution/normal.title
 #: tinytable/options/font_size/normal.title
@@ -50608,6 +51206,10 @@ msgstr ""
 msgid "Normality Assessment"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Normality check not applicable for this analysis."
+msgstr ""
+
 #: featurequality/results/normality_analysis.columns.title
 msgid "Normality Conclusion"
 msgstr ""
@@ -50677,8 +51279,28 @@ msgstr ""
 msgid "Normative Comparison"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Not available"
+msgstr ""
+
 #: consort/options/notEligibleN.title
 msgid "Not Eligible"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "not found in grouping variable. Highlight will be ignored."
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Not significant"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "not statistically significant"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Notable variation observed between groups, suggesting clinically meaningful differences."
 msgstr ""
 
 #: crosstable/results/pairwiseNote.title
@@ -50690,12 +51312,24 @@ msgstr ""
 msgid "Note: Boruta method may be slow with large datasets"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Note: Data appears highly variable."
+msgstr ""
+
 #: treeadvanced/ui[1][1][2].label
 msgid "Note: Hyperparameter tuning may take several minutes"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "Note: Large network detected. Analysis may take longer"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Note: Small sample size. Results should be interpreted with caution."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Note: Unequal time intervals detected. Trend interpretation should account for irregular spacing."
 msgstr ""
 
 #: clinicalprediction/results/regulatory_summary.columns.title
@@ -51181,6 +51815,8 @@ msgstr ""
 msgid "Number of folds for cross-validation."
 msgstr ""
 
+#: R/linechart.b.R
+#: R/lollipop.b.R
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
 msgid "Number of Groups"
 msgstr ""
@@ -51332,6 +51968,8 @@ msgstr ""
 msgid "Number of Neighbors (k)"
 msgstr ""
 
+#: R/linechart.b.R
+#: R/lollipop.b.R
 #: tidydensity/options/n_observations.title
 msgid "Number of Observations"
 msgstr ""
@@ -51590,6 +52228,10 @@ msgstr ""
 msgid "Number of warmup iterations to discard"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Number of X-axis Points"
+msgstr ""
+
 #: screeningevaluation/results/program_coverage.columns.title
 msgid "Numerator"
 msgstr ""
@@ -51605,6 +52247,10 @@ msgstr ""
 
 #: enhancedroc/options/predictors.description
 msgid "Numeric predictor variables for ROC analysis"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Numeric values (biomarker levels, scores, measurements)"
 msgstr ""
 
 #: spatialanalysis/options/coords_x.description.ui
@@ -51699,7 +52345,12 @@ msgid "Observations"
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: R/linechart.b.R
 msgid "observations"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "observations across"
 msgstr ""
 
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
@@ -52033,7 +52684,7 @@ msgstr ""
 #: swimmerplot/options.menuGroup
 #: timeupdatesurvival/options.menuGroup
 #: waterfall/options.menuGroup
-msgid "OncoPathologyT"
+msgid "OncoPathologyT2"
 msgstr ""
 
 #: package/analyses/ggoncoplot.menuSubtitle
@@ -52458,6 +53109,10 @@ msgstr ""
 msgid "Optional grouping variable for stratified analysis"
 msgstr ""
 
+#: alluvial/options/id.description.jamovi
+msgid "Optional ID variable for tracking individual entities."
+msgstr ""
+
 #: spatialanalysis/options/roi_id.description.ui
 msgid "Optional identifier for different regions of interest or tissue sections"
 msgstr ""
@@ -52466,12 +53121,20 @@ msgstr ""
 msgid "Optional inner confidence interval for enhanced visualization. Set to 0 to disable inner CI. Common values are 0.8 or 0.9."
 msgstr ""
 
+#: R/riverplot.b.R
+msgid "Optional inputs:"
+msgstr ""
+
 #: coxdiagnostics/options/strata_var.description.ui
 msgid "Optional stratification variable for Cox model."
 msgstr ""
 
 #: jforestmodel/options/covariates.description
 msgid "Optional subset of variables to include in plot"
+msgstr ""
+
+#: alluvial/options/time.description.jamovi
+msgid "Optional time or sequence variable for time-based flows."
 msgstr ""
 
 #: jsummarytools/options/weights_var.description
@@ -52527,11 +53190,17 @@ msgstr ""
 msgid "Optional variable to group data by different colors/symbols."
 msgstr ""
 
+#: alluvial/ui[0][2].label
 #: digitalvalidation/ui[0][1].label
 #: extratrees/ui[0][2].label
 #: haralicktexture/ui[0][0].label
 #: multiplexanalysis/ui[0][1].label
+#: riverplot/ui[0][1].label
 msgid "Optional Variables"
+msgstr ""
+
+#: alluvial/options/weight.description.jamovi
+msgid "Optional weight variable for flow thickness."
 msgstr ""
 
 #: statsplot2/options/grvar.description.ui
@@ -52544,6 +53213,10 @@ msgstr ""
 
 #: survivalvalidation/options/model_formula.description.ui
 msgid "Optional: Specify model formula for automatic fitting (e.g., \"age + stage + grade\")"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Optionally add a grouping variable (treatment arms, patient groups)"
 msgstr ""
 
 #: alluvial/ui[1].label
@@ -53114,6 +53787,7 @@ msgstr ""
 #: idi/options/outlier_method.title
 #: qualitycontrol/options/outlier_detection.title
 #: raincloud/options/outlier_method.title
+#: raincloud/ui[5][1]/outlier_method.label
 #: referenceintervals/options/outlier_detection.title
 #: robustcorrelation/options/outlier_method.title
 msgid "Outlier Detection Method"
@@ -55526,6 +56200,7 @@ msgstr ""
 msgid "Pearson and Spearman correlation coefficients"
 msgstr ""
 
+#: R/linechart.b.R
 #: imagingcorrelation/options/correlation_method/pearson.title
 #: jggheatmap/options/distance_method/pearson.title
 msgid "Pearson Correlation"
@@ -56969,6 +57644,14 @@ msgstr ""
 msgid "Please check your variable selections."
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Please select a different variable with varying values."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Please verify your data and variable selections."
+msgstr ""
+
 #: tidyplots/results/plot.title
 msgid "Plot"
 msgstr ""
@@ -57022,13 +57705,19 @@ msgstr ""
 msgid "Plot Color Scheme"
 msgstr ""
 
+#: raincloud/ui[1].label
+msgid "Plot Components"
+msgstr ""
+
 #: advancedraincloud/ui[1].label
+#: agepyramid/ui[1].label
 #: jjbetweenstats/ui[4].label
 #: jjcorrmat/ui[4].label
 #: jjdotplotstats/ui[5].label
 #: jjhistostats/ui[5].label
 #: jjscatterstats/ui[6].label
 #: jjwithinstats/ui[2][0].label
+#: riverplot/ui[1].label
 #: robustcorrelation/ui[6].label
 msgid "Plot Configuration"
 msgstr ""
@@ -57138,6 +57827,13 @@ msgstr ""
 #: survivalcont/options/endplot.title
 #: survivalcont/ui[4][1][0]/endplot.label
 msgid "Plot End Time"
+msgstr ""
+
+#: agepyramid/options/plot_engine.title
+#: agepyramid/ui[1][2]/plot_engine.label
+#: alluvial/options/engine.title
+#: alluvial/ui[2][0]/engine.label
+msgid "Plot Engine"
 msgstr ""
 
 #: tidydensity/options/plot_enhancements.title
@@ -57254,6 +57950,10 @@ msgstr ""
 msgid "Plot Height (pixels)"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Plot height must be between 300 and 1000 pixels. Current value will be ignored."
+msgstr ""
+
 #: hierarchicalbayes/options/sroc_curves.description.ui
 msgid "Plot hierarchical SROC curves"
 msgstr ""
@@ -57284,7 +57984,6 @@ msgstr ""
 #: jjscatterstats/ui[2][0].label
 #: jjtreemap/ui[2].label
 #: jjwithinstats/ui[3][1].label
-#: riverplot/ui[2][1].label
 msgid "Plot Labels"
 msgstr ""
 
@@ -57377,7 +58076,6 @@ msgstr ""
 #: jjtreemap/ui[1].label
 #: markovmultistate/ui[5].label
 #: multisurvival/ui[4].label
-#: riverplot/ui[1].label
 #: semimarkov/ui[5].label
 #: surveysurvival/ui[4].label
 #: toxicityprofile/ui[1].label
@@ -57392,6 +58090,7 @@ msgstr ""
 #: economistplots/options/plot_orientation.title
 #: enhancedfactorvariable/options/plotOrientation.title
 #: raincloud/options/orientation.title
+#: raincloud/ui[1][1]/orientation.label
 msgid "Plot Orientation"
 msgstr ""
 
@@ -57490,6 +58189,11 @@ msgstr ""
 msgid "Plot showing effect sizes with confidence intervals"
 msgstr ""
 
+#: linechart/ui[5].label
+#: lollipop/ui[5].label
+msgid "Plot Size"
+msgstr ""
+
 #: semimarkov/options/plotSojournDistributions.title
 msgid "Plot Sojourn Distributions"
 msgstr ""
@@ -57583,11 +58287,14 @@ msgstr ""
 #: hullplot/options/plot_theme.title
 #: jviolin/options/themex.title
 #: linechart/options/theme.title
+#: linechart/ui[3][0]/theme.label
 #: lollipop/options/theme.title
+#: lollipop/ui[2][0]/theme.label
 #: multiclassdiagnostics/options/plotTheme.title
 #: multiclassdiagnostics/ui[1][2][0]/plotTheme.label
 #: progressionsurvival/options/plot_theme.title
 #: raincloud/options/plot_theme.title
+#: raincloud/ui[3][0]/plot_theme.label
 #: swimmerplot/options/plotTheme.title
 msgid "Plot Theme"
 msgstr ""
@@ -57611,7 +58318,6 @@ msgstr ""
 #: advancedbarplot/options/plot_title.title
 #: advancedraincloud/options/plot_title.title
 #: agepyramid/options/plot_title.title
-#: agepyramid2/options/plot_title.title
 #: basegraphics/options/main_title.title
 #: economistplots/options/plot_title.title
 #: ggflowchart/options/plot_title.title
@@ -57640,6 +58346,8 @@ msgstr ""
 #: linechart/options/title.title
 #: lollipop/options/title.title
 #: raincloud/options/plot_title.title
+#: raincloud/ui[4][0]/plot_title.label
+#: riverplot/ui[4][1]/mytitle.label
 #: tidyplots/options/plotTitle.title
 #: tidyplots/ui[8][0].label
 msgid "Plot Title"
@@ -57681,8 +58389,7 @@ msgstr ""
 #: jjriverplot/ui[1][0].label
 #: jscattermore/options/plot_type.title
 #: jsjplot/options/plot_type.title
-#: riverplot/options/plotType.title
-#: riverplot/ui[1][0].label
+#: riverplot/ui[1][0]/plotType.label
 #: tidydensity/options/plot_type.title
 #: tidyplots/ui[1].label
 #: timeupdatedsurvival/options/plotType.title
@@ -57732,6 +58439,10 @@ msgstr ""
 #: decisioncombine/options/plotWidth.title
 #: jjdotplotstats/options/plotwidth.title
 msgid "Plot Width (pixels)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Plot width must be between 300 and 1200 pixels. Current value will be ignored."
 msgstr ""
 
 #: agreement/ui[2].label
@@ -57884,6 +58595,10 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "Point size"
+msgstr ""
+
+#: lollipop/ui[2][1]/pointSize.label
+msgid "Point Size (1-10)"
 msgstr ""
 
 #: jforester/options/point_size_range.title
@@ -58054,7 +58769,6 @@ msgstr ""
 
 #: advancedtrials/results/biomarker_strategy_results.columns.title
 #: agepyramid/results/pyramidTable.columns.title
-#: agepyramid2/results/pyramidTable.columns.title
 #: outbreakanalysis/results/spatial_analysis_results.columns.title
 msgid "Population"
 msgstr ""
@@ -58068,12 +58782,12 @@ msgstr ""
 msgid "Population Comparisons"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: populationhealth/results/riskStratificationTable.columns.title
 msgid "Population Count"
 msgstr ""
 
 #: agepyramid/results/pyramidTable.title
-#: agepyramid2/results/pyramidTable.title
 msgid "Population Data"
 msgstr ""
 
@@ -58289,6 +59003,10 @@ msgstr ""
 msgid "Position of vertical reference line"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "positive"
+msgstr ""
+
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
 #: ihcscoring/results/cpsanalysis/cpsresults.columns.title
 #: ihcscoring/results/molecularclassification/checkpointanalysis.columns.title
@@ -58407,6 +59125,10 @@ msgstr ""
 msgid "Positive Tests"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Positive trend: "
+msgstr ""
+
 #: clinicalvalidation/options/outcomeLevel.title
 #: clinicalvalidationinteractive/options/outcomeLevel.title
 msgid "Positive/Disease Level"
@@ -58491,6 +59213,10 @@ msgstr ""
 
 #: friedmantest/options/posthoc_method.title
 msgid "Post-hoc Test Method"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Post-hoc testing recommended to identify specific group differences."
 msgstr ""
 
 #: populationhealth/results/interventionAnalysisTable.columns.title
@@ -60533,6 +61259,10 @@ msgstr ""
 msgid "Professional"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Professional appearance for publications"
+msgstr ""
+
 #: package/analyses/advancedbarplot.menuSubtitle
 #: advancedbarplot/options.menuSubtitle
 msgid "Professional Bar Charts with Multiple Approaches"
@@ -61152,6 +61882,7 @@ msgstr ""
 #: enhancedfrequency/options/exportFormat/publication.title
 #: enhancedtables/options/table_theme/publication.title
 #: ggsegmentedtotalbar/options/chart_style/publication.title
+#: linechart/ui[3][0]/theme/publication.title
 #: progressionsurvival/options/plot_theme/publication.title
 #: simonmakuch/options/analysisType/publication.title
 #: tableone2/options/pivot_format/publication.title
@@ -61581,6 +62312,10 @@ msgstr ""
 msgid "Quality metrics for individual features"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Quality metrics over time"
+msgstr ""
+
 #: patientdashboard/options/quality_metrics.title
 msgid "Quality Metrics Tracking"
 msgstr ""
@@ -61719,8 +62454,16 @@ msgstr ""
 msgid "Questionnaire/Survey"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Quick Start Guide:"
+msgstr ""
+
 #: ggprism/options/prism_palette/quiet.title
 msgid "Quiet (9 colors)"
+msgstr ""
+
+#: alluvial/options/curveType/quintic.title
+msgid "Quintic (very smooth)"
 msgstr ""
 
 #: enhancedcorrelation/results/text.columns.title
@@ -61774,6 +62517,10 @@ msgstr ""
 #: bayesianmetaanalysis/results/modelSummary.columns.title
 #: bayesianmetaanalysis/results/mcmcDiagnostics.columns.title
 msgid "R-hat"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "R-squared (Effect Size)"
 msgstr ""
 
 #: aivalidation/results/modelSelectionTable.columns.title
@@ -61843,9 +62590,6 @@ msgstr ""
 
 #: package/analyses/raincloud.title
 #: package/analyses/raincloud.menuTitle
-#: package/analyses/advancedraincloud.title
-#: package/analyses/advancedraincloud.menuTitle
-#: advancedraincloud/options.title
 #: raincloud/options.title
 #: raincloud/ui.title
 #: raincloud/results.title
@@ -61853,6 +62597,7 @@ msgstr ""
 msgid "Raincloud Plot"
 msgstr ""
 
+#: R/raincloud.b.R
 #: raincloud/options/plot_title.default
 msgid "Raincloud Plot - Distribution Visualization"
 msgstr ""
@@ -62251,6 +62996,10 @@ msgstr ""
 
 #: enhancedroc/results/results/partialAucAnalysis.columns.title
 msgid "Range Type"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "ranges from"
 msgstr ""
 
 #: advancedimputation/results/cross_validation_results.columns.title
@@ -62958,6 +63707,7 @@ msgstr ""
 msgid "Redundancy Type"
 msgstr ""
 
+#: R/linechart.b.R
 #: clinicaltrialdesign/results/regulatory_considerations.columns.title
 #: epidemiosurvival/results/age_standardized_rates.columns.title
 #: linechart/options/reflineLabel.default
@@ -63010,6 +63760,10 @@ msgstr ""
 msgid "Reference Intervals Settings"
 msgstr ""
 
+#: linechart/ui[2][0]/reflineLabel.label
+msgid "Reference Label"
+msgstr ""
+
 #: linechart/options/reflineLabel.title
 msgid "Reference Line Label"
 msgstr ""
@@ -63020,9 +63774,21 @@ msgstr ""
 msgid "Reference Line Value"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Reference line value is not numeric and will be ignored."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Reference line value must be numeric. Please enter a valid number."
+msgstr ""
+
 #: jjdotplotstats/ui[2][0].label
 #: swimmerplot/options/referenceLines.title
 msgid "Reference Lines"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Reference lines help identify clinically significant thresholds"
 msgstr ""
 
 #: measurementuncertainty/options/reference_material_uncertainty.title
@@ -63137,6 +63903,7 @@ msgid "Reference Treatment Level"
 msgstr ""
 
 #: continuousrelationship/options/referenceValue.title
+#: linechart/ui[2][0]/refline.label
 msgid "Reference Value"
 msgstr ""
 
@@ -63285,6 +64052,10 @@ msgstr ""
 
 #: bayesiannetworkma/options/baseline_model/regression.title
 msgid "Regression on Covariates"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Regression Slope"
 msgstr ""
 
 #: jointmodeling/options/baseline_hazard/splines.title
@@ -63591,6 +64362,10 @@ msgstr ""
 msgid "Relative Value (%)"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Relatively consistent values across groups with minimal variation."
+msgstr ""
+
 #: explainableai/results/validationmetrics/stabilityanalysistable.columns.title
 #: semimarkov/results/reliabilityAnalysis.columns.title
 msgid "Reliability"
@@ -63695,6 +64470,10 @@ msgstr ""
 
 #: statsplot2/options/excl.description.ui
 msgid "Remove rows with missing values before analysis"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Remove rows with missing values or select variables with complete data."
 msgstr ""
 
 #: jggridges/options/expand_panel.description
@@ -63852,6 +64631,11 @@ msgstr ""
 
 #: poweranalysis/results/competing_risks_table.columns.title
 msgid "Required Events"
+msgstr ""
+
+#: R/lollipop.b.R
+#: R/riverplot.b.R
+msgid "Required inputs:"
 msgstr ""
 
 #: powercomprisk/results/powerCurveTable.columns.title
@@ -64881,7 +65665,6 @@ msgid "risktable"
 msgstr ""
 
 #: jjriverplot/results/plot.title
-#: riverplot/results/plot.title
 msgid "River Plot"
 msgstr ""
 
@@ -64893,8 +65676,6 @@ msgstr ""
 #: jjriverplot/ui.title
 #: jjriverplot/results.title
 #: riverplot/options.title
-#: riverplot/ui.title
-#: riverplot/results.title
 msgid "River Plots"
 msgstr ""
 
@@ -65624,6 +66405,11 @@ msgstr ""
 msgid "Rows"
 msgstr ""
 
+#: R/linechart.b.R
+#: R/lollipop.b.R
+msgid "rows with missing values were removed from analysis."
+msgstr ""
+
 #: flexiblebaseline/options/baseline_type/royston_parmar.title
 msgid "Royston-Parmar Model"
 msgstr ""
@@ -65687,6 +66473,10 @@ msgstr ""
 
 #: labcontrolcharts/options/run_number.title
 msgid "Run/Time Variable"
+msgstr ""
+
+#: riverplot/options/curveType/sigmoid.title
+msgid "S-shaped (sigmoid)"
 msgstr ""
 
 #: treatmentoptim/options/safety_assessment.title
@@ -65820,6 +66610,10 @@ msgstr ""
 msgid "Sample Size Component"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Sample Size Considerations:"
+msgstr ""
+
 #: screeningcalculator/options/samplesize.title
 #: screeningcalculator/ui[2].label
 msgid "Sample Size Estimation"
@@ -65847,6 +66641,10 @@ msgstr ""
 
 #: jpps/options/sample_size.title
 msgid "Sample Size Limit"
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Sample size not suitable"
 msgstr ""
 
 #: poweranalysis/results/multi_arm_table.columns.title
@@ -65972,8 +66770,11 @@ msgid "Sampling Variability Analysis"
 msgstr ""
 
 #: jjriverplot/options/plotType/sankey.title
-#: riverplot/options/plotType/sankey.title
 msgid "Sankey"
+msgstr ""
+
+#: alluvial/ui[2].label
+msgid "Sankey & Advanced Options"
 msgstr ""
 
 #: package/analyses/jggsankeyfier.title
@@ -66749,11 +67550,15 @@ msgstr ""
 msgid "Second categorical variable for contingency table analysis."
 msgstr ""
 
-#: agepyramid2/options/color2.title
+#: agepyramid/options/color2.title
 msgid "Second Color"
 msgstr ""
 
-#: agepyramid2/options/color2.description.jamovi
+#: agepyramid/ui[1][3]/color2.label
+msgid "Second Color (Male)"
+msgstr ""
+
+#: agepyramid/options/color2.description.jamovi
 msgid "Second color for the pyramid chart bars."
 msgstr ""
 
@@ -66911,7 +67716,6 @@ msgid "Select continuous variables to analyze (e.g., age, tumor size, biomarker 
 msgstr ""
 
 #: agepyramid/options/female.title
-#: agepyramid2/options/female.title
 msgid "Select Female"
 msgstr ""
 
@@ -67102,6 +67906,14 @@ msgstr ""
 
 #: psychopdaroc/options/positiveClass.description.ui
 msgid "Select which level of the class variable represents the positive class (disease/condition present)."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Select your X-axis variable (time points, visits, or sequence)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Select your Y-axis variable (measurements, lab values, or biomarkers)"
 msgstr ""
 
 #: bayesianma/results/inclusionProbabilities.columns.title
@@ -68166,6 +68978,7 @@ msgid "Show Biomarker Thresholds"
 msgstr ""
 
 #: raincloud/options/show_boxplot.title
+#: raincloud/ui[1][0]/show_boxplot.label
 msgid "Show Box Plot"
 msgstr ""
 
@@ -68370,6 +69183,10 @@ msgstr ""
 msgid "Show Color Bar"
 msgstr ""
 
+#: riverplot/ui[3][0]/showLegend.label
+msgid "Show Color Legend"
+msgstr ""
+
 #: jggheatmap/options/show_col_labels.title
 msgid "Show Column Labels"
 msgstr ""
@@ -68432,6 +69249,7 @@ msgstr ""
 #: icccoeff/options/show_confidence_intervals.title
 #: jforestmodel/options/show_confidence_intervals.title
 #: jvisr/options/confidence_interval.title
+#: linechart/ui[1][1]/confidence.label
 #: simonmakuch/options/showConfidenceIntervals.title
 #: simonmakuch/ui[7][0][1]/showConfidenceIntervals.label
 #: stagemigration/options/showConfidenceIntervals.title
@@ -68534,6 +69352,12 @@ msgstr ""
 msgid "Show Costs"
 msgstr ""
 
+#: alluvial/ui[2][0]/showCounts.label
+#: riverplot/ui[3][0]/showCounts.label
+msgid "Show Count Values"
+msgstr ""
+
+#: alluvial/options/showCounts.title
 #: jjriverplot/options/showCounts.title
 #: riverplot/options/showCounts.title
 msgid "Show Counts"
@@ -68616,6 +69440,7 @@ msgstr ""
 
 #: ggprism/options/show_points.title
 #: raincloud/options/show_dots.title
+#: raincloud/ui[1][0]/show_dots.label
 msgid "Show Data Points"
 msgstr ""
 
@@ -69061,6 +69886,7 @@ msgid "Show Group Summary"
 msgstr ""
 
 #: raincloud/options/show_violin.title
+#: raincloud/ui[1][0]/show_violin.label
 msgid "Show Half-Violin (Density)"
 msgstr ""
 
@@ -69131,6 +69957,7 @@ msgid "Show Inclusion Probabilities"
 msgstr ""
 
 #: grafify/options/show_individual_points.title
+#: linechart/ui[1][0]/points.label
 msgid "Show Individual Data Points"
 msgstr ""
 
@@ -69288,6 +70115,10 @@ msgstr ""
 
 #: jggridges/options/show_mean.title
 msgid "Show Mean Lines"
+msgstr ""
+
+#: lollipop/ui[1][0]/showMean.label
+msgid "Show Mean Reference Line"
 msgstr ""
 
 #: markovmultistate/options/showMeanSojournTimes.title
@@ -69528,8 +70359,10 @@ msgstr ""
 msgid "Show Node Details"
 msgstr ""
 
+#: alluvial/ui[2][0]/labelNodes.label
 #: decisiongraph/options/nodeLabels.title
 #: jggsankeyfier/options/show_labels.title
+#: riverplot/ui[3][0]/labelNodes.label
 msgid "Show Node Labels"
 msgstr ""
 
@@ -70323,6 +71156,7 @@ msgstr ""
 #: ggprism/options/show_summary.title
 #: grafify/options/show_summary_stats.title
 #: raincloud/options/show_statistics.title
+#: raincloud/ui[5][0]/show_statistics.label
 msgid "Show Summary Statistics"
 msgstr ""
 
@@ -70554,6 +71388,10 @@ msgstr ""
 msgid "Show Validation Results"
 msgstr ""
 
+#: lollipop/ui[1][0]/showValues.label
+msgid "Show Value Labels on Points"
+msgstr ""
+
 #: jsjplot/options/show_values.title
 #: lollipop/options/showValues.title
 msgid "Show Values"
@@ -70712,6 +71550,10 @@ msgstr ""
 msgid "Sigmoid"
 msgstr ""
 
+#: alluvial/options/curveType/sigmoid.title
+msgid "Sigmoid (S-shaped, Sankey-style)"
+msgstr ""
+
 #: friedmantest/options/posthoc_method/sign_test.title
 msgid "Sign Test"
 msgstr ""
@@ -70836,6 +71678,14 @@ msgstr ""
 #: jjbetweenstats/options/pairwisedisplay/significant.title
 #: jjwithinstats/options/pairwisedisplay/significant.title
 msgid "significant"
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Significant (*)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Significant differences between groups detected (p < 0.05). "
 msgstr ""
 
 #: jjstreamgraph/options/offset/silhouette.title
@@ -70969,6 +71819,10 @@ msgstr ""
 msgid "Simultaneous Autoregressive (SAR)"
 msgstr ""
 
+#: alluvial/options/curveType/sine.title
+msgid "Sine"
+msgstr ""
+
 #: ihcstats/options/linkageMethod/single.title
 #: jggheatmap/options/clustering_method/single.title
 #: multisurvival/options/ac_method/single.title
@@ -70990,6 +71844,10 @@ msgstr ""
 #: classification/options/classifier/singleDecisionTree.title
 #: classification/ui[3].label
 msgid "Single decision tree"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Single group"
 msgstr ""
 
 #: dendrogram/options/clusterMethod/single.title
@@ -71046,7 +71904,6 @@ msgstr ""
 #: jjstreamgraph/ui[1][1].label
 #: jjtreemap/ui[1][2][0][0]/labelLevel1Size.label
 #: jjtreemap/ui[1][2][0][1]/labelLevel2Size.label
-#: lollipop/ui[0][2][1].label
 msgid "Size"
 msgstr ""
 
@@ -71195,6 +72052,10 @@ msgstr ""
 msgid "Small (2-4)"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Small effect size - limited practical significance."
+msgstr ""
+
 #: effectsize/options/small_effect_threshold.title
 #: effectsize/results/results/clinicalSignificance.columns.title
 msgid "Small Effect Threshold"
@@ -71222,6 +72083,10 @@ msgstr ""
 
 #: jjstreamgraph/options/interpolate/cardinal.title
 msgid "Smooth"
+msgstr ""
+
+#: riverplot/options/curveType/cubic.title
+msgid "Smooth (cubic splines)"
 msgstr ""
 
 #: timeroc/options/smoothAUC.title
@@ -71276,6 +72141,10 @@ msgstr ""
 #: smoothtimevary/results/effectsTable.title
 #: smoothtimevary/results/smoothEffectPlots.title
 msgid "Smooth Time-Varying Effects"
+msgstr ""
+
+#: linechart/ui[1][0]/smooth.label
+msgid "Smooth Trend Lines"
 msgstr ""
 
 #: singlearm/options/hazard_smoothing.title
@@ -71430,6 +72299,7 @@ msgid "Sojourn Time Distributions"
 msgstr ""
 
 #: jjhistostats/options/centralitylinetype/solid.title
+#: lollipop/options/lineType/solid.title
 msgid "Solid"
 msgstr ""
 
@@ -71518,6 +72388,7 @@ msgstr ""
 
 #: jcomplexupset/options/sort_order.title
 #: lollipop/options/sortBy.title
+#: lollipop/ui[1][0]/sortBy.label
 #: swimmerplot/options/sortOrder.title
 msgid "Sort Order"
 msgstr ""
@@ -71537,6 +72408,10 @@ msgstr ""
 #: jjriverplot/options/sortStreams.title
 #: riverplot/options/sortStreams.title
 msgid "Sort Streams"
+msgstr ""
+
+#: riverplot/ui[3][0]/sortStreams.label
+msgid "Sort Streams by Frequency"
 msgstr ""
 
 #: subgroupforest/options/sortBy.title
@@ -71873,6 +72748,10 @@ msgstr ""
 #: imagingcorrelation/options/correlation_method/spearman.title
 #: jggheatmap/options/distance_method/spearman.title
 msgid "Spearman Correlation"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Spearman Correlation (Rank-based)"
 msgstr ""
 
 #: pathologyagreement/options/correlation_method/spearman.title
@@ -72764,6 +73643,7 @@ msgstr ""
 msgid "Standard clinical variables to include (optional)"
 msgstr ""
 
+#: R/lollipop.b.R
 #: advancedbarplot/options/error_bars/sd.title
 #: ggprism/options/error_bars/sd.title
 #: populationhealth/results/healthOutcomesTable.columns.title
@@ -73302,6 +74182,7 @@ msgstr ""
 #: jjpiestats/ui[1].label
 #: jjscatterstats/ui[1].label
 #: jjwithinstats/ui[1].label
+#: raincloud/ui[5].label
 #: summarydata2/options/pivot_layout/statistical.title
 #: survival/ui[3].label
 msgid "Statistical Analysis"
@@ -73319,6 +74200,11 @@ msgstr ""
 #: clinicaltrialdesign/results/assumptions_check.title
 #: poweranalysis/results/assumptions_table.title
 msgid "Statistical Assumptions"
+msgstr ""
+
+#: R/linechart.b.R
+#: linechart/results/assumptions.title
+msgid "Statistical Assumptions & Guidelines"
 msgstr ""
 
 #: adaptivetrialdesign/results/dmbRecommendations.columns.title
@@ -73528,6 +74414,10 @@ msgstr ""
 
 #: aivalidation/results/statisticalNotes.title
 msgid "Statistical Notes"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Statistical Notes:"
 msgstr ""
 
 #: chisqposttest/ui[1].label
@@ -73765,6 +74655,10 @@ msgstr ""
 msgid "Statistical Visualization"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "statistically significant"
+msgstr ""
+
 #: contTables/ui[1][0].label
 #: crosstablepivot/options/statistics.title
 #: jjarcdiagram/ui[5][0].label
@@ -73942,7 +74836,6 @@ msgstr ""
 #: jjriverplot/options/curveType/step.title
 #: jjstreamgraph/options/interpolate/step.title
 #: penalizedcoxregression/results/penaltyPath.columns.title
-#: riverplot/options/curveType/step.title
 #: stagemigration/results/stepwiseResults.columns.title
 msgid "Step"
 msgstr ""
@@ -74037,8 +74930,6 @@ msgstr ""
 
 #: jjriverplot/options/strata.title
 #: jjriverplot/ui[0][2].label
-#: riverplot/options/strata.title
-#: riverplot/ui[0][2].label
 msgid "Strata Variables"
 msgstr ""
 
@@ -74307,8 +75198,24 @@ msgid "Stratum"
 msgstr ""
 
 #: jjriverplot/options/plotType/stream.title
-#: riverplot/options/plotType/stream.title
 msgid "Stream"
+msgstr ""
+
+#: riverplot/options/plotType/stream.title
+msgid "Stream Chart (shows aggregate trends)"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Stream charts:"
+msgstr ""
+
+#: riverplot/results/plot.title
+msgid "Stream Plot"
+msgstr ""
+
+#: riverplot/ui.title
+#: riverplot/results.title
+msgid "Stream Plots"
 msgstr ""
 
 #: jjstreamgraph/results/StreamGraph.title
@@ -74347,6 +75254,10 @@ msgstr ""
 
 #: outbreakanalysis/options/strobe_compliance.title
 msgid "STROBE Compliance"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "strong"
 msgstr ""
 
 #: spikeslabpriors/options/heredity_constraint/strong.title
@@ -74589,6 +75500,10 @@ msgstr ""
 
 #: statsplot2/options/alluvsty.description.ui
 msgid "Style for alluvial diagrams when comparing two categorical variables in repeated measures"
+msgstr ""
+
+#: riverplot/ui[4].label
+msgid "Styling & Labels"
 msgstr ""
 
 #: epidemiosurvival/options/subcohort_indicator.title
@@ -74855,6 +75770,10 @@ msgstr ""
 
 #: clinicalvalidationinteractive/results/performanceWarnings.columns.title
 msgid "Suggested Action"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Suggestion:"
 msgstr ""
 
 #: advancedbarplot/options/stat_type/sum.title
@@ -76068,7 +76987,6 @@ msgstr ""
 
 #: package/analyses/groupedforest.menuGroup
 #: package/analyses/subgroupforest.menuGroup
-#: package/analyses/coxdiagnostics.menuGroup
 #: package/analyses/jvisr.menuGroup
 #: package/analyses/jiwillsurvive.menuGroup
 #: package/analyses/oneSurvival.menuGroup
@@ -76076,9 +76994,7 @@ msgstr ""
 #: package/analyses/timeroc.menuGroup
 #: package/analyses/alluvialSurvival.menuGroup
 #: package/analyses/simonmakuch.menuGroup
-#: package/analyses/multistatesurvival.menuGroup
 #: package/analyses/relativesurvival.menuGroup
-#: package/analyses/survivalvalidation.menuGroup
 #: package/analyses/jointmodeling.menuGroup
 #: package/analyses/timedependent.menuGroup
 #: package/analyses/surveysurvival.menuGroup
@@ -76096,6 +77012,7 @@ msgstr ""
 #: package/analyses/markovmultistate.menuGroup
 #: package/analyses/semimarkov.menuGroup
 #: package/analyses/hiddenmarkov.menuGroup
+#: package/analyses/adaptivelasso.menuGroup
 #: package/analyses/landmarkanalysis.menuGroup
 #: package/analyses/flexmultistate.menuGroup
 #: package/analyses/continuousmarkov.menuGroup
@@ -76104,7 +77021,6 @@ msgstr ""
 #: package/analyses/conditionalgee.menuGroup
 #: package/analyses/jointfrailty.menuGroup
 #: package/analyses/marginalrecurrent.menuGroup
-#: package/analyses/conditionalsurvival.menuGroup
 #: package/analyses/timeupdatedsurvival.menuGroup
 #: package/analyses/progressionsurvival.menuGroup
 #: package/analyses/epidemiosurvival.menuGroup
@@ -76112,14 +77028,14 @@ msgstr ""
 #: package/analyses/ncvregcox.menuGroup
 #: package/analyses/superpc.menuGroup
 #: package/analyses/flexparametricadvanced.menuGroup
+#: package/analyses/spatialbayesiansurvival.menuGroup
 #: aalenhazard/options.menuGroup
+#: adaptivelasso/options.menuGroup
 #: advancedtrials/options.menuGroup
 #: alluvialSurvival/options.menuGroup
 #: causespecifichazards/options.menuGroup
 #: conditionalgee/options.menuGroup
-#: conditionalsurvival/options.menuGroup
 #: continuousmarkov/options.menuGroup
-#: coxdiagnostics/options.menuGroup
 #: directbinomial/options.menuGroup
 #: epidemiosurvival/options.menuGroup
 #: flexcomprisk/options.menuGroup
@@ -76138,7 +77054,6 @@ msgstr ""
 #: marginalrecurrent/options.menuGroup
 #: markovmultistate/options.menuGroup
 #: mixedcox/options.menuGroup
-#: multistatesurvival/options.menuGroup
 #: ncvregcox/options.menuGroup
 #: oneSurvival/options.menuGroup
 #: parametricfrailty/options.menuGroup
@@ -76149,10 +77064,10 @@ msgstr ""
 #: relativesurvival/options.menuGroup
 #: semimarkov/options.menuGroup
 #: simonmakuch/options.menuGroup
+#: spatialbayesiansurvival/options.menuGroup
 #: subgroupforest/options.menuGroup
 #: superpc/options.menuGroup
 #: surveysurvival/options.menuGroup
-#: survivalvalidation/options.menuGroup
 #: timedependent/options.menuGroup
 #: timeroc/options.menuGroup
 #: timeupdatedsurvival/options.menuGroup
@@ -76170,14 +77085,21 @@ msgstr ""
 #: package/analyses/datecorrection.menuGroup
 #: package/analyses/outcomeorganizer.menuGroup
 #: package/analyses/powersurvival.menuGroup
+#: package/analyses/coxdiagnostics.menuGroup
 #: package/analyses/survivalpower.menuGroup
 #: package/analyses/comparingSurvival.menuGroup
 #: package/analyses/competingsurvival.menuGroup
+#: package/analyses/multistatesurvival.menuGroup
+#: package/analyses/survivalvalidation.menuGroup
+#: package/analyses/conditionalsurvival.menuGroup
 #: package/analyses/poweranalysis.menuGroup
 #: package/analyses/powercomprisk.menuGroup
 #: comparingSurvival/options.menuGroup
 #: competingsurvival/options.menuGroup
+#: conditionalsurvival/options.menuGroup
+#: coxdiagnostics/options.menuGroup
 #: datecorrection/options.menuGroup
+#: multistatesurvival/options.menuGroup
 #: multisurvival/options.menuGroup
 #: oddsratio/options.menuGroup
 #: outcomeorganizer/options.menuGroup
@@ -76188,8 +77110,9 @@ msgstr ""
 #: survival/options.menuGroup
 #: survivalcont/options.menuGroup
 #: survivalpower/options.menuGroup
+#: survivalvalidation/options.menuGroup
 #: timeinterval/options.menuGroup
-msgid "SurvivalT"
+msgid "SurvivalT2"
 msgstr ""
 
 #: multisurvival/options/sty/t3.title
@@ -76355,6 +77278,7 @@ msgid "t-statistic"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
+#: R/raincloud.b.R
 #: advancedbarplot/options/stat_method/ttest.title
 #: bbcplots/options/stat_method/ttest.title
 #: economistplots/options/stat_method/ttest.title
@@ -76750,8 +77674,17 @@ msgstr ""
 msgid "Temporal Analysis"
 msgstr ""
 
+#: package/analyses/riverplot.menuSubtitle
+#: riverplot/options.menuSubtitle
+msgid "Temporal Categorical Flow Visualization"
+msgstr ""
+
 #: imagingcorrelation/options/temporal_analysis.title
 msgid "Temporal Change Analysis"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Temporal flow plots require exactly one categorical variable. Use the Alluvial function for multiple variables."
 msgstr ""
 
 #: outbreakanalysis/options/temporal_analysis.title
@@ -77225,6 +78158,7 @@ msgstr ""
 
 #: haralicktexture/options/normality_testing.title
 #: raincloud/options/normality_test.title
+#: raincloud/ui[5][2]/normality_test.label
 msgid "Test for Normality"
 msgstr ""
 
@@ -77775,12 +78709,15 @@ msgstr ""
 msgid "The continuous outcome variable"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "The correlation explains "
+msgstr ""
+
 #: ggoncoplot/options/data.description.jamovi
 msgid "The data as a data frame containing mutation information."
 msgstr ""
 
 #: agepyramid/options/data.description.jamovi
-#: agepyramid2/options/data.description.jamovi
 #: alluvial/options/data.description.jamovi
 #: alluvial2/options/data.description.jamovi
 #: benford/options/data.description.jamovi
@@ -78011,7 +78948,6 @@ msgid "The time-to-event or follow-up duration for each patient. The sum of thes
 msgstr ""
 
 #: agepyramid/options/plot_title.description.jamovi
-#: agepyramid2/options/plot_title.description.jamovi
 msgid "The title displayed on the age pyramid plot."
 msgstr ""
 
@@ -78058,7 +78994,6 @@ msgid "The variables to be placed in table rows."
 msgstr ""
 
 #: agepyramid/options/bin_width.description.jamovi
-#: agepyramid2/options/bin_width.description.jamovi
 msgid "The width of the age bins in years."
 msgstr ""
 
@@ -78074,7 +79009,6 @@ msgstr ""
 #: jjriverplot/ui[2][0].label
 #: jscattermore/options/theme_style.title
 #: jsjplot/options/theme_style.title
-#: riverplot/ui[2][0].label
 msgid "Theme"
 msgstr ""
 
@@ -78153,6 +79087,18 @@ msgstr ""
 msgid "Third Measurement (Optional)"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "This analysis compared"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "This function creates comprehensive line charts for time series and trend analysis in clinical research."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "This function creates lollipop charts for categorical data visualization with clinical applications."
+msgstr ""
+
 #: package/analyses/tableone.description
 #: package/analyses/tableone2.description
 #: tableone/options.description.main
@@ -78173,6 +79119,30 @@ msgstr ""
 #: dataquality/options.description.main
 msgid "This module provides data quality assessment including duplicate detection,\n"
 "missing value analysis, and data completeness summary (similar to sumvar's dup() function)."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "This non-parametric measure is robust to outliers."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "This relationship is not statistically significant."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "This relationship is statistically significant and may have clinical relevance."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "This suggests a clinically meaningful relationship."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "This suggests a moderate association worth investigating."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "This suggests a weak association with limited clinical significance."
 msgstr ""
 
 #: screeningcalculator/results/repeatTest3Table.title
@@ -78704,6 +79674,10 @@ msgstr ""
 msgid "Time Points"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "time points"
+msgstr ""
+
 #: multistatesurvival/options/prediction_times.description.ui
 msgid "Time points (months) for predictions (comma-separated)"
 msgstr ""
@@ -78792,6 +79766,10 @@ msgstr ""
 #: markovmultistate/options/transitionTimes.description
 #: semimarkov/options/timePoints.description
 msgid "Time points for transition probability estimation"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Time points, follow-up dates, or sequential stages"
 msgstr ""
 
 #: swimmerplot/results/milestoneTable.columns.title
@@ -79567,11 +80545,20 @@ msgstr ""
 msgid "Time/Date Variable"
 msgstr ""
 
+#: R/riverplot.b.R
+#: alluvial/ui[0][2]/time.label
 #: jjriverplot/options/time.title
 #: jjriverplot/ui[0][1].label
-#: riverplot/options/time.title
-#: riverplot/ui[0][1].label
+#: riverplot/ui[0][0].label
 msgid "Time/Sequence Variable"
+msgstr ""
+
+#: alluvial/options/time.title
+msgid "Time/Sequence Variable (optional)"
+msgstr ""
+
+#: riverplot/options/time.title
+msgid "Time/Sequence Variable (required)"
 msgstr ""
 
 #: clinicalalerts/results/clinicalRecommendations.columns.title
@@ -79660,6 +80647,10 @@ msgstr ""
 
 #: markovmultistate/results/transitionProbabilities.columns.title
 msgid "To"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "to"
 msgstr ""
 
 #: alluvial/results/todo.title
@@ -80084,6 +81075,14 @@ msgstr ""
 
 #: decisioncalculator/options/tp2.title
 msgid "TP (Cut-off 2)"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Track how categorical variables change across time periods or sequential stages."
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Track individual patients/entities through time"
 msgstr ""
 
 #: enhancedtables/options/table_theme/traditional.title
@@ -80807,6 +81806,10 @@ msgstr ""
 msgid "Treatment Response Assessment"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Treatment response monitoring"
+msgstr ""
+
 #: clinicalvalidationinteractive/options/clinical_preset/treatment_response.title
 msgid "Treatment Response Prediction"
 msgstr ""
@@ -80976,6 +81979,10 @@ msgstr ""
 msgid "Trend Analysis"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Trend Analysis Assumptions"
+msgstr ""
+
 #: labcontrolcharts/options/trend_plot.title
 #: qualitycontrol/results/trendPlot.title
 msgid "Trend Analysis Plot"
@@ -80999,6 +82006,10 @@ msgstr ""
 
 #: labinterpret/options/trend_window.title
 msgid "Trend Analysis Window (days)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "trend detected"
 msgstr ""
 
 #: labinterpret/results/trendAnalysisTable.columns.title
@@ -81054,6 +82065,10 @@ msgstr ""
 
 #: pagetrendtest/results/trendOrdering.columns.title
 msgid "Trend Weight"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Trend:"
 msgstr ""
 
 #: clinicaltrialdesign/ui[0][0].label
@@ -81723,6 +82738,14 @@ msgstr ""
 msgid "Umbrella Trial"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Unable to assess linearity automatically."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Unable to test normality of residuals."
+msgstr ""
+
 #: advancedtrials/results/multiplicity_adjustment.columns.title
 msgid "Unadjusted Alpha"
 msgstr ""
@@ -82161,6 +83184,10 @@ msgstr ""
 
 #: cotest/results/dependenceExplanation.title
 msgid "Understanding Test Dependence"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Understanding the assumptions behind your analysis helps ensure valid interpretation."
 msgstr ""
 
 #: stagemigration/results/dashboardExplanation.title
@@ -82767,6 +83794,10 @@ msgstr ""
 msgid "Use compact formatting to reduce table size."
 msgstr ""
 
+#: lollipop/ui[3][0]/conditionalColor.label
+msgid "Use Conditional Coloring"
+msgstr ""
+
 #: basegraphics/options/custom_limits.title
 msgid "Use Custom Axis Limits"
 msgstr ""
@@ -82842,7 +83873,6 @@ msgid "Use Frailty Model"
 msgstr ""
 
 #: jjriverplot/options/originaltheme.title
-#: riverplot/options/originaltheme.title
 msgid "Use ggStatsPlot Theme"
 msgstr ""
 
@@ -82856,6 +83886,14 @@ msgstr ""
 
 #: bayesiandiagnostic/options/hpdi.title
 msgid "Use Highest Posterior Density Intervals"
+msgstr ""
+
+#: lollipop/options/useHighlight.title
+msgid "Use Highlight"
+msgstr ""
+
+#: lollipop/ui[0][1]/useHighlight.label
+msgid "Use Highlighting"
 msgstr ""
 
 #: continuousmarkov/options/initial_values.title
@@ -82907,6 +83945,14 @@ msgstr ""
 
 #: jforester/options/log_scale.title
 msgid "Use Logarithmic Scale"
+msgstr ""
+
+#: riverplot/options/originaltheme.title
+msgid "Use Minimal Theme"
+msgstr ""
+
+#: riverplot/ui[4][0]/originaltheme.label
+msgid "Use Minimal Theme (instead of default)"
 msgstr ""
 
 #: crosstable/options/simulation_based.description
@@ -83014,6 +84060,11 @@ msgstr ""
 
 #: betabinomialdiagnostic/options/robust_variance.description.ui
 msgid "Use robust/sandwich variance estimators"
+msgstr ""
+
+#: alluvial/options/sankeyStyle.title
+#: alluvial/ui[2][0]/sankeyStyle.label
+msgid "Use Sankey Styling"
 msgstr ""
 
 #: ihccluster/options/autoSelectK.description
@@ -83623,8 +84674,13 @@ msgstr ""
 msgid "Value Position"
 msgstr ""
 
+#: R/lollipop.b.R
 #: explainableai/results/partialdependence/pdptable.columns.title
 msgid "Value Range"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Value range"
 msgstr ""
 
 #: jcomplexupset/options/value_var.title
@@ -83645,6 +84701,10 @@ msgstr ""
 #: alluvial/options/fill/values.title
 #: alluvial2/options/fill/values.title
 msgid "Values"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Values to weight flows (patient counts, severity scores)"
 msgstr ""
 
 #: nonparametric/options/test_type/van_der_waerden.title
@@ -84225,6 +85285,10 @@ msgstr ""
 msgid "Variable Summary"
 msgstr ""
 
+#: R/riverplot.b.R
+msgid "Variable that changes over time (treatment response, disease stage)"
+msgstr ""
+
 #: checkdata/options/var.title
 #: checkdata/ui[0][0].label
 msgid "Variable to Check"
@@ -84356,7 +85420,6 @@ msgstr ""
 #: jjhistostats/options/dep.title
 #: jjhistostats/ui[0][0].label
 #: labcontrolcharts/ui[0][0].label
-#: lollipop/ui[0][0].label
 #: methodvalidation/ui[0][0].label
 #: modalitycomparison/ui[0][0].label
 #: modelbuilder/results/modelComparisonTable.columns.title
@@ -84507,6 +85570,12 @@ msgstr ""
 #: bayesianma/results/topModels.columns.title
 #: spikeslabpriors/results/modelProbabilities.columns.title
 msgid "Variables Included"
+msgstr ""
+
+#: R/linechart.b.R
+#: R/lollipop.b.R
+#: R/riverplot.b.R
+msgid "Variables not found in data:"
 msgstr ""
 
 #: conditionalinference/options/mtry.title
@@ -84814,6 +85883,14 @@ msgstr ""
 msgid "Verification Status"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Verify that grouping variables have multiple levels"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Verify that the grouping variable has meaningful categories."
+msgstr ""
+
 #: advancedbarplot/options/orientation/vertical.title
 #: alluvial/options/orient/vert.title
 #: alluvial2/options/orient/vert.title
@@ -84846,6 +85923,22 @@ msgstr ""
 
 #: netreclassification/results/reclassification.columns.title
 msgid "Very High Risk"
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Very significant (**)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Very small effect size - minimal practical significance."
+msgstr ""
+
+#: riverplot/options/curveType/quintic.title
+msgid "Very smooth (quintic)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "very strong"
 msgstr ""
 
 #: grafify/options/color_palette/vibrant.title
@@ -84923,6 +86016,7 @@ msgstr ""
 #: advancedraincloud/options/violin_alpha.title
 #: jviolin/options/violin_alpha.title
 #: raincloud/options/alpha_violin.title
+#: raincloud/ui[2][1]/alpha_violin.label
 msgid "Violin Transparency"
 msgstr ""
 
@@ -84930,9 +86024,18 @@ msgstr ""
 msgid "Violin transparency"
 msgstr ""
 
+#: R/raincloud.b.R
+msgid "Violin transparency must be between 0 and 1"
+msgstr ""
+
 #: jviolin/options/violin_width.title
 #: raincloud/options/violin_width.title
+#: raincloud/ui[2][0]/violin_width.label
 msgid "Violin Width"
+msgstr ""
+
+#: R/raincloud.b.R
+msgid "Violin width must be between 0.1 and 2"
 msgstr ""
 
 #: ggprism/options/violin_width.title
@@ -84960,6 +86063,7 @@ msgstr ""
 #: jsjplot/options/colors/viridis.title
 #: jviolin/options/color_palette/viridis.title
 #: linechart/options/colorPalette/viridis.title
+#: linechart/ui[3][1]/colorPalette/viridis.title
 #: lollipop/options/colorScheme/viridis.title
 #: parallelplot/options/colorPalette/viridis.title
 #: raincloud/options/color_palette/viridis.title
@@ -84986,6 +86090,8 @@ msgid "Visual Analysis Type"
 msgstr ""
 
 #: advancedraincloud/ui[7].label
+#: linechart/ui[3].label
+#: lollipop/ui[2].label
 msgid "Visual Appearance"
 msgstr ""
 
@@ -85093,6 +86199,7 @@ msgstr ""
 
 #: decisioncombine/options/plotType.title
 #: explainableai/options/plot_type.title
+#: riverplot/options/plotType.title
 msgid "Visualization Type"
 msgstr ""
 
@@ -85235,8 +86342,28 @@ msgstr ""
 msgid "Warning: %d self-loop(s) detected and will be ignored"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Warning: Less than 5 data points available for trend analysis. Results may be unreliable."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Warning: Many groups detected ("
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Warning: Many groups relative to sample size."
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid "Warning: Small networks (< 10 nodes) may not provide reliable centrality measures"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Warning: Small sample size (< 10 observations) may produce unreliable confidence intervals."
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Warning: Some groups have very few observations (< 3). Consider combining small groups."
 msgstr ""
 
 #: clinicalvalidationinteractive/results/performanceWarnings.columns.title
@@ -85265,6 +86392,10 @@ msgstr ""
 
 #: ihcscoring/options/segmentation_method/watershed.title
 msgid "Watershed Transform"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "weak"
 msgstr ""
 
 #: spikeslabpriors/options/heredity_constraint/weak.title
@@ -85462,15 +86593,21 @@ msgstr ""
 msgid "Weight Trimming"
 msgstr ""
 
+#: R/riverplot.b.R
+#: alluvial/ui[0][2]/weight.label
 #: jggstats/options/weight_var.title
 #: jggstats/ui[1][3].label
 msgid "Weight Variable"
 msgstr ""
 
+#: riverplot/ui[0][1]/weight.label
+msgid "Weight Variable (for flow width)"
+msgstr ""
+
+#: alluvial/options/weight.title
 #: jjriverplot/options/weight.title
 #: jjriverplot/ui[0][3].label
 #: riverplot/options/weight.title
-#: riverplot/ui[0][3].label
 msgid "Weight Variable (optional)"
 msgstr ""
 
@@ -85621,6 +86758,18 @@ msgstr ""
 msgid "Welcome message and instructions"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Welcome to Line Chart Analysis"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Welcome to Lollipop Chart Analysis"
+msgstr ""
+
+#: R/riverplot.b.R
+msgid "Welcome to River Plots (Temporal Flows)"
+msgstr ""
+
 #: simonmakuch/results/welcomeMessage.title
 msgid "Welcome to Simon-Makuch Analysis"
 msgstr ""
@@ -85652,6 +86801,10 @@ msgstr ""
 
 #: labcontrolcharts/options/westgard_rules.title
 msgid "Westgard Rules to Apply"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "When displayed, confidence intervals show the uncertainty around trend lines. Wider intervals indicate greater uncertainty."
 msgstr ""
 
 #: coefplot/options/decreasing_sort.description
@@ -85716,6 +86869,11 @@ msgstr ""
 msgid "Width"
 msgstr ""
 
+#: linechart/ui[5][0]/width.label
+#: lollipop/ui[5][0]/width.label
+msgid "Width (pixels)"
+msgstr ""
+
 #: bayesianci/results/comparisonTable.columns.title
 msgid "Width Difference"
 msgstr ""
@@ -85768,6 +86926,7 @@ msgstr ""
 msgid "Width Ratio"
 msgstr ""
 
+#: R/raincloud.b.R
 #: advancedbarplot/options/stat_method/wilcox.title
 #: economistplots/options/stat_method/wilcox.title
 #: ggprism/options/stats_method/wilcoxon.title
@@ -86088,6 +87247,7 @@ msgstr ""
 #: jiwillsurvive/options/x_label.title
 #: jscattermore/options/x_label.title
 #: raincloud/options/x_label.title
+#: raincloud/ui[4][1]/x_label.label
 msgid "X-Axis Label"
 msgstr ""
 
@@ -86098,7 +87258,9 @@ msgstr ""
 #: jjhistostats/options/xlab.title
 #: jviolin/options/xlabel.title
 #: linechart/options/xlabel.title
+#: linechart/ui[4][1]/xlabel.label
 #: lollipop/options/xlabel.title
+#: lollipop/ui[4][1]/xlabel.label
 msgid "X-axis Label"
 msgstr ""
 
@@ -86126,6 +87288,7 @@ msgstr ""
 #: bbcplots/options/x_axis_title.title
 #: economistplots/options/x_title.title
 #: ggsegmentedtotalbar/options/x_title.title
+#: riverplot/ui[4][1]/xtitle.label
 msgid "X-axis Title"
 msgstr ""
 
@@ -86134,7 +87297,6 @@ msgstr ""
 #: grafify/options/x_var.title
 #: grafify/ui[2][0].label
 #: linechart/options/xvar.title
-#: linechart/ui[0][0].label
 msgid "X-axis Variable"
 msgstr ""
 
@@ -86151,6 +87313,14 @@ msgstr ""
 
 #: advancedraincloud/ui[0][1].label
 msgid "X-Axis Variable (Groups)"
+msgstr ""
+
+#: linechart/ui[0][0].label
+msgid "X-axis Variable (Time/Sequence)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "X-axis variable contains non-numeric values that cannot be converted."
 msgstr ""
 
 #: assayoptimization/options/control_charts/xbar_r.title
@@ -86206,6 +87376,22 @@ msgstr ""
 msgid "Y Coordinates"
 msgstr ""
 
+#: R/linechart.b.R
+msgid "Y Mean"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Y Median"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Y Range"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Y Standard Deviation"
+msgstr ""
+
 #: basegraphics/options/y_var.title
 #: basegraphics/ui[1][1].label
 #: jscattermore/options/y_var.title
@@ -86244,6 +87430,7 @@ msgstr ""
 #: jiwillsurvive/options/y_label.title
 #: jscattermore/options/y_label.title
 #: raincloud/options/y_label.title
+#: raincloud/ui[4][1]/y_label.label
 msgid "Y-Axis Label"
 msgstr ""
 
@@ -86252,7 +87439,9 @@ msgstr ""
 #: jggstats/options/y_label.title
 #: jviolin/options/ylabel.title
 #: linechart/options/ylabel.title
+#: linechart/ui[4][1]/ylabel.label
 #: lollipop/options/ylabel.title
+#: lollipop/ui[4][1]/ylabel.label
 msgid "Y-axis Label"
 msgstr ""
 
@@ -86281,6 +87470,7 @@ msgstr ""
 #: bbcplots/options/y_axis_title.title
 #: economistplots/options/y_title.title
 #: ggsegmentedtotalbar/options/y_title.title
+#: riverplot/ui[4][1]/ytitle.label
 msgid "Y-axis Title"
 msgstr ""
 
@@ -86297,12 +87487,23 @@ msgstr ""
 #: grafify/options/y_var.title
 #: grafify/ui[2][1].label
 #: linechart/options/yvar.title
-#: linechart/ui[0][1].label
 msgid "Y-axis Variable"
 msgstr ""
 
 #: advancedraincloud/ui[0][0].label
 msgid "Y-Axis Variable (Continuous)"
+msgstr ""
+
+#: linechart/ui[0][1].label
+msgid "Y-axis Variable (Outcome)"
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Y-axis variable has no variation (all values are identical). "
+msgstr ""
+
+#: R/linechart.b.R
+msgid "Y-axis variable must be numeric (continuous variable)."
 msgstr ""
 
 #: jjbetweenstats/options/ytitle.title

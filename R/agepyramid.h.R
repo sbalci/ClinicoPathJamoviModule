@@ -10,7 +10,12 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             gender = NULL,
             female = NULL,
             bin_width = 5,
-            plot_title = "Age Pyramid", ...) {
+            plot_title = "Age Pyramid",
+            color1 = "#1F77B4",
+            color2 = "#FF7F0E",
+            color_palette = "standard",
+            age_groups = "custom",
+            plot_engine = "ggcharts", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -45,25 +50,73 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plot_title",
                 plot_title,
                 default="Age Pyramid")
+            private$..color1 <- jmvcore::OptionString$new(
+                "color1",
+                color1,
+                default="#1F77B4")
+            private$..color2 <- jmvcore::OptionString$new(
+                "color2",
+                color2,
+                default="#FF7F0E")
+            private$..color_palette <- jmvcore::OptionList$new(
+                "color_palette",
+                color_palette,
+                options=list(
+                    "standard",
+                    "accessible",
+                    "custom"),
+                default="standard")
+            private$..age_groups <- jmvcore::OptionList$new(
+                "age_groups",
+                age_groups,
+                options=list(
+                    "custom",
+                    "pediatric",
+                    "reproductive",
+                    "geriatric",
+                    "lifecourse"),
+                default="custom")
+            private$..plot_engine <- jmvcore::OptionList$new(
+                "plot_engine",
+                plot_engine,
+                options=list(
+                    "ggplot2",
+                    "ggcharts"),
+                default="ggcharts")
 
             self$.addOption(private$..age)
             self$.addOption(private$..gender)
             self$.addOption(private$..female)
             self$.addOption(private$..bin_width)
             self$.addOption(private$..plot_title)
+            self$.addOption(private$..color1)
+            self$.addOption(private$..color2)
+            self$.addOption(private$..color_palette)
+            self$.addOption(private$..age_groups)
+            self$.addOption(private$..plot_engine)
         }),
     active = list(
         age = function() private$..age$value,
         gender = function() private$..gender$value,
         female = function() private$..female$value,
         bin_width = function() private$..bin_width$value,
-        plot_title = function() private$..plot_title$value),
+        plot_title = function() private$..plot_title$value,
+        color1 = function() private$..color1$value,
+        color2 = function() private$..color2$value,
+        color_palette = function() private$..color_palette$value,
+        age_groups = function() private$..age_groups$value,
+        plot_engine = function() private$..plot_engine$value),
     private = list(
         ..age = NA,
         ..gender = NA,
         ..female = NA,
         ..bin_width = NA,
-        ..plot_title = NA)
+        ..plot_title = NA,
+        ..color1 = NA,
+        ..color2 = NA,
+        ..color_palette = NA,
+        ..age_groups = NA,
+        ..plot_engine = NA)
 )
 
 agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -89,20 +142,37 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="Pop", 
-                        `title`="Population", 
+                        `title`="Age Group", 
                         `type`="text"),
                     list(
                         `name`="Female", 
-                        `title`="Female", 
+                        `title`="Female (n)", 
                         `type`="number"),
                     list(
+                        `name`="Female_Pct", 
+                        `title`="Female (%)", 
+                        `type`="number", 
+                        `format`="zto;dp:1"),
+                    list(
                         `name`="Male", 
-                        `title`="Male", 
-                        `type`="number")),
+                        `title`="Male (n)", 
+                        `type`="number"),
+                    list(
+                        `name`="Male_Pct", 
+                        `title`="Male (%)", 
+                        `type`="number", 
+                        `format`="zto;dp:1")),
                 clearWith=list(
                     "age",
                     "gender",
-                    "female")))
+                    "female",
+                    "bin_width",
+                    "plot_title",
+                    "color1",
+                    "color2",
+                    "color_palette",
+                    "age_groups",
+                    "plot_engine")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -114,7 +184,14 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "age",
                     "gender",
-                    "female")))}))
+                    "female",
+                    "bin_width",
+                    "plot_title",
+                    "color1",
+                    "color2",
+                    "color_palette",
+                    "age_groups",
+                    "plot_engine")))}))
 
 agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agepyramidBase",
@@ -150,6 +227,15 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bin_width The width of the age bins in years. Adjust this to change
 #'   the granularity of the age groups.
 #' @param plot_title The title displayed on the age pyramid plot.
+#' @param color1 First color for the pyramid chart bars.
+#' @param color2 Second color for the pyramid chart bars.
+#' @param color_palette Choose color palette type. Standard uses traditional
+#'   gender colors, Accessible is colorblind-friendly, Custom allows
+#'   user-defined colors.
+#' @param age_groups Preset age groupings for common clinical contexts. Custom
+#'   uses bin_width setting.
+#' @param plot_engine Choose the plotting engine. ggcharts provides better
+#'   pyramid styling, ggplot2 offers more customization.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
@@ -169,7 +255,12 @@ agepyramid <- function(
     gender,
     female,
     bin_width = 5,
-    plot_title = "Age Pyramid") {
+    plot_title = "Age Pyramid",
+    color1 = "#1F77B4",
+    color2 = "#FF7F0E",
+    color_palette = "standard",
+    age_groups = "custom",
+    plot_engine = "ggcharts") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agepyramid requires jmvcore to be installed (restart may be required)")
@@ -189,7 +280,12 @@ agepyramid <- function(
         gender = gender,
         female = female,
         bin_width = bin_width,
-        plot_title = plot_title)
+        plot_title = plot_title,
+        color1 = color1,
+        color2 = color2,
+        color_palette = color_palette,
+        age_groups = age_groups,
+        plot_engine = plot_engine)
 
     analysis <- agepyramidClass$new(
         options = options,
