@@ -1,69 +1,75 @@
 ---
 name:  riverplot
 title: River Plots
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: 'Categorical Over Time'
-menuSubtitle: 'Flow and Transition Visualization'
+menuSubtitle: 'Temporal Categorical Flow Visualization'
 version: '0.0.31'
 jas: '1.2'
 
 description:
     main: |
-        'Function for generating river plots (alluvial diagrams) to visualize
-        flows and transitions over time or between categories. Supports alluvial 
-        diagrams, Sankey diagrams, and stream graphs with customizable aesthetics.'
+        Creates river plots to visualize how categorical variables change over time 
+        or sequential stages. Shows temporal flows of categories across time periods, 
+        ideal for tracking patient journeys, treatment progressions, disease stages, 
+        or any categorical changes over time. Requires a time/sequence variable and 
+        supports individual entity tracking.
     R:
         dontrun: true
         usage: |
-            # Load example data
-            data(riverplot_example_data)
-            data(riverplot_wide_example_data)
+            # Load temporal clinical data
+            data(patient_followup)
             
-            # Basic alluvial plot (longitudinal data)
+            # Basic temporal flow - Track treatment response changes over time
             riverplot(
-              data = riverplot_example_data,
-              time = "timepoint",
+              data = patient_followup,
+              time = "follow_up_date",
               strata = "treatment_response",
-              plotType = "alluvial"
+              plotType = "flow",
+              labelNodes = TRUE
             )
             
-            # Weighted river plot with patient tracking
+            # Individual patient tracking over time with ID
             riverplot(
-              data = riverplot_example_data,
+              data = patient_followup,
               id = "patient_id",
-              time = "timepoint",
-              strata = "treatment_response", 
-              weight = "treatment_cost",
-              plotType = "alluvial",
-              labelNodes = TRUE,
-              fillType = "first"
-            )
-            
-            # Multi-stage flow (wide format data)
-            riverplot(
-              data = riverplot_wide_example_data,
-              strata = c("screening", "enrollment", "treatment", "outcome"),
-              plotType = "alluvial",
+              time = "follow_up_date",
+              strata = "disease_stage",
+              plotType = "flow",
               fillType = "last",
+              showCounts = TRUE,
+              curveType = "cubic"
+            )
+            
+            # Weighted temporal flow - Account for severity scores
+            riverplot(
+              data = patient_followup,
+              time = "visit_number",
+              strata = "pain_level",
+              weight = "patient_count",
+              plotType = "flow",
+              curveType = "sigmoid"
+            )
+            
+            # Stream chart - Aggregate trends over time (no individual tracking)
+            riverplot(
+              data = patient_followup,
+              time = "month",
+              strata = "outcome_category",
+              plotType = "stream",
+              showLegend = TRUE
+            )
+            
+            # Complex temporal tracking - Multi-level response changes
+            riverplot(
+              data = longitudinal_study,
+              id = "subject_id",
+              time = "assessment_period",
+              strata = "functional_status",
+              weight = "quality_of_life_score",
+              plotType = "flow",
+              labelNodes = TRUE,
               showCounts = TRUE
-            )
-            
-            # Sankey diagram
-            riverplot(
-              data = riverplot_wide_example_data,
-              strata = c("screening", "enrollment", "treatment"),
-              weight = "total_cost",
-              plotType = "sankey",
-              curveType = "cardinal"
-            )
-            
-            # Stream plot
-            riverplot(
-              data = riverplot_example_data,
-              time = "timepoint",
-              strata = "treatment_response",
-              weight = "treatment_cost",
-              plotType = "stream"
             )
 
 options:
@@ -77,28 +83,28 @@ options:
       title: ID Variable (optional)
       type: Variable
       suggested: [ nominal, ordinal ]
-      default: NULL
+      permitted: [ factor ]
       description:
           R: >
-            Optional identifier for individual entities in the data.
+            Optional identifier for tracking individual entities (patients, cases) through transitions.
 
     - name: time
-      title: Time/Sequence Variable
+      title: Time/Sequence Variable (required)
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            Variable representing time points or sequential stages.
+            Required variable representing time points or sequential stages (e.g., visit dates, follow-up periods).
 
     - name: strata
-      title: Strata Variables
-      type: Variables
+      title: Categorical Variable
+      type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            Variables containing the categories that change over time.
+            The categorical variable that changes over time (e.g., treatment response, disease stage).
 
     - name: weight
       title: Weight Variable (optional)
@@ -111,19 +117,18 @@ options:
             Optional numerical variable to determine stream width.
 
     - name: plotType
-      title: Plot Type
+      title: Visualization Type
       type: List
       options:
-        - title: Alluvial
-          name: alluvial
-        - title: Sankey
-          name: sankey
-        - title: Stream
+        - title: Flow Diagram (tracks individual changes)
+          name: flow
+        - title: Stream Chart (shows aggregate trends)
           name: stream
-      default: alluvial
+      default: flow
       description:
           R: >
-            Type of river plot to generate.
+            Flow diagrams track individual entities through time periods. 
+            Stream charts show aggregate category trends over time.
 
     - name: fillType
       title: Fill Pattern
@@ -133,8 +138,6 @@ options:
           name: first
         - title: By Last Variable
           name: last
-        - title: By Frequency
-          name: frequency
       default: first
       description:
           R: >
@@ -157,21 +160,21 @@ options:
             Add labels to nodes.
 
     - name: curveType
-      title: Curve Type
+      title: Flow Curve Style
       type: List
       options:
-        - title: Linear
+        - title: Smooth (cubic splines)
+          name: cubic
+        - title: Very smooth (quintic)
+          name: quintic
+        - title: Linear connections
           name: linear
-        - title: Cardinal
-          name: cardinal
-        - title: Basis
-          name: basis
-        - title: Step
-          name: step
-      default: cardinal
+        - title: S-shaped (sigmoid)
+          name: sigmoid
+      default: cubic
       description:
           R: >
-            Type of curve to use for stream paths.
+            Style of curves connecting time periods. Smooth curves work best for temporal flows.
 
     - name: showCounts
       title: Show Counts
@@ -214,11 +217,11 @@ options:
             Label for the y-axis.
 
     - name: originaltheme
-      title: Use ggStatsPlot Theme
+      title: Use Minimal Theme
       type: Bool
       default: false
       description:
           R: >
-            Use the ggStatsPlot theme instead of the default theme.
+            Use a minimal theme instead of the default ggplot2 theme.
 
 ...

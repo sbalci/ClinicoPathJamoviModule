@@ -5,6 +5,9 @@
 #' @import ggplot2
 #' @importFrom magrittr %>%
 #' @import easyalluvial
+#' @importFrom ggalluvial geom_alluvium geom_stratum stat_alluvium stat_stratum geom_flow
+#' @importFrom dplyr group_by_at summarize n count
+#' @importFrom rlang sym
 #'
 #' @description 
 #' This tool creates Alluvial Diagrams (Alluvial Plots) to visualize the flow of 
@@ -75,9 +78,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- "
                 <div style='font-family: Arial, sans-serif; color: #2c3e50;'>
                   <h2>Welcome to ClinicoPath</h2>
-                  <p>This tool will help you form Alluvial Diagrams (Alluvial Plots).</p>
-                  <p><strong>Instructions:</strong> Please select at least <em>2 variables</em> to create an alluvial diagram.</p>
-                  <p>Alluvial diagrams show the flow of categorical data across multiple dimensions.</p>
+                  <p>This tool creates Alluvial and Sankey Diagrams for visualizing categorical data flows.</p>
+                  <p><strong>Instructions:</strong> Please select at least <em>2 variables</em> to create diagrams.</p>
+                  <p><strong>Engine Options:</strong></p>
+                  <ul>
+                    <li><em>Easy Alluvial</em>: Automatic binning and flow detection</li>
+                    <li><em>GG Alluvial</em>: Manual control with Sankey styling options</li>
+                  </ul>
+                  <p>Use Sankey styling for category-to-category flows, standard for time-based flows.</p>
                   <hr>
                 </div>
                 "
@@ -139,18 +147,23 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 bin <- c("LL", "ML", "M", "MH", "HH")
             }
 
-            # Generate core alluvial plot ----
-            # Using easyalluvial package for robust alluvial diagram generation
-            # Reference: https://erblast.github.io/easyalluvial/
+            # Generate plot based on selected engine ----
+            engine <- self$options$engine
             maxvars <- self$options$maxvars
-
-            plot <- easyalluvial::alluvial_wide(
-                data = mydata,
-                max_variables = maxvars,
-                fill_by = fill,
-                verbose = TRUE,
-                bin_labels = bin
-            )
+            
+            if (engine == "easyalluvial") {
+                # Using easyalluvial package for robust alluvial diagram generation
+                plot <- easyalluvial::alluvial_wide(
+                    data = mydata,
+                    max_variables = maxvars,
+                    fill_by = fill,
+                    verbose = TRUE,
+                    bin_labels = bin
+                )
+            } else if (engine == "ggalluvial") {
+                # Using ggalluvial package for manual control and Sankey styling
+                plot <- private$.createGgalluvialPlot(mydata, varsName)
+            }
 
             # Add marginal histograms if requested ----
             # Marginal plots provide additional context by showing distributions
@@ -187,6 +200,111 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Render the final plot
             print(plot)
             TRUE
+        },
+        
+        # New method for ggalluvial plots with Sankey support
+        .createGgalluvialPlot = function(data, vars) {
+            # Check for required packages
+            if (!requireNamespace("ggalluvial", quietly = TRUE)) {
+                stop("Package 'ggalluvial' is required for manual control engine. Please install it.")
+            }
+            
+            # Extract additional options for ggalluvial
+            time_var <- self$options$time
+            id_var <- self$options$id
+            weight_var <- self$options$weight
+            sankey_style <- self$options$sankeyStyle
+            curve_type <- self$options$curveType
+            label_nodes <- self$options$labelNodes
+            show_counts <- self$options$showCounts
+            fill_option <- self$options$fill
+            
+            # Apply Sankey styling overrides if requested
+            if (sankey_style) {
+                curve_type <- "sigmoid"  # Force sigmoid curves for Sankey style
+            }
+            
+            # Validate and map curve types
+            valid_curves <- c("linear", "cubic", "quintic", "sine", "arctangent", "sigmoid")
+            if (!curve_type %in% valid_curves) {
+                curve_type <- "cubic"  # Default fallback
+            }
+            
+            # Convert variables to factors if needed
+            for (var in vars) {
+                data[[var]] <- as.factor(data[[var]])
+            }
+            
+            if (!is.null(time_var)) {
+                data[[time_var]] <- as.factor(data[[time_var]])
+            }
+            
+            # Handle missing values
+            data <- jmvcore::naOmit(data)
+            
+            if (nrow(data) == 0) {
+                stop("No complete cases found after removing missing values.")
+            }
+            
+            # Create multi-variable plot (wide format alluvial/sankey)
+            if (length(vars) < 2) {
+                stop("At least 2 variables are required for ggalluvial plots.")
+            }
+            
+            # Create axis aesthetics dynamically
+            axis_aes <- list()
+            for (i in 1:min(length(vars), 4)) {
+                axis_name <- paste0("axis", i)
+                axis_aes[[axis_name]] <- rlang::sym(vars[i])
+            }
+            
+            # Add weight if provided
+            if (!is.null(weight_var)) {
+                axis_aes$y <- rlang::sym(weight_var)
+            }
+            
+            # Create base plot
+            plot <- ggplot(data, do.call(aes, axis_aes))
+            
+            # Determine fill variable based on option
+            fill_var <- switch(fill_option,
+                              "first_variable" = vars[1],
+                              "last_variable" = vars[length(vars)],
+                              vars[1])  # default to first
+            
+            # Add layers with optional Sankey styling
+            if (sankey_style) {
+                # Sankey styling: narrow stratum, different widths
+                plot <- plot +
+                    ggalluvial::geom_alluvium(aes(fill = !!rlang::sym(fill_var)),
+                                              alpha = 0.8,
+                                              curve_type = curve_type,
+                                              width = 1/2) +
+                    ggalluvial::geom_stratum(width = 1/8, alpha = 0.8)
+            } else {
+                # Standard alluvial styling
+                plot <- plot +
+                    ggalluvial::geom_alluvium(aes(fill = !!rlang::sym(fill_var)),
+                                              alpha = 0.8,
+                                              curve_type = curve_type) +
+                    ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+            }
+            
+            # Add labels if requested
+            if (label_nodes) {
+                plot <- plot + ggplot2::geom_text(stat = ggalluvial::StatStratum,
+                                                  aes(label = after_stat(stratum)),
+                                                  size = 3)
+            }
+            
+            # Add counts if requested
+            if (show_counts) {
+                plot <- plot + ggplot2::geom_text(stat = ggalluvial::StatStratum,
+                                                  aes(label = after_stat(count)),
+                                                  size = 3, vjust = -0.5)
+            }
+            
+            return(plot)
         }
 
         ,

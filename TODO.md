@@ -32,9 +32,33 @@ echo "/document-function FUNC_NAME" | claude
 ## JJStatsPlotT
 
 agepyramid2
+
+- agepyramid - Age Pyramid
+echo "/check-function agepyramid" | claude
+echo "/checkpoint agepyramid" | claude
+echo "/prepare-translation agepyramid" | claude
+echo "/review-function agepyramid" | claude
+echo "/fix-function agepyramid" | claude
+echo "/document-function agepyramid" | claude
+
+
+
 jggridges
+jjridgestats
+
 ggsegmentedtotalbar
+
+
 riverplot
+
+
+- alluvial - Alluvial Diagrams
+echo "/check-function alluvial" | claude
+echo "/checkpoint alluvial" | claude
+echo "/prepare-translation alluvial" | claude
+echo "/review-function alluvial" | claude
+echo "/fix-function alluvial" | claude
+echo "/document-function alluvial" | claude
 
 
 
@@ -252,13 +276,7 @@ echo "/review-function vartree" | claude
 echo "/fix-function vartree" | claude
 echo "/document-function vartree" | claude
 
-- agepyramid - Age Pyramid
-echo "/check-function agepyramid" | claude
-echo "/checkpoint agepyramid" | claude
-echo "/prepare-translation agepyramid" | claude
-echo "/review-function agepyramid" | claude
-echo "/fix-function agepyramid" | claude
-echo "/document-function agepyramid" | claude
+
 
 - chisqposttest - Chi-Square Post-Hoc Tests
 echo "/check-function chisqposttest" | claude
@@ -268,13 +286,6 @@ echo "/review-function chisqposttest" | claude
 echo "/fix-function chisqposttest" | claude
 echo "/document-function chisqposttest" | claude
 
-- alluvial - Alluvial Diagrams
-echo "/check-function alluvial" | claude
-echo "/checkpoint alluvial" | claude
-echo "/prepare-translation alluvial" | claude
-echo "/review-function alluvial" | claude
-echo "/fix-function alluvial" | claude
-echo "/document-function alluvial" | claude
 
 - benford - Benford Analysis
 echo "/check-function benford" | claude

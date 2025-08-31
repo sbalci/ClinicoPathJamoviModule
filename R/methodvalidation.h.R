@@ -786,7 +786,7 @@ methodvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "methodvalidation",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = methodvalidationResults$new(options=options),
                 data = data,

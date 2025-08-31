@@ -1,7 +1,7 @@
 ---
 name: conditionalsurvival
 title: Conditional Survival Estimation
-menuGroup: SurvivalT
+menuGroup: SurvivalT2
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Conditional Survival, Landmark Analysis, Advanced Methods'
 version: '0.0.1'

@@ -1,7 +1,7 @@
 ---
 name: consort
 title: CONSORT Flowchart
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyT2
 menuSubgroup: ClinicoPath Reports
 version: '0.0.3'
 jas: '1.2'

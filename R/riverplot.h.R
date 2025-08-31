@@ -10,11 +10,11 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             time = NULL,
             strata = NULL,
             weight = NULL,
-            plotType = "alluvial",
+            plotType = "flow",
             fillType = "first",
             sortStreams = TRUE,
             labelNodes = TRUE,
-            curveType = "cardinal",
+            curveType = "cubic",
             showCounts = FALSE,
             showLegend = TRUE,
             mytitle = "",
@@ -34,7 +34,8 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "nominal",
                     "ordinal"),
-                default=NULL)
+                permitted=list(
+                    "factor"))
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
@@ -43,7 +44,7 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..strata <- jmvcore::OptionVariables$new(
+            private$..strata <- jmvcore::OptionVariable$new(
                 "strata",
                 strata,
                 suggested=list(
@@ -63,17 +64,15 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plotType",
                 plotType,
                 options=list(
-                    "alluvial",
-                    "sankey",
+                    "flow",
                     "stream"),
-                default="alluvial")
+                default="flow")
             private$..fillType <- jmvcore::OptionList$new(
                 "fillType",
                 fillType,
                 options=list(
                     "first",
-                    "last",
-                    "frequency"),
+                    "last"),
                 default="first")
             private$..sortStreams <- jmvcore::OptionBool$new(
                 "sortStreams",
@@ -87,11 +86,11 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "curveType",
                 curveType,
                 options=list(
+                    "cubic",
+                    "quintic",
                     "linear",
-                    "cardinal",
-                    "basis",
-                    "step"),
-                default="cardinal")
+                    "sigmoid"),
+                default="cubic")
             private$..showCounts <- jmvcore::OptionBool$new(
                 "showCounts",
                 showCounts,
@@ -179,11 +178,9 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="River Plots",
+                title="Stream Plots",
                 refs=list(
                     "ggplot2",
-                    "ggalluvial",
-                    "easyalluvial",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "id",
@@ -205,7 +202,7 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="River Plot",
+                title="Stream Plot",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -234,80 +231,93 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' River Plots
 #'
-#' 'Function for generating river plots (alluvial diagrams) to visualize
-#' flows and transitions over time or between categories. Supports alluvial 
-#' diagrams, Sankey diagrams, and stream graphs with customizable aesthetics.'
+#' Creates river plots to visualize how categorical variables change over time 
+#' or sequential stages. Shows temporal flows of categories across time 
+#' periods, 
+#' ideal for tracking patient journeys, treatment progressions, disease 
+#' stages, 
+#' or any categorical changes over time. Requires a time/sequence variable and 
+#' supports individual entity tracking.
 #' 
 #'
 #' @examples
 #' \donttest{
-#' # Load example data
-#' data(riverplot_example_data)
-#' data(riverplot_wide_example_data)
+#' # Load temporal clinical data
+#' data(patient_followup)
 #'
-#' # Basic alluvial plot (longitudinal data)
+#' # Basic temporal flow - Track treatment response changes over time
 #' riverplot(
-#'   data = riverplot_example_data,
-#'   time = "timepoint",
+#'   data = patient_followup,
+#'   time = "follow_up_date",
 #'   strata = "treatment_response",
-#'   plotType = "alluvial"
+#'   plotType = "flow",
+#'   labelNodes = TRUE
 #' )
 #'
-#' # Weighted river plot with patient tracking
+#' # Individual patient tracking over time with ID
 #' riverplot(
-#'   data = riverplot_example_data,
+#'   data = patient_followup,
 #'   id = "patient_id",
-#'   time = "timepoint",
-#'   strata = "treatment_response",
-#'   weight = "treatment_cost",
-#'   plotType = "alluvial",
-#'   labelNodes = TRUE,
-#'   fillType = "first"
-#' )
-#'
-#' # Multi-stage flow (wide format data)
-#' riverplot(
-#'   data = riverplot_wide_example_data,
-#'   strata = c("screening", "enrollment", "treatment", "outcome"),
-#'   plotType = "alluvial",
+#'   time = "follow_up_date",
+#'   strata = "disease_stage",
+#'   plotType = "flow",
 #'   fillType = "last",
+#'   showCounts = TRUE,
+#'   curveType = "cubic"
+#' )
+#'
+#' # Weighted temporal flow - Account for severity scores
+#' riverplot(
+#'   data = patient_followup,
+#'   time = "visit_number",
+#'   strata = "pain_level",
+#'   weight = "patient_count",
+#'   plotType = "flow",
+#'   curveType = "sigmoid"
+#' )
+#'
+#' # Stream chart - Aggregate trends over time (no individual tracking)
+#' riverplot(
+#'   data = patient_followup,
+#'   time = "month",
+#'   strata = "outcome_category",
+#'   plotType = "stream",
+#'   showLegend = TRUE
+#' )
+#'
+#' # Complex temporal tracking - Multi-level response changes
+#' riverplot(
+#'   data = longitudinal_study,
+#'   id = "subject_id",
+#'   time = "assessment_period",
+#'   strata = "functional_status",
+#'   weight = "quality_of_life_score",
+#'   plotType = "flow",
+#'   labelNodes = TRUE,
 #'   showCounts = TRUE
-#' )
-#'
-#' # Sankey diagram
-#' riverplot(
-#'   data = riverplot_wide_example_data,
-#'   strata = c("screening", "enrollment", "treatment"),
-#'   weight = "total_cost",
-#'   plotType = "sankey",
-#'   curveType = "cardinal"
-#' )
-#'
-#' # Stream plot
-#' riverplot(
-#'   data = riverplot_example_data,
-#'   time = "timepoint",
-#'   strata = "treatment_response",
-#'   weight = "treatment_cost",
-#'   plotType = "stream"
 #' )
 #'}
 #' @param data The data as a data frame.
-#' @param id Optional identifier for individual entities in the data.
-#' @param time Variable representing time points or sequential stages.
-#' @param strata Variables containing the categories that change over time.
+#' @param id Optional identifier for tracking individual entities (patients,
+#'   cases) through transitions.
+#' @param time Required variable representing time points or sequential stages
+#'   (e.g., visit dates, follow-up periods).
+#' @param strata The categorical variable that changes over time (e.g.,
+#'   treatment response, disease stage).
 #' @param weight Optional numerical variable to determine stream width.
-#' @param plotType Type of river plot to generate.
+#' @param plotType Flow diagrams track individual entities through time
+#'   periods.  Stream charts show aggregate category trends over time.
 #' @param fillType Determines how colors are assigned to flows.
 #' @param sortStreams Sort alluvial streams by frequency.
 #' @param labelNodes Add labels to nodes.
-#' @param curveType Type of curve to use for stream paths.
+#' @param curveType Style of curves connecting time periods. Smooth curves
+#'   work best for temporal flows.
 #' @param showCounts Display counts on the diagram.
 #' @param showLegend Display color legend.
 #' @param mytitle Title for the plot.
 #' @param xtitle Label for the x-axis.
 #' @param ytitle Label for the y-axis.
-#' @param originaltheme Use the ggStatsPlot theme instead of the default
+#' @param originaltheme Use a minimal theme instead of the default ggplot2
 #'   theme.
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -318,15 +328,15 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 riverplot <- function(
     data,
-    id = NULL,
+    id,
     time,
     strata,
     weight = NULL,
-    plotType = "alluvial",
+    plotType = "flow",
     fillType = "first",
     sortStreams = TRUE,
     labelNodes = TRUE,
-    curveType = "cardinal",
+    curveType = "cubic",
     showCounts = FALSE,
     showLegend = TRUE,
     mytitle = "",
@@ -349,6 +359,7 @@ riverplot <- function(
             `if`( ! missing(strata), strata, NULL),
             `if`( ! missing(weight), weight, NULL))
 
+    for (v in id) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in time) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in strata) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 

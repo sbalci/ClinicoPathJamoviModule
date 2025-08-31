@@ -1,7 +1,7 @@
 ---
 name: modelbuilder
 title: Prediction Model Builder
-menuGroup: meddecideT
+menuGroup: meddecideT2
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Build prediction models for Decision Curve Analysis
 version: '0.0.31'

@@ -1,7 +1,7 @@
 ---
 name: adaptivelasso
 title: Adaptive LASSO for Cox Models
-menuGroup: jsurvivalD
+menuGroup: SurvivalD
 menuSubgroup: Machine Learning
 menuSubtitle: Advanced penalized regression with adaptive variable selection
 version: '0.0.31'

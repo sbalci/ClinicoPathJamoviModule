@@ -1,7 +1,7 @@
 ---
 name: imagingcorrelation
 title: Imaging Findings Correlation
-menuGroup: ClinicoPathT
+menuGroup: ClinicoPathT2
 version: '1.0.0'
 jas: '1.2'
 

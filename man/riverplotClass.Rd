@@ -2,11 +2,13 @@
 % Please edit documentation in R/riverplot.b.R
 \name{riverplotClass}
 \alias{riverplotClass}
-\title{River Plots}
+\title{River Plots (Temporal Flows)}
 \description{
-River Plots
-
-River Plots
+Creates river plots to visualize how categorical variables change over time
+or sequential stages. Shows temporal flows of categories across time periods,
+ideal for tracking patient journeys, treatment progressions, disease stages,
+or any categorical changes over time. Supports both individual tracking and
+aggregate trend visualization.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::riverplotBase} -> \code{riverplotClass}

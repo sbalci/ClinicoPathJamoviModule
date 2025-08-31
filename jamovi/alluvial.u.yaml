@@ -1,4 +1,4 @@
-title: Alluvial Diagrams
+title: Alluvial & Sankey Diagrams
 name: alluvial
 jus: '3.0'
 stage: 0
@@ -21,6 +21,24 @@ children:
             name: condensationvar
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Optional Variables
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+            label: "Time/Sequence Variable"
+          - type: VariablesListBox
+            name: id
+            maxItemCount: 1
+            isTarget: true
+            label: "ID Variable"
+          - type: VariablesListBox
+            name: weight
+            maxItemCount: 1
+            isTarget: true
+            label: "Weight Variable"
   - type: CollapseBox
     label: Options
     stretchFactor: 1
@@ -81,4 +99,26 @@ children:
                         format: string
                         width: large
                         enable: (usetitle)
+  - type: CollapseBox
+    label: Sankey & Advanced Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: engine
+            label: "Plot Engine"
+          - type: CheckBox
+            name: sankeyStyle
+            label: "Use Sankey Styling"
+          - type: ComboBox
+            name: curveType
+            label: "Curve Type"
+          - type: CheckBox
+            name: labelNodes
+            label: "Show Node Labels"
+          - type: CheckBox
+            name: showCounts
+            label: "Show Count Values"
 

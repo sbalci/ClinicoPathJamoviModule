@@ -1,7 +1,7 @@
 ---
 name: contTablesPaired
 title: Paired Samples Contingency Tables
-menuGroup: ExplorationT
+menuGroup: ExplorationT2
 menuSubgroup: Frequencies Contingency Tables
 menuTitle: Paired Samples
 menuSubtitle: McNemar test

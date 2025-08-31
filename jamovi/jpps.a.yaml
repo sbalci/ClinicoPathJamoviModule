@@ -1,9 +1,9 @@
 ---
 name: jpps
 title: Predictive Power Score Analysis
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: Correlation & Association
-version: '1.0.0'
+version: '0.0.31'
 jas: '1.2'
 description:
     main: |

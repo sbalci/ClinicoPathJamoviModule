@@ -1,6 +1,6 @@
 name: clinicalnomograms
 title: Clinical Nomograms & Risk Calculators
-menuGroup: ClinicoPathT
+menuGroup: ClinicoPathT2
 menuSubgroup: Clinical Translation
 menuSubtitle: 'Prognostic Tools for Clinical Practice'
 version: '1.0.0'
