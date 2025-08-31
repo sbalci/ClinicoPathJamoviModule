@@ -1,0 +1,505 @@
+---
+name: jjridges
+title: Advanced Ridge Plot
+menuGroup: JJStatsPlotT
+menuSubgroup: Distribution
+menuSubtitle: 'Enhanced Ridgeline Visualization'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        'Create advanced ridgeline plots combining features from ggridges and ggstatsplot.
+        Visualize distributions across groups with multiple style options, annotations,
+        statistical overlays, and publication-ready formatting. Supports both basic and
+        complex ridge plots with inside plots, double ridgelines, and color gradients.'
+    R:
+        dontrun: true
+        usage: |
+            # Basic ridgeline plot
+            jjridges(
+              data = iris,
+              x_var = "Sepal.Length",
+              y_var = "Species"
+            )
+            
+            # Advanced with statistics
+            jjridges(
+              data = mtcars,
+              x_var = "mpg",
+              y_var = "cyl",
+              plot_type = "density_ridges_gradient",
+              show_stats = TRUE,
+              add_boxplot = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    # Core Variables
+    - name: x_var
+      title: X Variable (Distribution)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            The continuous variable to display as distributions along the x-axis.
+            This is the main variable whose distribution will be shown for each group.
+
+    - name: y_var
+      title: Y Variable (Groups)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            The categorical grouping variable that defines the ridges.
+            Each level creates a separate ridge arranged vertically.
+
+    - name: fill_var
+      title: Fill Variable (Optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: null
+      description:
+          R: >
+            Optional variable for color/fill mapping within ridges.
+            Creates color-coded segments within each ridge.
+
+    - name: facet_var
+      title: Facet Variable (Optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: null
+      description:
+          R: >
+            Optional variable for creating separate panels.
+            Useful for comparing ridge plots across another dimension.
+
+    # Plot Type and Style
+    - name: plot_type
+      title: Plot Type
+      type: List
+      options:
+        - title: Basic Ridgeline
+          name: ridgeline
+        - title: Density Ridges
+          name: density_ridges
+        - title: Density with Gradient
+          name: density_ridges_gradient
+        - title: Histogram Ridges
+          name: histogram_ridges
+        - title: Violin Ridges
+          name: violin_ridges
+        - title: Double Ridgeline
+          name: double_ridges
+      default: density_ridges
+      description:
+          R: >
+            Type of ridge plot. 'density_ridges' for smooth curves, 'density_ridges_gradient'
+            adds color gradients, 'histogram_ridges' for discrete bins, 'violin_ridges'
+            for violin-style plots, 'double_ridges' for comparing two distributions.
+
+    - name: scale
+      title: Ridge Height Scale
+      type: Number
+      min: 0.1
+      max: 5.0
+      default: 1.0
+      description:
+          R: >
+            Controls ridge height and overlap. Values > 1 create overlapping ridges,
+            < 1 creates more separation between ridges.
+
+    - name: bandwidth
+      title: Bandwidth Method
+      type: List
+      options:
+        - title: Auto (nrd0)
+          name: nrd0
+        - title: Normal Reference
+          name: nrd
+        - title: Sheather-Jones
+          name: SJ
+        - title: Custom Value
+          name: custom
+      default: nrd0
+      description:
+          R: >
+            Bandwidth selection for density estimation. Controls smoothness of curves.
+
+    - name: bandwidth_value
+      title: Custom Bandwidth
+      type: Number
+      min: 0.01
+      max: 10
+      default: 1.0
+      description:
+          R: >
+            Custom bandwidth value when bandwidth method is 'custom'.
+
+    - name: binwidth
+      title: Histogram Bin Width
+      type: Number
+      min: 0.1
+      default: 1.0
+      description:
+          R: >
+            Width of bins for histogram-style ridges.
+
+    # Advanced Features
+    - name: add_boxplot
+      title: Add Boxplot Inside
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add boxplot elements inside each ridge for enhanced visualization
+            of quartiles and outliers.
+
+    - name: add_points
+      title: Add Data Points
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show individual data points below ridges as jittered points.
+
+    - name: point_alpha
+      title: Point Transparency
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.3
+      description:
+          R: >
+            Transparency of data points when shown.
+
+    - name: add_quantiles
+      title: Show Quantile Lines
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add vertical lines at specified quantiles within each ridge.
+
+    - name: quantiles
+      title: Quantile Values
+      type: String
+      default: '0.25, 0.5, 0.75'
+      description:
+          R: >
+            Comma-separated quantile values to display as vertical lines.
+
+    - name: add_mean
+      title: Show Mean Line
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add vertical line at the mean of each distribution.
+
+    - name: add_median
+      title: Show Median Line
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add vertical line at the median of each distribution.
+
+    # Statistical Overlays
+    - name: show_stats
+      title: Show Statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display statistical annotations including p-values and effect sizes
+            using ggstatsplot functionality.
+
+    - name: test_type
+      title: Statistical Test
+      type: List
+      options:
+        - title: Parametric
+          name: parametric
+        - title: Non-parametric
+          name: nonparametric
+        - title: Robust
+          name: robust
+        - title: Bayesian
+          name: bayes
+      default: parametric
+      description:
+          R: >
+            Type of statistical test for group comparisons when show_stats is TRUE.
+
+    - name: p_adjust_method
+      title: P-value Adjustment
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: FDR
+          name: fdr
+      default: none
+      description:
+          R: >
+            Method for adjusting p-values in multiple comparisons.
+
+    - name: effsize_type
+      title: Effect Size Type
+      type: List
+      options:
+        - title: Cohen's d
+          name: d
+        - title: Hedge's g
+          name: g
+        - title: Eta squared
+          name: eta
+        - title: Omega squared
+          name: omega
+      default: d
+      description:
+          R: >
+            Type of effect size to calculate and display.
+
+    # Visual Appearance
+    - name: alpha
+      title: Ridge Transparency
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.8
+      description:
+          R: >
+            Transparency level for ridge fills.
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: Inferno
+          name: inferno
+        - title: Magma
+          name: magma
+        - title: Set1
+          name: Set1
+        - title: Set2
+          name: Set2
+        - title: Dark2
+          name: Dark2
+        - title: Paired
+          name: Paired
+        - title: Custom
+          name: custom
+      default: viridis
+      description:
+          R: >
+            Color palette for ridges. Viridis family are colorblind-friendly.
+
+    - name: custom_colors
+      title: Custom Colors
+      type: String
+      default: '#3498db,#e74c3c,#2ecc71,#f39c12'
+      description:
+          R: >
+            Comma-separated list of custom colors when palette is 'custom'.
+
+    - name: gradient_low
+      title: Gradient Low Color
+      type: String
+      default: '#0000FF'
+      description:
+          R: >
+            Low value color for gradient plots.
+
+    - name: gradient_high
+      title: Gradient High Color
+      type: String
+      default: '#FF0000'
+      description:
+          R: >
+            High value color for gradient plots.
+
+    - name: fill_ridges
+      title: Fill Ridges
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to fill ridges with color or show only outlines.
+
+    - name: reverse_order
+      title: Reverse Y Order
+      type: Bool
+      default: false
+      description:
+          R: >
+            Reverse the vertical order of groups.
+
+    # Theme and Labels
+    - name: theme_style
+      title: Theme Style
+      type: List
+      options:
+        - title: Ridge Theme
+          name: theme_ridges
+        - title: Minimal
+          name: theme_minimal
+        - title: Classic
+          name: theme_classic
+        - title: Dark
+          name: theme_dark
+        - title: Publication
+          name: theme_pubr
+      default: theme_ridges
+      description:
+          R: >
+            Overall plot theme style.
+
+    - name: grid_lines
+      title: Show Grid Lines
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to show grid lines in the plot.
+
+    - name: expand_panels
+      title: Expand Panels
+      type: Bool
+      default: true
+      description:
+          R: >
+            Remove space around plot area for cleaner look.
+
+    - name: legend_position
+      title: Legend Position
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Right
+          name: right
+        - title: Bottom
+          name: bottom
+        - title: Top
+          name: top
+      default: none
+      description:
+          R: >
+            Position of color legend.
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Main plot title.
+
+    - name: plot_subtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+      description:
+          R: >
+            Plot subtitle for additional context.
+
+    - name: plot_caption
+      title: Plot Caption
+      type: String
+      default: ''
+      description:
+          R: >
+            Caption for data source or notes.
+
+    - name: x_label
+      title: X Axis Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom label for X axis.
+
+    - name: y_label
+      title: Y Axis Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom label for Y axis.
+
+    # Annotations
+    - name: add_sample_size
+      title: Show Sample Sizes
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display sample size (n) for each group.
+
+    - name: add_density_values
+      title: Show Density Values
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display density values at peaks.
+
+    - name: custom_annotations
+      title: Custom Annotations
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom text annotations in format 'x,y,text;x2,y2,text2'.
+
+    # Export Options
+    - name: width
+      title: Plot Width
+      type: Number
+      min: 400
+      max: 1200
+      default: 800
+      description:
+          R: >
+            Width of the plot in pixels.
+
+    - name: height
+      title: Plot Height
+      type: Number
+      min: 400
+      max: 1200
+      default: 600
+      description:
+          R: >
+            Height of the plot in pixels.
+
+    - name: dpi
+      title: Plot DPI
+      type: Number
+      min: 72
+      max: 600
+      default: 300
+      description:
+          R: >
+            Resolution for plot export.
+
+...

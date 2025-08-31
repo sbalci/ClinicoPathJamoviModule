@@ -32,9 +32,7 @@ echo "/document-function FUNC_NAME" | claude
 ## JJStatsPlotT
 
 
-
-jggridges
-jjridgestats
+jjridges
 
 ggsegmentedtotalbar
 
