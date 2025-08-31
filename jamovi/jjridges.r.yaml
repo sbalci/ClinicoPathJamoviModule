@@ -1,0 +1,161 @@
+---
+name:  jjridges
+title: Advanced Ridge Plot
+jrs:   '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+      clearWith:
+        - x_var
+        - y_var
+
+    - name: plot
+      title: Ridge Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+        - facet_var
+        - plot_type
+        - scale
+        - bandwidth
+        - bandwidth_value
+        - binwidth
+        - add_boxplot
+        - add_points
+        - point_alpha
+        - add_quantiles
+        - quantiles
+        - add_mean
+        - add_median
+        - alpha
+        - color_palette
+        - custom_colors
+        - gradient_low
+        - gradient_high
+        - fill_ridges
+        - reverse_order
+        - theme_style
+        - grid_lines
+        - expand_panels
+        - legend_position
+        - plot_title
+        - plot_subtitle
+        - plot_caption
+        - x_label
+        - y_label
+
+    - name: statistics
+      title: Statistical Summary
+      type: Table
+      rows: 0
+      visible: false
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: mean
+          title: Mean
+          type: number
+          format: zto,dp:2
+        - name: sd
+          title: SD
+          type: number
+          format: zto,dp:2
+        - name: median
+          title: Median
+          type: number
+          format: zto,dp:2
+        - name: q1
+          title: Q1
+          type: number
+          format: zto,dp:2
+        - name: q3
+          title: Q3
+          type: number
+          format: zto,dp:2
+        - name: min
+          title: Min
+          type: number
+          format: zto,dp:2
+        - name: max
+          title: Max
+          type: number
+          format: zto,dp:2
+      clearWith:
+        - x_var
+        - y_var
+
+    - name: tests
+      title: Statistical Tests
+      type: Table
+      rows: 0
+      visible: false
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+          format: zto,dp:3
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,dp:4,p
+        - name: p_adjusted
+          title: P-adj
+          type: number
+          format: zto,dp:4,p
+        - name: effect_size
+          title: Effect Size
+          type: number
+          format: zto,dp:3
+        - name: ci_lower
+          title: CI Lower
+          type: number
+          format: zto,dp:3
+        - name: ci_upper
+          title: CI Upper
+          type: number
+          format: zto,dp:3
+      clearWith:
+        - x_var
+        - y_var
+        - test_type
+        - p_adjust_method
+        - effsize_type
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: false
+      clearWith:
+        - x_var
+        - y_var
+        - plot_type
+
+    - name: warnings
+      title: Warnings
+      type: Html
+      visible: false
+
+refs:
+    - ggplot2
+    - ggridges
+    - ggstatsplot
+    - viridis
+    - RColorBrewer
+
+...

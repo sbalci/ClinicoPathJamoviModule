@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -1695,23 +1695,27 @@ analyses:
       package.'
     ribbon: analyses
     category: analyses
-  - title: Ridgeline Plot
-    name: jjridgestats
+  - title: Advanced Ridge Plot
+    name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
-    menuSubgroup: Categorical vs Continuous
-    menuTitle: Ridgeline Plot
-    menuSubtitle: Distribution Comparison
+    menuGroup: JJStatsPlotT
+    menuSubgroup: Distribution
+    menuTitle: Advanced Ridge Plot
+    menuSubtitle: Enhanced Ridgeline Visualization
     ribbon: analyses
     category: analyses
     description: >
-      'Create ridgeline plots to visualize and compare distributions of a
-      continuous
+      'Create advanced ridgeline plots combining features from ggridges and
+      ggstatsplot.
 
-      variable across different categorical groups. Useful for showing
-      distribution
+      Visualize distributions across groups with multiple style options,
+      annotations,
 
-      shapes, overlaps, and differences between groups.'
+      statistical overlays, and publication-ready formatting. Supports both
+      basic and
+
+      complex ridge plots with inside plots, double ridgelines, and color
+      gradients.'
   - title: StreamGraphs
     name: jjstreamgraph
     ns: ClinicoPath
@@ -1730,18 +1734,6 @@ analyses:
     menuTitle: Treemap
     description: |
       'Creates treemap visualizations for categorical data'
-    ribbon: analyses
-    category: analyses
-  - title: Ridge Plot Visualization
-    name: jggridges
-    ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
-    menuSubgroup: Distribution
-    menuTitle: Ridge Plot Visualization
-    description: >
-      Creates ridge plots (joy plots) for visualizing distributions across
-      groups. Ridge plots are particularly useful for comparing distributions of
-      continuous variables across multiple categories or time periods.
     ribbon: analyses
     category: analyses
   - title: Comprehensive Tidy Plots
@@ -4545,6 +4537,26 @@ analyses:
       studies. Calculates power for testing differences in cumulative incidence 
       functions between groups using Gray's test and subdistribution hazard
       models.
+  - title: Advanced Ridge Plot
+    name: jjridges
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: JJStatsPlotT
+    menuSubgroup: Distribution
+    menuTitle: Advanced Ridge Plot
+    menuSubtitle: Enhanced Ridgeline Visualization
+    description: >
+      'Create advanced ridgeline plots combining features from ggridges and
+      ggstatsplot.
+
+      Visualize distributions across groups with multiple style options,
+      annotations,
+
+      statistical overlays, and publication-ready formatting. Supports both
+      basic and
+
+      complex ridge plots with inside plots, double ridgelines, and color
+      gradients.'
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
