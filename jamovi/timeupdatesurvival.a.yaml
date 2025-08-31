@@ -1,7 +1,7 @@
 ---
 name: timeupdatesurvival
 title: Time-Updated Survival Estimates
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyT2
 version: '1.0.0'
 jas: '1.2'
 description:

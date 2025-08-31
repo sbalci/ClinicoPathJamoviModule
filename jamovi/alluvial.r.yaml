@@ -1,6 +1,6 @@
 ---
 name:  alluvial
-title: Alluvial Diagrams
+title: Alluvial & Sankey Diagrams
 jrs:   '1.1'
 
 items:
@@ -20,7 +20,7 @@ items:
     #       - marg
     #       - inter
 
-    - title: Alluvial Diagrams
+    - title: Alluvial & Sankey Diagrams
       name: plot
       type: Image
       width:  600
@@ -29,6 +29,9 @@ items:
       requiresData: true
       clearWith:
           - vars
+          - time
+          - id
+          - weight
           - excl
           - marg
           - fill
@@ -38,6 +41,11 @@ items:
           - usetitle
           - mytitle
           - maxvars
+          - sankeyStyle
+          - curveType
+          - engine
+          - labelNodes
+          - showCounts
           # - themex
           # - originaltheme
 
@@ -59,6 +67,7 @@ items:
 
 refs:
     - easyalluvial
+    - ggalluvial
     - ClinicoPathJamoviModule
     # - parcats
 

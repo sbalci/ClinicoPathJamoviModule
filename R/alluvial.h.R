@@ -16,7 +16,15 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             usetitle = FALSE,
             mytitle = "Alluvial Plot",
             maxvars = 8,
-            custombinlabels = "", ...) {
+            custombinlabels = "",
+            time = NULL,
+            id = NULL,
+            weight = NULL,
+            sankeyStyle = FALSE,
+            curveType = "cubic",
+            engine = "easyalluvial",
+            labelNodes = TRUE,
+            showCounts = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -82,6 +90,59 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "custombinlabels",
                 custombinlabels,
                 default="")
+            private$..time <- jmvcore::OptionVariable$new(
+                "time",
+                time,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..id <- jmvcore::OptionVariable$new(
+                "id",
+                id,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..weight <- jmvcore::OptionVariable$new(
+                "weight",
+                weight,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..sankeyStyle <- jmvcore::OptionBool$new(
+                "sankeyStyle",
+                sankeyStyle,
+                default=FALSE)
+            private$..curveType <- jmvcore::OptionList$new(
+                "curveType",
+                curveType,
+                options=list(
+                    "linear",
+                    "cubic",
+                    "quintic",
+                    "sine",
+                    "arctangent",
+                    "sigmoid"),
+                default="cubic")
+            private$..engine <- jmvcore::OptionList$new(
+                "engine",
+                engine,
+                options=list(
+                    "easyalluvial",
+                    "ggalluvial"),
+                default="easyalluvial")
+            private$..labelNodes <- jmvcore::OptionBool$new(
+                "labelNodes",
+                labelNodes,
+                default=TRUE)
+            private$..showCounts <- jmvcore::OptionBool$new(
+                "showCounts",
+                showCounts,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..condensationvar)
@@ -94,6 +155,14 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..mytitle)
             self$.addOption(private$..maxvars)
             self$.addOption(private$..custombinlabels)
+            self$.addOption(private$..time)
+            self$.addOption(private$..id)
+            self$.addOption(private$..weight)
+            self$.addOption(private$..sankeyStyle)
+            self$.addOption(private$..curveType)
+            self$.addOption(private$..engine)
+            self$.addOption(private$..labelNodes)
+            self$.addOption(private$..showCounts)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -106,7 +175,15 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         usetitle = function() private$..usetitle$value,
         mytitle = function() private$..mytitle$value,
         maxvars = function() private$..maxvars$value,
-        custombinlabels = function() private$..custombinlabels$value),
+        custombinlabels = function() private$..custombinlabels$value,
+        time = function() private$..time$value,
+        id = function() private$..id$value,
+        weight = function() private$..weight$value,
+        sankeyStyle = function() private$..sankeyStyle$value,
+        curveType = function() private$..curveType$value,
+        engine = function() private$..engine$value,
+        labelNodes = function() private$..labelNodes$value,
+        showCounts = function() private$..showCounts$value),
     private = list(
         ..vars = NA,
         ..condensationvar = NA,
@@ -118,7 +195,15 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..usetitle = NA,
         ..mytitle = NA,
         ..maxvars = NA,
-        ..custombinlabels = NA)
+        ..custombinlabels = NA,
+        ..time = NA,
+        ..id = NA,
+        ..weight = NA,
+        ..sankeyStyle = NA,
+        ..curveType = NA,
+        ..engine = NA,
+        ..labelNodes = NA,
+        ..showCounts = NA)
 )
 
 alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -134,9 +219,10 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Alluvial Diagrams",
+                title="Alluvial & Sankey Diagrams",
                 refs=list(
                     "easyalluvial",
+                    "ggalluvial",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -146,7 +232,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars")))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="Alluvial Diagrams",
+                title="Alluvial & Sankey Diagrams",
                 name="plot",
                 width=600,
                 height=450,
@@ -154,6 +240,9 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
+                    "time",
+                    "id",
+                    "weight",
                     "excl",
                     "marg",
                     "fill",
@@ -162,7 +251,12 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "orient",
                     "usetitle",
                     "mytitle",
-                    "maxvars")))
+                    "maxvars",
+                    "sankeyStyle",
+                    "curveType",
+                    "engine",
+                    "labelNodes",
+                    "showCounts")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="`Condensation Plot ${condensationvar}`",
@@ -197,7 +291,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Alluvial Diagrams
+#' Alluvial & Sankey Diagrams
 #'
 #' 
 #' @param data The data as a data frame.
@@ -215,6 +309,17 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param maxvars Maximum number of variables to include in the alluvial plot.
 #' @param custombinlabels Custom labels for bins, separated by commas (e.g.,
 #'   "Low,Medium,High").  Leave empty to use bin option defaults.
+#' @param time Optional time or sequence variable for time-based flows.
+#' @param id Optional ID variable for tracking individual entities.
+#' @param weight Optional weight variable for flow thickness.
+#' @param sankeyStyle Apply Sankey diagram styling (narrow nodes, sigmoid
+#'   curves).
+#' @param curveType Curve style for flows. Use sigmoid for Sankey-style
+#'   appearance.
+#' @param engine Choose plotting engine: easyalluvial for automatic plots,
+#'   ggalluvial for manual control.
+#' @param labelNodes Add labels to nodes.
+#' @param showCounts Display count values on nodes.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -235,19 +340,35 @@ alluvial <- function(
     usetitle = FALSE,
     mytitle = "Alluvial Plot",
     maxvars = 8,
-    custombinlabels = "") {
+    custombinlabels = "",
+    time,
+    id,
+    weight,
+    sankeyStyle = FALSE,
+    curveType = "cubic",
+    engine = "easyalluvial",
+    labelNodes = TRUE,
+    showCounts = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("alluvial requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(condensationvar)) condensationvar <- jmvcore::resolveQuo(jmvcore::enquo(condensationvar))
+    if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
+    if ( ! missing(id)) id <- jmvcore::resolveQuo(jmvcore::enquo(id))
+    if ( ! missing(weight)) weight <- jmvcore::resolveQuo(jmvcore::enquo(weight))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
-            `if`( ! missing(condensationvar), condensationvar, NULL))
+            `if`( ! missing(condensationvar), condensationvar, NULL),
+            `if`( ! missing(time), time, NULL),
+            `if`( ! missing(id), id, NULL),
+            `if`( ! missing(weight), weight, NULL))
 
+    for (v in time) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in id) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- alluvialOptions$new(
         vars = vars,
@@ -260,7 +381,15 @@ alluvial <- function(
         usetitle = usetitle,
         mytitle = mytitle,
         maxvars = maxvars,
-        custombinlabels = custombinlabels)
+        custombinlabels = custombinlabels,
+        time = time,
+        id = id,
+        weight = weight,
+        sankeyStyle = sankeyStyle,
+        curveType = curveType,
+        engine = engine,
+        labelNodes = labelNodes,
+        showCounts = showCounts)
 
     analysis <- alluvialClass$new(
         options = options,

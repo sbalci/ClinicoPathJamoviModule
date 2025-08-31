@@ -1,9 +1,9 @@
 ---
 name: jjtreemap
 title: Treemap
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: Categorical
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

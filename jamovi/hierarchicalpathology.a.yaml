@@ -1,7 +1,7 @@
 ---
 name: hierarchicalpathology
 title: Hierarchical Mixed-Effects Models
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyT2
 menuSubgroup: Inferential
 menuTitle: Hierarchical Mixed-Effects Models
 menuSubtitle: Multi-level analysis for nested pathology data

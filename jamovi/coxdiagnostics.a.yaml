@@ -1,7 +1,7 @@
 ---
 name: coxdiagnostics
 title: "Cox Proportional Hazards Model Diagnostics"
-menuGroup: SurvivalT
+menuGroup: SurvivalT2
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: "Model Validation & Residual Analysis"
 version: '0.0.3'

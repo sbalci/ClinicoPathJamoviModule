@@ -219,7 +219,7 @@ jjriverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjriverplot",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = jjriverplotResults$new(options=options),
                 data = data,

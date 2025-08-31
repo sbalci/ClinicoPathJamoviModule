@@ -328,7 +328,7 @@ jggsankeyfierBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jggsankeyfier",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = jggsankeyfierResults$new(options=options),
                 data = data,

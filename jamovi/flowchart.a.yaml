@@ -1,7 +1,7 @@
 ---
 name: flowchart
 title: Study Flowchart 
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyT2
 menuSubgroup: ClinicoPath Reports
 version: '1.0.0'
 jas: '1.2'

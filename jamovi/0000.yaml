@@ -69,12 +69,12 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
     category: analyses
-  - title: Alluvial Diagrams
+  - title: Alluvial & Sankey Diagrams
     name: alluvial
     ns: ClinicoPath
     menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Alluvial Diagrams
+    menuTitle: Alluvial & Sankey Diagrams
     ribbon: analyses
     category: analyses
   - title: Venn Diagram
@@ -256,7 +256,7 @@ analyses:
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Advanced Outlier Detection
     menuSubtitle: easystats Performance Package
@@ -606,7 +606,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -678,7 +678,7 @@ analyses:
   - title: Data Quality Assessment
     name: checkdata
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuTitle: Data Quality Assessment
     menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
@@ -694,7 +694,7 @@ analyses:
   - title: Contingency Tables
     name: contTables
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: Frequencies Contingency Tables
     menuTitle: Independent Samples
     menuSubtitle: χ² test of association
@@ -708,7 +708,7 @@ analyses:
   - title: Paired Samples Contingency Tables
     name: contTablesPaired
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: Frequencies Contingency Tables
     menuTitle: Paired Samples
     menuSubtitle: McNemar test
@@ -752,7 +752,7 @@ analyses:
   - title: ggFlowchart
     name: ggflowchart
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Reports
     menuTitle: ggFlowchart
     menuSubtitle: Modern ggplot2 Flowcharts
@@ -1073,7 +1073,7 @@ analyses:
   - title: Cox Proportional Hazards Model Diagnostics
     name: coxdiagnostics
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuTitle: Cox Proportional Hazards Model Diagnostics
     menuSubgroup: ClinicoPath Survival
     menuSubtitle: Model Validation & Residual Analysis
@@ -1215,7 +1215,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1385,7 +1385,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -1464,7 +1464,7 @@ analyses:
   - title: Intraclass Correlation Coefficient
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Intraclass Correlation Coefficient
     description: >
@@ -1698,7 +1698,7 @@ analyses:
   - title: Ridgeline Plot
     name: jjridgestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Ridgeline Plot
     menuSubtitle: Distribution Comparison
@@ -1715,7 +1715,7 @@ analyses:
   - title: StreamGraphs
     name: jjstreamgraph
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Time Series Visualization
     menuTitle: StreamGraphs
     description: |
@@ -1725,7 +1725,7 @@ analyses:
   - title: Treemap
     name: jjtreemap
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical
     menuTitle: Treemap
     description: |
@@ -1735,7 +1735,7 @@ analyses:
   - title: Ridge Plot Visualization
     name: jggridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Ridge Plot Visualization
     description: >
@@ -1760,7 +1760,7 @@ analyses:
   - title: River Plots
     name: jjriverplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuTitle: River Plots
     menuSubgroup: Categorical Over Time
     menuSubtitle: Flow and Transition Visualization
@@ -1775,22 +1775,26 @@ analyses:
     menuGroup: JJStatsPlotT
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots
-    menuSubtitle: Flow and Transition Visualization
+    menuSubtitle: Temporal Categorical Flow Visualization
     description: >
-      Creates river plots (alluvial diagrams, Sankey diagrams, and stream
-      graphs) 
+      Creates river plots to visualize how categorical variables change over
+      time 
 
-      to visualize flows and transitions over time or between categories. 
+      or sequential stages. Shows temporal flows of categories across time
+      periods, 
 
-      Ideal for tracking patient journeys, treatment pathways, or any
-      categorical 
+      ideal for tracking patient journeys, treatment progressions, disease
+      stages, 
 
-      data that changes across stages or time points.
+      or any categorical changes over time. Requires a time/sequence variable
+      and 
+
+      supports individual entity tracking.
     category: analyses
   - title: Scientific Visualization with Grafify
     name: grafify
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: ClinicoPath Scientific Plots
     menuTitle: Scientific Visualization with Grafify
     menuSubtitle: Easy Graphs & Color-Blind Friendly Palettes
@@ -1922,7 +1926,7 @@ analyses:
   - title: Sankey & Alluvial Diagrams
     name: jggsankeyfier
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical Over Time
     menuTitle: Sankey & Alluvial Diagrams
     menuSubtitle: Flow Visualization with ggsankeyfier
@@ -1961,7 +1965,7 @@ analyses:
   - title: Complex UpSet Plot Visualization
     name: jcomplexupset
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Set Visualization
     menuTitle: Complex UpSet Plot Visualization
     description: >
@@ -2001,7 +2005,7 @@ analyses:
   - title: Predictive Power Score Analysis
     name: jpps
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Correlation & Association
     menuTitle: Predictive Power Score Analysis
     ribbon: analyses
@@ -2033,7 +2037,7 @@ analyses:
   - title: Radar Plot
     name: jjradarplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Multivariate
     menuTitle: Radar Plot
     ribbon: analyses
@@ -2172,7 +2176,7 @@ analyses:
     name: curemodels
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: ClinicoPathT
     menuSubgroup: Survival Analysis
     menuTitle: Cure Models for Long-term Survivors
     menuSubtitle: Mixture and Non-mixture Cure Models
@@ -2186,7 +2190,7 @@ analyses:
     name: multistatesurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Advanced Survival
     menuTitle: Multistate Survival Models
     menuSubtitle: Disease Progression and Transition Modeling
@@ -2217,7 +2221,7 @@ analyses:
     name: survivalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Advanced Survival
     menuTitle: Survival Model Validation
     menuSubtitle: Model Performance Assessment and Validation
@@ -2561,7 +2565,7 @@ analyses:
     name: clinicalcalculators
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: ClinicoPathT
     menuTitle: Clinical Risk Calculators & Nomograms
   - title: Enhanced Survival Model Validation
     name: survivalmodelvalidation
@@ -2583,7 +2587,7 @@ analyses:
     name: clinicalnomograms
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD Survival
+    menuGroup: ClinicoPathT
     menuSubgroup: Clinical Translation
     menuTitle: Clinical Nomograms & Risk Calculators
     menuSubtitle: Prognostic Tools for Clinical Practice
@@ -2967,7 +2971,7 @@ analyses:
     name: treeadvanced
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Advanced Clinical Decision Trees
     menuSubtitle: Enhanced CART with Advanced Validation
@@ -3014,7 +3018,7 @@ analyses:
     name: treemedical
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Medical Decision Trees
     menuSubtitle: Simple Clinical Decision Trees
@@ -3103,7 +3107,7 @@ analyses:
     name: imagingcorrelation
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: ClinicoPathT
     menuSubgroup: Clinical Decision Support
     menuTitle: Imaging Findings Correlation
     menuSubtitle: Multi-Modal Diagnostic Data Integration
@@ -3322,7 +3326,7 @@ analyses:
     name: idi
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Performance Metrics
     menuTitle: Integrated Discrimination Improvement (IDI)
     menuSubtitle: Model improvement assessment through discrimination analysis
@@ -3366,7 +3370,7 @@ analyses:
     name: netreclassification
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Performance Metrics
     menuTitle: Net Reclassification Improvement (NRI)
     menuSubtitle: Advanced model improvement assessment with reclassification analysis
@@ -3503,7 +3507,7 @@ analyses:
     name: methodcomparison
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Diagnostic Statistics
     menuTitle: Method Comparison Analysis
     menuSubtitle: Bland-Altman & Method Comparison
@@ -3613,7 +3617,7 @@ analyses:
     name: conditionalsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Conditional Survival Estimation
     menuSubtitle: Conditional Survival, Landmark Analysis, Advanced Methods
@@ -3807,7 +3811,7 @@ analyses:
     name: methodvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptivesD
+    menuGroup: meddecideT
     menuTitle: Laboratory Method Validation Protocols
     description: >
       Comprehensive analytical method validation following CLSI EP15-A3,
@@ -3933,7 +3937,7 @@ analyses:
     name: aivalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: AI & Machine Learning
     menuTitle: AI Model Validation with Cross-Validation
     menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
@@ -3953,7 +3957,7 @@ analyses:
     name: tumorgrowth
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: ClinicoPathT
     menuSubgroup: Survival Analysis
     menuTitle: Tumor Growth Models
   - title: Progression-Free Survival Analysis
@@ -4115,7 +4119,7 @@ analyses:
     name: enhancedcorrelation
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Enhanced Correlation Analysis
     menuSubtitle: Advanced correlation with confidence intervals
@@ -4175,7 +4179,7 @@ analyses:
     name: clinicalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Clinical Model Validation Suite
     menuSubtitle: Comprehensive validation for clinical prediction models

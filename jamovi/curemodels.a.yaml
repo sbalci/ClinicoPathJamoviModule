@@ -1,7 +1,7 @@
 ---
 name: curemodels
 title: Cure Models for Long-term Survivors
-menuGroup: ClinicoPathT
+menuGroup: ClinicoPathT2
 menuSubgroup: Survival Analysis
 menuSubtitle: 'Mixture and Non-mixture Cure Models'
 version: '1.0.0'

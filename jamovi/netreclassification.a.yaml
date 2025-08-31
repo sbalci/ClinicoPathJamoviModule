@@ -1,7 +1,7 @@
 ---
 name: netreclassification
 title: Net Reclassification Improvement (NRI)
-menuGroup: meddecideT
+menuGroup: meddecideT2
 menuSubgroup: Performance Metrics
 menuSubtitle: Advanced model improvement assessment with reclassification analysis
 version: '0.0.31'

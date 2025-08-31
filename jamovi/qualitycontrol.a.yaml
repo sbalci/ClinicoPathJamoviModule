@@ -1,7 +1,7 @@
 ---
 name: qualitycontrol
 title: Laboratory Quality Control Statistics
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyT2
 version: '1.0.0'
 jas: '1.2'
 description:

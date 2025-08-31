@@ -1,7 +1,7 @@
 ---
 name:  alluvial
-title: Alluvial Diagrams
-menuGroup: ExplorationT
+title: Alluvial & Sankey Diagrams
+menuGroup: ExplorationT2
 menuSubgroup: ClinicoPath Descriptive Plots
 version: '0.0.31'
 jas: '1.2'
@@ -172,6 +172,107 @@ options:
           jamovi: >
             Custom labels for bins, separated by commas (e.g., "Low,Medium,High"). 
             Leave empty to use bin option defaults.
+
+    - name: time
+      title: Time/Sequence Variable (optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional time or sequence variable for time-based flows.
+          jamovi: >
+            Optional time or sequence variable for time-based flows.
+
+    - name: id
+      title: ID Variable (optional)
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional ID variable for tracking individual entities.
+          jamovi: >
+            Optional ID variable for tracking individual entities.
+
+    - name: weight
+      title: Weight Variable (optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Optional weight variable for flow thickness.
+          jamovi: >
+            Optional weight variable for flow thickness.
+
+    - name: sankeyStyle
+      title: Use Sankey Styling
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply Sankey diagram styling (narrow nodes, sigmoid curves).
+          jamovi: >
+            Apply Sankey diagram styling (narrow nodes, sigmoid curves).
+
+    - name: curveType
+      title: Curve Type
+      type: List
+      options:
+        - title: Linear
+          name: linear
+        - title: Cubic (smooth)
+          name: cubic
+        - title: Quintic (very smooth)
+          name: quintic
+        - title: Sine
+          name: sine
+        - title: Arctangent
+          name: arctangent
+        - title: Sigmoid (S-shaped, Sankey-style)
+          name: sigmoid
+      default: cubic
+      description:
+          R: >
+            Curve style for flows. Use sigmoid for Sankey-style appearance.
+          jamovi: >
+            Curve style for flows. Use sigmoid for Sankey-style appearance.
+
+    - name: engine
+      title: Plot Engine
+      type: List
+      options:
+        - title: Easy Alluvial (automatic)
+          name: easyalluvial
+        - title: GG Alluvial (manual control)
+          name: ggalluvial
+      default: easyalluvial
+      description:
+          R: >
+            Choose plotting engine: easyalluvial for automatic plots, ggalluvial for manual control.
+          jamovi: >
+            Choose plotting engine: easyalluvial for automatic plots, ggalluvial for manual control.
+
+    - name: labelNodes
+      title: Label Nodes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add labels to nodes.
+          jamovi: >
+            Add labels to nodes.
+
+    - name: showCounts
+      title: Show Counts
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display count values on nodes.
+          jamovi: >
+            Display count values on nodes.
 
 
     # - name: originaltheme

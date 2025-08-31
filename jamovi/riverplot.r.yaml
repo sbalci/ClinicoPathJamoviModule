@@ -1,6 +1,6 @@
 ---
 name:  riverplot
-title: River Plots
+title: Stream Plots
 jrs:   '1.1'
 
 clearWith:
@@ -23,7 +23,7 @@ items:
       type:  Html
 
     - name: plot
-      title: River Plot
+      title: Stream Plot
       type: Image
       width:  800
       height: 600
@@ -32,8 +32,6 @@ items:
 
 refs:
     - ggplot2
-    - ggalluvial
-    - easyalluvial
     - ClinicoPathJamoviModule
 
 ...

@@ -261,7 +261,7 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Lollipop Chart",
+                title="`Lollipop Chart {dep} vs {group}`",
                 width=700,
                 height=500,
                 renderFun=".plot",

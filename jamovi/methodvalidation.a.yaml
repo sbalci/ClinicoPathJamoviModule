@@ -1,8 +1,8 @@
 ---
 name: methodvalidation
 title: Laboratory Method Validation Protocols
-menuGroup: meddecideT
-version: '1.0.0'
+menuGroup: meddecideT2
+version: '0.0.31'
 jas: '1.2'
 description:
     main: >

@@ -1,7 +1,7 @@
 ---
 name: contTables
 title: Contingency Tables
-menuGroup: ExplorationT
+menuGroup: ExplorationT2
 menuSubgroup:  Frequencies Contingency Tables
 menuTitle: Independent Samples
 menuSubtitle: χ² test of association

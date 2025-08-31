@@ -1,7 +1,7 @@
 ---
 name: ggsegmentedtotalbar
 title: "Segmented Total Bar Charts"
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: ClinicoPath Advanced Plots
 menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
 version: '0.0.31'

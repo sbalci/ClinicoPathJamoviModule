@@ -2,7 +2,7 @@
 % Please edit documentation in R/alluvial.h.R
 \name{alluvial}
 \alias{alluvial}
-\title{Alluvial Diagrams}
+\title{Alluvial & Sankey Diagrams}
 \usage{
 alluvial(
   data,
@@ -16,7 +16,15 @@ alluvial(
   usetitle = FALSE,
   mytitle = "Alluvial Plot",
   maxvars = 8,
-  custombinlabels = ""
+  custombinlabels = "",
+  time,
+  id,
+  weight,
+  sankeyStyle = FALSE,
+  curveType = "cubic",
+  engine = "easyalluvial",
+  labelNodes = TRUE,
+  showCounts = FALSE
 )
 }
 \arguments{
@@ -46,6 +54,25 @@ represented by color. Default is 'first_variable'.}
 
 \item{custombinlabels}{Custom labels for bins, separated by commas (e.g.,
 "Low,Medium,High").  Leave empty to use bin option defaults.}
+
+\item{time}{Optional time or sequence variable for time-based flows.}
+
+\item{id}{Optional ID variable for tracking individual entities.}
+
+\item{weight}{Optional weight variable for flow thickness.}
+
+\item{sankeyStyle}{Apply Sankey diagram styling (narrow nodes, sigmoid
+curves).}
+
+\item{curveType}{Curve style for flows. Use sigmoid for Sankey-style
+appearance.}
+
+\item{engine}{Choose plotting engine: easyalluvial for automatic plots,
+ggalluvial for manual control.}
+
+\item{labelNodes}{Add labels to nodes.}
+
+\item{showCounts}{Display count values on nodes.}
 }
 \value{
 A results object containing:
@@ -56,5 +83,5 @@ A results object containing:
 }
 }
 \description{
-Alluvial Diagrams
+Alluvial & Sankey Diagrams
 }

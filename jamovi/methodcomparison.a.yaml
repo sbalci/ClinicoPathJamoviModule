@@ -1,7 +1,7 @@
 ---
 name: methodcomparison
 title: Method Comparison Analysis
-menuGroup: meddecideT
+menuGroup: meddecideT2
 menuSubgroup: Diagnostic Statistics
 menuSubtitle: 'Bland-Altman & Method Comparison'
 version: '0.0.31'
