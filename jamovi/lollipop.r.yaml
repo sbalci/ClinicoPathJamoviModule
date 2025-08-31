@@ -21,7 +21,7 @@ items:
           type: text
 
     - name: plot
-      title: 'Lollipop Chart'
+      title: '`Lollipop Chart {dep} vs {group}`'
       type: Image
       width: 700
       height: 500
@@ -30,5 +30,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
+    - RGraphGalleryLollipop
+    - ggplot2
 
 ...

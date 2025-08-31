@@ -1,0 +1,23 @@
+
+# Example Usage with Lollipop Function
+
+## Load the data
+clinical_data <- read.csv("clinical_lollipop_example.csv")
+simple_data <- read.csv("simple_lollipop_example.csv")
+
+## Basic lollipop chart
+lollipop(data = simple_data, dep = "Value", group = "Category")
+
+## With highlighting
+lollipop(data = simple_data, dep = "Value", group = "Category",
+         useHighlight = TRUE, highlight = "A")
+
+## Conditional coloring
+lollipop(data = simple_data, dep = "Value", group = "Category",
+         conditionalColor = TRUE, colorThreshold = 50)
+
+## Clinical example with advanced features
+lollipop(data = clinical_data, dep = "biomarker_level", 
+         group = "treatment_group", orientation = "horizontal",
+         conditionalColor = TRUE, colorThreshold = 50,
+         lineType = "dashed", title = "Biomarker Levels by Treatment")

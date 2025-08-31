@@ -96,18 +96,18 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Initialize with welcome message if no variables selected
             if (is.null(self$options$dep) || is.null(self$options$group)) {
-                welcome_msg <- "
+                welcome_msg <- paste0("
                 <div class='alert alert-info'>
-                <h4>Welcome to Lollipop Chart Analysis</h4>
-                <p>This function creates lollipop charts for categorical data visualization with clinical applications.</p>
+                <h4>", .("Welcome to Lollipop Chart Analysis"), "</h4>
+                <p>", .("This function creates lollipop charts for categorical data visualization with clinical applications."), "</p>
                 
-                <h5>Required inputs:</h5>
+                <h5>", .("Required inputs:"), "</h5>
                 <ul>
-                <li><strong>Dependent Variable</strong>: Numeric values (biomarker levels, scores, measurements)</li>
-                <li><strong>Grouping Variable</strong>: Categories (patient IDs, treatments, conditions)</li>
+                <li><strong>", .("Dependent Variable"), "</strong>: ", .("Numeric values (biomarker levels, scores, measurements)"), "</li>
+                <li><strong>", .("Grouping Variable"), "</strong>: ", .("Categories (patient IDs, treatments, conditions)"), "</li>
                 </ul>
                 
-                <h5>Key features:</h5>
+                <h5>", .("Key features:"), "</h5>
                 <ul>
                 <li><strong>Flexible Layout</strong>: Vertical or horizontal orientation</li>
                 <li><strong>Smart Sorting</strong>: Order by value, alphabetical, or original order</li>
@@ -131,10 +131,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li>Reduced visual clutter (lower ink-to-data ratio)</li>
                 <li>Better for sparse data or many categories</li>
                 <li>Emphasizes individual data points</li>
-                <li>Professional appearance for publications</li>
+                <li>", .("Professional appearance for publications"), "</li>
                 </ul>
                 </div>
-                "
+                ")
                 
                 self$results$todo$setContent(welcome_msg)
                 
@@ -161,13 +161,44 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Main analysis pipeline with comprehensive error handling
             tryCatch({
+                # Checkpoint before expensive data cleaning
+                private$.checkpoint()
+                
                 # Prepare and validate data
                 data <- private$.cleanData()
                 if (is.null(data)) return()
                 
+                # Checkpoint before statistical calculations
+                private$.checkpoint()
+                
                 # Calculate summary statistics
                 summary_stats <- private$.calculateSummary(data)
                 private$.populateSummary(summary_stats)
+                
+                # Check for potential issues and warnings
+                warnings <- private$.checkForMisuseAndWarnings(data, summary_stats)
+                
+                # Generate and display clinical summary with warnings
+                clinical_summary <- private$.generateClinicalSummary(summary_stats, self$options$dep, self$options$group)
+                
+                # Add warnings if any
+                if (length(warnings) > 0) {
+                    warning_html <- paste0(
+                        "<div class='alert alert-warning' style='margin-top: 10px;'>",
+                        "<h6>", .("Analysis Considerations"), "</h6>",
+                        "<ul>",
+                        paste0("<li>", warnings, "</li>", collapse = ""),
+                        "</ul>",
+                        "</div>"
+                    )
+                    clinical_summary <- paste0(clinical_summary, warning_html)
+                }
+                
+                self$results$todo$setContent(clinical_summary)
+                self$results$todo$setVisible(TRUE)
+                
+                # Checkpoint before plot data preparation
+                private$.checkpoint()
                 
                 # Save plot data for rendering
                 private$.savePlotData(data)
@@ -194,16 +225,19 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check if variables exist in data
             missing_vars <- setdiff(c(dep_var, group_var), names(self$data))
             if (length(missing_vars) > 0) {
-                stop(paste("Variables not found in data:", paste(missing_vars, collapse = ", ")))
+                stop(paste(.("Variables not found in data:"), paste(missing_vars, collapse = ", ")))
             }
             
             # Select and clean data
             data <- self$data[c(dep_var, group_var)]
             
+            # Checkpoint before expensive data validation and conversion
+            private$.checkpoint(flush = FALSE)  # Only poll for changes, don't push results yet
+            
             # Validate dependent variable (must be numeric)
             dep_data <- jmvcore::toNumeric(data[[dep_var]])
             if (all(is.na(dep_data))) {
-                stop("Dependent variable must be numeric (continuous variable).")
+                stop(.("Dependent variable must be numeric (continuous variable)."))
             }
             data[[dep_var]] <- dep_data
             
@@ -218,12 +252,15 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check number of groups
             n_groups <- length(unique(data[[group_var]]))
             if (n_groups < 2) {
-                stop("Grouping variable must have at least 2 different categories.")
+                stop(.("Grouping variable must have at least 2 different categories."))
             }
             
             if (n_groups > 50) {
-                warning("Grouping variable has more than 50 levels. Consider reducing categories for better visualization.")
+                warning(.("Grouping variable has more than 50 levels. Consider reducing categories for better visualization."))
             }
+            
+            # Checkpoint before potentially expensive missing data removal
+            private$.checkpoint(flush = FALSE)
             
             # Remove rows with missing values
             complete_before <- nrow(data)
@@ -231,17 +268,29 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             complete_after <- nrow(data)
             
             if (complete_after == 0) {
-                stop("No complete cases found. Please check for missing values in selected variables.")
+                stop(.("No complete cases found. Please check for missing values in selected variables."))
             }
             
             if (complete_after < complete_before) {
                 n_removed <- complete_before - complete_after
-                warning(paste(n_removed, "rows with missing values were removed from analysis."))
+                warning(paste(n_removed, .("rows with missing values were removed from analysis.")))
             }
             
             # Check minimum data requirements
             if (nrow(data) < 2) {
-                stop("At least 2 complete observations are required for lollipop chart analysis.")
+                stop(.("At least 2 complete observations are required for lollipop chart analysis."))
+            }
+            
+            # Validate highlight level if provided and highlighting is enabled
+            highlight_level <- if (self$options$useHighlight) {
+                self$options$highlight
+            } else {
+                NULL  # Disable highlighting if useHighlight is FALSE
+            }
+            
+            if (self$options$useHighlight && !is.null(highlight_level) && !highlight_level %in% data[[group_var]]) {
+                warning(paste(.("Highlight level"), "'", highlight_level, "'", .("not found in grouping variable. Highlight will be ignored.")))
+                highlight_level <- NULL  # Disable highlighting for this case
             }
             
             # Apply sorting if requested
@@ -286,11 +335,14 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             summary_stats$dep_max <- max(dep_data, na.rm = TRUE)
             summary_stats$dep_range <- summary_stats$dep_max - summary_stats$dep_min
             
+            # Checkpoint before group-by operations which can be expensive for large datasets
+            private$.checkpoint(flush = FALSE)
+            
             # Group information
             group_summary <- data %>%
-                group_by(group) %>%
-                summarise(
-                    n = n(),
+                dplyr::group_by(group) %>%
+                dplyr::summarise(
+                    n = dplyr::n(),
                     mean = mean(dependent, na.rm = TRUE),
                     .groups = 'drop'
                 )
@@ -302,6 +354,73 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(summary_stats)
         },
         
+        # Generate clinical summary for easier interpretation
+        .generateClinicalSummary = function(summary_stats, dep_var, group_var) {
+            summary_html <- paste0(
+                "<div class='alert alert-success'>",
+                "<h5>", .("Clinical Summary"), "</h5>",
+                "<p><strong>", .("Analysis Overview"), ":</strong> ",
+                .("This analysis compared"), " <strong>", summary_stats$n_observations, "</strong> ",
+                .("observations across"), " <strong>", summary_stats$n_groups, "</strong> ", 
+                .("groups"), ".</p>",
+                
+                "<p><strong>", .("Key Findings"), ":</strong></p>",
+                "<ul>",
+                "<li>", .("Mean value"), ": <strong>", round(summary_stats$dep_mean, 2), "</strong> ",
+                "(", .("Standard Deviation"), " = ", round(summary_stats$dep_sd, 2), ")</li>",
+                "<li>", .("Value range"), ": ", round(summary_stats$dep_min, 2), " - ", round(summary_stats$dep_max, 2), "</li>",
+                "<li>", .("Highest values found in"), ": <strong>", summary_stats$groups_with_highest, "</strong></li>",
+                "<li>", .("Lowest values found in"), ": <strong>", summary_stats$groups_with_lowest, "</strong></li>",
+                "</ul>",
+                
+                "<p><strong>", .("Clinical Interpretation"), ":</strong> ",
+                ifelse(summary_stats$dep_range > 2 * summary_stats$dep_sd,
+                    .("Notable variation observed between groups, suggesting clinically meaningful differences."),
+                    .("Relatively consistent values across groups with minimal variation.")
+                ), "</p>",
+                "</div>"
+            )
+            
+            return(summary_html)
+        },
+        
+        # Advanced misuse detection and contextual warnings
+        .checkForMisuseAndWarnings = function(data, summary_stats) {
+            warnings <- c()
+            
+            # Check for too many groups relative to sample size
+            if (summary_stats$n_groups > summary_stats$n_observations / 3) {
+                warnings <- c(warnings, 
+                    paste(.("Warning: Many groups relative to sample size."), 
+                          .("Consider grouping categories or using a different visualization.")))
+            }
+            
+            # Check for highly skewed data
+            if (summary_stats$dep_range > 5 * summary_stats$dep_sd) {
+                warnings <- c(warnings,
+                    paste(.("Note: Data appears highly variable."),
+                          .("Consider log transformation or outlier investigation.")))
+            }
+            
+            # Check for groups with very different sample sizes
+            group_counts <- table(data$group)
+            max_count <- max(group_counts)
+            min_count <- min(group_counts)
+            if (max_count > 5 * min_count && length(group_counts) > 2) {
+                warnings <- c(warnings,
+                    paste(.("Caution: Unbalanced group sizes detected."),
+                          .("Interpretation should account for different sample sizes per group.")))
+            }
+            
+            # Check for small overall sample size
+            if (summary_stats$n_observations < 10) {
+                warnings <- c(warnings,
+                    .("Note: Small sample size. Results should be interpreted with caution."))
+            }
+            
+            return(warnings)
+        },
+        
         # Populate summary table
         .populateSummary = function(summary_stats) {
             table <- self$results$summary
@@ -311,38 +430,38 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Data characteristics
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Number of Observations",
+                statistic = .("Number of Observations"),
                 value = as.character(summary_stats$n_observations)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Number of Groups",
+                statistic = .("Number of Groups"),
                 value = as.character(summary_stats$n_groups)
             ))
             row_num <- row_num + 1
             
             # Dependent variable statistics
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Mean Value",
+                statistic = .("Mean Value"),
                 value = format(summary_stats$dep_mean, digits = 3)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Median Value",
+                statistic = .("Median Value"),
                 value = format(summary_stats$dep_median, digits = 3)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Standard Deviation",
+                statistic = .("Standard Deviation"),
                 value = format(summary_stats$dep_sd, digits = 3)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Value Range",
+                statistic = .("Value Range"),
                 value = paste(format(summary_stats$dep_min, digits = 3), "-", 
                              format(summary_stats$dep_max, digits = 3))
             ))
@@ -350,13 +469,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Group information
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Highest Value Group",
+                statistic = .("Highest Value Group"),
                 value = as.character(summary_stats$groups_with_highest)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
-                statistic = "Lowest Value Group",
+                statistic = .("Lowest Value Group"),
                 value = as.character(summary_stats$groups_with_lowest)
             ))
         },
@@ -422,6 +541,82 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(base_theme)
         },
         
+        # Create base plot with proper orientation
+        .createBasePlot = function(plot_data, orientation) {
+            if (orientation == "horizontal") {
+                return(ggplot2::ggplot(plot_data, ggplot2::aes(x = dependent, y = group)))
+            } else {
+                return(ggplot2::ggplot(plot_data, ggplot2::aes(x = group, y = dependent)))
+            }
+        },
+        
+        # Add lollipop elements (refactored to eliminate duplication)
+        .addLollipopElements = function(p, plot_data, orientation, color_scheme, highlight_level, point_size, line_width, line_type = "solid", baseline = 0, conditional_color = FALSE, color_threshold = 0) {
+            has_highlight <- color_scheme$has_highlight && 
+                            !is.null(highlight_level) && 
+                            highlight_level %in% plot_data$group
+            
+            # Always create color_category column, determine coloring strategy
+            if (conditional_color) {
+                # Conditional coloring based on threshold
+                plot_data$color_category <- ifelse(plot_data$dependent > color_threshold, "above_threshold", "below_threshold")
+                use_color_mapping <- TRUE
+            } else if (has_highlight) {
+                # Highlight-based coloring
+                plot_data$color_category <- ifelse(plot_data$group == highlight_level, "highlighted", "normal")
+                use_color_mapping <- TRUE
+            } else {
+                # No special coloring - all same category
+                plot_data$color_category <- "normal"
+                use_color_mapping <- FALSE
+            }
+            
+            # Update the plot data in the ggplot object
+            p$data <- plot_data
+            
+            # Get segment coordinates based on orientation
+            if (orientation == "horizontal") {
+                if (use_color_mapping) {
+                    segment_aes <- ggplot2::aes(x = baseline, xend = dependent, y = group, yend = group, color = color_category)
+                    point_aes <- ggplot2::aes(color = color_category)
+                } else {
+                    segment_aes <- ggplot2::aes(x = baseline, xend = dependent, y = group, yend = group)
+                    point_aes <- ggplot2::aes()
+                }
+            } else {
+                if (use_color_mapping) {
+                    segment_aes <- ggplot2::aes(x = group, xend = group, y = baseline, yend = dependent, color = color_category)
+                    point_aes <- ggplot2::aes(color = color_category)
+                } else {
+                    segment_aes <- ggplot2::aes(x = group, xend = group, y = baseline, yend = dependent)
+                    point_aes <- ggplot2::aes()
+                }
+            }
+            
+            # Add segments and points
+            p <- p + ggplot2::geom_segment(segment_aes, linewidth = line_width, linetype = line_type)
+            
+            if (use_color_mapping) {
+                # Apply custom colors
+                if (conditional_color) {
+                    colors <- c("above_threshold" = "#E69F00", "below_threshold" = "#56B4E9")  # Orange/Blue
+                } else if (has_highlight) {
+                    colors <- c("highlighted" = color_scheme$highlight_color, "normal" = color_scheme$normal_color)
+                } else {
+                    colors <- c("normal" = color_scheme$colors[1])
+                }
+                
+                p <- p + 
+                    ggplot2::geom_point(point_aes, size = point_size) +
+                    ggplot2::scale_color_manual(values = colors, guide = "none")
+            } else {
+                # No special coloring - use default color
+                p <- p + ggplot2::geom_point(color = color_scheme$colors[1], size = point_size)
+            }
+            
+            return(p)
+        },
+        
         # Main plotting function
         .plot = function(image, ggtheme, theme, ...) {
             # Get plot data
@@ -432,85 +627,30 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             orientation <- self$options$orientation
             show_values <- self$options$showValues
             show_mean <- self$options$showMean
-            highlight_level <- self$options$highlight
+            highlight_level <- if (self$options$useHighlight) {
+                self$options$highlight
+            } else {
+                NULL  # Disable highlighting if useHighlight is FALSE
+            }
             point_size <- self$options$pointSize
             line_width <- self$options$lineWidth
+            line_type <- self$options$lineType
+            baseline <- self$options$baseline
+            conditional_color <- self$options$conditionalColor
+            color_threshold <- self$options$colorThreshold
             
             # Set up colors
             n_groups <- length(unique(plot_data$group))
             color_scheme <- private$.getColorScheme(n_groups, highlight_level)
             
-            # Create base plot
-            if (orientation == "horizontal") {
-                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = dependent, y = group))
-            } else {
-                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = group, y = dependent))
-            }
+            # Checkpoint before expensive plot generation
+            private$.checkpoint(flush = FALSE)
             
-            # Add lollipop elements
-            if (color_scheme$has_highlight && !is.null(highlight_level)) {
-                # Create highlight indicator
-                plot_data$is_highlight <- plot_data$group == highlight_level
-                
-                if (orientation == "horizontal") {
-                    p <- p + 
-                        ggplot2::geom_segment(
-                            ggplot2::aes(x = 0, xend = dependent, y = group, yend = group,
-                                        color = is_highlight),
-                            size = line_width
-                        ) +
-                        ggplot2::geom_point(
-                            ggplot2::aes(color = is_highlight),
-                            size = point_size
-                        ) +
-                        ggplot2::scale_color_manual(
-                            values = c("TRUE" = color_scheme$highlight_color, 
-                                     "FALSE" = color_scheme$normal_color),
-                            guide = FALSE
-                        )
-                } else {
-                    p <- p + 
-                        ggplot2::geom_segment(
-                            ggplot2::aes(x = group, xend = group, y = 0, yend = dependent,
-                                        color = is_highlight),
-                            size = line_width
-                        ) +
-                        ggplot2::geom_point(
-                            ggplot2::aes(color = is_highlight),
-                            size = point_size
-                        ) +
-                        ggplot2::scale_color_manual(
-                            values = c("TRUE" = color_scheme$highlight_color, 
-                                     "FALSE" = color_scheme$normal_color),
-                            guide = FALSE
-                        )
-                }
-            } else {
-                # Regular coloring
-                if (orientation == "horizontal") {
-                    p <- p + 
-                        ggplot2::geom_segment(
-                            ggplot2::aes(x = 0, xend = dependent, y = group, yend = group),
-                            color = color_scheme$colors[1],
-                            size = line_width
-                        ) +
-                        ggplot2::geom_point(
-                            color = color_scheme$colors[1],
-                            size = point_size
-                        )
-                } else {
-                    p <- p + 
-                        ggplot2::geom_segment(
-                            ggplot2::aes(x = group, xend = group, y = 0, yend = dependent),
-                            color = color_scheme$colors[1],
-                            size = line_width
-                        ) +
-                        ggplot2::geom_point(
-                            color = color_scheme$colors[1],
-                            size = point_size
-                        )
-                }
-            }
+            # Create base plot
+            p <- private$.createBasePlot(plot_data, orientation)
+            
+            # Add lollipop elements (refactored to eliminate duplication)
+            p <- private$.addLollipopElements(p, plot_data, orientation, color_scheme, highlight_level, point_size, line_width, line_type, baseline, conditional_color, color_threshold)
             
             # Add value labels if requested
             if (show_values) {
@@ -537,13 +677,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         xintercept = mean_value,
                         linetype = "dashed",
                         color = "red",
-                        size = 1
+                        linewidth = 1
                     ) +
                     ggplot2::annotate(
                         "text",
                         x = mean_value,
                         y = Inf,
-                        label = paste("Mean =", round(mean_value, 2)),
+                        label = paste(.("Mean ="), round(mean_value, 2)),
                         hjust = 1.1,
                         vjust = 1.5,
                         color = "red",
@@ -554,13 +694,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         yintercept = mean_value,
                         linetype = "dashed",
                         color = "red",
-                        size = 1
+                        linewidth = 1
                     ) +
                     ggplot2::annotate(
                         "text",
                         x = Inf,
                         y = mean_value,
-                        label = paste("Mean =", round(mean_value, 2)),
+                        label = paste(.("Mean ="), round(mean_value, 2)),
                         hjust = 1.1,
                         vjust = -0.5,
                         color = "red",
@@ -588,7 +728,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot_title <- if (!is.null(self$options$title) && nchar(self$options$title) > 0) {
                 self$options$title
             } else {
-                paste("Lollipop Chart:", dep_var, "by", group_var)
+                paste(.("Lollipop Chart:"), dep_var, .("by"), group_var)
             }
             
             p <- p + ggplot2::labs(
