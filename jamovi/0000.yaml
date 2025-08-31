@@ -1629,7 +1629,7 @@ analyses:
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Lines
     menuTitle: Line Chart
     menuSubtitle: Time Series and Trend Analysis
@@ -1649,9 +1649,10 @@ analyses:
     category: analyses
     menuSubtitle: Categorical Data Visualization
     description: >-
-      Creates lollipop charts for categorical data visualization with emphasis
-      on clinical applications like patient timelines, treatment outcomes, and
-      biomarker comparisons.
+      Creates lollipop charts for categorical data visualization following R
+      Graph Gallery best practices, with emphasis on clinical applications like
+      patient timelines, treatment outcomes, and biomarker comparisons. Uses
+      geom_segment() and geom_point() for optimal visual presentation.
   - title: Parallel Coordinates Plot
     name: parallelplot
     ns: ClinicoPath

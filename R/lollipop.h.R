@@ -8,6 +8,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
+            useHighlight = FALSE,
             highlight = NULL,
             sortBy = "original",
             orientation = "vertical",
@@ -17,6 +18,10 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             theme = "default",
             pointSize = 3,
             lineWidth = 1,
+            lineType = "solid",
+            baseline = 0,
+            conditionalColor = FALSE,
+            colorThreshold = 0,
             xlabel = NULL,
             ylabel = NULL,
             title = NULL,
@@ -44,6 +49,10 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..useHighlight <- jmvcore::OptionBool$new(
+                "useHighlight",
+                useHighlight,
+                default=FALSE)
             private$..highlight <- jmvcore::OptionLevel$new(
                 "highlight",
                 highlight,
@@ -102,6 +111,27 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=1,
                 min=0.5,
                 max=5)
+            private$..lineType <- jmvcore::OptionList$new(
+                "lineType",
+                lineType,
+                options=list(
+                    "solid",
+                    "dashed",
+                    "dotted",
+                    "dotdash"),
+                default="solid")
+            private$..baseline <- jmvcore::OptionNumber$new(
+                "baseline",
+                baseline,
+                default=0)
+            private$..conditionalColor <- jmvcore::OptionBool$new(
+                "conditionalColor",
+                conditionalColor,
+                default=FALSE)
+            private$..colorThreshold <- jmvcore::OptionNumber$new(
+                "colorThreshold",
+                colorThreshold,
+                default=0)
             private$..xlabel <- jmvcore::OptionString$new(
                 "xlabel",
                 xlabel)
@@ -126,6 +156,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
+            self$.addOption(private$..useHighlight)
             self$.addOption(private$..highlight)
             self$.addOption(private$..sortBy)
             self$.addOption(private$..orientation)
@@ -135,6 +166,10 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..theme)
             self$.addOption(private$..pointSize)
             self$.addOption(private$..lineWidth)
+            self$.addOption(private$..lineType)
+            self$.addOption(private$..baseline)
+            self$.addOption(private$..conditionalColor)
+            self$.addOption(private$..colorThreshold)
             self$.addOption(private$..xlabel)
             self$.addOption(private$..ylabel)
             self$.addOption(private$..title)
@@ -144,6 +179,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
+        useHighlight = function() private$..useHighlight$value,
         highlight = function() private$..highlight$value,
         sortBy = function() private$..sortBy$value,
         orientation = function() private$..orientation$value,
@@ -153,6 +189,10 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         theme = function() private$..theme$value,
         pointSize = function() private$..pointSize$value,
         lineWidth = function() private$..lineWidth$value,
+        lineType = function() private$..lineType$value,
+        baseline = function() private$..baseline$value,
+        conditionalColor = function() private$..conditionalColor$value,
+        colorThreshold = function() private$..colorThreshold$value,
         xlabel = function() private$..xlabel$value,
         ylabel = function() private$..ylabel$value,
         title = function() private$..title$value,
@@ -161,6 +201,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..dep = NA,
         ..group = NA,
+        ..useHighlight = NA,
         ..highlight = NA,
         ..sortBy = NA,
         ..orientation = NA,
@@ -170,6 +211,10 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..theme = NA,
         ..pointSize = NA,
         ..lineWidth = NA,
+        ..lineType = NA,
+        ..baseline = NA,
+        ..conditionalColor = NA,
+        ..colorThreshold = NA,
         ..xlabel = NA,
         ..ylabel = NA,
         ..title = NA,
@@ -192,7 +237,9 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Lollipop Chart",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "RGraphGalleryLollipop",
+                    "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -243,32 +290,83 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Lollipop Chart
 #'
-#' Creates lollipop charts for categorical data visualization with emphasis on 
-#' clinical applications like patient timelines, treatment outcomes, and 
-#' biomarker comparisons.
+#' Creates lollipop charts for categorical data visualization following R 
+#' Graph Gallery best practices, with emphasis on clinical applications like 
+#' patient timelines, treatment outcomes, and biomarker comparisons. Uses 
+#' geom_segment() and geom_point() for optimal visual presentation.
 #'
 #' @examples
-#' # Basic lollipop chart
+#' # Load clinical lab data
+#' clinical_lab_data <- read.csv("clinical_lab_data.csv")
+#' # Or load from package: data("clinical_lab_data", package = "ClinicoPath")
+#'
+#' # Basic lollipop chart - Hemoglobin by treatment group
 #' lollipop(
-#'     data = clinical_data,
-#'     dep = "biomarker_level",
-#'     group = "patient_id"
+#'     data = clinical_lab_data,
+#'     dep = "hemoglobin",
+#'     group = "treatment_group",
+#'     sortBy = "value_desc",
+#'     title = "Hemoglobin Levels by Treatment"
 #' )
 #'
-#' # Advanced lollipop with customization
+#' # Highlighting severe disease cases - Albumin levels
 #' lollipop(
-#'     data = clinical_data,
-#'     dep = "biomarker_level",
-#'     group = "patient_id",
-#'     highlight = "high_risk_patient",
-#'     sortBy = "value",
+#'     data = clinical_lab_data,
+#'     dep = "albumin",
+#'     group = "disease_severity",
+#'     useHighlight = TRUE,
+#'     highlight = "Severe",
+#'     orientation = "horizontal",
 #'     showValues = TRUE,
-#'     orientation = "horizontal"
+#'     colorScheme = "clinical",
+#'     title = "Albumin Levels by Disease Severity"
+#' )
+#'
+#' # Conditional coloring for abnormal creatinine (>1.2 mg/dL)
+#' lollipop(
+#'     data = clinical_lab_data,
+#'     dep = "creatinine",
+#'     group = "age_group",
+#'     conditionalColor = TRUE,
+#'     colorThreshold = 1.2,
+#'     lineType = "dashed",
+#'     sortBy = "value_asc",
+#'     title = "Creatinine by Age (Threshold: 1.2 mg/dL)"
+#' )
+#'
+#' # Advanced - Platelet count with clinical baseline
+#' lollipop(
+#'     data = clinical_lab_data,
+#'     dep = "platelet_count",
+#'     group = "hospital",
+#'     baseline = 150,  # Lower normal limit
+#'     useHighlight = TRUE,
+#'     highlight = "Hospital A",
+#'     lineType = "dotted",
+#'     pointSize = 4,
+#'     showMean = TRUE,
+#'     colorScheme = "clinical",
+#'     title = "Platelet Counts by Hospital (Normal >150)"
+#' )
+#'
+#' # Compare WBC across multiple factors
+#' lollipop(
+#'     data = clinical_lab_data,
+#'     dep = "white_blood_cells",
+#'     group = "treatment_group",
+#'     conditionalColor = TRUE,
+#'     colorThreshold = 11,  # Upper normal limit
+#'     orientation = "horizontal",
+#'     sortBy = "value_desc",
+#'     lineWidth = 2,
+#'     title = "WBC Count by Treatment (ULN: 11)"
 #' )
 #'
 #' @param data The data as a data frame.
 #' @param dep The numeric variable for the values (lollipop heights/lengths).
 #' @param group The categorical variable for grouping (lollipop categories).
+#' @param useHighlight Enable or disable highlighting of specific levels in
+#'   the plot.
 #' @param highlight Specific level to highlight in the plot with different
 #'   color/style.
 #' @param sortBy How to sort the lollipops in the chart.
@@ -279,6 +377,11 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param theme Overall theme/appearance of the plot.
 #' @param pointSize Size of the lollipop points.
 #' @param lineWidth Width of the lollipop stems.
+#' @param lineType Type of line for lollipop stems.
+#' @param baseline Starting point for lollipop stems (default is 0).
+#' @param conditionalColor Enable coloring based on value thresholds.
+#' @param colorThreshold Threshold value for conditional coloring (values
+#'   above/below get different colors).
 #' @param xlabel Custom label for the x-axis.
 #' @param ylabel Custom label for the y-axis.
 #' @param title Custom title for the plot.
@@ -302,6 +405,7 @@ lollipop <- function(
     data,
     dep,
     group,
+    useHighlight = FALSE,
     highlight,
     sortBy = "original",
     orientation = "vertical",
@@ -311,6 +415,10 @@ lollipop <- function(
     theme = "default",
     pointSize = 3,
     lineWidth = 1,
+    lineType = "solid",
+    baseline = 0,
+    conditionalColor = FALSE,
+    colorThreshold = 0,
     xlabel,
     ylabel,
     title,
@@ -333,6 +441,7 @@ lollipop <- function(
     options <- lollipopOptions$new(
         dep = dep,
         group = group,
+        useHighlight = useHighlight,
         highlight = highlight,
         sortBy = sortBy,
         orientation = orientation,
@@ -342,6 +451,10 @@ lollipop <- function(
         theme = theme,
         pointSize = pointSize,
         lineWidth = lineWidth,
+        lineType = lineType,
+        baseline = baseline,
+        conditionalColor = conditionalColor,
+        colorThreshold = colorThreshold,
         xlabel = xlabel,
         ylabel = ylabel,
         title = title,
