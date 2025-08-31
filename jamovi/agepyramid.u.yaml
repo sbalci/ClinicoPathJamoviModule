@@ -25,16 +25,56 @@ children:
           - type: LevelSelector
             name: female
             enable: (gender)
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Plot Configuration
+    collapsed: false
     children:
-      - type: TextBox
-        name: bin_width
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plot_title
-        format: string
-        width: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: bin_width
+            format: number
+            enable: "(age_groups == 'custom')"
+            events:
+              change: ./agepyramid.events::onChange_binWidth
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plot_title
+            format: string
+            width: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: color_palette
+            label: "Color Palette"
+            events:
+              change: ./agepyramid.events::onChange_colorPalette
+          - type: ComboBox
+            name: age_groups
+            label: "Age Group Preset"
+          - type: ComboBox
+            name: plot_engine
+            label: "Plot Engine"
+            events:
+              change: ./agepyramid.events::onChange_plotEngine
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: color1
+            format: string
+            label: "First Color (Female)"
+            enable: "(color_palette == 'custom')"
+            events:
+              change: ./agepyramid.events::onChange_color1
+          - type: TextBox
+            name: color2
+            format: string
+            label: "Second Color (Male)"
+            enable: "(color_palette == 'custom')"
+            events:
+              change: ./agepyramid.events::onChange_color2

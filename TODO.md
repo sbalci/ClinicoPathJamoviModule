@@ -31,16 +31,6 @@ echo "/document-function FUNC_NAME" | claude
 
 ## JJStatsPlotT
 
-agepyramid2
-
-- agepyramid - Age Pyramid
-echo "/check-function agepyramid" | claude
-echo "/checkpoint agepyramid" | claude
-echo "/prepare-translation agepyramid" | claude
-echo "/review-function agepyramid" | claude
-echo "/fix-function agepyramid" | claude
-echo "/document-function agepyramid" | claude
-
 
 
 jggridges

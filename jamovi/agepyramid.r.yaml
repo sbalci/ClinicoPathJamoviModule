@@ -13,18 +13,33 @@ items:
       columns:
       # columns: &idcols
         - name: Pop
-          title: "Population"
+          title: "Age Group"
           type: text
         - name: Female
-          title: "Female"
+          title: "Female (n)"
           type: number
+        - name: Female_Pct
+          title: "Female (%)"
+          type: number
+          format: 'zto;dp:1'
         - name: Male
-          title: "Male"
+          title: "Male (n)"
           type: number
+        - name: Male_Pct
+          title: "Male (%)"
+          type: number
+          format: 'zto;dp:1'
       clearWith:
           - age
           - gender
           - female
+          - bin_width
+          - plot_title
+          - color1
+          - color2
+          - color_palette
+          - age_groups
+          - plot_engine
 
 
 
@@ -39,6 +54,13 @@ items:
           - age
           - gender
           - female
+          - bin_width
+          - plot_title
+          - color1
+          - color2
+          - color_palette
+          - age_groups
+          - plot_engine
 
 refs:
     - ClinicoPathJamoviModule
