@@ -1,7 +1,7 @@
 ---
 name: grafify
 title: Scientific Visualization with Grafify
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: ClinicoPath Scientific Plots
 menuSubtitle: Easy Graphs & Color-Blind Friendly Palettes
 version: '0.0.3'

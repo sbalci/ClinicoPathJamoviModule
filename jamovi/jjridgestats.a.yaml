@@ -1,7 +1,7 @@
 ---
 name: jjridgestats
 title: Ridgeline Plot
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Distribution Comparison'
 version: '0.0.3'

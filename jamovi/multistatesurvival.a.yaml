@@ -1,7 +1,7 @@
 ---
 name: multistatesurvival
 title: Multistate Survival Models
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: Advanced Survival
 menuSubtitle: 'Disease Progression and Transition Modeling'
 version: '0.0.3'

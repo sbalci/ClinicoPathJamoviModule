@@ -1,7 +1,7 @@
 ---
 name: aivalidation
 title: AI Model Validation with Cross-Validation
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: AI & Machine Learning
 menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
 version: '1.0.0'

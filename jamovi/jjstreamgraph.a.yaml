@@ -1,7 +1,7 @@
 ---
 name: jjstreamgraph
 title: StreamGraphs
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Time Series Visualization'
 version: '0.0.3'
 jas: '1.2'

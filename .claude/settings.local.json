@@ -105,7 +105,9 @@
       "Read(//Users/serdarbalci/Documents/GitHub/JamoviTest/**)",
       "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/R/**)",
       "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/**)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "WebSearch",
+      "WebFetch(domain:corybrunson.github.io)"
     ],
     "deny": [],
     "additionalDirectories": [
