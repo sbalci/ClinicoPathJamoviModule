@@ -8,6 +8,7 @@ lollipop(
   data,
   dep,
   group,
+  useHighlight = FALSE,
   highlight,
   sortBy = "original",
   orientation = "vertical",
@@ -17,6 +18,10 @@ lollipop(
   theme = "default",
   pointSize = 3,
   lineWidth = 1,
+  lineType = "solid",
+  baseline = 0,
+  conditionalColor = FALSE,
+  colorThreshold = 0,
   xlabel,
   ylabel,
   title,
@@ -30,6 +35,9 @@ lollipop(
 \item{dep}{The numeric variable for the values (lollipop heights/lengths).}
 
 \item{group}{The categorical variable for grouping (lollipop categories).}
+
+\item{useHighlight}{Enable or disable highlighting of specific levels in
+the plot.}
 
 \item{highlight}{Specific level to highlight in the plot with different
 color/style.}
@@ -49,6 +57,15 @@ color/style.}
 \item{pointSize}{Size of the lollipop points.}
 
 \item{lineWidth}{Width of the lollipop stems.}
+
+\item{lineType}{Type of line for lollipop stems.}
+
+\item{baseline}{Starting point for lollipop stems (default is 0).}
+
+\item{conditionalColor}{Enable coloring based on value thresholds.}
+
+\item{colorThreshold}{Threshold value for conditional coloring (values
+above/below get different colors).}
 
 \item{xlabel}{Custom label for the x-axis.}
 
@@ -75,27 +92,76 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Creates lollipop charts for categorical data visualization with emphasis on
-clinical applications like patient timelines, treatment outcomes, and
-biomarker comparisons.
+Creates lollipop charts for categorical data visualization following R
+Graph Gallery best practices, with emphasis on clinical applications like
+patient timelines, treatment outcomes, and biomarker comparisons. Uses
+geom_segment() and geom_point() for optimal visual presentation.
 }
 \examples{
-# Basic lollipop chart
+# Load clinical lab data
+clinical_lab_data <- read.csv("clinical_lab_data.csv")
+# Or load from package: data("clinical_lab_data", package = "ClinicoPath")
+
+# Basic lollipop chart - Hemoglobin by treatment group
 lollipop(
-    data = clinical_data,
-    dep = "biomarker_level",
-    group = "patient_id"
+    data = clinical_lab_data,
+    dep = "hemoglobin",
+    group = "treatment_group",
+    sortBy = "value_desc",
+    title = "Hemoglobin Levels by Treatment"
 )
 
-# Advanced lollipop with customization
+# Highlighting severe disease cases - Albumin levels
 lollipop(
-    data = clinical_data,
-    dep = "biomarker_level",
-    group = "patient_id",
-    highlight = "high_risk_patient",
-    sortBy = "value",
+    data = clinical_lab_data,
+    dep = "albumin",
+    group = "disease_severity",
+    useHighlight = TRUE,
+    highlight = "Severe",
+    orientation = "horizontal",
     showValues = TRUE,
-    orientation = "horizontal"
+    colorScheme = "clinical",
+    title = "Albumin Levels by Disease Severity"
+)
+
+# Conditional coloring for abnormal creatinine (>1.2 mg/dL)
+lollipop(
+    data = clinical_lab_data,
+    dep = "creatinine",
+    group = "age_group",
+    conditionalColor = TRUE,
+    colorThreshold = 1.2,
+    lineType = "dashed",
+    sortBy = "value_asc",
+    title = "Creatinine by Age (Threshold: 1.2 mg/dL)"
+)
+
+# Advanced - Platelet count with clinical baseline
+lollipop(
+    data = clinical_lab_data,
+    dep = "platelet_count",
+    group = "hospital",
+    baseline = 150,  # Lower normal limit
+    useHighlight = TRUE,
+    highlight = "Hospital A",
+    lineType = "dotted",
+    pointSize = 4,
+    showMean = TRUE,
+    colorScheme = "clinical",
+    title = "Platelet Counts by Hospital (Normal >150)"
+)
+
+# Compare WBC across multiple factors
+lollipop(
+    data = clinical_lab_data,
+    dep = "white_blood_cells",
+    group = "treatment_group",
+    conditionalColor = TRUE,
+    colorThreshold = 11,  # Upper normal limit
+    orientation = "horizontal",
+    sortBy = "value_desc",
+    lineWidth = 2,
+    title = "WBC Count by Treatment (ULN: 11)"
 )
 
 }

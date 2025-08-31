@@ -31,10 +31,11 @@ echo "/document-function FUNC_NAME" | claude
 
 ## JJStatsPlotT
 
-
+agepyramid2
+jggridges
 ggsegmentedtotalbar
 riverplot
-lollipop
+
 
 
 - jjwithinstats - Box-Violin Plots to Compare Within Groups

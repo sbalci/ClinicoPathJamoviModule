@@ -1,7 +1,7 @@
 ---
 name:  jjriverplot
 title: River Plots
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical Over Time'
 menuSubtitle: 'Flow and Transition Visualization'
 version: '1.0.0'

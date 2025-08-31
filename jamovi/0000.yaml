@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.51
+version: 0.0.31.52
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-08-30'
+date: '2025-08-31'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1642,8 +1642,8 @@ analyses:
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
-    menuSubgroup: Drafts
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
     menuTitle: Lollipop Chart
     ribbon: analyses
     category: analyses
@@ -1777,12 +1777,15 @@ analyses:
     menuTitle: River Plots
     menuSubtitle: Flow and Transition Visualization
     description: >
-      'Function for generating river plots (alluvial diagrams) to visualize
+      Creates river plots (alluvial diagrams, Sankey diagrams, and stream
+      graphs) 
 
-      flows and transitions over time or between categories. Supports alluvial 
+      to visualize flows and transitions over time or between categories. 
 
-      diagrams, Sankey diagrams, and stream graphs with customizable
-      aesthetics.'
+      Ideal for tracking patient journeys, treatment pathways, or any
+      categorical 
+
+      data that changes across stages or time points.
     category: analyses
   - title: Scientific Visualization with Grafify
     name: grafify
