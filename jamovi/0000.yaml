@@ -1504,7 +1504,7 @@ analyses:
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
@@ -1543,7 +1543,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -1698,7 +1698,7 @@ analyses:
   - title: Ridge Plot
     name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Distribution
     menuTitle: Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization

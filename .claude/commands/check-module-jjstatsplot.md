@@ -24,6 +24,12 @@ Please systematically check these key functions:
 - `jjpiestats`
 - `jwaffle`
 - `statsplot2`
+- `jjarcdiagram`
+- `linechart`
+- `lollipop`
+- `raincloud`
+
+
 
 ## Analysis Approach
 

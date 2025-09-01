@@ -27,9 +27,41 @@ echo "/document-function FUNC_NAME" | claude
 
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
+
+## JJStatsPlotT
+
+- jjcorrmat - Correlation Matrix
+
+echo "/document-function jjcorrmat" | claude
+
+- jjbarstats - Bar Charts
+echo "/check-function jjbarstats" | claude
+echo "/checkpoint jjbarstats" | claude
+echo "/prepare-translation jjbarstats" | claude
+echo "/review-function jjbarstats" | claude
+echo "/fix-function jjbarstats" | claude
+echo "/document-function jjbarstats" | claude
+
+- jjpiestats - Pie Charts
+echo "/check-function jjpiestats" | claude
+echo "/checkpoint jjpiestats" | claude
+echo "/prepare-translation jjpiestats" | claude
+echo "/review-function jjpiestats" | claude
+echo "/fix-function jjpiestats" | claude
+echo "/document-function jjpiestats" | claude
+
+/check-module-jjstatsplot
+
+
+
+
+
+
+
+
+
+
 ***
-
-
 
 jjridges
 echo "/check-function FUNC_NAME" | claude
@@ -74,36 +106,10 @@ echo "/fix-function alluvial" | claude
 echo "/document-function alluvial" | claude
 
 
-## JJStatsPlotT
-
-- jjwithinstats - Box-Violin Plots to Compare Within Groups
+***
 
 
-echo "/document-function jjwithinstats" | claude
 
-- jjcorrmat - Correlation Matrix
-echo "/check-function jjcorrmat" | claude
-echo "/checkpoint jjcorrmat" | claude
-echo "/prepare-translation jjcorrmat" | claude
-echo "/review-function jjcorrmat" | claude
-echo "/fix-function jjcorrmat" | claude
-echo "/document-function jjcorrmat" | claude
-
-- jjbarstats - Bar Charts
-echo "/check-function jjbarstats" | claude
-echo "/checkpoint jjbarstats" | claude
-echo "/prepare-translation jjbarstats" | claude
-echo "/review-function jjbarstats" | claude
-echo "/fix-function jjbarstats" | claude
-echo "/document-function jjbarstats" | claude
-
-- jjpiestats - Pie Charts
-echo "/check-function jjpiestats" | claude
-echo "/checkpoint jjpiestats" | claude
-echo "/prepare-translation jjpiestats" | claude
-echo "/review-function jjpiestats" | claude
-echo "/fix-function jjpiestats" | claude
-echo "/document-function jjpiestats" | claude
 
 ## meddecideT (11 functions)
 
@@ -195,6 +201,8 @@ echo "/review-function decisioncompare" | claude
 echo "/fix-function decisioncompare" | claude
 echo "/document-function decisioncompare" | claude
 
+/check-module-meddecide
+
 ## SurvivalT (5 functions)
 
 - oddsratio - Odds Ratio Table and Plot
@@ -236,6 +244,8 @@ echo "/prepare-translation survivalcont" | claude
 echo "/review-function survivalcont" | claude
 echo "/fix-function survivalcont" | claude
 echo "/document-function survivalcont" | claude
+
+/check-module-jsurvival
 
 ## ExplorationT (10 functions)
 
@@ -287,8 +297,6 @@ echo "/review-function vartree" | claude
 echo "/fix-function vartree" | claude
 echo "/document-function vartree" | claude
 
-
-
 - chisqposttest - Chi-Square Post-Hoc Tests
 echo "/check-function chisqposttest" | claude
 echo "/checkpoint chisqposttest" | claude
@@ -297,7 +305,6 @@ echo "/review-function chisqposttest" | claude
 echo "/fix-function chisqposttest" | claude
 echo "/document-function chisqposttest" | claude
 
-
 - benford - Benford Analysis
 echo "/check-function benford" | claude
 echo "/checkpoint benford" | claude
@@ -305,6 +312,8 @@ echo "/prepare-translation benford" | claude
 echo "/review-function benford" | claude
 echo "/fix-function benford" | claude
 echo "/document-function benford" | claude
+
+/check-module-ClinicoPathDescriptives
 
 ## OncoPathologyT (26 functions)
 
@@ -515,3 +524,5 @@ echo "/prepare-translation timeupdatesurvival" | claude
 echo "/review-function timeupdatesurvival" | claude
 echo "/fix-function timeupdatesurvival" | claude
 echo "/document-function timeupdatesurvival" | claude
+
+/check-module-OncoPathology
