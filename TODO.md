@@ -30,9 +30,7 @@ echo "/document-function FUNC_NAME" | claude
 
 ## JJStatsPlotT
 
-- jjcorrmat - Correlation Matrix
 
-echo "/document-function jjcorrmat" | claude
 
 - jjbarstats - Bar Charts
 echo "/check-function jjbarstats" | claude

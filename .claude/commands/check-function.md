@@ -10,7 +10,7 @@ args:
   check_external:
     description: Compare against upstream docs on CRAN/GitHub (reference manuals, pkgdown, NEWS)
     required: false
-    default: true
+    default: false
   cran_pkg:
     description: Upstream CRAN package name to compare against (e.g., jmv)
     required: false
