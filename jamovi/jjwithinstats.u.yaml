@@ -41,6 +41,15 @@ children:
     collapsed: true
     children:
       - type: Label
+        label: Clinical Scenario
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clinicalpreset
+      - type: Label
         label: Test Method
         fitToGrid: true
         children:
@@ -67,7 +76,6 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
-
   - type: CollapseBox
     label: Plot Display
     collapsed: true
@@ -103,7 +111,6 @@ children:
                   - type: ComboBox
                     name: centralitytype
                     enable: (centralityplotting)
-
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -170,6 +177,3 @@ children:
                 name: plotheight
                 format: number
                 width: small
-
-
-

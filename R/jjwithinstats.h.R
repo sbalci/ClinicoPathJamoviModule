@@ -14,6 +14,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             centralitypath = FALSE,
             centralityplotting = FALSE,
             centralitytype = "parametric",
+            clinicalpreset = "custom",
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
@@ -90,6 +91,15 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..clinicalpreset <- jmvcore::OptionList$new(
+                "clinicalpreset",
+                clinicalpreset,
+                options=list(
+                    "custom",
+                    "biomarker",
+                    "treatment",
+                    "laboratory"),
+                default="custom")
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -202,6 +212,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..centralitypath)
             self$.addOption(private$..centralityplotting)
             self$.addOption(private$..centralitytype)
+            self$.addOption(private$..clinicalpreset)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
@@ -230,6 +241,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         centralitypath = function() private$..centralitypath$value,
         centralityplotting = function() private$..centralityplotting$value,
         centralitytype = function() private$..centralitytype$value,
+        clinicalpreset = function() private$..clinicalpreset$value,
         typestatistics = function() private$..typestatistics$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
@@ -257,6 +269,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..centralitypath = NA,
         ..centralityplotting = NA,
         ..centralitytype = NA,
+        ..clinicalpreset = NA,
         ..typestatistics = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
@@ -282,7 +295,9 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        plot = function() private$.items[["plot"]],
+        summary = function() private$.items[["summary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -299,6 +314,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep2",
                     "dep3",
                     "dep4",
+                    "clinicalpreset",
                     "typestatistics",
                     "pairwisecomparisons",
                     "pairwisedisplay",
@@ -324,13 +340,21 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="Analysis Guide"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Violin Plots",
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary"))}))
 
 jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjwithinstatsBase",
@@ -442,10 +466,20 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep4 .
 #' @param pointpath .
 #' @param centralitypath .
-#' @param centralityplotting .
+#' @param centralityplotting Display mean/median lines across time points to
+#'   visualize the overall trend.  Helps identify if the group as a whole is
+#'   improving, declining, or stable over time.
 #' @param centralitytype .
-#' @param typestatistics .
-#' @param pairwisecomparisons .
+#' @param clinicalpreset Choose a preset optimized for common clinical
+#'   scenarios, or select Custom for manual configuration.
+#' @param typestatistics Parametric: Assumes normal distribution, most
+#'   powerful when appropriate.  Nonparametric: No distribution assumptions,
+#'   robust for skewed biomarker data. Robust: Uses trimmed means, reduces
+#'   outlier influence. Bayesian: Provides evidence strength rather than
+#'   p-values.
+#' @param pairwisecomparisons Enable to see which specific time points differ
+#'   significantly (e.g., baseline vs month 3, month 3 vs month 6).  Useful for
+#'   identifying when changes occur during treatment or disease progression.
 #' @param pairwisedisplay .
 #' @param padjustmethod .
 #' @param effsizetype .
@@ -467,7 +501,9 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -481,6 +517,7 @@ jjwithinstats <- function(
     centralitypath = FALSE,
     centralityplotting = FALSE,
     centralitytype = "parametric",
+    clinicalpreset = "custom",
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
@@ -525,6 +562,7 @@ jjwithinstats <- function(
         centralitypath = centralitypath,
         centralityplotting = centralityplotting,
         centralitytype = centralitytype,
+        clinicalpreset = clinicalpreset,
         typestatistics = typestatistics,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
