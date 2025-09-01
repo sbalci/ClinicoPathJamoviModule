@@ -8,6 +8,7 @@ clearWith:
     - dep2
     - dep3
     - dep4
+    - clinicalpreset
     - typestatistics
     - pairwisecomparisons
     - pairwisedisplay
@@ -35,9 +36,12 @@ clearWith:
 items:
 
     - name:  todo
-      title: To Do
+      title: Analysis Guide
       type:  Html
 
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
 
     - name: plot
       title: 'Violin Plots'
@@ -45,27 +49,11 @@ items:
       renderFun: .plot
       requiresData: true
 
-
-    # - name:  e_stats
-    #   title: e_stats
-    #   type:  Preformatted
-
-    # - name:  e_subtitle
-    #   title: e_subtitle
-    #   type:  Preformatted
-
-    # - name:  e_caption
-    #   title: e_caption
-    #   type:  Preformatted
+    - name: summary
+      title: Analysis Summary
+      type: Html
 
 
-    # - name:  e_plot
-    #   title: e_plot
-    #   type:  Preformatted
-
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
 
 
 refs:

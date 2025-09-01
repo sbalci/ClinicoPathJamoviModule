@@ -1,7 +1,7 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
 version: '0.0.31'
@@ -136,9 +136,13 @@ options:
 
 
     - name: centralityplotting
-      title: Show Centrality
+      title: 'Show Average Values'
       type: Bool
       default: false
+      description:
+          R: >
+            Display mean/median lines across time points to visualize the overall trend. 
+            Helps identify if the group as a whole is improving, declining, or stable over time.
 
     - name: centralitytype
       title: 'Centrality Type'
@@ -155,24 +159,51 @@ options:
       default: parametric
 
 
-    - name: typestatistics
-      title: 'Type of Statistic'
+    - name: clinicalpreset
+      title: 'Clinical Analysis Preset'
       type: List
       options:
-        - title: Parametric
+        - title: 'Custom (Manual Configuration)'
+          name: custom
+        - title: 'Biomarker Tracking (Nonparametric)'  
+          name: biomarker
+        - title: 'Treatment Response (Parametric)'
+          name: treatment  
+        - title: 'Laboratory Values (Robust)'
+          name: laboratory
+      default: custom
+      description:
+          R: >
+            Choose a preset optimized for common clinical scenarios, or select Custom for manual configuration.
+
+    - name: typestatistics
+      title: 'Statistical Test Type'
+      type: List
+      options:
+        - title: 'Parametric (Normal Distribution)'
           name: parametric
-        - title: Nonparametric
+        - title: 'Nonparametric (No Distribution Assumptions)'
           name: nonparametric
-        - title: Robust
+        - title: 'Robust (Outlier-Resistant)'
           name: robust
-        - title: Bayes
+        - title: 'Bayesian (Evidence-Based)'
           name: bayes
       default: parametric
+      description:
+          R: >
+            Parametric: Assumes normal distribution, most powerful when appropriate. 
+            Nonparametric: No distribution assumptions, robust for skewed biomarker data.
+            Robust: Uses trimmed means, reduces outlier influence.
+            Bayesian: Provides evidence strength rather than p-values.
 
     - name: pairwisecomparisons
-      title: Pairwise Comparisons
+      title: 'Compare Each Time Point Pair'
       type: Bool
       default: false
+      description:
+          R: >
+            Enable to see which specific time points differ significantly (e.g., baseline vs month 3, month 3 vs month 6). 
+            Useful for identifying when changes occur during treatment or disease progression.
 
     - name: pairwisedisplay
       title: 'Pairwise Display'
@@ -235,7 +266,7 @@ options:
     - name: point
       title: Points
       type: Bool
-      default: true
+      default: false
 
     - name: mytitle
       title: Title
@@ -260,12 +291,12 @@ options:
     - name: resultssubtitle
       title: Statistical Results
       type: Bool
-      default: true
+      default: false
 
     - name: bfmessage
       title: Bayes Factor Message
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
@@ -366,10 +397,10 @@ options:
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
 #
 # bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
+# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (default: false).
 #
 # results.subtitle
-# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
+# Decides whether the results of statistical tests are to be displayed as a subtitle (default: false). If set to FALSE, only the plot will be returned.
 #
 # xlab
 # Labels for x and y axis variables. If NULL (default), variable names for x and y will be used.
@@ -384,7 +415,7 @@ options:
 # The text for the plot subtitle. Will work only if results.subtitle = FALSE.
 #
 # sample.size.label
-# Logical that decides whether sample size information should be displayed for each level of the grouping variable x (Default: TRUE).
+# Logical that decides whether sample size information should be displayed for each level of the grouping variable x (default: false).
 #
 # k
 # Number of digits after decimal point (should be an integer) (Default: k = 2L).
@@ -444,7 +475,7 @@ options:
 # A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
 #
 # ggstatsplot.layer
-# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
+# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (default: false). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
 #
 # package
 # Name of the package from which the given palette is to be extracted. The available palettes and packages can be checked by running View(paletteer::palettes_d_names).
@@ -517,7 +548,7 @@ options:
 # Type of statistic expected ("parametric" or "nonparametric" or "robust" or "bayes").Corresponding abbreviations are also accepted: "p" (for parametric), "np" (nonparametric), "r" (robust), or "bf"resp.
 #
 # pairwise.comparisons
-# Logical that decides whether pairwise comparisons are to be displayed (default: TRUE). Please note that only significant comparisons will be shown by default. To change this behavior, select appropriate option with pairwise.display argument. The pairwise comparison dataframes are prepared using the pairwiseComparisons::pairwise_comparisons function. For more details about pairwise comparisons, see the documentation for that function.
+# Logical that decides whether pairwise comparisons are to be displayed (default: false). Please note that only significant comparisons will be shown by default. To change this behavior, select appropriate option with pairwise.display argument. The pairwise comparison dataframes are prepared using the pairwiseComparisons::pairwise_comparisons function. For more details about pairwise comparisons, see the documentation for that function.
 #
 # pairwise.display
 # Decides which pairwise comparisons to display. Available options are "significant" (abbreviation accepted: "s") or "non-significant" (abbreviation accepted: "ns") or "everything"/"all". The default is "significant". You can use this argument to make sure that your plot is not uber-cluttered when you have multiple groups being compared and scores of pairwise comparisons being displayed.
@@ -532,10 +563,10 @@ options:
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
 #
 # bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
+# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (default: false).
 #
 # results.subtitle
-# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
+# Decides whether the results of statistical tests are to be displayed as a subtitle (default: false). If set to FALSE, only the plot will be returned.
 #
 # xlab
 # Labels for x and y axis variables. If NULL (default), variable names for x and y will be used.
@@ -550,7 +581,7 @@ options:
 # The text for the plot subtitle. Will work only if results.subtitle = FALSE.
 #
 # sample.size.label
-# Logical that decides whether sample size information should be displayed for each level of the grouping variable x (Default: TRUE).
+# Logical that decides whether sample size information should be displayed for each level of the grouping variable x (default: false).
 #
 # k
 # Number of digits after decimal point (should be an integer) (Default: k = 2L).
@@ -565,7 +596,7 @@ options:
 # Trim level for the mean when carrying out robust tests. If you get error stating "Standard error cannot be computed because of Winsorized variance of 0 (e.g., due to ties). Try to decrease the trimming level.", try to play around with the value of tr, which is by default set to 0.1. Lowering the value might help.
 #
 # mean.plotting
-# Logical that decides whether mean is to be highlighted and its value to be displayed (Default: TRUE).
+# Logical that decides whether mean is to be highlighted and its value to be displayed (default: false).
 #
 # mean.ci
 # Logical that decides whether 95% confidence interval for mean is to be displayed (Default: FALSE).
@@ -604,7 +635,7 @@ options:
 # A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
 #
 # ggstatsplot.layer
-# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
+# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (default: false). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
 #
 # package
 # Name of the package from which the given palette is to be extracted. The available palettes and packages can be checked by running View(paletteer::palettes_d_names).
