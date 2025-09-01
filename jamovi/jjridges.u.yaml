@@ -157,6 +157,14 @@ children:
           - type: CheckBox
             name: reverse_order
             label: Reverse Y Order
+          - type: CheckBox
+            name: show_fill_legend
+            label: Show Fill Legend
+            enable: (fill_var)
+          - type: CheckBox
+            name: show_facet_legend
+            label: Show Facet Legend
+            enable: (facet_var)
 
   - type: CollapseBox
     label: Theme & Labels

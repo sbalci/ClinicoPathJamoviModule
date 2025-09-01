@@ -19,7 +19,11 @@ args:
     description: Verbosity level (brief|standard|deep)
     required: false
     default: standard
-usage: /document-function <function_name> [--include_mermaid=true] [--include_examples=true] [--depth=standard]
+  update_existing:
+    description: Whether to update existing documentation non-destructively
+    required: false
+    default: true
+usage: /document-function <function_name> [--include_mermaid=true] [--include_examples=true] [--depth=standard] [--update_existing=true]
 output_file: vignettes/$ARGUMENTS-documentation.md
 ---
 
@@ -44,6 +48,8 @@ If a file is missing, note it explicitly and proceed with partial documentation.
 
 ---
 
+**TOOL USE POLICY**: Do **not** invoke tools or open files. Analyze only the content provided in this message or attachments. Print code and shell snippets; do not execute them.
+
 ## What to Analyze
 
 - In **`.u.yaml`**, list each control: its type (checkbox, combo, text, number, variable selector, etc.), label, and **which `.a.yaml` option** it sets. Include any enable/disable/visibility conditions.
@@ -52,6 +58,20 @@ If a file is missing, note it explicitly and proceed with partial documentation.
   - Describe **where it’s used**, conditional branches, and functions called.
   - Identify **result population calls** such as `self$results$<out>$setXxx(...)`, `setContent`, `setNotes`, `setRow`, `setVisible`, etc.
 - In **`.r.yaml`**, enumerate outputs (tables/images/html): ids, titles, descriptions, visibility conditions, **column schemas** for tables, and any footnotes/notes.
+
+---
+
+## Update Mode (Existing Doc Awareness)
+
+**Non‑Destructive Update Policy:** When updating an existing doc, do **not remove** correct, author‑written content. Prefer **repairing** broken pieces and **appending** missing mappings/diagrams. Only replace text that is demonstrably outdated or incorrect.
+
+**How to use a prior doc (if provided in the message or as an attachment):**
+
+1. Treat `vignettes/$ARGUMENTS-documentation.md` as the baseline.
+2. Preserve narrative sections and headings; re-sync only the affected subsections.
+3. Fix broken Mermaid blocks (validate minimal syntax) and keep node ids/titles stable.
+4. Append a **Changelog** (see section 1a) summarizing edits.
+5. If the prior doc is not provided, proceed with a fresh doc and note that the baseline was unavailable.
 
 ---
 
@@ -68,6 +88,16 @@ Produce a single **Markdown** document with the following sections (**always kee
   - `R/$ARGUMENTS.b.R` — Backend
   - `jamovi/$ARGUMENTS.r.yaml` — Results
 - **Summary** (2–4 sentences): What the analysis does and typical inputs/outputs.
+
+### 1a. Changelog (if updating an existing doc)
+
+- Date: <YYYY-MM-DD>
+- Summary: 1–3 bullets on what changed
+- Changes:
+  - Options: added/removed/renamed; defaults updated
+  - Backend: logic changes, new result population calls
+  - Results schema: table/column id changes, visibility tweaks
+  - Diagrams: fixes/updates
 
 ### 2. UI Controls → Options Map
 
@@ -107,6 +137,8 @@ Include minimal code excerpts (short snippets) when helpful.
 
 ### 6. Data Flow Diagram (UI → Options → Backend → Results)
 
+*When updating, reuse node ids/titles where possible to minimize diff churn across versions.*
+
 If `--include_mermaid=true`, add a Mermaid **flowchart** that connects:
 `[UI control] --> (a.yaml option) --> {b.R logic block} --> [[r.yaml output]]`
 
@@ -144,12 +176,14 @@ flowchart TD
 If `--include_mermaid=true`, provide **multiple focused small diagrams** covering different aspects:
 
 ### User Input Flow
+
 ```mermaid
 flowchart LR
   A[User Input] --> B[Option Updates] --> C[Backend Processing]
 ```
 
 ### Decision Logic
+
 ```mermaid
 flowchart TD
   A[Check Prerequisites] -->|Valid| B[Process Data]
@@ -158,6 +192,7 @@ flowchart TD
 ```
 
 ### Result Processing
+
 ```mermaid
 flowchart TD
   A[Backend Logic] --> B[Update Results]
@@ -277,4 +312,4 @@ Final Deliverable
 
 Return a single Markdown document containing all sections (1–10). Use headings exactly as specified so it can be indexed by other tools.
 
-Save the markdown file to `vignettes/$ARGUMENTS-documentation.md`.
+Always save (or update) the markdown file at `vignettes/$ARGUMENTS-documentation.md`. If a previous version existed and was provided, include a **Changelog** section summarizing differences.

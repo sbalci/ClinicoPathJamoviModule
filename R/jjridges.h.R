@@ -27,12 +27,14 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             p_adjust_method = "none",
             effsize_type = "d",
             alpha = 0.8,
-            color_palette = "viridis",
+            color_palette = "clinical_colorblind",
             custom_colors = "#3498db,#e74c3c,#2ecc71,#f39c12",
             gradient_low = "#0000FF",
             gradient_high = "#FF0000",
             fill_ridges = TRUE,
             reverse_order = FALSE,
+            show_fill_legend = TRUE,
+            show_facet_legend = TRUE,
             theme_style = "theme_ridges",
             grid_lines = FALSE,
             expand_panels = TRUE,
@@ -184,7 +186,9 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "d",
                     "g",
                     "eta",
-                    "omega"),
+                    "omega",
+                    "cliff_delta",
+                    "hodges_lehmann"),
                 default="d")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
@@ -196,6 +200,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "color_palette",
                 color_palette,
                 options=list(
+                    "clinical_colorblind",
                     "viridis",
                     "plasma",
                     "inferno",
@@ -205,7 +210,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Dark2",
                     "Paired",
                     "custom"),
-                default="viridis")
+                default="clinical_colorblind")
             private$..custom_colors <- jmvcore::OptionString$new(
                 "custom_colors",
                 custom_colors,
@@ -226,6 +231,14 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "reverse_order",
                 reverse_order,
                 default=FALSE)
+            private$..show_fill_legend <- jmvcore::OptionBool$new(
+                "show_fill_legend",
+                show_fill_legend,
+                default=TRUE)
+            private$..show_facet_legend <- jmvcore::OptionBool$new(
+                "show_facet_legend",
+                show_facet_legend,
+                default=TRUE)
             private$..theme_style <- jmvcore::OptionList$new(
                 "theme_style",
                 theme_style,
@@ -331,6 +344,8 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..gradient_high)
             self$.addOption(private$..fill_ridges)
             self$.addOption(private$..reverse_order)
+            self$.addOption(private$..show_fill_legend)
+            self$.addOption(private$..show_facet_legend)
             self$.addOption(private$..theme_style)
             self$.addOption(private$..grid_lines)
             self$.addOption(private$..expand_panels)
@@ -375,6 +390,8 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         gradient_high = function() private$..gradient_high$value,
         fill_ridges = function() private$..fill_ridges$value,
         reverse_order = function() private$..reverse_order$value,
+        show_fill_legend = function() private$..show_fill_legend$value,
+        show_facet_legend = function() private$..show_facet_legend$value,
         theme_style = function() private$..theme_style$value,
         grid_lines = function() private$..grid_lines$value,
         expand_panels = function() private$..expand_panels$value,
@@ -418,6 +435,8 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..gradient_high = NA,
         ..fill_ridges = NA,
         ..reverse_order = NA,
+        ..show_fill_legend = NA,
+        ..show_facet_legend = NA,
         ..theme_style = NA,
         ..grid_lines = NA,
         ..expand_panels = NA,
@@ -440,11 +459,12 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        warnings = function() private$.items[["warnings"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         plot = function() private$.items[["plot"]],
         statistics = function() private$.items[["statistics"]],
         tests = function() private$.items[["tests"]],
-        interpretation = function() private$.items[["interpretation"]],
-        warnings = function() private$.items[["warnings"]]),
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -457,7 +477,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggridges",
                     "ggstatsplot",
                     "viridis",
-                    "RColorBrewer"))
+                    "RColorBrewer",
+                    "RGraphGallery"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -466,12 +487,27 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Data Quality Warnings",
+                visible=FALSE,
+                clearWith=list(
+                    "x_var",
+                    "y_var")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible=FALSE,
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "show_stats")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Ridge Plot",
-                width=800,
-                height=600,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
@@ -615,12 +651,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "plot_type")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="warnings",
-                title="Warnings",
-                visible=FALSE))}))
+                    "plot_type")))}))
 
 jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjridgesBase",
@@ -630,7 +661,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjridges",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = jjridgesResults$new(options=options),
                 data = data,
@@ -643,10 +674,9 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Advanced Ridge Plot
+#' Ridge Plot
 #'
-#' 'Create advanced ridgeline plots combining features from ggridges and 
-#' ggstatsplot.
+#' 'Create advanced ridgeline plots.
 #' Visualize distributions across groups with multiple style options, 
 #' annotations,
 #' statistical overlays, and publication-ready formatting. Supports both basic 
@@ -675,11 +705,12 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' )
 #'}
 #' @param data The data as a data frame.
-#' @param x_var The continuous variable to display as distributions along the
-#'   x-axis. This is the main variable whose distribution will be shown for each
-#'   group.
-#' @param y_var The categorical grouping variable that defines the ridges.
-#'   Each level creates a separate ridge arranged vertically.
+#' @param x_var The continuous variable to display as distributions (e.g.,
+#'   biomarker values, age, tumor size). Each group will show the distribution
+#'   pattern of this variable.
+#' @param y_var The grouping variable for comparison (e.g., disease stage,
+#'   treatment group, pathology grade). Each group creates a separate ridge for
+#'   visual comparison.
 #' @param fill_var Optional variable for color/fill mapping within ridges.
 #'   Creates color-coded segments within each ridge.
 #' @param facet_var Optional variable for creating separate panels. Useful for
@@ -712,9 +743,13 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   show_stats is TRUE.
 #' @param p_adjust_method Method for adjusting p-values in multiple
 #'   comparisons.
-#' @param effsize_type Type of effect size to calculate and display.
+#' @param effsize_type Type of effect size to calculate and display. For
+#'   skewed data (like lymph node counts),  consider using nonparametric effect
+#'   sizes: Cliff's Delta shows probability that one group  has higher values,
+#'   Hodges-Lehmann shift shows typical difference in units.
 #' @param alpha Transparency level for ridge fills.
-#' @param color_palette Color palette for ridges. Viridis family are
+#' @param color_palette Color palette for ridges. 'Clinical' is optimized for
+#'   accessibility and medical publications. Viridis family are also
 #'   colorblind-friendly.
 #' @param custom_colors Comma-separated list of custom colors when palette is
 #'   'custom'.
@@ -722,6 +757,9 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param gradient_high High value color for gradient plots.
 #' @param fill_ridges Whether to fill ridges with color or show only outlines.
 #' @param reverse_order Reverse the vertical order of groups.
+#' @param show_fill_legend Show legend for fill variable when a fill variable
+#'   is specified.
+#' @param show_facet_legend Show facet labels when faceting is used.
 #' @param theme_style Overall plot theme style.
 #' @param grid_lines Whether to show grid lines in the plot.
 #' @param expand_panels Remove space around plot area for cleaner look.
@@ -741,11 +779,12 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$statistics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -778,12 +817,14 @@ jjridges <- function(
     p_adjust_method = "none",
     effsize_type = "d",
     alpha = 0.8,
-    color_palette = "viridis",
+    color_palette = "clinical_colorblind",
     custom_colors = "#3498db,#e74c3c,#2ecc71,#f39c12",
     gradient_low = "#0000FF",
     gradient_high = "#FF0000",
     fill_ridges = TRUE,
     reverse_order = FALSE,
+    show_fill_legend = TRUE,
+    show_facet_legend = TRUE,
     theme_style = "theme_ridges",
     grid_lines = FALSE,
     expand_panels = TRUE,
@@ -847,6 +888,8 @@ jjridges <- function(
         gradient_high = gradient_high,
         fill_ridges = fill_ridges,
         reverse_order = reverse_order,
+        show_fill_legend = show_fill_legend,
+        show_facet_legend = show_facet_legend,
         theme_style = theme_style,
         grid_lines = grid_lines,
         expand_panels = expand_panels,
