@@ -12,11 +12,26 @@ items:
         - x_var
         - y_var
 
+    - name: warnings
+      title: Data Quality Warnings
+      type: Html
+      visible: false
+      clearWith:
+        - x_var
+        - y_var
+
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      visible: false
+      clearWith:
+        - x_var
+        - y_var
+        - show_stats
+
     - name: plot
       title: Ridge Plot
       type: Image
-      width: 800
-      height: 600
       renderFun: .plot
       requiresData: true
       clearWith:
@@ -146,16 +161,12 @@ items:
         - y_var
         - plot_type
 
-    - name: warnings
-      title: Warnings
-      type: Html
-      visible: false
-
 refs:
     - ggplot2
     - ggridges
     - ggstatsplot
     - viridis
     - RColorBrewer
+    - RGraphGallery
 
 ...
