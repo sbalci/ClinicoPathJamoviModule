@@ -15,6 +15,8 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             conflevel = 0.95,
             padjustmethod = "holm",
             k = 2,
+            partial = FALSE,
+            clinicalpreset = "custom",
             lowcolor = "#E69F00",
             midcolor = "white",
             highcolor = "#009E73",
@@ -99,6 +101,19 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=2,
                 min=0,
                 max=5)
+            private$..partial <- jmvcore::OptionBool$new(
+                "partial",
+                partial,
+                default=FALSE)
+            private$..clinicalpreset <- jmvcore::OptionList$new(
+                "clinicalpreset",
+                clinicalpreset,
+                options=list(
+                    "custom",
+                    "biomarker",
+                    "labvalues",
+                    "imaging"),
+                default="custom")
             private$..lowcolor <- jmvcore::OptionString$new(
                 "lowcolor",
                 lowcolor,
@@ -145,6 +160,8 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..conflevel)
             self$.addOption(private$..padjustmethod)
             self$.addOption(private$..k)
+            self$.addOption(private$..partial)
+            self$.addOption(private$..clinicalpreset)
             self$.addOption(private$..lowcolor)
             self$.addOption(private$..midcolor)
             self$.addOption(private$..highcolor)
@@ -164,6 +181,8 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         conflevel = function() private$..conflevel$value,
         padjustmethod = function() private$..padjustmethod$value,
         k = function() private$..k$value,
+        partial = function() private$..partial$value,
+        clinicalpreset = function() private$..clinicalpreset$value,
         lowcolor = function() private$..lowcolor$value,
         midcolor = function() private$..midcolor$value,
         highcolor = function() private$..highcolor$value,
@@ -182,6 +201,8 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..conflevel = NA,
         ..padjustmethod = NA,
         ..k = NA,
+        ..partial = NA,
+        ..clinicalpreset = NA,
         ..lowcolor = NA,
         ..midcolor = NA,
         ..highcolor = NA,
@@ -197,6 +218,7 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        interpretation = function() private$.items[["interpretation"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
@@ -222,6 +244,8 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "conflevel",
                     "padjustmethod",
                     "k",
+                    "partial",
+                    "clinicalpreset",
                     "lowcolor",
                     "midcolor",
                     "highcolor",
@@ -233,7 +257,11 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="Analysis Guide"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -242,7 +270,7 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                visible="(grvar)"))
+                visible="(grvar && dep && dep.length >= 2)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -250,7 +278,8 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE,
+                visible="(dep && dep.length >= 2)"))}))
 
 jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjcorrmatBase",
@@ -333,6 +362,14 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param conflevel Confidence level for confidence intervals.
 #' @param padjustmethod Adjustment method for multiple comparisons.
 #' @param k Number of decimal places for displaying correlation coefficients.
+#' @param partial Compute partial correlations instead of zero-order
+#'   correlations. Partial correlations control for all other variables in the
+#'   analysis.
+#' @param clinicalpreset Pre-configured settings optimized for common clinical
+#'   correlation scenarios. Biomarker: Focus on molecular correlations with
+#'   robust methods. Lab Values: Emphasize clinical laboratory parameter
+#'   relationships. Imaging: Specialized for radiological and pathological
+#'   imaging metrics.
 #' @param lowcolor Color for low (negative) correlation values.
 #' @param midcolor Color for mid (zero) correlation values.
 #' @param highcolor Color for high (positive) correlation values.
@@ -346,6 +383,7 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
@@ -362,6 +400,8 @@ jjcorrmat <- function(
     conflevel = 0.95,
     padjustmethod = "holm",
     k = 2,
+    partial = FALSE,
+    clinicalpreset = "custom",
     lowcolor = "#E69F00",
     midcolor = "white",
     highcolor = "#009E73",
@@ -394,6 +434,8 @@ jjcorrmat <- function(
         conflevel = conflevel,
         padjustmethod = padjustmethod,
         k = k,
+        partial = partial,
+        clinicalpreset = clinicalpreset,
         lowcolor = lowcolor,
         midcolor = midcolor,
         highcolor = highcolor,

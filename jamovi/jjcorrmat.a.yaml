@@ -1,7 +1,7 @@
 ---
 name:  jjcorrmat
 title: Correlation Matrix
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
 version: '0.0.31'
@@ -180,6 +180,35 @@ options:
       description:
           R: >
             Number of decimal places for displaying correlation coefficients.
+
+    - name: partial
+      title: Partial Correlations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute partial correlations instead of zero-order correlations.
+            Partial correlations control for all other variables in the analysis.
+
+    - name: clinicalpreset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: Custom Analysis
+          name: custom
+        - title: Biomarker Correlations
+          name: biomarker
+        - title: Lab Value Relationships  
+          name: labvalues
+        - title: Imaging Metric Associations
+          name: imaging
+      default: custom
+      description:
+          R: >
+            Pre-configured settings optimized for common clinical correlation scenarios.
+            Biomarker: Focus on molecular correlations with robust methods.
+            Lab Values: Emphasize clinical laboratory parameter relationships.
+            Imaging: Specialized for radiological and pathological imaging metrics.
 
     - name: lowcolor
       title: Low Correlation Color
