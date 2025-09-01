@@ -6,6 +6,7 @@
       "WebFetch(domain:indrajeetpatil.github.io)",
       "WebFetch(domain:github.com)",
       "Bash(Rscript:*)",
+      "Read(/Users/serdarbalci/Downloads/**)",
       "Read(/Users/serdarbalci/Downloads/**)"
     ],
     "deny": [],
