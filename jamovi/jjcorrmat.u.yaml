@@ -52,6 +52,10 @@ children:
               - type: TextBox
                 name: k
                 format: number
+              - type: CheckBox
+                name: partial
+              - type: ComboBox
+                name: clinicalpreset
 
   - type: CollapseBox
     label: Matrix Display

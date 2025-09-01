@@ -15,6 +15,8 @@ jjcorrmat(
   conflevel = 0.95,
   padjustmethod = "holm",
   k = 2,
+  partial = FALSE,
+  clinicalpreset = "custom",
   lowcolor = "#E69F00",
   midcolor = "white",
   highcolor = "#009E73",
@@ -53,6 +55,16 @@ insignificant.}
 
 \item{k}{Number of decimal places for displaying correlation coefficients.}
 
+\item{partial}{Compute partial correlations instead of zero-order
+correlations. Partial correlations control for all other variables in the
+analysis.}
+
+\item{clinicalpreset}{Pre-configured settings optimized for common clinical
+correlation scenarios. Biomarker: Focus on molecular correlations with
+robust methods. Lab Values: Emphasize clinical laboratory parameter
+relationships. Imaging: Specialized for radiological and pathological
+imaging metrics.}
+
 \item{lowcolor}{Color for low (negative) correlation values.}
 
 \item{midcolor}{Color for mid (zero) correlation values.}
@@ -75,6 +87,7 @@ is 450.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }

@@ -15,6 +15,8 @@ clearWith:
     - conflevel
     - padjustmethod
     - k
+    - partial
+    - clinicalpreset
     - lowcolor
     - midcolor
     - highcolor
@@ -28,9 +30,12 @@ clearWith:
 items:
 
     - name:  todo
-      title: To Do
+      title: Analysis Guide
       type:  Html
 
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
 
     - name: plot2
       title: Chart
