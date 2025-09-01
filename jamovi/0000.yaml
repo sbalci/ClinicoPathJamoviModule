@@ -1543,7 +1543,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -1695,18 +1695,17 @@ analyses:
       package.'
     ribbon: analyses
     category: analyses
-  - title: Advanced Ridge Plot
+  - title: Ridge Plot
     name: jjridges
     ns: ClinicoPath
     menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
-    menuTitle: Advanced Ridge Plot
+    menuTitle: Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization
     ribbon: analyses
     category: analyses
     description: >
-      'Create advanced ridgeline plots combining features from ggridges and
-      ggstatsplot.
+      'Create advanced ridgeline plots.
 
       Visualize distributions across groups with multiple style options,
       annotations,

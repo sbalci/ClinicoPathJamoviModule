@@ -29,16 +29,41 @@ echo "/document-function FUNC_NAME" | claude
 
 ***
 
-## JJStatsPlotT
 
 
 jjridges
+echo "/check-function FUNC_NAME" | claude
+echo "/checkpoint FUNC_NAME" | claude
+echo "/prepare-translation FUNC_NAME" | claude
+echo "/review-function FUNC_NAME" | claude
+echo "/fix-function FUNC_NAME" | claude
+echo "/document-function FUNC_NAME" | claude
 
 ggsegmentedtotalbar
+echo "/check-function FUNC_NAME" | claude
+echo "/checkpoint FUNC_NAME" | claude
+echo "/prepare-translation FUNC_NAME" | claude
+echo "/review-function FUNC_NAME" | claude
+echo "/fix-function FUNC_NAME" | claude
+echo "/document-function FUNC_NAME" | claude
 
+combine these into one: nonparametric enhancednonparametric as nonparametric
+
+echo "/check-function FUNC_NAME" | claude
+echo "/checkpoint FUNC_NAME" | claude
+echo "/prepare-translation FUNC_NAME" | claude
+echo "/review-function FUNC_NAME" | claude
+echo "/fix-function FUNC_NAME" | claude
+echo "/document-function FUNC_NAME" | claude
 
 riverplot
 
+echo "/check-function FUNC_NAME" | claude
+echo "/checkpoint FUNC_NAME" | claude
+echo "/prepare-translation FUNC_NAME" | claude
+echo "/review-function FUNC_NAME" | claude
+echo "/fix-function FUNC_NAME" | claude
+echo "/document-function FUNC_NAME" | claude
 
 - alluvial - Alluvial Diagrams
 echo "/check-function alluvial" | claude
@@ -49,13 +74,11 @@ echo "/fix-function alluvial" | claude
 echo "/document-function alluvial" | claude
 
 
+## JJStatsPlotT
 
 - jjwithinstats - Box-Violin Plots to Compare Within Groups
-echo "/check-function jjwithinstats" | claude
-echo "/checkpoint jjwithinstats" | claude
-echo "/prepare-translation jjwithinstats" | claude
-echo "/review-function jjwithinstats" | claude
-echo "/fix-function jjwithinstats" | claude
+
+
 echo "/document-function jjwithinstats" | claude
 
 - jjcorrmat - Correlation Matrix

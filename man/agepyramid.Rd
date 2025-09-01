@@ -13,6 +13,8 @@ agepyramid(
   plot_title = "Age Pyramid",
   color1 = "#1F77B4",
   color2 = "#FF7F0E",
+  color_palette = "standard",
+  age_groups = "custom",
   plot_engine = "ggcharts"
 )
 }
@@ -36,6 +38,13 @@ the granularity of the age groups.}
 \item{color1}{First color for the pyramid chart bars.}
 
 \item{color2}{Second color for the pyramid chart bars.}
+
+\item{color_palette}{Choose color palette type. Standard uses traditional
+gender colors, Accessible is colorblind-friendly, Custom allows
+user-defined colors.}
+
+\item{age_groups}{Preset age groupings for common clinical contexts. Custom
+uses bin_width setting.}
 
 \item{plot_engine}{Choose the plotting engine. ggcharts provides better
 pyramid styling, ggplot2 offers more customization.}
