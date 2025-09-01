@@ -30,7 +30,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-    - RGraphGalleryLollipop
+    - RGraphGallery
     - ggplot2
 
 ...

@@ -83,16 +83,30 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         )
                     }, error = function(e) {})
                     
-                    # Wilcoxon test as non-parametric alternative
+                    # Wilcoxon test as non-parametric alternative with effect sizes
                     tryCatch({
-                        wilcox_test <- wilcox.test(biomarker_values ~ response_factor, conf.level = conf_level)
+                        wilcox_test <- wilcox.test(biomarker_values ~ response_factor, conf.level = conf_level, conf.int = TRUE)
+                        
+                        # Calculate effect sizes for biomarker analysis
+                        group_levels <- levels(response_factor)
+                        group1_data <- biomarker_values[response_factor == group_levels[1]]
+                        group2_data <- biomarker_values[response_factor == group_levels[2]]
+                        group1_data <- group1_data[!is.na(group1_data)]
+                        group2_data <- group2_data[!is.na(group2_data)]
+                        
+                        # Calculate Cliff's Delta
+                        cliff_delta <- private$.calculateCliffsDelta(group1_data, group2_data)
+                        
+                        # Calculate Hodges-Lehmann shift
+                        hodges_lehmann <- private$.calculateHodgesLehmann(group1_data, group2_data)
+                        
                         tests[["wilcox_test"]] <- list(
                             test = "Wilcoxon rank-sum test",
                             statistic = wilcox_test$statistic,
                             pvalue = wilcox_test$p.value,
-                            interpretation = ifelse(wilcox_test$p.value < 0.05, 
-                                                   "Significant difference between groups", 
-                                                   "No significant difference")
+                            cliff_delta = cliff_delta,
+                            hodges_lehmann = hodges_lehmann,
+                            interpretation = private$.interpretBiomarkerEffects(wilcox_test$p.value, cliff_delta, hodges_lehmann, group_levels)
                         )
                     }, error = function(e) {})
                     
@@ -626,6 +640,72 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             
             print(p)
             TRUE
+        },
+        
+        .calculateCliffsDelta = function(x, y) {
+            # Cliff's Delta for biomarker comparison between response groups
+            n1 <- length(x)
+            n2 <- length(y)
+            
+            greater <- 0
+            less <- 0
+            
+            for (xi in x) {
+                for (yj in y) {
+                    if (xi > yj) greater <- greater + 1
+                    else if (xi < yj) less <- less + 1
+                }
+            }
+            
+            delta <- (greater - less) / (n1 * n2)
+            return(delta)
+        },
+        
+        .calculateHodgesLehmann = function(x, y) {
+            # Hodges-Lehmann shift for biomarker level difference
+            differences <- c()
+            
+            for (xi in x) {
+                for (yj in y) {
+                    differences <- c(differences, xi - yj)
+                }
+            }
+            
+            # Return median of all pairwise differences
+            return(median(differences))
+        },
+        
+        .interpretBiomarkerEffects = function(p_value, cliff_delta, hodges_lehmann, group_levels) {
+            # Clinical interpretation for biomarker-response associations
+            significance <- ifelse(p_value < 0.05, "Significant", "Non-significant")
+            abs_delta <- abs(cliff_delta)
+            abs_shift <- abs(hodges_lehmann)
+            
+            # Probability interpretation
+            prob <- round((cliff_delta + 1) / 2 * 100, 1)
+            direction <- ifelse(cliff_delta > 0, "higher", "lower")
+            better_group <- ifelse(cliff_delta > 0, group_levels[1], group_levels[2])
+            
+            # Effect magnitude
+            if (abs_delta < 0.147) {
+                effect_size <- "negligible"
+            } else if (abs_delta < 0.33) {
+                effect_size <- "small"
+            } else if (abs_delta < 0.474) {
+                effect_size <- "medium"
+            } else {
+                effect_size <- "large"
+            }
+            
+            return(paste0(
+                significance, " difference (p = ", round(p_value, 4), "). ",
+                effect_size, " effect size (δ = ", round(cliff_delta, 3), "). ",
+                "Probability that ", group_levels[1], " has ", direction, " biomarker levels: ", prob, "%. ",
+                "Typical difference: ", round(abs_shift, 2), " units (",
+                ifelse(hodges_lehmann > 0, paste(group_levels[1], "typically higher"), 
+                       paste(group_levels[2], "typically higher")), "). ",
+                if (abs_delta >= 0.33) "Clinically meaningful biomarker difference." else "Limited clinical significance."
+            ))
         }
     )
 )

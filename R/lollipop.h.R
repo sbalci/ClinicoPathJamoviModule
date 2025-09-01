@@ -238,7 +238,7 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Lollipop Chart",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "RGraphGalleryLollipop",
+                    "RGraphGallery",
                     "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,

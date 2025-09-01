@@ -14,6 +14,7 @@ jjwithinstats(
   centralitypath = FALSE,
   centralityplotting = FALSE,
   centralitytype = "parametric",
+  clinicalpreset = "custom",
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
@@ -49,13 +50,24 @@ jjwithinstats(
 
 \item{centralitypath}{.}
 
-\item{centralityplotting}{.}
+\item{centralityplotting}{Display mean/median lines across time points to
+visualize the overall trend.  Helps identify if the group as a whole is
+improving, declining, or stable over time.}
 
 \item{centralitytype}{.}
 
-\item{typestatistics}{.}
+\item{clinicalpreset}{Choose a preset optimized for common clinical
+scenarios, or select Custom for manual configuration.}
 
-\item{pairwisecomparisons}{.}
+\item{typestatistics}{Parametric: Assumes normal distribution, most
+powerful when appropriate.  Nonparametric: No distribution assumptions,
+robust for skewed biomarker data. Robust: Uses trimmed means, reduces
+outlier influence. Bayesian: Provides evidence strength rather than
+p-values.}
+
+\item{pairwisecomparisons}{Enable to see which specific time points differ
+significantly (e.g., baseline vs month 3, month 3 vs month 6).  Useful for
+identifying when changes occur during treatment or disease progression.}
 
 \item{pairwisedisplay}{.}
 
@@ -95,7 +107,9 @@ subtitle.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
