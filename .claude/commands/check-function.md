@@ -7,6 +7,19 @@ args:
     description: Name of the jamovi function to check
     required: true
     autocomplete: functions
+  check_external:
+    description: Compare against upstream docs on CRAN/GitHub (reference manuals, pkgdown, NEWS)
+    required: false
+    default: true
+  cran_pkg:
+    description: Upstream CRAN package name to compare against (e.g., jmv)
+    required: false
+  github_repo:
+    description: Upstream GitHub repo in owner/name form (e.g., jamovi/jmv)
+    required: false
+  upstream_fn:
+    description: Upstream function name if it differs from SANITIZED_FN
+    required: false
 usage: /check-function <function_name>
 ---
 
@@ -28,6 +41,13 @@ Please analyze these files:
 - `R/SANITIZED_FN.b.R` - Backend implementation
 - `jamovi/SANITIZED_FN.r.yaml` - Results definition (outputs)
 - `jamovi/SANITIZED_FN.u.yaml` - User interface definition
+
+External sources (if available and check_external=true):
+
+- CRAN reference manual PDF – `https://cran.r-project.org/web/packages/$ARG_cran_pkg/$ARG_cran_pkg.pdf`
+- CRAN NEWS – `https://cran.r-project.org/web/packages/$ARG_cran_pkg/NEWS`
+- pkgdown reference – `https://$ARG_cran_pkg.tidyverse.org/` or project site if known
+- GitHub repo – `https://github.com/$ARG_github_repo` (read `R/*.R`, `man/*.Rd`, `NEWS.md`, `README.md`)
 
 ## Systematic Evaluation Framework
 
@@ -56,6 +76,16 @@ Please analyze these files:
    - UI elements appropriately grouped and labeled
    - Explanatory content available for complex outputs
    - Performance acceptable for typical datasets
+
+5. **Documentation Consistency (Code ↔ Docs)**
+   - Inline comments and roxygen documentation
+   - Help files and examples
+
+6. **External Documentation Consistency (CRAN/GitHub)**
+   - Function signature & arguments match upstream (names, order, defaults)
+   - Behavioral notes (assumptions, auto-switches) match upstream docs
+   - Deprecations/renames in upstream are reflected locally
+   - NEWS changelog items accounted for (version bumps, argument changes)
 
 ## Response Format
 
@@ -89,6 +119,22 @@ Structure your analysis as:
 
 1. [Positive findings]
 
+#### 📖 DOCS CONSISTENCY (Code ↔ Docs)
+
+[Summary of inline comments, roxygen, help files, and examples.]
+
+#### 🌐 EXTERNAL DOCS COMPARISON (CRAN / GitHub)
+
+State which upstreams were checked (CRAN pkg: `$ARG_cran_pkg`, GitHub: `$ARG_github_repo`) and summarize diffs.
+
+| Aspect             | Local (jamovi) | Upstream (CRAN/GitHub) | Status | Action |
+|--------------------|----------------|------------------------|:------:|--------|
+| Function signature  |                |                        |        |        |
+| Arguments/defaults  |                |                        |        |        |
+| Behavior notes     |                |                        |        |        |
+| Deprecations       |                |                        |        |        |
+| Examples           |                |                        |        |        |
+
 #### 🔧 ACTIONABLE FIXES
 
 **Immediate (Critical):**
@@ -109,11 +155,35 @@ Structure your analysis as:
 # Specific .b.R improvements
 ```
 
+**Upstream Sync Tasks:**
+
+- Align argument names/defaults with upstream or document intentional divergence
+- Port missing behavior notes (assumptions, edge-case handling) into docs
+- Reflect deprecations/renames; add migration notes
+- Update examples to match upstream signatures
+
+#### 🔎 FETCH COMMANDS (copy/paste; do not execute here)
+
+```bash
+# CRAN manual (PDF)
+curl -L "https://cran.r-project.org/web/packages/$ARG_cran_pkg/$ARG_cran_pkg.pdf" -o cran-manual.pdf
+
+# CRAN package metadata (json)
+curl -L "https://crandb.r-pkg.org/$ARG_cran_pkg" -o cran-meta.json
+
+# GitHub upstream sources
+curl -L "https://raw.githubusercontent.com/$ARG_github_repo/HEAD/R/${ARG_upstream_fn:-SANITIZED_FN}.R" -o upstream-fn.R || true
+curl -L "https://raw.githubusercontent.com/$ARG_github_repo/HEAD/NEWS.md" -o upstream-NEWS.md || true
+curl -L "https://raw.githubusercontent.com/$ARG_github_repo/HEAD/README.md" -o upstream-README.md || true
+```
+
 #### 🧪 TESTING CHECKLIST
 
 - [ ] Test with [specific scenario]
 - [ ] Validate [specific behavior]
 - [ ] Check [edge case]
+- [ ] Compare local function signature against upstream (CRAN/GitHub) and reconcile
+- [ ] Re-run examples from upstream docs with local function; fix divergences or document them
 
 #### 📊 READINESS ASSESSMENT
 

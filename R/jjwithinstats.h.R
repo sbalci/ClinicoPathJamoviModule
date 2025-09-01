@@ -22,13 +22,13 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             effsizetype = "biased",
             violin = TRUE,
             boxplot = TRUE,
-            point = TRUE,
+            point = FALSE,
             mytitle = "Within Group Comparison",
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = TRUE,
-            bfmessage = TRUE,
+            resultssubtitle = FALSE,
+            bfmessage = FALSE,
             conflevel = 0.95,
             k = 2,
             plotwidth = 650,
@@ -154,7 +154,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..point <- jmvcore::OptionBool$new(
                 "point",
                 point,
-                default=TRUE)
+                default=FALSE)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -174,11 +174,11 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
-                default=TRUE)
+                default=FALSE)
             private$..bfmessage <- jmvcore::OptionBool$new(
                 "bfmessage",
                 bfmessage,
-                default=TRUE)
+                default=FALSE)
             private$..conflevel <- jmvcore::OptionNumber$new(
                 "conflevel",
                 conflevel,
@@ -525,13 +525,13 @@ jjwithinstats <- function(
     effsizetype = "biased",
     violin = TRUE,
     boxplot = TRUE,
-    point = TRUE,
+    point = FALSE,
     mytitle = "Within Group Comparison",
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = TRUE,
-    bfmessage = TRUE,
+    resultssubtitle = FALSE,
+    bfmessage = FALSE,
     conflevel = 0.95,
     k = 2,
     plotwidth = 650,
