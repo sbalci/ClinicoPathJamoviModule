@@ -2,130 +2,248 @@
 % Please edit documentation in R/nonparametric.h.R
 \name{nonparametric}
 \alias{nonparametric}
-\title{Non-parametric Statistical Methods}
+\title{Non-Parametric Statistical Methods}
 \usage{
 nonparametric(
   data,
+  deps,
   outcome,
   groups,
   paired_variable = NULL,
   blocking_variable = NULL,
-  test_type = "kruskal_wallis",
+  test_type = "mann_whitney",
+  effect_size = TRUE,
+  effect_size_method = "eta_squared",
+  confidence_intervals = TRUE,
+  confidence_level = 0.95,
   post_hoc = TRUE,
   post_hoc_method = "dunn",
   p_adjustment = "holm",
   robust_method = "standard",
   trim_proportion = 0.1,
   winsorize_proportion = 0.1,
-  effect_size = TRUE,
-  effect_size_method = "eta_squared",
-  confidence_level = 0.95,
   bootstrap_ci = FALSE,
   bootstrap_samples = 1000,
   test_assumptions = TRUE,
+  normality_tests = TRUE,
+  assumption_checks = TRUE,
   homogeneity_test = "levene",
+  exact_test = FALSE,
+  exact_p_values = TRUE,
+  continuity_correction = TRUE,
+  tie_correction = TRUE,
+  ties_method = "average",
   show_boxplots = TRUE,
   show_violin_plots = FALSE,
   show_rank_plots = FALSE,
   show_effect_plots = TRUE,
+  descriptive_plots = TRUE,
+  show_qqplots = FALSE,
   show_descriptives = TRUE,
   show_test_statistics = TRUE,
   show_post_hoc_table = TRUE,
   show_effect_sizes = TRUE,
   show_assumptions = TRUE,
-  show_interpretation = TRUE,
-  exact_p_values = TRUE,
-  ties_method = "average",
+  show_robust_statistics = FALSE,
+  show_power_analysis = FALSE,
+  show_instructions = TRUE,
+  show_explanations = FALSE,
+  show_interpretation = FALSE,
+  show_recommendations = FALSE,
   clinical_context = "general",
   set_seed = TRUE,
-  seed_value = 42
+  seed_value = 42,
+  missing_data_handling = "listwise",
+  alpha_level = 0.05,
+  minimum_sample_size = 5,
+  outlier_method = "iqr",
+  small_sample_exact = TRUE,
+  report_standardized_statistics = FALSE
 )
 }
 \arguments{
-\item{data}{The data as a data frame for non-parametric analysis.}
+\item{data}{The dataset to be analyzed, provided as a data frame.}
 
-\item{outcome}{.}
+\item{deps}{Multiple continuous variables to be analyzed. These should be
+numeric variables representing biomarker expression levels, cell counts,
+morphometric measurements, or other quantitative pathology data.}
 
-\item{groups}{.}
+\item{outcome}{Single continuous outcome variable. Use either this OR
+'deps' for multiple variables.}
 
-\item{paired_variable}{.}
+\item{groups}{Categorical variable defining the groups to be compared. For
+Mann-Whitney U test, this should have exactly 2 levels. For Kruskal-Wallis
+test, can have 2+ levels.}
 
-\item{blocking_variable}{.}
+\item{paired_variable}{Variable identifying paired observations for
+repeated measures designs.}
 
-\item{test_type}{.}
+\item{blocking_variable}{Variable identifying blocks for Friedman test
+designs.}
 
-\item{post_hoc}{.}
+\item{test_type}{Select the appropriate non-parametric test based on your
+study design.}
 
-\item{post_hoc_method}{.}
+\item{effect_size}{Calculate appropriate effect sizes for non-parametric
+tests with confidence intervals.}
 
-\item{p_adjustment}{.}
+\item{effect_size_method}{Method for calculating effect sizes appropriate
+to the chosen test: - Eta-squared/Epsilon-squared: For Kruskal-Wallis
+(multi-group) - Rank-biserial correlation: For Wilcoxon tests (paired data)
+\itemize{
+\item Cliff's Delta: For Mann-Whitney U tests (two independent groups) -
+CLES/Vargha-Delaney A: Probability-based effect sizes - Kendall's W: For
+Friedman test (repeated measures concordance)
+}}
 
-\item{robust_method}{.}
+\item{confidence_intervals}{Calculate bootstrap confidence intervals for
+effect sizes using BCa method.}
 
-\item{trim_proportion}{.}
+\item{confidence_level}{Confidence level for confidence intervals and
+descriptive statistics.}
 
-\item{winsorize_proportion}{.}
+\item{post_hoc}{Perform post-hoc pairwise comparisons when overall test is
+significant.}
 
-\item{effect_size}{.}
+\item{post_hoc_method}{Method for post hoc pairwise comparisons.}
 
-\item{effect_size_method}{.}
+\item{p_adjustment}{Method for correcting p-values in multiple comparisons.}
 
-\item{confidence_level}{.}
+\item{robust_method}{Method for robust rank-based estimation.}
 
-\item{bootstrap_ci}{.}
+\item{trim_proportion}{Proportion of observations to trim from each end for
+robust estimation.}
 
-\item{bootstrap_samples}{.}
+\item{winsorize_proportion}{Proportion of observations to winsorize from
+each end.}
 
-\item{test_assumptions}{.}
+\item{bootstrap_ci}{Use bootstrap methods for confidence interval
+estimation.}
 
-\item{homogeneity_test}{.}
+\item{bootstrap_samples}{Number of bootstrap resamples for confidence
+interval estimation.}
 
-\item{show_boxplots}{.}
+\item{test_assumptions}{Perform comprehensive assumption checking for
+non-parametric tests.}
 
-\item{show_violin_plots}{.}
+\item{normality_tests}{Test normality of data to justify use of
+non-parametric methods.}
 
-\item{show_rank_plots}{.}
+\item{assumption_checks}{Perform detailed assumption checks including
+independence, distribution shape, and outlier assessment.}
 
-\item{show_effect_plots}{.}
+\item{homogeneity_test}{Test for homogeneity of variance between groups.}
 
-\item{show_descriptives}{.}
+\item{exact_test}{Use exact distribution calculations instead of asymptotic
+approximations.}
 
-\item{show_test_statistics}{.}
+\item{exact_p_values}{Use exact p-values when computationally feasible.}
 
-\item{show_post_hoc_table}{.}
+\item{continuity_correction}{Apply continuity correction for better normal
+approximation.}
 
-\item{show_effect_sizes}{.}
+\item{tie_correction}{Apply correction for tied observations in rank-based
+tests.}
 
-\item{show_assumptions}{.}
+\item{ties_method}{Method for handling tied ranks in calculations.}
 
-\item{show_interpretation}{.}
+\item{show_boxplots}{Generate box plots for visual group comparison.}
 
-\item{exact_p_values}{.}
+\item{show_violin_plots}{Generate violin plots showing distribution shapes.}
 
-\item{ties_method}{.}
+\item{show_rank_plots}{Generate plots showing rank distributions.}
 
-\item{clinical_context}{.}
+\item{show_effect_plots}{Generate visualization of effect sizes with
+confidence intervals.}
 
-\item{set_seed}{.}
+\item{descriptive_plots}{Generate comprehensive set of descriptive plots
+including box plots, violin plots, and distribution comparisons.}
 
-\item{seed_value}{.}
+\item{show_qqplots}{Generate Q-Q plots for normality assessment.}
+
+\item{show_descriptives}{Display comprehensive descriptive statistics.}
+
+\item{show_test_statistics}{Display main non-parametric test results table.}
+
+\item{show_post_hoc_table}{Display post-hoc pairwise comparison results.}
+
+\item{show_effect_sizes}{Display detailed effect size calculations and
+interpretations.}
+
+\item{show_assumptions}{Display assumption testing results and
+implications.}
+
+\item{show_robust_statistics}{Display robust statistical estimates using
+alternative methods.}
+
+\item{show_power_analysis}{Perform post-hoc power analysis and sample size
+recommendations.}
+
+\item{show_instructions}{Display comprehensive instructions for using
+non-parametric methods.}
+
+\item{show_explanations}{Display detailed explanations of non-parametric
+methods and assumptions.}
+
+\item{show_interpretation}{Provide plain-language interpretation of
+statistical results.}
+
+\item{show_recommendations}{Provide recommendations for follow-up analyses
+and study design.}
+
+\item{clinical_context}{Clinical context for tailored interpretation and
+recommendations.}
+
+\item{set_seed}{Set random seed for reproducible bootstrap and permutation
+results.}
+
+\item{seed_value}{Specific seed value for reproducible random number
+generation.}
+
+\item{missing_data_handling}{Method for handling missing data in
+non-parametric analyses.}
+
+\item{alpha_level}{Significance level for hypothesis testing (default:
+0.05).}
+
+\item{minimum_sample_size}{Minimum sample size per group before showing
+adequacy warnings.}
+
+\item{outlier_method}{Method for identifying outliers in the data.}
+
+\item{small_sample_exact}{Automatically use exact methods when sample sizes
+are small (n < 20 per group).}
+
+\item{report_standardized_statistics}{Report standardized versions of test
+statistics for better comparability.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$descriptives} \tab \tab \tab \tab \tab a table \cr
-\code{results$testStatistics} \tab \tab \tab \tab \tab a table \cr
-\code{results$postHocTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$effectSizesTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$assumptionsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$normality} \tab \tab \tab \tab \tab a table \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a table \cr
+\code{results$tests} \tab \tab \tab \tab \tab a table \cr
+\code{results$effectsizes} \tab \tab \tab \tab \tab a table \cr
+\code{results$posthoc} \tab \tab \tab \tab \tab a table \cr
 \code{results$robustStatistics} \tab \tab \tab \tab \tab a table \cr
+\code{results$powerAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$distributionplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$boxplots} \tab \tab \tab \tab \tab an image \cr
+\code{results$violinplots} \tab \tab \tab \tab \tab an image \cr
+\code{results$rankplots} \tab \tab \tab \tab \tab an image \cr
+\code{results$effectsizeplots} \tab \tab \tab \tab \tab an image \cr
+\code{results$qqplots} \tab \tab \tab \tab \tab an image \cr
+\code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$effectSizeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$postHocExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptionExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$robustMethodsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$resultInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$boxPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$violinPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$rankPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$effectSizePlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$powerAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$statisticalRecommendations} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -137,19 +255,36 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Comprehensive non-parametric statistical methods including Kruskal-Wallis
 test,
-Friedman test, robust alternatives to classical procedures, and
-distribution-free
-methods designed for clinical research where normality assumptions are
+Friedman test, Mann-Whitney U test, and robust alternatives to classical
+procedures.
+Designed specifically for clinical research where normality assumptions are
 violated.
+This enhanced module combines distribution-free methods with proper effect
+size calculations,
+assumption checking, and post hoc analysis - addressing critical gaps
+identified in 30\\%
+of pathology studies that use these methods.
 }
 \examples{
-# Kruskal-Wallis test with post-hoc comparisons
+# Example 1: Enhanced Mann-Whitney U test for biomarker expression
 nonparametric(
     data = clinical_data,
-    outcome = "biomarker_level",
+    deps = c("biomarker_level", "cell_count"),
     groups = "treatment_group",
-    test_type = "kruskal_wallis",
+    test_type = "mann_whitney",
+    effect_size = TRUE,
     post_hoc = TRUE
+)
+
+# Example 2: Kruskal-Wallis with robust estimation
+nonparametric(
+    data = clinical_data,
+    outcome = "expression_level",
+    groups = "tumor_grade",
+    test_type = "kruskal_wallis",
+    robust_method = "trimmed",
+    post_hoc_method = "dunn",
+    clinical_context = "pathological"
 )
 
 }

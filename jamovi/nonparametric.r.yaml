@@ -1,229 +1,576 @@
 ---
-title: Analysis Results
 name: nonparametric
+title: Enhanced Non-Parametric Statistical Methods
 jrs: '1.1'
+
 items:
+    # Instructions and Getting Started
+    - name: instructions
+      title: Getting Started with Non-Parametric Tests
+      type: Html
+      visible: (show_instructions)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+
+    # Descriptive Statistics - Enhanced to handle both single and multiple variables
     - name: descriptives
-      title: Descriptive Statistics
+      title: Descriptive Statistics by Group
       type: Table
+      visible: (show_descriptives)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
       columns:
-        - name: group
-          title: Group
-          type: text
-        - name: n
-          title: N
-          type: integer
-        - name: median
-          title: Median
-          type: number
-        - name: mad
-          title: MAD
-          type: number
-        - name: q1
-          title: Q1
-          type: number
-        - name: q3
-          title: Q3
-          type: number
-        - name: min
-          title: Min
-          type: number
-        - name: max
-          title: Max
-          type: number
-        - name: mean_rank
-          title: Mean Rank
-          type: number
+          - name: variable
+            title: Variable
+            type: text
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: missing
+            title: Missing
+            type: integer
+          - name: median
+            title: Median
+            type: number
+            format: zto
+          - name: q1
+            title: Q1
+            type: number
+            format: zto
+          - name: q3
+            title: Q3
+            type: number
+            format: zto
+          - name: iqr
+            title: IQR
+            type: number
+            format: zto
+          - name: mad
+            title: MAD
+            type: number
+            format: zto
+          - name: mean
+            title: Mean
+            type: number
+            format: zto
+          - name: sd
+            title: SD
+            type: number
+            format: zto
+          - name: min
+            title: Min
+            type: number
+            format: zto
+          - name: max
+            title: Max
+            type: number
+            format: zto
+          - name: mean_rank
+            title: Mean Rank
+            type: number
+            format: zto
+          - name: outliers
+            title: Outliers
+            type: integer
 
-    - name: testStatistics
-      title: Non-parametric Test Results
+    # Normality Assessment
+    - name: normality
+      title: Normality Assessment
       type: Table
+      visible: (normality_tests)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
       columns:
-        - name: test
-          title: Test
-          type: text
-        - name: statistic
-          title: Statistic
-          type: number
-        - name: df
-          title: df
-          type: integer
-        - name: p
-          title: p
-          type: number
-          format: zto,pvalue
-        - name: effect_size
-          title: Effect Size
-          type: number
-        - name: effect_ci_lower
-          title: Effect Size CI Lower
-          type: number
-        - name: effect_ci_upper
-          title: Effect Size CI Upper
-          type: number
-        - name: interpretation
-          title: Statistical Interpretation
-          type: text
+          - name: variable
+            title: Variable
+            type: text
+          - name: group
+            title: Group
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: integer
+          - name: p
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: conclusion
+            title: Conclusion
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
 
-    - name: postHocTable
-      title: Post-hoc Comparisons
+    # Test Assumptions - Enhanced from both modules
+    - name: assumptions
+      title: Test Assumptions and Diagnostic Checks
       type: Table
+      visible: (assumption_checks || test_assumptions)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
       columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: statistic
-          title: Statistic
-          type: number
-        - name: p_raw
-          title: p (raw)
-          type: number
-          format: zto,pvalue
-        - name: p_adjusted
-          title: p (adjusted)
-          type: number
-          format: zto,pvalue
-        - name: effect_size
-          title: Effect Size
-          type: number
-        - name: effect_ci_lower
-          title: Effect Size CI Lower
-          type: number
-        - name: effect_ci_upper
-          title: Effect Size CI Upper
-          type: number
-        - name: significance
-          title: Significance
-          type: text
+          - name: variable
+            title: Variable
+            type: text
+          - name: assumption
+            title: Assumption
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: integer
+          - name: p
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: result
+            title: Result
+            type: text
+          - name: assessment
+            title: Assessment
+            type: text
+          - name: implication
+            title: Implication
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
 
-    - name: effectSizesTable
-      title: Effect Sizes Summary
+    # Main Test Results - Comprehensive table
+    - name: tests
+      title: Non-Parametric Test Results
       type: Table
+      visible: (show_test_statistics)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - exact_test
+          - continuity_correction
+          - tie_correction
+          - confidence_level
       columns:
-        - name: measure
-          title: Effect Size Measure
-          type: text
-        - name: value
-          title: Value
-          type: number
-        - name: ci_lower
-          title: CI Lower
-          type: number
-        - name: ci_upper
-          title: CI Upper
-          type: number
-        - name: interpretation
-          title: Interpretation
-          type: text
-        - name: clinical_relevance
-          title: Clinical Relevance
-          type: text
+          - name: variable
+            title: Variable
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: integer
+          - name: p
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: effect_measure
+            title: Measure
+            type: text
+          - name: effect_ci_lower
+            title: Lower CI
+            type: number
+            format: zto
+          - name: effect_ci_upper
+            title: Upper CI
+            type: number
+            format: zto
+          - name: interpretation
+            title: Statistical Interpretation
+            type: text
 
-    - name: assumptionsTable
-      title: Assumption Tests
+    # Effect Sizes Detail Table
+    - name: effectsizes
+      title: Effect Size Details and Interpretation
       type: Table
+      visible: (effect_size && show_effect_sizes)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - effect_size_method
+          - confidence_level
       columns:
-        - name: assumption
-          title: Assumption
-          type: text
-        - name: test
-          title: Test
-          type: text
-        - name: statistic
-          title: Statistic
-          type: number
-        - name: df
-          title: df
-          type: integer
-        - name: p
-          title: p
-          type: number
-          format: zto,pvalue
-        - name: result
-          title: Result
-          type: text
-        - name: implication
-          title: Implication
-          type: text
+          - name: variable
+            title: Variable
+            type: text
+          - name: measure
+            title: Effect Size Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto
+          - name: ci_lower
+            title: Lower CI
+            type: number
+            format: zto
+          - name: ci_upper
+            title: Upper CI
+            type: number
+            format: zto
+          - name: magnitude
+            title: Magnitude
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+          - name: clinical_relevance
+            title: Clinical Relevance
+            type: text
 
+    # Post Hoc Comparisons - Enhanced
+    - name: posthoc
+      title: Post Hoc Pairwise Comparisons
+      type: Table
+      visible: (post_hoc && show_post_hoc_table)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - post_hoc_method
+          - p_adjustment
+          - confidence_level
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: statistic
+            title: Test Statistic
+            type: number
+            format: zto
+          - name: p_raw
+            title: p (raw)
+            type: number
+            format: zto,pvalue
+          - name: p_adjusted
+            title: p (adjusted)
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: effect_ci_lower
+            title: Effect Size CI Lower
+            type: number
+            format: zto
+          - name: effect_ci_upper
+            title: Effect Size CI Upper
+            type: number
+            format: zto
+          - name: significance
+            title: Significance
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    # Robust Statistics Table - From original nonparametric
     - name: robustStatistics
-      title: Robust Statistics
+      title: Robust Statistical Estimates
       type: Table
+      visible: (show_robust_statistics)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - robust_method
+          - trim_proportion
+          - winsorize_proportion
       columns:
-        - name: group
-          title: Group
-          type: text
-        - name: trimmed_mean
-          title: Trimmed Mean
-          type: number
-        - name: winsorized_mean
-          title: Winsorized Mean
-          type: number
-        - name: hodges_lehmann
-          title: Hodges-Lehmann
-          type: number
-        - name: robust_se
-          title: Robust SE
-          type: number
-        - name: robust_ci_lower
-          title: Robust CI Lower
-          type: number
-        - name: robust_ci_upper
-          title: Robust CI Upper
-          type: number
+          - name: variable
+            title: Variable
+            type: text
+          - name: group
+            title: Group
+            type: text
+          - name: trimmed_mean
+            title: Trimmed Mean
+            type: number
+            format: zto
+          - name: winsorized_mean
+            title: Winsorized Mean
+            type: number
+            format: zto
+          - name: hodges_lehmann
+            title: Hodges-Lehmann
+            type: number
+            format: zto
+          - name: robust_se
+            title: Robust SE
+            type: number
+            format: zto
+          - name: robust_ci_lower
+            title: Robust CI Lower
+            type: number
+            format: zto
+          - name: robust_ci_upper
+            title: Robust CI Upper
+            type: number
+            format: zto
 
-    - name: clinicalInterpretation
-      title: Clinical Interpretation and Guidelines
-      type: Html
+    # Power Analysis - From original nonparametric
+    - name: powerAnalysis
+      title: Post-hoc Power Analysis and Sample Size
+      type: Table
+      visible: (show_power_analysis)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - effect_size
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: observed_effect
+            title: Observed Effect
+            type: number
+            format: zto
+          - name: power
+            title: Achieved Power
+            type: number
+            format: zto
+          - name: required_n
+            title: Required N (80% power)
+            type: integer
+          - name: power_interpretation
+            title: Power Assessment
+            type: text
 
-    - name: methodsExplanation
-      title: Statistical Methods and Assumptions
-      type: Html
-
-    - name: boxPlots
-      title: Box Plots by Group
+    # Visualization - Enhanced plots from both modules
+    - name: distributionplot
+      title: Distribution Comparison Plots
       type: Image
-      width: 500
-      height: 350
-      renderFun: .plotBoxPlots
+      width: 800
+      height: 600
+      visible: (descriptive_plots)
+      requiresData: true
+      renderFun: .distributionplot
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
 
-    - name: violinPlots
-      title: Violin Plots with Distribution
+    - name: boxplots
+      title: Box Plots with Individual Data Points
       type: Image
-      width: 500
-      height: 350
-      renderFun: .plotViolinPlots
+      width: 800
+      height: 600
+      visible: (show_boxplots || descriptive_plots)
+      requiresData: true
+      renderFun: .boxplot
+      clearWith:
+          - deps
+          - outcome
+          - groups
 
-    - name: rankPlots
+    - name: violinplots
+      title: Violin Plots with Distribution Shapes
+      type: Image
+      width: 800
+      height: 600
+      visible: (show_violin_plots || descriptive_plots)
+      requiresData: true
+      renderFun: .violinplot
+      clearWith:
+          - deps
+          - outcome
+          - groups
+
+    - name: rankplots
       title: Rank Distribution Plots
       type: Image
       width: 500
       height: 350
+      visible: (show_rank_plots)
+      requiresData: true
       renderFun: .plotRankDistribution
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
 
-    - name: effectSizePlots
-      title: Effect Size Visualization
+    - name: effectsizeplots
+      title: Effect Size Visualization with Confidence Intervals
       type: Image
-      width: 500
-      height: 350
-      renderFun: .plotEffectSizes
+      width: 800
+      height: 500
+      visible: ((show_effect_plots || descriptive_plots) && effect_size)
+      requiresData: true
+      renderFun: .effectsizeplot
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - effect_size
+          - confidence_level
 
-    - name: powerAnalysis
-      title: Post-hoc Power Analysis
-      type: Table
-      columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: observed_effect
-          title: Observed Effect
-          type: number
-        - name: power
-          title: Achieved Power
-          type: number
-        - name: required_n
-          title: Required N (80% power)
-          type: integer
-        - name: power_interpretation
-          title: Power Assessment
-          type: text
+    - name: qqplots
+      title: Q-Q Plots for Normality Assessment
+      type: Image
+      width: 800
+      height: 600
+      visible: ((show_qqplots || normality_tests) && descriptive_plots)
+      requiresData: true
+      renderFun: .qqplot
+      clearWith:
+          - deps
+          - outcome
+          - groups
+
+    # Educational and Explanation Sections - From enhancednonparametric
+    - name: methodExplanation
+      title: Understanding Non-Parametric Statistical Methods
+      type: Html
+      visible: (show_explanations)
+      clearWith:
+          - test_type
+          - show_explanations
+
+    - name: effectSizeExplanation
+      title: Understanding Effect Sizes in Non-Parametric Tests
+      type: Html
+      visible: (effect_size && show_explanations)
+      clearWith:
+          - test_type
+          - effect_size
+          - effect_size_method
+          - show_explanations
+
+    - name: postHocExplanation
+      title: Understanding Post Hoc Testing and Multiple Comparisons
+      type: Html
+      visible: (post_hoc && show_explanations)
+      clearWith:
+          - post_hoc_method
+          - p_adjustment
+          - show_explanations
+
+    - name: assumptionExplanation
+      title: Understanding Test Assumptions and Robustness
+      type: Html
+      visible: ((assumption_checks || test_assumptions) && show_explanations)
+      clearWith:
+          - assumption_checks
+          - test_assumptions
+          - show_explanations
+
+    - name: robustMethodsExplanation
+      title: Understanding Robust Statistical Methods
+      type: Html
+      visible: (show_robust_statistics && show_explanations)
+      clearWith:
+          - robust_method
+          - show_explanations
+
+    # Interpretation Sections
+    - name: resultInterpretation
+      title: Statistical Results Interpretation
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - show_interpretation
+
+    - name: clinicalInterpretation
+      title: Clinical Significance and Practical Interpretation
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - effect_size
+          - clinical_context
+          - show_interpretation
+
+    - name: methodsExplanation
+      title: Statistical Methods and Assumptions Summary
+      type: Html
+      visible: (show_explanations)
+      clearWith:
+          - test_type
+          - robust_method
+          - show_explanations
+
+    # Recommendations Section
+    - name: statisticalRecommendations
+      title: Statistical Recommendations and Next Steps
+      type: Html
+      visible: (show_recommendations)
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+          - normality_tests
+          - assumption_checks
+          - show_recommendations
+
+refs:
+    - nonparametric
+    - enhancednonparametric
+    - mannwhitney
+    - kruskalwallis
+    - wilcoxon
+    - friedman
+    - dunn
+    - effectsize
+    - robustbase
+    - ClinicoPathJamoviModule
+
+...

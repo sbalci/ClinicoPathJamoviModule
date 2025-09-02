@@ -1841,7 +1841,7 @@ analyses:
   - title: Segmented Total Bar Charts
     name: jjsegmentedtotalbar
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuTitle: Segmented Total Bar Charts
     menuSubgroup: ClinicoPath Advanced Plots
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
@@ -4276,23 +4276,31 @@ analyses:
       significance assessment, meta-analyses, power analyses, and reproducible
 
       research in medical and pathological studies.
-  - title: Non-parametric Statistical Methods
+  - title: Non-Parametric Statistical Methods
     name: nonparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
-    menuSubgroup: Advanced Statistical Methods
-    menuTitle: Non-parametric Statistical Methods
-    menuSubtitle: Distribution-free statistical analysis for robust inference
+    menuGroup: ExplorationT
+    menuSubgroup: Advanced Statistical Tests
+    menuTitle: Non-Parametric Statistical Methods
+    menuSubtitle: Comprehensive non-parametric analysis with effect sizes and robust methods
     description: >
       Comprehensive non-parametric statistical methods including Kruskal-Wallis
       test,
 
-      Friedman test, robust alternatives to classical procedures, and
-      distribution-free
+      Friedman test, Mann-Whitney U test, and robust alternatives to classical
+      procedures.
 
-      methods designed for clinical research where normality assumptions are
-      violated.
+      Designed specifically for clinical research where normality assumptions
+      are violated.
+
+      This enhanced module combines distribution-free methods with proper effect
+      size calculations,
+
+      assumption checking, and post hoc analysis - addressing critical gaps
+      identified in 30% 
+
+      of pathology studies that use these methods.
   - title: Non-parametric Regression Methods
     name: nonparametricregression
     ns: ClinicoPath

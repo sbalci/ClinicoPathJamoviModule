@@ -22,6 +22,7 @@ Please systematically check these key functions:
 - `vartree`
 - `crosstable`
 - `benford`
+- `nonparametric`
 
 ## Analysis Approach
 
