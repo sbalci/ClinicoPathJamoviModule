@@ -8,8 +8,28 @@ msgstr ""
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
+#: R/jjcorrmat.b.R
+msgid " and "
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid " correlation (r = "
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid " correlation."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid " for reliable ridge plot analysis"
+msgstr ""
+
 #: R/linechart.b.R
 msgid " in Y on average."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid " observations may show unreliable density estimates: "
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -24,12 +44,20 @@ msgstr ""
 msgid " subjects with repeated measures."
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid " that is "
+msgstr ""
+
 #: R/linechart.b.R
 msgid " unit decrease"
 msgstr ""
 
 #: R/linechart.b.R
 msgid " unit increase"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid " using "
 msgstr ""
 
 #: multisurvival/options/td_suffix_pattern.default
@@ -52,8 +80,27 @@ msgstr ""
 msgid "-LR"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid ", using defaults"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "' not found in complete data. Available groups: "
+msgstr ""
+
+#: package/analyses/jjridges.description
+msgid "'Create advanced ridgeline plots combining features from ggridges and ggstatsplot.\n"
+"Visualize distributions across groups with multiple style options, annotations,\n"
+"statistical overlays, and publication-ready formatting. Supports both basic and\n"
+"complex ridge plots with inside plots, double ridgelines, and color gradients.'"
+msgstr ""
+
+#: package/analyses/jjridges.description
+#: jjridges/options.description.main
+msgid "'Create advanced ridgeline plots.\n"
+"Visualize distributions across groups with multiple style options, annotations,\n"
+"statistical overlays, and publication-ready formatting. Supports both basic and\n"
+"complex ridge plots with inside plots, double ridgelines, and color gradients.'"
 msgstr ""
 
 #: package/analyses/jjstreamgraph.description
@@ -65,13 +112,6 @@ msgstr ""
 #: jjradarplot/options.description.main
 msgid "'Create radar plots (spider plots) for multivariate data visualization.\n"
 "This function allows comparison of multiple variables across different categories.'"
-msgstr ""
-
-#: package/analyses/jjridgestats.description
-#: jjridgestats/options.description.main
-msgid "'Create ridgeline plots to visualize and compare distributions of a continuous\n"
-"variable across different categorical groups. Useful for showing distribution\n"
-"shapes, overlaps, and differences between groups.'"
 msgstr ""
 
 #: package/analyses/jjarcdiagram.description
@@ -134,6 +174,14 @@ msgstr ""
 msgid ") after data cleaning. Longitudinal connections may not be meaningful."
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid ") between "
+msgstr ""
+
+#: R/jjridges.b.R
+msgid ") is below recommended minimum of "
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid ") observations"
 msgstr ""
@@ -144,6 +192,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "). Consider reducing groups or using faceting for clarity."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "[Results will be automatically filled when analysis is complete]"
 msgstr ""
 
 #: enhancedcrosstable/options/percent_pattern/col_percent.title
@@ -182,6 +234,10 @@ msgstr ""
 msgid "# Stages"
 msgstr ""
 
+#: jjridges/options/gradient_low.default
+msgid "#0000FF"
+msgstr ""
+
 #: jjcorrmat/options/highcolor.default
 #: jjscatterstats/options/xsidefill.default
 msgid "#009E73"
@@ -211,12 +267,12 @@ msgstr ""
 msgid "#2E8B57"
 msgstr ""
 
-#: robustcorrelation/options/low_color.default
-msgid "#3B82C5"
+#: jjridges/options/custom_colors.default
+msgid "#3498db,#e74c3c,#2ecc71,#f39c12"
 msgstr ""
 
-#: jjridgestats/options/customColor.default
-msgid "#4682B4"
+#: robustcorrelation/options/low_color.default
+msgid "#3B82C5"
 msgstr ""
 
 #: jforester/options/custom_ci_color.default
@@ -243,6 +299,7 @@ msgstr ""
 msgid "#E74C3C"
 msgstr ""
 
+#: jjridges/options/gradient_high.default
 #: jpps/options/custom_color_high.default
 msgid "#FF0000"
 msgstr ""
@@ -269,7 +326,7 @@ msgstr ""
 #: enhancednonparametric/ui[0][2][0]/confidence_level.suffix
 #: enhancedroc/ui[2][0][0][0]/confidenceLevel.suffix
 #: exacttests/ui[1][1]/ciWidth.suffix
-#: ggsegmentedtotalbar/ui[3][0]/label_threshold.suffix
+#: jjsegmentedtotalbar/ui[3][0]/label_threshold.suffix
 #: likelihoodratio/ui[1][2]/confidenceLevel.suffix
 #: likelihoodratio/ui[3][2]/customPrevalenceMax.suffix
 #: mixedeffectscox/ui[4][0]/confidence_level.suffix
@@ -353,6 +410,18 @@ msgstr ""
 msgid "%)"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "%). Consider reviewing data quality or using robust statistical options."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "• Consider these correlations in your clinical interpretation and hypothesis generation."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "• No significant correlations found. Consider larger sample size or different variables."
+msgstr ""
+
 #: jjdotplotstats/results/plot2.title
 msgid "`${dep} - {group} by {grvar}`"
 msgstr ""
@@ -399,7 +468,7 @@ msgid "`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`"
 msgstr ""
 
 #: jjbarstats/results/plot2.title
-msgid "`Bar Chart Splitted by {grvar}`"
+msgid "`Bar Chart Grouped by {grvar}`"
 msgstr ""
 
 #: alluvial/results/plot2.title
@@ -571,6 +640,22 @@ msgstr ""
 msgid "<= (lower values indicate positive class)"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "<br>• All measurement variables contain numeric values"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>• Data has at least 2 complete rows"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>• No extreme outliers that might affect analysis"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>• Variables have sufficient variance for statistical tests"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid "<br><b>Error creating network:</b> Invalid edge structure<br><hr>"
 msgstr ""
@@ -591,12 +676,80 @@ msgstr ""
 msgid "<br><b>Error:</b> Source or target variables not found<br><hr>"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "<br><br>Please check that:"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br><hr>"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "<br><strong>Clinical Note:</strong> Although the correlation appears moderate-to-strong, it is not statistically significant."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "<br><strong>Clinical Note:</strong> This correlation is weak and may not be clinically meaningful."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "<br><strong>Clinical Note:</strong> This suggests a meaningful association that may warrant further investigation."
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>⚠️ <strong>Small Sample Size:</strong> With fewer than 10 subjects, results may be unreliable. Consider larger sample or descriptive analysis.<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>⚠️ <strong>Warning:</strong> {var} has less than 3 valid observations<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>⚠️ <strong>Warning:</strong> {var} has no variation (all values identical)<br>"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid "<br>⚠️ Warning: {var} has less than 3 valid observations<br>"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
 msgid "<br>⚠️ Warning: {var} has no variation (all values are the same)<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>✅ Ready for analysis: Violin Plot comparing %d repeated measurements.<br><hr>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>❌ Dataset is empty (0 rows). Please load data first.<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>❌ No complete observations after removing missing values<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>❌ Variables not found in dataset: "
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>💡 <strong>Many Outliers Detected:</strong> Consider Robust test type to reduce outlier influence<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>💡 <strong>Skewed Data Detected:</strong> Consider Nonparametric test for skewed biomarker or clinical data<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>Analysis summary temporarily unavailable<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>Clinical interpretation temporarily unavailable<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>Error creating within-subjects plot: "
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -611,8 +764,24 @@ msgid "<br>Network Analysis Complete\n"
 "                <br><hr>"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "<br>No complete data rows available after removing missing values.<br>Please check your data for missing values in the selected variables.<br><hr>"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "<br>Preparing correlation analysis options...<br><hr>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<br>Processing {length(vars)} measurements for within-subjects analysis...<br>"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid "<br>Processing data for analysis...<br>"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "<br>Processing data for correlation analysis...<br><hr>"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -632,6 +801,33 @@ msgid "<br>Welcome to ClinicoPath Arc Diagram\n"
 "                    <li>Edge Weight: Strength of connections</li>\n"
 "                    <li>Node Groups: Categories for color coding</li>\n"
 "                    <br><hr>"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "<br>Welcome to ClinicoPath Correlation Matrix Analysis\n"
+"                <br><br>\n"
+"                <strong>What this does:</strong> Analyzes relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)\n"
+"                <br><br>\n"
+"                <strong>When to use:</strong> When examining associations between 2+ continuous clinical variables\n"
+"                <br><br>\n"
+"                <strong>Quick Start:</strong>\n"
+"                <br>1. Select 2 or more continuous variables\n"
+"                <br>2. Choose correlation method (Pearson for normal data, Spearman for non-normal)\n"
+"                <br>3. Optionally group by categorical variable (e.g., tumor grade, treatment group)\n"
+"                <br>4. Use partial correlations (3+ variables) to control for confounding effects\n"
+"                <br><br>\n"
+"                <strong>Correlation Types:</strong>\n"
+"                <br>• <strong>Zero-order (regular):</strong> Direct relationship between two variables\n"
+"                <br>• <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)\n"
+"                <br><br>\n"
+"                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.\n"
+"                <br>\n"
+"                Please cite jamovi and the packages as given below.\n"
+"                <br><hr>"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "<br>You have selected to use a correlation matrix to compare continuous variables.<br><hr>"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -967,6 +1163,14 @@ msgstr ""
 msgid "<p>Analysis completed. See plot for detailed results.</p>"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "<p>Unable to calculate correlations with the selected options.</p>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "<strong>Analysis:</strong> %s with %d measurements per subject"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "<strong>Continuous Y-variable:</strong> The outcome variable should be numeric and measurable."
 msgstr ""
@@ -1048,8 +1252,52 @@ msgstr ""
 msgid "✅ Residuals appear normally distributed (Shapiro-Wilk p > 0.05)."
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "✓ Central tendency displayed"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "✓ Individual trajectories shown"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "✓ Pairwise comparisons enabled"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "💊 <strong>Treatment Response:</strong> Optimized for clinical treatment monitoring<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "💡 Biomarker preset: Consider using Nonparametric test for skewed biomarker data<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "💡 Laboratory preset: Consider Robust test to handle outliers common in lab values<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "💡 Laboratory preset: Enable centrality plotting to see overall trends<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "💡 Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "📊 Advanced Raincloud Statistics"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "🔍 <strong>What to look for:</strong><br>• Statistical significance (p < 0.05) indicates real changes over time<br>• Effect sizes show practical importance<br>• Individual trajectories reveal response patterns<br>• Outliers may indicate treatment non-responders or measurement errors"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "🔬 <strong>Biomarker Tracking:</strong> Optimized for laboratory values and biomarker levels over time<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "🔬 <strong>Laboratory Values:</strong> Optimized for clinical lab value monitoring<br>"
 msgstr ""
 
 #: advancedimputation/options/delta_values.default
@@ -1141,7 +1389,7 @@ msgstr ""
 msgid "0.20 , 0.80"
 msgstr ""
 
-#: jggridges/options/quantiles.default
+#: jjridges/options/quantiles.default
 #: survivalbart/options/survival_quantiles.default
 msgid "0.25, 0.5, 0.75"
 msgstr ""
@@ -1233,7 +1481,7 @@ msgstr ""
 msgid "1 Decimal"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format/decimal1.title
+#: jjsegmentedtotalbar/options/percentage_format/decimal1.title
 msgid "1 Decimal (80.5%)"
 msgstr ""
 
@@ -1390,8 +1638,8 @@ msgstr ""
 msgid "10:50"
 msgstr ""
 
-#: package/analyses/ggsegmentedtotalbar.menuSubtitle
-#: ggsegmentedtotalbar/options.menuSubtitle
+#: package/analyses/jjsegmentedtotalbar.menuSubtitle
+#: jjsegmentedtotalbar/options.menuSubtitle
 msgid "100% Stacked Bar Charts for Proportional Data"
 msgstr ""
 
@@ -1478,7 +1726,7 @@ msgstr ""
 msgid "2 Decimals"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format/decimal2.title
+#: jjsegmentedtotalbar/options/percentage_format/decimal2.title
 msgid "2 Decimals (80.50%)"
 msgstr ""
 
@@ -2071,6 +2319,10 @@ msgstr ""
 msgid "99% (0.5-99.5 percentiles)"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "A "
+msgstr ""
+
 #: alluvial/options/fill.description.jamovi
 #: alluvial2/options/fill.description.jamovi
 msgid "A list for the argument fill for selecting the variable to be represented by color. Default is 'first_variable'."
@@ -2153,6 +2405,11 @@ msgstr ""
 #: aalenhazard/ui.title
 #: aalenhazard/results.title
 msgid "Aalen's Additive Hazard Models"
+msgstr ""
+
+#: jjbarstats/results/about.title
+#: jjpiestats/results/about.title
+msgid "About This Analysis"
 msgstr ""
 
 #: advancedraincloud/options/p_value_position/above.title
@@ -2290,6 +2547,10 @@ msgstr ""
 msgid "Accessibility & Standards"
 msgstr ""
 
+#: agepyramid/options/color_palette/accessible.title
+msgid "Accessible (Colorblind Friendly)"
+msgstr ""
+
 #: multistatesurvival/options/competing_risks.title
 msgid "Account for Competing Risks"
 msgstr ""
@@ -2406,6 +2667,7 @@ msgstr ""
 msgid "Acquiescence Response Analysis"
 msgstr ""
 
+#: R/jjridges.b.R
 #: R/linechart.b.R
 msgid "across"
 msgstr ""
@@ -2624,6 +2886,11 @@ msgstr ""
 msgid "Add BBC-style Branding"
 msgstr ""
 
+#: jjridges/options/add_boxplot.title
+#: jjridges/ui[2][0]/add_boxplot.label
+msgid "Add Boxplot Inside"
+msgstr ""
+
 #: jviolin/options/add_boxplot.description
 msgid "Add boxplot inside violin for summary statistics"
 msgstr ""
@@ -2706,6 +2973,7 @@ msgstr ""
 msgid "Add correlation coefficient to the plot."
 msgstr ""
 
+#: jjridges/options/add_points.title
 #: jviolin/options/add_points.title
 msgid "Add Data Points"
 msgstr ""
@@ -2761,10 +3029,6 @@ msgstr ""
 
 #: summarydata2/options/summarytools_graphs.description.jamovi
 msgid "Add inline plots to summarytools analysis."
-msgstr ""
-
-#: jggridges/options/jittered_points.description
-msgid "Add jittered points below ridges"
 msgstr ""
 
 #: alluvial/options/labelNodes.description.jamovi
@@ -2845,10 +3109,6 @@ msgstr ""
 msgid "Add Q-values (FDR)"
 msgstr ""
 
-#: jggridges/options/quantile_lines.description
-msgid "Add quantile lines to ridges"
-msgstr ""
-
 #: jsjplot/options/show_data.description.jamovi
 msgid "Add raw data points to the plot."
 msgstr ""
@@ -2899,7 +3159,7 @@ msgstr ""
 msgid "Add risk table showing numbers at risk over time."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/add_outline.title
+#: jjsegmentedtotalbar/options/add_outline.title
 msgid "Add Segment Outlines"
 msgstr ""
 
@@ -2966,11 +3226,7 @@ msgstr ""
 msgid "Add trend line to show patterns."
 msgstr ""
 
-#: jggridges/options/show_mean.description
-msgid "Add vertical lines at group means"
-msgstr ""
-
-#: ggsegmentedtotalbar/options/add_outline.description.jamovi
+#: jjsegmentedtotalbar/options/add_outline.description.jamovi
 msgid "Add white borders around each segment for clarity."
 msgstr ""
 
@@ -3164,6 +3420,10 @@ msgstr ""
 msgid "Adjust horizontal spread of individual points."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Adjust plot width and height in Export Options"
+msgstr ""
+
 #: jsjplot/options/dot_size.description.jamovi
 msgid "Adjust size of coefficient points."
 msgstr ""
@@ -3181,7 +3441,7 @@ msgid "Adjust the size of points in the diagnostic plots."
 msgstr ""
 
 #: advancedbarplot/options/bar_width.description.jamovi
-#: ggsegmentedtotalbar/options/bar_width.description.jamovi
+#: jjsegmentedtotalbar/options/bar_width.description.jamovi
 msgid "Adjust the width of bars."
 msgstr ""
 
@@ -3331,6 +3591,10 @@ msgstr ""
 
 #: grouplasso/options/algorithm/admm.title
 msgid "ADMM"
+msgstr ""
+
+#: agepyramid/options/age_groups/reproductive.title
+msgid "Adult Reproductive (15-50)"
 msgstr ""
 
 #: extratrees/ui[8].label
@@ -3547,6 +3811,7 @@ msgstr ""
 msgid "Advanced factor level analysis with BlueSky features"
 msgstr ""
 
+#: jjridges/ui[2].label
 #: multisurvival/ui[16].label
 msgid "Advanced Features"
 msgstr ""
@@ -3755,6 +4020,11 @@ msgstr ""
 msgid "Advanced Output"
 msgstr ""
 
+#: jjbarstats/ui[2][3].label
+#: jjpiestats/ui[2][2].label
+msgid "Advanced Parameters"
+msgstr ""
+
 #: package/analyses/flexparametricadvanced.menuSubtitle
 #: flexparametricadvanced/options.menuSubtitle
 msgid "Advanced parametric survival modeling with flexible baseline hazards"
@@ -3807,6 +4077,13 @@ msgstr ""
 #: package/analyses/highdimcox.menuSubtitle
 #: highdimcox/options.menuSubtitle
 msgid "Advanced regularization for high-dimensional survival data"
+msgstr ""
+
+#: package/analyses/jjridges.title
+#: package/analyses/jjridges.menuTitle
+#: jjridges/ui.title
+#: jjridges/results.title
+msgid "Advanced Ridge Plot"
 msgstr ""
 
 #: psychopdaroc/ui[6].label
@@ -4026,12 +4303,18 @@ msgid "Age Decades"
 msgstr ""
 
 #: R/agepyramid.b.R
+#: agepyramid/results/pyramidTable.columns.title
 #: screeningevaluation/results/age_stratified_results.columns.title
 msgid "Age Group"
 msgstr ""
 
 #: screeningevaluation/options/age_group_breaks.title
 msgid "Age Group Boundaries"
+msgstr ""
+
+#: agepyramid/options/age_groups.title
+#: agepyramid/ui[1][2]/age_groups.label
+msgid "Age Group Preset"
 msgstr ""
 
 #: epidemiosurvival/options/age_groups.title
@@ -4470,6 +4753,10 @@ msgstr ""
 msgid "All Available Tests"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "All basic assumptions appear to be met."
+msgstr ""
+
 #: tinytable/options/style_borders/all.title
 msgid "All Borders"
 msgstr ""
@@ -4746,6 +5033,10 @@ msgstr ""
 msgid "Alone"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "along each ridge, helping visualize how values are distributed within groups."
+msgstr ""
+
 #: agreement/results/krippTable.columns.title
 #: kappaSizeCI/ui[3].label
 #: kappaSizeCI/ui[3][0][0]/alpha.label
@@ -4806,7 +5097,7 @@ msgstr ""
 
 #: advancedbarplot/options/sort_bars/alpha.title
 #: coefplot/options/sort_coefs/alphabetical.title
-#: ggsegmentedtotalbar/options/sort_categories/alpha.title
+#: jjsegmentedtotalbar/options/sort_categories/alpha.title
 #: gtsummary/options/sortVariables/alphabetical.title
 #: jforestmodel/options/sort_variables/alphabetical.title
 #: jggsankeyfier/options/sort_nodes/alphabetical.title
@@ -4907,6 +5198,10 @@ msgstr ""
 msgid "Analysis"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "analysis"
+msgstr ""
+
 #: advancedraincloud/ui[11].label
 msgid "Analysis & Output"
 msgstr ""
@@ -4946,6 +5241,7 @@ msgstr ""
 msgid "Analysis Component"
 msgstr ""
 
+#: R/jjpiestats.b.R
 #: explainableai/ui[1][0][0].label
 #: haralicktexture/ui[1][0][0].label
 #: multiplexanalysis/ui[1][0][0].label
@@ -4966,6 +5262,10 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "Analysis dataset:"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Analysis Details:"
 msgstr ""
 
 #: R/linechart.b.R
@@ -4992,6 +5292,8 @@ msgstr ""
 
 #: aivalidation/results/todo.title
 #: chisqposttest/results/educationalOverview.title
+#: jjcorrmat/results/todo.title
+#: jjwithinstats/results/todo.title
 msgid "Analysis Guide"
 msgstr ""
 
@@ -5235,6 +5537,11 @@ msgstr ""
 msgid "Analysis Settings"
 msgstr ""
 
+#: jjbarstats/results/todo.title
+#: jjpiestats/results/todo.title
+msgid "Analysis Setup"
+msgstr ""
+
 #: highdimcox/results/dimensionalityReduction.columns.title
 #: spikeslabpriors/results/dimensionSummary.columns.title
 msgid "Analysis Stage"
@@ -5310,6 +5617,9 @@ msgstr ""
 #: highdimcox/results/analysisSummary.title
 #: ihccluster/results/summary.title
 #: imagingcorrelation/results/todo.title
+#: jjbarstats/results/summary.title
+#: jjpiestats/results/summary.title
+#: jjwithinstats/results/summary.title
 #: jointfrailty/results/todo.title
 #: jpps/results/summary_stats.title
 #: jsjplot/results/summary.title
@@ -5389,6 +5699,8 @@ msgstr ""
 #: jggstats/options/analysis_type.title
 #: jiwillsurvive/options/analysis_type.title
 #: jjarcdiagram/options/analysisPreset.title
+#: jjbarstats/ui[0]/clinicalpreset.label
+#: jjpiestats/ui[0]/clinicalpreset.label
 #: jpps/options/analysis_type.title
 #: jsjplot/options/analysis_type.title
 #: jsummarytools/options/analysis_type.title
@@ -5441,6 +5753,10 @@ msgstr ""
 #: nogoldstandard/ui.title
 #: nogoldstandard/results.title
 msgid "Analysis Without Gold Standard"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Analysis:"
 msgstr ""
 
 #: sigmametrics/results/sigmaResults.columns.title
@@ -5548,6 +5864,10 @@ msgstr ""
 msgid "Analyzes relationships between continuous variables in clinical research using  evidence-based approaches from BMJ best practices. Avoids common pitfalls like  arbitrary categorization and linear assumptions."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Analyzing variable:"
+msgstr ""
+
 #: imagingcorrelation/results/lesionCharacterizationTable.columns.title
 msgid "Anatomical Location"
 msgstr ""
@@ -5609,6 +5929,7 @@ msgid "Annotation Variable"
 msgstr ""
 
 #: jcomplexupset/options/annotations.title
+#: jjridges/ui[6].label
 #: waterfall/ui[1][1][1].label
 msgid "Annotations"
 msgstr ""
@@ -5715,7 +6036,6 @@ msgid "Apparent Performance"
 msgstr ""
 
 #: jjarcdiagram/ui[4].label
-#: jjridgestats/ui[1][0].label
 #: jjriverplot/ui[2].label
 #: jwaffle/ui[1][1].label
 msgid "Appearance"
@@ -6256,6 +6576,10 @@ msgstr ""
 msgid "At least 2 complete observations are required for lollipop chart analysis."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "At least 2 groups required for ridge plot comparison"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "At least 3 complete observations are required for line chart analysis. "
 msgstr ""
@@ -6471,6 +6795,10 @@ msgstr ""
 
 #: enhancedroc/options/direction/auto.title
 msgid "Auto (determine automatically)"
+msgstr ""
+
+#: jjridges/options/bandwidth/nrd0.title
+msgid "Auto (nrd0)"
 msgstr ""
 
 #: treecompare/options/rf_mtry_method/auto.title
@@ -6898,9 +7226,6 @@ msgstr ""
 msgid "Balanced Accuracy"
 msgstr ""
 
-#: jggridges/options/bandwidth.title
-#: jjridgestats/options/bandwidth.title
-#: jjridgestats/ui[1][0][0]/bandwidth.label
 #: smoothhazard/options/bandwidth.title
 #: smoothhazard/results/hazard_export.columns.title
 #: smoothtimevary/ui[3][0]/bandwidth.label
@@ -6919,6 +7244,11 @@ msgstr ""
 msgid "Bandwidth for Smoothing"
 msgstr ""
 
+#: jjridges/options/bandwidth.title
+#: jjridges/ui[1][0]/bandwidth.label
+msgid "Bandwidth Method"
+msgstr ""
+
 #: smoothtimevary/options/bandwidth.title
 msgid "Bandwidth Parameter"
 msgstr ""
@@ -6932,10 +7262,6 @@ msgstr ""
 #: smoothhazard/options/bandwidth_method.title
 #: timeupdatedsurvival/options/bandwidthMethod.title
 msgid "Bandwidth Selection"
-msgstr ""
-
-#: jggridges/options/bandwidth.description
-msgid "Bandwidth selection method for density estimation"
 msgstr ""
 
 #: smoothhazard/results/bandwidth_selection.title
@@ -6968,6 +7294,10 @@ msgstr ""
 msgid "Bar Chart Approach"
 msgstr ""
 
+#: jjbarstats/ui[3][1].label
+msgid "Bar Chart Labels"
+msgstr ""
+
 #: package/analyses/jjbarstats.title
 #: package/analyses/jjbarstats.menuTitle
 #: jjbarstats/options.title
@@ -6985,8 +7315,12 @@ msgstr ""
 msgid "Bar Color"
 msgstr ""
 
+#: jjbarstats/ui[3][1][0]/label.label
+msgid "Bar Label Type"
+msgstr ""
+
 #: advancedbarplot/options/orientation.title
-#: ggsegmentedtotalbar/options/orientation.title
+#: jjsegmentedtotalbar/options/orientation.title
 msgid "Bar Orientation"
 msgstr ""
 
@@ -7023,7 +7357,7 @@ msgid "Bar Type"
 msgstr ""
 
 #: advancedbarplot/options/bar_width.title
-#: ggsegmentedtotalbar/options/bar_width.title
+#: jjsegmentedtotalbar/options/bar_width.title
 #: waterfall/options/barWidth.title
 msgid "Bar Width"
 msgstr ""
@@ -7351,7 +7685,7 @@ msgstr ""
 msgid "Basic Regions (NUTS 2)"
 msgstr ""
 
-#: jggridges/options/plot_type/ridgeline.title
+#: jjridges/options/plot_type/ridgeline.title
 msgid "Basic Ridgeline"
 msgstr ""
 
@@ -7458,7 +7792,6 @@ msgstr ""
 #: jjbetweenstats/options/typestatistics/bayes.title
 #: jjcorrmat/options/typestatistics/bayes.title
 #: jjpiestats/options/typestatistics/bayes.title
-#: jjwithinstats/options/typestatistics/bayes.title
 msgid "Bayes"
 msgstr ""
 
@@ -7493,8 +7826,10 @@ msgstr ""
 msgid "Bayes Factor Interpretation"
 msgstr ""
 
+#: jjbarstats/options/bfmessage.title
 #: jjbetweenstats/options/bfmessage.title
 #: jjhistostats/options/bf.message.title
+#: jjpiestats/options/bfmessage.title
 #: jjscatterstats/options/bfmessage.title
 #: jjwithinstats/options/bfmessage.title
 msgid "Bayes Factor Message"
@@ -7515,6 +7850,7 @@ msgid "Bayes Factors Evolution"
 msgstr ""
 
 #: jextractggstats/options/statistical_test/bayes.title
+#: jjridges/options/test_type/bayes.title
 msgid "Bayesian"
 msgstr ""
 
@@ -7524,6 +7860,10 @@ msgstr ""
 
 #: statsplot2/options/distribution/bf.title
 msgid "Bayesian (Bayes Factor)"
+msgstr ""
+
+#: jjwithinstats/options/typestatistics/bayes.title
+msgid "Bayesian (Evidence-Based)"
 msgstr ""
 
 #: jjdotplotstats/options/typestatistics/bayes.title
@@ -7547,6 +7887,7 @@ msgid "Bayesian Additive Regression Trees (BART) for survival analysis providing
 msgstr ""
 
 #: R/jjbetweenstats.b.R
+#: R/jjpiestats.b.R
 msgid "Bayesian analysis"
 msgstr ""
 
@@ -7557,6 +7898,10 @@ msgstr ""
 msgid "Bayesian Analysis"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Bayesian analysis is computationally intensive."
+msgstr ""
+
 #: package/analyses/bayesiandiagnostic.menuSubtitle
 #: bayesiandiagnostic/options.menuSubtitle
 msgid "Bayesian analysis of diagnostic test performance with uncertainty"
@@ -7564,6 +7909,14 @@ msgstr ""
 
 #: bayesianclinical/results/bayesian_overview.title
 msgid "Bayesian Analysis Overview"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Bayesian analysis provides evidence for or against group differences. Bayes factors > 3 suggest evidence for differences."
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Bayesian analysis provides evidence for/against differences, useful when traditional p-values are inconclusive."
 msgstr ""
 
 #: bayesianclinical/options/analysis_type.title
@@ -7776,6 +8129,10 @@ msgstr ""
 msgid "Bayesian Predictive Modeling"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Bayesian repeated measures analysis"
+msgstr ""
+
 #: bayesianclinical/options/analysis_type/survival_analysis.title
 msgid "Bayesian Survival Analysis"
 msgstr ""
@@ -7823,11 +8180,11 @@ msgid "BBC Design Principles"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/bbc_multi.title
-#: ggsegmentedtotalbar/options/color_palette/bbc_multi.title
+#: jjsegmentedtotalbar/options/color_palette/bbc_multi.title
 msgid "BBC Multi-color"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style/bbc_style.title
+#: jjsegmentedtotalbar/options/chart_style/bbc_style.title
 msgid "BBC News Style"
 msgstr ""
 
@@ -8264,10 +8621,6 @@ msgstr ""
 msgid "biased"
 msgstr ""
 
-#: jggridges/options/bandwidth/bcv.title
-msgid "Biased Cross-Validation"
-msgstr ""
-
 #: package/analyses/retracted.menuSubtitle
 msgid "Bibliometrics"
 msgstr ""
@@ -8355,10 +8708,6 @@ msgstr ""
 
 #: jjhistostats/options/binwidth.title
 msgid "Bin Width (Default is max(x) - min(x) / sqrt(N))"
-msgstr ""
-
-#: jjridgestats/options/binwidth.title
-msgid "Bin Width (for histogram)"
 msgstr ""
 
 #: agepyramid/options/bin_width.title
@@ -8543,6 +8892,10 @@ msgstr ""
 msgid "Biomarker Context"
 msgstr ""
 
+#: jjcorrmat/options/clinicalpreset/biomarker.title
+msgid "Biomarker Correlations"
+msgstr ""
+
 #: advancedtrials/options/adaptation_type/biomarker_cutoff.title
 msgid "Biomarker Cutoff Selection"
 msgstr ""
@@ -8573,6 +8926,7 @@ msgstr ""
 msgid "Biomarker Discovery Report"
 msgstr ""
 
+#: jjpiestats/options/clinicalpreset/biomarker.title
 #: optimalcutpoint/results/distributionplot.title
 msgid "Biomarker Distribution"
 msgstr ""
@@ -8587,6 +8941,10 @@ msgstr ""
 
 #: dynamicprediction/results/biomarkerEffects.title
 msgid "Biomarker Effects on Survival"
+msgstr ""
+
+#: jjbarstats/options/clinicalpreset/biomarker.title
+msgid "Biomarker Expression (ordinal levels)"
 msgstr ""
 
 #: biomarkerdiscovery/results/biomarker_importance_plot.title
@@ -8700,6 +9058,10 @@ msgstr ""
 
 #: clinicalcalculators/options/calculator_type/biomarker_threshold.title
 msgid "Biomarker Threshold Calculator"
+msgstr ""
+
+#: jjwithinstats/options/clinicalpreset/biomarker.title
+msgid "Biomarker Tracking (Nonparametric)"
 msgstr ""
 
 #: dynamicprediction/options/biomarker_trajectory.title
@@ -8842,7 +9204,7 @@ msgstr ""
 msgid "Biweight Midcorrelation"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color/black.title
+#: jjsegmentedtotalbar/options/outline_color/black.title
 msgid "Black"
 msgstr ""
 
@@ -8854,7 +9216,6 @@ msgid "black"
 msgstr ""
 
 #: jcomplexupset/options/theme_style/theme_bw.title
-#: jggridges/options/theme_style/theme_bw.title
 #: jsjplot/options/colors/bw.title
 #: jsjplot/options/theme_style/bw.title
 #: jviolin/options/themex/bw.title
@@ -8966,7 +9327,6 @@ msgid "Blueprint (9 colors)"
 msgstr ""
 
 #: eurostatmap/options/color_palette/blues.title
-#: jjridgestats/options/colorscheme/blues.title
 #: jjstreamgraph/options/palette/Blues.title
 #: jpps/options/color_scheme/blues.title
 msgid "Blues"
@@ -9039,6 +9399,7 @@ msgstr ""
 #: ihcstats/options/multipleTesting/bonferroni.title
 #: jextractggstats/options/pairwise_correction/bonferroni.title
 #: jjcorrmat/options/padjustmethod/bonferroni.title
+#: jjridges/options/p_adjust_method/bonferroni.title
 #: mediansurvival/options/multiple_comparison/bonferroni.title
 #: multiplexanalysis/options/multiple_testing/bonferroni.title
 #: nonparametric/options/p_adjustment/bonferroni.title
@@ -9510,6 +9871,8 @@ msgstr ""
 #: jggheatmap/options/output_format/both.title
 #: jggsankeyfier/options/output_format/both.title
 #: jggstats/options/output_format/both.title
+#: jjbarstats/options/label/both.title
+#: jjpiestats/options/label/both.title
 #: raincloud/options/dots_side/both.title
 msgid "Both"
 msgstr ""
@@ -9576,11 +9939,11 @@ msgstr ""
 #: advancedbarplot/options/legend_position/bottom.title
 #: bbcplots/options/legend_position/bottom.title
 #: ggprism/options/legend_position/bottom.title
-#: ggsegmentedtotalbar/options/legend_position/bottom.title
+#: jjsegmentedtotalbar/options/legend_position/bottom.title
 #: grafify/options/legend_position/bottom.title
 #: jiwillsurvive/options/legend_position/bottom.title
 #: jjradarplot/options/legendPosition/bottom.title
-#: jjridgestats/options/legendPosition/bottom.title
+#: jjridges/options/legend_position/bottom.title
 #: jjtreemap/options/labelAlignV/bottom.title
 #: jvisr/options/legend_position/bottom.title
 #: psychopdaroc/options/legendPosition/bottom.title
@@ -9720,6 +10083,14 @@ msgstr ""
 
 #: haralicktexture/results/boxplot.description
 msgid "Boxplots comparing texture features across groups"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Boxplots, quantiles, and mean/median lines"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Boxplots:"
 msgstr ""
 
 #: ggprism/options/prism_guides/bracket.title
@@ -9907,7 +10278,7 @@ msgstr ""
 msgid "By Group"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories/largest_segment.title
+#: jjsegmentedtotalbar/options/sort_categories/largest_segment.title
 msgid "By Largest Segment"
 msgstr ""
 
@@ -9949,7 +10320,7 @@ msgstr ""
 msgid "By Stage"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories/total.title
+#: jjsegmentedtotalbar/options/sort_categories/total.title
 msgid "By Total Value"
 msgstr ""
 
@@ -11233,11 +11604,9 @@ msgstr ""
 #: package/analyses/jjbetweenstats.menuSubgroup
 #: package/analyses/jjwithinstats.menuSubgroup
 #: package/analyses/lollipop.menuSubgroup
-#: package/analyses/jjridgestats.menuSubgroup
 #: advancedraincloud/options.menuSubgroup
 #: jjbetweenstats/options.menuSubgroup
 #: jjdotplotstats/options.menuSubgroup
-#: jjridgestats/options.menuSubgroup
 #: jjwithinstats/options.menuSubgroup
 #: lollipop/options.menuSubgroup
 #: raincloud/options.menuSubgroup
@@ -11246,7 +11615,7 @@ msgstr ""
 
 #: agreement/results/overviewTable.columns.title
 #: enhancedfrequency/results/results/variableSummary.columns.title
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 msgid "Categories"
 msgstr ""
@@ -11274,7 +11643,7 @@ msgstr ""
 #: cohenskappa/results/categoryStats.columns.title
 #: enhancedfrequency/results/results/combinedSummary.columns.title
 #: epidemiosurvival/results/apc_effects.columns.title
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 #: modelbuilder/results/riskScoreTable.columns.title
 #: stagemigration/results/executiveSummary.columns.title
 #: stagemigration/results/willRogersClinicalRecommendation.columns.title
@@ -11302,7 +11671,7 @@ msgstr ""
 msgid "Category Labels"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 msgid "Category Total"
 msgstr ""
 
@@ -11311,7 +11680,7 @@ msgstr ""
 msgid "Category Variable"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/x_var.title
+#: jjsegmentedtotalbar/options/x_var.title
 msgid "Category Variable (X-axis)"
 msgstr ""
 
@@ -11912,11 +12281,11 @@ msgstr ""
 msgid "Chart height in pixels for consistent export sizing."
 msgstr ""
 
-#: ggsegmentedtotalbar/results/interpretation.title
+#: jjsegmentedtotalbar/results/interpretation.title
 msgid "Chart Interpretation"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[2].label
+#: jjsegmentedtotalbar/ui[2].label
 #: jwaffle/ui[1].label
 msgid "Chart Options"
 msgstr ""
@@ -11925,7 +12294,7 @@ msgstr ""
 msgid "Chart Orientation"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style.title
+#: jjsegmentedtotalbar/options/chart_style.title
 msgid "Chart Style"
 msgstr ""
 
@@ -11933,7 +12302,7 @@ msgstr ""
 msgid "Chart Subtitle"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/summary.title
+#: jjsegmentedtotalbar/results/summary.title
 msgid "Chart Summary"
 msgstr ""
 
@@ -11949,7 +12318,7 @@ msgid "Chart Title"
 msgstr ""
 
 #: bbcplots/options/chart_type.title
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 #: labcontrolcharts/results/controlLimits.columns.title
 #: qualitycontrol/results/controlChartsResults.columns.title
 msgid "Chart Type"
@@ -11994,6 +12363,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Check that all selected variables exist in your dataset."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Check that selected variables exist in your dataset"
 msgstr ""
 
 #: tableone/options/excl.description.jamovi
@@ -12078,6 +12451,10 @@ msgstr ""
 msgid "Chi-square Test"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "chi-square test"
+msgstr ""
+
 #: clinicaltrialdesign/options/test_type/chi_square.title
 msgid "Chi-Square Test (Categorical Associations)"
 msgstr ""
@@ -12092,6 +12469,10 @@ msgstr ""
 
 #: chisqposttest/results/chisqTable.title
 msgid "Chi-Square Test Results"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations."
 msgstr ""
 
 #: categoricaladvanced/results/chisquaretest.title
@@ -12137,7 +12518,7 @@ msgstr ""
 msgid "Choose calculation method (Lachin-Foulkes for full design, Schoenfeld for events-based)."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color.description.jamovi
+#: jjsegmentedtotalbar/options/outline_color.description.jamovi
 msgid "Choose color for segment borders."
 msgstr ""
 
@@ -12145,7 +12526,7 @@ msgstr ""
 msgid "Choose color palette for visualizations."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/color_palette.description.jamovi
+#: jjsegmentedtotalbar/options/color_palette.description.jamovi
 msgid "Choose color scheme for bar segments."
 msgstr ""
 
@@ -12230,6 +12611,10 @@ msgstr ""
 msgid "Choose point symbol type for scatter plots."
 msgstr ""
 
+#: agepyramid/options/age_groups.description.jamovi
+msgid "Choose preset age groupings for clinical research."
+msgstr ""
+
 #: jjhistostats/options/typestatistics.description.ui
 msgid "Choose statistical approach: Parametric (best for normally distributed lab values like cholesterol),  Nonparametric (for skewed data or ordinal scales like tumor grades),  Robust (when outliers are present), Bayes (for uncertainty quantification)."
 msgstr ""
@@ -12248,6 +12633,10 @@ msgstr ""
 
 #: bbcplots/options/chart_type.description.ui
 msgid "Choose the chart type that best represents your data."
+msgstr ""
+
+#: agepyramid/options/color_palette.description.jamovi
+msgid "Choose the color scheme for the age pyramid."
 msgstr ""
 
 #: advancedbarplot/options/theme_style.description.jamovi
@@ -12311,7 +12700,7 @@ msgstr ""
 msgid "Choose the type of UpSet plot to generate."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style.description.jamovi
+#: jjsegmentedtotalbar/options/chart_style.description.jamovi
 msgid "Choose the visual style and theme for your chart."
 msgstr ""
 
@@ -12408,6 +12797,7 @@ msgstr ""
 #: flexiblerelativesurvival/results/relativeSurvival.columns.title
 #: jforestmodel/results/coefficients_table.columns.title
 #: jggstats/results/modeltab.columns.title
+#: jjridges/results/tests.columns.title
 #: modalitycomparison/results/agreementTable.columns.title
 #: multiclassdiagnostics/results/overallMetrics.columns.title
 #: multistatesurvival/results/transitionMatrix.columns.title
@@ -12489,6 +12879,7 @@ msgstr ""
 #: flexiblerelativesurvival/results/relativeSurvival.columns.title
 #: jforestmodel/results/coefficients_table.columns.title
 #: jggstats/results/modeltab.columns.title
+#: jjridges/results/tests.columns.title
 #: modalitycomparison/results/agreementTable.columns.title
 #: multiclassdiagnostics/results/overallMetrics.columns.title
 #: multistatesurvival/results/transitionMatrix.columns.title
@@ -12627,11 +13018,10 @@ msgstr ""
 #: groupedforest/options/plot_theme/classic.title
 #: hullplot/options/plot_theme/classic.title
 #: jcomplexupset/options/theme_style/theme_classic.title
-#: jggridges/options/theme_style/theme_classic.title
 #: jggsankeyfier/options/theme_style/classic.title
 #: jggstats/options/theme_style/classic.title
 #: jiwillsurvive/options/plot_style/classic.title
-#: jjridgestats/options/themeChoice/classic.title
+#: jjridges/options/theme_style/theme_classic.title
 #: jscattermore/options/theme_style/classic.title
 #: jsjplot/options/theme_style/classic.title
 #: jviolin/options/themex/classic.title
@@ -12736,7 +13126,7 @@ msgid "Clean (minimal annotations)"
 msgstr ""
 
 #: advancedbarplot/options/theme_style/clean.title
-#: ggsegmentedtotalbar/options/chart_style/clean.title
+#: jjsegmentedtotalbar/options/chart_style/clean.title
 msgid "Clean & Modern"
 msgstr ""
 
@@ -12746,6 +13136,10 @@ msgstr ""
 
 #: methodvalidation/options/acceptance_criteria/clia.title
 msgid "CLIA Requirements"
+msgstr ""
+
+#: jjridges/options/effsize_type/cliff_delta.title
+msgid "Cliff's Delta (nonparametric)"
 msgstr ""
 
 #: effectsize/options/measures_cliff_delta.title
@@ -12771,6 +13165,10 @@ msgstr ""
 
 #: linechart/ui[3][1]/colorPalette/clinical.title
 msgid "Clinical (Colorblind Safe)"
+msgstr ""
+
+#: jjridges/options/color_palette/clinical_colorblind.title
+msgid "Clinical (Colorblind-Safe)"
 msgstr ""
 
 #: hullplot/options/color_palette/clinical.title
@@ -12829,7 +13227,10 @@ msgstr ""
 msgid "Clinical Alerts"
 msgstr ""
 
+#: jjbarstats/options/clinicalpreset.title
 #: jjhistostats/options/clinicalPreset.title
+#: jjpiestats/options/clinicalpreset.title
+#: jjwithinstats/options/clinicalpreset.title
 msgid "Clinical Analysis Preset"
 msgstr ""
 
@@ -12937,6 +13338,8 @@ msgstr ""
 msgid "Clinical Considerations"
 msgstr ""
 
+#: R/jjpiestats.b.R
+#: R/jjwithinstats.b.R
 #: bayesiannetworkma/options/clinical_context.title
 #: clinicalalerts/ui[1][5].label
 #: enhancedfactorvariable/options/clinical_interpretation.title
@@ -13035,6 +13438,10 @@ msgstr ""
 
 #: continuousrelationship/options/knotPositions/clinical.title
 msgid "Clinical cutpoints"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Clinical Data Considerations:"
 msgstr ""
 
 #: package/analyses/clinicaldataintegration.title
@@ -13159,6 +13566,10 @@ msgstr ""
 msgid "Clinical Goals Based"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Clinical Guidance"
+msgstr ""
+
 #: differentialdiagnosis/options/clinical_guidelines.title
 #: imagingcorrelation/options/clinical_guidelines.title
 #: treatmentoptim/options/clinical_guidelines.title
@@ -13278,8 +13689,10 @@ msgstr ""
 #: ihcscoring/options/clinical_interpretation.title
 #: jforestmodel/results/interpretation.title
 #: jiwillsurvive/results/interpretation.title
+#: jjcorrmat/results/interpretation.title
 #: jjdotplotstats/results/interpretation.title
 #: jjhistostats/results/interpretation.title
+#: jjwithinstats/results/interpretation.title
 #: jointfrailty/results/associationMeasures.columns.title
 #: jointfrailty/results/exportTable.columns.title
 #: jvisr/results/interpretation.title
@@ -13575,6 +13988,18 @@ msgstr ""
 msgid "Clinical Prediction Models & ML Interpretability"
 msgstr ""
 
+#: jjcorrmat/options/clinicalpreset.title
+msgid "Clinical Preset"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Clinical preset application failed: {error}. Using custom settings."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Clinical Preset Guidance:"
+msgstr ""
+
 #: jjhistostats/ui[1][0].label
 msgid "Clinical Presets"
 msgstr ""
@@ -13643,6 +14068,10 @@ msgstr ""
 msgid "Clinical Recommendations"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Clinical Recommendations:"
+msgstr ""
+
 #: linechart/ui[2].label
 msgid "Clinical Reference"
 msgstr ""
@@ -13687,8 +14116,8 @@ msgstr ""
 
 #: advancedbarplot/options/color_palette/clinical.title
 #: enhancedtables/options/table_theme/clinical.title
-#: ggsegmentedtotalbar/options/chart_style/clinical.title
-#: ggsegmentedtotalbar/options/color_palette/clinical.title
+#: jjsegmentedtotalbar/options/chart_style/clinical.title
+#: jjsegmentedtotalbar/options/color_palette/clinical.title
 #: summarydata2/options/pivot_layout/clinical.title
 #: tableone2/options/pivot_format/clinical.title
 msgid "Clinical Research"
@@ -13744,6 +14173,10 @@ msgstr ""
 
 #: decisioncurve/options/decisionRuleLabel.default
 msgid "Clinical Rule"
+msgstr ""
+
+#: jjwithinstats/ui[1][0].label
+msgid "Clinical Scenario"
 msgstr ""
 
 #: clinicalvalidationinteractive/options/clinical_preset.title
@@ -13829,7 +14262,9 @@ msgstr ""
 msgid "Clinical Standards"
 msgstr ""
 
+#: R/jjridges.b.R
 #: R/lollipop.b.R
+#: jjridges/results/clinicalSummary.title
 msgid "Clinical Summary"
 msgstr ""
 
@@ -14053,13 +14488,13 @@ msgid "ClinicoPath"
 msgstr ""
 
 #: package/analyses/advancedbarplot.menuSubgroup
-#: package/analyses/ggsegmentedtotalbar.menuSubgroup
+#: package/analyses/jjsegmentedtotalbar.menuSubgroup
 #: package/analyses/economistplots.menuSubgroup
 #: package/analyses/bbcplots.menuSubgroup
 #: advancedbarplot/options.menuSubgroup
 #: bbcplots/options.menuSubgroup
 #: economistplots/options.menuSubgroup
-#: ggsegmentedtotalbar/options.menuSubgroup
+#: jjsegmentedtotalbar/options.menuSubgroup
 msgid "ClinicoPath Advanced Plots"
 msgstr ""
 
@@ -14805,6 +15240,18 @@ msgstr ""
 msgid "Coarsened Exact Matching (CEM)"
 msgstr ""
 
+#: contTables/results/trendTest.columns.content
+msgid "Cochran-Armitage trend"
+msgstr ""
+
+#: contTables/options/trendTest.title
+msgid "Cochran-Armitage trend test"
+msgstr ""
+
+#: contTables/results/trendTest.description
+msgid "Cochran-Armitage trend test results"
+msgstr ""
+
 #: enhancednonparametric/options/test_type/cochran_q.title
 msgid "Cochran's Q Test (>2 paired groups)"
 msgstr ""
@@ -14950,6 +15397,7 @@ msgstr ""
 #: advancedraincloud/options/effect_size_type/cohens_d.title
 #: effectsize/options/measures_cohens_d.title
 #: jextractggstats/options/effect_size_type/cohens_d.title
+#: jjridges/options/effsize_type/d.title
 msgid "Cohen's d"
 msgstr ""
 
@@ -15119,16 +15567,19 @@ msgstr ""
 
 #: advancedbarplot/options/color_palette.title
 #: advancedraincloud/options/color_palette.title
+#: agepyramid/options/color_palette.title
+#: agepyramid/ui[1][2]/color_palette.label
 #: eurostatmap/options/color_palette.title
 #: ggprism/options/prism_palette.title
-#: ggsegmentedtotalbar/options/color_palette.title
+#: jjsegmentedtotalbar/options/color_palette.title
 #: grafify/options/color_palette.title
 #: hullplot/options/color_palette.title
 #: jcomplexupset/options/color_palette.title
-#: jggridges/options/color_palette.title
 #: jggsankeyfier/options/color_palette.title
 #: jggstats/options/color_palette.title
 #: jiwillsurvive/options/color_palette.title
+#: jjridges/options/color_palette.title
+#: jjridges/ui[4][0]/color_palette.label
 #: jjstreamgraph/options/palette.title
 #: jscattermore/options/color_palette.title
 #: jviolin/options/color_palette.title
@@ -15139,10 +15590,6 @@ msgstr ""
 #: raincloud/options/color_palette.title
 #: raincloud/ui[3][0]/color_palette.label
 msgid "Color Palette"
-msgstr ""
-
-#: jggridges/options/color_palette.description
-msgid "Color palette for ridges"
 msgstr ""
 
 #: eurostatmap/options/color_palette.description.jamovi
@@ -15185,8 +15632,6 @@ msgstr ""
 #: jforestmodel/options/color_scheme.title
 #: jggheatmap/options/color_scheme.title
 #: jjcorrmat/ui[3][0].label
-#: jjridgestats/options/colorscheme.title
-#: jjridgestats/ui[1][0][0]/colorscheme.label
 #: jsjplot/options/colors.title
 #: linechart/ui[3][1]/colorPalette.label
 #: lollipop/options/colorScheme.title
@@ -15230,8 +15675,6 @@ msgstr ""
 msgid "Color Threshold"
 msgstr ""
 
-#: jggridges/options/color_var.title
-#: jggridges/ui[0][2].label
 #: jscattermore/options/color_var.title
 #: jscattermore/ui[0][2].label
 #: jviolin/options/col.title
@@ -15253,9 +15696,13 @@ msgstr ""
 msgid "Color Variable (Optional)"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Color-code segments within ridges"
+msgstr ""
+
 #: advancedbarplot/options/color_palette/colorblind.title
 #: decisiongraph/options/colorScheme/colorblind.title
-#: ggsegmentedtotalbar/options/color_palette/colorblind.title
+#: jjsegmentedtotalbar/options/color_palette/colorblind.title
 #: jwaffle/options/color_palette/colorblind.title
 #: tidyplots/options/colorScheme/friendly.title
 msgid "Colorblind Friendly"
@@ -15308,6 +15755,10 @@ msgstr ""
 
 #: raincloud/ui[3].label
 msgid "Colors & Themes"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Colors represent the value of"
 msgstr ""
 
 #: contTables/options/pcCol.title
@@ -15738,6 +16189,10 @@ msgstr ""
 msgid "Compare Between Groups"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Compare biomarker distributions between patient groups"
+msgstr ""
+
 #: stagemigration/options/informativeCensoringCompareStages.title
 msgid "Compare Censoring Across Stages"
 msgstr ""
@@ -15775,8 +16230,16 @@ msgstr ""
 msgid "Compare Distributions"
 msgstr ""
 
+#: jjwithinstats/options/pairwisecomparisons.title
+msgid "Compare Each Time Point Pair"
+msgstr ""
+
 #: frailtysurvival/options/model_comparison.description.ui
 msgid "Compare frailty vs standard Cox model"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Compare medians and quartile ranges across groups for clinical significance."
 msgstr ""
 
 #: package/analyses/decisioncompare.title
@@ -15833,6 +16296,10 @@ msgstr ""
 msgid "Compare PPS with Pearson correlation"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Compare ridge positions (left/right shift) for group differences"
+msgstr ""
+
 #: pseudosurvival/options/rmst_comparison.description.ui
 msgid "Compare RMST between groups"
 msgstr ""
@@ -15879,6 +16346,10 @@ msgstr ""
 msgid "Compare with Linear Model"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Comparing across groups:"
+msgstr ""
+
 #: package/analyses/comparingSurvival.title
 #: package/analyses/comparingSurvival.menuTitle
 #: comparingSurvival/options.title
@@ -15913,6 +16384,7 @@ msgstr ""
 #: ihcscoring/results/agreementtable.columns.title
 #: ihcscoring/results/molecularclassification/subtypestatistics.columns.title
 #: ihcstats/results/survivalTable.columns.title
+#: jjridges/results/tests.columns.title
 #: mediansurvival/results/comparisonTable.columns.title
 #: metaanalysis/results/networkResults.columns.title
 #: modelbuilder/results/nriTable.columns.title
@@ -16503,7 +16975,7 @@ msgstr ""
 msgid "Composite Score Threshold"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/composition_table.title
+#: jjsegmentedtotalbar/results/composition_table.title
 msgid "Composition Analysis"
 msgstr ""
 
@@ -17768,10 +18240,12 @@ msgstr ""
 #: jforestmodel/options/confidence_level.title
 #: jggstats/options/confidence_level.title
 #: jiwillsurvive/options/confidence_level.title
+#: jjbarstats/options/conflevel.title
 #: jjbetweenstats/options/conflevel.title
 #: jjcorrmat/options/conflevel.title
 #: jjdotplotstats/options/conflevel.title
 #: jjhistostats/options/conf.level.title
+#: jjpiestats/options/conflevel.title
 #: jjscatterstats/options/conflevel.title
 #: jjwithinstats/options/conflevel.title
 #: jointfrailty/options/confidence_level.title
@@ -17883,6 +18357,14 @@ msgstr ""
 
 #: competingsurvival/ui[3][0]/confidencelevel.label
 msgid "Confidence Level (0-1)"
+msgstr ""
+
+#: jjpiestats/ui[2][2][0]/conflevel.label
+msgid "Confidence Level (0.50-0.99)"
+msgstr ""
+
+#: jjbarstats/ui[2][3][0]/conflevel.label
+msgid "Confidence Level (0.90-0.99)"
 msgstr ""
 
 #: stagemigration/options/confidenceLevel.description
@@ -17997,6 +18479,14 @@ msgstr ""
 #: deeplearningprediction/options/confidence_threshold.title
 #: differentialdiagnosis/options/confidence_threshold.title
 msgid "Confidence Threshold"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Configuration:"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Confirm variables have adequate variation (≥2 categories)"
 msgstr ""
 
 #: decisionpanel/options/sequentialStop/confirmatory.title
@@ -18130,8 +18620,16 @@ msgstr ""
 msgid "Consider checking for missing values or selecting different variables."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Consider combining small categories or collecting more data."
+msgstr ""
+
 #: treemedical/options/cost_sensitive.description
 msgid "Consider different costs of false positives vs false negatives."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Consider effect sizes alongside p-values for clinical importance. Adjust for multiple comparisons when appropriate."
 msgstr ""
 
 #: R/lollipop.b.R
@@ -18140,6 +18638,10 @@ msgstr ""
 
 #: R/lollipop.b.R
 msgid "Consider log transformation or outlier investigation."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Consider potential confounding variables in your analysis."
 msgstr ""
 
 #: R/linechart.b.R
@@ -18356,8 +18858,8 @@ msgstr ""
 msgid "Continuous Variable for Cut-point Analysis"
 msgstr ""
 
-#: jggridges/options/x_var.description
-msgid "Continuous variable for distribution visualization"
+#: R/jjridges.b.R
+msgid "Continuous variable for distributions"
 msgstr ""
 
 #: desctools/options/continuous_var.description
@@ -18779,6 +19281,19 @@ msgstr ""
 msgid "Copula Association"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Copy the text above and modify as needed for your manuscript or report."
+msgstr ""
+
+#: jjbarstats/results/report.title
+#: jjpiestats/results/report.title
+msgid "Copy-Ready Report"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Copy-Ready Report Template"
+msgstr ""
+
 #: R/linechart.b.R
 #: jjarcdiagram/results/reportSentence.title
 msgid "Copy-Ready Summary"
@@ -18907,6 +19422,14 @@ msgstr ""
 msgid "Correlation Analysis Method"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Correlation analysis requires at least 2 numeric variables with sufficient variation and observations"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Correlation Analysis Summary"
+msgstr ""
+
 #: package/analyses/partialcorrelation.menuSubtitle
 #: partialcorrelation/options.menuSubtitle
 msgid "Correlation analysis with BlueSky integration and advanced features"
@@ -19007,6 +19530,10 @@ msgstr ""
 msgid "Correlation Matrix Variables"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Correlation matrix with >10 variables may be difficult to interpret. Consider focusing on key variables."
+msgstr ""
+
 #: jcorrelation/results/matrix.description
 msgid "correlation matrix with significance tests"
 msgstr ""
@@ -19104,6 +19631,10 @@ msgstr ""
 #: polychoriccorr/options/corrType.title
 #: polychoriccorr/ui[1][0]/corrType.label
 msgid "Correlation type"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Correlation type: %s"
 msgstr ""
 
 #: imagingcorrelation/options/correlation_plots.title
@@ -19288,7 +19819,7 @@ msgstr ""
 #: enhancedfactorvariable/results/results/combinedFactorAnalysis.columns.title
 #: enhancedtwowayfrequency/results/observedFrequencies.columns.title
 #: flowchart/results/nodeData.columns.title
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 #: ihcscoring/results/molecularclassification/subtypedistribution.columns.title
 #: modalitycomparison/results/discordanceTable.columns.title
 #: modalitycomparison/results/directionalBiasTable.columns.title
@@ -19334,6 +19865,8 @@ msgstr ""
 
 #: contTables/ui[1][1][0][0][0].label
 #: exacttests/options/counts.title
+#: jjbarstats/options/label/counts.title
+#: jjpiestats/options/label/counts.title
 #: vartree/options/showcount.title
 msgid "Counts"
 msgstr ""
@@ -19346,9 +19879,14 @@ msgstr ""
 msgid "Counts (optional)"
 msgstr ""
 
+#: jjbarstats/options/counts.title
 #: jwaffle/options/counts.title
 #: jwaffle/ui[0][2].label
 msgid "Counts (Optional)"
+msgstr ""
+
+#: jjpiestats/options/counts.title
+msgid "Counts Variable (Optional)"
 msgstr ""
 
 #: populationhealth/options/geographic_level/county.title
@@ -19811,7 +20349,7 @@ msgstr ""
 msgid "Cramér's V, phi coefficient, and association measures"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[1][0][0].label
+#: jjsegmentedtotalbar/ui[1][0][0].label
 msgid "Create 100% stacked bar charts showing proportional composition within categories"
 msgstr ""
 
@@ -19929,11 +20467,15 @@ msgstr ""
 msgid "Create risk group classifications"
 msgstr ""
 
-#: package/analyses/ggsegmentedtotalbar.description
-#: ggsegmentedtotalbar/options.description.main
+#: package/analyses/jjsegmentedtotalbar.description
+#: jjsegmentedtotalbar/options.description.main
 msgid "Create segmented total bar charts (100% stacked bars) that show proportional \n"
 "breakdowns within categories. Perfect for displaying composition data where \n"
 "each bar represents 100% and segments show relative proportions."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Create separate panels"
 msgstr ""
 
 #: survivalmodelvalidation/options/roc_curves.description.ui
@@ -20105,10 +20647,6 @@ msgid "Creates Raincloud plots to visualize data distributions using ggdist pack
 "individual data points. This provides a comprehensive view of data distribution \n"
 "that reveals patterns traditional box plots might miss, including multimodality\n"
 "and distribution shape. Based on the ggdist R-Bloggers tutorial."
-msgstr ""
-
-#: package/analyses/jggridges.description
-msgid "Creates ridge plots (joy plots) for visualizing distributions across groups. Ridge plots are particularly useful for comparing distributions of continuous variables across multiple categories or time periods."
 msgstr ""
 
 #: package/analyses/riverplot.description
@@ -20960,6 +21498,10 @@ msgstr ""
 msgid "Current Approach Description"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Current configuration"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Current dataset has "
 msgstr ""
@@ -21060,7 +21602,7 @@ msgstr ""
 #: jforester/options/color_scheme/custom.title
 #: jforestmodel/options/color_scheme/custom.title
 #: jggheatmap/options/color_scheme/custom.title
-#: jjridgestats/options/colorscheme/custom.title
+#: jjridges/options/color_palette/custom.title
 #: jointmodeling/options/random_effects/custom.title
 #: jointmodeling/options/prior_specification/custom.title
 #: jpps/options/color_scheme/custom.title
@@ -21069,8 +21611,21 @@ msgstr ""
 msgid "Custom"
 msgstr ""
 
+#: jjbarstats/options/clinicalpreset/custom.title
+#: jjpiestats/options/clinicalpreset/custom.title
+msgid "Custom (manual configuration)"
+msgstr ""
+
+#: jjwithinstats/options/clinicalpreset/custom.title
+msgid "Custom (Manual Configuration)"
+msgstr ""
+
 #: jjhistostats/options/clinicalPreset/custom.title
 msgid "Custom (manual settings)"
+msgstr ""
+
+#: agepyramid/options/color_palette/custom.title
+msgid "Custom (User Defined)"
 msgstr ""
 
 #: digitalvalidation/ui[1][1].label
@@ -21089,6 +21644,15 @@ msgstr ""
 msgid "Custom Alpha Spending"
 msgstr ""
 
+#: jjcorrmat/options/clinicalpreset/custom.title
+msgid "Custom Analysis"
+msgstr ""
+
+#: jjridges/options/custom_annotations.title
+#: jjridges/ui[6][0]/custom_annotations.label
+msgid "Custom Annotations"
+msgstr ""
+
 #: haralicktexture/options/biomarker_context/custom.title
 msgid "Custom Application"
 msgstr ""
@@ -21097,12 +21661,21 @@ msgstr ""
 msgid "Custom Axis Labels"
 msgstr ""
 
+#: jjridges/options/bandwidth_value.title
+#: jjridges/ui[1][0]/bandwidth_value.label
+msgid "Custom Bandwidth"
+msgstr ""
+
 #: methodvalidation/options/custom_bias_limit.title
 msgid "Custom Bias Limit (%)"
 msgstr ""
 
 #: alluvial/options/custombinlabels.title
 msgid "Custom bin labels"
+msgstr ""
+
+#: agepyramid/options/age_groups/custom.title
+msgid "Custom Bins"
 msgstr ""
 
 #: flexparametricadv/options/boundary_knots/custom.title
@@ -21150,6 +21723,11 @@ msgstr ""
 
 #: bbcplots/options/bbc_colors/custom.title
 msgid "Custom Color Set"
+msgstr ""
+
+#: jjridges/options/custom_colors.title
+#: jjridges/ui[4][0]/custom_colors.label
+msgid "Custom Colors"
 msgstr ""
 
 #: bbcplots/options/custom_colors.title
@@ -21204,10 +21782,6 @@ msgstr ""
 #: excessmortality/options/expectedRate/custom.title
 #: flexiblerelativesurvival/options/expectedType/custom.title
 msgid "Custom expected rates"
-msgstr ""
-
-#: jjridgestats/options/customColor.title
-msgid "Custom Fill Color"
 msgstr ""
 
 #: enhancedtables/options/table_type/custom.title
@@ -21283,10 +21857,6 @@ msgstr ""
 msgid "Custom label for the vertical axis."
 msgstr ""
 
-#: jggridges/options/x_label.description
-msgid "Custom label for X axis"
-msgstr ""
-
 #: jviolin/options/xlabel.description
 msgid "Custom label for x-axis"
 msgstr ""
@@ -21301,10 +21871,6 @@ msgstr ""
 
 #: grafify/options/x_label.description
 msgid "Custom label for X-axis. Leave empty to use variable name."
-msgstr ""
-
-#: jggridges/options/y_label.description
-msgid "Custom label for Y axis"
 msgstr ""
 
 #: jviolin/options/ylabel.description
@@ -21603,6 +22169,7 @@ msgstr ""
 msgid "Custom Utilities"
 msgstr ""
 
+#: jjridges/options/bandwidth/custom.title
 #: penalizedcox/options/lambda_selection/custom.title
 msgid "Custom Value"
 msgstr ""
@@ -22025,7 +22592,7 @@ msgstr ""
 #: grafify/options/color_palette/dark.title
 #: hullplot/options/plot_theme/dark.title
 #: jggstats/options/theme_style/dark.title
-#: jjridgestats/options/themeChoice/dark.title
+#: jjridges/options/theme_style/theme_dark.title
 #: jscattermore/options/theme_style/dark.title
 #: jviolin/options/themex/dark.title
 msgid "Dark"
@@ -22040,10 +22607,10 @@ msgstr ""
 #: hullplot/options/color_palette/dark2.title
 #: jcomplexupset/options/color_palette/Dark2.title
 #: jggheatmap/options/annotation_colors/dark2.title
-#: jggridges/options/color_palette/Dark2.title
 #: jggsankeyfier/options/color_palette/dark2.title
 #: jggstats/options/color_palette/dark2.title
 #: jiwillsurvive/options/color_palette/dark2.title
+#: jjridges/options/color_palette/Dark2.title
 #: jvisr/options/color_palette/Dark2.title
 #: raincloud/options/color_palette/dark2.title
 msgid "Dark2"
@@ -22103,6 +22670,8 @@ msgstr ""
 #: R/agepyramid.b.R
 #: R/jjarcdiagram.b.R
 #: R/jjbetweenstats.b.R
+#: R/jjcorrmat.b.R
+#: R/jjwithinstats.b.R
 msgid "Data contains no (complete) rows"
 msgstr ""
 
@@ -22112,6 +22681,10 @@ msgstr ""
 
 #: advancedtrials/results/interim_monitoring_guidelines.columns.title
 msgid "Data Cutoff Rule"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Data dimensions are invalid"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -22151,6 +22724,11 @@ msgstr ""
 msgid "Data Frame Summary (summarytools)"
 msgstr ""
 
+#: jjbarstats/ui[2][0].label
+#: jjpiestats/ui[2][0].label
+msgid "Data Handling"
+msgstr ""
+
 #: imagingcorrelation/options/integration_method.title
 msgid "Data Integration Method"
 msgstr ""
@@ -22164,12 +22742,16 @@ msgstr ""
 msgid "Data Monitoring Board Recommendation Templates"
 msgstr ""
 
-#: multiplexanalysis/options/normalization_method.title
-msgid "Data Normalization"
+#: R/jjwithinstats.b.R
+msgid "Data must be a data frame"
 msgstr ""
 
-#: jjbarstats/ui[1][0].label
-msgid "Data Options"
+#: R/jjwithinstats.b.R
+msgid "Data must contain at least 2 columns"
+msgstr ""
+
+#: multiplexanalysis/options/normalization_method.title
+msgid "Data Normalization"
 msgstr ""
 
 #: clinicaldataintegration/results/overview.title
@@ -22201,6 +22783,10 @@ msgstr ""
 
 #: jiwillsurvive/results/prepText.title
 msgid "Data Preparation Summary"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Data prepared"
 msgstr ""
 
 #: biomarkerdiscovery/options/data_preprocessing.title
@@ -22273,12 +22859,24 @@ msgstr ""
 msgid "Data Quality Visualization"
 msgstr ""
 
+#: jjridges/results/warnings.title
+msgid "Data Quality Warnings"
+msgstr ""
+
 #: jggheatmap/options/scaling.title
 msgid "Data Scaling"
 msgstr ""
 
 #: modelbuilder/ui[1].label
 msgid "Data Setup"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Data should be categorical (factors or characters)"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Data shows high skewness. Consider log transformation if appropriate for your clinical context."
 msgstr ""
 
 #: bbcplots/options/source_text.title
@@ -22392,6 +22990,10 @@ msgstr ""
 #: deeplearningprediction/results/dataInfo.title
 #: eurostatmap/results/info.title
 msgid "Dataset Information"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Dataset is empty. Please ensure your data contains observations."
 msgstr ""
 
 #: autoeda/results/overview.title
@@ -22634,6 +23236,11 @@ msgstr ""
 msgid "Decimal (2)"
 msgstr ""
 
+#: jjbarstats/options/digits.title
+#: jjpiestats/options/digits.title
+msgid "Decimal Digits"
+msgstr ""
+
 #: enhancedcrosstable/options/digits.title
 #: enhancedfrequency/ui[2][0][0][0].label
 #: enhancedtables/options/decimal_places.title
@@ -22648,6 +23255,15 @@ msgstr ""
 #: summarydata/options/decimal_places.title
 #: timedependent/options/decimals.title
 msgid "Decimal Places"
+msgstr ""
+
+#: jjbarstats/ui[3][1][0]/digitsperc.label
+msgid "Decimal Places (Percentages)"
+msgstr ""
+
+#: jjbarstats/ui[3][1][0]/digits.label
+#: jjpiestats/ui[3][1][0]/digits.label
+msgid "Decimal Places (Statistics)"
 msgstr ""
 
 #: tinytable/options/precision_digits.title
@@ -22930,6 +23546,10 @@ msgstr ""
 msgid "decreasing"
 msgstr ""
 
+#: contTables/options/trendDirection/decreasing.title
+msgid "Decreasing"
+msgstr ""
+
 #: coefplot/options/decreasing_sort.title
 msgid "Decreasing Sort Order"
 msgstr ""
@@ -22993,10 +23613,6 @@ msgstr ""
 msgid "Default (follows test type)"
 msgstr ""
 
-#: jggridges/options/bandwidth/nrd0.title
-msgid "Default (nrd0)"
-msgstr ""
-
 #: hullplot/options/plot_theme/minimal.title
 msgid "Default (theme_minimal)"
 msgstr ""
@@ -23014,7 +23630,7 @@ msgid "Default Colors"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/default.title
-#: ggsegmentedtotalbar/options/color_palette/default.title
+#: jjsegmentedtotalbar/options/color_palette/default.title
 #: jviolin/options/color_palette/default.title
 msgid "Default ggplot2"
 msgstr ""
@@ -23063,6 +23679,10 @@ msgstr ""
 
 #: decisiongraph/options/tunnelStates.description.ui
 msgid "Define tunnel states for temporary health states (e.g., post-surgical recovery)."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "defined by"
 msgstr ""
 
 #: ihcstats/results/supervisedResultsTable.columns.title
@@ -23233,10 +23853,6 @@ msgstr ""
 msgid "DenseNet"
 msgstr ""
 
-#: jjridgestats/options/plotStyle/density.title
-msgid "Density"
-msgstr ""
-
 #: tidyplots/options/distributionType/density.title
 msgid "Density Curve"
 msgstr ""
@@ -23252,8 +23868,12 @@ msgstr ""
 msgid "Density Plot"
 msgstr ""
 
-#: jggridges/options/plot_type/density_ridges.title
+#: jjridges/options/plot_type/density_ridges.title
 msgid "Density Ridges"
+msgstr ""
+
+#: jjridges/options/plot_type/density_ridges_gradient.title
+msgid "Density with Gradient"
 msgstr ""
 
 #: psychopdaroc/options/rocSmoothingMethod/density.title
@@ -23281,11 +23901,10 @@ msgstr ""
 #: jggstats/options/dependent_var.title
 #: jggstats/ui[1][0].label
 #: jjbarstats/options/dep.title
-#: jjbarstats/ui[0][0].label
 #: jjdotplotstats/options/dep.title
 #: jjdotplotstats/ui[0][0].label
 #: jjpiestats/options/dep.title
-#: jjpiestats/ui[0][0].label
+#: jjpiestats/ui[1][0].label
 #: jsjplot/options/dependent_var.title
 #: jsjplot/ui[1][0].label
 #: jviolin/options/dep.title
@@ -23656,7 +24275,7 @@ msgstr ""
 msgid "Detailed Statistical Output"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/detailed_stats.title
+#: jjsegmentedtotalbar/results/detailed_stats.title
 msgid "Detailed Statistics"
 msgstr ""
 
@@ -24160,6 +24779,11 @@ msgstr ""
 #: stagemigration/results/intervalCensoringDiagnosticsTable.columns.title
 #: stagemigration/results/frailtyModelsDiagnostics.columns.title
 msgid "Diagnostic Test"
+msgstr ""
+
+#: jjbarstats/options/clinicalpreset/diagnostic.title
+#: jjpiestats/options/clinicalpreset/diagnostic.title
+msgid "Diagnostic Test (2×2 table)"
 msgstr ""
 
 #: metaanalysis/options/analysis_type/diagnostic_accuracy.title
@@ -24822,6 +25446,10 @@ msgstr ""
 msgid "Display actual data values on chart elements."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Display age or tumor size distributions by clinical characteristics"
+msgstr ""
+
 #: enhancedfactorvariable/options/showCombinedAnalysis.description
 msgid "Display all factors in a single combined table"
 msgstr ""
@@ -25431,10 +26059,8 @@ msgstr ""
 #: flowchart/ui[2].label
 #: groupsummary/ui[3].label
 #: highdimcox/ui[6][0].label
-#: jjbarstats/ui[2][0].label
 #: jjbetweenstats/ui[3][0].label
 #: jjdotplotstats/ui[4][0].label
-#: jjpiestats/ui[2][0].label
 #: jjriverplot/ui[1][1].label
 #: jjscatterstats/ui[2][1].label
 #: jjwithinstats/ui[3][0].label
@@ -25596,7 +26222,6 @@ msgstr ""
 
 #: jcomplexupset/options/show_interpretation.description
 #: jextractggstats/options/show_interpretation.description
-#: jggridges/options/show_interpretation.description
 msgid "Display result interpretation"
 msgstr ""
 
@@ -25753,7 +26378,6 @@ msgid "Display summary of PPS analysis"
 msgstr ""
 
 #: jcomplexupset/options/show_statistics.description
-#: jggridges/options/show_statistics.description
 msgid "Display summary statistics"
 msgstr ""
 
@@ -25980,7 +26604,7 @@ msgid "Distance-based interaction analysis"
 msgstr ""
 
 #: package/analyses/jwaffle.menuSubgroup
-#: package/analyses/jggridges.menuSubgroup
+#: package/analyses/jjridges.menuSubgroup
 #: batcheffect/results/feature_quality.columns.title
 #: conditionalgee/results/modelfit.columns.title
 #: condsurvival/results/modelFitStatistics.columns.title
@@ -25992,7 +26616,7 @@ msgstr ""
 #: flexparametricadvanced/results/model_summary.columns.title
 #: flexparametricadvanced/results/model_comparison_table.columns.title
 #: ihcscoring/results/advancedmetrics/distributionanalysis.columns.title
-#: jggridges/options.menuSubgroup
+#: jjridges/options.menuSubgroup
 #: jwaffle/options.menuSubgroup
 #: semimarkov/results/modelSummary.columns.title
 #: semimarkov/results/sojournDistribution.columns.title
@@ -26019,11 +26643,6 @@ msgstr ""
 
 #: distributionfit/results/distributionSummary.title
 msgid "Distribution Characteristics"
-msgstr ""
-
-#: package/analyses/jjridgestats.menuSubtitle
-#: jjridgestats/options.menuSubtitle
-msgid "Distribution Comparison"
 msgstr ""
 
 #: biopsysimulation/results/biopsyplot.description
@@ -26445,6 +27064,10 @@ msgstr ""
 msgid "Dotted"
 msgstr ""
 
+#: jjridges/options/plot_type/double_ridges.title
+msgid "Double Ridgeline"
+msgstr ""
+
 #: tumorgrowth/results/doublingTimeTable.columns.title
 msgid "Doubling Time"
 msgstr ""
@@ -26709,6 +27332,10 @@ msgstr ""
 msgid "E-values"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Each ridge:"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Each unit increase in X corresponds to "
 msgstr ""
@@ -26938,6 +27565,7 @@ msgstr ""
 #: ihccluster/results/associationTests.columns.title
 #: ihcscoring/results/digitalvalidation/batcheffects.columns.title
 #: ihcscoring/results/molecularclassification/subtypestatistics.columns.title
+#: jjridges/results/tests.columns.title
 #: metaanalysis/options/effect_size.title
 #: metaanalysis/results/studySummary.columns.title
 #: nonparametric/results/testStatistics.columns.title
@@ -27119,6 +27747,8 @@ msgstr ""
 
 #: advancedraincloud/options/effect_size_type.title
 #: jextractggstats/options/effect_size_type.title
+#: jjridges/options/effsize_type.title
+#: jjridges/ui[3][0]/effsize_type.label
 #: poweranalysis/options/effect_size_type.title
 #: poweranalysis/results/power_summary.columns.title
 msgid "Effect Size Type"
@@ -27916,6 +28546,11 @@ msgstr ""
 msgid "Enhanced Reclassification Metrics"
 msgstr ""
 
+#: package/analyses/jjridges.menuSubtitle
+#: jjridges/options.menuSubtitle
+msgid "Enhanced Ridgeline Visualization"
+msgstr ""
+
 #: package/analyses/timeroc.title
 #: package/analyses/timeroc.menuTitle
 #: enhancedroc/ui.title
@@ -28093,12 +28728,20 @@ msgstr ""
 msgid "Ensure at least 3 observations are available for analysis"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Ensure dependent variable is categorical"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Ensure the Y-axis variable contains numeric values. Convert text numbers if needed."
 msgstr ""
 
 #: R/linechart.b.R
 msgid "Ensure variables contain appropriate data types (numeric for Y-axis)"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Ensure your variables have multiple categories for meaningful pie charts."
 msgstr ""
 
 #: economistplots/options/x_title.description.jamovi
@@ -28133,7 +28776,7 @@ msgstr ""
 msgid "Enter a title for your bar chart."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/plot_title.description.jamovi
+#: jjsegmentedtotalbar/options/plot_title.description.jamovi
 msgid "Enter a title for your chart."
 msgstr ""
 
@@ -28215,17 +28858,17 @@ msgstr ""
 msgid "Enter time points for survival estimates (e.g., 12,24,36)."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/legend_title.description.jamovi
+#: jjsegmentedtotalbar/options/legend_title.description.jamovi
 msgid "Enter title for the legend."
 msgstr ""
 
 #: advancedbarplot/options/x_title.description.jamovi
-#: ggsegmentedtotalbar/options/x_title.description.jamovi
+#: jjsegmentedtotalbar/options/x_title.description.jamovi
 msgid "Enter title for the x-axis."
 msgstr ""
 
 #: advancedbarplot/options/y_title.description.jamovi
-#: ggsegmentedtotalbar/options/y_title.description.jamovi
+#: jjsegmentedtotalbar/options/y_title.description.jamovi
 msgid "Enter title for the y-axis."
 msgstr ""
 
@@ -28468,8 +29111,16 @@ msgstr ""
 msgid "Error Distribution"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Error in Pie Chart Analysis"
+msgstr ""
+
 #: jointmodeling/results/errors.title
 msgid "Error Messages"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Error parsing ratio: {error}. Using equal proportions."
 msgstr ""
 
 #: jointmodeling/options/error_structure.title
@@ -28748,6 +29399,10 @@ msgstr ""
 #: jjbetweenstats/options/effsizetype/eta.title
 #: jjwithinstats/options/effsizetype/eta.title
 msgid "eta"
+msgstr ""
+
+#: jjridges/options/effsize_type/eta.title
+msgid "Eta squared"
 msgstr ""
 
 #: jextractggstats/options/effect_size_type/eta.title
@@ -29667,6 +30322,10 @@ msgstr ""
 msgid "Exclude Missing (NA)"
 msgstr ""
 
+#: jjbarstats/ui[2][0][0]/excl.label
+msgid "Exclude Missing Data"
+msgstr ""
+
 #: coxdiagnostics/options/exclude_missing.title
 #: enhancedcrosstable/options/exclude_missing.title
 #: jviolin/options/excl.title
@@ -29770,8 +30429,9 @@ msgstr ""
 msgid "Expand (Percentage)"
 msgstr ""
 
-#: jggridges/options/expand_panel.title
-msgid "Expand Panel"
+#: jjridges/options/expand_panels.title
+#: jjridges/ui[5][0]/expand_panels.label
+msgid "Expand Panels"
 msgstr ""
 
 #: methodvalidation/results/uncertaintySummary.columns.title
@@ -29795,6 +30455,10 @@ msgstr ""
 
 #: adaptivetrialdesign/results/decisionAnalysis.columns.title
 msgid "Expected Benefit"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Expected cell counts < 5 detected. Consider using Fisher\'s exact test (nonparametric option) for more reliable results."
 msgstr ""
 
 #: powercomprisk/results/sampleSizeBreakdown.columns.title
@@ -29915,6 +30579,16 @@ msgstr ""
 
 #: spikeslabpriors/options/expected_model_size.description
 msgid "Expected number of active predictors"
+msgstr ""
+
+#: jjbarstats/ui[2][3][0]/ratio.label
+#: jjpiestats/ui[2][2][0]/ratio.label
+msgid "Expected Proportions (e.g., 0.5,0.5)"
+msgstr ""
+
+#: jjbarstats/options/ratio.title
+#: jjpiestats/options/ratio.title
+msgid "Expected Proportions (Optional)"
 msgstr ""
 
 #: friedmantest/results/rankAnalysis.columns.title
@@ -30179,6 +30853,11 @@ msgstr ""
 msgid "Explanatory Variables:"
 msgstr ""
 
+#: package/analyses/agepyramid.menuGroup
+#: agepyramid/options.menuGroup
+msgid "Exploration"
+msgstr ""
+
 #: package/analyses/eurostatmap.menuGroup
 #: package/analyses/coefplot.menuGroup
 #: package/analyses/crosstablepivot.menuGroup
@@ -30260,11 +30939,6 @@ msgstr ""
 #: toxicityprofile/options.menuGroup
 #: treatmenteffects/options.menuGroup
 msgid "ExplorationD"
-msgstr ""
-
-#: package/analyses/agepyramid.menuGroup
-#: agepyramid/options.menuGroup
-msgid "ExplorationT"
 msgstr ""
 
 #: package/analyses/tableone.menuGroup
@@ -30478,7 +31152,12 @@ msgid "Export nomogram in multiple formats (PDF, PNG, HTML)"
 msgstr ""
 
 #: clinicaldataintegration/ui[1][3].label
+#: jjridges/ui[7].label
 msgid "Export Options"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Export Options:"
 msgstr ""
 
 #: missingdataexplorer/options/export_patterns.title
@@ -30518,7 +31197,7 @@ msgid "Export R Code"
 msgstr ""
 
 #: advancedbarplot/options/export_options.title
-#: ggsegmentedtotalbar/options/export_ready.title
+#: jjsegmentedtotalbar/options/export_ready.title
 msgid "Export Ready"
 msgstr ""
 
@@ -30909,8 +31588,6 @@ msgstr ""
 msgid "Facet Type"
 msgstr ""
 
-#: jggridges/options/facet_var.title
-#: jggridges/ui[0][3].label
 #: jggstats/options/facet_var.title
 #: jggstats/ui[14][0].label
 #: jscattermore/options/facet_var.title
@@ -30922,7 +31599,13 @@ msgstr ""
 
 #: advancedbarplot/options/facet_var.title
 #: advancedbarplot/ui[0][3].label
+#: jjridges/options/facet_var.title
+#: jjridges/ui[0][3].label
 msgid "Facet Variable (Optional)"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Facet Variable:"
 msgstr ""
 
 #: grafify/options/facet_var.title
@@ -31281,6 +31964,7 @@ msgid "FDA Strict (r≥0.95, ICC≥0.90)"
 msgstr ""
 
 #: chisqposttest/options/posthoc/fdr.title
+#: jjridges/options/p_adjust_method/fdr.title
 msgid "FDR"
 msgstr ""
 
@@ -31563,8 +32247,16 @@ msgstr ""
 msgid "Features to Analyze"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Features:"
+msgstr ""
+
 #: agepyramid/results/pyramidTable.columns.title
-msgid "Female"
+msgid "Female (%)"
+msgstr ""
+
+#: agepyramid/results/pyramidTable.columns.title
+msgid "Female (n)"
 msgstr ""
 
 #: clinicaldataintegration/options/exportFormat/fhir.title
@@ -31580,15 +32272,15 @@ msgstr ""
 msgid "Fill by"
 msgstr ""
 
-#: jjridgestats/options/fill.title
-#: jjridgestats/ui[1][0][0]/fill.label
-msgid "Fill Densities"
-msgstr ""
-
 #: jjriverplot/options/fillType.title
 #: riverplot/options/fillType.title
 #: riverplot/ui[1][0]/fillType.label
 msgid "Fill Pattern"
+msgstr ""
+
+#: jjridges/options/fill_ridges.title
+#: jjridges/ui[4][0]/fill_ridges.label
+msgid "Fill Ridges"
 msgstr ""
 
 #: jjradarplot/options/alpha.title
@@ -31603,7 +32295,13 @@ msgstr ""
 #: advancedbarplot/ui[0][2].label
 #: advancedraincloud/options/fill_var.title
 #: advancedraincloud/ui[0][2].label
+#: jjridges/options/fill_var.title
+#: jjridges/ui[0][2].label
 msgid "Fill Variable (Optional)"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Fill Variable:"
 msgstr ""
 
 #: advancedbarplot/options/bar_position/fill.title
@@ -31857,6 +32555,14 @@ msgstr ""
 
 #: treatmentmeta/options/effect_measure/ZCOR.title
 msgid "Fisher's Z (Correlation)"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Fisher\'s exact test"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Fisher\'s exact test provides precise p-values for small samples. Recommended when expected cell counts are < 5."
 msgstr ""
 
 #: grafify/options/color_palette/fishy.title
@@ -32453,6 +33159,14 @@ msgstr ""
 msgid "For binary classification, specify which class is considered positive"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "For biomarker analysis: Examine distribution patterns across patient groups. Consider biological relevance of observed differences."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "For biomarker correlations, consider robust correlation methods to handle outliers."
+msgstr ""
+
 #: bayesiannetworkma/options/treatment_classes.description
 msgid "For class-effect models"
 msgstr ""
@@ -32465,12 +33179,28 @@ msgstr ""
 msgid "For datasets >10,000 rows, randomly sample 5,000 rows for faster visualization while maintaining statistical validity"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "For diagnostic tests: Focus on sensitivity (true positive rate) and specificity (true negative rate). Consider positive and negative predictive values for clinical decision-making."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "For imaging metrics, consider nonparametric correlations due to potentially skewed distributions."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "For lab values, parametric correlations are often appropriate if distributions are normal."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "for pairwise comparisons. Limiting to first "
 msgstr ""
 
 #: ihccluster/options/seed.description
 msgid "For reproducibility"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "For statistical tests: adequate sample size in each category"
 msgstr ""
 
 #: spikeslabpriors/options/time_variable.description
@@ -32480,6 +33210,10 @@ msgstr ""
 
 #: adaptivetrialdesign/options/time_variable.description
 msgid "For time-to-event endpoints"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "For treatment response: Look for significant differences between treatment arms. Consider clinical significance alongside statistical significance."
 msgstr ""
 
 #: explainableai/options/plot_type/force.title
@@ -32945,6 +33679,11 @@ msgstr ""
 msgid "Frequency and percentage of each molecular subtype"
 msgstr ""
 
+#: jjbarstats/ui[1][3].label
+#: jjpiestats/ui[1][3].label
+msgid "Frequency Counts (Optional)"
+msgstr ""
+
 #: enhancedfrequency/options/frequencyDecimals.title
 msgid "Frequency Decimals"
 msgstr ""
@@ -33007,8 +33746,16 @@ msgstr ""
 msgid "Friedman Test"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Friedman test"
+msgstr ""
+
 #: enhancednonparametric/options/test_type/friedman.title
 msgid "Friedman Test (repeated measures)"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Friedman test compares medians across time points without assuming normal distribution (robust for skewed biomarker data)."
 msgstr ""
 
 #: package/analyses/friedmantest.description
@@ -33537,6 +34284,10 @@ msgstr ""
 msgid "General Diagnosis"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "General Guidance"
+msgstr ""
+
 #: adaptivetrialdesign/options/regulatory_framework/general.title
 msgid "General Guidelines"
 msgstr ""
@@ -33553,12 +34304,20 @@ msgstr ""
 msgid "General Population"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "General Requirements"
+msgstr ""
+
 #: spatialbayesiansurvival/options/clinical_context/general.title
 msgid "General Spatial Analysis"
 msgstr ""
 
 #: poweranalysis/options/primary_endpoint/time_to_event.title
 msgid "General Time-to-Event"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "General Troubleshooting"
 msgstr ""
 
 #: biomarkerdiscovery/options/biomarker_generalizability.title
@@ -34003,6 +34762,10 @@ msgstr ""
 msgid "Generates a detailed summary of categorical variables including counts, percentages, and missing value information. The output is presented in both textual and visual formats, making it easy to interpret the distribution of your data."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Generates pie charts with statistical analysis to compare categorical variables across groups. Performs chi-square tests, Fisher\'s exact tests, or other appropriate statistical tests based on your data."
+msgstr ""
+
 #: treatmentmeta/options/outcome_type/generic.title
 msgid "Generic (Pre-calculated Effects)"
 msgstr ""
@@ -34111,6 +34874,10 @@ msgstr ""
 msgid "George-McCulloch"
 msgstr ""
 
+#: agepyramid/options/age_groups/geriatric.title
+msgid "Geriatric (65+)"
+msgstr ""
+
 #: populationhealth/options/population_type/geriatric.title
 msgid "Geriatric Population"
 msgstr ""
@@ -34209,7 +34976,6 @@ msgid "ggplot2 Optimized (geom_scattermost)"
 msgstr ""
 
 #: jcomplexupset/options/theme_style.description
-#: jggridges/options/theme_style.description
 msgid "ggplot2 theme style"
 msgstr ""
 
@@ -34526,10 +35292,6 @@ msgstr ""
 msgid "Grade Distribution"
 msgstr ""
 
-#: jjridgestats/options/plotStyle/gradient.title
-msgid "Gradient"
-msgstr ""
-
 #: biomarkerdiscovery/options/discovery_method/gradient_boosting.title
 #: clinicalcalculators/options/model_type/gradient_boosting.title
 #: treatmenteffects/options/ps_method/gradient_boosting.title
@@ -34555,8 +35317,18 @@ msgstr ""
 msgid "Gradient Boosting for survival analysis using ensemble methods that combine multiple weak learners (typically shallow trees) to create strong predictive models. This implementation supports both traditional gradient boosting (gbm) and modern component-wise boosting (mboost) approaches. The method is particularly effective for high-dimensional survival data and complex non-linear relationships between predictors and survival outcomes. Features include automatic variable selection, handling of mixed-type predictors, built-in cross-validation for optimal stopping, and robust performance with noisy data. Especially suitable for biomarker discovery, prognostic modeling, and complex survival prediction tasks."
 msgstr ""
 
-#: jggridges/options/plot_type/density_ridges_gradient.title
-msgid "Gradient Density Ridges"
+#: R/jjridges.b.R
+msgid "Gradient Coloring:"
+msgstr ""
+
+#: jjridges/options/gradient_high.title
+#: jjridges/ui[4][0]/gradient_high.label
+msgid "Gradient High Color"
+msgstr ""
+
+#: jjridges/options/gradient_low.title
+#: jjridges/ui[4][0]/gradient_low.label
+msgid "Gradient Low Color"
 msgstr ""
 
 #: transformationmodels/options/method/gradient.title
@@ -34583,7 +35355,7 @@ msgstr ""
 msgid "Graph Options"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style/prism_style.title
+#: jjsegmentedtotalbar/options/chart_style/prism_style.title
 msgid "GraphPad Prism Style"
 msgstr ""
 
@@ -34608,9 +35380,8 @@ msgstr ""
 msgid "Graphs and Plots"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color/gray.title
+#: jjsegmentedtotalbar/options/outline_color/gray.title
 #: jcomplexupset/options/theme_style/theme_gray.title
-#: jggridges/options/theme_style/theme_gray.title
 #: jviolin/options/themex/gray.title
 msgid "Gray"
 msgstr ""
@@ -34718,6 +35489,7 @@ msgstr ""
 #: ihcstats/results/prognosticTable.columns.title
 #: jiwillsurvive/results/survivalTable.columns.title
 #: jiwillsurvive/results/kmTable.columns.title
+#: jjridges/results/statistics.columns.title
 #: mediansurvival/results/medianTable.columns.title
 #: mixedeffectscox/results/randomEffectsPredictions.columns.title
 #: nonparametric/results/descriptives.columns.title
@@ -35065,6 +35837,10 @@ msgstr ""
 msgid "Group Variable (optional)"
 msgstr ""
 
+#: jjbarstats/ui[1][1].label
+msgid "Group Variable (what you're comparing)"
+msgstr ""
+
 #: spikeslabpriors/options/group_variables.title
 msgid "Group Variable Selection"
 msgstr ""
@@ -35097,6 +35873,10 @@ msgstr ""
 msgid "Grouped (Dodge)"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "grouped by"
+msgstr ""
+
 #: bbcplots/options/chart_type/grouped_column.title
 msgid "Grouped Column"
 msgstr ""
@@ -35116,6 +35896,10 @@ msgstr ""
 #: groupedforest/ui.title
 #: groupedforest/results.title
 msgid "Grouped Hazard Forest Plot"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Grouped plot preparation failed: {error}"
 msgstr ""
 
 #: tinytable/options/table_type/grouped.title
@@ -35163,7 +35947,6 @@ msgstr ""
 #: jiwillsurvive/options/group_var.title
 #: jiwillsurvive/ui[1][2].label
 #: jjbarstats/options/group.title
-#: jjbarstats/ui[0][1].label
 #: jjbetweenstats/options/group.title
 #: jjbetweenstats/ui[0][1].label
 #: jjdotplotstats/options/group.title
@@ -35247,7 +36030,7 @@ msgstr ""
 msgid "Grouping variable for comparisons"
 msgstr ""
 
-#: jggridges/options/y_var.description
+#: R/jjridges.b.R
 msgid "Grouping variable for separate ridges"
 msgstr ""
 
@@ -35259,6 +36042,10 @@ msgstr ""
 msgid "Grouping variable has more than 50 levels. Consider reducing categories for better visualization."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Grouping variable must have at least 2 categories for comparison."
+msgstr ""
+
 #: R/lollipop.b.R
 msgid "Grouping variable must have at least 2 different categories."
 msgstr ""
@@ -35268,18 +36055,17 @@ msgid "Grouping variable that defines the table columns."
 msgstr ""
 
 #: jjpiestats/options/group.title
-#: jjpiestats/ui[0][1].label
+#: jjpiestats/ui[1][1].label
 msgid "Grouping Variable: (Optional)"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
-#: jjridgestats/options/group.title
-#: jjridgestats/ui[0][1].label
 #: jwaffle/options/groups.title
 #: jwaffle/ui[0][0].label
 msgid "Groups"
 msgstr ""
 
+#: R/jjridges.b.R
 #: R/linechart.b.R
 #: R/lollipop.b.R
 #: clinicalprediction/ui[8][0]/n_risk_groups.suffix
@@ -35310,6 +36096,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Groups show similar mean values."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Groups with fewer than "
 msgstr ""
 
 #: R/linechart.b.R
@@ -35931,6 +36721,10 @@ msgstr ""
 msgid "Heatmap Visualization"
 msgstr ""
 
+#: jjridges/options/effsize_type/g.title
+msgid "Hedge's g"
+msgstr ""
+
 #: jjdotplotstats/options/effsizetype/unbiased.title
 msgid "Hedge's g (unbiased, small samples)"
 msgstr ""
@@ -35993,11 +36787,6 @@ msgstr ""
 
 #: jcomplexupset/options/height_ratio.title
 msgid "Height Ratio"
-msgstr ""
-
-#: jjridgestats/options/scaling.title
-#: jjridgestats/ui[1][0][0]/scaling.label
-msgid "Height Scale"
 msgstr ""
 
 #: classification/options/splitRule/hellinger.title
@@ -36298,6 +37087,10 @@ msgstr ""
 msgid "High Priority Alerts"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "High proportion of extreme outliers detected ("
+msgstr ""
+
 #: treatmentoptim/options/evidence_level/high_only.title
 msgid "High Quality Only"
 msgstr ""
@@ -36514,6 +37307,14 @@ msgstr ""
 msgid "Highly significant (***)"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "highly significant (p < 0.001)"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "highly significant (p = "
+msgstr ""
+
 #: package/analyses/jjhistostats.title
 #: package/analyses/jjhistostats.menuTitle
 #: basegraphics/options/plot_type/histogram.title
@@ -36523,7 +37324,6 @@ msgstr ""
 #: jjhistostats/ui.title
 #: jjhistostats/results.title
 #: jjhistostats/results/plot.title
-#: jjridgestats/options/plotStyle/histogram.title
 #: tidyplots/options/plotType/histogram.title
 msgid "Histogram"
 msgstr ""
@@ -36540,6 +37340,11 @@ msgstr ""
 msgid "Histogram and density plots for texture features"
 msgstr ""
 
+#: jjridges/options/binwidth.title
+#: jjridges/ui[1][0]/binwidth.label
+msgid "Histogram Bin Width"
+msgstr ""
+
 #: tidyplots/options/histogramBins.title
 #: tidyplots/ui[5][2].label
 msgid "Histogram Bins"
@@ -36547,6 +37352,10 @@ msgstr ""
 
 #: ihcscoring/results/automatedanalysis/intensityplot.description
 msgid "Histogram of DAB optical density values"
+msgstr ""
+
+#: jjridges/options/plot_type/histogram_ridges.title
+msgid "Histogram Ridges"
 msgstr ""
 
 #: jjhistostats/ui[3].label
@@ -36611,6 +37420,10 @@ msgstr ""
 msgid "Hodges-Lehmann Estimator"
 msgstr ""
 
+#: jjridges/options/effsize_type/hodges_lehmann.title
+msgid "Hodges-Lehmann Shift (nonparametric)"
+msgstr ""
+
 #: clinicalvalidation/options/holdout_proportion.title
 #: clinicalvalidationinteractive/options/holdout_proportion.title
 msgid "Hold-Out Test Proportion"
@@ -36653,6 +37466,7 @@ msgstr ""
 #: friedmantest/options/correction/holm.title
 #: jextractggstats/options/pairwise_correction/holm.title
 #: jjcorrmat/options/padjustmethod/holm.title
+#: jjridges/options/p_adjust_method/holm.title
 #: mediansurvival/options/multiple_comparison/holm.title
 #: nonparametric/options/p_adjustment/holm.title
 #: optimalcutpoint/options/multiple_testing/holm.title
@@ -36720,7 +37534,7 @@ msgstr ""
 #: alluvial/options/orient/horr.title
 #: alluvial2/options/orient/horr.title
 #: economistplots/options/plot_orientation/horizontal.title
-#: ggsegmentedtotalbar/options/orientation/horizontal.title
+#: jjsegmentedtotalbar/options/orientation/horizontal.title
 #: jjtreemap/ui[1][2][0][5]/labelAlignH.label
 #: lollipop/options/orientation/horizontal.title
 msgid "Horizontal"
@@ -36818,7 +37632,7 @@ msgstr ""
 msgid "How Sequential Testing Works"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format.description.jamovi
+#: jjsegmentedtotalbar/options/percentage_format.description.jamovi
 msgid "How to format percentage values."
 msgstr ""
 
@@ -36838,6 +37652,10 @@ msgstr ""
 
 #: treemedical/options/handle_missing.description
 msgid "How to handle missing values in predictor variables."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "How to Interpret Your Results"
 msgstr ""
 
 #: coefplot/options/sort_coefs.description
@@ -37597,6 +38415,10 @@ msgid "Imaging Findings Correlation provides comprehensive multi-modal diagnosti
 "recognition and cross-modality validation."
 msgstr ""
 
+#: jjcorrmat/options/clinicalpreset/imaging.title
+msgid "Imaging Metric Associations"
+msgstr ""
+
 #: imagingcorrelation/options/imagingModality.title
 msgid "Imaging Modality Types"
 msgstr ""
@@ -37927,8 +38749,8 @@ msgstr ""
 msgid "In Table"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[7][0]/plot_width.suffix
-#: ggsegmentedtotalbar/ui[7][0]/plot_height.suffix
+#: jjsegmentedtotalbar/ui[7][0]/plot_width.suffix
+#: jjsegmentedtotalbar/ui[7][0]/plot_height.suffix
 msgid "inches"
 msgstr ""
 
@@ -38483,6 +39305,11 @@ msgstr ""
 msgid "Include Proficiency Testing Data"
 msgstr ""
 
+#: jjbarstats/ui[2][1][0]/proportiontest.label
+#: jjpiestats/ui[2][1][0]/proportiontest.label
+msgid "Include Proportion Tests"
+msgstr ""
+
 #: treatmenteffects/options/include_ps_in_outcome.title
 msgid "Include PS in Outcome Model"
 msgstr ""
@@ -38693,6 +39520,10 @@ msgstr ""
 msgid "increasing"
 msgstr ""
 
+#: contTables/options/trendDirection/increasing.title
+msgid "Increasing"
+msgstr ""
+
 #: pagetrendtest/options/trend_direction/increasing.title
 msgid "Increasing Trend"
 msgstr ""
@@ -38779,6 +39610,14 @@ msgstr ""
 
 #: jforestmodel/options/predictor_vars.description
 msgid "Independent variables to include in the model"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Indicate similar value ranges between groups"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Indicate the concentration and variability of values"
 msgstr ""
 
 #: eurostatmap/options/indicator.title
@@ -38971,7 +39810,7 @@ msgstr ""
 
 #: explainableai/options/colormap/inferno.title
 #: jcomplexupset/options/color_palette/inferno.title
-#: jggridges/options/color_palette/inferno.title
+#: jjridges/options/color_palette/inferno.title
 #: jscattermore/options/color_palette/inferno.title
 #: tidyplots/options/colorScheme/inferno.title
 msgid "Inferno"
@@ -39225,7 +40064,7 @@ msgstr ""
 #: ggflowchart/results/todo.title
 #: ggoncoplot/results/instructions.title
 #: ggprism/results/instructions.title
-#: ggsegmentedtotalbar/results/instructions.title
+#: jjsegmentedtotalbar/results/instructions.title
 #: grafify/results/todo.title
 #: groupedforest/results/todo.title
 #: grouplasso/results/instructions.title
@@ -39236,8 +40075,8 @@ msgstr ""
 #: illnessdeath/results/instructions.title
 #: jcomplexupset/results/instructions.title
 #: jextractggstats/results/instructions.title
-#: jggridges/results/instructions.title
 #: jjarcdiagram/results/instructions.title
+#: jjridges/results/instructions.title
 #: landmarkanalysis/results/todo.title
 #: likelihoodratio/results/instructions.title
 #: linechart/results/todo.title
@@ -39336,6 +40175,10 @@ msgstr ""
 
 #: treatmenteffects/options/causal_method/instrumental_variable.title
 msgid "Instrumental Variables"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Insufficient data for correlation interpretation."
 msgstr ""
 
 #: R/linechart.b.R
@@ -39547,6 +40390,10 @@ msgstr ""
 msgid "Interactive Patient Monitor"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Interactive pie charts with statistical test results, confidence intervals, and effect sizes. Optional grouped analysis for complex study designs."
+msgstr ""
+
 #: parallelplot/options/interactive.title
 #: parallelplot/results/plotly.title
 msgid "Interactive Plot"
@@ -39719,6 +40566,10 @@ msgstr ""
 msgid "Interpolation"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Interpret results in the context of your specific research question and clinical setting."
+msgstr ""
+
 #: biomarkerdiscovery/ui[7][0].label
 msgid "Interpretability & Networks"
 msgstr ""
@@ -39807,8 +40658,8 @@ msgstr ""
 #: jcomplexupset/results/interpretation.title
 #: jextractggstats/results/interpretation.title
 #: jforestmodel/results/model_diagnostics.columns.title
-#: jggridges/results/interpretation.title
 #: jggsankeyfier/results/interpretation.title
+#: jjridges/results/interpretation.title
 #: jointfrailty/results/frailtyParameters.columns.title
 #: jointfrailty/results/residualAnalysis.columns.title
 #: labcontrolcharts/results/performanceMetrics.columns.title
@@ -39930,6 +40781,10 @@ msgstr ""
 #: jpps/results/interpretation.title
 #: raincloud/results/interpretation.title
 msgid "Interpretation Guide"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Interpretation Guide:"
 msgstr ""
 
 #: R/lollipop.b.R
@@ -40145,8 +41000,16 @@ msgstr ""
 msgid "Intuitive survival analysis using the iwillsurvive package with user-friendly interface, automatic data preparation, and comprehensive visualization options."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Invalid quantiles specified: "
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "Invalid rain.side value. Using default 'l' (left)."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Invalid ratio specification - contains non-numeric values. Using equal proportions."
 msgstr ""
 
 #: outbreakanalysis/results/data_quality_report.columns.title
@@ -40463,8 +41326,12 @@ msgstr ""
 #: package/analyses/advancedraincloud.menuGroup
 #: package/analyses/jjhistostats.menuGroup
 #: package/analyses/jjscatterstats.menuGroup
+#: package/analyses/jjcorrmat.menuGroup
 #: package/analyses/jjdotplotstats.menuGroup
 #: package/analyses/jjbetweenstats.menuGroup
+#: package/analyses/jjwithinstats.menuGroup
+#: package/analyses/jjbarstats.menuGroup
+#: package/analyses/jjpiestats.menuGroup
 #: package/analyses/jwaffle.menuGroup
 #: package/analyses/statsplot2.menuGroup
 #: package/analyses/linechart.menuGroup
@@ -40472,10 +41339,15 @@ msgstr ""
 #: package/analyses/jjarcdiagram.menuGroup
 #: advancedraincloud/options.menuGroup
 #: jjarcdiagram/options.menuGroup
+#: jjbarstats/options.menuGroup
 #: jjbetweenstats/options.menuGroup
+#: jjcorrmat/options.menuGroup
 #: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
+#: jjpiestats/options.menuGroup
+#: jjridges/options.menuGroup
 #: jjscatterstats/options.menuGroup
+#: jjwithinstats/options.menuGroup
 #: jwaffle/options.menuGroup
 #: linechart/options.menuGroup
 #: lollipop/options.menuGroup
@@ -40516,36 +41388,28 @@ msgstr ""
 msgid "JJStatsPlotD"
 msgstr ""
 
-#: package/analyses/jjcorrmat.menuGroup
-#: package/analyses/jjwithinstats.menuGroup
-#: package/analyses/jjbarstats.menuGroup
-#: package/analyses/jjpiestats.menuGroup
-#: package/analyses/jjridgestats.menuGroup
+#: package/analyses/jjridges.menuGroup
+msgid "JJStatsPlotT"
+msgstr ""
+
 #: package/analyses/jjstreamgraph.menuGroup
 #: package/analyses/jjtreemap.menuGroup
-#: package/analyses/jggridges.menuGroup
 #: package/analyses/jjriverplot.menuGroup
 #: package/analyses/riverplot.menuGroup
 #: package/analyses/grafify.menuGroup
-#: package/analyses/ggsegmentedtotalbar.menuGroup
+#: package/analyses/jjsegmentedtotalbar.menuGroup
 #: package/analyses/jggsankeyfier.menuGroup
 #: package/analyses/jcomplexupset.menuGroup
 #: package/analyses/jpps.menuGroup
 #: package/analyses/jjradarplot.menuGroup
-#: ggsegmentedtotalbar/options.menuGroup
+#: jjsegmentedtotalbar/options.menuGroup
 #: grafify/options.menuGroup
 #: jcomplexupset/options.menuGroup
-#: jggridges/options.menuGroup
 #: jggsankeyfier/options.menuGroup
-#: jjbarstats/options.menuGroup
-#: jjcorrmat/options.menuGroup
-#: jjpiestats/options.menuGroup
 #: jjradarplot/options.menuGroup
-#: jjridgestats/options.menuGroup
 #: jjriverplot/options.menuGroup
 #: jjstreamgraph/options.menuGroup
 #: jjtreemap/options.menuGroup
-#: jjwithinstats/options.menuGroup
 #: jpps/options.menuGroup
 #: riverplot/options.menuGroup
 msgid "JJStatsPlotT2"
@@ -40969,6 +41833,10 @@ msgstr ""
 msgid "Key Assumptions:"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Key Considerations:"
+msgstr ""
+
 #: R/lollipop.b.R
 msgid "Key features:"
 msgstr ""
@@ -40989,6 +41857,10 @@ msgstr ""
 
 #: R/lollipop.b.R
 msgid "Key Findings"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Key Findings:"
 msgstr ""
 
 #: ihcscoring/options/biomarker_type/ki67.title
@@ -41170,6 +42042,10 @@ msgstr ""
 msgid "Lab Components"
 msgstr ""
 
+#: jjcorrmat/options/clinicalpreset/labvalues.title
+msgid "Lab Value Relationships"
+msgstr ""
+
 #: jjhistostats/options/clinicalPreset/lab_values.title
 msgid "Lab Values Analysis (parametric, centrality line)"
 msgstr ""
@@ -41185,6 +42061,11 @@ msgstr ""
 
 #: psychopdaroc/ui[4][0][0]/directLabel.label
 msgid "Label curves directly"
+msgstr ""
+
+#: jjbarstats/options/label.title
+#: jjpiestats/options/label.title
+msgid "Label Display"
 msgstr ""
 
 #: jjtreemap/options/labelFontFace.title
@@ -41234,7 +42115,7 @@ msgstr ""
 msgid "Label Size"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/label_threshold.title
+#: jjsegmentedtotalbar/options/label_threshold.title
 msgid "Label Threshold (%)"
 msgstr ""
 
@@ -41250,7 +42131,6 @@ msgstr ""
 msgid "Label Vertical Alignment"
 msgstr ""
 
-#: jjridgestats/ui[6][0].label
 #: jjtreemap/ui[1][2].label
 #: jwaffle/ui[2].label
 msgid "Labels"
@@ -41264,7 +42144,7 @@ msgstr ""
 msgid "Labels & Titles"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[3].label
+#: jjsegmentedtotalbar/ui[3].label
 msgid "Labels and Percentages"
 msgstr ""
 
@@ -41377,6 +42257,10 @@ msgstr ""
 #: patientdashboard/ui[0][2].label
 #: treatmentoptim/options/labVars.title
 msgid "Laboratory Values"
+msgstr ""
+
+#: jjwithinstats/options/clinicalpreset/laboratory.title
+msgid "Laboratory Values (Robust)"
 msgstr ""
 
 #: patientdashboard/results/labValuesTable.title
@@ -41770,7 +42654,7 @@ msgstr ""
 msgid "Layout"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[5].label
+#: jjsegmentedtotalbar/ui[5].label
 msgid "Layout and Styling"
 msgstr ""
 
@@ -41865,7 +42749,7 @@ msgstr ""
 #: advancedraincloud/options/rain_side/l.title
 #: bbcplots/options/legend_position/left.title
 #: ggprism/options/legend_position/left.title
-#: ggsegmentedtotalbar/options/legend_position/left.title
+#: jjsegmentedtotalbar/options/legend_position/left.title
 #: grafify/options/legend_position/left.title
 #: jiwillsurvive/options/legend_position/left.title
 #: jjradarplot/options/legendPosition/left.title
@@ -41918,14 +42802,19 @@ msgstr ""
 msgid "Left-align title and subtitle following BBC style."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Left/right shift indicates lower/higher average values"
+msgstr ""
+
 #: advancedbarplot/options/legend_position.title
 #: bbcplots/options/legend_position.title
 #: ggprism/options/legend_position.title
-#: ggsegmentedtotalbar/options/legend_position.title
+#: jjsegmentedtotalbar/options/legend_position.title
 #: grafify/options/legend_position.title
 #: jiwillsurvive/options/legend_position.title
 #: jjradarplot/options/legendPosition.title
-#: jjridgestats/options/legendPosition.title
+#: jjridges/options/legend_position.title
+#: jjridges/ui[5][0]/legend_position.label
 #: jvisr/options/legend_position.title
 #: psychopdaroc/options/legendPosition.title
 msgid "Legend Position"
@@ -41935,7 +42824,7 @@ msgstr ""
 msgid "Legend position"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/legend_title.title
+#: jjsegmentedtotalbar/options/legend_title.title
 #: jwaffle/options/legendtitle.title
 #: jwaffle/ui[2][0][0]/legendtitle.label
 #: tidyplots/options/legendTitle.title
@@ -42123,6 +43012,10 @@ msgstr ""
 
 #: epidemiosurvival/options/par_method/levin.title
 msgid "Levin's Formula"
+msgstr ""
+
+#: agepyramid/options/age_groups/lifecourse.title
+msgid "Life Course (All Ages)"
 msgstr ""
 
 #: flexiblerelativesurvival/results/lifeExpectancyPlot.title
@@ -43642,8 +44535,7 @@ msgstr ""
 
 #: explainableai/options/colormap/magma.title
 #: jcomplexupset/options/color_palette/magma.title
-#: jggridges/options/color_palette/magma.title
-#: jjridgestats/options/colorscheme/magma.title
+#: jjridges/options/color_palette/magma.title
 #: jscattermore/options/color_palette/magma.title
 #: tidyplots/options/colorScheme/magma.title
 msgid "Magma"
@@ -43726,7 +44618,11 @@ msgid "Majority Rule (≥50%)"
 msgstr ""
 
 #: agepyramid/results/pyramidTable.columns.title
-msgid "Male"
+msgid "Male (%)"
+msgstr ""
+
+#: agepyramid/results/pyramidTable.columns.title
+msgid "Male (n)"
 msgstr ""
 
 #: classification/options/knnDistance/manhattan.title
@@ -44201,6 +45097,7 @@ msgstr ""
 #: hierarchicalpathology/results/descriptives.columns.title
 #: icccoeff/results/descriptive_stats.columns.title
 #: ihcscoring/results/statisticstable.columns.title
+#: jjridges/results/statistics.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
 #: nonparametric/options/ties_method/max.title
 #: nonparametric/results/descriptives.columns.title
@@ -44649,6 +45546,10 @@ msgstr ""
 msgid "may cause display issues. Consider grouping your data."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "May indicate subgroups or distinct clinical phenotypes"
+msgstr ""
+
 #: bayesianma/options/mcmc_method/mc3.title
 msgid "MC³ (Metropolis-Coupled MCMC)"
 msgstr ""
@@ -44875,6 +45776,7 @@ msgstr ""
 #: ihcscoring/results/statisticstable.columns.title
 #: illnessdeath/results/residualAnalysis.columns.title
 #: jjradarplot/options/aggregationMethod/mean.title
+#: jjridges/results/statistics.columns.title
 #: jointfrailty/results/residualAnalysis.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
 #: methodcomparison/results/descriptiveStats.columns.title
@@ -45188,7 +46090,7 @@ msgstr ""
 #: enhancedtwowayfrequency/results/associationMeasuresTable.columns.title
 #: enhancedtwowayfrequency/results/comprehensiveAnalysisSummary.columns.title
 #: factoranalysis/results/results/comprehensiveResults.columns.title
-#: ggsegmentedtotalbar/results/detailed_stats.columns.title
+#: jjsegmentedtotalbar/results/detailed_stats.columns.title
 #: likelihoodratio/results/summaryTable.columns.title
 #: likelihoodratio/results/diagnosticOddsRatio.columns.title
 #: linechart/results/correlation.columns.title
@@ -45396,6 +46298,7 @@ msgstr ""
 #: hierarchicalpathology/results/descriptives.columns.title
 #: ihcscoring/results/statisticstable.columns.title
 #: jjradarplot/options/aggregationMethod/median.title
+#: jjridges/results/statistics.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
 #: mediansurvival/results/medianTable.columns.title
 #: methodcomparison/results/descriptiveStats.columns.title
@@ -46339,6 +47242,10 @@ msgstr ""
 msgid "Method Verification"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Method: %s correlation"
+msgstr ""
+
 #: advancedimputation/results/sensitivity_results.columns.title
 msgid "Method/Assumption"
 msgstr ""
@@ -46394,6 +47301,10 @@ msgstr ""
 #: stagemigration/ui[16][1][0]/showMethodologyNotes.label
 #: stagemigration/results/methodologyNotes.title
 msgid "Methodology Notes"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Methods"
 msgstr ""
 
 #: advancedimputation/results/methods_documentation.title
@@ -46693,6 +47604,7 @@ msgstr ""
 #: hierarchicalpathology/results/descriptives.columns.title
 #: icccoeff/results/descriptive_stats.columns.title
 #: ihcscoring/results/statisticstable.columns.title
+#: jjridges/results/statistics.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
 #: nonparametric/options/ties_method/min.title
 #: nonparametric/results/descriptives.columns.title
@@ -46745,11 +47657,10 @@ msgstr ""
 #: enhancedtables/options/table_theme/minimal.title
 #: groupedforest/options/plot_theme/minimal.title
 #: jcomplexupset/options/theme_style/theme_minimal.title
-#: jggridges/options/theme_style/theme_minimal.title
 #: jggsankeyfier/options/theme_style/minimal.title
 #: jggstats/options/theme_style/minimal.title
 #: jiwillsurvive/options/plot_style/minimal.title
-#: jjridgestats/options/themeChoice/minimal.title
+#: jjridges/options/theme_style/theme_minimal.title
 #: jscattermore/options/theme_style/minimal.title
 #: jsjplot/options/theme_style/minimal.title
 #: jsummarytools/options/output_style/minimal.title
@@ -46832,6 +47743,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Minimum 3 time points recommended for trend analysis"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Minimum 3-5 observations per group for reliable curves"
 msgstr ""
 
 #: biopsysimulation/options/correlation_threshold.title
@@ -46934,10 +47849,6 @@ msgstr ""
 #: survivalcont/options/min_group_size.title
 #: survivalcont/ui[1][1][0]/min_group_size.label
 msgid "Minimum Group Size (%)"
-msgstr ""
-
-#: jggridges/options/rel_min_height.description
-msgid "Minimum height of ridges relative to overall scale"
 msgstr ""
 
 #: digitalvalidation/options/custom_icc_threshold.title
@@ -48596,6 +49507,7 @@ msgstr ""
 msgid "Models to Compare"
 msgstr ""
 
+#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "moderate"
 msgstr ""
@@ -48606,6 +49518,10 @@ msgstr ""
 
 #: qualityoflife/results/severity_classification.columns.title
 msgid "Moderate Impairment N"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "moderate-to-strong"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -49187,6 +50103,7 @@ msgstr ""
 #: effectsize/options/correction_method.title
 #: enhancednonparametric/options/posthoc_correction.title
 #: friedmantest/options/correction.title
+#: jjbarstats/ui[2][2][0]/pairwisecomparisons/padjustmethod.label
 #: mediansurvival/options/multiple_comparison.title
 #: partialcorrelation/options/multipleComparison.title
 #: permutationsurvival/options/multiple_comparison.title
@@ -49305,6 +50222,18 @@ msgstr ""
 
 #: stagemigration/options/cutpointMethod/comprehensive.title
 msgid "Multiple Methods Comparison"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Multiple peaks may indicate distinct clinical subgroups"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Multiple Peaks:"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Multiple plot types (density, histogram, gradient, violin)"
 msgstr ""
 
 #: jpps/options/predictor_vars.description
@@ -49532,6 +50461,7 @@ msgstr ""
 #: ihccluster/results/sizes.columns.title
 #: ihccluster/results/distr.columns.title
 #: jforester/results/data_table.columns.title
+#: jjridges/results/statistics.columns.title
 #: kappaSizeFixedN/options/n.title
 #: likelihoodratio/results/stratifiedAnalysis.columns.title
 #: methodcomparison/results/descriptiveStats.columns.title
@@ -49898,7 +50828,7 @@ msgid "Nature"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/nature.title
-#: ggsegmentedtotalbar/options/color_palette/nature.title
+#: jjsegmentedtotalbar/options/color_palette/nature.title
 msgid "Nature Journal"
 msgstr ""
 
@@ -49918,6 +50848,7 @@ msgstr ""
 msgid "Negative"
 msgstr ""
 
+#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "negative"
 msgstr ""
@@ -50467,9 +51398,17 @@ msgstr ""
 msgid "No Clustering"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "No complete cases found after removing missing values."
+msgstr ""
+
 #: R/linechart.b.R
 #: R/lollipop.b.R
 msgid "No complete cases found. Please check for missing values in selected variables."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "No complete data rows available after handling missing values. Please check your data."
 msgstr ""
 
 #: multiplexanalysis/options/multiple_testing/none.title
@@ -50487,16 +51426,24 @@ msgstr ""
 msgid "No CV"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "No data available for analysis"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "No data available for plotting"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format/integer.title
+#: jjsegmentedtotalbar/options/percentage_format/integer.title
 msgid "No Decimals (80%)"
 msgstr ""
 
 #: advancedtrials/options/beta_spending/none.title
 msgid "No Futility Boundary"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "No grouping variable - single pie chart"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -50524,6 +51471,10 @@ msgstr ""
 msgid "No Normalization"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "No outcome variable selected"
+msgstr ""
+
 #: qualitycontrol/options/outlier_detection/none.title
 #: referenceintervals/options/outlier_detection/none.title
 msgid "No Outlier Detection"
@@ -50535,6 +51486,10 @@ msgstr ""
 
 #: jsummarytools/options/cross_proportions/none.title
 msgid "No Proportions"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "No quantile values provided"
 msgstr ""
 
 #: bayesiannetworkma/options/random_effects_model/fixed.title
@@ -50566,7 +51521,7 @@ msgid "No significant differences between groups detected (p ≥ 0.05). "
 msgstr ""
 
 #: advancedbarplot/options/sort_bars/none.title
-#: ggsegmentedtotalbar/options/sort_categories/none.title
+#: jjsegmentedtotalbar/options/sort_categories/none.title
 #: jpps/options/sort_results/none.title
 msgid "No Sorting"
 msgstr ""
@@ -50856,7 +51811,12 @@ msgstr ""
 msgid "Non-normal"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Non-numeric values detected in quantiles"
+msgstr ""
+
 #: jextractggstats/options/statistical_test/nonparametric.title
+#: jjridges/options/test_type/nonparametric.title
 #: marginalrecurrent/options/baseline_type/nonparametric.title
 #: semimarkov/options/distributionType/nonparametric.title
 #: semimarkov/options/estimationMethod/nonparametric.title
@@ -50997,8 +51957,8 @@ msgstr ""
 #: friedmantest/options/correction/none.title
 #: ggprism/options/legend_position/none.title
 #: ggprism/options/error_bars/none.title
-#: ggsegmentedtotalbar/options/legend_position/none.title
-#: ggsegmentedtotalbar/options/outline_color/none.title
+#: jjsegmentedtotalbar/options/legend_position/none.title
+#: jjsegmentedtotalbar/options/outline_color/none.title
 #: grafify/options/error_type/none.title
 #: grafify/options/legend_position/none.title
 #: ihccluster/options/heatmapScale/none.title
@@ -51010,7 +51970,8 @@ msgstr ""
 #: jjarcdiagram/options/sortNodes/none.title
 #: jjcorrmat/options/padjustmethod/none.title
 #: jjradarplot/options/legendPosition/none.title
-#: jjridgestats/options/legendPosition/none.title
+#: jjridges/options/p_adjust_method/none.title
+#: jjridges/options/legend_position/none.title
 #: jsjplot/options/transform_axis/none.title
 #: jvisr/options/legend_position/none.title
 #: mediansurvival/options/multiple_comparison/none.title
@@ -51072,7 +52033,6 @@ msgstr ""
 #: jjbetweenstats/options/typestatistics/nonparametric.title
 #: jjcorrmat/options/typestatistics/nonparametric.title
 #: jjpiestats/options/typestatistics/nonparametric.title
-#: jjwithinstats/options/typestatistics/nonparametric.title
 msgid "Nonparametric"
 msgstr ""
 
@@ -51086,6 +52046,10 @@ msgstr ""
 
 #: jjhistostats/options/centralitytype/nonparametric.title
 msgid "Nonparametric (Median)"
+msgstr ""
+
+#: jjwithinstats/options/typestatistics/nonparametric.title
+msgid "Nonparametric (No Distribution Assumptions)"
 msgstr ""
 
 #: statsplot2/options/distribution/np.title
@@ -51177,8 +52141,8 @@ msgstr ""
 msgid "Normal Range"
 msgstr ""
 
-#: jggridges/options/bandwidth/nrd.title
-msgid "Normal Reference (nrd)"
+#: jjridges/options/bandwidth/nrd.title
+msgid "Normal Reference"
 msgstr ""
 
 #: flexmultistate/options/time_scale/normal.title
@@ -51295,8 +52259,16 @@ msgstr ""
 msgid "Not significant"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "not significant (p = "
+msgstr ""
+
 #: R/linechart.b.R
 msgid "not statistically significant"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Notable Correlations:"
 msgstr ""
 
 #: R/lollipop.b.R
@@ -52345,6 +53317,7 @@ msgid "Observations"
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: R/jjpiestats.b.R
 #: R/linechart.b.R
 msgid "observations"
 msgstr ""
@@ -52355,6 +53328,10 @@ msgstr ""
 
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
 msgid "Observations per Group"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Observations should be independent"
 msgstr ""
 
 #: continuousmarkov/results/transitionMatrix.columns.title
@@ -52612,6 +53589,10 @@ msgstr ""
 msgid "omega"
 msgstr ""
 
+#: jjridges/options/effsize_type/omega.title
+msgid "Omega squared"
+msgstr ""
+
 #: jextractggstats/options/effect_size_type/omega.title
 msgid "Omega-squared"
 msgstr ""
@@ -52746,7 +53727,7 @@ msgstr ""
 msgid "Only show intersections with at least this many members."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/label_threshold.description.jamovi
+#: jjsegmentedtotalbar/options/label_threshold.description.jamovi
 msgid "Only show labels for segments above this percentage."
 msgstr ""
 
@@ -53060,7 +54041,7 @@ msgid "Optimize diagnostic test panels by evaluating various combination strateg
 msgstr ""
 
 #: advancedbarplot/options/export_options.description.jamovi
-#: ggsegmentedtotalbar/options/export_ready.description.jamovi
+#: jjsegmentedtotalbar/options/export_ready.description.jamovi
 msgid "Optimize plot for publication/presentation export."
 msgstr ""
 
@@ -53182,7 +54163,7 @@ msgid "Optional variable to create separate panels for each level."
 msgstr ""
 
 #: advancedbarplot/options/facet_var.description.jamovi
-#: ggsegmentedtotalbar/options/facet_var.description.jamovi
+#: jjsegmentedtotalbar/options/facet_var.description.jamovi
 msgid "Optional variable to create separate panels."
 msgstr ""
 
@@ -53205,6 +54186,10 @@ msgstr ""
 
 #: statsplot2/options/grvar.description.ui
 msgid "Optional, Split analysis by another variable (e.g., gender, age group, tumor stage) to create separate plots"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Optional:"
 msgstr ""
 
 #: jjhistostats/options/grvar.description.ui
@@ -53677,6 +54662,10 @@ msgstr ""
 msgid "Outcome Variable (Optional)"
 msgstr ""
 
+#: jjbarstats/ui[1][0].label
+msgid "Outcome Variable (what you're measuring)"
+msgstr ""
+
 #: jforestmodel/options/dependent_var.description
 msgid "Outcome variable for regression modeling"
 msgstr ""
@@ -53890,7 +54879,7 @@ msgstr ""
 msgid "Outliers New Model"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color.title
+#: jjsegmentedtotalbar/options/outline_color.title
 msgid "Outline Color"
 msgstr ""
 
@@ -54198,6 +55187,14 @@ msgstr ""
 msgid "Overlap Tolerance"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Overlap:"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Overlapping areas:"
+msgstr ""
+
 #: clinmon/options/overlapping.title
 msgid "Overlapping Blocks"
 msgstr ""
@@ -54274,6 +55271,7 @@ msgstr ""
 #: causespecifichazards/results/coefficients.columns.title
 #: contTables/results/chiSq.columns.title
 #: contTables/results/taub.columns.title
+#: contTables/results/trendTest.columns.title
 #: contTablesPaired/results/test.columns.title
 #: directregression/results/modelSummary.columns.title
 #: dynamicprediction/results/biomarkerEffects.columns.title
@@ -54328,6 +55326,10 @@ msgstr ""
 
 #: ggprism/options/pvalue_format/exact.title
 msgid "p = 0.001"
+msgstr ""
+
+#: jjridges/results/tests.columns.title
+msgid "P-adj"
 msgstr ""
 
 #: treatmentmeta/options/pcurve.title
@@ -54612,6 +55614,7 @@ msgstr ""
 #: ihcstats/results/regionalTable.columns.title
 #: ihcstats/results/survivalTable.columns.title
 #: ihcstats/results/tilSignatureTable.columns.title
+#: jjridges/results/tests.columns.title
 #: mixedcox/results/fixedEffectsTable.columns.title
 #: mixedcox/results/likelihoodRatioTable.columns.title
 #: modelbuilder/results/nriTable.columns.title
@@ -54681,6 +55684,8 @@ msgstr ""
 msgid "p-value (Upper)"
 msgstr ""
 
+#: jjridges/options/p_adjust_method.title
+#: jjridges/ui[3][0]/p_adjust_method.label
 #: nonparametric/options/p_adjustment.title
 #: robustcorrelation/options/p_adjust_method.title
 msgid "P-value Adjustment"
@@ -54878,8 +55883,8 @@ msgstr ""
 
 #: jcomplexupset/options/color_palette/Paired.title
 #: jggheatmap/options/annotation_colors/paired.title
-#: jggridges/options/color_palette/Paired.title
 #: jggstats/options/color_palette/paired.title
+#: jjridges/options/color_palette/Paired.title
 #: jvisr/options/color_palette/Paired.title
 msgid "Paired"
 msgstr ""
@@ -54914,6 +55919,16 @@ msgstr ""
 
 #: clinicaltrialdesign/options/test_type/paired_ttest.title
 msgid "Paired t-test (Before vs After)"
+msgstr ""
+
+#: jjbarstats/ui[2][0][0]/paired.label
+#: jjpiestats/ui[2][0][0]/paired.label
+msgid "Paired/Matched Data (McNemar's Test)"
+msgstr ""
+
+#: jjbarstats/options/paired.title
+#: jjpiestats/options/paired.title
+msgid "Paired/Repeated Measures"
 msgstr ""
 
 #: nonparametric/options/paired_variable.title
@@ -54967,11 +55982,9 @@ msgstr ""
 #: jextractggstats/options/extract_components/pairwise_data.title
 #: jextractggstats/options/pairwise_comparisons.title
 #: jjbarstats/options/pairwisecomparisons.title
-#: jjbarstats/ui[1][2].label
 #: jjbetweenstats/options/pairwisecomparisons.title
 #: jjbetweenstats/ui[1][2].label
-#: jjwithinstats/options/pairwisecomparisons.title
-#: jjwithinstats/ui[1][1].label
+#: jjwithinstats/ui[1][2].label
 #: mediansurvival/results/comparisonTable.title
 #: survival/ui[3][1].label
 msgid "Pairwise Comparisons"
@@ -54984,6 +55997,10 @@ msgstr ""
 
 #: enhancedroc/results/results/rocComparisons.description
 msgid "Pairwise comparisons between ROC curves"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Pairwise comparisons test whether group differences are statistically significant."
 msgstr ""
 
 #: jextractggstats/options/pairwise_correction.title
@@ -55058,7 +56075,7 @@ msgstr ""
 msgid "Panel Size"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/facet_var.title
+#: jjsegmentedtotalbar/options/facet_var.title
 msgid "Panel Variable (Optional)"
 msgstr ""
 
@@ -55349,7 +56366,7 @@ msgstr ""
 #: jjbetweenstats/options/typestatistics/parametric.title
 #: jjcorrmat/options/typestatistics/parametric.title
 #: jjpiestats/options/typestatistics/parametric.title
-#: jjwithinstats/options/typestatistics/parametric.title
+#: jjridges/options/test_type/parametric.title
 msgid "Parametric"
 msgstr ""
 
@@ -55361,6 +56378,7 @@ msgstr ""
 msgid "Parametric (normal data, t-tests, ANOVA)"
 msgstr ""
 
+#: jjwithinstats/options/typestatistics/parametric.title
 #: qualitycontrol/options/reference_method/parametric.title
 #: referenceintervals/options/ri_method/parametric.title
 msgid "Parametric (Normal Distribution)"
@@ -55474,6 +56492,10 @@ msgstr ""
 msgid "Parametric: Use for normally distributed continuous data. Nonparametric: Best for skewed data or ordinal scales. Robust: Good when outliers are present. Bayesian: Provides strength of evidence"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Partial"
+msgstr ""
+
 #: enhancedroc/results/results/partialAucAnalysis.columns.title
 #: psychopdaroc/ui[6][0][0].label
 #: psychopdaroc/results/partialAUCTable.columns.title
@@ -55513,9 +56535,34 @@ msgstr ""
 msgid "Partial Correlation Network"
 msgstr ""
 
+#: jjcorrmat/options/partial.title
 #: partialcorrelation/options/correlationType/partial.title
 #: partialcorrelation/results/partialCorr.title
 msgid "Partial Correlations"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Partial Correlations Explained:"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Partial correlations help identify direct relationships by controlling for confounding variables in your dataset."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Partial Correlations Note:"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Partial correlations require at least 3 variables to control for confounding effects"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Partial correlations require at least 3 variables. Using zero-order correlations instead."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Partial correlations show the relationship between two variables while controlling for all other variables in the analysis"
 msgstr ""
 
 #: biomarkerdiscovery/options/partial_dependence.title
@@ -56173,6 +57220,10 @@ msgstr ""
 msgid "Peak ID"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Peaks:"
+msgstr ""
+
 #: ggprism/options/prism_palette/pearl.title
 msgid "Pearl (6 colors)"
 msgstr ""
@@ -56208,6 +57259,10 @@ msgstr ""
 
 #: pathologyagreement/options/correlation_method/pearson.title
 msgid "Pearson only"
+msgstr ""
+
+#: agepyramid/options/age_groups/pediatric.title
+msgid "Pediatric (0-18)"
 msgstr ""
 
 #: populationhealth/options/population_type/pediatric.title
@@ -56382,12 +57437,14 @@ msgstr ""
 #: enhancedfactorvariable/results/results/detailedLevelsAnalysis.columns.title
 #: enhancedfactorvariable/results/results/combinedFactorAnalysis.columns.title
 #: enhancedfrequency/results/results/combinedSummary.columns.title
-#: ggsegmentedtotalbar/options/y_title.default
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/options/y_title.default
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 #: ihccluster/results/clusterSizes.columns.title
 #: ihccluster/results/distr.columns.title
 #: ihcscoring/results/automatedanalysis/intensityanalysis.columns.title
 #: jggsankeyfier/results/datatab.columns.title
+#: jjbarstats/options/label/percentage.title
+#: jjpiestats/options/label/percentage.title
 #: modalitycomparison/results/discordanceTable.columns.title
 #: modalitycomparison/results/directionalBiasTable.columns.title
 #: outcomeorganizer/results/outputTable.columns.title
@@ -56426,6 +57483,10 @@ msgstr ""
 msgid "Percentage Changes"
 msgstr ""
 
+#: jjbarstats/options/digitsperc.title
+msgid "Percentage Decimal Digits"
+msgstr ""
+
 #: enhancedfrequency/options/percentageDecimals.title
 msgid "Percentage Decimals"
 msgstr ""
@@ -56438,7 +57499,7 @@ msgstr ""
 msgid "Percentage Display Pattern"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format.title
+#: jjsegmentedtotalbar/options/percentage_format.title
 msgid "Percentage Format"
 msgstr ""
 
@@ -56702,6 +57763,10 @@ msgstr ""
 
 #: competingsurvival/options/graystest.description.ui
 msgid "Perform Gray's test to compare cumulative incidence functions between groups"
+msgstr ""
+
+#: jjbarstats/ui[2][2][0]/pairwisecomparisons.label
+msgid "Perform Group-by-Group Comparisons"
 msgstr ""
 
 #: jggheatmap/options/cluster_cols.description
@@ -57109,6 +58174,10 @@ msgstr ""
 msgid "Performance Metrics to Report"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Performance Note:"
+msgstr ""
+
 #: treecompare/results/ranking_table.columns.title
 msgid "Performance Score"
 msgstr ""
@@ -57498,12 +58567,28 @@ msgstr ""
 msgid "Physical Functioning Domains"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Pie Chart Analysis"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Pie chart analysis ready"
+msgstr ""
+
+#: jjpiestats/ui[3][1].label
+msgid "Pie Chart Labels"
+msgstr ""
+
 #: package/analyses/jjpiestats.title
 #: package/analyses/jjpiestats.menuTitle
 #: jjpiestats/options.title
 #: jjpiestats/ui.title
 #: jjpiestats/results.title
 msgid "Pie Charts"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Pie charts show proportions visually - larger slices represent higher frequencies. Statistical tests determine if observed differences are likely due to chance or represent true group differences."
 msgstr ""
 
 #: continuousmarkov/options/baseline_hazard/piecewise.title
@@ -57608,9 +58693,8 @@ msgstr ""
 #: explainableai/options/colormap/plasma.title
 #: jcomplexupset/options/color_palette/plasma.title
 #: jggheatmap/options/color_scheme/plasma.title
-#: jggridges/options/color_palette/plasma.title
 #: jggsankeyfier/options/color_palette/plasma.title
-#: jjridgestats/options/colorscheme/plasma.title
+#: jjridges/options/color_palette/plasma.title
 #: jscattermore/options/color_palette/plasma.title
 #: robustcorrelation/options/heatmap_colors/plasma.title
 msgid "Plasma"
@@ -57644,8 +58728,20 @@ msgstr ""
 msgid "Please check your variable selections."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Please cite jamovi and the packages as given below."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Please select a continuous variable for X (Distribution)"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Please select a different variable with varying values."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Please select a grouping variable for Y (Groups)"
 msgstr ""
 
 #: R/linechart.b.R
@@ -57656,12 +58752,12 @@ msgstr ""
 msgid "Plot"
 msgstr ""
 
-#: jjbarstats/ui[2].label
+#: jjbarstats/ui[3].label
 #: jjbetweenstats/ui[3].label
 #: jjcorrmat/ui[3].label
 #: jjdotplotstats/ui[4].label
 #: jjhistostats/ui[2].label
-#: jjpiestats/ui[2].label
+#: jjpiestats/ui[3].label
 #: jjscatterstats/ui[2].label
 #: jjwithinstats/ui[3].label
 #: survival/ui[4][1].label
@@ -57688,6 +58784,8 @@ msgstr ""
 
 #: jjcorrmat/options/caption.title
 #: jjhistostats/options/caption.title
+#: jjridges/options/plot_caption.title
+#: jjridges/ui[5][1]/plot_caption.label
 #: jjtreemap/options/caption.title
 msgid "Plot Caption"
 msgstr ""
@@ -57798,7 +58896,7 @@ msgstr ""
 msgid "Plot Description"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[7].label
+#: jjsegmentedtotalbar/ui[7].label
 #: jjbetweenstats/ui[4][0].label
 #: jjcorrmat/ui[4][0].label
 #: jjdotplotstats/ui[5][0].label
@@ -57813,6 +58911,11 @@ msgstr ""
 #: jjdotplotstats/ui[2].label
 #: jjwithinstats/ui[2].label
 msgid "Plot Display"
+msgstr ""
+
+#: jjridges/options/dpi.title
+#: jjridges/ui[7][0]/dpi.label
+msgid "Plot DPI"
 msgstr ""
 
 #: jointmodeling/options/plot_dynamic_auc.title
@@ -57925,12 +59028,14 @@ msgstr ""
 #: enhancedroc/options/plotHeight.title
 #: factoranalysis/options/plotHeight.title
 #: ggoncoplot/options/plotHeight.title
-#: ggsegmentedtotalbar/options/plot_height.title
+#: jjsegmentedtotalbar/options/plot_height.title
 #: grafify/options/plot_height.title
 #: jggheatmap/options/plot_height.title
 #: jjbetweenstats/options/plotheight.title
 #: jjcorrmat/options/plotheight.title
 #: jjhistostats/options/plotheight.title
+#: jjridges/options/height.title
+#: jjridges/ui[7][0]/height.label
 #: jjscatterstats/options/plotheight.title
 #: jjwithinstats/options/plotheight.title
 #: linechart/options/height.title
@@ -57979,7 +59084,6 @@ msgstr ""
 #: jjcorrmat/ui[3][1].label
 #: jjdotplotstats/ui[4][1].label
 #: jjhistostats/ui[2][0].label
-#: jjridgestats/ui[6].label
 #: jjriverplot/ui[2][1].label
 #: jjscatterstats/ui[2][0].label
 #: jjtreemap/ui[2].label
@@ -58071,7 +59175,6 @@ msgstr ""
 #: enhancedfactorvariable/ui[4][0][0][0].label
 #: enhancedroc/ui[1][3][0].label
 #: flexcomprisk/ui[6].label
-#: jjridgestats/ui[1].label
 #: jjriverplot/ui[1].label
 #: jjtreemap/ui[1].label
 #: markovmultistate/ui[5].label
@@ -58120,6 +59223,10 @@ msgstr ""
 
 #: bayesianma/options/plot_predictions.title
 msgid "Plot Predictions"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Plot preparation failed: {error}"
 msgstr ""
 
 #: recurrentsurvival/options/recurrence_plots.title
@@ -58228,7 +59335,7 @@ msgstr ""
 
 #: decisioncurve/options/plotStyle.title
 #: jiwillsurvive/options/plot_style.title
-#: jjridgestats/options/plotStyle.title
+#: jjridges/ui[1].label
 #: multisurvival/options/sty.title
 #: psychopdaroc/ui[4][1][0].label
 msgid "Plot Style"
@@ -58238,12 +59345,18 @@ msgstr ""
 msgid "Plot style"
 msgstr ""
 
+#: jjbarstats/ui[3][0].label
+#: jjpiestats/ui[3][0].label
+msgid "Plot Styling"
+msgstr ""
+
 #: jcomplexupset/options/plot_subtitle.title
-#: jggridges/options/plot_subtitle.title
 #: jggsankeyfier/options/plot_subtitle.title
 #: jggstats/options/plot_subtitle.title
 #: jjcorrmat/options/subtitle.title
 #: jjhistostats/options/subtitle.title
+#: jjridges/options/plot_subtitle.title
+#: jjridges/ui[5][1]/plot_subtitle.label
 #: jjtreemap/options/subtitle.title
 msgid "Plot Subtitle"
 msgstr ""
@@ -58322,7 +59435,7 @@ msgstr ""
 #: economistplots/options/plot_title.title
 #: ggflowchart/options/plot_title.title
 #: ggprism/options/plot_title.title
-#: ggsegmentedtotalbar/options/plot_title.title
+#: jjsegmentedtotalbar/options/plot_title.title
 #: grafify/options/title_text.title
 #: groupedforest/options/plot_title.title
 #: hullplot/options/plot_title.title
@@ -58330,7 +59443,6 @@ msgstr ""
 #: jforester/options/plot_title.title
 #: jforestmodel/options/plot_title.title
 #: jggheatmap/options/plot_title.title
-#: jggridges/options/plot_title.title
 #: jggsankeyfier/options/plot_title.title
 #: jggstats/options/plot_title.title
 #: jiwillsurvive/options/plot_title.title
@@ -58339,6 +59451,8 @@ msgstr ""
 #: jjdotplotstats/options/mytitle.title
 #: jjhistostats/options/title.title
 #: jjradarplot/options/title.title
+#: jjridges/options/plot_title.title
+#: jjridges/ui[5][1]/plot_title.label
 #: jjtreemap/options/title.title
 #: jscattermore/options/plot_title.title
 #: jsjplot/options/title.title
@@ -58384,7 +59498,8 @@ msgstr ""
 #: ggoncoplot/options/plotType.title
 #: ggprism/options/plot_type.title
 #: grafify/options/plot_type.title
-#: jggridges/options/plot_type.title
+#: jjridges/options/plot_type.title
+#: jjridges/ui[1][0]/plot_type.label
 #: jjriverplot/options/plotType.title
 #: jjriverplot/ui[1][0].label
 #: jscattermore/options/plot_type.title
@@ -58416,12 +59531,14 @@ msgstr ""
 #: enhancedroc/options/plotWidth.title
 #: factoranalysis/options/plotWidth.title
 #: ggoncoplot/options/plotWidth.title
-#: ggsegmentedtotalbar/options/plot_width.title
+#: jjsegmentedtotalbar/options/plot_width.title
 #: grafify/options/plot_width.title
 #: jggheatmap/options/plot_width.title
 #: jjbetweenstats/options/plotwidth.title
 #: jjcorrmat/options/plotwidth.title
 #: jjhistostats/options/plotwidth.title
+#: jjridges/options/width.title
+#: jjridges/ui[7][0]/width.label
 #: jjscatterstats/options/plotwidth.title
 #: jjwithinstats/options/plotwidth.title
 #: linechart/options/width.title
@@ -58626,7 +59743,8 @@ msgstr ""
 #: ggprism/options/point_alpha.title
 #: grafify/options/transparency.title
 #: hullplot/options/point_alpha.title
-#: jggridges/options/point_alpha.title
+#: jjridges/options/point_alpha.title
+#: jjridges/ui[2][0]/point_alpha.label
 #: jjscatterstats/options/pointalpha.title
 #: jviolin/options/point_alpha.title
 msgid "Point Transparency"
@@ -58768,7 +59886,6 @@ msgid "Pooled Standard Deviation"
 msgstr ""
 
 #: advancedtrials/results/biomarker_strategy_results.columns.title
-#: agepyramid/results/pyramidTable.columns.title
 #: outbreakanalysis/results/spatial_analysis_results.columns.title
 msgid "Population"
 msgstr ""
@@ -59003,6 +60120,7 @@ msgstr ""
 msgid "Position of vertical reference line"
 msgstr ""
 
+#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "positive"
 msgstr ""
@@ -59184,6 +60302,10 @@ msgstr ""
 #: grafify/results/posthoc_results.title
 #: nonparametric/results/postHocTable.title
 msgid "Post-hoc Comparisons"
+msgstr ""
+
+#: jjbarstats/ui[2][2].label
+msgid "Post-hoc Comparisons (when >2 groups)"
 msgstr ""
 
 #: chisqposttest/options/posthoc.title
@@ -60441,9 +61563,17 @@ msgstr ""
 msgid "Prentice weights"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Preparation time"
+msgstr ""
+
 #: modelbuilder/options/exportForDCA.title
 #: modelbuilder/ui[7][2][0]/exportForDCA.label
 msgid "Prepare for Decision Curve Analysis"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Preparing pie chart analysis options..."
 msgstr ""
 
 #: advancedbarplot/options/theme_style/presentation.title
@@ -60452,7 +61582,7 @@ msgstr ""
 msgid "Presentation"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style/presentation.title
+#: jjsegmentedtotalbar/options/chart_style/presentation.title
 msgid "Presentation Style"
 msgstr ""
 
@@ -60983,7 +62113,7 @@ msgstr ""
 msgid "Prism Candy Bright (9 colors)"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/color_palette/prism_colorblind_safe.title
+#: jjsegmentedtotalbar/options/color_palette/prism_colorblind_safe.title
 #: raincloud/options/color_palette/prism_colorblind_safe.title
 msgid "Prism Colorblind Safe"
 msgstr ""
@@ -61241,6 +62371,14 @@ msgstr ""
 
 #: jiwillsurvive/results/dataOutput.title
 msgid "Processed Data"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Processing data for pie chart analysis..."
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "Processing large dataset (%d rows) - this may take a moment..."
 msgstr ""
 
 #: nonparametricregression/options/multivariate_method/product.title
@@ -61546,6 +62684,11 @@ msgstr ""
 msgid "Proportion range for cut-point search (e.g., \"0.1, 0.9\" excludes outer  10% to maintain statistical power). Prevents extreme cut-points that  create unbalanced groups."
 msgstr ""
 
+#: jjbarstats/options/proportiontest.title
+#: jjpiestats/options/proportiontest.title
+msgid "Proportion Test"
+msgstr ""
+
 #: ihcscoring/options/proportion_var.title
 msgid "Proportion Variable"
 msgstr ""
@@ -61845,6 +62988,7 @@ msgstr ""
 #: economistplots/options/distribution_style/publication.title
 #: groupedforest/options/plot_theme/publication.title
 #: jiwillsurvive/options/plot_style/publication.title
+#: jjridges/options/theme_style/theme_pubr.title
 #: linechart/options/theme/publication.title
 #: lollipop/options/theme/publication.title
 #: raincloud/options/plot_theme/publication.title
@@ -61881,7 +63025,7 @@ msgstr ""
 #: enhancedfactorvariable/options/outputFormat/publication.title
 #: enhancedfrequency/options/exportFormat/publication.title
 #: enhancedtables/options/table_theme/publication.title
-#: ggsegmentedtotalbar/options/chart_style/publication.title
+#: jjsegmentedtotalbar/options/chart_style/publication.title
 #: linechart/ui[3][0]/theme/publication.title
 #: progressionsurvival/options/plot_theme/publication.title
 #: simonmakuch/options/analysisType/publication.title
@@ -61944,6 +63088,10 @@ msgstr ""
 #: gtsummary/ui.title
 #: gtsummary/results.title
 msgid "Publication-Ready Tables with gtsummary"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Publication-ready themes and customization"
 msgstr ""
 
 #: retracted/results/pmids.title
@@ -62022,6 +63170,7 @@ msgstr ""
 #: enhancednonparametric/results/descriptives.columns.title
 #: friedmantest/results/descriptiveStats.columns.title
 #: ihcscoring/results/statisticstable.columns.title
+#: jjridges/results/statistics.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
 #: nonparametric/results/descriptives.columns.title
 #: qualityoflife/results/domain_scores.columns.title
@@ -62045,6 +63194,7 @@ msgstr ""
 #: enhancednonparametric/results/descriptives.columns.title
 #: friedmantest/results/descriptiveStats.columns.title
 #: ihcscoring/results/statisticstable.columns.title
+#: jjridges/results/statistics.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
 #: nonparametric/results/descriptives.columns.title
 #: qualityoflife/results/domain_scores.columns.title
@@ -62410,8 +63560,14 @@ msgstr ""
 msgid "Quantile Regression Method"
 msgstr ""
 
+#: jjridges/options/quantiles.title
+#: jjridges/ui[2][0]/quantiles.label
 #: jviolin/options/quantile_lines.title
 msgid "Quantile Values"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Quantile values must be between 0 and 1"
 msgstr ""
 
 #: survivalcont/options/cutoff_method/quantile.title
@@ -62420,14 +63576,6 @@ msgstr ""
 
 #: continuousrelationship/options/knotPositions/quantile.title
 msgid "Quantile-based (recommended)"
-msgstr ""
-
-#: jggridges/options/quantiles.title
-msgid "Quantiles"
-msgstr ""
-
-#: jggridges/options/quantiles.description
-msgid "Quantiles to display as lines (comma-separated)"
 msgstr ""
 
 #: bayesianma/results/uncertaintyQuantification.columns.title
@@ -62452,6 +63600,11 @@ msgstr ""
 
 #: screeningevaluation/options/screening_test_type/questionnaire.title
 msgid "Questionnaire/Survey"
+msgstr ""
+
+#: jjbarstats/ui[0].label
+#: jjpiestats/ui[0].label
+msgid "Quick Clinical Setup"
 msgstr ""
 
 #: R/linechart.b.R
@@ -62503,7 +63656,6 @@ msgstr ""
 
 #: jcomplexupset/options/data.description
 #: jextractggstats/options/data.description
-#: jggridges/options/data.description
 msgid "R object to use"
 msgstr ""
 
@@ -63290,6 +64442,14 @@ msgstr ""
 msgid "Rationale"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Ratios must be positive. Using equal proportions."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Ratios sum to {sum} but should sum to 1. Using equal proportions."
+msgstr ""
+
 #: tinytable/options/table_type/raw.title
 msgid "Raw Data Display"
 msgstr ""
@@ -63312,16 +64472,16 @@ msgid "Raw Values (numeric)"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/dark2.title
-#: ggsegmentedtotalbar/options/color_palette/dark2.title
+#: jjsegmentedtotalbar/options/color_palette/dark2.title
 msgid "RColorBrewer Dark2"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/color_palette/paired.title
+#: jjsegmentedtotalbar/options/color_palette/paired.title
 msgid "RColorBrewer Paired"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/set1.title
-#: ggsegmentedtotalbar/options/color_palette/set1.title
+#: jjsegmentedtotalbar/options/color_palette/set1.title
 msgid "RColorBrewer Set1"
 msgstr ""
 
@@ -64290,10 +65450,6 @@ msgstr ""
 msgid "Relative Margin"
 msgstr ""
 
-#: jggridges/options/rel_min_height.title
-msgid "Relative Minimum Height"
-msgstr ""
-
 #: bayesianclinical/results/model_comparison.columns.title
 #: sparsegrouplasso/results/comparisonTable.columns.title
 #: spatialbayesiansurvival/results/modelComparison.columns.title
@@ -64424,6 +65580,10 @@ msgstr ""
 msgid "REMARK Guidelines"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Remember that correlation does not imply causation."
+msgstr ""
+
 #: parametricfrailty/options/estimation_method/reml.title
 msgid "REML"
 msgstr ""
@@ -64474,10 +65634,6 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Remove rows with missing values or select variables with complete data."
-msgstr ""
-
-#: jggridges/options/expand_panel.description
-msgid "Remove space around plot area"
 msgstr ""
 
 #: tidyplots/options/removeXAxis.title
@@ -64536,6 +65692,14 @@ msgstr ""
 
 #: statsplot2/options/direction/repeated.title
 msgid "Repeated Measures (Within-Subjects)"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Repeated measures ANOVA"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Repeated measures ANOVA tests whether means differ significantly across time points, assuming normal distribution."
 msgstr ""
 
 #: measurementuncertainty/options/replicate_group.title
@@ -64654,6 +65818,10 @@ msgstr ""
 #: clinicaltrialdesign/options/calculation_type/sample_size.title
 #: poweranalysis/results/snp_analysis_table.columns.title
 msgid "Required Sample Size"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Required:"
 msgstr ""
 
 #: eurostatmap/ui[0][0][2].label
@@ -65070,6 +66238,10 @@ msgstr ""
 msgid "Result Overlap"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Results"
+msgstr ""
+
 #: advancedimputation/results/sensitivity_results.description
 msgid "Results across different imputation methods and assumptions"
 msgstr ""
@@ -65097,6 +66269,8 @@ msgstr ""
 #: aivalidation/results/resultsInterpretation.title
 #: conditionalgee/results/interpretationContent.title
 #: enhancednonparametric/results/resultInterpretation.title
+#: jjbarstats/results/interpretation.title
+#: jjpiestats/results/interpretation.title
 #: jointfrailty/results/interpretationContent.title
 #: marginalrecurrent/results/interpretationContent.title
 msgid "Results Interpretation"
@@ -65159,11 +66333,8 @@ msgstr ""
 msgid "Reverse the order of colors in the selected palette. Useful for adjusting color assignments to groups."
 msgstr ""
 
-#: jggridges/options/reverse_order.description
-msgid "Reverse the order of groups on Y axis"
-msgstr ""
-
-#: jggridges/options/reverse_order.title
+#: jjridges/options/reverse_order.title
+#: jjridges/ui[4][0]/reverse_order.label
 msgid "Reverse Y Order"
 msgstr ""
 
@@ -65222,19 +66393,32 @@ msgstr ""
 msgid "Ridge (L2)"
 msgstr ""
 
-#: jggridges/results/plot.title
+#: R/jjridges.b.R
+msgid "Ridge height and spread:"
+msgstr ""
+
+#: jjridges/options/scale.title
+#: jjridges/ui[1][0]/scale.label
+msgid "Ridge Height Scale"
+msgstr ""
+
+#: package/analyses/jjridges.title
+#: package/analyses/jjridges.menuTitle
+#: jjridges/options.title
+#: jjridges/results/plot.title
 msgid "Ridge Plot"
 msgstr ""
 
-#: jggridges/results.title
-msgid "Ridge Plot Results"
+#: R/jjridges.b.R
+msgid "Ridge plot comparing the distribution of"
 msgstr ""
 
-#: package/analyses/jggridges.title
-#: package/analyses/jggridges.menuTitle
-#: jggridges/options.title
-#: jggridges/ui.title
-msgid "Ridge Plot Visualization"
+#: R/jjridges.b.R
+msgid "Ridge Plot Instructions"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Ridge Position:"
 msgstr ""
 
 #: aivalidation/options/modelSelection/ridge.title
@@ -65249,32 +66433,32 @@ msgstr ""
 msgid "Ridge Regression Weights"
 msgstr ""
 
-#: jggridges/options/theme_style/theme_ridges.title
+#: R/jjridges.b.R
+msgid "Ridge Shape:"
+msgstr ""
+
+#: jjridges/options/theme_style/theme_ridges.title
 msgid "Ridge Theme"
+msgstr ""
+
+#: jjridges/options/alpha.title
+#: jjridges/ui[4][0]/alpha.label
+msgid "Ridge Transparency"
 msgstr ""
 
 #: sparsegrouplasso/options/weight_type/ridge_based.title
 msgid "Ridge-Based Weights"
 msgstr ""
 
-#: package/analyses/jjridgestats.title
-#: package/analyses/jjridgestats.menuTitle
-#: jjridgestats/options.title
-#: jjridgestats/ui.title
-#: jjridgestats/results.title
-#: jjridgestats/results/plot.title
-msgid "Ridgeline Plot"
-msgstr ""
-
 #: advancedbarplot/options/legend_position/right.title
 #: advancedraincloud/options/rain_side/r.title
 #: bbcplots/options/legend_position/right.title
 #: ggprism/options/legend_position/right.title
-#: ggsegmentedtotalbar/options/legend_position/right.title
+#: jjsegmentedtotalbar/options/legend_position/right.title
 #: grafify/options/legend_position/right.title
 #: jiwillsurvive/options/legend_position/right.title
 #: jjradarplot/options/legendPosition/right.title
-#: jjridgestats/options/legendPosition/right.title
+#: jjridges/options/legend_position/right.title
 #: jjtreemap/options/labelAlignH/right.title
 #: jvisr/options/legend_position/right.title
 #: psychopdaroc/options/legendPosition/right.title
@@ -65391,6 +66575,7 @@ msgstr ""
 msgid "Risk Factor"
 msgstr ""
 
+#: jjbarstats/options/clinicalpreset/riskfactor.title
 #: outbreakanalysis/options/risk_factor_analysis.title
 msgid "Risk Factor Analysis"
 msgstr ""
@@ -65814,7 +66999,7 @@ msgstr ""
 #: jjbetweenstats/options/typestatistics/robust.title
 #: jjcorrmat/options/typestatistics/robust.title
 #: jjpiestats/options/typestatistics/robust.title
-#: jjwithinstats/options/typestatistics/robust.title
+#: jjridges/options/test_type/robust.title
 msgid "Robust"
 msgstr ""
 
@@ -65828,6 +67013,10 @@ msgstr ""
 
 #: statsplot2/options/distribution/r.title
 msgid "Robust (outlier-resistant, trimmed means)"
+msgstr ""
+
+#: jjwithinstats/options/typestatistics/robust.title
+msgid "Robust (Outlier-Resistant)"
 msgstr ""
 
 #: jjhistostats/options/typestatistics/robust.title
@@ -65937,6 +67126,10 @@ msgstr ""
 msgid "Robust Methods"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Robust methods provide reliable results even with outliers or non-normal distributions."
+msgstr ""
+
 #: referenceintervals/options/ri_method/robust_nonparametric.title
 msgid "Robust Non-parametric"
 msgstr ""
@@ -65947,6 +67140,10 @@ msgstr ""
 
 #: pseudosurvival/options/regression_method/robust.title
 msgid "Robust Regression"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Robust repeated measures test"
 msgstr ""
 
 #: biomarkerdiscovery/options/normalization_method/robust.title
@@ -65976,6 +67173,10 @@ msgstr ""
 msgid "Robust standard errors"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "robust statistical analysis"
+msgstr ""
+
 #: assayoptimization/options/robust_methods.title
 msgid "Robust Statistical Methods"
 msgstr ""
@@ -65995,6 +67196,10 @@ msgstr ""
 
 #: idi/options/test_method/robust.title
 msgid "Robust Test"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Robust test uses trimmed means, reducing influence of outliers common in clinical measurements."
 msgstr ""
 
 #: robustaft/results/diagnostics.columns.title
@@ -66576,12 +67781,24 @@ msgstr ""
 msgid "Sample Size (for Power Calculation)"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Sample size (n="
+msgstr ""
+
 #: metaanalysis/options/sample_size.title
 msgid "Sample Size (optional)"
 msgstr ""
 
 #: advancedraincloud/ui[4].label
 msgid "Sample Size & Data Info"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Sample size < 10 is insufficient for correlation analysis. Minimum 10 observations required."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Sample size < 20 may produce unreliable correlation estimates. Consider collecting more data."
 msgstr ""
 
 #: clinicaltrialdesign/results/sample_size_breakdown.title
@@ -66689,6 +67906,14 @@ msgstr ""
 msgid "Sample Size Weighting"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Sample size:"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Sample size: %d observations"
+msgstr ""
+
 #: kappaSizeFixedN/options/n.description.ui
 msgid "Sample size."
 msgstr ""
@@ -66720,6 +67945,10 @@ msgstr ""
 
 #: explainableai/results/localexplanations/samplewiseexplanationtable.title
 msgid "Sample-wise Explanations"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Sample:"
 msgstr ""
 
 #: biomarkerdiscovery/ui[5][0]/n_bootstrap_samples.suffix
@@ -66897,7 +68126,6 @@ msgstr ""
 msgid "SCAD/MCP Parameter"
 msgstr ""
 
-#: jggridges/options/scale.title
 #: tidydensity/options/logistic_scale.title
 #: tidydensity/options/cauchy_scale.title
 msgid "Scale"
@@ -67011,10 +68239,6 @@ msgstr ""
 
 #: principalcox/results/scalingSummary.columns.title
 msgid "Scaled SD"
-msgstr ""
-
-#: jggridges/options/scale.description
-msgid "Scaling factor for ridge heights"
 msgstr ""
 
 #: principalcox/options/scaling_method.title
@@ -67135,7 +68359,7 @@ msgid "Schoenfeld Transform"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/science.title
-#: ggsegmentedtotalbar/options/color_palette/science.title
+#: jjsegmentedtotalbar/options/color_palette/science.title
 msgid "Science Journal"
 msgstr ""
 
@@ -67336,6 +68560,7 @@ msgstr ""
 #: icccoeff/results/descriptive_stats.columns.title
 #: ihcscoring/results/statisticstable.columns.title
 #: illnessdeath/results/residualAnalysis.columns.title
+#: jjridges/results/statistics.columns.title
 #: methodcomparison/results/descriptiveStats.columns.title
 #: pagetrendtest/results/descriptiveStats.columns.title
 #: parallelplot/results/summary.columns.title
@@ -67618,6 +68843,10 @@ msgstr ""
 msgid "Secondary title providing additional information."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "seconds"
+msgstr ""
+
 #: treemedical/options/seed_value.description
 msgid "Seed value for random number generation."
 msgstr ""
@@ -67626,11 +68855,11 @@ msgstr ""
 msgid "Segi World Standard"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 msgid "Segment"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/fill_var.title
+#: jjsegmentedtotalbar/options/fill_var.title
 msgid "Segment Variable (Fill)"
 msgstr ""
 
@@ -67646,20 +68875,20 @@ msgstr ""
 msgid "Segmentation Quality Metrics"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/plot.title
+#: jjsegmentedtotalbar/results/plot.title
 msgid "Segmented Total Bar Chart"
 msgstr ""
 
-#: package/analyses/ggsegmentedtotalbar.title
-#: package/analyses/ggsegmentedtotalbar.menuTitle
-#: ggsegmentedtotalbar/options.title
-#: ggsegmentedtotalbar/ui.title
-#: ggsegmentedtotalbar/ui[1][0].label
-#: ggsegmentedtotalbar/results.title
+#: package/analyses/jjsegmentedtotalbar.title
+#: package/analyses/jjsegmentedtotalbar.menuTitle
+#: jjsegmentedtotalbar/options.title
+#: jjsegmentedtotalbar/ui.title
+#: jjsegmentedtotalbar/ui[1][0].label
+#: jjsegmentedtotalbar/results.title
 msgid "Segmented Total Bar Charts"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 msgid "Segments"
 msgstr ""
 
@@ -67695,7 +68924,7 @@ msgstr ""
 msgid "Select BBC standard colors or create custom color schemes."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/x_var.description.jamovi
+#: jjsegmentedtotalbar/options/x_var.description.jamovi
 msgid "Select categorical variable for the x-axis categories."
 msgstr ""
 
@@ -67731,7 +68960,7 @@ msgstr ""
 msgid "Select numeric variable for bar heights."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/y_var.description.jamovi
+#: jjsegmentedtotalbar/options/y_var.description.jamovi
 msgid "Select numeric variable for segment values."
 msgstr ""
 
@@ -67871,7 +69100,7 @@ msgstr ""
 msgid "Select variable for the x-axis."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/fill_var.description.jamovi
+#: jjsegmentedtotalbar/options/fill_var.description.jamovi
 msgid "Select variable to define bar segments and colors."
 msgstr ""
 
@@ -68424,6 +69653,10 @@ msgstr ""
 msgid "Set Degree"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Set DPI for high-resolution output (300 DPI recommended for publications)"
+msgstr ""
+
 #: basegraphics/options/x_max.description.jamovi
 msgid "Set maximum value for x-axis."
 msgstr ""
@@ -68442,13 +69675,13 @@ msgstr ""
 
 #: advancedbarplot/options/plot_height.description.jamovi
 #: economistplots/options/plot_height.description.jamovi
-#: ggsegmentedtotalbar/options/plot_height.description.jamovi
+#: jjsegmentedtotalbar/options/plot_height.description.jamovi
 msgid "Set plot height for optimal display."
 msgstr ""
 
 #: advancedbarplot/options/plot_width.description.jamovi
 #: economistplots/options/plot_width.description.jamovi
-#: ggsegmentedtotalbar/options/plot_width.description.jamovi
+#: jjsegmentedtotalbar/options/plot_width.description.jamovi
 msgid "Set plot width for optimal display."
 msgstr ""
 
@@ -68504,9 +69737,9 @@ msgstr ""
 #: hullplot/options/color_palette/set1.title
 #: jcomplexupset/options/color_palette/Set1.title
 #: jggheatmap/options/annotation_colors/set1.title
-#: jggridges/options/color_palette/Set1.title
 #: jggstats/options/color_palette/set1.title
 #: jiwillsurvive/options/color_palette/set1.title
+#: jjridges/options/color_palette/Set1.title
 #: jvisr/options/color_palette/Set1.title
 #: parallelplot/options/colorPalette/set1.title
 #: raincloud/options/color_palette/set1.title
@@ -68516,7 +69749,7 @@ msgstr ""
 #: advancedraincloud/options/color_palette/set2.title
 #: hullplot/options/color_palette/set2.title
 #: jcomplexupset/options/color_palette/Set2.title
-#: jggridges/options/color_palette/Set2.title
+#: jjridges/options/color_palette/Set2.title
 #: jvisr/options/color_palette/Set2.title
 #: raincloud/options/color_palette/set2.title
 msgid "Set2"
@@ -68798,7 +70031,7 @@ msgstr ""
 msgid "Shared Shape Parameter"
 msgstr ""
 
-#: jggridges/options/bandwidth/SJ.title
+#: jjridges/options/bandwidth/SJ.title
 msgid "Sheather-Jones"
 msgstr ""
 
@@ -68965,8 +70198,17 @@ msgstr ""
 msgid "Show AUC values over time"
 msgstr ""
 
+#: jjwithinstats/options/centralityplotting.title
+msgid "Show Average Values"
+msgstr ""
+
 #: bayesianma/options/show_coefficients.title
 msgid "Show Averaged Coefficients"
+msgstr ""
+
+#: jjbarstats/ui[2][1][0]/bfmessage.label
+#: jjpiestats/ui[2][1][0]/bfmessage.label
+msgid "Show Bayes Factor (for Bayesian)"
 msgstr ""
 
 #: dynamicprediction/options/show_biomarker_effects.title
@@ -69046,7 +70288,6 @@ msgstr ""
 
 #: jextractggstats/options/centrality_plotting.title
 #: jjbetweenstats/options/centralityplotting.title
-#: jjwithinstats/options/centralityplotting.title
 msgid "Show Centrality"
 msgstr ""
 
@@ -69077,6 +70318,16 @@ msgstr ""
 
 #: clinicalvalidationinteractive/options/show_clinical_guidance.title
 msgid "Show Clinical Decision Guidance"
+msgstr ""
+
+#: jjbarstats/options/showexplanations.title
+#: jjpiestats/options/showexplanations.title
+msgid "Show Clinical Explanations"
+msgstr ""
+
+#: jjbarstats/ui[0]/showexplanations.label
+#: jjpiestats/ui[0]/showexplanations.label
+msgid "Show Clinical Guidance"
 msgstr ""
 
 #: clinicalvalidation/options/show_clinical_interpretation.title
@@ -69289,6 +70540,9 @@ msgid "Show Consensus Results"
 msgstr ""
 
 #: jjbarstats/options/messages.title
+#: jjbarstats/ui[3][0][0]/messages.label
+#: jjpiestats/options/messages.title
+#: jjpiestats/ui[3][0][0]/messages.label
 msgid "Show Console Messages"
 msgstr ""
 
@@ -69439,6 +70693,7 @@ msgid "Show Data Patterns"
 msgstr ""
 
 #: ggprism/options/show_points.title
+#: jjridges/ui[2][0]/add_points.label
 #: raincloud/options/show_dots.title
 #: raincloud/ui[1][0]/show_dots.label
 msgid "Show Data Points"
@@ -69493,6 +70748,11 @@ msgstr ""
 
 #: flexparametric/options/show_density_plot.title
 msgid "Show Density Plot"
+msgstr ""
+
+#: jjridges/options/add_density_values.title
+#: jjridges/ui[6][0]/add_density_values.label
+msgid "Show Density Values"
 msgstr ""
 
 #: icccoeff/options/show_descriptive_stats.title
@@ -69758,6 +71018,11 @@ msgstr ""
 msgid "Show F-test"
 msgstr ""
 
+#: jjridges/options/show_facet_legend.title
+#: jjridges/ui[4][0]/show_facet_legend.label
+msgid "Show Facet Legend"
+msgstr ""
+
 #: cotest/ui[4][0]/fagan.label
 msgid "Show Fagan nomogram"
 msgstr ""
@@ -69776,6 +71041,11 @@ msgstr ""
 
 #: superpc/options/plot_screening.title
 msgid "Show Feature Screening Plot"
+msgstr ""
+
+#: jjridges/options/show_fill_legend.title
+#: jjridges/ui[4][0]/show_fill_legend.label
+msgid "Show Fill Legend"
 msgstr ""
 
 #: nonparametricregression/options/show_fitted_curves.title
@@ -69861,6 +71131,11 @@ msgstr ""
 msgid "Show Goodness-of-Fit Tests"
 msgstr ""
 
+#: jjridges/options/grid_lines.title
+#: jjridges/ui[5][0]/grid_lines.label
+msgid "Show Grid Lines"
+msgstr ""
+
 #: advancedraincloud/options/show_comparisons.title
 msgid "Show Group Comparisons"
 msgstr ""
@@ -69943,6 +71218,10 @@ msgstr ""
 msgid "Show horizontal gridlines for easier value reading."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Show how continuous measures vary by pathological categories"
+msgstr ""
+
 #: idi/options/show_summary.title
 msgid "Show IDI Summary"
 msgstr ""
@@ -70008,7 +71287,6 @@ msgstr ""
 #: icccoeff/options/show_interpretation.title
 #: jcomplexupset/options/show_interpretation.title
 #: jextractggstats/options/show_interpretation.title
-#: jggridges/options/show_interpretation.title
 #: jggsankeyfier/options/show_interpretation.title
 #: jggstats/options/show_interpretation.title
 #: vartree/options/showInterpretation.title
@@ -70035,10 +71313,6 @@ msgstr ""
 
 #: decisioncurve/ui[3][0]/showInterventionAvoided.label
 msgid "Show interventions avoided"
-msgstr ""
-
-#: jggridges/options/jittered_points.title
-msgid "Show Jittered Points"
 msgstr ""
 
 #: weightedlogrank/options/show_kaplan_meier.title
@@ -70109,12 +71383,10 @@ msgstr ""
 msgid "Show Mean"
 msgstr ""
 
+#: jjridges/options/add_mean.title
+#: jjridges/ui[2][0]/add_mean.label
 #: lollipop/options/showMean.title
 msgid "Show Mean Line"
-msgstr ""
-
-#: jggridges/options/show_mean.title
-msgid "Show Mean Lines"
 msgstr ""
 
 #: lollipop/ui[1][0]/showMean.label
@@ -70127,6 +71399,15 @@ msgstr ""
 
 #: tidyplots/options/showMedian.title
 msgid "Show Median"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Show median (center line), quartiles (box boundaries), and outliers for each group."
+msgstr ""
+
+#: jjridges/options/add_median.title
+#: jjridges/ui[2][0]/add_median.label
+msgid "Show Median Line"
 msgstr ""
 
 #: mediansurvival/options/show_median_lines.title
@@ -70542,13 +71823,13 @@ msgstr ""
 msgid "Show Percentage Axis"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/show_percentages.description.jamovi
+#: jjsegmentedtotalbar/options/show_percentages.description.jamovi
 msgid "Show percentage values on each segment."
 msgstr ""
 
 #: enhancedfrequency/options/showPercentages.title
 #: flowchart/options/showPercentages.title
-#: ggsegmentedtotalbar/options/show_percentages.title
+#: jjsegmentedtotalbar/options/show_percentages.title
 #: jcomplexupset/options/show_percentages.title
 #: toxicityprofile/options/showPercentages.title
 msgid "Show Percentages"
@@ -70690,7 +71971,8 @@ msgstr ""
 msgid "Show Quality Assessment"
 msgstr ""
 
-#: jggridges/options/quantile_lines.title
+#: jjridges/options/add_quantiles.title
+#: jjridges/ui[2][0]/add_quantiles.label
 msgid "Show Quantile Lines"
 msgstr ""
 
@@ -70726,11 +72008,11 @@ msgstr ""
 msgid "Show Ratio Test"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/show_counts.description.jamovi
+#: jjsegmentedtotalbar/options/show_counts.description.jamovi
 msgid "Show raw count values in addition to percentages."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/show_counts.title
+#: jjsegmentedtotalbar/options/show_counts.title
 msgid "Show Raw Counts"
 msgstr ""
 
@@ -70828,6 +72110,10 @@ msgstr ""
 msgid "Show Result Interpretation"
 msgstr ""
 
+#: jjbarstats/ui[2][2][0]/pairwisecomparisons/pairwisedisplay.label
+msgid "Show Results"
+msgstr ""
+
 #: conditionalsurvival/options/showTable.title
 #: decisioncurve/options/showTable.title
 #: timeupdatedsurvival/options/showTable.title
@@ -70918,6 +72204,8 @@ msgstr ""
 
 #: bbcplots/options/show_sample_sizes.title
 #: groupedforest/options/show_counts.title
+#: jjridges/options/add_sample_size.title
+#: jjridges/ui[6][0]/add_sample_size.label
 #: subgroupforest/options/showSampleSizes.title
 msgid "Show Sample Sizes"
 msgstr ""
@@ -71098,10 +72386,16 @@ msgstr ""
 
 #: basegraphics/options/show_statistics.title
 #: jcomplexupset/options/show_statistics.title
-#: jggridges/options/show_statistics.title
 #: jggstats/options/show_statistics.title
+#: jjridges/options/show_stats.title
+#: jjridges/ui[3][0]/show_stats.label
 #: toolssummary/options/showStats.title
 msgid "Show Statistics"
+msgstr ""
+
+#: jjbarstats/ui[3][0][0]/resultssubtitle.label
+#: jjpiestats/ui[3][0][0]/resultssubtitle.label
+msgid "Show Statistics in Plot Subtitle"
 msgstr ""
 
 #: groupedforest/options/show_statistics.title
@@ -71248,6 +72542,10 @@ msgstr ""
 
 #: survivalpower/options/show_formulas.description.jamovi
 msgid "Show the mathematical formulas and equations used in calculations."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Show the most common values (modes) within each group"
 msgstr ""
 
 #: clinicalnomograms/options/model_equation.description.ui
@@ -71471,6 +72769,10 @@ msgstr ""
 msgid "Show zero-order correlations"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Shows the probability density or frequency distribution for a group"
+msgstr ""
+
 #: stagemigration/results/fineGrayResults.columns.title
 msgid "SHR Lower CI"
 msgstr ""
@@ -71684,6 +72986,14 @@ msgstr ""
 msgid "Significant (*)"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "significant (p = "
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Significant correlations (p < 0.05): %d"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Significant differences between groups detected (p < 0.05). "
 msgstr ""
@@ -71707,6 +73017,10 @@ msgstr ""
 
 #: ihccluster/results/silhouetteStats.title
 msgid "Silhouette Statistics"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Similar distributions between groups; Separation = distinct patterns"
 msgstr ""
 
 #: simonmakuch/results/methodologyNotes.title
@@ -72018,6 +73332,10 @@ msgstr ""
 msgid "Slab Variance"
 msgstr ""
 
+#: jjpiestats/ui[3][1][0]/label.label
+msgid "Slice Label Type"
+msgstr ""
+
 #: dynamicprediction/results/trajectoryParameters.columns.title
 #: labcontrolcharts/results/trendAnalysis.columns.title
 #: methodcomparison/results/regressionComparison.columns.title
@@ -72059,6 +73377,10 @@ msgstr ""
 #: effectsize/options/small_effect_threshold.title
 #: effectsize/results/results/clinicalSignificance.columns.title
 msgid "Small Effect Threshold"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Small group sizes detected ({groups}). Chi-square tests require minimum 5 observations per group for reliable results."
 msgstr ""
 
 #: eurostatmap/options/geo_level/nuts3.title
@@ -72303,6 +73625,10 @@ msgstr ""
 msgid "Solid"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Some categories have very few observations. Consider combining categories or collecting more data."
+msgstr ""
+
 #: advancedbarplot/options/sort_bars.title
 msgid "Sort Bars"
 msgstr ""
@@ -72343,11 +73669,11 @@ msgstr ""
 msgid "Sort By Variable"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories.title
+#: jjsegmentedtotalbar/options/sort_categories.title
 msgid "Sort Categories"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories.description.jamovi
+#: jjsegmentedtotalbar/options/sort_categories.description.jamovi
 msgid "Sort categories by different criteria."
 msgstr ""
 
@@ -73252,8 +74578,11 @@ msgstr ""
 msgid "Split by"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "split by"
+msgstr ""
+
 #: jjbarstats/options/grvar.title
-#: jjbarstats/ui[0][2].label
 #: jjbetweenstats/options/grvar.title
 #: jjbetweenstats/ui[0][2].label
 #: jjcorrmat/options/grvar.title
@@ -73263,7 +74592,7 @@ msgstr ""
 #: jjhistostats/options/grvar.title
 #: jjhistostats/ui[0][1].label
 #: jjpiestats/options/grvar.title
-#: jjpiestats/ui[0][2].label
+#: jjpiestats/ui[1][2].label
 #: jjradarplot/options/splitBy.title
 #: jjradarplot/ui[0][2].label
 #: jjscatterstats/options/grvar.title
@@ -73620,6 +74949,10 @@ msgstr ""
 
 #: stagemigration/options/clinicalUtilityThresholds/standard.title
 msgid "Standard (10-50%)"
+msgstr ""
+
+#: agepyramid/options/color_palette/standard.title
+msgid "Standard (Gender Traditional)"
 msgstr ""
 
 #: enhancedfactorvariable/options/outputFormat/standard.title
@@ -74124,6 +75457,7 @@ msgstr ""
 #: jcorrelation/results/summary.columns.title
 #: jforester/results/summary_statistics.columns.title
 #: jggstats/results/modeltab.columns.title
+#: jjridges/results/tests.columns.title
 #: jpps/results/summary_stats.columns.title
 #: linechart/results/summary.columns.title
 #: lollipop/results/summary.columns.title
@@ -74174,12 +75508,13 @@ msgstr ""
 #: bbcplots/results/statistical_results.title
 #: biomarkerresponse/ui[4].label
 #: haralicktexture/ui[1][1].label
-#: jjbarstats/ui[1].label
+#: jjbarstats/ui[2].label
 #: jjbetweenstats/ui[1].label
 #: jjcorrmat/ui[1].label
 #: jjdotplotstats/ui[1].label
 #: jjhistostats/ui[1][1].label
-#: jjpiestats/ui[1].label
+#: jjpiestats/ui[2].label
+#: jjridges/ui[3].label
 #: jjscatterstats/ui[1].label
 #: jjwithinstats/ui[1].label
 #: raincloud/ui[5].label
@@ -74188,9 +75523,17 @@ msgstr ""
 msgid "Statistical Analysis"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "statistical analysis"
+msgstr ""
+
 #: economistplots/results/statistical_results.title
 #: grafify/results/statistical_analysis.title
 msgid "Statistical Analysis Results"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Statistical analysis will be performed based on your data characteristics."
 msgstr ""
 
 #: statsplot2/options/distribution.title
@@ -74205,6 +75548,12 @@ msgstr ""
 #: R/linechart.b.R
 #: linechart/results/assumptions.title
 msgid "Statistical Assumptions & Guidelines"
+msgstr ""
+
+#: R/jjpiestats.b.R
+#: jjbarstats/results/assumptions.title
+#: jjpiestats/results/assumptions.title
+msgid "Statistical Assumptions & Warnings"
 msgstr ""
 
 #: adaptivetrialdesign/results/dmbRecommendations.columns.title
@@ -74340,8 +75689,14 @@ msgstr ""
 msgid "Statistical Justification"
 msgstr ""
 
+#: R/jjpiestats.b.R
 #: grafify/options/stat_method.title
+#: jjbarstats/ui[2][1].label
 msgid "Statistical Method"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Statistical method"
 msgstr ""
 
 #: jointmodeling/options/estimation_method.description.ui
@@ -74350,6 +75705,10 @@ msgstr ""
 
 #: grafify/options/stat_method.description
 msgid "Statistical method to apply. Results will be displayed as text annotations or in separate output sections."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Statistical method:"
 msgstr ""
 
 #: advancedtrials/results/interim_monitoring_guidelines.columns.title
@@ -74430,6 +75789,10 @@ msgstr ""
 #: surveysurvival/ui[3][1].label
 #: timeupdatesurvival/ui[1][2].label
 msgid "Statistical Options"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Statistical overlays with p-values and effect sizes"
 msgstr ""
 
 #: advancedanova/ui[1][4][0].label
@@ -74535,9 +75898,14 @@ msgstr ""
 msgid "Statistical Significance Testing"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Statistical significance was set at p < 0.05. All analyses were performed using jamovi statistical software."
+msgstr ""
+
 #: advancedbarplot/options/stat_type.title
 #: gtsummary/results/stats_summary.title
 #: jextractggstats/results/statistical_summary.title
+#: jjridges/results/statistics.title
 #: stagemigration/results/statisticalSummary.title
 msgid "Statistical Summary"
 msgstr ""
@@ -74559,12 +75927,18 @@ msgstr ""
 #: economistplots/options/stat_method.title
 #: enhancedroc/results/results/statisticalSummary.columns.title
 #: jextractggstats/options/statistical_test.title
+#: jjridges/options/test_type.title
+#: jjridges/ui[3][0]/test_type.label
 #: labcontrolcharts/results/shiftDetection.columns.title
 #: poweranalysis/options/test_type.title
 #: poweranalysis/results/power_summary.columns.title
 #: powercomprisk/options/testType.title
 #: qualityoflife/options/statistical_test.title
 msgid "Statistical Test"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Statistical test compares measurements across time points."
 msgstr ""
 
 #: effectsize/options/testDetails.title
@@ -74597,6 +75971,7 @@ msgstr ""
 #: enhancedtables/options/test_type.title
 #: jjdotplotstats/options/typestatistics.title
 #: jjscatterstats/options/typestatistics.title
+#: jjwithinstats/options/typestatistics.title
 msgid "Statistical Test Type"
 msgstr ""
 
@@ -74616,6 +75991,7 @@ msgstr ""
 #: exacttests/results/tests.title
 #: factoranalysis/ui[3][0][0][0].label
 #: jiwillsurvive/results/survivalStats.title
+#: jjridges/results/tests.title
 #: mixedcox/ui[4][0].label
 #: outbreakanalysis/options/statistical_tests.title
 #: simonmakuch/ui[6][0][0].label
@@ -74645,6 +76021,10 @@ msgstr ""
 #: package/analyses/desctools.menuSubtitle
 #: desctools/options.menuSubtitle
 msgid "Statistical Tests from DescTools Package"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Statistical Tests:"
 msgstr ""
 
 #: qualitycontrol/results/trendAnalysis.title
@@ -75256,12 +76636,21 @@ msgstr ""
 msgid "STROBE Compliance"
 msgstr ""
 
+#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "strong"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Strong correlations (|r| ≥ 0.5): %d"
+msgstr ""
+
 #: spikeslabpriors/options/heredity_constraint/strong.title
 msgid "Strong Heredity"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Strong partial correlations suggest a direct relationship that persists even after controlling for other factors"
 msgstr ""
 
 #: continuousmarkov/options/model_structure.description.ui
@@ -75565,6 +76954,10 @@ msgstr ""
 msgid "Subgroup Analysis"
 msgstr ""
 
+#: jjbarstats/ui[1][2].label
+msgid "Subgroup Analysis (Optional)"
+msgstr ""
+
 #: package/analyses/subgroupforest.title
 #: package/analyses/subgroupforest.menuTitle
 #: subgroupforest/options.title
@@ -75736,7 +77129,6 @@ msgid "Subtitle Data"
 msgstr ""
 
 #: jcomplexupset/options/plot_subtitle.description
-#: jggridges/options/plot_subtitle.description
 msgid "Subtitle for the plot"
 msgstr ""
 
@@ -76016,7 +77408,6 @@ msgstr ""
 #: grafify/results/summary_stats.title
 #: jcorrelation/results/summary.title
 #: jforester/results/summary_statistics.title
-#: jggridges/results/statistics.title
 #: jvisr/results/summary.title
 #: missingdataexplorer/options/summary_statistics.title
 #: raincloud/results/statistics.title
@@ -77637,6 +79028,10 @@ msgstr ""
 msgid "Technical Details"
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Technical Interpretation"
+msgstr ""
+
 #: ihccluster/results/technicalNotes.title
 #: landmarkanalysis/results/technicalNotes.title
 msgid "Technical Notes"
@@ -77851,6 +79246,7 @@ msgstr ""
 #: biomarkerresponse/results/statisticalTests.columns.title
 #: cohenskappa/results/marginalTest.columns.title
 #: continuousrelationship/results/linearityTest.columns.title
+#: contTables/results/trendTest.columns.title
 #: cotest/results/testParamsTable.columns.title
 #: crosstable/results/pairwiseTable.columns.title
 #: curemodels/results/goodnessOfFit.columns.title
@@ -78266,11 +79662,10 @@ msgstr ""
 #: friedmantest/options/method.title
 #: gtsummary/options/testMethod.title
 #: idi/options/test_method.title
-#: jjbarstats/ui[1][1].label
 #: jjbetweenstats/ui[1][0].label
 #: jjdotplotstats/ui[1][0].label
-#: jjpiestats/ui[1][0].label
-#: jjwithinstats/ui[1][0].label
+#: jjpiestats/ui[2][1].label
+#: jjwithinstats/ui[1][1].label
 #: mediansurvival/options/test_method.title
 #: mediansurvival/ui[1][0][0]/test_method.label
 #: pagetrendtest/options/method.title
@@ -78514,6 +79909,7 @@ msgid "Test Time-Varying Effects"
 msgstr ""
 
 #: conditionalinference/options/testtype.title
+#: jjbarstats/ui[2][1][0]/typestatistics.label
 #: rmst/results/comparisonTable.columns.title
 #: survivalpower/options/sided.title
 msgid "Test Type"
@@ -78527,6 +79923,10 @@ msgstr ""
 #: decision/options/newtest.title
 #: decision/ui[0][1].label
 msgid "Test Under Evaluation"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Test Used:"
 msgstr ""
 
 #: effectsize/options/testValue.title
@@ -78770,7 +80170,7 @@ msgstr ""
 msgid "The dataset for scatter plot visualization."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/data.description.jamovi
+#: jjsegmentedtotalbar/options/data.description.jamovi
 msgid "The dataset for segmented total bar chart visualization."
 msgstr ""
 
@@ -78806,6 +80206,10 @@ msgstr ""
 
 #: eurostatmap/options/geo_level.description.jamovi
 msgid "The geographic level for mapping."
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "The ggridges package is required but not installed."
 msgstr ""
 
 #: decision/options/gold.description.ui
@@ -78931,6 +80335,10 @@ msgstr ""
 msgid "The ratio of control group size to treatment group size. 1 indicates equal allocation. Values > 1 mean more subjects in the control group; values < 1 mean more in the treatment group."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "The ridge plot displays the distribution of"
+msgstr ""
+
 #: ppv/options/alpha.description
 msgid "The significance level (Type I error rate) used in the studies. Standard value is 0.05, but may be lower for multiple testing situations."
 msgstr ""
@@ -79012,16 +80420,20 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
+#: jjridges/ui[5].label
+msgid "Theme & Labels"
+msgstr ""
+
 #: multiclassdiagnostics/options/plotTheme.description
 msgid "Theme for plots"
 msgstr ""
 
 #: advancedbarplot/options/theme_style.title
 #: jcomplexupset/options/theme_style.title
-#: jggridges/options/theme_style.title
 #: jggsankeyfier/options/theme_style.title
 #: jggstats/options/theme_style.title
-#: jjridgestats/options/themeChoice.title
+#: jjridges/options/theme_style.title
+#: jjridges/ui[5][0]/theme_style.label
 #: jvisr/options/theme_style.title
 msgid "Theme Style"
 msgstr ""
@@ -79091,6 +80503,26 @@ msgstr ""
 msgid "This analysis compared"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "This analysis compares %d measurements from the same subjects. Useful for: biomarker tracking, treatment response monitoring, disease progression assessment."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "This analysis is optimized for biomarker distribution analysis with robust statistical methods."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "This analysis is optimized for diagnostic test evaluation, focusing on sensitivity, specificity, and predictive values."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "This analysis is optimized for treatment response comparison across multiple treatment groups."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "This analysis uses custom settings for pie chart generation with statistical testing."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "This function creates comprehensive line charts for time series and trend analysis in clinical research."
 msgstr ""
@@ -79104,6 +80536,10 @@ msgstr ""
 #: tableone/options.description.main
 #: tableone2/options.description.main
 msgid "This function generates a \"Table One\", a descriptive summary table frequently used in  clinicopathological research manuscripts. It supports multiple output styles for flexible formatting."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "This function uses ggplot2 and ggstatsplot packages. See documentations <a href = \'https://indrajeetpatil.github.io/ggstatsplot/reference/ggpiestats.html\' target=\'_blank\'>ggpiestats</a> and <a href = \'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggpiestats.html\' target=\'_blank\'>grouped_ggpiestats</a>."
 msgstr ""
 
 #: package/analyses/summarydata.description
@@ -79143,6 +80579,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "This suggests a weak association with limited clinical significance."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "This tool will help you generate Pie Charts with statistical analysis."
 msgstr ""
 
 #: screeningcalculator/results/repeatTest3Table.title
@@ -80600,11 +82040,13 @@ msgstr ""
 msgid "TinyTable - Zero Dependencies"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Tip:"
+msgstr ""
+
 #: alluvial/options/mytitle.title
 #: alluvial2/options/mytitle.title
 #: jjbetweenstats/options/mytitle.title
-#: jjridgestats/options/mytitle.title
-#: jjridgestats/ui[6][0][0]/mytitle.label
 #: jjriverplot/options/mytitle.title
 #: jjscatterstats/options/mytitle.title
 #: jjtreemap/ui[2][0][0]/title.label
@@ -80619,7 +82061,6 @@ msgid "Title for the nomogram visualization"
 msgstr ""
 
 #: jcomplexupset/options/plot_title.description
-#: jggridges/options/plot_title.description
 msgid "Title for the plot"
 msgstr ""
 
@@ -80670,17 +82111,12 @@ msgstr ""
 #: flexcomprisk/results/todo.title
 #: flowchart/results/todo.title
 #: groupsummary/results/todo.title
-#: jjbarstats/results/todo.title
 #: jjbetweenstats/results/todo.title
-#: jjcorrmat/results/todo.title
 #: jjdotplotstats/results/todo.title
 #: jjhistostats/results/todo.title
-#: jjpiestats/results/todo.title
-#: jjridgestats/results/todo.title
 #: jjriverplot/results/todo.title
 #: jjscatterstats/results/todo.title
 #: jjtreemap/results/todo.title
-#: jjwithinstats/results/todo.title
 #: jviolin/results/todo.title
 #: jwaffle/results/todo.title
 #: lassocox/results/todo.title
@@ -80777,10 +82213,11 @@ msgstr ""
 
 #: advancedbarplot/options/legend_position/top.title
 #: ggprism/options/legend_position/top.title
-#: ggsegmentedtotalbar/options/legend_position/top.title
+#: jjsegmentedtotalbar/options/legend_position/top.title
 #: grafify/options/legend_position/top.title
 #: jiwillsurvive/options/legend_position/top.title
 #: jjradarplot/options/legendPosition/top.title
+#: jjridges/options/legend_position/top.title
 #: jjtreemap/options/labelAlignV/top.title
 #: jvisr/options/legend_position/top.title
 msgid "Top"
@@ -80906,6 +82343,10 @@ msgstr ""
 msgid "Total Cases"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Total correlations: %d"
+msgstr ""
+
 #: venn/results/summary.columns.title
 msgid "Total Count"
 msgstr ""
@@ -80955,9 +82396,13 @@ msgstr ""
 msgid "Total Nuclei"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 #: stagemigration/results/frailtyModelsOverview.columns.title
 msgid "Total Observations"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "total observations across all groups"
 msgstr ""
 
 #: bayesiannetworkma/results/networkCharacteristics.columns.title
@@ -81446,7 +82891,6 @@ msgid "Transitions"
 msgstr ""
 
 #: coxdiagnostics/options/alpha_level.title
-#: jggridges/options/alpha.title
 #: tidyplots/ui[7][1].label
 msgid "Transparency"
 msgstr ""
@@ -81457,10 +82901,6 @@ msgstr ""
 
 #: jscattermore/options/alpha.title
 msgid "Transparency (Alpha)"
-msgstr ""
-
-#: jggridges/options/point_alpha.description
-msgid "Transparency for jittered points"
 msgstr ""
 
 #: economistplots/options/alpha_level.title
@@ -81485,10 +82925,6 @@ msgstr ""
 
 #: jviolin/options/point_alpha.description
 msgid "Transparency level for points"
-msgstr ""
-
-#: jggridges/options/alpha.description
-msgid "Transparency level for ridges"
 msgstr ""
 
 #: jviolin/options/violin_alpha.description
@@ -81793,6 +83229,15 @@ msgstr ""
 msgid "Treatment Response"
 msgstr ""
 
+#: jjbarstats/options/clinicalpreset/treatment.title
+#: jjpiestats/options/clinicalpreset/treatment.title
+msgid "Treatment Response (multiple groups)"
+msgstr ""
+
+#: jjwithinstats/options/clinicalpreset/treatment.title
+msgid "Treatment Response (Parametric)"
+msgstr ""
+
 #: package/analyses/waterfall.title
 #: package/analyses/waterfall.menuTitle
 #: waterfall/options.title
@@ -82020,6 +83465,10 @@ msgstr ""
 msgid "Trend Direction"
 msgstr ""
 
+#: contTables/options/trendDirection.title
+msgid "Trend direction"
+msgstr ""
+
 #: linechart/options/trendline.title
 msgid "Trend Line"
 msgstr ""
@@ -82048,6 +83497,7 @@ msgstr ""
 msgid "Trend Status"
 msgstr ""
 
+#: contTables/results/trendTest.title
 #: qualitycontrol/results/trendAnalysis.columns.title
 msgid "Trend Test"
 msgstr ""
@@ -82399,6 +83849,7 @@ msgstr ""
 msgid "Two-Sample t-test (Treatment vs Control)"
 msgstr ""
 
+#: contTables/options/trendDirection/twosided.title
 #: exacttests/options/alternative/two.sided.title
 #: jcorrelation/options/alternative/two.sided.title
 #: survivalpower/options/sided/2.title
@@ -82640,10 +84091,6 @@ msgstr ""
 msgid "Type of regression model to fit: - Linear: For continuous outcomes - Logistic: For binary outcomes (odds ratios) - Cox: For survival analysis (hazard ratios) - Poisson: For count outcomes (rate ratios)"
 msgstr ""
 
-#: jggridges/options/plot_type.description
-msgid "Type of ridge plot to create"
-msgstr ""
-
 #: enhancedroc/options/analysisType.description
 msgid "Type of ROC analysis to perform"
 msgstr ""
@@ -82669,7 +84116,6 @@ msgstr ""
 #: jjcorrmat/options/typestatistics.title
 #: jjhistostats/options/typestatistics.title
 #: jjpiestats/options/typestatistics.title
-#: jjwithinstats/options/typestatistics.title
 msgid "Type of Statistic"
 msgstr ""
 
@@ -82742,6 +84188,10 @@ msgstr ""
 msgid "Unable to assess linearity automatically."
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Unable to interpret correlation"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Unable to test normality of residuals."
 msgstr ""
@@ -82762,10 +84212,6 @@ msgstr ""
 #: jjbetweenstats/options/effsizetype/unbiased.title
 #: jjwithinstats/options/effsizetype/unbiased.title
 msgid "unbiased"
-msgstr ""
-
-#: jggridges/options/bandwidth/ucv.title
-msgid "Unbiased Cross-Validation"
 msgstr ""
 
 #: package/analyses/conditionalinference.menuSubtitle
@@ -83369,6 +84815,10 @@ msgstr ""
 msgid "Unknown/Mixed"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "Unlike zero-order (regular) correlations, partial correlations remove the influence of confounding variables"
+msgstr ""
+
 #: treatmenteffects/results/matching_summary.columns.title
 msgid "Unmatched Control"
 msgstr ""
@@ -83810,6 +85260,10 @@ msgstr ""
 msgid "Use Custom Y-axis Label"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Use Data > Transform to create categorical groups from continuous variables."
+msgstr ""
+
 #: enhancedcrosstable/options/use_labels.description.jamovi
 msgid "Use descriptive variable labels instead of variable names."
 msgstr ""
@@ -83874,6 +85328,11 @@ msgstr ""
 
 #: jjriverplot/options/originaltheme.title
 msgid "Use ggStatsPlot Theme"
+msgstr ""
+
+#: jjbarstats/ui[3][0][0]/originaltheme.label
+#: jjpiestats/ui[3][0][0]/originaltheme.label
+msgid "Use ggstatsplot Theme"
 msgstr ""
 
 #: deeplearningprediction/options/gpu_acceleration.title
@@ -84033,6 +85492,10 @@ msgstr ""
 msgid "Use random forest models to compare staging systems through  non-parametric ensemble methods. Provides robust staging comparison  without proportional hazards assumptions."
 msgstr ""
 
+#: R/jjridges.b.R
+msgid "Use right-click → Save Image As for quick export"
+msgstr ""
+
 #: coefplot/options/robust_se.description
 msgid "Use robust (sandwich) standard errors for confidence intervals. Recommended when there are concerns about heteroscedasticity."
 msgstr ""
@@ -84110,6 +85573,10 @@ msgstr ""
 
 #: multisurvival/options/use_stratify.title
 msgid "Use Variable Stratification"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Use when you want to visualize proportions of categorical outcomes and test for significant differences between groups. Ideal for diagnostic test results, treatment responses, or biomarker categories."
 msgstr ""
 
 #: differentialdiagnosis/options/prevalence_source/user_defined.title
@@ -84492,7 +85959,7 @@ msgstr ""
 #: friedmantest/results/dataInfo.columns.title
 #: friedmantest/results/effectSize.columns.title
 #: ggoncoplot/results/plotInfo.columns.title
-#: ggsegmentedtotalbar/results/detailed_stats.columns.title
+#: jjsegmentedtotalbar/results/detailed_stats.columns.title
 #: gradientboosting/results/modelSummary.columns.title
 #: grouplasso/results/modelPerformance.columns.title
 #: hiddenmarkov/results/goodnessOfFit.columns.title
@@ -84694,13 +86161,17 @@ msgstr ""
 msgid "Value Variable"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/y_var.title
+#: jjsegmentedtotalbar/options/y_var.title
 msgid "Value Variable (Y-axis)"
 msgstr ""
 
 #: alluvial/options/fill/values.title
 #: alluvial2/options/fill/values.title
 msgid "Values"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Values closer to zero indicate that the relationship is largely explained by other variables"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -84788,8 +86259,6 @@ msgstr ""
 #: highdimcox/results/stabilityResults.columns.title
 #: ihccluster/results/clinicalComparison.columns.title
 #: jforestmodel/results/coefficients_table.columns.title
-#: jjridgestats/options/dep.title
-#: jjridgestats/ui[0][0].label
 #: jsummarytools/results/data_summary_table.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
 #: lassocox/results/coefficients.columns.title
@@ -84852,8 +86321,28 @@ msgstr ""
 msgid "Variable"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Variable '{name}' cannot be converted to numeric values"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Variable '{name}' not found in data"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid "Variable \"{var}\" not found in data. Available variables: \"{available_vars}\""
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Variable \"%s\" not found in data"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Variable \'{var}\' appears to be continuous ({count} unique values). Pie charts are for categorical data. Consider converting to groups first."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Variable \'{var}\' has insufficient variation (only {count} level). Need at least 2 categories for meaningful pie chart."
 msgstr ""
 
 #: enhancedcorrelation/results/text.columns.title
@@ -84991,10 +86480,6 @@ msgstr ""
 msgid "Variable for blocking or pairing observations. Used in randomized block designs or before-after comparisons."
 msgstr ""
 
-#: jggridges/options/color_var.description
-msgid "Variable for color mapping"
-msgstr ""
-
 #: parallelplot/options/group.description
 msgid "Variable for coloring and grouping lines"
 msgstr ""
@@ -85005,10 +86490,6 @@ msgstr ""
 
 #: jggstats/options/facet_var.description
 msgid "Variable for creating plot facets"
-msgstr ""
-
-#: jggridges/options/facet_var.description
-msgid "Variable for facetting plots"
 msgstr ""
 
 #: jggsankeyfier/options/grouping_var.description
@@ -85395,6 +86876,10 @@ msgstr ""
 msgid "Variable Weights (optional)"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Variable:"
+msgstr ""
+
 #: clinicaldataintegration/results/consistencyChecks.columns.title
 msgid "Variable(s)"
 msgstr ""
@@ -85463,6 +86948,10 @@ msgstr ""
 #: crosstablepivot/options/vars.title
 #: crosstablepivot/ui[0][1]/variableSupplier[0].label
 msgid "Variables (Rows)"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Variables analyzed: %d"
 msgstr ""
 
 #: decisiongraph/options/costs.description.ui
@@ -85572,6 +87061,7 @@ msgstr ""
 msgid "Variables Included"
 msgstr ""
 
+#: R/jjpiestats.b.R
 #: R/linechart.b.R
 #: R/lollipop.b.R
 #: R/riverplot.b.R
@@ -85883,6 +87373,10 @@ msgstr ""
 msgid "Verification Status"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Verify sufficient sample sizes in each category (≥5 recommended)"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Verify that grouping variables have multiple levels"
 msgstr ""
@@ -85895,7 +87389,7 @@ msgstr ""
 #: alluvial/options/orient/vert.title
 #: alluvial2/options/orient/vert.title
 #: economistplots/options/plot_orientation/vertical.title
-#: ggsegmentedtotalbar/options/orientation/vertical.title
+#: jjsegmentedtotalbar/options/orientation/vertical.title
 #: jjtreemap/ui[1][2][0][5]/labelAlignV.label
 #: lollipop/options/orientation/vertical.title
 #: raincloud/options/orientation/vertical.title
@@ -85939,6 +87433,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "very strong"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "very weak"
 msgstr ""
 
 #: grafify/options/color_palette/vibrant.title
@@ -86005,7 +87503,7 @@ msgstr ""
 msgid "Violin Plots with Distribution"
 msgstr ""
 
-#: jggridges/options/plot_type/violin_ridges.title
+#: jjridges/options/plot_type/violin_ridges.title
 msgid "Violin Ridges"
 msgstr ""
 
@@ -86049,15 +87547,14 @@ msgstr ""
 #: eurostatmap/options/color_palette/viridis.title
 #: explainableai/options/colormap/viridis.title
 #: ggflowchart/options/node_fill_palette/viridis.title
-#: ggsegmentedtotalbar/options/color_palette/viridis.title
+#: jjsegmentedtotalbar/options/color_palette/viridis.title
 #: hullplot/options/color_palette/viridis.title
 #: jcomplexupset/options/color_palette/viridis.title
 #: jggheatmap/options/color_scheme/viridis.title
-#: jggridges/options/color_palette/viridis.title
 #: jggsankeyfier/options/color_palette/viridis.title
 #: jggstats/options/color_palette/viridis.title
 #: jiwillsurvive/options/color_palette/viridis.title
-#: jjridgestats/options/colorscheme/viridis.title
+#: jjridges/options/color_palette/viridis.title
 #: jpps/options/color_scheme/viridis.title
 #: jscattermore/options/color_palette/viridis.title
 #: jsjplot/options/colors/viridis.title
@@ -86090,6 +87587,7 @@ msgid "Visual Analysis Type"
 msgstr ""
 
 #: advancedraincloud/ui[7].label
+#: jjridges/ui[4].label
 #: linechart/ui[3].label
 #: lollipop/ui[2].label
 msgid "Visual Appearance"
@@ -86214,6 +87712,10 @@ msgstr ""
 
 #: hierarchicalbayes/options/shrinkage_plots.description.ui
 msgid "Visualize shrinkage of study estimates"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Visualize treatment response patterns across disease stages"
 msgstr ""
 
 #: patientdashboard/results/vitalsTable.columns.title
@@ -86370,6 +87872,7 @@ msgstr ""
 msgid "Warning/Recommendation"
 msgstr ""
 
+#: R/jjpiestats.b.R
 #: bayesiandiagnostic/results/convergenceDiagnostics.columns.title
 #: curemodels/results/warnings.title
 #: partialcorrelation/results/diagnostics.columns.title
@@ -86394,12 +87897,24 @@ msgstr ""
 msgid "Watershed Transform"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "We analyzed the distribution of {outcome} using descriptive statistics."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "We compared {outcome} distributions across {groups} using {method}."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "weak"
 msgstr ""
 
 #: spikeslabpriors/options/heredity_constraint/weak.title
 msgid "Weak Heredity"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "weak-to-moderate"
 msgstr ""
 
 #: adaptivetrialdesign/options/prior_type/weakly_informative.title
@@ -86758,6 +88273,10 @@ msgstr ""
 msgid "Welcome message and instructions"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Welcome to ClinicoPath"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Welcome to Line Chart Analysis"
 msgstr ""
@@ -86772,6 +88291,10 @@ msgstr ""
 
 #: simonmakuch/results/welcomeMessage.title
 msgid "Welcome to Simon-Makuch Analysis"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Welcome to the Advanced Ridge Plot analysis!"
 msgstr ""
 
 #: sigmametrics/options/sigma_calculation/westgard.title
@@ -86803,6 +88326,14 @@ msgstr ""
 msgid "Westgard Rules to Apply"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "What this analysis does"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "What you\'ll get"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "When displayed, confidence intervals show the uncertainty around trend lines. Wider intervals indicate greater uncertainty."
 msgstr ""
@@ -86811,13 +88342,21 @@ msgstr ""
 msgid "When sorting by magnitude or alphabetically, use decreasing order."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "When to use"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "When to Use Ridge Plots:"
+msgstr ""
+
 #: advancedbarplot/options/legend_position.description.jamovi
-#: ggsegmentedtotalbar/options/legend_position.description.jamovi
+#: jjsegmentedtotalbar/options/legend_position.description.jamovi
 msgid "Where to place the legend."
 msgstr ""
 
 #: advancedbarplot/options/orientation.description.jamovi
-#: ggsegmentedtotalbar/options/orientation.description.jamovi
+#: jjsegmentedtotalbar/options/orientation.description.jamovi
 msgid "Whether bars should be vertical or horizontal."
 msgstr ""
 
@@ -86833,7 +88372,7 @@ msgstr ""
 msgid "Which statistical components to extract"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color/white.title
+#: jjsegmentedtotalbar/options/outline_color/white.title
 msgid "White"
 msgstr ""
 
@@ -86863,6 +88402,14 @@ msgstr ""
 
 #: plscox/options/pls_algorithm/widekernelpls.title
 msgid "Wide Kernel PLS"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Wide ridges = high variability; narrow ridges = consistent values"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Wider ridges = more variability; Narrow ridges = consistent values"
 msgstr ""
 
 #: jjstreamgraph/options/width.title
@@ -87064,6 +88611,10 @@ msgstr ""
 msgid "Wisconsin Breast Cancer Database dataset, obtained from {mlbench}."
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "With fewer than 3 variables, regular (zero-order) correlations are computed instead"
+msgstr ""
+
 #: decisionpanel/results/incrementalValue.columns.title
 msgid "With Others"
 msgstr ""
@@ -87091,6 +88642,10 @@ msgstr ""
 
 #: sparsegrouplasso/results/groupStructure.columns.title
 msgid "Within-Group Sparsity"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Within-subjects comparison"
 msgstr ""
 
 #: friedmantest/options/within.title
@@ -87190,7 +88745,8 @@ msgstr ""
 msgid "X Axis"
 msgstr ""
 
-#: jggridges/options/x_label.title
+#: jjridges/options/x_label.title
+#: jjridges/ui[5][2]/x_label.label
 #: tidyplots/options/xLabel.title
 #: tidyplots/ui[8][1].label
 msgid "X Axis Label"
@@ -87227,9 +88783,13 @@ msgstr ""
 msgid "X Variable (Categories)"
 msgstr ""
 
-#: jggridges/options/x_var.title
-#: jggridges/ui[0][0].label
-msgid "X Variable (Continuous)"
+#: jjridges/options/x_var.title
+#: jjridges/ui[0][0].label
+msgid "X Variable (Distribution)"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "X Variable:"
 msgstr ""
 
 #: jjscatterstats/ui[0][0].label
@@ -87287,7 +88847,7 @@ msgstr ""
 #: advancedbarplot/options/x_title.title
 #: bbcplots/options/x_axis_title.title
 #: economistplots/options/x_title.title
-#: ggsegmentedtotalbar/options/x_title.title
+#: jjsegmentedtotalbar/options/x_title.title
 #: riverplot/ui[4][1]/xtitle.label
 msgid "X-axis Title"
 msgstr ""
@@ -87332,8 +88892,6 @@ msgid "X-bar and S Charts"
 msgstr ""
 
 #: jjbetweenstats/options/xtitle.title
-#: jjridgestats/options/xtitle.title
-#: jjridgestats/ui[6][0][0]/xtitle.label
 #: jjriverplot/options/xtitle.title
 #: jjscatterstats/options/xtitle.title
 #: jjwithinstats/options/xtitle.title
@@ -87353,7 +88911,8 @@ msgstr ""
 msgid "Y Axis"
 msgstr ""
 
-#: jggridges/options/y_label.title
+#: jjridges/options/y_label.title
+#: jjridges/ui[5][2]/y_label.label
 #: tidyplots/options/yLabel.title
 #: tidyplots/ui[8][2].label
 msgid "Y Axis Label"
@@ -87401,14 +88960,18 @@ msgstr ""
 msgid "Y Variable"
 msgstr ""
 
-#: jggridges/options/y_var.title
-#: jggridges/ui[0][1].label
-msgid "Y Variable (Grouping)"
+#: jjridges/options/y_var.title
+#: jjridges/ui[0][1].label
+msgid "Y Variable (Groups)"
 msgstr ""
 
 #: advancedbarplot/options/y_var.title
 #: advancedbarplot/ui[0][1].label
 msgid "Y Variable (Values)"
+msgstr ""
+
+#: R/jjridges.b.R
+msgid "Y Variable:"
 msgstr ""
 
 #: jjscatterstats/ui[0][1].label
@@ -87469,7 +89032,7 @@ msgstr ""
 #: advancedbarplot/options/y_title.title
 #: bbcplots/options/y_axis_title.title
 #: economistplots/options/y_title.title
-#: ggsegmentedtotalbar/options/y_title.title
+#: jjsegmentedtotalbar/options/y_title.title
 #: riverplot/ui[4][1]/ytitle.label
 msgid "Y-axis Title"
 msgstr ""
@@ -87507,8 +89070,6 @@ msgid "Y-axis variable must be numeric (continuous variable)."
 msgstr ""
 
 #: jjbetweenstats/options/ytitle.title
-#: jjridgestats/options/ytitle.title
-#: jjridgestats/ui[6][0][0]/ytitle.label
 #: jjriverplot/options/ytitle.title
 #: jjscatterstats/options/ytitle.title
 #: jjwithinstats/options/ytitle.title
@@ -87719,6 +89280,7 @@ msgid "z"
 msgstr ""
 
 #: causespecifichazards/results/coefficients.columns.title
+#: contTables/results/trendTest.columns.title
 #: parametricfrailty/results/coefficients.columns.title
 #: rmst/results/comparisonTable.columns.title
 #: simonmakuch/results/timeDependentCox.columns.title
@@ -87821,6 +89383,10 @@ msgstr ""
 
 #: hierarchicalbayes/options/model_type/zero_inflated.title
 msgid "Zero-Inflated Model"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Zero-order"
 msgstr ""
 
 #: partialcorrelation/results/zeroOrder.title

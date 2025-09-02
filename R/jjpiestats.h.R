@@ -21,7 +21,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bfmessage = TRUE,
             messages = FALSE,
             clinicalpreset = "custom",
-            showexplanations = FALSE,
+            showexplanations = TRUE,
             resultssubtitle = FALSE, ...) {
 
             super$initialize(
@@ -129,7 +129,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showexplanations <- jmvcore::OptionBool$new(
                 "showexplanations",
                 showexplanations,
-                default=FALSE)
+                default=TRUE)
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
@@ -246,8 +246,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
-                title="Statistical Assumptions & Warnings",
-                visible="(dep && group)"))
+                title="Statistical Assumptions & Warnings"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -425,7 +424,7 @@ jjpiestats <- function(
     bfmessage = TRUE,
     messages = FALSE,
     clinicalpreset = "custom",
-    showexplanations = FALSE,
+    showexplanations = TRUE,
     resultssubtitle = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

@@ -127,6 +127,12 @@ children:
                         name: gamma
                       - type: CheckBox
                         name: taub
+                      - type: CheckBox
+                        name: trendTest
+                        children:
+                          - type: ComboBox
+                            name: trendDirection
+                            enable: (trendTest)
       - type: CollapseBox
         label: Cells
         stretchFactor: 1

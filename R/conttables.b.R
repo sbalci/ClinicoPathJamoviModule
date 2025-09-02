@@ -18,6 +18,7 @@ contTablesClass <- R6::R6Class(
             odds  <- self$results$odds
             gamma <- self$results$gamma
             taub  <- self$results$taub
+            trendTest <- self$results$trendTest
 
             data <- private$.cleanData()
 
@@ -30,6 +31,7 @@ contTablesClass <- R6::R6Class(
                 nom$addColumn(index=i, name=layer, type='text', combineBelow=TRUE)
                 gamma$addColumn(index=i, name=layer, type='text', combineBelow=TRUE)
                 taub$addColumn(index=i, name=layer, type='text', combineBelow=TRUE)
+                trendTest$addColumn(index=i, name=layer, type='text', combineBelow=TRUE)
             }
 
             # add the row column, containing the row variable
@@ -240,6 +242,7 @@ contTablesClass <- R6::R6Class(
             odds  <- self$results$odds
             gamma <- self$results$gamma
             taub  <- self$results$taub
+            trendTest <- self$results$trendTest
 
             freqRowNo <- 1
             othRowNo <- 1
@@ -274,6 +277,21 @@ contTablesClass <- R6::R6Class(
 
                         # this can be slow
                         tau <- try(cor.test(v1, v2, method='kendall', conf.level=ciWidth))
+                    }
+
+                    # Cochran-Armitage trend test
+                    trend <- NULL
+                    if (self$options$trendTest) {
+                        if (requireNamespace("DescTools", quietly = TRUE)) {
+                            alternative <- switch(self$options$trendDirection,
+                                                "twosided" = "two.sided",
+                                                "increasing" = "greater",
+                                                "decreasing" = "less")
+                            trend <- try(DescTools::CochranArmitageTest(
+                                x = mat, 
+                                alternative = alternative
+                            ))
+                        }
                     }
 
                     lor <- NULL
@@ -424,6 +442,21 @@ contTablesClass <- R6::R6Class(
                             t=unname(tau$statistic),
                             p=tau$p.value)
                     taub$setRow(rowNo=othRowNo, values=values)
+                }
+
+                # Populate trend test results
+                if (self$options$trendTest) {
+                    trendResult <- self$results$trendTest
+                    if (base::inherits(trend, 'try-error') || is.null(trend))
+                        values <- list(statistic=NaN, p='')
+                    else
+                        values <- list(
+                            statistic=unname(trend$statistic),
+                            p=trend$p.value)
+                    trendResult$setRow(rowNo=othRowNo, values=values)
+                    
+                    if (base::inherits(trend, 'try-error'))
+                        trendResult$addFootnote(rowNo=othRowNo, 'statistic', 'DescTools package required')
                 }
 
                 if ( ! is.null(lor)) {

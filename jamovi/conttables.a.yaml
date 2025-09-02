@@ -239,6 +239,30 @@ options:
           R: >
             `TRUE` or `FALSE` (default), provide Kendall's tau-b
 
+    - name: trendTest
+      title: Cochran-Armitage trend test
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide Cochran-Armitage test for trend
+            for ordered categorical variables
+
+    - name: trendDirection
+      title: Trend direction
+      type: List
+      options:
+        - name: twosided
+          title: Two-sided
+        - name: increasing
+          title: Increasing
+        - name: decreasing
+          title: Decreasing
+      default: twosided
+      description:
+          R: >
+            Direction of trend test: two-sided (default), increasing, or decreasing
+
     - name: obs
       title: Observed counts
       type: Bool

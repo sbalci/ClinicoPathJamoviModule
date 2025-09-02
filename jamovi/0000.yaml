@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.54
+version: 0.0.31.55
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-01'
+date: '2025-09-02'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1569,7 +1569,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -1698,7 +1698,7 @@ analyses:
   - title: Ridge Plot
     name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization
@@ -1718,7 +1718,7 @@ analyses:
   - title: StreamGraphs
     name: jjstreamgraph
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Time Series Visualization
     menuTitle: StreamGraphs
     description: |
@@ -1728,7 +1728,7 @@ analyses:
   - title: Treemap
     name: jjtreemap
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical
     menuTitle: Treemap
     description: |
@@ -1751,7 +1751,7 @@ analyses:
   - title: River Plots
     name: jjriverplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuTitle: River Plots
     menuSubgroup: Categorical Over Time
     menuSubtitle: Flow and Transition Visualization
@@ -1763,7 +1763,7 @@ analyses:
   - title: River Plots
     name: riverplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots
     menuSubtitle: Temporal Categorical Flow Visualization
@@ -1785,7 +1785,7 @@ analyses:
   - title: Scientific Visualization with Grafify
     name: grafify
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: ClinicoPath Scientific Plots
     menuTitle: Scientific Visualization with Grafify
     menuSubtitle: Easy Graphs & Color-Blind Friendly Palettes
@@ -1839,9 +1839,9 @@ analyses:
     ribbon: analyses
     category: analyses
   - title: Segmented Total Bar Charts
-    name: ggsegmentedtotalbar
+    name: jjsegmentedtotalbar
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuTitle: Segmented Total Bar Charts
     menuSubgroup: ClinicoPath Advanced Plots
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
@@ -1917,7 +1917,7 @@ analyses:
   - title: Sankey & Alluvial Diagrams
     name: jggsankeyfier
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical Over Time
     menuTitle: Sankey & Alluvial Diagrams
     menuSubtitle: Flow Visualization with ggsankeyfier
@@ -1956,7 +1956,7 @@ analyses:
   - title: Complex UpSet Plot Visualization
     name: jcomplexupset
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Set Visualization
     menuTitle: Complex UpSet Plot Visualization
     description: >
@@ -1996,7 +1996,7 @@ analyses:
   - title: Predictive Power Score Analysis
     name: jpps
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: meddicideT2
     menuSubgroup: Correlation & Association
     menuTitle: Predictive Power Score Analysis
     ribbon: analyses
@@ -2028,7 +2028,7 @@ analyses:
   - title: Radar Plot
     name: jjradarplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Multivariate
     menuTitle: Radar Plot
     ribbon: analyses

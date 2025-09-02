@@ -24,9 +24,9 @@
 #' @importFrom rlang sym
 #' @export
 
-ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "ggsegmentedtotalbarClass",
-    inherit = ggsegmentedtotalbarBase,
+jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "jjsegmentedtotalbarClass",
+    inherit = jjsegmentedtotalbarBase,
     private = list(
         
         # Internal data storage
@@ -94,17 +94,55 @@ ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Update composition table
             private$.updateComposition()
             
+            # Update detailed statistics
+            private$.updateDetailedStats()
+            
             # Create interpretation
             private$.createInterpretation()
         },
         
         .processData = function(data, x_var, y_var, fill_var, facet_var) {
             
+            # Validate variables exist in data
+            required_vars <- c(x_var, y_var, fill_var)
+            missing_vars <- setdiff(required_vars, names(data))
+            if (length(missing_vars) > 0) {
+                stop(paste("Missing variables in data:", paste(missing_vars, collapse = ", ")))
+            }
+            
+            # Check for NA values in key variables
+            if (sum(is.na(data[[x_var]])) > 0) {
+                warning(paste("Found", sum(is.na(data[[x_var]])), "NA values in", x_var, "- these will be removed"))
+                data <- data[!is.na(data[[x_var]]), ]
+            }
+            
+            if (sum(is.na(data[[fill_var]])) > 0) {
+                warning(paste("Found", sum(is.na(data[[fill_var]])), "NA values in", fill_var, "- these will be removed"))
+                data <- data[!is.na(data[[fill_var]]), ]
+            }
+            
+            # Check if y_var is numeric
+            if (!is.numeric(data[[y_var]])) {
+                stop(paste(y_var, "must be a numeric variable"))
+            }
+            
             # Convert variables to factors if needed
             data[[x_var]] <- as.factor(data[[x_var]])
             data[[fill_var]] <- as.factor(data[[fill_var]])
             
+            # Check for sufficient levels
+            if (length(levels(data[[x_var]])) < 1) {
+                stop(paste(x_var, "must have at least one category"))
+            }
+            
+            if (length(levels(data[[fill_var]])) < 1) {
+                stop(paste(fill_var, "must have at least one segment"))
+            }
+            
             if (!is.null(facet_var)) {
+                if (!facet_var %in% names(data)) {
+                    stop(paste("Facet variable", facet_var, "not found in data"))
+                }
                 data[[facet_var]] <- as.factor(data[[facet_var]])
             }
             
@@ -144,6 +182,23 @@ ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         total_in_category = sum(value)
                     ) %>%
                     dplyr::ungroup()
+            }
+            
+            # Check for empty groups
+            if (nrow(processed_data) == 0) {
+                stop("No valid data after processing. Please check your input variables.")
+            }
+            
+            # Check for zero totals
+            zero_totals <- processed_data %>%
+                dplyr::group_by(!!rlang::sym(x_var)) %>%
+                dplyr::summarise(total = sum(value), .groups = 'drop') %>%
+                dplyr::filter(total == 0)
+            
+            if (nrow(zero_totals) > 0) {
+                warning(paste("Categories with zero totals found:", 
+                            paste(zero_totals[[x_var]], collapse = ", "),
+                            "- these may appear empty in the plot"))
             }
             
             # Apply sorting if requested
@@ -211,6 +266,12 @@ ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             data <- private$.processed_data
             
             if (is.null(data) || nrow(data) == 0) {
+                self$results$instructions$setContent(
+                    "<div style='background-color: #ffebee; padding: 15px; border-radius: 6px; margin: 10px 0;'>
+                    <p style='color: #c62828;'><strong>Error:</strong> No data available for plotting. 
+                    Please check your variable selections and ensure data is available.</p>
+                    </div>"
+                )
                 return()
             }
             
@@ -314,6 +375,16 @@ ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Apply legend settings
             p <- private$.applyLegend(p)
             
+            # Apply export-ready settings if requested
+            if (self$options$export_ready) {
+                p <- p + ggplot2::theme(
+                    text = ggplot2::element_text(family = "Arial"),
+                    plot.background = ggplot2::element_rect(fill = "white", color = NA),
+                    panel.background = ggplot2::element_rect(fill = "white", color = NA),
+                    legend.background = ggplot2::element_rect(fill = "white", color = NA)
+                )
+            }
+            
             # Print plot
             print(p)
             TRUE
@@ -346,8 +417,36 @@ ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 } else {
                     p <- p + ggplot2::scale_fill_viridis_d()
                 }
+            } else if (palette == "bbc_multi") {
+                bbc_colors <- c("#1380A1", "#FAAB18", "#990000", "#588300", "#990099", "#FF6600", "#809900", "#bcc4c1")
+                if (n_colors <= length(bbc_colors)) {
+                    p <- p + ggplot2::scale_fill_manual(values = bbc_colors[1:n_colors])
+                } else {
+                    p <- p + ggplot2::scale_fill_viridis_d()
+                }
+            } else if (palette == "prism_colorblind_safe") {
+                prism_colors <- c("#0000FF", "#FF0000", "#00BF00", "#FF00FF", "#FFFF00", "#00FFFF", "#800080", "#FFA500")
+                if (n_colors <= length(prism_colors)) {
+                    p <- p + ggplot2::scale_fill_manual(values = prism_colors[1:n_colors])
+                } else {
+                    p <- p + ggplot2::scale_fill_viridis_d()
+                }
+            } else if (palette == "nature") {
+                nature_colors <- c("#E64B35", "#4DBBD5", "#00A087", "#3C5488", "#F39B7F", "#8491B4", "#91D1C2", "#DC0000")
+                if (n_colors <= length(nature_colors)) {
+                    p <- p + ggplot2::scale_fill_manual(values = nature_colors[1:n_colors])
+                } else {
+                    p <- p + ggplot2::scale_fill_viridis_d()
+                }
+            } else if (palette == "science") {
+                science_colors <- c("#0C5BB0", "#FFA042", "#15983D", "#EC0000", "#8b7355", "#149EF3", "#FA6B09", "#A149FA")
+                if (n_colors <= length(science_colors)) {
+                    p <- p + ggplot2::scale_fill_manual(values = science_colors[1:n_colors])
+                } else {
+                    p <- p + ggplot2::scale_fill_viridis_d()
+                }
             }
-            # Add more palette options as needed
+            # Default fallback to viridis if palette not recognized
             
             return(p)
         },
@@ -384,8 +483,47 @@ ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         panel.grid.major.x = ggplot2::element_blank(),
                         panel.grid.minor = ggplot2::element_blank()
                     )
+            } else if (style == "clinical") {
+                p <- p + ggplot2::theme_bw() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 11, family = "sans"),
+                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
+                        plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5),
+                        panel.grid.major.x = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        legend.position = "right",
+                        legend.background = ggplot2::element_rect(fill = "white", color = "gray80"),
+                        panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 1)
+                    )
+            } else if (style == "bbc_style") {
+                p <- p + ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 11, family = "sans"),
+                        plot.title = ggplot2::element_text(size = 18, face = "bold", hjust = 0),
+                        plot.subtitle = ggplot2::element_text(size = 14, hjust = 0),
+                        axis.title = ggplot2::element_blank(),
+                        axis.text = ggplot2::element_text(size = 10),
+                        panel.grid.major.x = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        panel.background = ggplot2::element_blank(),
+                        legend.position = "top",
+                        legend.justification = "left",
+                        legend.text = ggplot2::element_text(size = 10),
+                        legend.title = ggplot2::element_blank()
+                    )
+            } else if (style == "prism_style") {
+                p <- p + ggplot2::theme_classic() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 10, family = "sans"),
+                        axis.title = ggplot2::element_text(size = 11),
+                        plot.title = ggplot2::element_text(size = 12, face = "bold", hjust = 0.5),
+                        axis.line = ggplot2::element_line(color = "black", linewidth = 0.5),
+                        axis.ticks = ggplot2::element_line(color = "black", linewidth = 0.5),
+                        legend.text = ggplot2::element_text(size = 9),
+                        legend.key.size = ggplot2::unit(0.8, "cm"),
+                        panel.background = ggplot2::element_rect(fill = "white")
+                    )
             }
-            # Add more themes as needed
             
             return(p)
         },
@@ -511,6 +649,55 @@ ggsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             )
             
             self$results$interpretation$setContent(interpretation_html)
+        },
+        
+        .updateDetailedStats = function() {
+            
+            data <- private$.processed_data
+            composition_data <- private$.composition_data
+            
+            if (is.null(data) || is.null(composition_data)) {
+                return()
+            }
+            
+            # Calculate detailed statistics
+            n_categories <- length(unique(data[[self$options$x_var]]))
+            n_segments <- length(unique(data[[self$options$fill_var]]))
+            total_obs <- sum(data$count, na.rm = TRUE)
+            
+            # Calculate min and max percentages
+            min_pct <- round(min(composition_data$percentage, na.rm = TRUE), 1)
+            max_pct <- round(max(composition_data$percentage, na.rm = TRUE), 1)
+            mean_pct <- round(mean(composition_data$percentage, na.rm = TRUE), 1)
+            
+            # Calculate segment with highest variation
+            segment_variation <- composition_data %>%
+                dplyr::group_by(segment) %>%
+                dplyr::summarise(
+                    cv = sd(percentage, na.rm = TRUE) / mean(percentage, na.rm = TRUE),
+                    .groups = 'drop'
+                ) %>%
+                dplyr::arrange(desc(cv)) %>%
+                dplyr::slice(1)
+            
+            # Create statistics rows
+            stats_rows <- list(
+                list(measure = "Total Categories", value = as.character(n_categories)),
+                list(measure = "Total Segments", value = as.character(n_segments)),
+                list(measure = "Total Observations", value = as.character(total_obs)),
+                list(measure = "Min Percentage", value = paste0(min_pct, "%")),
+                list(measure = "Max Percentage", value = paste0(max_pct, "%")),
+                list(measure = "Mean Percentage", value = paste0(mean_pct, "%")),
+                list(measure = "Most Variable Segment", value = as.character(segment_variation$segment[1]))
+            )
+            
+            # Add rows to table
+            for (i in seq_along(stats_rows)) {
+                self$results$detailed_stats$addRow(rowKey = i, values = stats_rows[[i]])
+            }
+            
+            # Make the table visible if we have data
+            self$results$detailed_stats$setVisible(TRUE)
         }
     )
 )

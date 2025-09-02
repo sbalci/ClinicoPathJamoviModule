@@ -1,18 +1,18 @@
 # Segmented Total Bar Plot Analysis Documentation
 
-This document provides a comprehensive overview of the Segmented Total Bar Plot Analysis module (ggsegmentedtotalbar), detailing its features, user interface elements, and the underlying R functions.
+This document provides a comprehensive overview of the Segmented Total Bar Plot Analysis module (jjsegmentedtotalbar), detailing its features, user interface elements, and the underlying R functions.
 
 ## Feature Summary
 
-The ggsegmentedtotalbar module is a specialized tool for creating segmented bar plots where each bar represents a total, and segments within the bar represent proportions of different categories. It is particularly useful for visualizing compositional data and comparing proportions across different groups.
+The jjsegmentedtotalbar module is a specialized tool for creating segmented bar plots where each bar represents a total, and segments within the bar represent proportions of different categories. It is particularly useful for visualizing compositional data and comparing proportions across different groups.
 
 The module's features can be broadly categorized as follows:
 
-*   **Core Segmented Bar Plot Generation:** Create bar plots showing total counts or values segmented by categories.
-*   **Proportional Representation:** Visualize the contribution of each segment to the total.
-*   **Customization Options:** Control plot aesthetics such as colors, labels, and bar orientation.
-*   **Grouping and Faceting:** Organize plots by additional categorical variables.
-*   **Export Options:** Capabilities to save the generated plots in various formats.
+* **Core Segmented Bar Plot Generation:** Create bar plots showing total counts or values segmented by categories.
+* **Proportional Representation:** Visualize the contribution of each segment to the total.
+* **Customization Options:** Control plot aesthetics such as colors, labels, and bar orientation.
+* **Grouping and Faceting:** Organize plots by additional categorical variables.
+* **Export Options:** Capabilities to save the generated plots in various formats.
 
 ## Feature Details
 

@@ -11,7 +11,7 @@ args:
     required: false
     default: true
 usage: /review-article-stats [article_label]
-output_file: literature/$ARGUMENTS-citation-review.md
+output_file: literature/$ARG_article_label-citation-review.md
 ---
 
 # Jamovi Coverage Review for Research Articles
@@ -19,7 +19,7 @@ output_file: literature/$ARGUMENTS-citation-review.md
 You are an **expert jamovi module developer for ClinicoPathJamoviModule** and **an expert statistican in evaluating the correct use of statistical methods**. The user will attach or reference one or more article sources (PDF/HTML/Markdown/webpages). Your task:
 
 1) **READ & PARSE THE ARTICLE(S)**  
-   - Accept **attached files** (`.pdf`, `.html`, `.md`) and/or **URLs** in the user message.  
+   - Accept **attached files** (`.pdf`, `.html`, `.md`) and/or **URLs** in the user message. Do not treat command-line arguments as file paths; they are used only as an optional label.  
    - If multiple items are provided, treat them as parts of the same article (supplements, appendices), unless obviously unrelated.  
    - Extract:
      - Study type & design (e.g., retrospective cohort, case-control, RCT)
@@ -343,4 +343,4 @@ ARTICLE_METHODS ||--o{ JAMOVI_FUNCTIONS : mapped_by
 
 Return a single Markdown document containing all output.
 
-Save the markdown file to `literature/$ARGUMENTS-citation-review.md`.
+Save the markdown file to `literature/$ARG_article_label-citation-review.md`.

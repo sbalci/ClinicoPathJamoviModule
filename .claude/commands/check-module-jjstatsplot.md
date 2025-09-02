@@ -28,6 +28,7 @@ Please systematically check these key functions:
 - `linechart`
 - `lollipop`
 - `raincloud`
+- `jjsegmentedtotalbar`
 
 
 

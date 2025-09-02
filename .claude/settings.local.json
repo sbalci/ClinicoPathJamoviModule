@@ -7,7 +7,9 @@
       "WebFetch(domain:github.com)",
       "Bash(Rscript:*)",
       "Read(/Users/serdarbalci/Downloads/**)",
-      "Read(/Users/serdarbalci/Downloads/**)"
+      "Read(/Users/serdarbalci/Downloads/**)",
+      "Read(/Users/serdarbalci/Downloads/**)",
+      "WebFetch(domain:cran.r-project.org)"
     ],
     "deny": [],
     "ask": [],
