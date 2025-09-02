@@ -1,0 +1,17 @@
+Treatment,Response,Count
+Chemotherapy,Complete Response,25
+Chemotherapy,Partial Response,35
+Chemotherapy,Stable Disease,30
+Chemotherapy,Progressive Disease,10
+Immunotherapy,Complete Response,40
+Immunotherapy,Partial Response,30
+Immunotherapy,Stable Disease,20
+Immunotherapy,Progressive Disease,10
+Surgery,Complete Response,60
+Surgery,Partial Response,25
+Surgery,Stable Disease,10
+Surgery,Progressive Disease,5
+Combination,Complete Response,35
+Combination,Partial Response,40
+Combination,Stable Disease,15
+Combination,Progressive Disease,10

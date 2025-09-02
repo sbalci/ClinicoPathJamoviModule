@@ -44,22 +44,17 @@ echo "/document-function FUNC_NAME" | claude
 
 <./claude/commands/review-module-jjstatsplot.md>
 
-jjsegmentedtotalbar
-echo "/check-function jjsegmentedtotalbar" | claude
-echo "/checkpoint jjsegmentedtotalbar" | claude
-echo "/prepare-translation jjsegmentedtotalbar" | claude
-echo "/review-function jjsegmentedtotalbar" | claude
-echo "/fix-function jjsegmentedtotalbar" | claude
-echo "/document-function jjsegmentedtotalbar" | claude
+
+***
 
 combine these into one: nonparametric enhancednonparametric as nonparametric
 
-echo "/check-function FUNC_NAME" | claude
-echo "/checkpoint FUNC_NAME" | claude
-echo "/prepare-translation FUNC_NAME" | claude
-echo "/review-function FUNC_NAME" | claude
-echo "/fix-function FUNC_NAME" | claude
-echo "/document-function FUNC_NAME" | claude
+echo "/check-function nonparametric" | claude
+echo "/checkpoint nonparametric" | claude
+echo "/prepare-translation nonparametric" | claude
+echo "/review-function nonparametric" | claude
+echo "/fix-function nonparametric" | claude
+echo "/document-function nonparametric" | claude
 
 grafify
 echo "/check-function grafify" | claude

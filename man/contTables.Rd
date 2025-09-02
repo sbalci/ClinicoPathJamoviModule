@@ -23,6 +23,8 @@ contTables(
   ciWidth = 95,
   gamma = FALSE,
   taub = FALSE,
+  trendTest = FALSE,
+  trendDirection = "twosided",
   obs = TRUE,
   exp = FALSE,
   pcRow = FALSE,
@@ -82,6 +84,12 @@ confidence intervals to provide}
 
 \item{taub}{\code{TRUE} or \code{FALSE} (default), provide Kendall's tau-b}
 
+\item{trendTest}{\code{TRUE} or \code{FALSE} (default), provide
+Cochran-Armitage test for trend for ordered categorical variables}
+
+\item{trendDirection}{Direction of trend test: two-sided (default),
+increasing, or decreasing}
+
 \item{obs}{\code{TRUE} or \code{FALSE} (default), provide the observed
 counts}
 
@@ -107,6 +115,7 @@ A results object containing:
 \code{results$nom} \tab \tab \tab \tab \tab a table of the 'nominal' test results \cr
 \code{results$gamma} \tab \tab \tab \tab \tab a table of the gamma test results \cr
 \code{results$taub} \tab \tab \tab \tab \tab a table of the Kendall's tau-b test results \cr
+\code{results$trendTest} \tab \tab \tab \tab \tab Cochran-Armitage trend test results \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
