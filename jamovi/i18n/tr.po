@@ -5007,7 +5007,7 @@ msgstr ""
 msgid "Alluvial & Sankey Diagrams"
 msgstr ""
 
-#: jggsankeyfier/options/diagram_type/alluvial.title
+#: jjsankeyfier/options/diagram_type/alluvial.title
 msgid "Alluvial Diagram"
 msgstr ""
 
@@ -5100,7 +5100,7 @@ msgstr ""
 #: jjsegmentedtotalbar/options/sort_categories/alpha.title
 #: gtsummary/options/sortVariables/alphabetical.title
 #: jforestmodel/options/sort_variables/alphabetical.title
-#: jggsankeyfier/options/sort_nodes/alphabetical.title
+#: jjsankeyfier/options/sort_nodes/alphabetical.title
 #: subgroupforest/options/sortBy/alpha.title
 #: toxicityprofile/options/sortBy/alphabetical.title
 msgid "Alphabetical"
@@ -9869,7 +9869,7 @@ msgstr ""
 #: advancedanova/options/plot_type/both.title
 #: conditionalsurvival/options/plotType/both.title
 #: jggheatmap/options/output_format/both.title
-#: jggsankeyfier/options/output_format/both.title
+#: jjsankeyfier/options/output_format/both.title
 #: jggstats/options/output_format/both.title
 #: jjbarstats/options/label/both.title
 #: jjpiestats/options/label/both.title
@@ -9950,7 +9950,7 @@ msgstr ""
 msgid "Bottom"
 msgstr ""
 
-#: jggsankeyfier/options/flow_direction/bottom_top.title
+#: jjsankeyfier/options/flow_direction/bottom_top.title
 msgid "Bottom to Top"
 msgstr ""
 
@@ -10328,7 +10328,7 @@ msgstr ""
 msgid "By Treatment"
 msgstr ""
 
-#: jggsankeyfier/options/sort_nodes/by_value.title
+#: jjsankeyfier/options/sort_nodes/by_value.title
 msgid "By Value"
 msgstr ""
 
@@ -11550,8 +11550,8 @@ msgstr ""
 
 #: package/analyses/jjriverplot.menuSubgroup
 #: package/analyses/riverplot.menuSubgroup
-#: package/analyses/jggsankeyfier.menuSubgroup
-#: jggsankeyfier/options.menuSubgroup
+#: package/analyses/jjsankeyfier.menuSubgroup
+#: jjsankeyfier/options.menuSubgroup
 #: jjriverplot/options.menuSubgroup
 #: riverplot/options.menuSubgroup
 msgid "Categorical Over Time"
@@ -13018,7 +13018,7 @@ msgstr ""
 #: groupedforest/options/plot_theme/classic.title
 #: hullplot/options/plot_theme/classic.title
 #: jcomplexupset/options/theme_style/theme_classic.title
-#: jggsankeyfier/options/theme_style/classic.title
+#: jjsankeyfier/options/theme_style/classic.title
 #: jggstats/options/theme_style/classic.title
 #: jiwillsurvive/options/plot_style/classic.title
 #: jjridges/options/theme_style/theme_classic.title
@@ -15575,7 +15575,7 @@ msgstr ""
 #: grafify/options/color_palette.title
 #: hullplot/options/color_palette.title
 #: jcomplexupset/options/color_palette.title
-#: jggsankeyfier/options/color_palette.title
+#: jjsankeyfier/options/color_palette.title
 #: jggstats/options/color_palette.title
 #: jiwillsurvive/options/color_palette.title
 #: jjridges/options/color_palette.title
@@ -20658,7 +20658,7 @@ msgid "Creates river plots to visualize how categorical variables change over ti
 "supports individual entity tracking."
 msgstr ""
 
-#: package/analyses/jggsankeyfier.description
+#: package/analyses/jjsankeyfier.description
 msgid "Creates Sankey and Alluvial diagrams for visualizing flows and transitions using the ggsankey package with ggplot2 integration for categorical data flow analysis."
 msgstr ""
 
@@ -22607,7 +22607,7 @@ msgstr ""
 #: hullplot/options/color_palette/dark2.title
 #: jcomplexupset/options/color_palette/Dark2.title
 #: jggheatmap/options/annotation_colors/dark2.title
-#: jggsankeyfier/options/color_palette/dark2.title
+#: jjsankeyfier/options/color_palette/dark2.title
 #: jggstats/options/color_palette/dark2.title
 #: jiwillsurvive/options/color_palette/dark2.title
 #: jjridges/options/color_palette/Dark2.title
@@ -22925,7 +22925,7 @@ msgstr ""
 msgid "Data Summary Table"
 msgstr ""
 
-#: jggsankeyfier/options/output_format/data_table.title
+#: jjsankeyfier/options/output_format/data_table.title
 msgid "Data Table"
 msgstr ""
 
@@ -23589,8 +23589,8 @@ msgstr ""
 #: hullplot/options/color_palette/default.title
 #: jforestmodel/options/color_scheme/default.title
 #: jggheatmap/options/annotation_colors/default.title
-#: jggsankeyfier/options/color_palette/default.title
-#: jggsankeyfier/options/theme_style/default.title
+#: jjsankeyfier/options/color_palette/default.title
+#: jjsankeyfier/options/theme_style/default.title
 #: jggstats/options/color_palette/default.title
 #: jggstats/options/theme_style/default.title
 #: jiwillsurvive/options/color_palette/default.title
@@ -24864,7 +24864,7 @@ msgstr ""
 msgid "Diagonal"
 msgstr ""
 
-#: jggsankeyfier/options/diagram_type.title
+#: jjsankeyfier/options/diagram_type.title
 msgid "Diagram Type"
 msgstr ""
 
@@ -27433,7 +27433,7 @@ msgstr ""
 msgid "Edge Effects Correction"
 msgstr ""
 
-#: jggsankeyfier/options/edge_alpha.title
+#: jjsankeyfier/options/edge_alpha.title
 msgid "Edge Transparency"
 msgstr ""
 
@@ -32932,7 +32932,7 @@ msgstr ""
 msgid "Flow Curve Style"
 msgstr ""
 
-#: jggsankeyfier/results/datatab.title
+#: jjsankeyfier/results/datatab.title
 msgid "Flow Data"
 msgstr ""
 
@@ -32944,20 +32944,20 @@ msgstr ""
 msgid "Flow diagrams:"
 msgstr ""
 
-#: jggsankeyfier/options/flow_direction.title
+#: jjsankeyfier/options/flow_direction.title
 #: stagemigration/results/enhancedMigrationPatternAnalysis.columns.title
 msgid "Flow Direction"
 msgstr ""
 
-#: jggsankeyfier/results/stats.title
+#: jjsankeyfier/results/stats.title
 msgid "Flow Statistics"
 msgstr ""
 
-#: jggsankeyfier/results/datatab.columns.title
+#: jjsankeyfier/results/datatab.columns.title
 msgid "Flow Value"
 msgstr ""
 
-#: package/analyses/jggsankeyfier.menuSubtitle
+#: package/analyses/jjsankeyfier.menuSubtitle
 msgid "Flow Visualization with ggsankeyfier"
 msgstr ""
 
@@ -35940,8 +35940,8 @@ msgstr ""
 #: hullplot/ui[0][2].label
 #: jextractggstats/options/group_var.title
 #: jextractggstats/ui[0][1].label
-#: jggsankeyfier/options/grouping_var.title
-#: jggsankeyfier/ui[1][4].label
+#: jjsankeyfier/options/grouping_var.title
+#: jjsankeyfier/ui[1][4].label
 #: jggstats/options/grouping_var.title
 #: jggstats/ui[1][2].label
 #: jiwillsurvive/options/group_var.title
@@ -40658,7 +40658,7 @@ msgstr ""
 #: jcomplexupset/results/interpretation.title
 #: jextractggstats/results/interpretation.title
 #: jforestmodel/results/model_diagnostics.columns.title
-#: jggsankeyfier/results/interpretation.title
+#: jjsankeyfier/results/interpretation.title
 #: jjridges/results/interpretation.title
 #: jointfrailty/results/frailtyParameters.columns.title
 #: jointfrailty/results/residualAnalysis.columns.title
@@ -41398,14 +41398,14 @@ msgstr ""
 #: package/analyses/riverplot.menuGroup
 #: package/analyses/grafify.menuGroup
 #: package/analyses/jjsegmentedtotalbar.menuGroup
-#: package/analyses/jggsankeyfier.menuGroup
+#: package/analyses/jjsankeyfier.menuGroup
 #: package/analyses/jcomplexupset.menuGroup
 #: package/analyses/jpps.menuGroup
 #: package/analyses/jjradarplot.menuGroup
 #: jjsegmentedtotalbar/options.menuGroup
 #: grafify/options.menuGroup
 #: jcomplexupset/options.menuGroup
-#: jggsankeyfier/options.menuGroup
+#: jjsankeyfier/options.menuGroup
 #: jjradarplot/options.menuGroup
 #: jjriverplot/options.menuGroup
 #: jjstreamgraph/options.menuGroup
@@ -42110,7 +42110,7 @@ msgstr ""
 msgid "Label responses exceeding the specified threshold."
 msgstr ""
 
-#: jggsankeyfier/options/label_size.title
+#: jjsankeyfier/options/label_size.title
 #: jjarcdiagram/options/labelSize.title
 msgid "Label Size"
 msgstr ""
@@ -42658,7 +42658,7 @@ msgstr ""
 msgid "Layout and Styling"
 msgstr ""
 
-#: jggsankeyfier/options/iterations.title
+#: jjsankeyfier/options/iterations.title
 msgid "Layout Iterations"
 msgstr ""
 
@@ -42782,7 +42782,7 @@ msgid "Left Side"
 msgstr ""
 
 #: flowchart/options/direction/LR.title
-#: jggsankeyfier/options/flow_direction/left_right.title
+#: jjsankeyfier/options/flow_direction/left_right.title
 msgid "Left to Right"
 msgstr ""
 
@@ -47353,7 +47353,7 @@ msgstr ""
 #: idi/results/summary.columns.title
 #: ihcscoring/results/digitalvalidation/algorithmcomparison.columns.title
 #: ihcscoring/results/automatedanalysis/validationcomparison.columns.title
-#: jggsankeyfier/results/stats.columns.title
+#: jjsankeyfier/results/stats.columns.title
 #: jggstats/results/summary.columns.title
 #: lassocox/results/performance.columns.title
 #: multiclassdiagnostics/results/overallMetrics.columns.title
@@ -47657,7 +47657,7 @@ msgstr ""
 #: enhancedtables/options/table_theme/minimal.title
 #: groupedforest/options/plot_theme/minimal.title
 #: jcomplexupset/options/theme_style/theme_minimal.title
-#: jggsankeyfier/options/theme_style/minimal.title
+#: jjsankeyfier/options/theme_style/minimal.title
 #: jggstats/options/theme_style/minimal.title
 #: jiwillsurvive/options/plot_style/minimal.title
 #: jjridges/options/theme_style/theme_minimal.title
@@ -51628,7 +51628,7 @@ msgstr ""
 msgid "Node Sorting"
 msgstr ""
 
-#: jggsankeyfier/options/node_spacing.title
+#: jjsankeyfier/options/node_spacing.title
 msgid "Node Spacing"
 msgstr ""
 
@@ -51637,13 +51637,13 @@ msgstr ""
 msgid "Node Survival Curves"
 msgstr ""
 
-#: jggsankeyfier/options/node_vars.title
-#: jggsankeyfier/ui[1][3].label
+#: jjsankeyfier/options/node_vars.title
+#: jjsankeyfier/ui[1][3].label
 msgid "Node Variables"
 msgstr ""
 
 #: flowchart/options/nodeWidth.title
-#: jggsankeyfier/options/node_width.title
+#: jjsankeyfier/options/node_width.title
 msgid "Node Width"
 msgstr ""
 
@@ -52840,7 +52840,7 @@ msgstr ""
 msgid "Number of intervals for piecewise constant hazards"
 msgstr ""
 
-#: jggsankeyfier/options/iterations.description
+#: jjsankeyfier/options/iterations.description
 msgid "Number of iterations for layout optimization"
 msgstr ""
 
@@ -54384,7 +54384,7 @@ msgstr ""
 msgid "Original order"
 msgstr ""
 
-#: jggsankeyfier/options/sort_nodes/original.title
+#: jjsankeyfier/options/sort_nodes/original.title
 #: lollipop/options/sortBy/original.title
 msgid "Original Order"
 msgstr ""
@@ -54905,7 +54905,7 @@ msgstr ""
 #: gtsummary/options/outputFormat.title
 #: jextractggstats/options/output_format.title
 #: jggheatmap/options/output_format.title
-#: jggsankeyfier/options/output_format.title
+#: jjsankeyfier/options/output_format.title
 #: jggstats/options/output_format.title
 msgid "Output Format"
 msgstr ""
@@ -56143,7 +56143,7 @@ msgstr ""
 msgid "Parallel Processing"
 msgstr ""
 
-#: jggsankeyfier/options/diagram_type/parallel_sets.title
+#: jjsankeyfier/options/diagram_type/parallel_sets.title
 msgid "Parallel Sets"
 msgstr ""
 
@@ -56703,7 +56703,7 @@ msgstr ""
 msgid "Pastel Colors"
 msgstr ""
 
-#: jggsankeyfier/options/color_palette/pastel1.title
+#: jjsankeyfier/options/color_palette/pastel1.title
 msgid "Pastel1"
 msgstr ""
 
@@ -57442,7 +57442,7 @@ msgstr ""
 #: ihccluster/results/clusterSizes.columns.title
 #: ihccluster/results/distr.columns.title
 #: ihcscoring/results/automatedanalysis/intensityanalysis.columns.title
-#: jggsankeyfier/results/datatab.columns.title
+#: jjsankeyfier/results/datatab.columns.title
 #: jjbarstats/options/label/percentage.title
 #: jjpiestats/options/label/percentage.title
 #: modalitycomparison/results/discordanceTable.columns.title
@@ -57537,7 +57537,7 @@ msgstr ""
 
 #: contTables/ui[1][1][0][1][0].label
 #: contTablesPaired/ui[2][0].label
-#: jggsankeyfier/options/value_format/percent.title
+#: jjsankeyfier/options/value_format/percent.title
 #: ppv/results/confusion.title
 #: vartree/options/pct.title
 msgid "Percentages"
@@ -58693,7 +58693,7 @@ msgstr ""
 #: explainableai/options/colormap/plasma.title
 #: jcomplexupset/options/color_palette/plasma.title
 #: jggheatmap/options/color_scheme/plasma.title
-#: jggsankeyfier/options/color_palette/plasma.title
+#: jjsankeyfier/options/color_palette/plasma.title
 #: jjridges/options/color_palette/plasma.title
 #: jscattermore/options/color_palette/plasma.title
 #: robustcorrelation/options/heatmap_colors/plasma.title
@@ -59164,7 +59164,7 @@ msgid "Plot of the frailty distribution"
 msgstr ""
 
 #: jggheatmap/options/output_format/plot_only.title
-#: jggsankeyfier/options/output_format/plot_only.title
+#: jjsankeyfier/options/output_format/plot_only.title
 #: jggstats/options/output_format/plot_only.title
 msgid "Plot Only"
 msgstr ""
@@ -59351,7 +59351,7 @@ msgid "Plot Styling"
 msgstr ""
 
 #: jcomplexupset/options/plot_subtitle.title
-#: jggsankeyfier/options/plot_subtitle.title
+#: jjsankeyfier/options/plot_subtitle.title
 #: jggstats/options/plot_subtitle.title
 #: jjcorrmat/options/subtitle.title
 #: jjhistostats/options/subtitle.title
@@ -59443,7 +59443,7 @@ msgstr ""
 #: jforester/options/plot_title.title
 #: jforestmodel/options/plot_title.title
 #: jggheatmap/options/plot_title.title
-#: jggsankeyfier/options/plot_title.title
+#: jjsankeyfier/options/plot_title.title
 #: jggstats/options/plot_title.title
 #: jiwillsurvive/options/plot_title.title
 #: jjarcdiagram/options/plotTitle.title
@@ -64458,7 +64458,7 @@ msgstr ""
 msgid "Raw Measurements"
 msgstr ""
 
-#: jggsankeyfier/options/value_format/raw.title
+#: jjsankeyfier/options/value_format/raw.title
 msgid "Raw Numbers"
 msgstr ""
 
@@ -66488,7 +66488,7 @@ msgstr ""
 msgid "Right Side"
 msgstr ""
 
-#: jggsankeyfier/options/flow_direction/right_left.title
+#: jjsankeyfier/options/flow_direction/right_left.title
 msgid "Right to Left"
 msgstr ""
 
@@ -67549,7 +67549,7 @@ msgstr ""
 msgid "Round Digits"
 msgstr ""
 
-#: jggsankeyfier/options/value_format/rounded.title
+#: jjsankeyfier/options/value_format/rounded.title
 msgid "Rounded"
 msgstr ""
 
@@ -68006,20 +68006,20 @@ msgstr ""
 msgid "Sankey & Advanced Options"
 msgstr ""
 
-#: package/analyses/jggsankeyfier.title
-#: package/analyses/jggsankeyfier.menuTitle
-#: jggsankeyfier/options.title
-#: jggsankeyfier/ui.title
-#: jggsankeyfier/results.title
+#: package/analyses/jjsankeyfier.title
+#: package/analyses/jjsankeyfier.menuTitle
+#: jjsankeyfier/options.title
+#: jjsankeyfier/ui.title
+#: jjsankeyfier/results.title
 msgid "Sankey & Alluvial Diagrams"
 msgstr ""
 
-#: jggsankeyfier/options/diagram_type/sankey.title
+#: jjsankeyfier/options/diagram_type/sankey.title
 #: stagemigration/ui[14][0][0]/showSankeyDiagram.label
 msgid "Sankey Diagram"
 msgstr ""
 
-#: jggsankeyfier/results/plot.title
+#: jjsankeyfier/results/plot.title
 msgid "Sankey/Alluvial Diagram"
 msgstr ""
 
@@ -69755,7 +69755,7 @@ msgstr ""
 msgid "Set2"
 msgstr ""
 
-#: jggsankeyfier/options/color_palette/set3.title
+#: jjsankeyfier/options/color_palette/set3.title
 msgid "Set3"
 msgstr ""
 
@@ -71060,11 +71060,11 @@ msgstr ""
 msgid "Show Fixed Effects Table"
 msgstr ""
 
-#: jggsankeyfier/options/show_statistics.title
+#: jjsankeyfier/options/show_statistics.title
 msgid "Show Flow Statistics"
 msgstr ""
 
-#: jggsankeyfier/options/show_values.title
+#: jjsankeyfier/options/show_values.title
 msgid "Show Flow Values"
 msgstr ""
 
@@ -71287,7 +71287,7 @@ msgstr ""
 #: icccoeff/options/show_interpretation.title
 #: jcomplexupset/options/show_interpretation.title
 #: jextractggstats/options/show_interpretation.title
-#: jggsankeyfier/options/show_interpretation.title
+#: jjsankeyfier/options/show_interpretation.title
 #: jggstats/options/show_interpretation.title
 #: vartree/options/showInterpretation.title
 msgid "Show Interpretation"
@@ -71642,7 +71642,7 @@ msgstr ""
 
 #: alluvial/ui[2][0]/labelNodes.label
 #: decisiongraph/options/nodeLabels.title
-#: jggsankeyfier/options/show_labels.title
+#: jjsankeyfier/options/show_labels.title
 #: riverplot/ui[3][0]/labelNodes.label
 msgid "Show Node Labels"
 msgstr ""
@@ -73707,7 +73707,7 @@ msgstr ""
 msgid "Sort Intersections By"
 msgstr ""
 
-#: jggsankeyfier/options/sort_nodes.title
+#: jjsankeyfier/options/sort_nodes.title
 #: jjarcdiagram/options/sortNodes.title
 msgid "Sort Nodes"
 msgstr ""
@@ -73754,7 +73754,7 @@ msgid "Sort Variables"
 msgstr ""
 
 #: advancedanova/results/anova.columns.title
-#: jggsankeyfier/results/datatab.columns.title
+#: jjsankeyfier/results/datatab.columns.title
 msgid "Source"
 msgstr ""
 
@@ -73774,8 +73774,8 @@ msgstr ""
 msgid "Source Note"
 msgstr ""
 
-#: jggsankeyfier/options/source_var.title
-#: jggsankeyfier/ui[1][1].label
+#: jjsankeyfier/options/source_var.title
+#: jjsankeyfier/ui[1][1].label
 msgid "Source Variable"
 msgstr ""
 
@@ -73787,7 +73787,7 @@ msgstr ""
 msgid "Sources of measurement variability"
 msgstr ""
 
-#: jggsankeyfier/options/node_spacing.description
+#: jjsankeyfier/options/node_spacing.description
 msgid "Spacing between nodes"
 msgstr ""
 
@@ -78839,7 +78839,7 @@ msgstr ""
 msgid "Tail ESS"
 msgstr ""
 
-#: jggsankeyfier/results/datatab.columns.title
+#: jjsankeyfier/results/datatab.columns.title
 #: jpps/results/pps_scores.columns.title
 #: patientdashboard/results/qualityMetricsTable.columns.title
 msgid "Target"
@@ -78942,8 +78942,8 @@ msgstr ""
 #: deeplearningprediction/ui[0][1].label
 #: explainableai/options/target_var.title
 #: explainableai/ui[0][1].label
-#: jggsankeyfier/options/target_var.title
-#: jggsankeyfier/ui[1][2].label
+#: jjsankeyfier/options/target_var.title
+#: jjsankeyfier/ui[1][2].label
 #: jpps/options/target_var.title
 #: jpps/ui[1][0].label
 #: treeadvanced/ui[0][0].label
@@ -80430,7 +80430,7 @@ msgstr ""
 
 #: advancedbarplot/options/theme_style.title
 #: jcomplexupset/options/theme_style.title
-#: jggsankeyfier/options/theme_style.title
+#: jjsankeyfier/options/theme_style.title
 #: jggstats/options/theme_style.title
 #: jjridges/options/theme_style.title
 #: jjridges/ui[5][0]/theme_style.label
@@ -81466,8 +81466,8 @@ msgstr ""
 #: highdimcox/ui[0][0].label
 #: idi/options/time_var.title
 #: idi/ui[0][3].label
-#: jggsankeyfier/options/time_var.title
-#: jggsankeyfier/ui[1][5].label
+#: jjsankeyfier/options/time_var.title
+#: jjsankeyfier/ui[1][5].label
 #: jiwillsurvive/options/time_var.title
 #: jiwillsurvive/ui[1][0].label
 #: jjstreamgraph/options/timeVar.title
@@ -82278,7 +82278,7 @@ msgid "Top right"
 msgstr ""
 
 #: flowchart/options/direction/TB.title
-#: jggsankeyfier/options/flow_direction/top_bottom.title
+#: jjsankeyfier/options/flow_direction/top_bottom.title
 msgid "Top to Bottom"
 msgstr ""
 
@@ -82915,7 +82915,7 @@ msgstr ""
 msgid "Transparency level for data points (alpha value). Lower values make points more transparent."
 msgstr ""
 
-#: jggsankeyfier/options/edge_alpha.description
+#: jjsankeyfier/options/edge_alpha.description
 msgid "Transparency level for edges"
 msgstr ""
 
@@ -85977,7 +85977,7 @@ msgstr ""
 #: jforestmodel/results/model_diagnostics.columns.title
 #: jggheatmap/options/colorbar_title.default
 #: jggheatmap/results/matrixtab.columns.title
-#: jggsankeyfier/results/stats.columns.title
+#: jjsankeyfier/results/stats.columns.title
 #: jggstats/results/summary.columns.title
 #: jointfrailty/results/exportTable.columns.title
 #: jpps/results/summary_stats.columns.title
@@ -86118,7 +86118,7 @@ msgstr ""
 
 #: advancedbarplot/options/value_format.title
 #: jggheatmap/options/value_format.title
-#: jggsankeyfier/options/value_format.title
+#: jjsankeyfier/options/value_format.title
 msgid "Value Format"
 msgstr ""
 
@@ -86154,8 +86154,8 @@ msgstr ""
 #: jcomplexupset/ui[0][1].label
 #: jggheatmap/options/value_var.title
 #: jggheatmap/ui[0][3].label
-#: jggsankeyfier/options/value_var.title
-#: jggsankeyfier/ui[1][0].label
+#: jjsankeyfier/options/value_var.title
+#: jjsankeyfier/ui[1][0].label
 #: jjstreamgraph/options/valueVar.title
 #: jjstreamgraph/ui[0][1].label
 msgid "Value Variable"
@@ -86397,7 +86397,7 @@ msgstr ""
 msgid "Variable containing end of follow-up or event dates."
 msgstr ""
 
-#: jggsankeyfier/options/value_var.description
+#: jjsankeyfier/options/value_var.description
 msgid "Variable containing flow values/weights"
 msgstr ""
 
@@ -86459,11 +86459,11 @@ msgstr ""
 msgid "Variable defining row groupings (for pivot format)"
 msgstr ""
 
-#: jggsankeyfier/options/source_var.description
+#: jjsankeyfier/options/source_var.description
 msgid "Variable defining source nodes"
 msgstr ""
 
-#: jggsankeyfier/options/target_var.description
+#: jjsankeyfier/options/target_var.description
 msgid "Variable defining target nodes"
 msgstr ""
 
@@ -86492,7 +86492,7 @@ msgstr ""
 msgid "Variable for creating plot facets"
 msgstr ""
 
-#: jggsankeyfier/options/grouping_var.description
+#: jjsankeyfier/options/grouping_var.description
 msgid "Variable for grouping flows"
 msgstr ""
 
@@ -86526,7 +86526,7 @@ msgstr ""
 msgid "Variable for stratified validation analysis"
 msgstr ""
 
-#: jggsankeyfier/options/time_var.description
+#: jjsankeyfier/options/time_var.description
 msgid "Variable for temporal flow analysis"
 msgstr ""
 
@@ -87020,7 +87020,7 @@ msgstr ""
 msgid "Variables for Matrix"
 msgstr ""
 
-#: jggsankeyfier/options/node_vars.description
+#: jjsankeyfier/options/node_vars.description
 msgid "Variables for multi-level node definitions"
 msgstr ""
 
@@ -87551,7 +87551,7 @@ msgstr ""
 #: hullplot/options/color_palette/viridis.title
 #: jcomplexupset/options/color_palette/viridis.title
 #: jggheatmap/options/color_scheme/viridis.title
-#: jggsankeyfier/options/color_palette/viridis.title
+#: jjsankeyfier/options/color_palette/viridis.title
 #: jggstats/options/color_palette/viridis.title
 #: jiwillsurvive/options/color_palette/viridis.title
 #: jjridges/options/color_palette/viridis.title
@@ -87749,7 +87749,7 @@ msgid "Viterbi State"
 msgstr ""
 
 #: jcomplexupset/options/theme_style/theme_void.title
-#: jggsankeyfier/options/theme_style/void.title
+#: jjsankeyfier/options/theme_style/void.title
 #: jviolin/options/themex/void.title
 msgid "Void"
 msgstr ""
@@ -88445,7 +88445,7 @@ msgstr ""
 msgid "Width of exported plot"
 msgstr ""
 
-#: jggsankeyfier/options/node_width.description
+#: jjsankeyfier/options/node_width.description
 msgid "Width of nodes in the diagram"
 msgstr ""
 

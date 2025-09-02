@@ -1,37 +1,98 @@
 ---
-name:  riverplot
-title: Stream Plots
-jrs:   '1.1'
-
-clearWith:
-    - id
-    - time
-    - strata
-    - weight
-    - plotType
-    - fillType
-    - sortStreams
-    - labelNodes
-    - curveType
-    - showCounts
-    - showLegend
-    - originaltheme
-
+name: riverplot
+title: River Plots & Alluvial Diagrams
+jrs: '1.1'
+refs: ClinicoPath
 items:
-    - name:  todo
-      title: To Do
-      type:  Html
+    - name: todo
+      title: Welcome & Instructions
+      type: Html
+      visible: true
 
     - name: plot
-      title: Stream Plot
+      title: River Plot
       type: Image
-      width:  800
+      width: 800
       height: 600
       renderFun: .plot
-      requiresData: true
+      visible: true
 
-refs:
-    - ggplot2
-    - ClinicoPathJamoviModule
+    - name: diagnostics
+      title: Data Processing Diagnostics
+      type: Html
+      visible: (enableDiagnostics)
+
+    - name: flowTable
+      title: Flow Summary Table
+      type: Table
+      visible: (showCounts || showPercentages)
+      columns:
+          - name: from_stage
+            title: From Stage
+            type: text
+          - name: from_category
+            title: From Category
+            type: text
+          - name: to_stage
+            title: To Stage
+            type: text
+          - name: to_category
+            title: To Category
+            type: text
+          - name: count
+            title: Count
+            type: integer
+            visible: (showCounts)
+          - name: percentage
+            title: Percentage
+            type: number
+            format: dp:1
+            visible: (showPercentages)
+          - name: weight
+            title: Weighted Value
+            type: number
+            visible: (weight)
+
+    - name: stageTable
+      title: Stage Summary Table
+      type: Table
+      visible: (showCounts || showPercentages)  
+      columns:
+          - name: stage
+            title: Stage/Time
+            type: text
+          - name: category
+            title: Category
+            type: text
+          - name: count
+            title: Count
+            type: integer
+            visible: (showCounts)
+          - name: percentage
+            title: Percentage
+            type: number
+            format: dp:1
+            visible: (showPercentages)
+          - name: cumulative
+            title: Cumulative %
+            type: number
+            format: dp:1
+            visible: (showPercentages)
+
+    - name: transitionMatrix
+      title: Transition Matrix
+      type: Table
+      visible: (enableDiagnostics && (plotType:alluvial || plotType:flow))
+      columns: []
+
+    - name: riverplotObject
+      title: Riverplot Object Structure
+      type: Html
+      visible: (exportRiverplotObject)
+
+    - name: riverplotCode
+      title: CRAN Riverplot Compatible Code
+      type: Html
+      visible: (exportRiverplotObject)
 
 ...

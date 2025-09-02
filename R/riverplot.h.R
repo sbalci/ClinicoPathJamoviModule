@@ -10,17 +10,38 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             time = NULL,
             strata = NULL,
             weight = NULL,
-            plotType = "flow",
+            plotType = "alluvial",
             fillType = "first",
+            dataFormat = "auto",
             sortStreams = TRUE,
             labelNodes = TRUE,
-            curveType = "cubic",
+            curveType = "cardinal",
             showCounts = FALSE,
+            showPercentages = FALSE,
             showLegend = TRUE,
+            legendPosition = "right",
+            colorScheme = "default",
+            customColors = "",
+            nodeWidth = 0.1,
+            nodeGap = 0.05,
+            flowAlpha = 0.7,
             mytitle = "",
             xtitle = "",
             ytitle = "",
-            originaltheme = FALSE, ...) {
+            originaltheme = FALSE,
+            fontSize = 12,
+            plotWidth = 10,
+            plotHeight = 8,
+            enableDiagnostics = FALSE,
+            edgeGradient = TRUE,
+            nodeStyle = "regular",
+            edgeStyle = "gradient",
+            gravity = "center",
+            addMidPoints = FALSE,
+            reorderEdges = FALSE,
+            curveGranularity = 100,
+            backgroundLabels = FALSE,
+            exportRiverplotObject = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -35,7 +56,8 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
@@ -43,8 +65,9 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
-            private$..strata <- jmvcore::OptionVariable$new(
+                    "factor"),
+                default=NULL)
+            private$..strata <- jmvcore::OptionVariables$new(
                 "strata",
                 strata,
                 suggested=list(
@@ -64,16 +87,27 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plotType",
                 plotType,
                 options=list(
-                    "flow",
-                    "stream"),
-                default="flow")
+                    "alluvial",
+                    "sankey",
+                    "stream",
+                    "flow"),
+                default="alluvial")
             private$..fillType <- jmvcore::OptionList$new(
                 "fillType",
                 fillType,
                 options=list(
                     "first",
-                    "last"),
+                    "last",
+                    "frequency"),
                 default="first")
+            private$..dataFormat <- jmvcore::OptionList$new(
+                "dataFormat",
+                dataFormat,
+                options=list(
+                    "long",
+                    "wide",
+                    "auto"),
+                default="auto")
             private$..sortStreams <- jmvcore::OptionBool$new(
                 "sortStreams",
                 sortStreams,
@@ -86,19 +120,69 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "curveType",
                 curveType,
                 options=list(
+                    "cardinal",
                     "cubic",
-                    "quintic",
                     "linear",
-                    "sigmoid"),
-                default="cubic")
+                    "sigmoid",
+                    "sin",
+                    "basis",
+                    "step",
+                    "riverplot"),
+                default="cardinal")
             private$..showCounts <- jmvcore::OptionBool$new(
                 "showCounts",
                 showCounts,
+                default=FALSE)
+            private$..showPercentages <- jmvcore::OptionBool$new(
+                "showPercentages",
+                showPercentages,
                 default=FALSE)
             private$..showLegend <- jmvcore::OptionBool$new(
                 "showLegend",
                 showLegend,
                 default=TRUE)
+            private$..legendPosition <- jmvcore::OptionList$new(
+                "legendPosition",
+                legendPosition,
+                options=list(
+                    "right",
+                    "left",
+                    "top",
+                    "bottom"),
+                default="right")
+            private$..colorScheme <- jmvcore::OptionList$new(
+                "colorScheme",
+                colorScheme,
+                options=list(
+                    "default",
+                    "viridis",
+                    "set1",
+                    "clinical",
+                    "timeline",
+                    "custom"),
+                default="default")
+            private$..customColors <- jmvcore::OptionString$new(
+                "customColors",
+                customColors,
+                default="")
+            private$..nodeWidth <- jmvcore::OptionNumber$new(
+                "nodeWidth",
+                nodeWidth,
+                default=0.1,
+                min=0.05,
+                max=0.5)
+            private$..nodeGap <- jmvcore::OptionNumber$new(
+                "nodeGap",
+                nodeGap,
+                default=0.05,
+                min=0.01,
+                max=0.2)
+            private$..flowAlpha <- jmvcore::OptionNumber$new(
+                "flowAlpha",
+                flowAlpha,
+                default=0.7,
+                min=0.1,
+                max=1)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -115,6 +199,78 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..fontSize <- jmvcore::OptionNumber$new(
+                "fontSize",
+                fontSize,
+                default=12,
+                min=8,
+                max=20)
+            private$..plotWidth <- jmvcore::OptionNumber$new(
+                "plotWidth",
+                plotWidth,
+                default=10,
+                min=6,
+                max=20)
+            private$..plotHeight <- jmvcore::OptionNumber$new(
+                "plotHeight",
+                plotHeight,
+                default=8,
+                min=4,
+                max=16)
+            private$..enableDiagnostics <- jmvcore::OptionBool$new(
+                "enableDiagnostics",
+                enableDiagnostics,
+                default=FALSE)
+            private$..edgeGradient <- jmvcore::OptionBool$new(
+                "edgeGradient",
+                edgeGradient,
+                default=TRUE)
+            private$..nodeStyle <- jmvcore::OptionList$new(
+                "nodeStyle",
+                nodeStyle,
+                options=list(
+                    "regular",
+                    "point",
+                    "invisible"),
+                default="regular")
+            private$..edgeStyle <- jmvcore::OptionList$new(
+                "edgeStyle",
+                edgeStyle,
+                options=list(
+                    "gradient",
+                    "solid",
+                    "sin"),
+                default="gradient")
+            private$..gravity <- jmvcore::OptionList$new(
+                "gravity",
+                gravity,
+                options=list(
+                    "center",
+                    "top",
+                    "bottom"),
+                default="center")
+            private$..addMidPoints <- jmvcore::OptionBool$new(
+                "addMidPoints",
+                addMidPoints,
+                default=FALSE)
+            private$..reorderEdges <- jmvcore::OptionBool$new(
+                "reorderEdges",
+                reorderEdges,
+                default=FALSE)
+            private$..curveGranularity <- jmvcore::OptionInteger$new(
+                "curveGranularity",
+                curveGranularity,
+                default=100,
+                min=10,
+                max=1000)
+            private$..backgroundLabels <- jmvcore::OptionBool$new(
+                "backgroundLabels",
+                backgroundLabels,
+                default=FALSE)
+            private$..exportRiverplotObject <- jmvcore::OptionBool$new(
+                "exportRiverplotObject",
+                exportRiverplotObject,
+                default=FALSE)
 
             self$.addOption(private$..id)
             self$.addOption(private$..time)
@@ -122,15 +278,36 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..weight)
             self$.addOption(private$..plotType)
             self$.addOption(private$..fillType)
+            self$.addOption(private$..dataFormat)
             self$.addOption(private$..sortStreams)
             self$.addOption(private$..labelNodes)
             self$.addOption(private$..curveType)
             self$.addOption(private$..showCounts)
+            self$.addOption(private$..showPercentages)
             self$.addOption(private$..showLegend)
+            self$.addOption(private$..legendPosition)
+            self$.addOption(private$..colorScheme)
+            self$.addOption(private$..customColors)
+            self$.addOption(private$..nodeWidth)
+            self$.addOption(private$..nodeGap)
+            self$.addOption(private$..flowAlpha)
             self$.addOption(private$..mytitle)
             self$.addOption(private$..xtitle)
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..fontSize)
+            self$.addOption(private$..plotWidth)
+            self$.addOption(private$..plotHeight)
+            self$.addOption(private$..enableDiagnostics)
+            self$.addOption(private$..edgeGradient)
+            self$.addOption(private$..nodeStyle)
+            self$.addOption(private$..edgeStyle)
+            self$.addOption(private$..gravity)
+            self$.addOption(private$..addMidPoints)
+            self$.addOption(private$..reorderEdges)
+            self$.addOption(private$..curveGranularity)
+            self$.addOption(private$..backgroundLabels)
+            self$.addOption(private$..exportRiverplotObject)
         }),
     active = list(
         id = function() private$..id$value,
@@ -139,15 +316,36 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         weight = function() private$..weight$value,
         plotType = function() private$..plotType$value,
         fillType = function() private$..fillType$value,
+        dataFormat = function() private$..dataFormat$value,
         sortStreams = function() private$..sortStreams$value,
         labelNodes = function() private$..labelNodes$value,
         curveType = function() private$..curveType$value,
         showCounts = function() private$..showCounts$value,
+        showPercentages = function() private$..showPercentages$value,
         showLegend = function() private$..showLegend$value,
+        legendPosition = function() private$..legendPosition$value,
+        colorScheme = function() private$..colorScheme$value,
+        customColors = function() private$..customColors$value,
+        nodeWidth = function() private$..nodeWidth$value,
+        nodeGap = function() private$..nodeGap$value,
+        flowAlpha = function() private$..flowAlpha$value,
         mytitle = function() private$..mytitle$value,
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
-        originaltheme = function() private$..originaltheme$value),
+        originaltheme = function() private$..originaltheme$value,
+        fontSize = function() private$..fontSize$value,
+        plotWidth = function() private$..plotWidth$value,
+        plotHeight = function() private$..plotHeight$value,
+        enableDiagnostics = function() private$..enableDiagnostics$value,
+        edgeGradient = function() private$..edgeGradient$value,
+        nodeStyle = function() private$..nodeStyle$value,
+        edgeStyle = function() private$..edgeStyle$value,
+        gravity = function() private$..gravity$value,
+        addMidPoints = function() private$..addMidPoints$value,
+        reorderEdges = function() private$..reorderEdges$value,
+        curveGranularity = function() private$..curveGranularity$value,
+        backgroundLabels = function() private$..backgroundLabels$value,
+        exportRiverplotObject = function() private$..exportRiverplotObject$value),
     private = list(
         ..id = NA,
         ..time = NA,
@@ -155,15 +353,36 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..weight = NA,
         ..plotType = NA,
         ..fillType = NA,
+        ..dataFormat = NA,
         ..sortStreams = NA,
         ..labelNodes = NA,
         ..curveType = NA,
         ..showCounts = NA,
+        ..showPercentages = NA,
         ..showLegend = NA,
+        ..legendPosition = NA,
+        ..colorScheme = NA,
+        ..customColors = NA,
+        ..nodeWidth = NA,
+        ..nodeGap = NA,
+        ..flowAlpha = NA,
         ..mytitle = NA,
         ..xtitle = NA,
         ..ytitle = NA,
-        ..originaltheme = NA)
+        ..originaltheme = NA,
+        ..fontSize = NA,
+        ..plotWidth = NA,
+        ..plotHeight = NA,
+        ..enableDiagnostics = NA,
+        ..edgeGradient = NA,
+        ..nodeStyle = NA,
+        ..edgeStyle = NA,
+        ..gravity = NA,
+        ..addMidPoints = NA,
+        ..reorderEdges = NA,
+        ..curveGranularity = NA,
+        ..backgroundLabels = NA,
+        ..exportRiverplotObject = NA)
 )
 
 riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -171,42 +390,124 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        diagnostics = function() private$.items[["diagnostics"]],
+        flowTable = function() private$.items[["flowTable"]],
+        stageTable = function() private$.items[["stageTable"]],
+        transitionMatrix = function() private$.items[["transitionMatrix"]],
+        riverplotObject = function() private$.items[["riverplotObject"]],
+        riverplotCode = function() private$.items[["riverplotCode"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Stream Plots",
-                refs=list(
-                    "ggplot2",
-                    "ClinicoPathJamoviModule"),
-                clearWith=list(
-                    "id",
-                    "time",
-                    "strata",
-                    "weight",
-                    "plotType",
-                    "fillType",
-                    "sortStreams",
-                    "labelNodes",
-                    "curveType",
-                    "showCounts",
-                    "showLegend",
-                    "originaltheme"))
+                title="River Plots & Alluvial Diagrams",
+                refs="ClinicoPath")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="Welcome & Instructions",
+                visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Stream Plot",
+                title="River Plot",
                 width=800,
                 height=600,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="diagnostics",
+                title="Data Processing Diagnostics",
+                visible="(enableDiagnostics)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="flowTable",
+                title="Flow Summary Table",
+                visible="(showCounts || showPercentages)",
+                columns=list(
+                    list(
+                        `name`="from_stage", 
+                        `title`="From Stage", 
+                        `type`="text"),
+                    list(
+                        `name`="from_category", 
+                        `title`="From Category", 
+                        `type`="text"),
+                    list(
+                        `name`="to_stage", 
+                        `title`="To Stage", 
+                        `type`="text"),
+                    list(
+                        `name`="to_category", 
+                        `title`="To Category", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer", 
+                        `visible`="(showCounts)"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="dp:1", 
+                        `visible`="(showPercentages)"),
+                    list(
+                        `name`="weight", 
+                        `title`="Weighted Value", 
+                        `type`="number", 
+                        `visible`="(weight)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stageTable",
+                title="Stage Summary Table",
+                visible="(showCounts || showPercentages)",
+                columns=list(
+                    list(
+                        `name`="stage", 
+                        `title`="Stage/Time", 
+                        `type`="text"),
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer", 
+                        `visible`="(showCounts)"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="dp:1", 
+                        `visible`="(showPercentages)"),
+                    list(
+                        `name`="cumulative", 
+                        `title`="Cumulative %", 
+                        `type`="number", 
+                        `format`="dp:1", 
+                        `visible`="(showPercentages)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="transitionMatrix",
+                title="Transition Matrix",
+                visible="(enableDiagnostics && (plotType:alluvial || plotType:flow))",
+                columns=list()))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="riverplotObject",
+                title="Riverplot Object Structure",
+                visible="(exportRiverplotObject)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="riverplotCode",
+                title="CRAN Riverplot Compatible Code",
+                visible="(exportRiverplotObject)"))}))
 
 riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "riverplotBase",
@@ -229,120 +530,210 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' River Plots
+#' River Plots & Alluvial Diagrams
 #'
-#' Creates river plots to visualize how categorical variables change over time 
-#' or sequential stages. Shows temporal flows of categories across time 
-#' periods, 
-#' ideal for tracking patient journeys, treatment progressions, disease 
-#' stages, 
-#' or any categorical changes over time. Requires a time/sequence variable and 
-#' supports individual entity tracking.
+#' Creates comprehensive river plots, alluvial diagrams, and stream charts to 
+#' visualize
+#' flows, transitions, and temporal changes in categorical data. Supports 
+#' individual
+#' entity tracking, aggregate trends, and multi-stage pathways. Perfect for 
+#' patient
+#' journeys, treatment progressions, categorical changes over time, and flow 
+#' analysis.
 #' 
 #'
 #' @examples
 #' \donttest{
-#' # Load temporal clinical data
-#' data(patient_followup)
-#'
 #' # Basic temporal flow - Track treatment response changes over time
 #' riverplot(
-#'   data = patient_followup,
-#'   time = "follow_up_date",
+#'   data = patient_data,
+#'   time = "follow_up_month",
 #'   strata = "treatment_response",
-#'   plotType = "flow",
+#'   plotType = "alluvial",
 #'   labelNodes = TRUE
 #' )
 #'
-#' # Individual patient tracking over time with ID
+#' # Individual patient tracking with ID
 #' riverplot(
-#'   data = patient_followup,
+#'   data = longitudinal_data,
 #'   id = "patient_id",
-#'   time = "follow_up_date",
+#'   time = "visit_date",
 #'   strata = "disease_stage",
 #'   plotType = "flow",
 #'   fillType = "last",
-#'   showCounts = TRUE,
-#'   curveType = "cubic"
+#'   showCounts = TRUE
 #' )
 #'
-#' # Weighted temporal flow - Account for severity scores
+#' # Multi-stage pathway (wide format data)
 #' riverplot(
-#'   data = patient_followup,
-#'   time = "visit_number",
-#'   strata = "pain_level",
-#'   weight = "patient_count",
-#'   plotType = "flow",
-#'   curveType = "sigmoid"
+#'   data = pathway_data,
+#'   strata = c("baseline_status", "month3_status", "month6_status"),
+#'   plotType = "sankey",
+#'   fillType = "frequency",
+#'   curveType = "cardinal"
 #' )
 #'
-#' # Stream chart - Aggregate trends over time (no individual tracking)
+#' # Weighted stream chart - Account for patient counts or values
 #' riverplot(
-#'   data = patient_followup,
-#'   time = "month",
+#'   data = aggregate_data,
+#'   time = "quarter",
 #'   strata = "outcome_category",
+#'   weight = "patient_count",
 #'   plotType = "stream",
 #'   showLegend = TRUE
-#' )
-#'
-#' # Complex temporal tracking - Multi-level response changes
-#' riverplot(
-#'   data = longitudinal_study,
-#'   id = "subject_id",
-#'   time = "assessment_period",
-#'   strata = "functional_status",
-#'   weight = "quality_of_life_score",
-#'   plotType = "flow",
-#'   labelNodes = TRUE,
-#'   showCounts = TRUE
 #' )
 #'}
 #' @param data The data as a data frame.
 #' @param id Optional identifier for tracking individual entities (patients,
-#'   cases) through transitions.
-#' @param time Required variable representing time points or sequential stages
-#'   (e.g., visit dates, follow-up periods).
-#' @param strata The categorical variable that changes over time (e.g.,
-#'   treatment response, disease stage).
-#' @param weight Optional numerical variable to determine stream width.
-#' @param plotType Flow diagrams track individual entities through time
-#'   periods.  Stream charts show aggregate category trends over time.
-#' @param fillType Determines how colors are assigned to flows.
-#' @param sortStreams Sort alluvial streams by frequency.
-#' @param labelNodes Add labels to nodes.
-#' @param curveType Style of curves connecting time periods. Smooth curves
-#'   work best for temporal flows.
-#' @param showCounts Display counts on the diagram.
-#' @param showLegend Display color legend.
-#' @param mytitle Title for the plot.
-#' @param xtitle Label for the x-axis.
-#' @param ytitle Label for the y-axis.
-#' @param originaltheme Use a minimal theme instead of the default ggplot2
-#'   theme.
+#'   cases, customers) through transitions. Required for individual-level flow
+#'   tracking. Leave empty for aggregate flow visualization.
+#' @param time Variable representing time points or sequential stages (visit
+#'   dates, follow-up periods, sequential stages). Required for longitudinal
+#'   data with single strata variable. Leave empty when using wide format data
+#'   with multiple strata variables.
+#' @param strata Variables containing the categories that flow between stages.
+#'   For longitudinal data: single variable with categories (treatment_response,
+#'   disease_stage).  For wide format: multiple variables representing
+#'   sequential stages  (baseline_status, month3_status, month6_status). Each
+#'   should be a factor with meaningful category names.
+#' @param weight Optional numerical variable to determine flow width
+#'   proportional to values. Examples: patient count, cost, severity score,
+#'   revenue. If not provided, flows represent equal counts/frequencies. Use for
+#'   emphasizing quantitative importance of different pathways.
+#' @param plotType Type of flow visualization. 'alluvial' creates flowing
+#'   streams with curved connections, ideal for transitions. 'sankey' creates
+#'   directed flow diagrams  with straighter connections, good for process
+#'   flows. 'stream' shows aggregate category trends over time. 'flow' tracks
+#'   individual entities through time periods.
+#' @param fillType Determines how colors are assigned to flows. 'first' colors
+#'   flows based on initial category (tracking origins). 'last' colors by final
+#'   category  (tracking destinations). 'frequency' uses flow volume for colors
+#'   (emphasizes major pathways).
+#' @param dataFormat Format of input data. 'long' format has rows for each
+#'   time point with single strata variable. 'wide' format has multiple strata
+#'   variables as columns representing different stages. 'auto' detects format
+#'   based on variables provided.
+#' @param sortStreams Sort alluvial streams by frequency/size. Larger flows
+#'   are positioned more prominently, making major pathways easier to identify.
+#'   Recommended for highlighting dominant patterns.
+#' @param labelNodes Display category labels on nodes (vertical bars). Labels
+#'   identify what each segment represents. Recommended unless space is limited
+#'   or labels overlap.
+#' @param curveType Shape of connecting curves between stages. 'cardinal'
+#'   creates smooth flowing curves (most aesthetic). 'sin' creates sinusoidal
+#'   curves (CRAN riverplot style). 'riverplot' uses the advanced curve
+#'   generation from CRAN riverplot package.
+#' @param showCounts Display numerical counts or values on nodes. Shows exact
+#'   frequencies or sums for each category at each stage. Useful for precise
+#'   interpretation but may clutter visualization with many categories.
+#' @param showPercentages Display percentages on nodes or flows. Shows
+#'   relative proportions within each stage or flow. Complement to absolute
+#'   counts for better interpretation.
+#' @param showLegend Display color legend explaining category mappings.
+#'   Recommended when colors represent meaningful categories. Can be hidden to
+#'   save space if category labels are clearly visible.
+#' @param legendPosition Position of the color legend relative to the plot.
+#' @param colorScheme Color palette for categories. Choose based on data type
+#'   and aesthetic preference.
+#' @param customColors Comma-separated hex colors for custom color scheme
+#'   (e.g., "#1f77b4,#ff7f0e,#2ca02c"). Only used when Color Scheme is set to
+#'   'Custom'.
+#' @param nodeWidth Width of nodes (vertical bars) as proportion of plot
+#'   width. Adjust for better balance between nodes and flows.
+#' @param nodeGap Gap between categories within each node as proportion of
+#'   node height. Smaller values create more compact nodes.
+#' @param flowAlpha Transparency of flow connections (0 = fully transparent, 1
+#'   = opaque). Lower values help see overlapping flows.
+#' @param mytitle Main title for the plot. Leave empty for no title.
+#' @param xtitle Label for x-axis (time/stage axis). Leave empty for default
+#'   label.
+#' @param ytitle Label for y-axis (frequency/count axis). Leave empty for
+#'   default label.
+#' @param originaltheme Use original ggalluvial package theme instead of
+#'   minimal theme. May provide better default styling for some plot types.
+#' @param fontSize Base font size for labels and text in the plot.
+#' @param plotWidth Width of the plot in inches for export.
+#' @param plotHeight Height of the plot in inches for export.
+#' @param enableDiagnostics Display diagnostic information about data
+#'   processing, flow calculations, and potential issues. Useful for
+#'   troubleshooting complex datasets.
+#' @param edgeGradient Apply color gradients to edges for smoother visual
+#'   transitions. Based on CRAN riverplot package gradient capabilities.
+#' @param nodeStyle Visual style for nodes. 'regular' shows filled rectangles,
+#'   'point' shows small circles, 'invisible' hides nodes but maintains
+#'   connections.
+#' @param edgeStyle Visual style for edges. 'gradient' creates smooth color
+#'   transitions, 'sin' varies edge thickness sinusoidally for aesthetic effect.
+#' @param gravity Vertical alignment strategy for nodes within each stage.
+#'   Affects how nodes are positioned relative to each other.
+#' @param addMidPoints Add intermediate invisible nodes to create smoother
+#'   edge paths. Helps reduce edge crossings and improve visual clarity (CRAN
+#'   riverplot feature).
+#' @param reorderEdges Automatically attempt to disentangle and optimize edge
+#'   routing to reduce crossings. Uses algorithms from CRAN riverplot package.
+#' @param curveGranularity Number of points used to generate smooth curves.
+#'   Higher values create smoother curves but increase rendering time.
+#' @param backgroundLabels Add background boxes to labels for better
+#'   readability, similar to CRAN riverplot's bglabel functionality.
+#' @param exportRiverplotObject Create and display a riverplot-compatible
+#'   object structure for use with the CRAN riverplot package.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnostics} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$flowTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stageTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$transitionMatrix} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$riverplotObject} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$riverplotCode} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$flowTable$asDF}
+#'
+#' \code{as.data.frame(results$flowTable)}
 #'
 #' @export
 riverplot <- function(
     data,
-    id,
-    time,
+    id = NULL,
+    time = NULL,
     strata,
     weight = NULL,
-    plotType = "flow",
+    plotType = "alluvial",
     fillType = "first",
+    dataFormat = "auto",
     sortStreams = TRUE,
     labelNodes = TRUE,
-    curveType = "cubic",
+    curveType = "cardinal",
     showCounts = FALSE,
+    showPercentages = FALSE,
     showLegend = TRUE,
+    legendPosition = "right",
+    colorScheme = "default",
+    customColors = "",
+    nodeWidth = 0.1,
+    nodeGap = 0.05,
+    flowAlpha = 0.7,
     mytitle = "",
     xtitle = "",
     ytitle = "",
-    originaltheme = FALSE) {
+    originaltheme = FALSE,
+    fontSize = 12,
+    plotWidth = 10,
+    plotHeight = 8,
+    enableDiagnostics = FALSE,
+    edgeGradient = TRUE,
+    nodeStyle = "regular",
+    edgeStyle = "gradient",
+    gravity = "center",
+    addMidPoints = FALSE,
+    reorderEdges = FALSE,
+    curveGranularity = 100,
+    backgroundLabels = FALSE,
+    exportRiverplotObject = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("riverplot requires jmvcore to be installed (restart may be required)")
@@ -370,15 +761,36 @@ riverplot <- function(
         weight = weight,
         plotType = plotType,
         fillType = fillType,
+        dataFormat = dataFormat,
         sortStreams = sortStreams,
         labelNodes = labelNodes,
         curveType = curveType,
         showCounts = showCounts,
+        showPercentages = showPercentages,
         showLegend = showLegend,
+        legendPosition = legendPosition,
+        colorScheme = colorScheme,
+        customColors = customColors,
+        nodeWidth = nodeWidth,
+        nodeGap = nodeGap,
+        flowAlpha = flowAlpha,
         mytitle = mytitle,
         xtitle = xtitle,
         ytitle = ytitle,
-        originaltheme = originaltheme)
+        originaltheme = originaltheme,
+        fontSize = fontSize,
+        plotWidth = plotWidth,
+        plotHeight = plotHeight,
+        enableDiagnostics = enableDiagnostics,
+        edgeGradient = edgeGradient,
+        nodeStyle = nodeStyle,
+        edgeStyle = edgeStyle,
+        gravity = gravity,
+        addMidPoints = addMidPoints,
+        reorderEdges = reorderEdges,
+        curveGranularity = curveGranularity,
+        backgroundLabels = backgroundLabels,
+        exportRiverplotObject = exportRiverplotObject)
 
     analysis <- riverplotClass$new(
         options = options,

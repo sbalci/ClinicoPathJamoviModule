@@ -13,7 +13,8 @@
       "Bash(R:*)",
       "WebFetch(domain:ozancanozdemir.r-universe.dev)",
       "Bash(sed:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Read(/Users/serdarbalci/Downloads/**)"
     ],
     "deny": [],
     "ask": [],

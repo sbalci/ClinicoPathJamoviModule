@@ -1,18 +1,18 @@
 # Sankey Diagram Analysis Documentation
 
-This document provides a comprehensive overview of the Sankey Diagram Analysis module (jggsankeyfier), detailing its features, user interface elements, and the underlying R functions.
+This document provides a comprehensive overview of the Sankey Diagram Analysis module (jjsankeyfier), detailing its features, user interface elements, and the underlying R functions.
 
 ## Feature Summary
 
-The jggsankeyfier module is a powerful tool for visualizing flows and relationships between different categories or stages. It is particularly useful for illustrating transitions, allocations, or movements of quantities through a system.
+The jjsankeyfier module is a powerful tool for visualizing flows and relationships between different categories or stages. It is particularly useful for illustrating transitions, allocations, or movements of quantities through a system.
 
 The module's features can be broadly categorized as follows:
 
-*   **Core Sankey Diagram Generation:** Create basic Sankey diagrams to show flows between nodes.
-*   **Node and Link Customization:** Options for styling nodes and links (e.g., colors, widths, labels).
-*   **Flow Aggregation and Disaggregation:** Control how flows are grouped or broken down.
-*   **Interactive Features:** Tools for exploring and manipulating the Sankey diagram.
-*   **Export Options:** Capabilities to save the generated diagrams in various formats.
+* **Core Sankey Diagram Generation:** Create basic Sankey diagrams to show flows between nodes.
+* **Node and Link Customization:** Options for styling nodes and links (e.g., colors, widths, labels).
+* **Flow Aggregation and Disaggregation:** Control how flows are grouped or broken down.
+* **Interactive Features:** Tools for exploring and manipulating the Sankey diagram.
+* **Export Options:** Capabilities to save the generated diagrams in various formats.
 
 ## Feature Details
 

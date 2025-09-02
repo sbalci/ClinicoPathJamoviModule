@@ -1,4 +1,4 @@
-# Create test data for jggsankeyfier function
+# Create test data for jjsankeyfier function
 # This script generates comprehensive datasets for testing sankey and alluvial diagrams
 
 set.seed(123)
@@ -114,7 +114,7 @@ sankey_comprehensive_data <- list(
 
 save(sankey_comprehensive_data, file = "data/sankey_comprehensive_data.rda")
 
-message("Successfully created comprehensive test datasets for jggsankeyfier function:")
+message("Successfully created comprehensive test datasets for jjsankeyfier function:")
 message("- sankey_simple_data.rda")
 message("- treatment_pathways_data.rda") 
 message("- education_pathways_data.rda")

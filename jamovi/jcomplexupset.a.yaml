@@ -1,7 +1,7 @@
 ---
 name: jcomplexupset
 title: Complex UpSet Plot Visualization
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotD
 menuSubgroup: Set Visualization
 version: '0.0.31'
 jas: '1.2'

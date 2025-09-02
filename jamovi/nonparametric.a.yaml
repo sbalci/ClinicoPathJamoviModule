@@ -4,7 +4,7 @@ title: "Non-Parametric Statistical Methods"
 menuGroup: Exploration
 menuSubgroup: Advanced Statistical Tests
 menuSubtitle: "Comprehensive non-parametric analysis with effect sizes and robust methods"
-version: '0.1.0'
+version: '0.0.31'
 jas: '1.2'
 
 description:

@@ -1,0 +1,509 @@
+---
+name:  groupedbar
+title: Grouped Bar Chart Comparison
+menuGroup: JJStatsPlotD
+menuSubgroup: 'Descriptives'
+menuSubtitle: 'Compare measurements across multiple groups'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Creates grouped bar charts to compare measurements, responses, or outcomes 
+        across different groups. Suitable for comparing lab values across disease groups,
+        treatment responses across hospitals, survey responses across demographics,
+        or any metric that varies by categorical groupings.
+    R:
+        dontrun: true
+        usage: |
+            # Example: Compare lab values across disease groups
+            groupedbar(
+                data = clinicalData,
+                items = c("glucose", "cholesterol", "creatinine"),
+                groups = "disease_group",
+                values = "measurement"
+            )
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: items
+      title: Items/Measurements to Compare
+      type: Variables
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            The measurements, variables, or items to compare across groups.
+            Can be categorical (for frequencies) or continuous (for summary statistics).
+
+    - name: groups
+      title: Grouping Variable
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Variable containing group categories (e.g., disease groups, hospitals, 
+            age groups, treatment arms, regions, etc.).
+
+    - name: values
+      title: Values Variable (Optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+          R: >
+            Numeric variable containing measurement values.
+            If NULL, frequencies or summary statistics will be calculated from the data.
+
+    - name: facetby
+      title: Facet By (Optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+          R: >
+            Optional variable to create separate panels (e.g., by gender, time point, location).
+
+    - name: statistic
+      title: Summary Statistic
+      type: List
+      options:
+        - title: Mean
+          name: mean
+        - title: Median
+          name: median
+        - title: Sum
+          name: sum
+        - title: Count
+          name: count
+        - title: Percentage
+          name: percentage
+        - title: Proportion
+          name: proportion
+        - title: Standard Deviation
+          name: sd
+        - title: Standard Error
+          name: se
+        - title: Min
+          name: min
+        - title: Max
+          name: max
+      default: mean
+      description:
+          R: >
+            Which summary statistic to display for continuous variables.
+
+    - name: plottype
+      title: Plot Layout
+      type: List
+      options:
+        - title: Grouped (Side-by-side)
+          name: grouped
+        - title: Stacked
+          name: stacked
+        - title: Stacked Percentage
+          name: stacked_percent
+        - title: Dodged
+          name: dodged
+        - title: Horizontal Grouped
+          name: horizontal
+        - title: Cleveland Dot Plot
+          name: cleveland
+      default: grouped
+      description:
+          R: >
+            Choose the bar chart layout style.
+
+    - name: sortorder
+      title: Sort Items By
+      type: List
+      options:
+        - title: Highest Value (First Group)
+          name: highest_first
+        - title: Highest Value (Last Group)
+          name: highest_last
+        - title: Average Across Groups
+          name: average
+        - title: Maximum Value
+          name: maximum
+        - title: Range (Max-Min)
+          name: range
+        - title: Alphabetical
+          name: alphabetical
+        - title: As Provided
+          name: none
+      default: highest_first
+      description:
+          R: >
+            How to sort the items in the chart.
+
+    - name: grouporder
+      title: Order Groups By
+      type: List
+      options:
+        - title: As in Data
+          name: data
+        - title: Alphabetical
+          name: alphabetical
+        - title: By Mean Value
+          name: mean
+        - title: By Median Value
+          name: median
+        - title: Custom Order
+          name: custom
+      default: data
+      description:
+          R: >
+            How to order the groups in the legend and bars.
+
+    - name: customgrouporder
+      title: Custom Group Order
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated list of group names in desired order 
+            (e.g., "Control,Mild,Moderate,Severe").
+
+    - name: showvalues
+      title: Show Values on Bars
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display numeric values on or next to bars.
+
+    - name: valueposition
+      title: Value Label Position
+      type: List
+      options:
+        - title: Inside Bar
+          name: inside
+        - title: Outside Bar
+          name: outside
+        - title: Center of Bar
+          name: center
+      default: outside
+      description:
+          R: >
+            Position of value labels relative to bars.
+
+    - name: showerrorbars
+      title: Show Error Bars
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display error bars for continuous variables.
+
+    - name: errortype
+      title: Error Bar Type
+      type: List
+      options:
+        - title: Standard Error
+          name: se
+        - title: Standard Deviation
+          name: sd
+        - title: 95% Confidence Interval
+          name: ci95
+        - title: 99% Confidence Interval
+          name: ci99
+        - title: Interquartile Range
+          name: iqr
+        - title: Min-Max Range
+          name: range
+      default: se
+      description:
+          R: >
+            Type of error bars to display.
+
+    - name: showconnectors
+      title: Show Connecting Lines
+      type: Bool
+      default: false
+      description:
+          R: >
+            Draw lines connecting values across groups to show patterns.
+
+    - name: colorscheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Clinical (Green-Yellow-Red)
+          name: clinical
+        - title: Sequential Blue
+          name: blues
+        - title: Sequential Red
+          name: reds
+        - title: Diverging (Blue-White-Red)
+          name: diverging
+        - title: Viridis
+          name: viridis
+        - title: Color Blind Friendly
+          name: colorblind
+        - title: Grayscale
+          name: grayscale
+        - title: Custom
+          name: custom
+      default: default
+      description:
+          R: >
+            Color palette for groups.
+
+    - name: customcolors
+      title: Custom Colors (Optional)
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated hex colors for each group (e.g., "#1f77b4,#ff7f0e,#2ca02c").
+
+    - name: referenceline
+      title: Reference Line Value (Optional)
+      type: Number
+      description:
+          R: >
+            Add a horizontal reference line at this value (e.g., normal range limit, cutoff).
+
+    - name: referencelinelabel
+      title: Reference Line Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Label for the reference line.
+
+    - name: referenceband
+      title: Reference Band (Optional)
+      type: String
+      default: ''
+      description:
+          R: >
+            Add a reference band using format "min,max" (e.g., "3.5,5.5" for normal range).
+
+    - name: title
+      title: Chart Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Main title for the chart.
+
+    - name: subtitle
+      title: Chart Subtitle
+      type: String
+      default: ''
+      description:
+          R: >
+            Subtitle or description for the chart.
+
+    - name: xlabel
+      title: X-Axis Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Label for the x-axis.
+
+    - name: ylabel
+      title: Y-Axis Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Label for the y-axis.
+
+    - name: showlegend
+      title: Show Legend
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display legend for groups.
+
+    - name: legendtitle
+      title: Legend Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Title for the legend.
+
+    - name: legendposition
+      title: Legend Position
+      type: List
+      options:
+        - title: Top
+          name: top
+        - title: Bottom
+          name: bottom
+        - title: Right
+          name: right
+        - title: Left
+          name: left
+        - title: None
+          name: none
+      default: right
+      description:
+          R: >
+            Position of the legend.
+
+    - name: showstatistics
+      title: Show Statistical Tests
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform and display statistical tests comparing groups.
+
+    - name: testtype
+      title: Statistical Test
+      type: List
+      options:
+        - title: Automatic Selection
+          name: auto
+        - title: ANOVA
+          name: anova
+        - title: Kruskal-Wallis
+          name: kruskal
+        - title: Chi-square
+          name: chisq
+        - title: Fisher's Exact
+          name: fisher
+        - title: t-test (2 groups only)
+          name: ttest
+        - title: Wilcoxon (2 groups only)
+          name: wilcoxon
+        - title: Trend Test
+          name: trend
+      default: auto
+      description:
+          R: >
+            Statistical test for comparing groups.
+
+    - name: posthoc
+      title: Post-hoc Tests
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform pairwise post-hoc comparisons when significant.
+
+    - name: padjust
+      title: P-value Adjustment
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: FDR
+          name: fdr
+      default: none
+      description:
+          R: >
+            Method for adjusting p-values in multiple comparisons.
+
+    - name: decimals
+      title: Decimal Places
+      type: Integer
+      default: 1
+      min: 0
+      max: 4
+      description:
+          R: >
+            Number of decimal places for displayed values.
+
+    - name: highlightmax
+      title: Highlight Maximum Values
+      type: Bool
+      default: false
+      description:
+          R: >
+            Emphasize the highest value for each item.
+
+    - name: highlightmin
+      title: Highlight Minimum Values
+      type: Bool
+      default: false
+      description:
+          R: >
+            Emphasize the lowest value for each item.
+
+    - name: highlightgroups
+      title: Highlight Specific Groups
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated list of group names to highlight.
+
+    - name: gridlines
+      title: Show Grid Lines
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display background grid lines.
+
+    - name: aspectratio
+      title: Aspect Ratio
+      type: List
+      options:
+        - title: Automatic
+          name: auto
+        - title: Square (1:1)
+          name: square
+        - title: Wide (16:9)
+          name: wide
+        - title: Tall (9:16)
+          name: tall
+        - title: Golden (1.618:1)
+          name: golden
+      default: auto
+      description:
+          R: >
+            Aspect ratio of the plot.
+
+    - name: width
+      title: Plot Width (inches)
+      type: Number
+      default: 10
+      min: 5
+      max: 20
+      description:
+          R: >
+            Width of the plot in inches.
+
+    - name: height
+      title: Plot Height (inches)
+      type: Number
+      default: 8
+      min: 4
+      max: 20
+      description:
+          R: >
+            Height of the plot in inches.
+
+    - name: showTable
+      title: Show Data Table
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a summary table below the plot.
+
+...
