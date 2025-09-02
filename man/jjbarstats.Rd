@@ -9,6 +9,7 @@ jjbarstats(
   dep,
   group,
   grvar = NULL,
+  counts = NULL,
   excl = FALSE,
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
@@ -16,7 +17,17 @@ jjbarstats(
   padjustmethod = "holm",
   originaltheme = FALSE,
   resultssubtitle = FALSE,
-  messages = FALSE
+  messages = FALSE,
+  paired = FALSE,
+  label = "percentage",
+  digits = 2,
+  digitsperc = 0,
+  proportiontest = FALSE,
+  bfmessage = FALSE,
+  conflevel = 0.95,
+  ratio = "",
+  clinicalpreset = "custom",
+  showexplanations = TRUE
 )
 }
 \arguments{
@@ -27,6 +38,9 @@ jjbarstats(
 \item{group}{.}
 
 \item{grvar}{.}
+
+\item{counts}{A variable in data containing counts, or NULL if each row
+represents a single observation.}
 
 \item{excl}{.}
 
@@ -45,10 +59,47 @@ Disabling improves performance significantly.}
 
 \item{messages}{Display statistical messages in console.  Disabling
 improves performance.}
+
+\item{paired}{Logical indicating whether data came from a within-subjects
+or repeated measures design study. If TRUE, McNemar's test  will be used.
+If FALSE, Pearson's chi-square test will be used.}
+
+\item{label}{What information needs to be displayed on the label  in each
+bar segment.}
+
+\item{digits}{Number of digits after decimal point for statistical results.}
+
+\item{digitsperc}{Number of decimal places for percentage labels.}
+
+\item{proportiontest}{Decides whether proportion test for x variable is to
+be  carried out for each level of y.}
+
+\item{bfmessage}{Display Bayes Factor in favor of the null hypothesis.
+Only relevant for parametric test.}
+
+\item{conflevel}{Confidence/credible interval level.}
+
+\item{ratio}{A comma-separated list of expected proportions for the
+proportion test  (should sum to 1). For example: '0.5,0.5' for two equal
+groups or  '0.25,0.25,0.25,0.25' for four equal groups. Leave empty for
+equal  theoretical proportions.}
+
+\item{clinicalpreset}{Predefined configurations for common clinical
+scenarios.  Automatically sets appropriate statistical methods and
+parameters.}
+
+\item{showexplanations}{Display detailed explanations of statistical
+methods, assumptions,  and clinical interpretations to guide analysis and
+result interpretation.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$report} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr

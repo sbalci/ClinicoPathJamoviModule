@@ -7,7 +7,9 @@ clearWith:
     - dep
     - group
     - grvar
+    - counts
     - excl
+    - paired
     - typestatistics
     - pairwisecomparisons
     - pairwisedisplay
@@ -15,34 +17,54 @@ clearWith:
     - originaltheme
     - resultssubtitle
     - messages
+    - label
+    - digits
+    - digitsperc
+    - proportiontest
+    - bfmessage
+    - conflevel
+    - ratio
+    - clinicalpreset
+    - showexplanations
 
 
 items:
 
+    - name: about
+      title: About This Analysis
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+
+    - name: assumptions
+      title: Statistical Assumptions & Warnings
+      type: Html  
+
+    - name: interpretation
+      title: Results Interpretation
+      type: Html
+
+    - name: report
+      title: Copy-Ready Report
+      type: Html
+
     - name:  todo
-      title: To Do
+      title: Analysis Setup
       type:  Html
 
-
-      # title: '`Bar Chart ${group} - {dep} by {grvar}`'
-
     - name: plot2
-      title: '`Bar Chart Splitted by {grvar}`'
+      title: '`Bar Chart Grouped by {grvar}`'
       type: Image
-      # width:  800
-      # height: 600
       renderFun: .plot2
       requiresData: true
       visible: (grvar)
 
-      # title: '`Bar Chart ${group} - {dep}`'
-
-
     - name: plot
       title: Bar Chart
       type: Image
-      # width:  800
-      # height: 600
       renderFun: .plot
       requiresData: true
 

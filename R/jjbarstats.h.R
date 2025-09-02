@@ -9,6 +9,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
+            counts = NULL,
             excl = FALSE,
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
@@ -16,7 +17,17 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             padjustmethod = "holm",
             originaltheme = FALSE,
             resultssubtitle = FALSE,
-            messages = FALSE, ...) {
+            messages = FALSE,
+            paired = FALSE,
+            label = "percentage",
+            digits = 2,
+            digitsperc = 0,
+            proportiontest = FALSE,
+            bfmessage = FALSE,
+            conflevel = 0.95,
+            ratio = "",
+            clinicalpreset = "custom",
+            showexplanations = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -48,6 +59,14 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"),
+                default=NULL)
+            private$..counts <- jmvcore::OptionVariable$new(
+                "counts",
+                counts,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
                 default=NULL)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
@@ -99,10 +118,67 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "messages",
                 messages,
                 default=FALSE)
+            private$..paired <- jmvcore::OptionBool$new(
+                "paired",
+                paired,
+                default=FALSE)
+            private$..label <- jmvcore::OptionList$new(
+                "label",
+                label,
+                options=list(
+                    "percentage",
+                    "counts",
+                    "both"),
+                default="percentage")
+            private$..digits <- jmvcore::OptionInteger$new(
+                "digits",
+                digits,
+                default=2,
+                min=0,
+                max=5)
+            private$..digitsperc <- jmvcore::OptionInteger$new(
+                "digitsperc",
+                digitsperc,
+                default=0,
+                min=0,
+                max=2)
+            private$..proportiontest <- jmvcore::OptionBool$new(
+                "proportiontest",
+                proportiontest,
+                default=FALSE)
+            private$..bfmessage <- jmvcore::OptionBool$new(
+                "bfmessage",
+                bfmessage,
+                default=FALSE)
+            private$..conflevel <- jmvcore::OptionNumber$new(
+                "conflevel",
+                conflevel,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..ratio <- jmvcore::OptionString$new(
+                "ratio",
+                ratio,
+                default="")
+            private$..clinicalpreset <- jmvcore::OptionList$new(
+                "clinicalpreset",
+                clinicalpreset,
+                options=list(
+                    "custom",
+                    "diagnostic",
+                    "treatment",
+                    "biomarker",
+                    "riskfactor"),
+                default="custom")
+            private$..showexplanations <- jmvcore::OptionBool$new(
+                "showexplanations",
+                showexplanations,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
+            self$.addOption(private$..counts)
             self$.addOption(private$..excl)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..pairwisecomparisons)
@@ -111,11 +187,22 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..resultssubtitle)
             self$.addOption(private$..messages)
+            self$.addOption(private$..paired)
+            self$.addOption(private$..label)
+            self$.addOption(private$..digits)
+            self$.addOption(private$..digitsperc)
+            self$.addOption(private$..proportiontest)
+            self$.addOption(private$..bfmessage)
+            self$.addOption(private$..conflevel)
+            self$.addOption(private$..ratio)
+            self$.addOption(private$..clinicalpreset)
+            self$.addOption(private$..showexplanations)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
+        counts = function() private$..counts$value,
         excl = function() private$..excl$value,
         typestatistics = function() private$..typestatistics$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
@@ -123,11 +210,22 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         padjustmethod = function() private$..padjustmethod$value,
         originaltheme = function() private$..originaltheme$value,
         resultssubtitle = function() private$..resultssubtitle$value,
-        messages = function() private$..messages$value),
+        messages = function() private$..messages$value,
+        paired = function() private$..paired$value,
+        label = function() private$..label$value,
+        digits = function() private$..digits$value,
+        digitsperc = function() private$..digitsperc$value,
+        proportiontest = function() private$..proportiontest$value,
+        bfmessage = function() private$..bfmessage$value,
+        conflevel = function() private$..conflevel$value,
+        ratio = function() private$..ratio$value,
+        clinicalpreset = function() private$..clinicalpreset$value,
+        showexplanations = function() private$..showexplanations$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
+        ..counts = NA,
         ..excl = NA,
         ..typestatistics = NA,
         ..pairwisecomparisons = NA,
@@ -135,13 +233,28 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..padjustmethod = NA,
         ..originaltheme = NA,
         ..resultssubtitle = NA,
-        ..messages = NA)
+        ..messages = NA,
+        ..paired = NA,
+        ..label = NA,
+        ..digits = NA,
+        ..digitsperc = NA,
+        ..proportiontest = NA,
+        ..bfmessage = NA,
+        ..conflevel = NA,
+        ..ratio = NA,
+        ..clinicalpreset = NA,
+        ..showexplanations = NA)
 )
 
 jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjbarstatsResults",
     inherit = jmvcore::Group,
     active = list(
+        about = function() private$.items[["about"]],
+        summary = function() private$.items[["summary"]],
+        assumptions = function() private$.items[["assumptions"]],
+        interpretation = function() private$.items[["interpretation"]],
+        report = function() private$.items[["report"]],
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]]),
@@ -160,22 +273,58 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
+                    "counts",
                     "excl",
+                    "paired",
                     "typestatistics",
                     "pairwisecomparisons",
                     "pairwisedisplay",
                     "padjustmethod",
                     "originaltheme",
                     "resultssubtitle",
-                    "messages"))
+                    "messages",
+                    "label",
+                    "digits",
+                    "digitsperc",
+                    "proportiontest",
+                    "bfmessage",
+                    "conflevel",
+                    "ratio",
+                    "clinicalpreset",
+                    "showexplanations"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About This Analysis",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible="(dep && group)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Statistical Assumptions & Warnings",
+                visible="(dep && group)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Results Interpretation",
+                visible="(dep && group)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="report",
+                title="Copy-Ready Report",
+                visible="(dep && group)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="Analysis Setup"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Bar Chart Splitted by {grvar}`",
+                title="`Bar Chart Grouped by {grvar}`",
                 renderFun=".plot2",
                 requiresData=TRUE,
                 visible="(grvar)"))
@@ -221,6 +370,8 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param grvar .
+#' @param counts A variable in data containing counts, or NULL if each row
+#'   represents a single observation.
 #' @param excl .
 #' @param typestatistics .
 #' @param pairwisecomparisons .
@@ -231,8 +382,35 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Disabling improves performance significantly.
 #' @param messages Display statistical messages in console.  Disabling
 #'   improves performance.
+#' @param paired Logical indicating whether data came from a within-subjects
+#'   or repeated measures design study. If TRUE, McNemar's test  will be used.
+#'   If FALSE, Pearson's chi-square test will be used.
+#' @param label What information needs to be displayed on the label  in each
+#'   bar segment.
+#' @param digits Number of digits after decimal point for statistical results.
+#' @param digitsperc Number of decimal places for percentage labels.
+#' @param proportiontest Decides whether proportion test for x variable is to
+#'   be  carried out for each level of y.
+#' @param bfmessage Display Bayes Factor in favor of the null hypothesis.
+#'   Only relevant for parametric test.
+#' @param conflevel Confidence/credible interval level.
+#' @param ratio A comma-separated list of expected proportions for the
+#'   proportion test  (should sum to 1). For example: '0.5,0.5' for two equal
+#'   groups or  '0.25,0.25,0.25,0.25' for four equal groups. Leave empty for
+#'   equal  theoretical proportions.
+#' @param clinicalpreset Predefined configurations for common clinical
+#'   scenarios.  Automatically sets appropriate statistical methods and
+#'   parameters.
+#' @param showexplanations Display detailed explanations of statistical
+#'   methods, assumptions,  and clinical interpretations to guide analysis and
+#'   result interpretation.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$report} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -244,6 +422,7 @@ jjbarstats <- function(
     dep,
     group,
     grvar = NULL,
+    counts = NULL,
     excl = FALSE,
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
@@ -251,7 +430,17 @@ jjbarstats <- function(
     padjustmethod = "holm",
     originaltheme = FALSE,
     resultssubtitle = FALSE,
-    messages = FALSE) {
+    messages = FALSE,
+    paired = FALSE,
+    label = "percentage",
+    digits = 2,
+    digitsperc = 0,
+    proportiontest = FALSE,
+    bfmessage = FALSE,
+    conflevel = 0.95,
+    ratio = "",
+    clinicalpreset = "custom",
+    showexplanations = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbarstats requires jmvcore to be installed (restart may be required)")
@@ -259,12 +448,14 @@ jjbarstats <- function(
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
+    if ( ! missing(counts)) counts <- jmvcore::resolveQuo(jmvcore::enquo(counts))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL),
-            `if`( ! missing(grvar), grvar, NULL))
+            `if`( ! missing(grvar), grvar, NULL),
+            `if`( ! missing(counts), counts, NULL))
 
     for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -274,6 +465,7 @@ jjbarstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
+        counts = counts,
         excl = excl,
         typestatistics = typestatistics,
         pairwisecomparisons = pairwisecomparisons,
@@ -281,7 +473,17 @@ jjbarstats <- function(
         padjustmethod = padjustmethod,
         originaltheme = originaltheme,
         resultssubtitle = resultssubtitle,
-        messages = messages)
+        messages = messages,
+        paired = paired,
+        label = label,
+        digits = digits,
+        digitsperc = digitsperc,
+        proportiontest = proportiontest,
+        bfmessage = bfmessage,
+        conflevel = conflevel,
+        ratio = ratio,
+        clinicalpreset = clinicalpreset,
+        showexplanations = showexplanations)
 
     analysis <- jjbarstatsClass$new(
         options = options,

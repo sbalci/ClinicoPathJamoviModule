@@ -270,7 +270,7 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                visible="(grvar && dep && dep.length >= 2)"))
+                visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -278,8 +278,7 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE,
-                visible="(dep && dep.length >= 2)"))}))
+                requiresData=TRUE))}))
 
 jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjcorrmatBase",
