@@ -4,28 +4,45 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Quick Clinical Setup
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: clinicalpreset
+        label: "Analysis Type"
+      - type: CheckBox
+        name: showexplanations
+        label: "Show Clinical Guidance"
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: "Outcome Variable (what you're measuring)"
         children:
           - type: VariablesListBox
             name: dep
             isTarget: true
       - type: TargetLayoutBox
-        label: Grouping Variable
+        label: "Group Variable (what you're comparing)"
         children:
           - type: VariablesListBox
             name: group
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Split By (Optional)
+        label: "Subgroup Analysis (Optional)"
         children:
           - type: VariablesListBox
             name: grvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: "Frequency Counts (Optional)"
+        children:
+          - type: VariablesListBox
+            name: counts
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
@@ -33,7 +50,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Data Options
+        label: Data Handling
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -41,8 +58,12 @@ children:
             children:
               - type: CheckBox
                 name: excl
+                label: "Exclude Missing Data"
+              - type: CheckBox
+                name: paired
+                label: "Paired/Matched Data (McNemar's Test)"
       - type: Label
-        label: Test Method
+        label: Statistical Method
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -50,8 +71,15 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+                label: "Test Type"
+              - type: CheckBox
+                name: proportiontest
+                label: "Include Proportion Tests"
+              - type: CheckBox
+                name: bfmessage
+                label: "Show Bayes Factor (for Bayesian)"
       - type: Label
-        label: Pairwise Comparisons
+        label: Post-hoc Comparisons (when >2 groups)
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -59,19 +87,37 @@ children:
             children:
               - type: CheckBox
                 name: pairwisecomparisons
+                label: "Perform Group-by-Group Comparisons"
                 children:
                   - type: ComboBox
                     name: pairwisedisplay
+                    label: "Show Results"
                     enable: (pairwisecomparisons)
                   - type: ComboBox
                     name: padjustmethod
+                    label: "Multiple Comparison Correction"
                     enable: (pairwisecomparisons)
+      - type: Label
+        label: Advanced Parameters
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: conflevel
+                label: "Confidence Level (0.90-0.99)"
+                format: number
+              - type: TextBox
+                name: ratio
+                label: "Expected Proportions (e.g., 0.5,0.5)"
+                format: string
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
     children:
       - type: Label
-        label: Display Options
+        label: Plot Styling
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -79,7 +125,28 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
+                label: "Use ggstatsplot Theme"
               - type: CheckBox
                 name: resultssubtitle
+                label: "Show Statistics in Plot Subtitle"
               - type: CheckBox
                 name: messages
+                label: "Show Console Messages"
+      - type: Label
+        label: Bar Chart Labels
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: label
+                label: "Bar Label Type"
+              - type: TextBox
+                name: digits
+                label: "Decimal Places (Statistics)"
+                format: number
+              - type: TextBox
+                name: digitsperc
+                label: "Decimal Places (Percentages)"
+                format: number

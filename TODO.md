@@ -32,14 +32,6 @@ echo "/document-function FUNC_NAME" | claude
 
 
 
-- jjbarstats - Bar Charts
-echo "/check-function jjbarstats" | claude
-echo "/checkpoint jjbarstats" | claude
-echo "/prepare-translation jjbarstats" | claude
-echo "/review-function jjbarstats" | claude
-echo "/fix-function jjbarstats" | claude
-echo "/document-function jjbarstats" | claude
-
 - jjpiestats - Pie Charts
 echo "/check-function jjpiestats" | claude
 echo "/checkpoint jjpiestats" | claude
