@@ -279,3 +279,31 @@ items:
           title: p
           type: number
           format: zto,pvalue
+
+    - name: trendTest
+      title: Trend Test
+      type: Table
+      description: Cochran-Armitage trend test results
+      visible: (trendTest)
+      refs: DescTools
+
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - layers
+
+      columns:
+        - name: test
+          title: Test
+          type: text
+          content: Cochran-Armitage trend
+
+        - name: statistic
+          title: Z
+          type: number
+
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue

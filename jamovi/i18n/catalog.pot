@@ -220,7 +220,7 @@ msgstr ""
 #: enhancednonparametric/ui[0][2][0]/confidence_level.suffix
 #: enhancedroc/ui[2][0][0][0]/confidenceLevel.suffix
 #: exacttests/ui[1][1]/ciWidth.suffix
-#: ggsegmentedtotalbar/ui[3][0]/label_threshold.suffix
+#: jjsegmentedtotalbar/ui[3][0]/label_threshold.suffix
 #: likelihoodratio/ui[1][2]/confidenceLevel.suffix
 #: likelihoodratio/ui[3][2]/customPrevalenceMax.suffix
 #: mixedeffectscox/ui[4][0]/confidence_level.suffix
@@ -820,7 +820,7 @@ msgstr ""
 msgid "1 Decimal"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format/decimal1.title
+#: jjsegmentedtotalbar/options/percentage_format/decimal1.title
 msgid "1 Decimal (80.5%)"
 msgstr ""
 
@@ -977,8 +977,8 @@ msgstr ""
 msgid "10:50"
 msgstr ""
 
-#: package/analyses/ggsegmentedtotalbar.menuSubtitle
-#: ggsegmentedtotalbar/options.menuSubtitle
+#: package/analyses/jjsegmentedtotalbar.menuSubtitle
+#: jjsegmentedtotalbar/options.menuSubtitle
 msgid "100% Stacked Bar Charts for Proportional Data"
 msgstr ""
 
@@ -1065,7 +1065,7 @@ msgstr ""
 msgid "2 Decimals"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format/decimal2.title
+#: jjsegmentedtotalbar/options/percentage_format/decimal2.title
 msgid "2 Decimals (80.50%)"
 msgstr ""
 
@@ -2477,7 +2477,7 @@ msgstr ""
 msgid "Add risk table showing numbers at risk over time."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/add_outline.title
+#: jjsegmentedtotalbar/options/add_outline.title
 msgid "Add Segment Outlines"
 msgstr ""
 
@@ -2548,7 +2548,7 @@ msgstr ""
 msgid "Add vertical lines at group means"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/add_outline.description.jamovi
+#: jjsegmentedtotalbar/options/add_outline.description.jamovi
 msgid "Add white borders around each segment for clarity."
 msgstr ""
 
@@ -2759,7 +2759,7 @@ msgid "Adjust the size of points in the diagnostic plots."
 msgstr ""
 
 #: advancedbarplot/options/bar_width.description.jamovi
-#: ggsegmentedtotalbar/options/bar_width.description.jamovi
+#: jjsegmentedtotalbar/options/bar_width.description.jamovi
 msgid "Adjust the width of bars."
 msgstr ""
 
@@ -4378,7 +4378,7 @@ msgstr ""
 
 #: advancedbarplot/options/sort_bars/alpha.title
 #: coefplot/options/sort_coefs/alphabetical.title
-#: ggsegmentedtotalbar/options/sort_categories/alpha.title
+#: jjsegmentedtotalbar/options/sort_categories/alpha.title
 #: gtsummary/options/sortVariables/alphabetical.title
 #: jforestmodel/options/sort_variables/alphabetical.title
 #: jggsankeyfier/options/sort_nodes/alphabetical.title
@@ -6497,7 +6497,7 @@ msgid "Bar Color"
 msgstr ""
 
 #: advancedbarplot/options/orientation.title
-#: ggsegmentedtotalbar/options/orientation.title
+#: jjsegmentedtotalbar/options/orientation.title
 msgid "Bar Orientation"
 msgstr ""
 
@@ -6534,7 +6534,7 @@ msgid "Bar Type"
 msgstr ""
 
 #: advancedbarplot/options/bar_width.title
-#: ggsegmentedtotalbar/options/bar_width.title
+#: jjsegmentedtotalbar/options/bar_width.title
 #: waterfall/options/barWidth.title
 msgid "Bar Width"
 msgstr ""
@@ -7325,11 +7325,11 @@ msgid "BBC Design Principles"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/bbc_multi.title
-#: ggsegmentedtotalbar/options/color_palette/bbc_multi.title
+#: jjsegmentedtotalbar/options/color_palette/bbc_multi.title
 msgid "BBC Multi-color"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style/bbc_style.title
+#: jjsegmentedtotalbar/options/chart_style/bbc_style.title
 msgid "BBC News Style"
 msgstr ""
 
@@ -8337,7 +8337,7 @@ msgstr ""
 msgid "Biweight Midcorrelation"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color/black.title
+#: jjsegmentedtotalbar/options/outline_color/black.title
 msgid "Black"
 msgstr ""
 
@@ -9071,7 +9071,7 @@ msgstr ""
 #: advancedbarplot/options/legend_position/bottom.title
 #: bbcplots/options/legend_position/bottom.title
 #: ggprism/options/legend_position/bottom.title
-#: ggsegmentedtotalbar/options/legend_position/bottom.title
+#: jjsegmentedtotalbar/options/legend_position/bottom.title
 #: grafify/options/legend_position/bottom.title
 #: jiwillsurvive/options/legend_position/bottom.title
 #: jjradarplot/options/legendPosition/bottom.title
@@ -9389,7 +9389,7 @@ msgstr ""
 msgid "By Group"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories/largest_segment.title
+#: jjsegmentedtotalbar/options/sort_categories/largest_segment.title
 msgid "By Largest Segment"
 msgstr ""
 
@@ -9431,7 +9431,7 @@ msgstr ""
 msgid "By Stage"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories/total.title
+#: jjsegmentedtotalbar/options/sort_categories/total.title
 msgid "By Total Value"
 msgstr ""
 
@@ -10719,7 +10719,7 @@ msgstr ""
 
 #: agreement/results/overviewTable.columns.title
 #: enhancedfrequency/results/results/variableSummary.columns.title
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 msgid "Categories"
 msgstr ""
@@ -10743,7 +10743,7 @@ msgstr ""
 #: cohenskappa/results/categoryStats.columns.title
 #: enhancedfrequency/results/results/combinedSummary.columns.title
 #: epidemiosurvival/results/apc_effects.columns.title
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 #: modelbuilder/results/riskScoreTable.columns.title
 #: stagemigration/results/executiveSummary.columns.title
 #: stagemigration/results/willRogersClinicalRecommendation.columns.title
@@ -10771,7 +10771,7 @@ msgstr ""
 msgid "Category Labels"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 msgid "Category Total"
 msgstr ""
 
@@ -10780,7 +10780,7 @@ msgstr ""
 msgid "Category Variable"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/x_var.title
+#: jjsegmentedtotalbar/options/x_var.title
 msgid "Category Variable (X-axis)"
 msgstr ""
 
@@ -11368,17 +11368,17 @@ msgstr ""
 msgid "Chart height in pixels for consistent export sizing."
 msgstr ""
 
-#: ggsegmentedtotalbar/results/interpretation.title
+#: jjsegmentedtotalbar/results/interpretation.title
 msgid "Chart Interpretation"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[2].label
+#: jjsegmentedtotalbar/ui[2].label
 #: jwaffle/ui[1].label
 #: lollipop/ui[0][1][0].label
 msgid "Chart Options"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style.title
+#: jjsegmentedtotalbar/options/chart_style.title
 msgid "Chart Style"
 msgstr ""
 
@@ -11386,7 +11386,7 @@ msgstr ""
 msgid "Chart Subtitle"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/summary.title
+#: jjsegmentedtotalbar/results/summary.title
 msgid "Chart Summary"
 msgstr ""
 
@@ -11400,7 +11400,7 @@ msgid "Chart Title"
 msgstr ""
 
 #: bbcplots/options/chart_type.title
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 #: labcontrolcharts/results/controlLimits.columns.title
 #: qualitycontrol/results/controlChartsResults.columns.title
 msgid "Chart Type"
@@ -11580,7 +11580,7 @@ msgstr ""
 msgid "Choose calculation method (Lachin-Foulkes for full design, Schoenfeld for events-based)."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color.description.jamovi
+#: jjsegmentedtotalbar/options/outline_color.description.jamovi
 msgid "Choose color for segment borders."
 msgstr ""
 
@@ -11588,7 +11588,7 @@ msgstr ""
 msgid "Choose color palette for visualizations."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/color_palette.description.jamovi
+#: jjsegmentedtotalbar/options/color_palette.description.jamovi
 msgid "Choose color scheme for bar segments."
 msgstr ""
 
@@ -11742,7 +11742,7 @@ msgstr ""
 msgid "Choose the type of UpSet plot to generate."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style.description.jamovi
+#: jjsegmentedtotalbar/options/chart_style.description.jamovi
 msgid "Choose the visual style and theme for your chart."
 msgstr ""
 
@@ -12166,7 +12166,7 @@ msgid "Clean (minimal annotations)"
 msgstr ""
 
 #: advancedbarplot/options/theme_style/clean.title
-#: ggsegmentedtotalbar/options/chart_style/clean.title
+#: jjsegmentedtotalbar/options/chart_style/clean.title
 msgid "Clean & Modern"
 msgstr ""
 
@@ -13095,8 +13095,8 @@ msgstr ""
 
 #: advancedbarplot/options/color_palette/clinical.title
 #: enhancedtables/options/table_theme/clinical.title
-#: ggsegmentedtotalbar/options/chart_style/clinical.title
-#: ggsegmentedtotalbar/options/color_palette/clinical.title
+#: jjsegmentedtotalbar/options/chart_style/clinical.title
+#: jjsegmentedtotalbar/options/color_palette/clinical.title
 #: summarydata2/options/pivot_layout/clinical.title
 #: tableone2/options/pivot_format/clinical.title
 msgid "Clinical Research"
@@ -13459,13 +13459,13 @@ msgid "ClinicoPath"
 msgstr ""
 
 #: package/analyses/advancedbarplot.menuSubgroup
-#: package/analyses/ggsegmentedtotalbar.menuSubgroup
+#: package/analyses/jjsegmentedtotalbar.menuSubgroup
 #: package/analyses/economistplots.menuSubgroup
 #: package/analyses/bbcplots.menuSubgroup
 #: advancedbarplot/options.menuSubgroup
 #: bbcplots/options.menuSubgroup
 #: economistplots/options.menuSubgroup
-#: ggsegmentedtotalbar/options.menuSubgroup
+#: jjsegmentedtotalbar/options.menuSubgroup
 msgid "ClinicoPath Advanced Plots"
 msgstr ""
 
@@ -14531,7 +14531,7 @@ msgstr ""
 #: advancedraincloud/options/color_palette.title
 #: eurostatmap/options/color_palette.title
 #: ggprism/options/prism_palette.title
-#: ggsegmentedtotalbar/options/color_palette.title
+#: jjsegmentedtotalbar/options/color_palette.title
 #: grafify/options/color_palette.title
 #: hullplot/options/color_palette.title
 #: jcomplexupset/options/color_palette.title
@@ -14653,7 +14653,7 @@ msgstr ""
 
 #: advancedbarplot/options/color_palette/colorblind.title
 #: decisiongraph/options/colorScheme/colorblind.title
-#: ggsegmentedtotalbar/options/color_palette/colorblind.title
+#: jjsegmentedtotalbar/options/color_palette/colorblind.title
 #: jwaffle/options/color_palette/colorblind.title
 #: tidyplots/options/colorScheme/friendly.title
 msgid "Colorblind Friendly"
@@ -15875,7 +15875,7 @@ msgstr ""
 msgid "Composite Score Threshold"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/composition_table.title
+#: jjsegmentedtotalbar/results/composition_table.title
 msgid "Composition Analysis"
 msgstr ""
 
@@ -18615,7 +18615,7 @@ msgstr ""
 #: enhancedfactorvariable/results/results/combinedFactorAnalysis.columns.title
 #: enhancedtwowayfrequency/results/observedFrequencies.columns.title
 #: flowchart/results/nodeData.columns.title
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 #: ihcscoring/results/molecularclassification/subtypedistribution.columns.title
 #: modalitycomparison/results/discordanceTable.columns.title
 #: modalitycomparison/results/directionalBiasTable.columns.title
@@ -19130,7 +19130,7 @@ msgstr ""
 msgid "Cramér's V, phi coefficient, and association measures"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[1][0][0].label
+#: jjsegmentedtotalbar/ui[1][0][0].label
 msgid "Create 100% stacked bar charts showing proportional composition within categories"
 msgstr ""
 
@@ -19248,8 +19248,8 @@ msgstr ""
 msgid "Create risk group classifications"
 msgstr ""
 
-#: package/analyses/ggsegmentedtotalbar.description
-#: ggsegmentedtotalbar/options.description.main
+#: package/analyses/jjsegmentedtotalbar.description
+#: jjsegmentedtotalbar/options.description.main
 msgid "Create segmented total bar charts (100% stacked bars) that show proportional \n"
 "breakdowns within categories. Perfect for displaying composition data where \n"
 "each bar represents 100% and segments show relative proportions."
@@ -22264,7 +22264,7 @@ msgid "Default Colors"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/default.title
-#: ggsegmentedtotalbar/options/color_palette/default.title
+#: jjsegmentedtotalbar/options/color_palette/default.title
 #: jviolin/options/color_palette/default.title
 msgid "Default ggplot2"
 msgstr ""
@@ -22901,7 +22901,7 @@ msgstr ""
 msgid "Detailed Statistical Output"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/detailed_stats.title
+#: jjsegmentedtotalbar/results/detailed_stats.title
 msgid "Detailed Statistics"
 msgstr ""
 
@@ -27311,7 +27311,7 @@ msgstr ""
 msgid "Enter a title for your bar chart."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/plot_title.description.jamovi
+#: jjsegmentedtotalbar/options/plot_title.description.jamovi
 msgid "Enter a title for your chart."
 msgstr ""
 
@@ -27393,17 +27393,17 @@ msgstr ""
 msgid "Enter time points for survival estimates (e.g., 12,24,36)."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/legend_title.description.jamovi
+#: jjsegmentedtotalbar/options/legend_title.description.jamovi
 msgid "Enter title for the legend."
 msgstr ""
 
 #: advancedbarplot/options/x_title.description.jamovi
-#: ggsegmentedtotalbar/options/x_title.description.jamovi
+#: jjsegmentedtotalbar/options/x_title.description.jamovi
 msgid "Enter title for the x-axis."
 msgstr ""
 
 #: advancedbarplot/options/y_title.description.jamovi
-#: ggsegmentedtotalbar/options/y_title.description.jamovi
+#: jjsegmentedtotalbar/options/y_title.description.jamovi
 msgid "Enter title for the y-axis."
 msgstr ""
 
@@ -29675,7 +29675,7 @@ msgid "Export R Code"
 msgstr ""
 
 #: advancedbarplot/options/export_options.title
-#: ggsegmentedtotalbar/options/export_ready.title
+#: jjsegmentedtotalbar/options/export_ready.title
 msgid "Export Ready"
 msgstr ""
 
@@ -33679,7 +33679,7 @@ msgstr ""
 msgid "Graph Options"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style/prism_style.title
+#: jjsegmentedtotalbar/options/chart_style/prism_style.title
 msgid "GraphPad Prism Style"
 msgstr ""
 
@@ -33704,7 +33704,7 @@ msgstr ""
 msgid "Graphs and Plots"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color/gray.title
+#: jjsegmentedtotalbar/options/outline_color/gray.title
 #: jcomplexupset/options/theme_style/theme_gray.title
 #: jggridges/options/theme_style/theme_gray.title
 #: jviolin/options/themex/gray.title
@@ -35753,7 +35753,7 @@ msgstr ""
 #: alluvial/options/orient/horr.title
 #: alluvial2/options/orient/horr.title
 #: economistplots/options/plot_orientation/horizontal.title
-#: ggsegmentedtotalbar/options/orientation/horizontal.title
+#: jjsegmentedtotalbar/options/orientation/horizontal.title
 #: jjtreemap/ui[1][2][0][5]/labelAlignH.label
 #: lollipop/options/orientation/horizontal.title
 msgid "Horizontal"
@@ -35851,7 +35851,7 @@ msgstr ""
 msgid "How Sequential Testing Works"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format.description.jamovi
+#: jjsegmentedtotalbar/options/percentage_format.description.jamovi
 msgid "How to format percentage values."
 msgstr ""
 
@@ -36947,8 +36947,8 @@ msgstr ""
 msgid "In Table"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[7][0]/plot_width.suffix
-#: ggsegmentedtotalbar/ui[7][0]/plot_height.suffix
+#: jjsegmentedtotalbar/ui[7][0]/plot_width.suffix
+#: jjsegmentedtotalbar/ui[7][0]/plot_height.suffix
 msgid "inches"
 msgstr ""
 
@@ -38237,7 +38237,7 @@ msgstr ""
 #: ggflowchart/results/todo.title
 #: ggoncoplot/results/instructions.title
 #: ggprism/results/instructions.title
-#: ggsegmentedtotalbar/results/instructions.title
+#: jjsegmentedtotalbar/results/instructions.title
 #: grafify/results/todo.title
 #: groupedforest/results/todo.title
 #: grouplasso/results/instructions.title
@@ -39527,9 +39527,9 @@ msgstr ""
 #: package/analyses/lollipop.menuGroup
 #: package/analyses/jjarcdiagram.menuGroup
 #: package/analyses/riverplot.menuGroup
-#: package/analyses/ggsegmentedtotalbar.menuGroup
+#: package/analyses/jjsegmentedtotalbar.menuGroup
 #: advancedraincloud/options.menuGroup
-#: ggsegmentedtotalbar/options.menuGroup
+#: jjsegmentedtotalbar/options.menuGroup
 #: jjarcdiagram/options.menuGroup
 #: jjbarstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
@@ -40217,7 +40217,7 @@ msgstr ""
 msgid "Label Size"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/label_threshold.title
+#: jjsegmentedtotalbar/options/label_threshold.title
 msgid "Label Threshold (%)"
 msgstr ""
 
@@ -40245,7 +40245,7 @@ msgstr ""
 msgid "Labels & Titles"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[3].label
+#: jjsegmentedtotalbar/ui[3].label
 msgid "Labels and Percentages"
 msgstr ""
 
@@ -40739,7 +40739,7 @@ msgstr ""
 msgid "Layout"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[5].label
+#: jjsegmentedtotalbar/ui[5].label
 msgid "Layout and Styling"
 msgstr ""
 
@@ -40834,7 +40834,7 @@ msgstr ""
 #: advancedraincloud/options/rain_side/l.title
 #: bbcplots/options/legend_position/left.title
 #: ggprism/options/legend_position/left.title
-#: ggsegmentedtotalbar/options/legend_position/left.title
+#: jjsegmentedtotalbar/options/legend_position/left.title
 #: grafify/options/legend_position/left.title
 #: jiwillsurvive/options/legend_position/left.title
 #: jjradarplot/options/legendPosition/left.title
@@ -40890,7 +40890,7 @@ msgstr ""
 #: advancedbarplot/options/legend_position.title
 #: bbcplots/options/legend_position.title
 #: ggprism/options/legend_position.title
-#: ggsegmentedtotalbar/options/legend_position.title
+#: jjsegmentedtotalbar/options/legend_position.title
 #: grafify/options/legend_position.title
 #: jiwillsurvive/options/legend_position.title
 #: jjradarplot/options/legendPosition.title
@@ -40904,7 +40904,7 @@ msgstr ""
 msgid "Legend position"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/legend_title.title
+#: jjsegmentedtotalbar/options/legend_title.title
 #: jwaffle/options/legendtitle.title
 #: jwaffle/ui[2][0][0]/legendtitle.label
 #: tidyplots/options/legendTitle.title
@@ -44090,7 +44090,7 @@ msgstr ""
 #: enhancedtwowayfrequency/results/associationMeasuresTable.columns.title
 #: enhancedtwowayfrequency/results/comprehensiveAnalysisSummary.columns.title
 #: factoranalysis/results/results/comprehensiveResults.columns.title
-#: ggsegmentedtotalbar/results/detailed_stats.columns.title
+#: jjsegmentedtotalbar/results/detailed_stats.columns.title
 #: likelihoodratio/results/summaryTable.columns.title
 #: likelihoodratio/results/diagnosticOddsRatio.columns.title
 #: linechart/results/correlation.columns.title
@@ -48725,7 +48725,7 @@ msgid "Nature"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/nature.title
-#: ggsegmentedtotalbar/options/color_palette/nature.title
+#: jjsegmentedtotalbar/options/color_palette/nature.title
 msgid "Nature Journal"
 msgstr ""
 
@@ -49285,7 +49285,7 @@ msgstr ""
 msgid "No CV"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format/integer.title
+#: jjsegmentedtotalbar/options/percentage_format/integer.title
 msgid "No Decimals (80%)"
 msgstr ""
 
@@ -49340,7 +49340,7 @@ msgid "No Scaling"
 msgstr ""
 
 #: advancedbarplot/options/sort_bars/none.title
-#: ggsegmentedtotalbar/options/sort_categories/none.title
+#: jjsegmentedtotalbar/options/sort_categories/none.title
 #: jpps/options/sort_results/none.title
 msgid "No Sorting"
 msgstr ""
@@ -49764,8 +49764,8 @@ msgstr ""
 #: friedmantest/options/correction/none.title
 #: ggprism/options/legend_position/none.title
 #: ggprism/options/error_bars/none.title
-#: ggsegmentedtotalbar/options/legend_position/none.title
-#: ggsegmentedtotalbar/options/outline_color/none.title
+#: jjsegmentedtotalbar/options/legend_position/none.title
+#: jjsegmentedtotalbar/options/outline_color/none.title
 #: grafify/options/error_type/none.title
 #: grafify/options/legend_position/none.title
 #: ihccluster/options/heatmapScale/none.title
@@ -51443,7 +51443,7 @@ msgstr ""
 msgid "Only show intersections with at least this many members."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/label_threshold.description.jamovi
+#: jjsegmentedtotalbar/options/label_threshold.description.jamovi
 msgid "Only show labels for segments above this percentage."
 msgstr ""
 
@@ -51757,7 +51757,7 @@ msgid "Optimize diagnostic test panels by evaluating various combination strateg
 msgstr ""
 
 #: advancedbarplot/options/export_options.description.jamovi
-#: ggsegmentedtotalbar/options/export_ready.description.jamovi
+#: jjsegmentedtotalbar/options/export_ready.description.jamovi
 msgid "Optimize plot for publication/presentation export."
 msgstr ""
 
@@ -51867,7 +51867,7 @@ msgid "Optional variable to create separate panels for each level."
 msgstr ""
 
 #: advancedbarplot/options/facet_var.description.jamovi
-#: ggsegmentedtotalbar/options/facet_var.description.jamovi
+#: jjsegmentedtotalbar/options/facet_var.description.jamovi
 msgid "Optional variable to create separate panels."
 msgstr ""
 
@@ -52560,7 +52560,7 @@ msgstr ""
 msgid "Outliers New Model"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color.title
+#: jjsegmentedtotalbar/options/outline_color.title
 msgid "Outline Color"
 msgstr ""
 
@@ -53724,7 +53724,7 @@ msgstr ""
 msgid "Panel Size"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/facet_var.title
+#: jjsegmentedtotalbar/options/facet_var.title
 msgid "Panel Variable (Optional)"
 msgstr ""
 
@@ -55039,8 +55039,8 @@ msgstr ""
 #: enhancedfactorvariable/results/results/detailedLevelsAnalysis.columns.title
 #: enhancedfactorvariable/results/results/combinedFactorAnalysis.columns.title
 #: enhancedfrequency/results/results/combinedSummary.columns.title
-#: ggsegmentedtotalbar/options/y_title.default
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/options/y_title.default
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 #: ihccluster/results/clusterSizes.columns.title
 #: ihccluster/results/distr.columns.title
 #: ihcscoring/results/automatedanalysis/intensityanalysis.columns.title
@@ -55095,7 +55095,7 @@ msgstr ""
 msgid "Percentage Display Pattern"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/percentage_format.title
+#: jjsegmentedtotalbar/options/percentage_format.title
 msgid "Percentage Format"
 msgstr ""
 
@@ -56437,7 +56437,7 @@ msgstr ""
 msgid "Plot Description"
 msgstr ""
 
-#: ggsegmentedtotalbar/ui[7].label
+#: jjsegmentedtotalbar/ui[7].label
 #: jjbetweenstats/ui[4][0].label
 #: jjcorrmat/ui[4][0].label
 #: jjdotplotstats/ui[5][0].label
@@ -56557,7 +56557,7 @@ msgstr ""
 #: enhancedroc/options/plotHeight.title
 #: factoranalysis/options/plotHeight.title
 #: ggoncoplot/options/plotHeight.title
-#: ggsegmentedtotalbar/options/plot_height.title
+#: jjsegmentedtotalbar/options/plot_height.title
 #: grafify/options/plot_height.title
 #: jggheatmap/options/plot_height.title
 #: jjbetweenstats/options/plotheight.title
@@ -56944,7 +56944,7 @@ msgstr ""
 #: economistplots/options/plot_title.title
 #: ggflowchart/options/plot_title.title
 #: ggprism/options/plot_title.title
-#: ggsegmentedtotalbar/options/plot_title.title
+#: jjsegmentedtotalbar/options/plot_title.title
 #: grafify/options/title_text.title
 #: groupedforest/options/plot_title.title
 #: hullplot/options/plot_title.title
@@ -57037,7 +57037,7 @@ msgstr ""
 #: enhancedroc/options/plotWidth.title
 #: factoranalysis/options/plotWidth.title
 #: ggoncoplot/options/plotWidth.title
-#: ggsegmentedtotalbar/options/plot_width.title
+#: jjsegmentedtotalbar/options/plot_width.title
 #: grafify/options/plot_width.title
 #: jggheatmap/options/plot_width.title
 #: jjbetweenstats/options/plotwidth.title
@@ -59046,7 +59046,7 @@ msgstr ""
 msgid "Presentation"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/chart_style/presentation.title
+#: jjsegmentedtotalbar/options/chart_style/presentation.title
 msgid "Presentation Style"
 msgstr ""
 
@@ -59577,7 +59577,7 @@ msgstr ""
 msgid "Prism Candy Bright (9 colors)"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/color_palette/prism_colorblind_safe.title
+#: jjsegmentedtotalbar/options/color_palette/prism_colorblind_safe.title
 #: raincloud/options/color_palette/prism_colorblind_safe.title
 msgid "Prism Colorblind Safe"
 msgstr ""
@@ -60471,7 +60471,7 @@ msgstr ""
 #: enhancedfactorvariable/options/outputFormat/publication.title
 #: enhancedfrequency/options/exportFormat/publication.title
 #: enhancedtables/options/table_theme/publication.title
-#: ggsegmentedtotalbar/options/chart_style/publication.title
+#: jjsegmentedtotalbar/options/chart_style/publication.title
 #: progressionsurvival/options/plot_theme/publication.title
 #: simonmakuch/options/analysisType/publication.title
 #: tableone2/options/pivot_format/publication.title
@@ -61882,16 +61882,16 @@ msgid "Raw Values (numeric)"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/dark2.title
-#: ggsegmentedtotalbar/options/color_palette/dark2.title
+#: jjsegmentedtotalbar/options/color_palette/dark2.title
 msgid "RColorBrewer Dark2"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/color_palette/paired.title
+#: jjsegmentedtotalbar/options/color_palette/paired.title
 msgid "RColorBrewer Paired"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/set1.title
-#: ggsegmentedtotalbar/options/color_palette/set1.title
+#: jjsegmentedtotalbar/options/color_palette/set1.title
 msgid "RColorBrewer Set1"
 msgstr ""
 
@@ -63777,7 +63777,7 @@ msgstr ""
 #: advancedraincloud/options/rain_side/r.title
 #: bbcplots/options/legend_position/right.title
 #: ggprism/options/legend_position/right.title
-#: ggsegmentedtotalbar/options/legend_position/right.title
+#: jjsegmentedtotalbar/options/legend_position/right.title
 #: grafify/options/legend_position/right.title
 #: jiwillsurvive/options/legend_position/right.title
 #: jjradarplot/options/legendPosition/right.title
@@ -65625,7 +65625,7 @@ msgid "Schoenfeld Transform"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/science.title
-#: ggsegmentedtotalbar/options/color_palette/science.title
+#: jjsegmentedtotalbar/options/color_palette/science.title
 msgid "Science Journal"
 msgstr ""
 
@@ -66111,11 +66111,11 @@ msgstr ""
 msgid "Segi World Standard"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/composition_table.columns.title
+#: jjsegmentedtotalbar/results/composition_table.columns.title
 msgid "Segment"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/fill_var.title
+#: jjsegmentedtotalbar/options/fill_var.title
 msgid "Segment Variable (Fill)"
 msgstr ""
 
@@ -66131,20 +66131,20 @@ msgstr ""
 msgid "Segmentation Quality Metrics"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/plot.title
+#: jjsegmentedtotalbar/results/plot.title
 msgid "Segmented Total Bar Chart"
 msgstr ""
 
-#: package/analyses/ggsegmentedtotalbar.title
-#: package/analyses/ggsegmentedtotalbar.menuTitle
-#: ggsegmentedtotalbar/options.title
-#: ggsegmentedtotalbar/ui.title
-#: ggsegmentedtotalbar/ui[1][0].label
-#: ggsegmentedtotalbar/results.title
+#: package/analyses/jjsegmentedtotalbar.title
+#: package/analyses/jjsegmentedtotalbar.menuTitle
+#: jjsegmentedtotalbar/options.title
+#: jjsegmentedtotalbar/ui.title
+#: jjsegmentedtotalbar/ui[1][0].label
+#: jjsegmentedtotalbar/results.title
 msgid "Segmented Total Bar Charts"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 msgid "Segments"
 msgstr ""
 
@@ -66180,7 +66180,7 @@ msgstr ""
 msgid "Select BBC standard colors or create custom color schemes."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/x_var.description.jamovi
+#: jjsegmentedtotalbar/options/x_var.description.jamovi
 msgid "Select categorical variable for the x-axis categories."
 msgstr ""
 
@@ -66217,7 +66217,7 @@ msgstr ""
 msgid "Select numeric variable for bar heights."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/y_var.description.jamovi
+#: jjsegmentedtotalbar/options/y_var.description.jamovi
 msgid "Select numeric variable for segment values."
 msgstr ""
 
@@ -66357,7 +66357,7 @@ msgstr ""
 msgid "Select variable for the x-axis."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/fill_var.description.jamovi
+#: jjsegmentedtotalbar/options/fill_var.description.jamovi
 msgid "Select variable to define bar segments and colors."
 msgstr ""
 
@@ -66920,13 +66920,13 @@ msgstr ""
 
 #: advancedbarplot/options/plot_height.description.jamovi
 #: economistplots/options/plot_height.description.jamovi
-#: ggsegmentedtotalbar/options/plot_height.description.jamovi
+#: jjsegmentedtotalbar/options/plot_height.description.jamovi
 msgid "Set plot height for optimal display."
 msgstr ""
 
 #: advancedbarplot/options/plot_width.description.jamovi
 #: economistplots/options/plot_width.description.jamovi
-#: ggsegmentedtotalbar/options/plot_width.description.jamovi
+#: jjsegmentedtotalbar/options/plot_width.description.jamovi
 msgid "Set plot width for optimal display."
 msgstr ""
 
@@ -68999,13 +68999,13 @@ msgstr ""
 msgid "Show Percentage Axis"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/show_percentages.description.jamovi
+#: jjsegmentedtotalbar/options/show_percentages.description.jamovi
 msgid "Show percentage values on each segment."
 msgstr ""
 
 #: enhancedfrequency/options/showPercentages.title
 #: flowchart/options/showPercentages.title
-#: ggsegmentedtotalbar/options/show_percentages.title
+#: jjsegmentedtotalbar/options/show_percentages.title
 #: jcomplexupset/options/show_percentages.title
 #: toxicityprofile/options/showPercentages.title
 msgid "Show Percentages"
@@ -69183,11 +69183,11 @@ msgstr ""
 msgid "Show Ratio Test"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/show_counts.description.jamovi
+#: jjsegmentedtotalbar/options/show_counts.description.jamovi
 msgid "Show raw count values in addition to percentages."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/show_counts.title
+#: jjsegmentedtotalbar/options/show_counts.title
 msgid "Show Raw Counts"
 msgstr ""
 
@@ -70763,11 +70763,11 @@ msgstr ""
 msgid "Sort By Variable"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories.title
+#: jjsegmentedtotalbar/options/sort_categories.title
 msgid "Sort Categories"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/sort_categories.description.jamovi
+#: jjsegmentedtotalbar/options/sort_categories.description.jamovi
 msgid "Sort categories by different criteria."
 msgstr ""
 
@@ -77101,7 +77101,7 @@ msgstr ""
 msgid "The dataset for scatter plot visualization."
 msgstr ""
 
-#: ggsegmentedtotalbar/options/data.description.jamovi
+#: jjsegmentedtotalbar/options/data.description.jamovi
 msgid "The dataset for segmented total bar chart visualization."
 msgstr ""
 
@@ -79050,7 +79050,7 @@ msgstr ""
 
 #: advancedbarplot/options/legend_position/top.title
 #: ggprism/options/legend_position/top.title
-#: ggsegmentedtotalbar/options/legend_position/top.title
+#: jjsegmentedtotalbar/options/legend_position/top.title
 #: grafify/options/legend_position/top.title
 #: jiwillsurvive/options/legend_position/top.title
 #: jjradarplot/options/legendPosition/top.title
@@ -79228,7 +79228,7 @@ msgstr ""
 msgid "Total Nuclei"
 msgstr ""
 
-#: ggsegmentedtotalbar/results/summary.columns.title
+#: jjsegmentedtotalbar/results/summary.columns.title
 #: stagemigration/results/frailtyModelsOverview.columns.title
 msgid "Total Observations"
 msgstr ""
@@ -82693,7 +82693,7 @@ msgstr ""
 #: friedmantest/results/dataInfo.columns.title
 #: friedmantest/results/effectSize.columns.title
 #: ggoncoplot/results/plotInfo.columns.title
-#: ggsegmentedtotalbar/results/detailed_stats.columns.title
+#: jjsegmentedtotalbar/results/detailed_stats.columns.title
 #: gradientboosting/results/modelSummary.columns.title
 #: grouplasso/results/modelPerformance.columns.title
 #: hiddenmarkov/results/goodnessOfFit.columns.title
@@ -82890,7 +82890,7 @@ msgstr ""
 msgid "Value Variable"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/y_var.title
+#: jjsegmentedtotalbar/options/y_var.title
 msgid "Value Variable (Y-axis)"
 msgstr ""
 
@@ -84069,7 +84069,7 @@ msgstr ""
 #: alluvial/options/orient/vert.title
 #: alluvial2/options/orient/vert.title
 #: economistplots/options/plot_orientation/vertical.title
-#: ggsegmentedtotalbar/options/orientation/vertical.title
+#: jjsegmentedtotalbar/options/orientation/vertical.title
 #: jjtreemap/ui[1][2][0][5]/labelAlignV.label
 #: lollipop/options/orientation/vertical.title
 #: raincloud/options/orientation/vertical.title
@@ -84189,7 +84189,7 @@ msgstr ""
 #: eurostatmap/options/color_palette/viridis.title
 #: explainableai/options/colormap/viridis.title
 #: ggflowchart/options/node_fill_palette/viridis.title
-#: ggsegmentedtotalbar/options/color_palette/viridis.title
+#: jjsegmentedtotalbar/options/color_palette/viridis.title
 #: hullplot/options/color_palette/viridis.title
 #: jcomplexupset/options/color_palette/viridis.title
 #: jggheatmap/options/color_scheme/viridis.title
@@ -84894,12 +84894,12 @@ msgid "When sorting by magnitude or alphabetically, use decreasing order."
 msgstr ""
 
 #: advancedbarplot/options/legend_position.description.jamovi
-#: ggsegmentedtotalbar/options/legend_position.description.jamovi
+#: jjsegmentedtotalbar/options/legend_position.description.jamovi
 msgid "Where to place the legend."
 msgstr ""
 
 #: advancedbarplot/options/orientation.description.jamovi
-#: ggsegmentedtotalbar/options/orientation.description.jamovi
+#: jjsegmentedtotalbar/options/orientation.description.jamovi
 msgid "Whether bars should be vertical or horizontal."
 msgstr ""
 
@@ -84915,7 +84915,7 @@ msgstr ""
 msgid "Which statistical components to extract"
 msgstr ""
 
-#: ggsegmentedtotalbar/options/outline_color/white.title
+#: jjsegmentedtotalbar/options/outline_color/white.title
 msgid "White"
 msgstr ""
 
@@ -85360,7 +85360,7 @@ msgstr ""
 #: advancedbarplot/options/x_title.title
 #: bbcplots/options/x_axis_title.title
 #: economistplots/options/x_title.title
-#: ggsegmentedtotalbar/options/x_title.title
+#: jjsegmentedtotalbar/options/x_title.title
 msgid "X-axis Title"
 msgstr ""
 
@@ -85515,7 +85515,7 @@ msgstr ""
 #: advancedbarplot/options/y_title.title
 #: bbcplots/options/y_axis_title.title
 #: economistplots/options/y_title.title
-#: ggsegmentedtotalbar/options/y_title.title
+#: jjsegmentedtotalbar/options/y_title.title
 msgid "Y-axis Title"
 msgstr ""
 

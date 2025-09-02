@@ -23,6 +23,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ciWidth = 95,
             gamma = FALSE,
             taub = FALSE,
+            trendTest = FALSE,
+            trendDirection = "twosided",
             obs = TRUE,
             exp = FALSE,
             pcRow = FALSE,
@@ -119,6 +121,18 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "taub",
                 taub,
                 default=FALSE)
+            private$..trendTest <- jmvcore::OptionBool$new(
+                "trendTest",
+                trendTest,
+                default=FALSE)
+            private$..trendDirection <- jmvcore::OptionList$new(
+                "trendDirection",
+                trendDirection,
+                options=list(
+                    "twosided",
+                    "increasing",
+                    "decreasing"),
+                default="twosided")
             private$..obs <- jmvcore::OptionBool$new(
                 "obs",
                 obs,
@@ -157,6 +171,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..gamma)
             self$.addOption(private$..taub)
+            self$.addOption(private$..trendTest)
+            self$.addOption(private$..trendDirection)
             self$.addOption(private$..obs)
             self$.addOption(private$..exp)
             self$.addOption(private$..pcRow)
@@ -181,6 +197,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ciWidth = function() private$..ciWidth$value,
         gamma = function() private$..gamma$value,
         taub = function() private$..taub$value,
+        trendTest = function() private$..trendTest$value,
+        trendDirection = function() private$..trendDirection$value,
         obs = function() private$..obs$value,
         exp = function() private$..exp$value,
         pcRow = function() private$..pcRow$value,
@@ -204,6 +222,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ciWidth = NA,
         ..gamma = NA,
         ..taub = NA,
+        ..trendTest = NA,
+        ..trendDirection = NA,
         ..obs = NA,
         ..exp = NA,
         ..pcRow = NA,
@@ -220,7 +240,8 @@ contTablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         odds = function() private$.items[["odds"]],
         nom = function() private$.items[["nom"]],
         gamma = function() private$.items[["gamma"]],
-        taub = function() private$.items[["taub"]]),
+        taub = function() private$.items[["taub"]],
+        trendTest = function() private$.items[["trendTest"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -493,6 +514,32 @@ contTablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="p", 
                         `title`="p", 
                         `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="trendTest",
+                title="Trend Test",
+                visible="(trendTest)",
+                refs="DescTools",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "layers"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text", 
+                        `content`="Cochran-Armitage trend"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Z", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
                         `format`="zto,pvalue"))))}))
 
 contTablesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -592,6 +639,10 @@ contTablesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   confidence intervals to provide
 #' @param gamma \code{TRUE} or \code{FALSE} (default), provide gamma
 #' @param taub \code{TRUE} or \code{FALSE} (default), provide Kendall's tau-b
+#' @param trendTest \code{TRUE} or \code{FALSE} (default), provide
+#'   Cochran-Armitage test for trend for ordered categorical variables
+#' @param trendDirection Direction of trend test: two-sided (default),
+#'   increasing, or decreasing
 #' @param obs \code{TRUE} or \code{FALSE} (default), provide the observed
 #'   counts
 #' @param exp \code{TRUE} or \code{FALSE} (default), provide the expected
@@ -610,6 +661,7 @@ contTablesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$nom} \tab \tab \tab \tab \tab a table of the 'nominal' test results \cr
 #'   \code{results$gamma} \tab \tab \tab \tab \tab a table of the gamma test results \cr
 #'   \code{results$taub} \tab \tab \tab \tab \tab a table of the Kendall's tau-b test results \cr
+#'   \code{results$trendTest} \tab \tab \tab \tab \tab Cochran-Armitage trend test results \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -638,6 +690,8 @@ contTables <- function(
     ciWidth = 95,
     gamma = FALSE,
     taub = FALSE,
+    trendTest = FALSE,
+    trendDirection = "twosided",
     obs = TRUE,
     exp = FALSE,
     pcRow = FALSE,
@@ -713,6 +767,8 @@ contTables <- function(
         ciWidth = ciWidth,
         gamma = gamma,
         taub = taub,
+        trendTest = trendTest,
+        trendDirection = trendDirection,
         obs = obs,
         exp = exp,
         pcRow = pcRow,

@@ -1,5 +1,16 @@
 ## check articles
 
+source .venv/bin/activate
+
+.claude/completions/review_article_stats_save.sh "aqaf082" \
+  "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp3/aqaf082.pdf"
+
+.claude/completions/review_article_stats_save.sh "Thyroid-CNN" \
+  "/path/paper.pdf" "/path/supplement.html" "/path/notes.md"
+
+.claude/completions/review_article_stats_save.sh "Example-URL" \
+  "<https://example.com/article.html>"
+
 > pdftotext
 
 > /review-article-stats '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md'
@@ -27,45 +38,19 @@ echo "/document-function FUNC_NAME" | claude
 
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
+***
 
 ## JJStatsPlotT
 
+<./claude/commands/review-module-jjstatsplot.md>
 
-
-- jjpiestats - Pie Charts
-
-echo "" | claude
-echo "" | claude
-echo "" | claude
-
-/check-module-jjstatsplot
-
-
-
-
-
-
-
-
-
-
-***
-
-jjridges
-echo "/check-function FUNC_NAME" | claude
-echo "/checkpoint FUNC_NAME" | claude
-echo "/prepare-translation FUNC_NAME" | claude
-echo "/review-function FUNC_NAME" | claude
-echo "/fix-function FUNC_NAME" | claude
-echo "/document-function FUNC_NAME" | claude
-
-ggsegmentedtotalbar
-echo "/check-function FUNC_NAME" | claude
-echo "/checkpoint FUNC_NAME" | claude
-echo "/prepare-translation FUNC_NAME" | claude
-echo "/review-function FUNC_NAME" | claude
-echo "/fix-function FUNC_NAME" | claude
-echo "/document-function FUNC_NAME" | claude
+jjsegmentedtotalbar
+echo "/check-function jjsegmentedtotalbar" | claude
+echo "/checkpoint jjsegmentedtotalbar" | claude
+echo "/prepare-translation jjsegmentedtotalbar" | claude
+echo "/review-function jjsegmentedtotalbar" | claude
+echo "/fix-function jjsegmentedtotalbar" | claude
+echo "/document-function jjsegmentedtotalbar" | claude
 
 combine these into one: nonparametric enhancednonparametric as nonparametric
 
@@ -76,14 +61,61 @@ echo "/review-function FUNC_NAME" | claude
 echo "/fix-function FUNC_NAME" | claude
 echo "/document-function FUNC_NAME" | claude
 
-riverplot
+grafify
+echo "/check-function grafify" | claude
+echo "/checkpoint grafify" | claude
+echo "/prepare-translation grafify" | claude
+echo "/review-function grafify" | claude
+echo "/fix-function grafify" | claude
+echo "/document-function grafify" | claude
 
-echo "/check-function FUNC_NAME" | claude
-echo "/checkpoint FUNC_NAME" | claude
-echo "/prepare-translation FUNC_NAME" | claude
-echo "/review-function FUNC_NAME" | claude
-echo "/fix-function FUNC_NAME" | claude
-echo "/document-function FUNC_NAME" | claude
+jcomplexupset
+echo "/check-function jcomplexupset" | claude
+echo "/checkpoint jcomplexupset" | claude
+echo "/prepare-translation jcomplexupset" | claude
+echo "/review-function jcomplexupset" | claude
+echo "/fix-function jcomplexupset" | claude
+echo "/document-function jcomplexupset" | claude
+
+jjradarplot
+echo "/check-function jjradarplot" | claude
+echo "/checkpoint jjradarplot" | claude
+echo "/prepare-translation jjradarplot" | claude
+echo "/review-function jjradarplot" | claude
+echo "/fix-function jjradarplot" | claude
+echo "/document-function jjradarplot" | claude
+
+riverplot and jjriverplot - merge into one riverplot
+echo "/check-function riverplot" | claude
+echo "/checkpoint riverplot" | claude
+echo "/prepare-translation riverplot" | claude
+echo "/review-function riverplot" | claude
+echo "/fix-function riverplot" | claude
+echo "/document-function riverplot" | claude
+
+jjstreamgraph
+echo "/check-function jjstreamgraph" | claude
+echo "/checkpoint jjstreamgraph" | claude
+echo "/prepare-translation jjstreamgraph" | claude
+echo "/review-function jjstreamgraph" | claude
+echo "/fix-function jjstreamgraph" | claude
+echo "/document-function jjstreamgraph" | claude
+
+jjtreemap
+echo "/check-function jjtreemap" | claude
+echo "/checkpoint jjtreemap" | claude
+echo "/prepare-translation jjtreemap" | claude
+echo "/review-function jjtreemap" | claude
+echo "/fix-function jjtreemap" | claude
+echo "/document-function jjtreemap" | claude
+
+jggsankeyfier
+echo "/check-function jggsankeyfier" | claude
+echo "/checkpoint jggsankeyfier" | claude
+echo "/prepare-translation jggsankeyfier" | claude
+echo "/review-function jggsankeyfier" | claude
+echo "/fix-function jggsankeyfier" | claude
+echo "/document-function jggsankeyfier" | claude
 
 - alluvial - Alluvial Diagrams
 echo "/check-function alluvial" | claude
@@ -93,11 +125,7 @@ echo "/review-function alluvial" | claude
 echo "/fix-function alluvial" | claude
 echo "/document-function alluvial" | claude
 
-
 ***
-
-
-
 
 ## meddecideT (11 functions)
 

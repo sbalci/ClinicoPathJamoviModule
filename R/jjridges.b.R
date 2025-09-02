@@ -24,52 +24,52 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() {
             # Check if required variables are provided
             if (is.null(self$options$x_var) || is.null(self$options$y_var)) {
-                self$results$instructions$setContent(
-                    "<h3>Ridge Plot Instructions</h3>
-                    <p>Welcome to the Advanced Ridge Plot analysis!</p>
+                self$results$instructions$setContent(paste0(
+                    "<h3>", .("Ridge Plot Instructions"), "</h3>",
+                    "<p>", .("Welcome to the Advanced Ridge Plot analysis!"), "</p>",
                     
-                    <div style='background:#f0f8ff; border-left:4px solid #2196F3; padding:15px; margin:15px 0;'>
-                        <h4 style='color:#2196F3; margin-top:0;'>📊 Clinical Guidance</h4>
-                        <p><strong>When to Use Ridge Plots:</strong></p>
-                        <ul style='margin-bottom:10px;'>
-                            <li>Compare biomarker distributions between patient groups</li>
-                            <li>Visualize treatment response patterns across disease stages</li>
-                            <li>Show how continuous measures vary by pathological categories</li>
-                            <li>Display age or tumor size distributions by clinical characteristics</li>
-                        </ul>
-                        <p><strong>Key Considerations:</strong></p>
-                        <ul style='margin-bottom:10px;'>
-                            <li>Minimum 3-5 observations per group for reliable curves</li>
-                            <li>Wide ridges = high variability; narrow ridges = consistent values</li>
-                            <li>Multiple peaks may indicate distinct clinical subgroups</li>
-                            <li>Compare ridge positions (left/right shift) for group differences</li>
-                        </ul>
-                    </div>
+                    "<div style='background:#f0f8ff; border-left:4px solid #2196F3; padding:15px; margin:15px 0;'>",
+                        "<h4 style='color:#2196F3; margin-top:0;'>📊 ", .("Clinical Guidance"), "</h4>",
+                        "<p><strong>", .("When to Use Ridge Plots:"), "</strong></p>",
+                        "<ul style='margin-bottom:10px;'>",
+                            "<li>", .("Compare biomarker distributions between patient groups"), "</li>",
+                            "<li>", .("Visualize treatment response patterns across disease stages"), "</li>",
+                            "<li>", .("Show how continuous measures vary by pathological categories"), "</li>",
+                            "<li>", .("Display age or tumor size distributions by clinical characteristics"), "</li>",
+                        "</ul>",
+                        "<p><strong>", .("Key Considerations:"), "</strong></p>",
+                        "<ul style='margin-bottom:10px;'>",
+                            "<li>", .("Minimum 3-5 observations per group for reliable curves"), "</li>",
+                            "<li>", .("Wide ridges = high variability; narrow ridges = consistent values"), "</li>",
+                            "<li>", .("Multiple peaks may indicate distinct clinical subgroups"), "</li>",
+                            "<li>", .("Compare ridge positions (left/right shift) for group differences"), "</li>",
+                        "</ul>",
+                    "</div>",
                     
-                    <p><strong>Required:</strong></p>
-                    <ul>
-                        <li><strong>X Variable:</strong> Continuous variable for distributions</li>
-                        <li><strong>Y Variable:</strong> Grouping variable for separate ridges</li>
-                    </ul>
-                    <p><strong>Optional:</strong></p>
-                    <ul>
-                        <li><strong>Fill Variable:</strong> Color-code segments within ridges</li>
-                        <li><strong>Facet Variable:</strong> Create separate panels</li>
-                    </ul>
-                    <p><strong>Features:</strong></p>
-                    <ul>
-                        <li>Multiple plot types (density, histogram, gradient, violin)</li>
-                        <li>Statistical overlays with p-values and effect sizes</li>
-                        <li>Boxplots, quantiles, and mean/median lines</li>
-                        <li>Publication-ready themes and customization</li>
-                    </ul>
-                    <p><strong>Export Options:</strong></p>
-                    <ul>
-                        <li>Adjust plot width and height in Export Options</li>
-                        <li>Set DPI for high-resolution output (300 DPI recommended for publications)</li>
-                        <li>Use right-click → Save Image As for quick export</li>
-                    </ul>"
-                )
+                    "<p><strong>", .("Required:"), "</strong></p>",
+                    "<ul>",
+                        "<li><strong>", .("X Variable:"), "</strong> ", .("Continuous variable for distributions"), "</li>",
+                        "<li><strong>", .("Y Variable:"), "</strong> ", .("Grouping variable for separate ridges"), "</li>",
+                    "</ul>",
+                    "<p><strong>", .("Optional:"), "</strong></p>",
+                    "<ul>",
+                        "<li><strong>", .("Fill Variable:"), "</strong> ", .("Color-code segments within ridges"), "</li>",
+                        "<li><strong>", .("Facet Variable:"), "</strong> ", .("Create separate panels"), "</li>",
+                    "</ul>",
+                    "<p><strong>", .("Features:"), "</strong></p>",
+                    "<ul>",
+                        "<li>", .("Multiple plot types (density, histogram, gradient, violin)"), "</li>",
+                        "<li>", .("Statistical overlays with p-values and effect sizes"), "</li>",
+                        "<li>", .("Boxplots, quantiles, and mean/median lines"), "</li>",
+                        "<li>", .("Publication-ready themes and customization"), "</li>",
+                    "</ul>",
+                    "<p><strong>", .("Export Options:"), "</strong></p>",
+                    "<ul>",
+                        "<li>", .("Adjust plot width and height in Export Options"), "</li>",
+                        "<li>", .("Set DPI for high-resolution output (300 DPI recommended for publications)"), "</li>",
+                        "<li>", .("Use right-click → Save Image As for quick export"), "</li>",
+                    "</ul>"
+                ))
                 self$results$instructions$setVisible(visible = TRUE)
                 self$results$plot$setVisible(visible = FALSE)
                 self$results$statistics$setVisible(visible = FALSE)
@@ -116,22 +116,22 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check variable selection
             if (is.null(self$options$x_var)) {
-                stop("Please select a continuous variable for X (Distribution)")
+                stop(.("Please select a continuous variable for X (Distribution)"))
             }
             if (is.null(self$options$y_var)) {
-                stop("Please select a grouping variable for Y (Groups)")
+                stop(.("Please select a grouping variable for Y (Groups)"))
             }
             
             # Check data availability
             if (is.null(self$data) || nrow(self$data) == 0) {
-                stop("No data available for analysis")
+                stop(.("No data available for analysis"))
             }
             
             # Check minimum sample size
             if (nrow(self$data) < private$.MIN_SAMPLE_SIZE) {
-                warnings <- c(warnings, paste0("Sample size (n=", nrow(self$data), 
-                                               ") is below recommended minimum of ", private$.MIN_SAMPLE_SIZE, 
-                                               " for reliable ridge plot analysis"))
+                warnings <- c(warnings, paste0(.("Sample size (n="), nrow(self$data), 
+                                               .(") is below recommended minimum of "), private$.MIN_SAMPLE_SIZE, 
+                                               .(" for reliable ridge plot analysis")))
             }
             
             return(warnings)
@@ -143,15 +143,15 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for minimum group count
             n_groups <- length(unique(plot_data$y))
             if (n_groups < 2) {
-                stop("At least 2 groups required for ridge plot comparison")
+                stop(.("At least 2 groups required for ridge plot comparison"))
             }
             
             # Check group sizes with clinical context
             group_counts <- table(plot_data$y)
             small_groups <- group_counts[group_counts < private$.MIN_GROUP_SIZE]
             if (length(small_groups) > 0) {
-                warnings <- c(warnings, paste0("Groups with fewer than ", private$.MIN_GROUP_SIZE, 
-                                               " observations may show unreliable density estimates: ", 
+                warnings <- c(warnings, paste0(.("Groups with fewer than "), private$.MIN_GROUP_SIZE, 
+                                               .(" observations may show unreliable density estimates: "), 
                                                paste(names(small_groups), collapse=", ")))
             }
             
@@ -160,9 +160,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 z_scores <- abs(scale(plot_data$x))
                 outlier_prop <- sum(z_scores > 3, na.rm = TRUE) / length(z_scores)
                 if (outlier_prop > private$.MAX_OUTLIER_PROP) {
-                    warnings <- c(warnings, paste0("High proportion of extreme outliers detected (", 
+                    warnings <- c(warnings, paste0(.("High proportion of extreme outliers detected ("), 
                                                    round(outlier_prop * 100, 1), 
-                                                   "%). Consider reviewing data quality or using robust statistical options."))
+                                                   .("%). Consider reviewing data quality or using robust statistical options.")))
                 }
             }
             
@@ -186,11 +186,41 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
                 if (abs(skewness) > 2) {
-                    warnings <- c(warnings, "Data shows high skewness. Consider log transformation if appropriate for your clinical context.")
+                    warnings <- c(warnings, .("Data shows high skewness. Consider log transformation if appropriate for your clinical context."))
                 }
             }
             
             return(warnings)
+        },
+        
+        .validateQuantiles = function(quantile_string) {
+            tryCatch({
+                # Split and trim whitespace
+                vals <- as.numeric(trimws(strsplit(quantile_string, ",")[[1]]))
+                
+                # Check for parsing errors
+                if (any(is.na(vals))) {
+                    stop(.("Non-numeric values detected in quantiles"))
+                }
+                
+                # Check valid range
+                if (any(vals < 0 | vals > 1)) {
+                    stop(.("Quantile values must be between 0 and 1"))
+                }
+                
+                # Check not empty
+                if (length(vals) == 0) {
+                    stop(.("No quantile values provided"))
+                }
+                
+                # Sort quantiles
+                sort(vals)
+                
+            }, error = function(e) {
+                # Log warning and use defaults
+                warning(.("Invalid quantiles specified: "), e$message, .(", using defaults"))
+                c(0.25, 0.5, 0.75)
+            })
         },
         
         .generateClinicalSummary = function(data, has_stats = FALSE) {
@@ -200,21 +230,21 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Basic summary
             summary <- paste0(
                 "<div class='clinical-summary' style='background:#f8f9fa; border-left:4px solid #007bff; padding:15px; margin:10px 0;'>",
-                "<h4 style='color:#007bff; margin-top:0;'>Clinical Summary</h4>",
-                "<p><strong>Analysis:</strong> Ridge plot comparing the distribution of <strong>", 
-                self$options$x_var, "</strong> across <strong>", n_groups, " groups</strong> defined by <strong>", 
+                "<h4 style='color:#007bff; margin-top:0;'>", .("Clinical Summary"), "</h4>",
+                "<p><strong>", .("Analysis:"), "</strong> ", .("Ridge plot comparing the distribution of"), " <strong>", 
+                self$options$x_var, "</strong> ", .("across"), " <strong>", n_groups, " ", .("groups"), "</strong> ", .("defined by"), " <strong>", 
                 self$options$y_var, "</strong>.</p>",
-                "<p><strong>Sample:</strong> n = ", n_total, " total observations across all groups.</p>"
+                "<p><strong>", .("Sample:"), "</strong> n = ", n_total, " ", .("total observations across all groups"), ".</p>"
             )
             
             # Add interpretation guidance
             summary <- paste0(summary,
-                "<p><strong>Interpretation Guide:</strong></p>",
+                "<p><strong>", .("Interpretation Guide:"), "</strong></p>",
                 "<ul style='margin-bottom:10px;'>",
-                "<li><strong>Ridge Shape:</strong> Wider ridges = more variability; Narrow ridges = consistent values</li>",
-                "<li><strong>Ridge Position:</strong> Left/right shift indicates lower/higher average values</li>",
-                "<li><strong>Multiple Peaks:</strong> May indicate subgroups or distinct clinical phenotypes</li>",
-                "<li><strong>Overlap:</strong> Similar distributions between groups; Separation = distinct patterns</li>",
+                "<li><strong>", .("Ridge Shape:"), "</strong> ", .("Wider ridges = more variability; Narrow ridges = consistent values"), "</li>",
+                "<li><strong>", .("Ridge Position:"), "</strong> ", .("Left/right shift indicates lower/higher average values"), "</li>",
+                "<li><strong>", .("Multiple Peaks:"), "</strong> ", .("May indicate subgroups or distinct clinical phenotypes"), "</li>",
+                "<li><strong>", .("Overlap:"), "</strong> ", .("Similar distributions between groups; Separation = distinct patterns"), "</li>",
                 "</ul></div>"
             )
             
@@ -229,7 +259,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check package availability
             if (!requireNamespace("ggridges", quietly = TRUE)) {
                 self$results$warnings$setContent(
-                    "<p style='color:red;'>The ggridges package is required but not installed.</p>"
+                    paste0("<p style='color:red;'>", .("The ggridges package is required but not installed."), "</p>")
                 )
                 self$results$warnings$setVisible(TRUE)
                 return()
@@ -250,7 +280,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (nrow(plot_data) == 0) {
                 self$results$warnings$setContent(
-                    "<p style='color:orange;'>No complete cases found after removing missing values.</p>"
+                    paste0("<p style='color:orange;'>", .("No complete cases found after removing missing values."), "</p>")
                 )
                 self$results$warnings$setVisible(TRUE)
                 return()
@@ -270,7 +300,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(all_warnings) > 0) {
                 warning_html <- paste0(
                     "<div style='background:#fff3cd; border:1px solid #ffeaa7; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<h5 style='color:#856404; margin-top:0;'>⚠️ Clinical Data Considerations:</h5>",
+                    "<h5 style='color:#856404; margin-top:0;'>⚠️ ", .("Clinical Data Considerations:"), "</h5>",
                     paste0("<p style='color:#856404; margin:5px 0;'>• ", all_warnings, "</p>", collapse=""),
                     "</div>"
                 )
@@ -380,7 +410,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (self$options$add_quantiles) {
-                quantiles <- as.numeric(strsplit(self$options$quantiles, ",")[[1]])
+                quantiles <- private$.validateQuantiles(self$options$quantiles)
                 p <- p + ggridges::stat_density_ridges(
                     quantile_lines = TRUE,
                     quantiles = quantiles
@@ -982,14 +1012,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             interpretation <- paste0(
                 clinical_summary,
-                "<h4>Technical Interpretation</h4>",
-                "<p>The ridge plot displays the distribution of <strong>", self$options$x_var, "</strong> ",
-                "across <strong>", n_groups, " groups</strong> defined by <strong>", self$options$y_var, "</strong>.</p>",
+                "<h4>", .("Technical Interpretation"), "</h4>",
+                "<p>", .("The ridge plot displays the distribution of"), " <strong>", self$options$x_var, "</strong> ",
+                .("across"), " <strong>", n_groups, " ", .("groups"), "</strong> ", .("defined by"), " <strong>", self$options$y_var, "</strong>.</p>",
                 "<ul>",
-                "<li><strong>Each ridge:</strong> Shows the probability density or frequency distribution for a group</li>",
-                "<li><strong>Overlapping areas:</strong> Indicate similar value ranges between groups</li>",
-                "<li><strong>Ridge height and spread:</strong> Indicate the concentration and variability of values</li>",
-                "<li><strong>Peaks:</strong> Show the most common values (modes) within each group</li>",
+                "<li><strong>", .("Each ridge:"), "</strong> ", .("Shows the probability density or frequency distribution for a group"), "</li>",
+                "<li><strong>", .("Overlapping areas:"), "</strong> ", .("Indicate similar value ranges between groups"), "</li>",
+                "<li><strong>", .("Ridge height and spread:"), "</strong> ", .("Indicate the concentration and variability of values"), "</li>",
+                "<li><strong>", .("Peaks:"), "</strong> ", .("Show the most common values (modes) within each group"), "</li>",
                 "</ul>"
             )
             
@@ -998,8 +1028,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#e3f2fd; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<strong>🎨 Gradient Coloring:</strong> Colors represent the value of ", 
-                    self$options$x_var, " along each ridge, helping visualize how values are distributed within groups.</div>"
+                    "<strong>🎨 ", .("Gradient Coloring:"), "</strong> ", .("Colors represent the value of"), " ", 
+                    self$options$x_var, " ", .("along each ridge, helping visualize how values are distributed within groups."), "</div>"
                 )
             }
             
@@ -1007,8 +1037,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#e8f5e8; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<strong>📊 Boxplots:</strong> Show median (center line), quartiles (box boundaries), and outliers for each group. ",
-                    "Compare medians and quartile ranges across groups for clinical significance.</div>"
+                    "<strong>📊 ", .("Boxplots:"), "</strong> ", .("Show median (center line), quartiles (box boundaries), and outliers for each group."), " ",
+                    .("Compare medians and quartile ranges across groups for clinical significance."), "</div>"
                 )
             }
             
@@ -1017,8 +1047,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#fff3e0; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<strong>📈 Statistical Tests:</strong> Pairwise comparisons test whether group differences are statistically significant. ",
-                    "Consider effect sizes alongside p-values for clinical importance. Adjust for multiple comparisons when appropriate.</div>"
+                    "<strong>📈 ", .("Statistical Tests:"), "</strong> ", .("Pairwise comparisons test whether group differences are statistically significant."), " ",
+                    .("Consider effect sizes alongside p-values for clinical importance. Adjust for multiple comparisons when appropriate."), "</div>"
                 )
             }
             
