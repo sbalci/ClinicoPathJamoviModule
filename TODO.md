@@ -33,12 +33,10 @@ echo "/document-function FUNC_NAME" | claude
 
 
 - jjpiestats - Pie Charts
-echo "/check-function jjpiestats" | claude
-echo "/checkpoint jjpiestats" | claude
-echo "/prepare-translation jjpiestats" | claude
-echo "/review-function jjpiestats" | claude
-echo "/fix-function jjpiestats" | claude
-echo "/document-function jjpiestats" | claude
+
+echo "" | claude
+echo "" | claude
+echo "" | claude
 
 /check-module-jjstatsplot
 

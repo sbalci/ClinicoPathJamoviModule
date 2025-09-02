@@ -11,6 +11,17 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             grvar = NULL,
             typestatistics = "parametric",
             originaltheme = FALSE,
+            counts = NULL,
+            ratio = "",
+            paired = FALSE,
+            label = "percentage",
+            digits = 2,
+            conflevel = 0.95,
+            proportiontest = TRUE,
+            bfmessage = TRUE,
+            messages = FALSE,
+            clinicalpreset = "custom",
+            showexplanations = FALSE,
             resultssubtitle = FALSE, ...) {
 
             super$initialize(
@@ -58,6 +69,67 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..counts <- jmvcore::OptionVariable$new(
+                "counts",
+                counts,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..ratio <- jmvcore::OptionString$new(
+                "ratio",
+                ratio,
+                default="")
+            private$..paired <- jmvcore::OptionBool$new(
+                "paired",
+                paired,
+                default=FALSE)
+            private$..label <- jmvcore::OptionList$new(
+                "label",
+                label,
+                options=list(
+                    "percentage",
+                    "counts",
+                    "both"),
+                default="percentage")
+            private$..digits <- jmvcore::OptionInteger$new(
+                "digits",
+                digits,
+                default=2,
+                min=0,
+                max=5)
+            private$..conflevel <- jmvcore::OptionNumber$new(
+                "conflevel",
+                conflevel,
+                default=0.95,
+                min=0.5,
+                max=0.99)
+            private$..proportiontest <- jmvcore::OptionBool$new(
+                "proportiontest",
+                proportiontest,
+                default=TRUE)
+            private$..bfmessage <- jmvcore::OptionBool$new(
+                "bfmessage",
+                bfmessage,
+                default=TRUE)
+            private$..messages <- jmvcore::OptionBool$new(
+                "messages",
+                messages,
+                default=FALSE)
+            private$..clinicalpreset <- jmvcore::OptionList$new(
+                "clinicalpreset",
+                clinicalpreset,
+                options=list(
+                    "custom",
+                    "diagnostic",
+                    "treatment",
+                    "biomarker"),
+                default="custom")
+            private$..showexplanations <- jmvcore::OptionBool$new(
+                "showexplanations",
+                showexplanations,
+                default=FALSE)
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
@@ -68,6 +140,17 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..counts)
+            self$.addOption(private$..ratio)
+            self$.addOption(private$..paired)
+            self$.addOption(private$..label)
+            self$.addOption(private$..digits)
+            self$.addOption(private$..conflevel)
+            self$.addOption(private$..proportiontest)
+            self$.addOption(private$..bfmessage)
+            self$.addOption(private$..messages)
+            self$.addOption(private$..clinicalpreset)
+            self$.addOption(private$..showexplanations)
             self$.addOption(private$..resultssubtitle)
         }),
     active = list(
@@ -76,6 +159,17 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
         originaltheme = function() private$..originaltheme$value,
+        counts = function() private$..counts$value,
+        ratio = function() private$..ratio$value,
+        paired = function() private$..paired$value,
+        label = function() private$..label$value,
+        digits = function() private$..digits$value,
+        conflevel = function() private$..conflevel$value,
+        proportiontest = function() private$..proportiontest$value,
+        bfmessage = function() private$..bfmessage$value,
+        messages = function() private$..messages$value,
+        clinicalpreset = function() private$..clinicalpreset$value,
+        showexplanations = function() private$..showexplanations$value,
         resultssubtitle = function() private$..resultssubtitle$value),
     private = list(
         ..dep = NA,
@@ -83,6 +177,17 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..grvar = NA,
         ..typestatistics = NA,
         ..originaltheme = NA,
+        ..counts = NA,
+        ..ratio = NA,
+        ..paired = NA,
+        ..label = NA,
+        ..digits = NA,
+        ..conflevel = NA,
+        ..proportiontest = NA,
+        ..bfmessage = NA,
+        ..messages = NA,
+        ..clinicalpreset = NA,
+        ..showexplanations = NA,
         ..resultssubtitle = NA)
 )
 
@@ -90,6 +195,11 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjpiestatsResults",
     inherit = jmvcore::Group,
     active = list(
+        about = function() private$.items[["about"]],
+        summary = function() private$.items[["summary"]],
+        assumptions = function() private$.items[["assumptions"]],
+        interpretation = function() private$.items[["interpretation"]],
+        report = function() private$.items[["report"]],
         todo = function() private$.items[["todo"]],
         plot4 = function() private$.items[["plot4"]],
         plot2 = function() private$.items[["plot2"]],
@@ -109,13 +219,49 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
+                    "counts",
+                    "ratio",
+                    "paired",
                     "typestatistics",
+                    "label",
+                    "digits",
+                    "conflevel",
+                    "proportiontest",
+                    "bfmessage",
+                    "messages",
                     "originaltheme",
-                    "resultssubtitle"))
+                    "resultssubtitle",
+                    "clinicalpreset",
+                    "showexplanations"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About This Analysis",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible="(dep)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Statistical Assumptions & Warnings",
+                visible="(dep && group)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Results Interpretation",
+                visible="(dep)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="report",
+                title="Copy-Ready Report",
+                visible="(dep)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="Analysis Setup"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot4",
@@ -218,12 +364,43 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param originaltheme Whether to apply the original ggstatsplot theme layer
 #'   to the plot. If TRUE, uses ggstatsplot's default styling. If FALSE, uses
 #'   jamovi's default ggplot2 theme for consistency with other analyses.
+#' @param counts A variable in data containing counts, or NULL if each row
+#'   represents a single observation. Use this when your data is  already
+#'   aggregated/tabulated.
+#' @param ratio A comma-separated list of expected proportions for the
+#'   proportion test  (should sum to 1). For example: '0.5,0.5' for two equal
+#'   groups or  '0.25,0.25,0.25,0.25' for four equal groups. Leave empty for
+#'   equal  theoretical proportions.
+#' @param paired Logical indicating whether data came from a within-subjects
+#'   or repeated measures design study (Default: FALSE). If TRUE, McNemar's test
+#'   will be used. If FALSE, Pearson's chi-square test will be used.
+#' @param label What information needs to be displayed on the label  in each
+#'   pie slice.
+#' @param digits Number of digits after decimal point for statistical results.
+#' @param conflevel Confidence/credible interval level.
+#' @param proportiontest Decides whether proportion test for x variable is to
+#'   be  carried out for each level of y.
+#' @param bfmessage Display Bayes Factor in favor of the null hypothesis.
+#'   Only relevant for parametric test.
+#' @param messages Display statistical messages in console.  Disabling
+#'   improves performance.
+#' @param clinicalpreset Predefined configurations for common clinical
+#'   scenarios.  Automatically sets appropriate statistical methods and
+#'   parameters.
+#' @param showexplanations Display detailed explanations of statistical
+#'   methods, assumptions,  and clinical interpretations to guide analysis and
+#'   result interpretation.
 #' @param resultssubtitle Whether to display statistical test results as
 #'   subtitle in the pie chart. Shows test statistics, p-values, effect sizes,
 #'   and confidence intervals for categorical association tests. Provides
 #'   detailed statistical summary.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$report} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
@@ -238,6 +415,17 @@ jjpiestats <- function(
     grvar = NULL,
     typestatistics = "parametric",
     originaltheme = FALSE,
+    counts = NULL,
+    ratio = "",
+    paired = FALSE,
+    label = "percentage",
+    digits = 2,
+    conflevel = 0.95,
+    proportiontest = TRUE,
+    bfmessage = TRUE,
+    messages = FALSE,
+    clinicalpreset = "custom",
+    showexplanations = FALSE,
     resultssubtitle = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -246,12 +434,14 @@ jjpiestats <- function(
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
+    if ( ! missing(counts)) counts <- jmvcore::resolveQuo(jmvcore::enquo(counts))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL),
-            `if`( ! missing(grvar), grvar, NULL))
+            `if`( ! missing(grvar), grvar, NULL),
+            `if`( ! missing(counts), counts, NULL))
 
     for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -263,6 +453,17 @@ jjpiestats <- function(
         grvar = grvar,
         typestatistics = typestatistics,
         originaltheme = originaltheme,
+        counts = counts,
+        ratio = ratio,
+        paired = paired,
+        label = label,
+        digits = digits,
+        conflevel = conflevel,
+        proportiontest = proportiontest,
+        bfmessage = bfmessage,
+        messages = messages,
+        clinicalpreset = clinicalpreset,
+        showexplanations = showexplanations,
         resultssubtitle = resultssubtitle)
 
     analysis <- jjpiestatsClass$new(

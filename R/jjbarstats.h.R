@@ -27,7 +27,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             conflevel = 0.95,
             ratio = "",
             clinicalpreset = "custom",
-            showexplanations = TRUE, ...) {
+            showexplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -173,7 +173,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showexplanations <- jmvcore::OptionBool$new(
                 "showexplanations",
                 showexplanations,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -300,23 +300,19 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
-                title="Analysis Summary",
-                visible="(dep && group)"))
+                title="Analysis Summary"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
-                title="Statistical Assumptions & Warnings",
-                visible="(dep && group)"))
+                title="Statistical Assumptions & Warnings"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
-                title="Results Interpretation",
-                visible="(dep && group)"))
+                title="Results Interpretation"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="report",
-                title="Copy-Ready Report",
-                visible="(dep && group)"))
+                title="Copy-Ready Report"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -440,7 +436,7 @@ jjbarstats <- function(
     conflevel = 0.95,
     ratio = "",
     clinicalpreset = "custom",
-    showexplanations = TRUE) {
+    showexplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbarstats requires jmvcore to be installed (restart may be required)")

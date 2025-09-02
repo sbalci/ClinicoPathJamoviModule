@@ -7,14 +7,49 @@ clearWith:
     - dep
     - group
     - grvar
+    - counts
+    - ratio
+    - paired
     - typestatistics
+    - label
+    - digits
+    - conflevel
+    - proportiontest
+    - bfmessage
+    - messages
     - originaltheme
     - resultssubtitle
+    - clinicalpreset
+    - showexplanations
 
 items:
 
+    - name: about
+      title: About This Analysis
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (dep)
+
+    - name: assumptions
+      title: Statistical Assumptions & Warnings
+      type: Html  
+
+    - name: interpretation
+      title: Results Interpretation
+      type: Html
+      visible: (dep)
+
+    - name: report
+      title: Copy-Ready Report
+      type: Html
+      visible: (dep)
+
     - name:  todo
-      title: To Do
+      title: Analysis Setup
       type:  Html
 
     - name: plot4
