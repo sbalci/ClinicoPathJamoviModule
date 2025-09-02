@@ -1,27 +1,42 @@
 ---
 name: nonparametric
-title: Non-parametric Statistical Methods
-menuGroup: meddecideD
-menuSubgroup: Advanced Statistical Methods
-menuSubtitle: Distribution-free statistical analysis for robust inference
-version: '0.0.31'
+title: "Non-Parametric Statistical Methods"
+menuGroup: Exploration
+menuSubgroup: Advanced Statistical Tests
+menuSubtitle: "Comprehensive non-parametric analysis with effect sizes and robust methods"
+version: '0.1.0'
 jas: '1.2'
 
 description:
     main: |
         Comprehensive non-parametric statistical methods including Kruskal-Wallis test,
-        Friedman test, robust alternatives to classical procedures, and distribution-free
-        methods designed for clinical research where normality assumptions are violated.
+        Friedman test, Mann-Whitney U test, and robust alternatives to classical procedures.
+        Designed specifically for clinical research where normality assumptions are violated.
+        This enhanced module combines distribution-free methods with proper effect size calculations,
+        assumption checking, and post hoc analysis - addressing critical gaps identified in 30% 
+        of pathology studies that use these methods.
     R:
         dontrun: false
         usage: |
-            # Kruskal-Wallis test with post-hoc comparisons
+            # Example 1: Enhanced Mann-Whitney U test for biomarker expression
             nonparametric(
                 data = clinical_data,
-                outcome = "biomarker_level",
+                deps = c("biomarker_level", "cell_count"),
                 groups = "treatment_group",
-                test_type = "kruskal_wallis",
+                test_type = "mann_whitney",
+                effect_size = TRUE,
                 post_hoc = TRUE
+            )
+            
+            # Example 2: Kruskal-Wallis with robust estimation
+            nonparametric(
+                data = clinical_data,
+                outcome = "expression_level",
+                groups = "tumor_grade",
+                test_type = "kruskal_wallis",
+                robust_method = "trimmed",
+                post_hoc_method = "dunn",
+                clinical_context = "pathological"
             )
 
 options:
@@ -29,20 +44,38 @@ options:
       type: Data
       description:
           R: >
-            The data as a data frame for non-parametric analysis.
+            The dataset to be analyzed, provided as a data frame.
 
-    # Core variables
+    # Variable Selection - Supporting both single and multiple dependent variables
+    - name: deps
+      title: Dependent Variables (Multiple)
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Multiple continuous variables to be analyzed. These should be numeric variables
+            representing biomarker expression levels, cell counts, morphometric measurements,
+            or other quantitative pathology data.
+
     - name: outcome
-      title: Outcome Variable
+      title: Outcome Variable (Single)
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      description:
+          R: >
+            Single continuous outcome variable. Use either this OR 'deps' for multiple variables.
 
     - name: groups
       title: Grouping Variable
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
+      description:
+          R: >
+            Categorical variable defining the groups to be compared. For Mann-Whitney U test,
+            this should have exactly 2 levels. For Kruskal-Wallis test, can have 2+ levels.
 
     - name: paired_variable
       title: Paired/Repeated Measures Variable
@@ -50,6 +83,9 @@ options:
       suggested: [nominal, ordinal]
       permitted: [factor]
       default: null
+      description:
+          R: >
+            Variable identifying paired observations for repeated measures designs.
 
     - name: blocking_variable
       title: Blocking Variable (for Friedman)
@@ -57,36 +93,114 @@ options:
       suggested: [nominal, ordinal]
       permitted: [factor]
       default: null
+      description:
+          R: >
+            Variable identifying blocks for Friedman test designs.
 
-    # Test selection
+    # Test Selection - Combined comprehensive options
     - name: test_type
       title: Non-parametric Test
       type: List
       options:
-        - title: "Kruskal-Wallis Test"
-          name: kruskal_wallis
-        - title: "Friedman Test"
-          name: friedman
-        - title: "Mann-Whitney U Test"
+        - title: "Mann-Whitney U Test (2 groups)"
           name: mann_whitney
-        - title: "Wilcoxon Signed-Rank Test"
+        - title: "Kruskal-Wallis Test (2+ groups)"
+          name: kruskal_wallis
+        - title: "Wilcoxon Signed-Rank Test (paired)"
           name: wilcoxon_signed
+        - title: "Friedman Test (repeated measures)"
+          name: friedman
         - title: "Median Test"
           name: median_test
         - title: "Van der Waerden Test"
           name: van_der_waerden
         - title: "Mood's Median Test"
           name: mood_median
-      default: kruskal_wallis
+        - title: "Cochran's Q Test (binary outcomes)"
+          name: cochran_q
+        - title: "Page's Trend Test (ordered alternatives)"
+          name: page_trend
+        - title: "McNemar Test (paired categorical)"
+          name: mcnemar
+        - title: "Sign Test (paired samples)"
+          name: sign_test
+        - title: "Jonckheere-Terpstra Test (ordered trends)"
+          name: jonckheere_terpstra
+      default: mann_whitney
+      description:
+          R: >
+            Select the appropriate non-parametric test based on your study design.
 
-    # Post-hoc analysis
+    # Effect Size Options - Enhanced from both modules
+    - name: effect_size
+      title: Calculate Effect Sizes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate appropriate effect sizes for non-parametric tests with confidence intervals.
+
+    - name: effect_size_method
+      title: Effect Size Method
+      type: List
+      options:
+        - title: "Eta-squared (η²)"
+          name: eta_squared
+        - title: "Epsilon-squared (ε²)"
+          name: epsilon_squared
+        - title: "Rank-biserial correlation (r)"
+          name: rank_biserial
+        - title: "Cliff's Delta (δ)"
+          name: cliff_delta
+        - title: "Common Language Effect Size (CLES)"
+          name: cles
+        - title: "Vargha-Delaney A"
+          name: vargha_delaney
+        - title: "Kendall's W (concordance)"
+          name: kendall_w
+        - title: "Glass's Rank Biserial"
+          name: glass_rank_biserial
+        - title: "Somers' D (asymmetric)"
+          name: somers_d
+      default: eta_squared
+      description:
+          R: >
+            Method for calculating effect sizes appropriate to the chosen test:
+            - Eta-squared/Epsilon-squared: For Kruskal-Wallis (multi-group)
+            - Rank-biserial correlation: For Wilcoxon tests (paired data)
+            - Cliff's Delta: For Mann-Whitney U tests (two independent groups)
+            - CLES/Vargha-Delaney A: Probability-based effect sizes
+            - Kendall's W: For Friedman test (repeated measures concordance)
+
+    - name: confidence_intervals
+      title: Effect Size Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for effect sizes using BCa method.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals and descriptive statistics.
+
+    # Post Hoc Analysis - Enhanced options
     - name: post_hoc
       title: Perform Post-hoc Tests
       type: Bool
       default: true
+      description:
+          R: >
+            Perform post-hoc pairwise comparisons when overall test is significant.
 
     - name: post_hoc_method
-      title: Post-hoc Method
+      title: Post Hoc Method
       type: List
       options:
         - title: "Dunn's Test"
@@ -99,9 +213,15 @@ options:
           name: nemenyi
         - title: "Pairwise Wilcoxon"
           name: pairwise_wilcoxon
+        - title: "Games-Howell (unequal variances)"
+          name: games_howell
+        - title: "Dwass-Steel-Critchlow-Fligner"
+          name: dscf
       default: dunn
+      description:
+          R: >
+            Method for post hoc pairwise comparisons.
 
-    # Multiple comparison corrections
     - name: p_adjustment
       title: P-value Adjustment
       type: List
@@ -110,17 +230,20 @@ options:
           name: none
         - title: "Bonferroni"
           name: bonferroni
-        - title: "Holm"
+        - title: "Holm-Bonferroni"
           name: holm
         - title: "Hochberg"
           name: hochberg
         - title: "Benjamini-Hochberg (FDR)"
           name: BH
-        - title: "Benjamini-Yekutieli"
+        - title: "Benjamini-Yekutieli (FDR)"
           name: BY
       default: holm
+      description:
+          R: >
+            Method for correcting p-values in multiple comparisons.
 
-    # Robust options
+    # Robust Methods - From original nonparametric
     - name: robust_method
       title: Robust Estimation Method
       type: List
@@ -136,6 +259,9 @@ options:
         - title: "Hodges-Lehmann Estimator"
           name: hodges_lehmann
       default: standard
+      description:
+          R: >
+            Method for robust rank-based estimation.
 
     - name: trim_proportion
       title: Trimming Proportion
@@ -143,6 +269,9 @@ options:
       default: 0.1
       min: 0.01
       max: 0.4
+      description:
+          R: >
+            Proportion of observations to trim from each end for robust estimation.
 
     - name: winsorize_proportion
       title: Winsorizing Proportion  
@@ -150,41 +279,18 @@ options:
       default: 0.1
       min: 0.01
       max: 0.4
+      description:
+          R: >
+            Proportion of observations to winsorize from each end.
 
-    # Effect size calculations
-    - name: effect_size
-      title: Calculate Effect Sizes
-      type: Bool
-      default: true
-
-    - name: effect_size_method
-      title: Effect Size Method
-      type: List
-      options:
-        - title: "Eta-squared (η²)"
-          name: eta_squared
-        - title: "Epsilon-squared (ε²)"
-          name: epsilon_squared
-        - title: "Rank-biserial correlation"
-          name: rank_biserial
-        - title: "Common Language Effect Size"
-          name: cles
-        - title: "Vargha-Delaney A"
-          name: vargha_delaney
-      default: eta_squared
-
-    # Confidence intervals
-    - name: confidence_level
-      title: Confidence Level
-      type: Number
-      default: 0.95
-      min: 0.50
-      max: 0.99
-
+    # Bootstrap Options - Enhanced
     - name: bootstrap_ci
       title: Bootstrap Confidence Intervals
       type: Bool
       default: false
+      description:
+          R: >
+            Use bootstrap methods for confidence interval estimation.
 
     - name: bootstrap_samples
       title: Bootstrap Samples
@@ -192,12 +298,35 @@ options:
       default: 1000
       min: 100
       max: 10000
+      description:
+          R: >
+            Number of bootstrap resamples for confidence interval estimation.
 
-    # Assumptions testing
+    # Assumption Testing - Combined from both
     - name: test_assumptions
       title: Test Assumptions
       type: Bool
       default: true
+      description:
+          R: >
+            Perform comprehensive assumption checking for non-parametric tests.
+
+    - name: normality_tests
+      title: Test Normality (for comparison)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test normality of data to justify use of non-parametric methods.
+
+    - name: assumption_checks
+      title: Detailed Assumption Checking
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform detailed assumption checks including independence, distribution shape,
+            and outlier assessment.
 
     - name: homogeneity_test
       title: Test Homogeneity of Variance
@@ -212,64 +341,42 @@ options:
         - title: "Bartlett's Test"
           name: bartlett
       default: levene
+      description:
+          R: >
+            Test for homogeneity of variance between groups.
 
-    # Visualization options
-    - name: show_boxplots
-      title: Show Box Plots
-      type: Bool
-      default: true
-
-    - name: show_violin_plots
-      title: Show Violin Plots
+    # Advanced Test Options
+    - name: exact_test
+      title: Use Exact Tests (when possible)
       type: Bool
       default: false
+      description:
+          R: >
+            Use exact distribution calculations instead of asymptotic approximations.
 
-    - name: show_rank_plots
-      title: Show Rank Distribution Plots
-      type: Bool
-      default: false
-
-    - name: show_effect_plots
-      title: Show Effect Size Plots
-      type: Bool
-      default: true
-
-    # Output options
-    - name: show_descriptives
-      title: Show Descriptive Statistics
-      type: Bool
-      default: true
-
-    - name: show_test_statistics
-      title: Show Test Statistics Table
-      type: Bool
-      default: true
-
-    - name: show_post_hoc_table
-      title: Show Post-hoc Comparisons Table
-      type: Bool
-      default: true
-
-    - name: show_effect_sizes
-      title: Show Effect Sizes Table
-      type: Bool
-      default: true
-
-    - name: show_assumptions
-      title: Show Assumption Tests
-      type: Bool
-      default: true
-
-    - name: show_interpretation
-      title: Show Statistical Interpretation
-      type: Bool
-      default: true
-
-    # Advanced options
     - name: exact_p_values
       title: Use Exact P-values (when available)
       type: Bool
       default: true
+      description:
+          R: >
+            Use exact p-values when computationally feasible.
+
+    - name: continuity_correction
+      title: Continuity Correction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply continuity correction for better normal approximation.
+
+    - name: tie_correction
+      title: Tie Correction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply correction for tied observations in rank-based tests.
 
     - name: ties_method
       title: Method for Handling Ties
@@ -286,8 +393,151 @@ options:
         - title: "Min"
           name: min
       default: average
+      description:
+          R: >
+            Method for handling tied ranks in calculations.
 
-    # Clinical interpretation
+    # Visualization Options - Enhanced from both
+    - name: show_boxplots
+      title: Show Box Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate box plots for visual group comparison.
+
+    - name: show_violin_plots
+      title: Show Violin Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate violin plots showing distribution shapes.
+
+    - name: show_rank_plots
+      title: Show Rank Distribution Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate plots showing rank distributions.
+
+    - name: show_effect_plots
+      title: Show Effect Size Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate visualization of effect sizes with confidence intervals.
+
+    - name: descriptive_plots
+      title: Comprehensive Descriptive Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate comprehensive set of descriptive plots including box plots,
+            violin plots, and distribution comparisons.
+
+    - name: show_qqplots
+      title: Show Q-Q Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate Q-Q plots for normality assessment.
+
+    # Output Control Options - Combined from both
+    - name: show_descriptives
+      title: Show Descriptive Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive descriptive statistics.
+
+    - name: show_test_statistics
+      title: Show Test Statistics Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display main non-parametric test results table.
+
+    - name: show_post_hoc_table
+      title: Show Post-hoc Comparisons Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display post-hoc pairwise comparison results.
+
+    - name: show_effect_sizes
+      title: Show Effect Sizes Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed effect size calculations and interpretations.
+
+    - name: show_assumptions
+      title: Show Assumption Tests
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display assumption testing results and implications.
+
+    - name: show_robust_statistics
+      title: Show Robust Statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display robust statistical estimates using alternative methods.
+
+    - name: show_power_analysis
+      title: Show Power Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform post-hoc power analysis and sample size recommendations.
+
+    # Educational and Interpretation Options - From enhancednonparametric
+    - name: show_instructions
+      title: Show Getting Started Instructions
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive instructions for using non-parametric methods.
+
+    - name: show_explanations
+      title: Show Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed explanations of non-parametric methods and assumptions.
+
+    - name: show_interpretation
+      title: Show Result Interpretation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Provide plain-language interpretation of statistical results.
+
+    - name: show_recommendations
+      title: Show Statistical Recommendations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Provide recommendations for follow-up analyses and study design.
+
+    # Clinical Context - From original nonparametric
     - name: clinical_context
       title: Clinical Application Context
       type: List
@@ -305,12 +555,18 @@ options:
         - title: "Pathological Grading"
           name: pathological
       default: general
+      description:
+          R: >
+            Clinical context for tailored interpretation and recommendations.
 
-    # Reproducibility
+    # Reproducibility - Enhanced
     - name: set_seed
       title: Set Random Seed
       type: Bool
       default: true
+      description:
+          R: >
+            Set random seed for reproducible bootstrap and permutation results.
 
     - name: seed_value
       title: Random Seed Value
@@ -318,3 +574,81 @@ options:
       default: 42
       min: 1
       max: 999999
+      description:
+          R: >
+            Specific seed value for reproducible random number generation.
+
+    # Advanced Clinical Options
+    - name: missing_data_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: "Listwise Deletion (Complete Cases)"
+          name: listwise
+        - title: "Pairwise Deletion"
+          name: pairwise
+        - title: "Mean Imputation"
+          name: mean_imputation
+        - title: "Median Imputation"
+          name: median_imputation
+      default: listwise
+      description:
+          R: >
+            Method for handling missing data in non-parametric analyses.
+
+    - name: alpha_level
+      title: Significance Level (Alpha)
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.10
+      description:
+          R: >
+            Significance level for hypothesis testing (default: 0.05).
+
+    - name: minimum_sample_size
+      title: Minimum Sample Size Warning
+      type: Integer
+      default: 5
+      min: 3
+      max: 20
+      description:
+          R: >
+            Minimum sample size per group before showing adequacy warnings.
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "IQR Method (1.5 × IQR)"
+          name: iqr
+        - title: "Modified Z-score"
+          name: modified_zscore
+        - title: "Tukey's Fences"
+          name: tukey
+        - title: "Hampel Filter"
+          name: hampel
+      default: iqr
+      description:
+          R: >
+            Method for identifying outliers in the data.
+
+    - name: small_sample_exact
+      title: Force Exact Tests for Small Samples
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatically use exact methods when sample sizes are small (n < 20 per group).
+
+    - name: report_standardized_statistics
+      title: Report Standardized Test Statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Report standardized versions of test statistics for better comparability.
+
+...

@@ -1,15 +1,21 @@
-title: Non-parametric Statistical Methods
 name: nonparametric
+title: Enhanced Non-Parametric Statistical Methods
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome Variable
+        label: Dependent Variables (Multiple Analysis)
+        children:
+          - type: VariablesListBox
+            name: deps
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Outcome Variable (Single Analysis)
         children:
           - type: VariablesListBox
             name: outcome
@@ -36,123 +42,267 @@ children:
             name: blocking_variable
             maxItemCount: 1
             isTarget: true
+  - type: CollapseBox
+    label: Test Selection and Main Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: test_type
+            label: Statistical Test Method
+          - type: ComboBox
+            name: clinical_context
+            label: Clinical Research Context
+  - type: CollapseBox
+    label: Effect Sizes and Statistical Inference
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: effect_size
+            label: Calculate Effect Sizes
+          - type: ComboBox
+            name: effect_size_method
+            label: Effect Size Measure
+            enable: (effect_size)
+          - type: CheckBox
+            name: confidence_intervals
+            label: Effect Size Confidence Intervals
+            enable: (effect_size)
+          - type: TextBox
+            name: confidence_level
+            label: Confidence Level
+            format: number
+            suffix: ''
+  - type: CollapseBox
+    label: Post Hoc Analysis and Multiple Comparisons
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: post_hoc
+            label: Pairwise Comparisons (Post-hoc Tests)
+          - type: ComboBox
+            name: post_hoc_method
+            label: Multiple Comparison Method
+            enable: (post_hoc)
+          - type: ComboBox
+            name: p_adjustment
+            label: P-value Adjustment
+            enable: (post_hoc)
+  - type: CollapseBox
+    label: Robust Methods and Advanced Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: robust_method
+            label: Robust Estimation Method
+          - type: TextBox
+            name: trim_proportion
+            label: Trimming Proportion
+            format: number
+            suffix: ''
+            enable: (robust_method == 'trimmed')
+          - type: TextBox
+            name: winsorize_proportion
+            label: Winsorizing Proportion
+            format: number
+            suffix: ''
+            enable: (robust_method == 'winsorized')
+  - type: CollapseBox
+    label: Bootstrap and Resampling Methods
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap_ci
+            label: Bootstrap Confidence Intervals
+          - type: TextBox
+            name: bootstrap_samples
+            label: Bootstrap Samples
+            format: number
+            enable: (bootstrap_ci)
+  - type: CollapseBox
+    label: Assumption Testing and Diagnostics
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: test_assumptions
+            label: Test Assumptions
+          - type: CheckBox
+            name: normality_tests
+            label: Test Normality (for comparison)
+          - type: CheckBox
+            name: assumption_checks
+            label: Detailed Assumption Checking
+          - type: ComboBox
+            name: homogeneity_test
+            label: Test Homogeneity of Variance
+            enable: (test_assumptions || assumption_checks)
+  - type: CollapseBox
+    label: Advanced Test Configuration
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: exact_test
+            label: Use Exact Tests (when possible)
+          - type: CheckBox
+            name: exact_p_values
+            label: Use Exact P-values (when available)
+          - type: CheckBox
+            name: continuity_correction
+            label: Continuity Correction
+          - type: CheckBox
+            name: tie_correction
+            label: Tie Correction
+          - type: ComboBox
+            name: ties_method
+            label: Method for Handling Ties
+  - type: CollapseBox
+    label: Plots and Visualizations
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: descriptive_plots
+            label: Comprehensive Descriptive Plots
+          - type: CheckBox
+            name: show_boxplots
+            label: Show Box Plots
+          - type: CheckBox
+            name: show_violin_plots
+            label: Show Violin Plots
+          - type: CheckBox
+            name: show_rank_plots
+            label: Show Rank Distribution Plots
+          - type: CheckBox
+            name: show_effect_plots
+            label: Show Effect Size Plots
+            enable: (effect_size)
+          - type: CheckBox
+            name: show_qqplots
+            label: Show Q-Q Plots for Normality
+  - type: CollapseBox
+    label: Output Tables and Statistics
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_descriptives
+            label: Show Descriptive Statistics
+          - type: CheckBox
+            name: show_test_statistics
+            label: Show Test Statistics Table
+          - type: CheckBox
+            name: show_post_hoc_table
+            label: Show Post-hoc Comparisons Table
+            enable: (post_hoc)
+          - type: CheckBox
+            name: show_effect_sizes
+            label: Show Effect Sizes Table
+            enable: (effect_size)
+          - type: CheckBox
+            name: show_assumptions
+            label: Show Assumption Tests
+            enable: (test_assumptions || assumption_checks)
+          - type: CheckBox
+            name: show_robust_statistics
+            label: Show Robust Statistics
+          - type: CheckBox
+            name: show_power_analysis
+            label: Show Power Analysis
+  - type: CollapseBox
+    label: Educational Features and Interpretations
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_instructions
+            label: Show Getting Started Instructions
+          - type: CheckBox
+            name: show_explanations
+            label: Show Method Explanations
+          - type: CheckBox
+            name: show_interpretation
+            label: Show Result Interpretation
+          - type: CheckBox
+            name: show_recommendations
+            label: Show Statistical Recommendations
+  - type: CollapseBox
+    label: Reproducibility and Random Seed
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: set_seed
+            label: Set Random Seed
+          - type: TextBox
+            name: seed_value
+            label: Random Seed Value
+            format: number
+            enable: (set_seed)
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: test_type
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: post_hoc
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: post_hoc_method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: p_adjustment
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: robust_method
+        name: missing_data_handling
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
-        name: trim_proportion
+        name: alpha_level
         format: number
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
-        name: winsorize_proportion
+        name: minimum_sample_size
         format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: CheckBox
-        name: effect_size
-  - type: LayoutBox
-    margin: large
-    children:
       - type: ComboBox
-        name: effect_size_method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: confidence_level
-        format: number
+        name: outlier_method
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: bootstrap_ci
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: bootstrap_samples
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
+        name: small_sample_exact
       - type: CheckBox
-        name: test_assumptions
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: homogeneity_test
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_boxplots
-      - type: CheckBox
-        name: show_violin_plots
-      - type: CheckBox
-        name: show_rank_plots
-      - type: CheckBox
-        name: show_effect_plots
-      - type: CheckBox
-        name: show_descriptives
-      - type: CheckBox
-        name: show_test_statistics
-      - type: CheckBox
-        name: show_post_hoc_table
-      - type: CheckBox
-        name: show_effect_sizes
-      - type: CheckBox
-        name: show_assumptions
-      - type: CheckBox
-        name: show_interpretation
-      - type: CheckBox
-        name: exact_p_values
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: ties_method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: clinical_context
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: set_seed
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: seed_value
-        format: number
+        name: report_standardized_statistics

@@ -45,16 +45,6 @@ echo "/document-function FUNC_NAME" | claude
 <./claude/commands/review-module-jjstatsplot.md>
 
 
-***
-
-combine these into one: nonparametric enhancednonparametric as nonparametric
-
-echo "/check-function nonparametric" | claude
-echo "/checkpoint nonparametric" | claude
-echo "/prepare-translation nonparametric" | claude
-echo "/review-function nonparametric" | claude
-echo "/fix-function nonparametric" | claude
-echo "/document-function nonparametric" | claude
 
 grafify
 echo "/check-function grafify" | claude
