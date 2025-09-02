@@ -1,5 +1,5 @@
 ---
-title: "Comprehensive Guide to Sankey & Alluvial Diagrams with jggsankeyfier"
+title: "Comprehensive Guide to Sankey & Alluvial Diagrams with jjsankeyfier"
 author: "ClinicoPath Package"
 date: "`r Sys.Date()`"
 output: html_document
@@ -27,11 +27,11 @@ library(ggplot2)
 library(ggalluvial)
 ```
 
-# Sankey & Alluvial Diagrams with jggsankeyfier
+# Sankey & Alluvial Diagrams with jjsankeyfier
 
 ## Overview
 
-The `jggsankeyfier` function creates flow diagrams that visualize how quantities flow between different categories over time or through different stages. This guide covers three main diagram types:
+The `jjsankeyfier` function creates flow diagrams that visualize how quantities flow between different categories over time or through different stages. This guide covers three main diagram types:
 
 - **Sankey Diagrams**: Visualize flows between source and target nodes with thickness proportional to flow magnitude
 - **Alluvial Diagrams**: Show how categorical variables change across multiple dimensions or time points  
@@ -70,7 +70,7 @@ The `jggsankeyfier` function creates flow diagrams that visualize how quantities
 data("simple_flow_data", package = "ClinicoPath")
 
 # Basic sankey diagram
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = simple_flow_data,
 #   value_var = "flow_amount",
 #   source_var = "from_node", 
@@ -87,7 +87,7 @@ data("simple_flow_data", package = "ClinicoPath")
 data("complex_alluvial_data", package = "ClinicoPath")
 
 # Multi-level alluvial diagram
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = complex_alluvial_data,
 #   value_var = "revenue",
 #   node_vars = c("level_1", "level_2", "level_3", "level_4"),
@@ -105,7 +105,7 @@ data("complex_alluvial_data", package = "ClinicoPath")
 data("treatment_pathways_data", package = "ClinicoPath")
 
 # Visualize treatment progression
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = treatment_pathways_data,
 #   value_var = "patient_count",
 #   node_vars = c("initial_diagnosis", "first_treatment", "response", "final_outcome"),
@@ -123,7 +123,7 @@ data("treatment_pathways_data", package = "ClinicoPath")
 
 ```{r patient-outcomes}
 # Create outcome-focused view
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = treatment_pathways_data,
 #   value_var = "patient_count", 
 #   source_var = "response",
@@ -147,7 +147,7 @@ data("treatment_pathways_data", package = "ClinicoPath")
 data("business_process_data", package = "ClinicoPath")
 
 # Analyze process flows
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = business_process_data,
 #   value_var = "process_value",
 #   node_vars = c("department_start", "process_step_1", "process_step_2", "final_outcome"),
@@ -169,7 +169,7 @@ data("business_process_data", package = "ClinicoPath")
 successful_processes <- business_process_data %>%
   filter(final_outcome %in% c("Closed Won", "On Hold"))
 
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = successful_processes,
 #   value_var = "process_value",
 #   source_var = "department_start",
@@ -194,7 +194,7 @@ successful_processes <- business_process_data %>%
 data("education_pathways_data", package = "ClinicoPath")
 
 # Analyze educational progression
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = education_pathways_data,
 #   value_var = "student_count",
 #   node_vars = c("high_school_type", "college_admission", "major_category", "graduation_status"),
@@ -212,7 +212,7 @@ data("education_pathways_data", package = "ClinicoPath")
 
 ```{r college-outcomes}
 # Focus on college admission patterns
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = education_pathways_data,
 #   value_var = "student_count",
 #   source_var = "high_school_type",
@@ -236,7 +236,7 @@ data("education_pathways_data", package = "ClinicoPath")
 data("tech_migration_data", package = "ClinicoPath")
 
 # Analyze migration patterns
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = tech_migration_data,
 #   value_var = "migration_cost",
 #   node_vars = c("legacy_system", "migration_phase_1", "migration_phase_2", "implementation"),
@@ -257,7 +257,7 @@ data("tech_migration_data", package = "ClinicoPath")
 
 ```{r custom-styling}
 # Advanced styling example
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = simple_flow_data,
 #   value_var = "flow_value",
 #   source_var = "source",
@@ -286,7 +286,7 @@ directions <- c("left_right", "top_bottom", "right_left", "bottom_top")
 
 # for (direction in directions[1:2]) {  # Show first two for brevity
 #   print(
-#     jggsankeyfier(
+#     jjsankeyfier(
 #       data = simple_flow_data,
 #       value_var = "flow_amount",
 #       source_var = "from_node",
@@ -356,7 +356,7 @@ The function provides automatic statistics including:
 
 ```{r flow-statistics}
 # Example with statistics enabled
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = simple_flow_data,
 #   value_var = "flow_amount",
 #   source_var = "from_node",
@@ -387,7 +387,7 @@ clinical_summary <- clinical_decisions %>%
   group_by(presentation, initial_test, diagnosis, treatment) %>%
   summarise(patient_count = sum(patient_count), .groups = "drop")
 
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = clinical_summary,
 #   value_var = "patient_count",
 #   node_vars = c("presentation", "initial_test", "diagnosis", "treatment"),
@@ -414,7 +414,7 @@ transfer_summary <- hospital_transfers %>%
   group_by(admission_dept, transfer_dept, severity) %>%
   summarise(patient_count = n(), avg_los = mean(los_days), .groups = "drop")
 
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = transfer_summary,
 #   value_var = "patient_count",
 #   source_var = "admission_dept",
@@ -453,7 +453,7 @@ aggregated_data <- large_dataset_simulation %>%
   summarise(total_value = sum(value), flow_count = n(), .groups = "drop") %>%
   filter(total_value >= quantile(total_value, 0.75))  # Focus on top 25% of flows
 
-# jggsankeyfier(
+# jjsankeyfier(
 #   data = aggregated_data,
 #   value_var = "total_value", 
 #   source_var = "source",
@@ -555,7 +555,7 @@ check_flow_data(
 
 ## Conclusion
 
-The `jggsankeyfier` function provides powerful capabilities for visualizing flow data across multiple domains. Whether analyzing clinical pathways, business processes, or educational outcomes, these diagrams offer intuitive ways to understand complex relationships and identify optimization opportunities.
+The `jjsankeyfier` function provides powerful capabilities for visualizing flow data across multiple domains. Whether analyzing clinical pathways, business processes, or educational outcomes, these diagrams offer intuitive ways to understand complex relationships and identify optimization opportunities.
 
 Key takeaways:
 

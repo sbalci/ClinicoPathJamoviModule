@@ -1,75 +1,58 @@
 ---
 name:  riverplot
-title: River Plots
+title: River Plots & Alluvial Diagrams
 menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical Over Time'
-menuSubtitle: 'Temporal Categorical Flow Visualization'
+menuSubtitle: 'Flow, Stream, and Transition Visualization'
 version: '0.0.31'
 jas: '1.2'
 
 description:
     main: |
-        Creates river plots to visualize how categorical variables change over time 
-        or sequential stages. Shows temporal flows of categories across time periods, 
-        ideal for tracking patient journeys, treatment progressions, disease stages, 
-        or any categorical changes over time. Requires a time/sequence variable and 
-        supports individual entity tracking.
+        Creates comprehensive river plots, alluvial diagrams, and stream charts to visualize
+        flows, transitions, and temporal changes in categorical data. Supports individual
+        entity tracking, aggregate trends, and multi-stage pathways. Perfect for patient
+        journeys, treatment progressions, categorical changes over time, and flow analysis.
     R:
         dontrun: true
         usage: |
-            # Load temporal clinical data
-            data(patient_followup)
-            
             # Basic temporal flow - Track treatment response changes over time
             riverplot(
-              data = patient_followup,
-              time = "follow_up_date",
+              data = patient_data,
+              time = "follow_up_month",
               strata = "treatment_response",
-              plotType = "flow",
+              plotType = "alluvial",
               labelNodes = TRUE
             )
             
-            # Individual patient tracking over time with ID
+            # Individual patient tracking with ID
             riverplot(
-              data = patient_followup,
+              data = longitudinal_data,
               id = "patient_id",
-              time = "follow_up_date",
+              time = "visit_date",
               strata = "disease_stage",
               plotType = "flow",
               fillType = "last",
-              showCounts = TRUE,
-              curveType = "cubic"
+              showCounts = TRUE
             )
             
-            # Weighted temporal flow - Account for severity scores
+            # Multi-stage pathway (wide format data)
             riverplot(
-              data = patient_followup,
-              time = "visit_number",
-              strata = "pain_level",
+              data = pathway_data,
+              strata = c("baseline_status", "month3_status", "month6_status"),
+              plotType = "sankey",
+              fillType = "frequency",
+              curveType = "cardinal"
+            )
+            
+            # Weighted stream chart - Account for patient counts or values
+            riverplot(
+              data = aggregate_data,
+              time = "quarter",
+              strata = "outcome_category", 
               weight = "patient_count",
-              plotType = "flow",
-              curveType = "sigmoid"
-            )
-            
-            # Stream chart - Aggregate trends over time (no individual tracking)
-            riverplot(
-              data = patient_followup,
-              time = "month",
-              strata = "outcome_category",
               plotType = "stream",
               showLegend = TRUE
-            )
-            
-            # Complex temporal tracking - Multi-level response changes
-            riverplot(
-              data = longitudinal_study,
-              id = "subject_id",
-              time = "assessment_period",
-              strata = "functional_status",
-              weight = "quality_of_life_score",
-              plotType = "flow",
-              labelNodes = TRUE,
-              showCounts = TRUE
             )
 
 options:
@@ -80,148 +63,439 @@ options:
             The data as a data frame.
 
     - name: id
-      title: ID Variable (optional)
+      title: ID Variable (Optional)
       type: Variable
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
+      default: NULL
       description:
           R: >
-            Optional identifier for tracking individual entities (patients, cases) through transitions.
+            Optional identifier for tracking individual entities (patients, cases, customers)
+            through transitions. Required for individual-level flow tracking. Leave empty
+            for aggregate flow visualization.
 
     - name: time
-      title: Time/Sequence Variable (required)
-      type: Variable
+      title: Time/Sequence Variable (Conditional)
+      type: Variable  
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: NULL
       description:
           R: >
-            Required variable representing time points or sequential stages (e.g., visit dates, follow-up periods).
+            Variable representing time points or sequential stages (visit dates, follow-up
+            periods, sequential stages). Required for longitudinal data with single strata
+            variable. Leave empty when using wide format data with multiple strata variables.
 
     - name: strata
-      title: Categorical Variable
-      type: Variable
+      title: Strata Variables (Required)
+      type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            The categorical variable that changes over time (e.g., treatment response, disease stage).
+            Variables containing the categories that flow between stages. For longitudinal
+            data: single variable with categories (treatment_response, disease_stage). 
+            For wide format: multiple variables representing sequential stages 
+            (baseline_status, month3_status, month6_status). Each should be a factor
+            with meaningful category names.
 
     - name: weight
-      title: Weight Variable (optional)
+      title: Weight Variable (Optional)
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
       default: NULL
       description:
           R: >
-            Optional numerical variable to determine stream width.
+            Optional numerical variable to determine flow width proportional to values.
+            Examples: patient count, cost, severity score, revenue. If not provided,
+            flows represent equal counts/frequencies. Use for emphasizing quantitative
+            importance of different pathways.
 
     - name: plotType
       title: Visualization Type
       type: List
       options:
-        - title: Flow Diagram (tracks individual changes)
-          name: flow
-        - title: Stream Chart (shows aggregate trends)
+        - title: Alluvial (flowing streams)
+          name: alluvial
+        - title: Sankey (directed flows) 
+          name: sankey
+        - title: Stream Chart (aggregate trends)
           name: stream
-      default: flow
+        - title: Flow Diagram (individual tracking)
+          name: flow
+      default: alluvial
       description:
           R: >
-            Flow diagrams track individual entities through time periods. 
-            Stream charts show aggregate category trends over time.
+            Type of flow visualization. 'alluvial' creates flowing streams with curved
+            connections, ideal for transitions. 'sankey' creates directed flow diagrams 
+            with straighter connections, good for process flows. 'stream' shows aggregate
+            category trends over time. 'flow' tracks individual entities through time periods.
 
     - name: fillType
       title: Fill Pattern
       type: List
       options:
-        - title: By First Variable
+        - title: By First Variable/Stage
           name: first
-        - title: By Last Variable
+        - title: By Last Variable/Stage  
           name: last
+        - title: By Flow Frequency/Volume
+          name: frequency
       default: first
       description:
           R: >
-            Determines how colors are assigned to flows.
+            Determines how colors are assigned to flows. 'first' colors flows based on
+            initial category (tracking origins). 'last' colors by final category 
+            (tracking destinations). 'frequency' uses flow volume for colors (emphasizes
+            major pathways).
+
+    - name: dataFormat
+      title: Data Format
+      type: List
+      options:
+        - title: Long Format (time variable + single strata)
+          name: long
+        - title: Wide Format (multiple strata variables)
+          name: wide
+        - title: Auto-detect
+          name: auto
+      default: auto
+      description:
+          R: >
+            Format of input data. 'long' format has rows for each time point with single
+            strata variable. 'wide' format has multiple strata variables as columns
+            representing different stages. 'auto' detects format based on variables provided.
 
     - name: sortStreams
-      title: Sort Streams
+      title: Sort Streams by Size
       type: Bool
       default: true
       description:
           R: >
-            Sort alluvial streams by frequency.
+            Sort alluvial streams by frequency/size. Larger flows are positioned more
+            prominently, making major pathways easier to identify. Recommended for
+            highlighting dominant patterns.
 
     - name: labelNodes
-      title: Label Nodes
+      title: Show Node Labels
       type: Bool
       default: true
       description:
           R: >
-            Add labels to nodes.
+            Display category labels on nodes (vertical bars). Labels identify what each
+            segment represents. Recommended unless space is limited or labels overlap.
 
     - name: curveType
       title: Flow Curve Style
       type: List
       options:
-        - title: Smooth (cubic splines)
+        - title: Cardinal (smooth curves)
+          name: cardinal
+        - title: Cubic (spline curves)
           name: cubic
-        - title: Very smooth (quintic)
-          name: quintic
-        - title: Linear connections
+        - title: Linear (straight connections)
           name: linear
-        - title: S-shaped (sigmoid)
+        - title: Sigmoid (S-shaped)
           name: sigmoid
-      default: cubic
+        - title: Sin (sinusoidal curves)
+          name: sin
+        - title: Basis (very smooth)
+          name: basis
+        - title: Step (stepped connections)
+          name: step
+        - title: CRAN Riverplot Style
+          name: riverplot
+      default: cardinal
       description:
           R: >
-            Style of curves connecting time periods. Smooth curves work best for temporal flows.
+            Shape of connecting curves between stages. 'cardinal' creates smooth flowing
+            curves (most aesthetic). 'sin' creates sinusoidal curves (CRAN riverplot style).
+            'riverplot' uses the advanced curve generation from CRAN riverplot package.
 
     - name: showCounts
-      title: Show Counts
+      title: Show Numerical Counts
       type: Bool
       default: false
       description:
           R: >
-            Display counts on the diagram.
+            Display numerical counts or values on nodes. Shows exact frequencies or
+            sums for each category at each stage. Useful for precise interpretation
+            but may clutter visualization with many categories.
+
+    - name: showPercentages
+      title: Show Percentages
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display percentages on nodes or flows. Shows relative proportions within
+            each stage or flow. Complement to absolute counts for better interpretation.
 
     - name: showLegend
-      title: Show Legend
+      title: Show Color Legend
       type: Bool
       default: true
       description:
           R: >
-            Display color legend.
+            Display color legend explaining category mappings. Recommended when colors
+            represent meaningful categories. Can be hidden to save space if category
+            labels are clearly visible.
+
+    - name: legendPosition
+      title: Legend Position
+      type: List
+      options:
+        - title: Right
+          name: right
+        - title: Left
+          name: left
+        - title: Top
+          name: top
+        - title: Bottom
+          name: bottom
+      default: right
+      description:
+          R: >
+            Position of the color legend relative to the plot.
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Default (ggplot2)
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: Set1 (qualitative)
+          name: set1
+        - title: Clinical (green-yellow-red)
+          name: clinical
+        - title: Timeline (blue gradient)
+          name: timeline
+        - title: Custom
+          name: custom
+      default: default
+      description:
+          R: >
+            Color palette for categories. Choose based on data type and aesthetic preference.
+
+    - name: customColors
+      title: Custom Colors (Optional)
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated hex colors for custom color scheme (e.g., "#1f77b4,#ff7f0e,#2ca02c").
+            Only used when Color Scheme is set to 'Custom'.
+
+    - name: nodeWidth
+      title: Node Width
+      type: Number
+      default: 0.1
+      min: 0.05
+      max: 0.5
+      description:
+          R: >
+            Width of nodes (vertical bars) as proportion of plot width. Adjust for
+            better balance between nodes and flows.
+
+    - name: nodeGap
+      title: Gap Between Nodes
+      type: Number  
+      default: 0.05
+      min: 0.01
+      max: 0.2
+      description:
+          R: >
+            Gap between categories within each node as proportion of node height.
+            Smaller values create more compact nodes.
+
+    - name: flowAlpha
+      title: Flow Transparency
+      type: Number
+      default: 0.7
+      min: 0.1
+      max: 1.0
+      description:
+          R: >
+            Transparency of flow connections (0 = fully transparent, 1 = opaque).
+            Lower values help see overlapping flows.
 
     - name: mytitle
-      title: Title
+      title: Plot Title
       type: String
       default: ''
       description:
           R: >
-            Title for the plot.
+            Main title for the plot. Leave empty for no title.
 
-    - name: xtitle
-      title: X-Title
+    - name: xtitle  
+      title: X-Axis Label
       type: String
       default: ''
       description:
           R: >
-            Label for the x-axis.
+            Label for x-axis (time/stage axis). Leave empty for default label.
 
     - name: ytitle
-      title: Y-Title
+      title: Y-Axis Label  
       type: String
       default: ''
       description:
           R: >
-            Label for the y-axis.
+            Label for y-axis (frequency/count axis). Leave empty for default label.
 
     - name: originaltheme
-      title: Use Minimal Theme
+      title: Use Original ggalluvial Theme
       type: Bool
       default: false
       description:
           R: >
-            Use a minimal theme instead of the default ggplot2 theme.
+            Use original ggalluvial package theme instead of minimal theme. May provide
+            better default styling for some plot types.
+
+    - name: fontSize
+      title: Font Size
+      type: Number
+      default: 12
+      min: 8
+      max: 20
+      description:
+          R: >
+            Base font size for labels and text in the plot.
+
+    - name: plotWidth
+      title: Plot Width (inches)
+      type: Number
+      default: 10
+      min: 6
+      max: 20
+      description:
+          R: >
+            Width of the plot in inches for export.
+
+    - name: plotHeight
+      title: Plot Height (inches)
+      type: Number
+      default: 8
+      min: 4
+      max: 16
+      description:
+          R: >
+            Height of the plot in inches for export.
+
+    - name: enableDiagnostics
+      title: Show Diagnostic Information
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display diagnostic information about data processing, flow calculations,
+            and potential issues. Useful for troubleshooting complex datasets.
+
+    - name: edgeGradient
+      title: Use Edge Gradients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply color gradients to edges for smoother visual transitions. Based on
+            CRAN riverplot package gradient capabilities.
+
+    - name: nodeStyle
+      title: Node Style
+      type: List
+      options:
+        - title: Regular (filled rectangles)
+          name: regular
+        - title: Point (small circles)
+          name: point
+        - title: Invisible (hidden nodes)
+          name: invisible
+      default: regular
+      description:
+          R: >
+            Visual style for nodes. 'regular' shows filled rectangles, 'point' shows
+            small circles, 'invisible' hides nodes but maintains connections.
+
+    - name: edgeStyle
+      title: Edge Style
+      type: List
+      options:
+        - title: Gradient (color transitions)
+          name: gradient
+        - title: Solid (single color)
+          name: solid
+        - title: Sin (sinusoidal thickness)
+          name: sin
+      default: gradient
+      description:
+          R: >
+            Visual style for edges. 'gradient' creates smooth color transitions,
+            'sin' varies edge thickness sinusoidally for aesthetic effect.
+
+    - name: gravity
+      title: Node Gravity
+      type: List
+      options:
+        - title: Center
+          name: center
+        - title: Top
+          name: top
+        - title: Bottom
+          name: bottom
+      default: center
+      description:
+          R: >
+            Vertical alignment strategy for nodes within each stage. Affects how
+            nodes are positioned relative to each other.
+
+    - name: addMidPoints
+      title: Add Mid Points
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add intermediate invisible nodes to create smoother edge paths. Helps
+            reduce edge crossings and improve visual clarity (CRAN riverplot feature).
+
+    - name: reorderEdges
+      title: Reorder Edges
+      type: Bool
+      default: false
+      description:
+          R: >
+            Automatically attempt to disentangle and optimize edge routing to reduce
+            crossings. Uses algorithms from CRAN riverplot package.
+
+    - name: curveGranularity
+      title: Curve Smoothness
+      type: Integer
+      default: 100
+      min: 10
+      max: 1000
+      description:
+          R: >
+            Number of points used to generate smooth curves. Higher values create
+            smoother curves but increase rendering time.
+
+    - name: backgroundLabels
+      title: Background Labels
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add background boxes to labels for better readability, similar to
+            CRAN riverplot's bglabel functionality.
+
+    - name: exportRiverplotObject
+      title: Export Riverplot Object
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create and display a riverplot-compatible object structure for use
+            with the CRAN riverplot package.
 
 ...

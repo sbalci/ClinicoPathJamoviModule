@@ -29,8 +29,8 @@ Please systematically check these key functions:
 - `lollipop`
 - `raincloud`
 - `jjsegmentedtotalbar`
-
-
+- `jjstreamgraph`
+- `riverplot`
 
 ## Analysis Approach
 

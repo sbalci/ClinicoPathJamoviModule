@@ -1,0 +1,123 @@
+---
+name: groupedbar
+title: Grouped Bar Chart Comparison
+jrs: '1.1'
+refs: ClinicoPath
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: plot
+      title: Main Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      visible: true
+
+    - name: plotnotes
+      title: Plot Notes
+      type: Html
+      visible: false
+
+    - name: descriptives
+      title: Descriptive Statistics
+      type: Table
+      visible: (showTable)
+      columns:
+          - name: item
+            title: Item/Variable
+            type: text
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: statistic_value
+            title: Value
+            type: number
+          - name: se
+            title: SE
+            type: number
+            visible: (showerrorbars && errortype:se)
+          - name: sd
+            title: SD
+            type: number
+            visible: (showerrorbars && errortype:sd)
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            visible: (showerrorbars && (errortype:ci95 || errortype:ci99))
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            visible: (showerrorbars && (errortype:ci95 || errortype:ci99))
+
+    - name: statistics
+      title: Statistical Tests
+      type: Table
+      visible: (showstatistics)
+      columns:
+          - name: item
+            title: Item/Variable
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: posthoctests
+      title: Post-hoc Comparisons
+      type: Table
+      visible: (posthoc && showstatistics)
+      columns:
+          - name: item
+            title: Item/Variable
+            type: text
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: difference
+            title: Difference
+            type: number
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+          - name: p_adjusted
+            title: p (adjusted)
+            type: number
+            format: zto,pvalue
+          - name: significant
+            title: Significant
+            type: text
+
+    - name: plotcode
+      title: R Code
+      type: Html
+      visible: false
+
+    - name: dataexport
+      title: Data Export
+      type: Html
+      visible: false
+
+...

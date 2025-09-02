@@ -1728,7 +1728,7 @@ analyses:
   - title: Treemap
     name: jjtreemap
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotD
     menuSubgroup: Categorical
     menuTitle: Treemap
     description: |
@@ -1760,32 +1760,30 @@ analyses:
       flows and transitions over time or between categories.'
     ribbon: analyses
     category: analyses
-  - title: River Plots
+  - title: River Plots & Alluvial Diagrams
     name: riverplot
     ns: ClinicoPath
     menuGroup: JJStatsPlotT
     menuSubgroup: Categorical Over Time
-    menuTitle: River Plots
-    menuSubtitle: Temporal Categorical Flow Visualization
+    menuTitle: River Plots & Alluvial Diagrams
+    menuSubtitle: Flow, Stream, and Transition Visualization
     description: >
-      Creates river plots to visualize how categorical variables change over
-      time 
+      Creates comprehensive river plots, alluvial diagrams, and stream charts to
+      visualize
 
-      or sequential stages. Shows temporal flows of categories across time
-      periods, 
+      flows, transitions, and temporal changes in categorical data. Supports
+      individual
 
-      ideal for tracking patient journeys, treatment progressions, disease
-      stages, 
+      entity tracking, aggregate trends, and multi-stage pathways. Perfect for
+      patient
 
-      or any categorical changes over time. Requires a time/sequence variable
-      and 
-
-      supports individual entity tracking.
+      journeys, treatment progressions, categorical changes over time, and flow
+      analysis.
     category: analyses
   - title: Scientific Visualization with Grafify
     name: grafify
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotD
     menuSubgroup: ClinicoPath Scientific Plots
     menuTitle: Scientific Visualization with Grafify
     menuSubtitle: Easy Graphs & Color-Blind Friendly Palettes
@@ -1915,7 +1913,7 @@ analyses:
     ribbon: analyses
     category: analyses
   - title: Sankey & Alluvial Diagrams
-    name: jggsankeyfier
+    name: jjsankeyfier
     ns: ClinicoPath
     menuGroup: JJStatsPlotT
     menuSubgroup: Categorical Over Time
@@ -1956,7 +1954,7 @@ analyses:
   - title: Complex UpSet Plot Visualization
     name: jcomplexupset
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotD
     menuSubgroup: Set Visualization
     menuTitle: Complex UpSet Plot Visualization
     description: >
@@ -2028,7 +2026,7 @@ analyses:
   - title: Radar Plot
     name: jjradarplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotD
     menuSubgroup: Multivariate
     menuTitle: Radar Plot
     ribbon: analyses
@@ -4280,7 +4278,7 @@ analyses:
     name: nonparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: Advanced Statistical Tests
     menuTitle: Non-Parametric Statistical Methods
     menuSubtitle: Comprehensive non-parametric analysis with effect sizes and robust methods
@@ -4564,6 +4562,25 @@ analyses:
 
       complex ridge plots with inside plots, double ridgelines, and color
       gradients.'
+  - title: Grouped Bar Chart Comparison
+    name: groupedbar
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: JJStatsPlotD
+    menuSubgroup: Descriptives
+    menuTitle: Grouped Bar Chart Comparison
+    menuSubtitle: Compare measurements across multiple groups
+    description: >
+      Creates grouped bar charts to compare measurements, responses, or
+      outcomes 
+
+      across different groups. Suitable for comparing lab values across disease
+      groups,
+
+      treatment responses across hospitals, survey responses across
+      demographics,
+
+      or any metric that varies by categorical groupings.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

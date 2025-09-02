@@ -1,4 +1,4 @@
-# Test file for jggsankeyfier function
+# Test file for jjsankeyfier function
 # Tests sankey and alluvial diagram functionality
 
 library(testthat)
@@ -12,10 +12,10 @@ test_that("Test data loads correctly", {
 })
 
 # Basic Functionality Tests
-test_that("jggsankeyfier basic functionality works", {
+test_that("jjsankeyfier basic functionality works", {
   
   # Test with minimal required parameters
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -26,11 +26,11 @@ test_that("jggsankeyfier basic functionality works", {
   expect_s3_class(result, "jmvAnalysis")
 })
 
-test_that("jggsankeyfier handles missing required variables", {
+test_that("jjsankeyfier handles missing required variables", {
   
   # Test without value variable
   expect_error(
-    jggsankeyfier(
+    jjsankeyfier(
       data = simple_flow_data,
       source_var = "from_node",
       target_var = "to_node"
@@ -40,7 +40,7 @@ test_that("jggsankeyfier handles missing required variables", {
   
   # Test without source/target or node variables
   expect_error(
-    jggsankeyfier(
+    jjsankeyfier(
       data = simple_flow_data,
       value_var = "flow_amount"
     ),
@@ -49,10 +49,10 @@ test_that("jggsankeyfier handles missing required variables", {
 })
 
 # Diagram Type Tests
-test_that("jggsankeyfier diagram types work correctly", {
+test_that("jjsankeyfier diagram types work correctly", {
   
   # Test Sankey diagram
-  result_sankey <- jggsankeyfier(
+  result_sankey <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -63,7 +63,7 @@ test_that("jggsankeyfier diagram types work correctly", {
   expect_true(!is.null(result_sankey))
   
   # Test Alluvial diagram
-  result_alluvial <- jggsankeyfier(
+  result_alluvial <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -74,7 +74,7 @@ test_that("jggsankeyfier diagram types work correctly", {
   expect_true(!is.null(result_alluvial))
   
   # Test Parallel sets
-  result_parallel <- jggsankeyfier(
+  result_parallel <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -86,9 +86,9 @@ test_that("jggsankeyfier diagram types work correctly", {
 })
 
 # Multi-Node Variable Tests
-test_that("jggsankeyfier multi-node functionality works", {
+test_that("jjsankeyfier multi-node functionality works", {
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = complex_alluvial_data,
     value_var = "revenue",
     node_vars = c("level_1", "level_2", "level_3", "level_4"),
@@ -100,9 +100,9 @@ test_that("jggsankeyfier multi-node functionality works", {
 })
 
 # Grouping Variable Tests
-test_that("jggsankeyfier grouping variables work", {
+test_that("jjsankeyfier grouping variables work", {
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -114,13 +114,13 @@ test_that("jggsankeyfier grouping variables work", {
 })
 
 # Customization Options Tests
-test_that("jggsankeyfier customization options work", {
+test_that("jjsankeyfier customization options work", {
   
   # Test color palettes
   color_palettes <- c("default", "viridis", "plasma", "set3", "pastel1", "dark2")
   
   for (palette in color_palettes) {
-    result <- jggsankeyfier(
+    result <- jjsankeyfier(
       data = simple_flow_data,
       value_var = "flow_amount",
       source_var = "from_node",
@@ -132,9 +132,9 @@ test_that("jggsankeyfier customization options work", {
   }
 })
 
-test_that("jggsankeyfier node width and transparency work", {
+test_that("jjsankeyfier node width and transparency work", {
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -146,10 +146,10 @@ test_that("jggsankeyfier node width and transparency work", {
   expect_true(!is.null(result))
 })
 
-test_that("jggsankeyfier label options work", {
+test_that("jjsankeyfier label options work", {
   
   # Test with labels shown
-  result_with_labels <- jggsankeyfier(
+  result_with_labels <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -161,7 +161,7 @@ test_that("jggsankeyfier label options work", {
   expect_true(!is.null(result_with_labels))
   
   # Test with values shown
-  result_with_values <- jggsankeyfier(
+  result_with_values <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -173,12 +173,12 @@ test_that("jggsankeyfier label options work", {
 })
 
 # Value Format Tests
-test_that("jggsankeyfier value formats work", {
+test_that("jjsankeyfier value formats work", {
   
   value_formats <- c("raw", "percent", "rounded")
   
   for (format in value_formats) {
-    result <- jggsankeyfier(
+    result <- jjsankeyfier(
       data = simple_flow_data,
       value_var = "flow_amount",
       source_var = "from_node",
@@ -191,12 +191,12 @@ test_that("jggsankeyfier value formats work", {
 })
 
 # Sorting Options Tests
-test_that("jggsankeyfier sorting options work", {
+test_that("jjsankeyfier sorting options work", {
   
   sort_options <- c("original", "alphabetical", "by_value")
   
   for (sort_option in sort_options) {
-    result <- jggsankeyfier(
+    result <- jjsankeyfier(
       data = simple_flow_data,
       value_var = "flow_amount",
       source_var = "from_node",
@@ -209,12 +209,12 @@ test_that("jggsankeyfier sorting options work", {
 })
 
 # Flow Direction Tests
-test_that("jggsankeyfier flow directions work", {
+test_that("jjsankeyfier flow directions work", {
   
   flow_directions <- c("left_right", "top_bottom", "right_left", "bottom_top")
   
   for (direction in flow_directions) {
-    result <- jggsankeyfier(
+    result <- jjsankeyfier(
       data = simple_flow_data,
       value_var = "flow_amount",
       source_var = "from_node",
@@ -227,12 +227,12 @@ test_that("jggsankeyfier flow directions work", {
 })
 
 # Theme Style Tests
-test_that("jggsankeyfier theme styles work", {
+test_that("jjsankeyfier theme styles work", {
   
   theme_styles <- c("default", "minimal", "classic", "void")
   
   for (theme in theme_styles) {
-    result <- jggsankeyfier(
+    result <- jjsankeyfier(
       data = simple_flow_data,
       value_var = "flow_amount",
       source_var = "from_node",
@@ -245,9 +245,9 @@ test_that("jggsankeyfier theme styles work", {
 })
 
 # Title and Subtitle Tests
-test_that("jggsankeyfier titles work", {
+test_that("jjsankeyfier titles work", {
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -260,12 +260,12 @@ test_that("jggsankeyfier titles work", {
 })
 
 # Output Format Tests
-test_that("jggsankeyfier output formats work", {
+test_that("jjsankeyfier output formats work", {
   
   output_formats <- c("plot_only", "data_table", "both")
   
   for (format in output_formats) {
-    result <- jggsankeyfier(
+    result <- jjsankeyfier(
       data = simple_flow_data,
       value_var = "flow_amount",
       source_var = "from_node",
@@ -278,9 +278,9 @@ test_that("jggsankeyfier output formats work", {
 })
 
 # Statistics and Interpretation Tests
-test_that("jggsankeyfier statistics and interpretation work", {
+test_that("jjsankeyfier statistics and interpretation work", {
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = simple_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -293,9 +293,9 @@ test_that("jggsankeyfier statistics and interpretation work", {
 })
 
 # Complex Real-World Data Tests
-test_that("jggsankeyfier works with treatment pathway data", {
+test_that("jjsankeyfier works with treatment pathway data", {
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = treatment_pathways_data,
     value_var = "patient_count",
     node_vars = c("initial_diagnosis", "first_treatment", "response", "final_outcome"),
@@ -306,9 +306,9 @@ test_that("jggsankeyfier works with treatment pathway data", {
   expect_true(!is.null(result))
 })
 
-test_that("jggsankeyfier works with business process data", {
+test_that("jjsankeyfier works with business process data", {
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = business_process_data,
     value_var = "process_value",
     node_vars = c("department_start", "process_step_1", "process_step_2", "final_outcome"),
@@ -321,7 +321,7 @@ test_that("jggsankeyfier works with business process data", {
 })
 
 # Edge Cases and Error Handling Tests
-test_that("jggsankeyfier handles empty data", {
+test_that("jjsankeyfier handles empty data", {
   
   empty_data <- data.frame(
     from_node = character(0),
@@ -330,7 +330,7 @@ test_that("jggsankeyfier handles empty data", {
   )
   
   expect_error(
-    jggsankeyfier(
+    jjsankeyfier(
       data = empty_data,
       value_var = "flow_amount",
       source_var = "from_node",
@@ -340,12 +340,12 @@ test_that("jggsankeyfier handles empty data", {
   )
 })
 
-test_that("jggsankeyfier handles data with missing values", {
+test_that("jjsankeyfier handles data with missing values", {
   
   data_with_na <- simple_flow_data
   data_with_na$flow_amount[1:2] <- NA
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = data_with_na,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -355,7 +355,7 @@ test_that("jggsankeyfier handles data with missing values", {
   expect_true(!is.null(result))
 })
 
-test_that("jggsankeyfier handles single flow case", {
+test_that("jjsankeyfier handles single flow case", {
   
   single_flow_data <- data.frame(
     from_node = "A",
@@ -363,7 +363,7 @@ test_that("jggsankeyfier handles single flow case", {
     flow_amount = 100
   )
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = single_flow_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -373,7 +373,7 @@ test_that("jggsankeyfier handles single flow case", {
   expect_true(!is.null(result))
 })
 
-test_that("jggsankeyfier handles large datasets", {
+test_that("jjsankeyfier handles large datasets", {
   
   # Create a larger synthetic dataset
   large_data <- data.frame(
@@ -382,7 +382,7 @@ test_that("jggsankeyfier handles large datasets", {
     value = sample(1:100, 1000, replace = TRUE)
   )
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = large_data,
     value_var = "value",
     source_var = "source",
@@ -393,14 +393,14 @@ test_that("jggsankeyfier handles large datasets", {
 })
 
 # Integration Tests with Different Variable Types
-test_that("jggsankeyfier handles different variable types", {
+test_that("jjsankeyfier handles different variable types", {
   
   # Test with factor variables
   factor_data <- simple_flow_data
   factor_data$from_node <- as.factor(factor_data$from_node)
   factor_data$to_node <- as.factor(factor_data$to_node)
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = factor_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -410,7 +410,7 @@ test_that("jggsankeyfier handles different variable types", {
   expect_true(!is.null(result))
 })
 
-test_that("jggsankeyfier handles numeric node identifiers", {
+test_that("jjsankeyfier handles numeric node identifiers", {
   
   numeric_data <- data.frame(
     from_node = rep(1:4, each = 2),
@@ -418,7 +418,7 @@ test_that("jggsankeyfier handles numeric node identifiers", {
     flow_amount = sample(10:100, 8)
   )
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = numeric_data,
     value_var = "flow_amount",
     source_var = "from_node",
@@ -429,7 +429,7 @@ test_that("jggsankeyfier handles numeric node identifiers", {
 })
 
 # Performance and Memory Tests
-test_that("jggsankeyfier performs reasonably with medium datasets", {
+test_that("jjsankeyfier performs reasonably with medium datasets", {
   
   # Test performance with moderately sized data
   medium_data <- data.frame(
@@ -442,7 +442,7 @@ test_that("jggsankeyfier performs reasonably with medium datasets", {
   # Test that it completes in reasonable time (should be < 30 seconds)
   start_time <- Sys.time()
   
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = medium_data,
     value_var = "value",
     source_var = "source",
@@ -458,10 +458,10 @@ test_that("jggsankeyfier performs reasonably with medium datasets", {
 })
 
 # Comprehensive Integration Test
-test_that("jggsankeyfier comprehensive integration test", {
+test_that("jjsankeyfier comprehensive integration test", {
   
   # Test with all major options enabled
-  result <- jggsankeyfier(
+  result <- jjsankeyfier(
     data = sankey_simple_data,
     value_var = "flow_value",
     source_var = "source",
@@ -490,4 +490,4 @@ test_that("jggsankeyfier comprehensive integration test", {
   expect_s3_class(result, "jmvAnalysis")
 })
 
-message("All jggsankeyfier tests completed successfully!")
+message("All jjsankeyfier tests completed successfully!")

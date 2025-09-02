@@ -13220,42 +13220,42 @@
         "code": ""
     },
     {
-        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jggsankeyfier.html",
+        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjsankeyfier.html",
         "id": null,
         "dir": "Reference",
         "previous_headings": "",
-        "what": "Sankey & Alluvial Diagrams — jggsankeyfier",
-        "title": "Sankey & Alluvial Diagrams — jggsankeyfier",
+        "what": "Sankey & Alluvial Diagrams — jjsankeyfier",
+        "title": "Sankey & Alluvial Diagrams — jjsankeyfier",
         "text": "Sankey & Alluvial Diagrams",
         "code": ""
     },
     {
-        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jggsankeyfier.html",
+        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjsankeyfier.html",
         "id": "ref-usage",
         "dir": "Reference",
         "previous_headings": "",
         "what": "Usage",
-        "title": "Sankey & Alluvial Diagrams — jggsankeyfier",
+        "title": "Sankey & Alluvial Diagrams — jjsankeyfier",
         "text": "",
-        "code": "jggsankeyfier(   data,   diagram_type = \"sankey\",   value_var,   source_var = NULL,   target_var = NULL,   node_vars = NULL,   grouping_var = NULL,   time_var = NULL,   node_width = 0.5,   node_spacing = 0.1,   edge_alpha = 0.6,   color_palette = \"default\",   show_labels = TRUE,   label_size = 10,   iterations = 32,   show_values = TRUE,   value_format = \"raw\",   sort_nodes = \"original\",   flow_direction = \"left_right\",   plot_title = \"\",   plot_subtitle = \"\",   theme_style = \"default\",   show_statistics = FALSE,   show_interpretation = TRUE,   output_format = \"plot_only\" )"
+        "code": "jjsankeyfier(   data,   diagram_type = \"sankey\",   value_var,   source_var = NULL,   target_var = NULL,   node_vars = NULL,   grouping_var = NULL,   time_var = NULL,   node_width = 0.5,   node_spacing = 0.1,   edge_alpha = 0.6,   color_palette = \"default\",   show_labels = TRUE,   label_size = 10,   iterations = 32,   show_values = TRUE,   value_format = \"raw\",   sort_nodes = \"original\",   flow_direction = \"left_right\",   plot_title = \"\",   plot_subtitle = \"\",   theme_style = \"default\",   show_statistics = FALSE,   show_interpretation = TRUE,   output_format = \"plot_only\" )"
     },
     {
-        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jggsankeyfier.html",
+        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjsankeyfier.html",
         "id": "arguments",
         "dir": "Reference",
         "previous_headings": "",
         "what": "Arguments",
-        "title": "Sankey & Alluvial Diagrams — jggsankeyfier",
+        "title": "Sankey & Alluvial Diagrams — jjsankeyfier",
         "text": "data . diagram_type . value_var Variable containing flow values/weights source_var Variable defining source nodes target_var Variable defining target nodes node_vars Variables multi-level node definitions grouping_var Variable grouping flows time_var Variable temporal flow analysis node_width Width nodes diagram node_spacing Spacing nodes edge_alpha Transparency level edges color_palette . show_labels . label_size . iterations Number iterations layout optimization show_values . value_format . sort_nodes . flow_direction . plot_title . plot_subtitle . theme_style . show_statistics . show_interpretation . output_format .",
         "code": ""
     },
     {
-        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jggsankeyfier.html",
+        "path": "https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjsankeyfier.html",
         "id": "value",
         "dir": "Reference",
         "previous_headings": "",
         "what": "Value",
-        "title": "Sankey & Alluvial Diagrams — jggsankeyfier",
+        "title": "Sankey & Alluvial Diagrams — jjsankeyfier",
         "text": "results object containing: Tables can converted data frames asDF .data.frame. example: results$datatab$asDF .data.frame(results$datatab)",
         "code": ""
     },

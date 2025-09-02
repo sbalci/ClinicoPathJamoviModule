@@ -1,5 +1,5 @@
-title: River Plots & Alluvial Diagrams
-name: riverplot
+title: Grouped Bar Chart Comparison
+name: groupedbar
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -9,182 +9,215 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: ID Variable (Optional)
+        label: Items/Measurements to Compare
         children:
           - type: VariablesListBox
-            name: id
+            name: items
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: groups
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Time/Sequence Variable (Conditional)
+        label: Values Variable (Optional)
         children:
           - type: VariablesListBox
-            name: time
+            name: values
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Strata Variables (Required)
+        label: Facet By (Optional)
         children:
           - type: VariablesListBox
-            name: strata
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Weight Variable (Optional)
-        children:
-          - type: VariablesListBox
-            name: weight
+            name: facetby
             maxItemCount: 1
             isTarget: true
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: plotType
+        name: statistic
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: fillType
+        name: plottype
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: dataFormat
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: sortStreams
-      - type: CheckBox
-        name: labelNodes
+        name: sortorder
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: curveType
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showCounts
-      - type: CheckBox
-        name: showPercentages
-      - type: CheckBox
-        name: showLegend
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: legendPosition
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: colorScheme
+        name: grouporder
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
-        name: customColors
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: nodeWidth
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: nodeGap
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: flowAlpha
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: mytitle
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: xtitle
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ytitle
+        name: customgrouporder
         format: string
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: originaltheme
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: fontSize
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plotWidth
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plotHeight
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: enableDiagnostics
-      - type: CheckBox
-        name: edgeGradient
+        name: showvalues
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: nodeStyle
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: edgeStyle
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: gravity
+        name: valueposition
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: addMidPoints
+        name: showerrorbars
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: errortype
+  - type: LayoutBox
+    margin: large
+    children:
       - type: CheckBox
-        name: reorderEdges
+        name: showconnectors
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: colorscheme
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
-        name: curveGranularity
+        name: customcolors
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: referenceline
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: referencelinelabel
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: referenceband
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: title
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: subtitle
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: xlabel
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ylabel
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showlegend
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: legendtitle
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: legendposition
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showstatistics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: testtype
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: posthoc
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: padjust
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: decimals
         format: number
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: backgroundLabels
+        name: highlightmax
       - type: CheckBox
-        name: exportRiverplotObject
+        name: highlightmin
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: highlightgroups
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: gridlines
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: aspectratio
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: height
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showTable

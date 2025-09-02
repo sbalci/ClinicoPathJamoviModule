@@ -1,9 +1,9 @@
 
 # This file is a generated template, your changes will not be overwritten
 
-jggsankeyfierClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "jggsankeyfierClass",
-    inherit = jggsankeyfierBase,
+jjsankeyfierClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "jjsankeyfierClass",
+    inherit = jjsankeyfierBase,
     private = list(
         .init = function() {
             if (is.null(self$data) || is.null(self$options$value_var)) {

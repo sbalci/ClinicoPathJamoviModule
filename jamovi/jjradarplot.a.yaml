@@ -1,7 +1,7 @@
 ---
 name:  jjradarplot
 title: Radar Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotD
 menuSubgroup: 'Multivariate'
 version: '0.0.31'
 jas: '1.2'

@@ -45,32 +45,6 @@ echo "/document-function FUNC_NAME" | claude
 <./claude/commands/review-module-jjstatsplot.md>
 
 
-
-grafify
-echo "/check-function grafify" | claude
-echo "/checkpoint grafify" | claude
-echo "/prepare-translation grafify" | claude
-echo "/review-function grafify" | claude
-echo "/fix-function grafify" | claude
-echo "/document-function grafify" | claude
-
-jcomplexupset
-echo "/check-function jcomplexupset" | claude
-echo "/checkpoint jcomplexupset" | claude
-echo "/prepare-translation jcomplexupset" | claude
-echo "/review-function jcomplexupset" | claude
-echo "/fix-function jcomplexupset" | claude
-echo "/document-function jcomplexupset" | claude
-
-jjradarplot
-echo "/check-function jjradarplot" | claude
-echo "/checkpoint jjradarplot" | claude
-echo "/prepare-translation jjradarplot" | claude
-echo "/review-function jjradarplot" | claude
-echo "/fix-function jjradarplot" | claude
-echo "/document-function jjradarplot" | claude
-
-riverplot and jjriverplot - merge into one riverplot
 echo "/check-function riverplot" | claude
 echo "/checkpoint riverplot" | claude
 echo "/prepare-translation riverplot" | claude
@@ -86,29 +60,7 @@ echo "/review-function jjstreamgraph" | claude
 echo "/fix-function jjstreamgraph" | claude
 echo "/document-function jjstreamgraph" | claude
 
-jjtreemap
-echo "/check-function jjtreemap" | claude
-echo "/checkpoint jjtreemap" | claude
-echo "/prepare-translation jjtreemap" | claude
-echo "/review-function jjtreemap" | claude
-echo "/fix-function jjtreemap" | claude
-echo "/document-function jjtreemap" | claude
 
-jggsankeyfier
-echo "/check-function jggsankeyfier" | claude
-echo "/checkpoint jggsankeyfier" | claude
-echo "/prepare-translation jggsankeyfier" | claude
-echo "/review-function jggsankeyfier" | claude
-echo "/fix-function jggsankeyfier" | claude
-echo "/document-function jggsankeyfier" | claude
-
-- alluvial - Alluvial Diagrams
-echo "/check-function alluvial" | claude
-echo "/checkpoint alluvial" | claude
-echo "/prepare-translation alluvial" | claude
-echo "/review-function alluvial" | claude
-echo "/fix-function alluvial" | claude
-echo "/document-function alluvial" | claude
 
 ***
 
@@ -313,6 +265,23 @@ echo "/prepare-translation benford" | claude
 echo "/review-function benford" | claude
 echo "/fix-function benford" | claude
 echo "/document-function benford" | claude
+
+
+add jjsankeyfier features as additional options and plots to alluvial function
+
+- alluvial - Alluvial Diagrams
+echo "/check-function alluvial" | claude
+echo "/checkpoint alluvial" | claude
+echo "/prepare-translation alluvial" | claude
+echo "/review-function alluvial" | claude
+echo "/fix-function alluvial" | claude
+echo "/document-function alluvial" | claude
+
+
+
+
+
+
 
 /check-module-ClinicoPathDescriptives
 
