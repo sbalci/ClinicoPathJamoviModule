@@ -27,7 +27,7 @@ jjbarstats(
   conflevel = 0.95,
   ratio = "",
   clinicalpreset = "custom",
-  showexplanations = TRUE
+  showexplanations = FALSE
 )
 }
 \arguments{

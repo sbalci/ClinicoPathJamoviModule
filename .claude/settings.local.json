@@ -9,7 +9,11 @@
       "Read(/Users/serdarbalci/Downloads/**)",
       "Read(/Users/serdarbalci/Downloads/**)",
       "Read(/Users/serdarbalci/Downloads/**)",
-      "WebFetch(domain:cran.r-project.org)"
+      "WebFetch(domain:cran.r-project.org)",
+      "Bash(R:*)",
+      "WebFetch(domain:ozancanozdemir.r-universe.dev)",
+      "Bash(sed:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": [],

@@ -6,11 +6,16 @@
 \usage{
 jjsegmentedtotalbar(
   data,
+  analysis_preset = "custom",
   x_var,
   y_var,
   fill_var,
   facet_var = NULL,
-  chart_style = "clean",
+  show_ggplot2_plot = FALSE,
+  show_ggsegmented_plot = FALSE,
+  ggsegmented_labels = TRUE,
+  ggsegmented_alpha = 0.3,
+  chart_style = "clinical",
   color_palette = "clinical",
   show_percentages = TRUE,
   percentage_format = "integer",
@@ -28,11 +33,15 @@ jjsegmentedtotalbar(
   plot_height = 6,
   add_outline = TRUE,
   outline_color = "white",
-  export_ready = TRUE
+  export_ready = TRUE,
+  show_statistical_tests = FALSE,
+  confidence_level = 0.95
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
+
+\item{analysis_preset}{Predefined clinical analysis configurations.}
 
 \item{x_var}{Categorical variable for x-axis categories.}
 
@@ -42,6 +51,15 @@ jjsegmentedtotalbar(
 composition.}
 
 \item{facet_var}{Optional variable for creating multiple panels.}
+
+\item{show_ggplot2_plot}{Show plot using built-in ggplot2 implementation.}
+
+\item{show_ggsegmented_plot}{Show plot using ggsegmentedtotalbar package.}
+
+\item{ggsegmented_labels}{Show value labels in ggsegmentedtotalbar plot.}
+
+\item{ggsegmented_alpha}{Transparency of background boxes in
+ggsegmentedtotalbar.}
 
 \item{chart_style}{Overall visual style for the chart.}
 
@@ -80,16 +98,25 @@ composition.}
 \item{outline_color}{Color for segment outlines.}
 
 \item{export_ready}{Whether to optimize plot for high-quality export.}
+
+\item{show_statistical_tests}{Whether to perform chi-square tests for
+proportion differences.}
+
+\item{confidence_level}{Confidence level for statistical tests (0.80-0.99).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot_ggsegmented} \tab \tab \tab \tab \tab an image \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$composition_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$detailed_stats} \tab \tab \tab \tab \tab a table \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
+\code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -1,7 +1,7 @@
 ---
 name: jjsegmentedtotalbar
 title: "Segmented Total Bar Charts"
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: ClinicoPath Advanced Plots
 menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
 version: '0.0.31'
@@ -25,6 +25,27 @@ options:
       description:
         R: The data as a data frame.
         jamovi: The dataset for segmented total bar chart visualization.
+
+    - name: analysis_preset
+      title: "Clinical Analysis Preset"
+      type: List
+      options:
+        - title: "Custom Configuration"
+          name: custom
+        - title: "Treatment Response Analysis"
+          name: treatment_response
+        - title: "Patient Demographics"
+          name: demographics
+        - title: "Biomarker Distribution"
+          name: biomarker
+        - title: "Quality Metrics"
+          name: quality
+        - title: "Temporal Analysis"
+          name: temporal
+      default: custom
+      description:
+        R: Predefined clinical analysis configurations.
+        jamovi: Choose from common clinical analysis templates.
 
     - name: x_var
       title: "Category Variable (X-axis)"
@@ -63,6 +84,40 @@ options:
         R: Optional variable for creating multiple panels.
         jamovi: Optional variable to create separate panels.
 
+    - name: show_ggplot2_plot
+      title: "Show ggplot2 Plot"
+      type: Bool
+      default: false
+      description:
+        R: Show plot using built-in ggplot2 implementation.
+        jamovi: Display plot using the built-in ggplot2 implementation.
+
+    - name: show_ggsegmented_plot
+      title: "Show ggsegmentedtotalbar Plot"
+      type: Bool
+      default: false
+      description:
+        R: Show plot using ggsegmentedtotalbar package.
+        jamovi: Display plot using the ggsegmentedtotalbar package.
+
+    - name: ggsegmented_labels
+      title: "Show Labels in ggsegmentedtotalbar"
+      type: Bool
+      default: true
+      description:
+        R: Show value labels in ggsegmentedtotalbar plot.
+        jamovi: Display value labels on segments and totals.
+
+    - name: ggsegmented_alpha
+      title: "Background Transparency (0-1)"
+      type: Number
+      default: 0.3
+      min: 0
+      max: 1
+      description:
+        R: Transparency of background boxes in ggsegmentedtotalbar.
+        jamovi: Set transparency of background annotation boxes (0=transparent, 1=opaque).
+
     - name: chart_style
       title: "Chart Style"
       type: List
@@ -79,7 +134,7 @@ options:
           name: bbc_style
         - title: "GraphPad Prism Style"
           name: prism_style
-      default: clean
+      default: clinical
       description:
         R: Overall visual style for the chart.
         jamovi: Choose the visual style and theme for your chart.
@@ -147,14 +202,14 @@ options:
         jamovi: Show raw count values in addition to percentages.
 
     - name: label_threshold
-      title: "Label Threshold (%)"
+      title: "Min Segment Size for Labels (%)"
       type: Number
       min: 0
       max: 50
       default: 5
       description:
         R: Minimum percentage for showing labels (0-50%).
-        jamovi: Only show labels for segments above this percentage.
+        jamovi: Only show labels for segments above this percentage threshold.
 
     - name: orientation
       title: "Bar Orientation"
@@ -238,14 +293,14 @@ options:
         jamovi: Where to place the legend.
 
     - name: bar_width
-      title: "Bar Width"
+      title: "Bar Width (0.1-1.0)"
       type: Number
       min: 0.1
       max: 1.0
       default: 0.8
       description:
         R: Width of the bars (0.1 to 1.0).
-        jamovi: Adjust the width of bars.
+        jamovi: Adjust the width of bars (0.1=thin, 1.0=wide).
 
     - name: plot_width
       title: "Plot Width"
@@ -299,3 +354,21 @@ options:
       description:
         R: Whether to optimize plot for high-quality export.
         jamovi: Optimize plot for publication/presentation export.
+
+    - name: show_statistical_tests
+      title: "Show Statistical Tests"
+      type: Bool
+      default: false
+      description:
+        R: Whether to perform chi-square tests for proportion differences.
+        jamovi: Add statistical tests comparing proportions across categories.
+
+    - name: confidence_level
+      title: "Confidence Level"
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+        R: Confidence level for statistical tests (0.80-0.99).
+        jamovi: Confidence level for proportion comparisons.

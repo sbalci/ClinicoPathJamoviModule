@@ -11,6 +11,17 @@ jjpiestats(
   grvar = NULL,
   typestatistics = "parametric",
   originaltheme = FALSE,
+  counts = NULL,
+  ratio = "",
+  paired = FALSE,
+  label = "percentage",
+  digits = 2,
+  conflevel = 0.95,
+  proportiontest = TRUE,
+  bfmessage = TRUE,
+  messages = FALSE,
+  clinicalpreset = "custom",
+  showexplanations = TRUE,
   resultssubtitle = FALSE
 )
 }
@@ -38,6 +49,43 @@ provides Bayesian analysis with Bayes factors.}
 to the plot. If TRUE, uses ggstatsplot's default styling. If FALSE, uses
 jamovi's default ggplot2 theme for consistency with other analyses.}
 
+\item{counts}{A variable in data containing counts, or NULL if each row
+represents a single observation. Use this when your data is  already
+aggregated/tabulated.}
+
+\item{ratio}{A comma-separated list of expected proportions for the
+proportion test  (should sum to 1). For example: '0.5,0.5' for two equal
+groups or  '0.25,0.25,0.25,0.25' for four equal groups. Leave empty for
+equal  theoretical proportions.}
+
+\item{paired}{Logical indicating whether data came from a within-subjects
+or repeated measures design study (Default: FALSE). If TRUE, McNemar's test
+will be used. If FALSE, Pearson's chi-square test will be used.}
+
+\item{label}{What information needs to be displayed on the label  in each
+pie slice.}
+
+\item{digits}{Number of digits after decimal point for statistical results.}
+
+\item{conflevel}{Confidence/credible interval level.}
+
+\item{proportiontest}{Decides whether proportion test for x variable is to
+be  carried out for each level of y.}
+
+\item{bfmessage}{Display Bayes Factor in favor of the null hypothesis.
+Only relevant for parametric test.}
+
+\item{messages}{Display statistical messages in console.  Disabling
+improves performance.}
+
+\item{clinicalpreset}{Predefined configurations for common clinical
+scenarios.  Automatically sets appropriate statistical methods and
+parameters.}
+
+\item{showexplanations}{Display detailed explanations of statistical
+methods, assumptions,  and clinical interpretations to guide analysis and
+result interpretation.}
+
 \item{resultssubtitle}{Whether to display statistical test results as
 subtitle in the pie chart. Shows test statistics, p-values, effect sizes,
 and confidence intervals for categorical association tests. Provides
@@ -46,6 +94,11 @@ detailed statistical summary.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$report} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr

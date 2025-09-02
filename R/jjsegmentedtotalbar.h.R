@@ -6,11 +6,16 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            analysis_preset = "custom",
             x_var = NULL,
             y_var = NULL,
             fill_var = NULL,
             facet_var = NULL,
-            chart_style = "clean",
+            show_ggplot2_plot = FALSE,
+            show_ggsegmented_plot = FALSE,
+            ggsegmented_labels = TRUE,
+            ggsegmented_alpha = 0.3,
+            chart_style = "clinical",
             color_palette = "clinical",
             show_percentages = TRUE,
             percentage_format = "integer",
@@ -28,7 +33,9 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             plot_height = 6,
             add_outline = TRUE,
             outline_color = "white",
-            export_ready = TRUE, ...) {
+            export_ready = TRUE,
+            show_statistical_tests = FALSE,
+            confidence_level = 0.95, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -36,6 +43,17 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 requiresData=TRUE,
                 ...)
 
+            private$..analysis_preset <- jmvcore::OptionList$new(
+                "analysis_preset",
+                analysis_preset,
+                options=list(
+                    "custom",
+                    "treatment_response",
+                    "demographics",
+                    "biomarker",
+                    "quality",
+                    "temporal"),
+                default="custom")
             private$..x_var <- jmvcore::OptionVariable$new(
                 "x_var",
                 x_var,
@@ -68,6 +86,24 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..show_ggplot2_plot <- jmvcore::OptionBool$new(
+                "show_ggplot2_plot",
+                show_ggplot2_plot,
+                default=FALSE)
+            private$..show_ggsegmented_plot <- jmvcore::OptionBool$new(
+                "show_ggsegmented_plot",
+                show_ggsegmented_plot,
+                default=FALSE)
+            private$..ggsegmented_labels <- jmvcore::OptionBool$new(
+                "ggsegmented_labels",
+                ggsegmented_labels,
+                default=TRUE)
+            private$..ggsegmented_alpha <- jmvcore::OptionNumber$new(
+                "ggsegmented_alpha",
+                ggsegmented_alpha,
+                default=0.3,
+                min=0,
+                max=1)
             private$..chart_style <- jmvcore::OptionList$new(
                 "chart_style",
                 chart_style,
@@ -78,7 +114,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "clinical",
                     "bbc_style",
                     "prism_style"),
-                default="clean")
+                default="clinical")
             private$..color_palette <- jmvcore::OptionList$new(
                 "color_palette",
                 color_palette,
@@ -194,11 +230,26 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "export_ready",
                 export_ready,
                 default=TRUE)
+            private$..show_statistical_tests <- jmvcore::OptionBool$new(
+                "show_statistical_tests",
+                show_statistical_tests,
+                default=FALSE)
+            private$..confidence_level <- jmvcore::OptionNumber$new(
+                "confidence_level",
+                confidence_level,
+                min=0.8,
+                max=0.99,
+                default=0.95)
 
+            self$.addOption(private$..analysis_preset)
             self$.addOption(private$..x_var)
             self$.addOption(private$..y_var)
             self$.addOption(private$..fill_var)
             self$.addOption(private$..facet_var)
+            self$.addOption(private$..show_ggplot2_plot)
+            self$.addOption(private$..show_ggsegmented_plot)
+            self$.addOption(private$..ggsegmented_labels)
+            self$.addOption(private$..ggsegmented_alpha)
             self$.addOption(private$..chart_style)
             self$.addOption(private$..color_palette)
             self$.addOption(private$..show_percentages)
@@ -218,12 +269,19 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..add_outline)
             self$.addOption(private$..outline_color)
             self$.addOption(private$..export_ready)
+            self$.addOption(private$..show_statistical_tests)
+            self$.addOption(private$..confidence_level)
         }),
     active = list(
+        analysis_preset = function() private$..analysis_preset$value,
         x_var = function() private$..x_var$value,
         y_var = function() private$..y_var$value,
         fill_var = function() private$..fill_var$value,
         facet_var = function() private$..facet_var$value,
+        show_ggplot2_plot = function() private$..show_ggplot2_plot$value,
+        show_ggsegmented_plot = function() private$..show_ggsegmented_plot$value,
+        ggsegmented_labels = function() private$..ggsegmented_labels$value,
+        ggsegmented_alpha = function() private$..ggsegmented_alpha$value,
         chart_style = function() private$..chart_style$value,
         color_palette = function() private$..color_palette$value,
         show_percentages = function() private$..show_percentages$value,
@@ -242,12 +300,19 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         plot_height = function() private$..plot_height$value,
         add_outline = function() private$..add_outline$value,
         outline_color = function() private$..outline_color$value,
-        export_ready = function() private$..export_ready$value),
+        export_ready = function() private$..export_ready$value,
+        show_statistical_tests = function() private$..show_statistical_tests$value,
+        confidence_level = function() private$..confidence_level$value),
     private = list(
+        ..analysis_preset = NA,
         ..x_var = NA,
         ..y_var = NA,
         ..fill_var = NA,
         ..facet_var = NA,
+        ..show_ggplot2_plot = NA,
+        ..show_ggsegmented_plot = NA,
+        ..ggsegmented_labels = NA,
+        ..ggsegmented_alpha = NA,
         ..chart_style = NA,
         ..color_palette = NA,
         ..show_percentages = NA,
@@ -266,7 +331,9 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..plot_height = NA,
         ..add_outline = NA,
         ..outline_color = NA,
-        ..export_ready = NA)
+        ..export_ready = NA,
+        ..show_statistical_tests = NA,
+        ..confidence_level = NA)
 )
 
 jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -275,10 +342,14 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
     active = list(
         instructions = function() private$.items[["instructions"]],
         plot = function() private$.items[["plot"]],
+        plot_ggsegmented = function() private$.items[["plot_ggsegmented"]],
         summary = function() private$.items[["summary"]],
         composition_table = function() private$.items[["composition_table"]],
         detailed_stats = function() private$.items[["detailed_stats"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        clinical_summary = function() private$.items[["clinical_summary"]],
+        statistical_tests = function() private$.items[["statistical_tests"]],
+        preset_guidance = function() private$.items[["preset_guidance"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -287,7 +358,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Segmented Total Bar Charts",
                 refs=list(
-                    "ggplot2"))
+                    "ggplot2",
+                    "ggsegmentedtotalbar"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -296,17 +368,25 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Segmented Total Bar Chart",
+                title="Segmented Total Bar Chart (ggplot2)",
                 width=650,
                 height=450,
                 requiresData=TRUE,
-                refs="ggplot2"))
+                renderFun=".plot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_ggsegmented",
+                title="Segmented Total Bar Chart (ggsegmentedtotalbar)",
+                width=650,
+                height=450,
+                requiresData=TRUE,
+                renderFun=".plot_ggsegmented",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
                 title="Chart Summary",
                 rows=1,
-                visible="(x_var && y_var && fill_var)",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -332,7 +412,6 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="composition_table",
                 title="Composition Analysis",
-                visible="(x_var && y_var && fill_var)",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -363,7 +442,6 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="detailed_stats",
                 title="Detailed Statistics",
-                visible="(x_var && y_var && fill_var)",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -381,11 +459,57 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="interpretation",
                 title="Chart Interpretation",
-                visible="(x_var && y_var && fill_var)",
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var")))}))
+                    "fill_var")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_summary",
+                title="Clinical Summary",
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "fill_var")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="statistical_tests",
+                title="Statistical Tests",
+                visible=FALSE,
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "fill_var",
+                    "show_statistical_tests"),
+                columns=list(
+                    list(
+                        `name`="test_name", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Chi-square", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="preset_guidance",
+                title="Template Guidance",
+                visible=FALSE,
+                clearWith=list(
+                    "analysis_preset")))}))
 
 jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjsegmentedtotalbarBase",
@@ -423,11 +547,17 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' # Each bar totals to 100\% with segments showing relative proportions
 #'}
 #' @param data The data as a data frame.
+#' @param analysis_preset Predefined clinical analysis configurations.
 #' @param x_var Categorical variable for x-axis categories.
 #' @param y_var Numeric variable for segment values.
 #' @param fill_var Categorical variable for bar segment colors and
 #'   composition.
 #' @param facet_var Optional variable for creating multiple panels.
+#' @param show_ggplot2_plot Show plot using built-in ggplot2 implementation.
+#' @param show_ggsegmented_plot Show plot using ggsegmentedtotalbar package.
+#' @param ggsegmented_labels Show value labels in ggsegmentedtotalbar plot.
+#' @param ggsegmented_alpha Transparency of background boxes in
+#'   ggsegmentedtotalbar.
 #' @param chart_style Overall visual style for the chart.
 #' @param color_palette Color palette for segment fills.
 #' @param show_percentages Whether to display percentage labels on segments.
@@ -447,14 +577,21 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param add_outline Whether to add white outlines around segments.
 #' @param outline_color Color for segment outlines.
 #' @param export_ready Whether to optimize plot for high-quality export.
+#' @param show_statistical_tests Whether to perform chi-square tests for
+#'   proportion differences.
+#' @param confidence_level Confidence level for statistical tests (0.80-0.99).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot_ggsegmented} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$composition_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detailed_stats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -466,11 +603,16 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @export
 jjsegmentedtotalbar <- function(
     data,
+    analysis_preset = "custom",
     x_var,
     y_var,
     fill_var,
     facet_var = NULL,
-    chart_style = "clean",
+    show_ggplot2_plot = FALSE,
+    show_ggsegmented_plot = FALSE,
+    ggsegmented_labels = TRUE,
+    ggsegmented_alpha = 0.3,
+    chart_style = "clinical",
     color_palette = "clinical",
     show_percentages = TRUE,
     percentage_format = "integer",
@@ -488,7 +630,9 @@ jjsegmentedtotalbar <- function(
     plot_height = 6,
     add_outline = TRUE,
     outline_color = "white",
-    export_ready = TRUE) {
+    export_ready = TRUE,
+    show_statistical_tests = FALSE,
+    confidence_level = 0.95) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjsegmentedtotalbar requires jmvcore to be installed (restart may be required)")
@@ -510,10 +654,15 @@ jjsegmentedtotalbar <- function(
     for (v in facet_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjsegmentedtotalbarOptions$new(
+        analysis_preset = analysis_preset,
         x_var = x_var,
         y_var = y_var,
         fill_var = fill_var,
         facet_var = facet_var,
+        show_ggplot2_plot = show_ggplot2_plot,
+        show_ggsegmented_plot = show_ggsegmented_plot,
+        ggsegmented_labels = ggsegmented_labels,
+        ggsegmented_alpha = ggsegmented_alpha,
         chart_style = chart_style,
         color_palette = color_palette,
         show_percentages = show_percentages,
@@ -532,7 +681,9 @@ jjsegmentedtotalbar <- function(
         plot_height = plot_height,
         add_outline = add_outline,
         outline_color = outline_color,
-        export_ready = export_ready)
+        export_ready = export_ready,
+        show_statistical_tests = show_statistical_tests,
+        confidence_level = confidence_level)
 
     analysis <- jjsegmentedtotalbarClass$new(
         options = options,

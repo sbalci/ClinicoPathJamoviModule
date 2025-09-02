@@ -10,18 +10,26 @@ items:
       visible: true
 
     - name: plot
-      title: Segmented Total Bar Chart
+      title: Segmented Total Bar Chart (ggplot2)
       type: Image
       width: 650
       height: 450
       requiresData: true
-      refs: ggplot2
+      renderFun: .plot
+
+    - name: plot_ggsegmented
+      title: Segmented Total Bar Chart (ggsegmentedtotalbar)
+      type: Image
+      width: 650
+      height: 450
+      requiresData: true
+      renderFun: .plot_ggsegmented
+      visible: true
 
     - name: summary
       title: 'Chart Summary'
       type: Table
       rows: 1
-      visible: (x_var && y_var && fill_var)
       clearWith:
         - x_var
         - y_var
@@ -43,7 +51,6 @@ items:
     - name: composition_table
       title: 'Composition Analysis'
       type: Table
-      visible: (x_var && y_var && fill_var)
       clearWith:
         - x_var
         - y_var
@@ -69,7 +76,6 @@ items:
     - name: detailed_stats
       title: 'Detailed Statistics'
       type: Table
-      visible: (x_var && y_var && fill_var)
       clearWith:
         - x_var
         - y_var
@@ -85,11 +91,53 @@ items:
     - name: interpretation
       title: 'Chart Interpretation'
       type: Html
-      visible: (x_var && y_var && fill_var)
       clearWith:
         - x_var
         - y_var
         - fill_var
 
+    - name: clinical_summary
+      title: 'Clinical Summary'
+      type: Html
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+
+    - name: statistical_tests
+      title: 'Statistical Tests'
+      type: Table
+      visible: false
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+        - show_statistical_tests
+      columns:
+        - name: test_name
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'Chi-square'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: preset_guidance
+      title: 'Template Guidance'
+      type: Html
+      visible: false
+      clearWith:
+        - analysis_preset
+
 refs:
   - ggplot2
+  - ggsegmentedtotalbar

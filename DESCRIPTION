@@ -271,6 +271,7 @@ Imports:
     RANN,
     fastICA,
     ResourceSelection,
+    ggsegmentedtotalbar,
     tools
 VignetteBuilder: 
     knitr, 
@@ -285,7 +286,8 @@ Remotes:
     alstockdale/sumvar,
     mlr-org/mlr3extralearners@v1.0.0,
     CCICB/ggEDA,
-    cran/parcor
+    cran/parcor,
+    ozancanozdemir/ggsegmentedtotalbar
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

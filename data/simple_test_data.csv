@@ -1,0 +1,10 @@
+Category,Segment,Value
+Group_A,Positive,30
+Group_A,Negative,20
+Group_A,Uncertain,10
+Group_B,Positive,25
+Group_B,Negative,35
+Group_B,Uncertain,15
+Group_C,Positive,40
+Group_C,Negative,15
+Group_C,Uncertain,5
