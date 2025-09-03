@@ -1,7 +1,7 @@
 ---
 name: jjsankeyfier
 title: Sankey & Alluvial Diagrams
-menuGroup: JJStatsPlotT
+menuGroup: ExplorationT2
 menuSubgroup: Categorical Over Time
 version: '0.0.31'
 jas: '1.2'

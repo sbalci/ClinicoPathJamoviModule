@@ -188,3 +188,8 @@ children:
         name: backgroundLabels
       - type: CheckBox
         name: exportRiverplotObject
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinicalPreset

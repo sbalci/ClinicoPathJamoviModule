@@ -814,8 +814,15 @@ if (!WIP && !TEST) {
   cat("\n📁 Copying assets with configuration-based logic...\n")
 
   for (module_name in names(modules_config)) {
-    # Skip disabled modules - respects enabled: false in config
-    if (!modules_config[[module_name]]$enabled) next
+    # Skip disabled modules - use top-level configuration flags
+    module_enabled <- FALSE
+    if (module_name == "meddecide" && meddecide_module) module_enabled <- TRUE
+    if (module_name == "jjstatsplot" && jjstatsplot_module) module_enabled <- TRUE  
+    if (module_name == "jsurvival" && jsurvival_module) module_enabled <- TRUE
+    if (module_name == "ClinicoPathDescriptives" && ClinicoPathDescriptives_module) module_enabled <- TRUE
+    if (module_name == "JamoviTest" && TEST) module_enabled <- TRUE
+    
+    if (!module_enabled) next
 
     module_cfg <- modules_config[[module_name]]
     module_dir <- module_dirs[[module_name]]

@@ -2,137 +2,255 @@
 % Please edit documentation in R/riverplot.h.R
 \name{riverplot}
 \alias{riverplot}
-\title{River Plots}
+\title{River Plots & Alluvial Diagrams}
 \usage{
 riverplot(
   data,
-  id,
-  time,
+  id = NULL,
+  time = NULL,
   strata,
   weight = NULL,
-  plotType = "flow",
+  plotType = "alluvial",
   fillType = "first",
+  dataFormat = "auto",
   sortStreams = TRUE,
   labelNodes = TRUE,
   curveType = "cubic",
   showCounts = FALSE,
+  showPercentages = FALSE,
   showLegend = TRUE,
+  legendPosition = "right",
+  colorScheme = "default",
+  customColors = "",
+  nodeWidth = 0.1,
+  nodeGap = 0.05,
+  flowAlpha = 0.7,
   mytitle = "",
   xtitle = "",
   ytitle = "",
-  originaltheme = FALSE
+  originaltheme = FALSE,
+  fontSize = 12,
+  plotWidth = 10,
+  plotHeight = 8,
+  enableDiagnostics = FALSE,
+  edgeGradient = TRUE,
+  nodeStyle = "regular",
+  edgeStyle = "gradient",
+  gravity = "center",
+  addMidPoints = FALSE,
+  reorderEdges = FALSE,
+  curveGranularity = 100,
+  backgroundLabels = FALSE,
+  exportRiverplotObject = FALSE,
+  clinicalPreset = "none"
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{id}{Optional identifier for tracking individual entities (patients,
-cases) through transitions.}
+cases, customers) through transitions. Required for individual-level flow
+tracking. Leave empty for aggregate flow visualization.}
 
-\item{time}{Required variable representing time points or sequential stages
-(e.g., visit dates, follow-up periods).}
+\item{time}{Variable representing time points or sequential stages (visit
+dates, follow-up periods, sequential stages). Required for longitudinal
+data with single strata variable. Leave empty when using wide format data
+with multiple strata variables.}
 
-\item{strata}{The categorical variable that changes over time (e.g.,
-treatment response, disease stage).}
+\item{strata}{Variables containing the categories that flow between stages.
+For longitudinal data: single variable with categories (treatment_response,
+disease_stage).  For wide format: multiple variables representing
+sequential stages  (baseline_status, month3_status, month6_status). Each
+should be a factor with meaningful category names.}
 
-\item{weight}{Optional numerical variable to determine stream width.}
+\item{weight}{Optional numerical variable to determine flow width
+proportional to values. Examples: patient count, cost, severity score,
+revenue. If not provided, flows represent equal counts/frequencies. Use for
+emphasizing quantitative importance of different pathways.}
 
-\item{plotType}{Flow diagrams track individual entities through time
-periods.  Stream charts show aggregate category trends over time.}
+\item{plotType}{Type of flow visualization. 'alluvial' creates flowing
+streams with curved connections, ideal for transitions. 'sankey' creates
+directed flow diagrams  with straighter connections, good for process
+flows. 'stream' shows aggregate category trends over time. 'flow' tracks
+individual entities through time periods.}
 
-\item{fillType}{Determines how colors are assigned to flows.}
+\item{fillType}{Determines how colors are assigned to flows. 'first' colors
+flows based on initial category (tracking origins). 'last' colors by final
+category  (tracking destinations). 'frequency' uses flow volume for colors
+(emphasizes major pathways).}
 
-\item{sortStreams}{Sort alluvial streams by frequency.}
+\item{dataFormat}{Format of input data. 'long' format has rows for each
+time point with single strata variable. 'wide' format has multiple strata
+variables as columns representing different stages. 'auto' detects format
+based on variables provided.}
 
-\item{labelNodes}{Add labels to nodes.}
+\item{sortStreams}{Sort alluvial streams by frequency/size. Larger flows
+are positioned more prominently, making major pathways easier to identify.
+Recommended for highlighting dominant patterns.}
 
-\item{curveType}{Style of curves connecting time periods. Smooth curves
-work best for temporal flows.}
+\item{labelNodes}{Display category labels on nodes (vertical bars). Labels
+identify what each segment represents. Recommended unless space is limited
+or labels overlap.}
 
-\item{showCounts}{Display counts on the diagram.}
+\item{curveType}{Shape of connecting curves between stages. 'cardinal'
+creates smooth flowing curves (most aesthetic). 'sin' creates sinusoidal
+curves (CRAN riverplot style). 'riverplot' uses the advanced curve
+generation from CRAN riverplot package.}
 
-\item{showLegend}{Display color legend.}
+\item{showCounts}{Display numerical counts or values on nodes. Shows exact
+frequencies or sums for each category at each stage. Useful for precise
+interpretation but may clutter visualization with many categories.}
 
-\item{mytitle}{Title for the plot.}
+\item{showPercentages}{Display percentages on nodes or flows. Shows
+relative proportions within each stage or flow. Complement to absolute
+counts for better interpretation.}
 
-\item{xtitle}{Label for the x-axis.}
+\item{showLegend}{Display color legend explaining category mappings.
+Recommended when colors represent meaningful categories. Can be hidden to
+save space if category labels are clearly visible.}
 
-\item{ytitle}{Label for the y-axis.}
+\item{legendPosition}{Position of the color legend relative to the plot.}
 
-\item{originaltheme}{Use a minimal theme instead of the default ggplot2
-theme.}
+\item{colorScheme}{Color palette for categories. Choose based on data type
+and aesthetic preference.}
+
+\item{customColors}{Comma-separated hex colors for custom color scheme
+(e.g., "#1f77b4,#ff7f0e,#2ca02c"). Only used when Color Scheme is set to
+'Custom'.}
+
+\item{nodeWidth}{Width of nodes (vertical bars) as proportion of plot
+width. Adjust for better balance between nodes and flows.}
+
+\item{nodeGap}{Gap between categories within each node as proportion of
+node height. Smaller values create more compact nodes.}
+
+\item{flowAlpha}{Transparency of flow connections (0 = fully transparent, 1
+= opaque). Lower values help see overlapping flows.}
+
+\item{mytitle}{Main title for the plot. Leave empty for no title.}
+
+\item{xtitle}{Label for x-axis (time/stage axis). Leave empty for default
+label.}
+
+\item{ytitle}{Label for y-axis (frequency/count axis). Leave empty for
+default label.}
+
+\item{originaltheme}{Use original ggalluvial package theme instead of
+minimal theme. May provide better default styling for some plot types.}
+
+\item{fontSize}{Base font size for labels and text in the plot.}
+
+\item{plotWidth}{Width of the plot in inches for export.}
+
+\item{plotHeight}{Height of the plot in inches for export.}
+
+\item{enableDiagnostics}{Display diagnostic information about data
+processing, flow calculations, and potential issues. Useful for
+troubleshooting complex datasets.}
+
+\item{edgeGradient}{Apply color gradients to edges for smoother visual
+transitions. Based on CRAN riverplot package gradient capabilities.}
+
+\item{nodeStyle}{Visual style for nodes. 'regular' shows filled rectangles,
+'point' shows small circles, 'invisible' hides nodes but maintains
+connections.}
+
+\item{edgeStyle}{Visual style for edges. 'gradient' creates smooth color
+transitions, 'sin' varies edge thickness sinusoidally for aesthetic effect.}
+
+\item{gravity}{Vertical alignment strategy for nodes within each stage.
+Affects how nodes are positioned relative to each other.}
+
+\item{addMidPoints}{Add intermediate invisible nodes to create smoother
+edge paths. Helps reduce edge crossings and improve visual clarity (CRAN
+riverplot feature).}
+
+\item{reorderEdges}{Automatically attempt to disentangle and optimize edge
+routing to reduce crossings. Uses algorithms from CRAN riverplot package.}
+
+\item{curveGranularity}{Number of points used to generate smooth curves.
+Higher values create smoother curves but increase rendering time.}
+
+\item{backgroundLabels}{Add background boxes to labels for better
+readability, similar to CRAN riverplot's bglabel functionality.}
+
+\item{exportRiverplotObject}{Create and display a riverplot-compatible
+object structure for use with the CRAN riverplot package.}
+
+\item{clinicalPreset}{Apply predefined configurations optimized for common
+clinical scenarios. Each preset automatically configures plot type,
+styling, and display options for the selected clinical use case.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnostics} \tab \tab \tab \tab \tab a html \cr
+\code{results$flowTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$transitionMatrix} \tab \tab \tab \tab \tab a table \cr
+\code{results$riverplotObject} \tab \tab \tab \tab \tab a html \cr
+\code{results$riverplotCode} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$flowTable$asDF}
+
+\code{as.data.frame(results$flowTable)}
 }
 \description{
-Creates river plots to visualize how categorical variables change over time
-or sequential stages. Shows temporal flows of categories across time
-periods,
-ideal for tracking patient journeys, treatment progressions, disease
-stages,
-or any categorical changes over time. Requires a time/sequence variable and
-supports individual entity tracking.
+Creates comprehensive river plots, alluvial diagrams, and stream charts to
+visualize
+flows, transitions, and temporal changes in categorical data. Supports
+individual
+entity tracking, aggregate trends, and multi-stage pathways. Perfect for
+patient
+journeys, treatment progressions, categorical changes over time, and flow
+analysis.
 }
 \examples{
 \donttest{
-# Load temporal clinical data
-data(patient_followup)
-
 # Basic temporal flow - Track treatment response changes over time
 riverplot(
-  data = patient_followup,
-  time = "follow_up_date",
+  data = patient_data,
+  time = "follow_up_month",
   strata = "treatment_response",
-  plotType = "flow",
+  plotType = "alluvial",
   labelNodes = TRUE
 )
 
-# Individual patient tracking over time with ID
+# Individual patient tracking with ID
 riverplot(
-  data = patient_followup,
+  data = longitudinal_data,
   id = "patient_id",
-  time = "follow_up_date",
+  time = "visit_date",
   strata = "disease_stage",
   plotType = "flow",
   fillType = "last",
-  showCounts = TRUE,
-  curveType = "cubic"
+  showCounts = TRUE
 )
 
-# Weighted temporal flow - Account for severity scores
+# Multi-stage pathway (wide format data)
 riverplot(
-  data = patient_followup,
-  time = "visit_number",
-  strata = "pain_level",
-  weight = "patient_count",
-  plotType = "flow",
-  curveType = "sigmoid"
+  data = pathway_data,
+  strata = c("baseline_status", "month3_status", "month6_status"),
+  plotType = "sankey",
+  fillType = "frequency",
+  curveType = "cardinal"
 )
 
-# Stream chart - Aggregate trends over time (no individual tracking)
+# Weighted stream chart - Account for patient counts or values
 riverplot(
-  data = patient_followup,
-  time = "month",
+  data = aggregate_data,
+  time = "quarter",
   strata = "outcome_category",
+  weight = "patient_count",
   plotType = "stream",
   showLegend = TRUE
-)
-
-# Complex temporal tracking - Multi-level response changes
-riverplot(
-  data = longitudinal_study,
-  id = "subject_id",
-  time = "assessment_period",
-  strata = "functional_status",
-  weight = "quality_of_life_score",
-  plotType = "flow",
-  labelNodes = TRUE,
-  showCounts = TRUE
 )
 }
 }

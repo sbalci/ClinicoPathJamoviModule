@@ -29,8 +29,6 @@ Please systematically check these key functions:
 - `lollipop`
 - `raincloud`
 - `jjsegmentedtotalbar`
-- `jjstreamgraph`
-- `riverplot`
 
 ## Analysis Approach
 
@@ -47,17 +45,17 @@ For each function, perform a focused check on:
 
 | Function          | Status   | Critical Issues | Schema Issues | Ready? |
 | ----------------- | -------- | --------------- | ------------- | ------ |
-| jjhistostats      | ✅⚠️❌    | #               | #             | ✅❌   |
-| jjscatterstats    | ✅⚠️❌    | #               | #             | ✅❌   |
-| jjcorrmat         | ✅⚠️❌    | #               | #             | ✅❌   |
-| jjbetweenstats    | ✅⚠️❌    | #               | #             | ✅❌   |
-| jjdotplotstats    | ✅⚠️❌    | #               | #             | ✅❌   |
-| jjwithinstats     | ✅⚠️❌    | #               | #             | ✅❌   |
-| advancedraincloud | ✅⚠️❌    | #               | #             | ✅❌   |
-| jjbarstats        | ✅⚠️❌    | #               | #             | ✅❌   |
-| jjpiestats        | ✅⚠️❌    | #               | #             | ✅❌   |
-| jwaffle           | ✅⚠️❌    | #               | #             | ✅❌   |
-| statsplot2        | ✅⚠️❌    | #               | #             | ✅❌   |
+| jjhistostats      | ✅⚠️❌ | #               | #             | ✅❌   |
+| jjscatterstats    | ✅⚠️❌ | #               | #             | ✅❌   |
+| jjcorrmat         | ✅⚠️❌ | #               | #             | ✅❌   |
+| jjbetweenstats    | ✅⚠️❌ | #               | #             | ✅❌   |
+| jjdotplotstats    | ✅⚠️❌ | #               | #             | ✅❌   |
+| jjwithinstats     | ✅⚠️❌ | #               | #             | ✅❌   |
+| advancedraincloud | ✅⚠️❌ | #               | #             | ✅❌   |
+| jjbarstats        | ✅⚠️❌ | #               | #             | ✅❌   |
+| jjpiestats        | ✅⚠️❌ | #               | #             | ✅❌   |
+| jwaffle           | ✅⚠️❌ | #               | #             | ✅❌   |
+| statsplot2        | ✅⚠️❌ | #               | #             | ✅❌   |
 
 ### 🔥 CRITICAL ISSUES SUMMARY
 

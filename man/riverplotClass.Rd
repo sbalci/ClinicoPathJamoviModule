@@ -2,13 +2,29 @@
 % Please edit documentation in R/riverplot.b.R
 \name{riverplotClass}
 \alias{riverplotClass}
-\title{River Plots (Temporal Flows)}
+\title{River Plots & Alluvial Diagrams}
 \description{
-Creates river plots to visualize how categorical variables change over time
-or sequential stages. Shows temporal flows of categories across time periods,
-ideal for tracking patient journeys, treatment progressions, disease stages,
-or any categorical changes over time. Supports both individual tracking and
-aggregate trend visualization.
+Comprehensive river plot, alluvial diagram, and stream chart visualization for
+categorical flow analysis. Combines functionality for temporal flows, individual
+entity tracking, aggregate trends, and multi-stage pathways. Supports both
+longitudinal (long format) and cross-sectional (wide format) data.
+}
+\details{
+This unified implementation supports multiple visualization types:
+\itemize{
+\item Alluvial diagrams: Flowing streams with curved connections
+\item Sankey diagrams: Directed flows with straighter connections
+\item Stream charts: Aggregate category trends over time
+\item Flow diagrams: Individual entity tracking through stages
+}
+
+Data format flexibility:
+\itemize{
+\item Long format: Time variable + single categorical variable
+\item Wide format: Multiple categorical variables as stages
+\item Individual tracking: Optional ID variable for entity-level flows
+\item Weighted flows: Optional weight variable for proportional sizing
+}
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::riverplotBase} -> \code{riverplotClass}

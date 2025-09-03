@@ -1,7 +1,7 @@
 ---
 name:  riverplot
 title: River Plots & Alluvial Diagrams
-menuGroup: JJStatsPlotT
+menuGroup: ExplorationT2
 menuSubgroup: 'Categorical Over Time'
 menuSubtitle: 'Flow, Stream, and Transition Visualization'
 version: '0.0.31'
@@ -190,23 +190,19 @@ options:
       title: Flow Curve Style
       type: List
       options:
-        - title: Cardinal (smooth curves)
-          name: cardinal
-        - title: Cubic (spline curves)
-          name: cubic
         - title: Linear (straight connections)
           name: linear
-        - title: Sigmoid (S-shaped)
+        - title: Cubic (smooth splines)
+          name: cubic
+        - title: Quintic (very smooth splines)
+          name: quintic
+        - title: Sine (sinusoidal curves)
+          name: sine
+        - title: Arctangent (gradual curves)
+          name: arctangent
+        - title: Sigmoid (S-shaped curves)
           name: sigmoid
-        - title: Sin (sinusoidal curves)
-          name: sin
-        - title: Basis (very smooth)
-          name: basis
-        - title: Step (stepped connections)
-          name: step
-        - title: CRAN Riverplot Style
-          name: riverplot
-      default: cardinal
+      default: cubic
       description:
           R: >
             Shape of connecting curves between stages. 'cardinal' creates smooth flowing
@@ -497,5 +493,28 @@ options:
           R: >
             Create and display a riverplot-compatible object structure for use
             with the CRAN riverplot package.
+
+    - name: clinicalPreset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: None (Custom Settings)
+          name: none
+        - title: Patient Journey Tracking
+          name: patient_journey
+        - title: Treatment Response Analysis
+          name: treatment_response
+        - title: Disease Progression Monitoring
+          name: disease_progression
+        - title: Clinical Pathway Analysis
+          name: clinical_pathway
+        - title: Population Health Trends
+          name: population_trends
+      default: none
+      description:
+          R: >
+            Apply predefined configurations optimized for common clinical scenarios.
+            Each preset automatically configures plot type, styling, and display options
+            for the selected clinical use case.
 
 ...

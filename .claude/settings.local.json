@@ -14,6 +14,10 @@
       "WebFetch(domain:ozancanozdemir.r-universe.dev)",
       "Bash(sed:*)",
       "Bash(grep:*)",
+      "Read(/Users/serdarbalci/Downloads/**)",
+      "WebFetch(domain:r-graph-gallery.com)",
+      "WebFetch(domain:rdrr.io)",
+      "Read(/var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T/TemporaryItems/NSIRD_screencaptureui_pLmnpg/**)",
       "Read(/Users/serdarbalci/Downloads/**)"
     ],
     "deny": [],

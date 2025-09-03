@@ -15,7 +15,7 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dataFormat = "auto",
             sortStreams = TRUE,
             labelNodes = TRUE,
-            curveType = "cardinal",
+            curveType = "cubic",
             showCounts = FALSE,
             showPercentages = FALSE,
             showLegend = TRUE,
@@ -41,7 +41,8 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             reorderEdges = FALSE,
             curveGranularity = 100,
             backgroundLabels = FALSE,
-            exportRiverplotObject = FALSE, ...) {
+            exportRiverplotObject = FALSE,
+            clinicalPreset = "none", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -120,15 +121,13 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "curveType",
                 curveType,
                 options=list(
-                    "cardinal",
-                    "cubic",
                     "linear",
-                    "sigmoid",
-                    "sin",
-                    "basis",
-                    "step",
-                    "riverplot"),
-                default="cardinal")
+                    "cubic",
+                    "quintic",
+                    "sine",
+                    "arctangent",
+                    "sigmoid"),
+                default="cubic")
             private$..showCounts <- jmvcore::OptionBool$new(
                 "showCounts",
                 showCounts,
@@ -271,6 +270,17 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "exportRiverplotObject",
                 exportRiverplotObject,
                 default=FALSE)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "none",
+                    "patient_journey",
+                    "treatment_response",
+                    "disease_progression",
+                    "clinical_pathway",
+                    "population_trends"),
+                default="none")
 
             self$.addOption(private$..id)
             self$.addOption(private$..time)
@@ -308,6 +318,7 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..curveGranularity)
             self$.addOption(private$..backgroundLabels)
             self$.addOption(private$..exportRiverplotObject)
+            self$.addOption(private$..clinicalPreset)
         }),
     active = list(
         id = function() private$..id$value,
@@ -345,7 +356,8 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         reorderEdges = function() private$..reorderEdges$value,
         curveGranularity = function() private$..curveGranularity$value,
         backgroundLabels = function() private$..backgroundLabels$value,
-        exportRiverplotObject = function() private$..exportRiverplotObject$value),
+        exportRiverplotObject = function() private$..exportRiverplotObject$value,
+        clinicalPreset = function() private$..clinicalPreset$value),
     private = list(
         ..id = NA,
         ..time = NA,
@@ -382,7 +394,8 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..reorderEdges = NA,
         ..curveGranularity = NA,
         ..backgroundLabels = NA,
-        ..exportRiverplotObject = NA)
+        ..exportRiverplotObject = NA,
+        ..clinicalPreset = NA)
 )
 
 riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -390,6 +403,8 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
+        reportSentence = function() private$.items[["reportSentence"]],
         plot = function() private$.items[["plot"]],
         diagnostics = function() private$.items[["diagnostics"]],
         flowTable = function() private$.items[["flowTable"]],
@@ -409,6 +424,16 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Welcome & Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentence",
+                title="Copy-Ready Report",
                 visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -497,7 +522,24 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="transitionMatrix",
                 title="Transition Matrix",
                 visible="(enableDiagnostics && (plotType:alluvial || plotType:flow))",
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="from", 
+                        `title`="From Category", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To Category", 
+                        `type`="text"),
+                    list(
+                        `name`="probability", 
+                        `title`="Probability", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="riverplotObject",
@@ -677,9 +719,14 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   readability, similar to CRAN riverplot's bglabel functionality.
 #' @param exportRiverplotObject Create and display a riverplot-compatible
 #'   object structure for use with the CRAN riverplot package.
+#' @param clinicalPreset Apply predefined configurations optimized for common
+#'   clinical scenarios. Each preset automatically configures plot type,
+#'   styling, and display options for the selected clinical use case.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$diagnostics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$flowTable} \tab \tab \tab \tab \tab a table \cr
@@ -707,7 +754,7 @@ riverplot <- function(
     dataFormat = "auto",
     sortStreams = TRUE,
     labelNodes = TRUE,
-    curveType = "cardinal",
+    curveType = "cubic",
     showCounts = FALSE,
     showPercentages = FALSE,
     showLegend = TRUE,
@@ -733,7 +780,8 @@ riverplot <- function(
     reorderEdges = FALSE,
     curveGranularity = 100,
     backgroundLabels = FALSE,
-    exportRiverplotObject = FALSE) {
+    exportRiverplotObject = FALSE,
+    clinicalPreset = "none") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("riverplot requires jmvcore to be installed (restart may be required)")
@@ -790,7 +838,8 @@ riverplot <- function(
         reorderEdges = reorderEdges,
         curveGranularity = curveGranularity,
         backgroundLabels = backgroundLabels,
-        exportRiverplotObject = exportRiverplotObject)
+        exportRiverplotObject = exportRiverplotObject,
+        clinicalPreset = clinicalPreset)
 
     analysis <- riverplotClass$new(
         options = options,
