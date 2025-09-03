@@ -44,10 +44,8 @@ echo "/document-function FUNC_NAME" | claude
 ## meddecideT (11 functions)
 
 - modelbuilder - Prediction Model Builder
-echo "/check-function modelbuilder" | claude
-echo "/checkpoint modelbuilder" | claude
-echo "/prepare-translation modelbuilder" | claude
-echo "/review-function modelbuilder" | claude
+
+
 echo "/fix-function modelbuilder" | claude
 echo "/document-function modelbuilder" | claude
 
