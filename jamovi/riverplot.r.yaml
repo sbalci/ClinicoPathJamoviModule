@@ -9,6 +9,16 @@ items:
       type: Html
       visible: true
 
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    - name: reportSentence
+      title: Copy-Ready Report
+      type: Html
+      visible: true
+
     - name: plot
       title: River Plot
       type: Image
@@ -83,7 +93,20 @@ items:
       title: Transition Matrix
       type: Table
       visible: (enableDiagnostics && (plotType:alluvial || plotType:flow))
-      columns: []
+      columns:
+          - name: from
+            title: From Category
+            type: text
+          - name: to
+            title: To Category
+            type: text
+          - name: probability
+            title: Probability
+            type: number
+            format: dp:3
+          - name: count
+            title: Count
+            type: integer
 
     - name: riverplotObject
       title: Riverplot Object Structure

@@ -38,29 +38,6 @@ echo "/document-function FUNC_NAME" | claude
 
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
-***
-
-## JJStatsPlotT
-
-<./claude/commands/review-module-jjstatsplot.md>
-
-
-echo "/check-function riverplot" | claude
-echo "/checkpoint riverplot" | claude
-echo "/prepare-translation riverplot" | claude
-echo "/review-function riverplot" | claude
-echo "/fix-function riverplot" | claude
-echo "/document-function riverplot" | claude
-
-jjstreamgraph
-echo "/check-function jjstreamgraph" | claude
-echo "/checkpoint jjstreamgraph" | claude
-echo "/prepare-translation jjstreamgraph" | claude
-echo "/review-function jjstreamgraph" | claude
-echo "/fix-function jjstreamgraph" | claude
-echo "/document-function jjstreamgraph" | claude
-
-
 
 ***
 
@@ -268,6 +245,8 @@ echo "/document-function benford" | claude
 
 
 add jjsankeyfier features as additional options and plots to alluvial function
+add riverplot features as additional options and plots to alluvial function
+
 
 - alluvial - Alluvial Diagrams
 echo "/check-function alluvial" | claude
