@@ -3,13 +3,17 @@ name: modelbuilder
 jus: '3.0'
 stage: 0
 compilerMode: tame
+
 children:
+  # =============================================================================
+  # VARIABLE SELECTION - Always visible at top
+  # =============================================================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome Variable
+        label: 🎯 Outcome Variable
         children:
           - type: VariablesListBox
             name: outcome
@@ -17,29 +21,46 @@ children:
             isTarget: true
           - type: LevelSelector
             name: outcomePositive
-            label: Positive Outcome
+            label: Positive Outcome Level
             enable: (outcome)
-  - type: CollapseBox
-    label: Data Setup
-    margin: normal
-    collapsed: false
-    children:
-      - type: LayoutBox
-        margin: large
+      
+      - type: TargetLayoutBox
+        label: 🩺 Basic Clinical Variables (Demographics & Primary Risk Factors)
         children:
-          - type: CheckBox
-            name: splitData
-            label: Split data for validation (70/30)
-          - type: TextBox
-            name: randomSeed
-            format: number
-            label: Random seed
-            enable: (splitData)
-          - type: ComboBox
-            name: missingDataMethod
-            label: Missing data handling
+          - type: VariablesListBox
+            name: basicPredictors
+            isTarget: true
+            height: normal
+            
+      - type: TargetLayoutBox
+        label: 🩺+ Enhanced Clinical Variables (Additional Clinical Factors)
+        children:
+          - type: VariablesListBox
+            name: enhancedPredictors
+            isTarget: true
+            height: normal
+            
+      - type: TargetLayoutBox
+        label: 🧬 Biomarker Variables (Laboratory & Advanced Diagnostics)
+        children:
+          - type: VariablesListBox
+            name: biomarkerPredictors
+            isTarget: true
+            height: normal
+            
+      - type: TargetLayoutBox
+        label: 🎛️ Custom Variables (User-Defined Combination)
+        children:
+          - type: VariablesListBox
+            name: customPredictors
+            isTarget: true
+            height: normal
+
+  # =============================================================================
+  # DATA PREPARATION - Essential setup
+  # =============================================================================
   - type: CollapseBox
-    label: Models to Build
+    label: 📊 Data Preparation
     margin: normal
     collapsed: false
     children:
@@ -47,82 +68,104 @@ children:
         margin: large
         children:
           - type: Label
-            label: Basic Clinical Model
+            label: Data Splitting
+            children:
+              - type: CheckBox
+                name: splitData
+                label: Split data for validation (training 70% / testing 30%)
+              - type: TextBox
+                name: randomSeed
+                format: number
+                label: Random seed (for reproducibility)
+                enable: (splitData)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Missing Data Handling
+            children:
+              - type: ComboBox
+                name: missingDataMethod
+                label: Missing data strategy
+              - type: TextBox
+                name: imputationSets
+                format: number
+                label: Number of imputation sets
+                enable: (missingDataMethod:multiple_imputation)
+
+  # =============================================================================
+  # MODEL SELECTION - Core functionality
+  # =============================================================================
+  - type: CollapseBox
+    label: 🏗️ Model Types to Build
+    margin: normal
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: 🩺 Basic Clinical Model
             children:
               - type: CheckBox
                 name: buildBasicModel
-                label: Build basic clinical model
-              - type: VariablesListBox
-                name: basicPredictors
-                label: Basic model predictors
-                enable: (buildBasicModel)
+                label: Build basic clinical model (uses Basic Clinical Variables above)
               - type: TextBox
                 name: basicModelName
                 format: string
-                label: Model name
+                label: Model display name
                 enable: (buildBasicModel)
+
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Enhanced Clinical Model
+            label: 🩺+ Enhanced Clinical Model
             children:
               - type: CheckBox
                 name: buildEnhancedModel
-                label: Build enhanced clinical model
-              - type: VariablesListBox
-                name: enhancedPredictors
-                label: Enhanced model predictors
-                enable: (buildEnhancedModel)
+                label: Build enhanced clinical model (uses Enhanced Clinical Variables above)
               - type: TextBox
                 name: enhancedModelName
                 format: string
-                label: Model name
+                label: Model display name
                 enable: (buildEnhancedModel)
+
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Biomarker Model
+            label: 🧬 Biomarker Model
             children:
               - type: CheckBox
                 name: buildBiomarkerModel
-                label: Build biomarker model
-              - type: VariablesListBox
-                name: biomarkerPredictors
-                label: Biomarker model predictors
-                enable: (buildBiomarkerModel)
+                label: Build biomarker model (uses Biomarker Variables above)
               - type: TextBox
                 name: biomarkerModelName
                 format: string
-                label: Model name
+                label: Model display name
                 enable: (buildBiomarkerModel)
+
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Custom Model
+            label: 🎛️ Custom Model
             children:
               - type: CheckBox
                 name: buildCustomModel
-                label: Build custom model
-              - type: VariablesListBox
-                name: customPredictors
-                label: Custom model predictors
-                enable: (buildCustomModel)
+                label: Build custom model (uses Custom Variables above)
               - type: TextBox
                 name: customModelName
                 format: string
-                label: Model name
+                label: Model display name
                 enable: (buildCustomModel)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: imputationSets
-        format: number
+
+  # =============================================================================
+  # MODELING METHOD - Algorithm selection
+  # =============================================================================
   - type: CollapseBox
-    label: Advanced Modeling Options
+    label: 🔬 Modeling Method
     margin: normal
     collapsed: true
     children:
@@ -130,55 +173,76 @@ children:
         margin: large
         children:
           - type: Label
-            label: Model Complexity
+            label: 📈 Regression Type
             children:
               - type: CheckBox
-                name: includeInteractions
-                label: Include interactions
-              - type: TextBox
-                name: interactionTerms
-                format: string
-                label: Specific interactions (optional)
-                enable: (includeInteractions)
+                name: penalizedRegression
+                label: Use penalized regression (for high-dimensional data)
+              - type: ComboBox
+                name: penaltyType
+                label: Penalty method
+                enable: (penalizedRegression)
+
+  # =============================================================================
+  # FEATURE ENGINEERING - Advanced preprocessing
+  # =============================================================================
+  - type: CollapseBox
+    label: ⚙️ Feature Engineering
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: 🔄 Variable Transformations
+            children:
               - type: CheckBox
                 name: transformVariables
                 label: Transform continuous variables
               - type: ComboBox
                 name: transformMethod
-                label: Transformation method
+                label: Transformation type
                 enable: (transformVariables)
+      
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Variable Selection
+            label: 🔗 Variable Interactions
+            children:
+              - type: CheckBox
+                name: includeInteractions
+                label: Include interaction terms
+              - type: TextBox
+                name: interactionTerms
+                format: string
+                label: Specific interactions (e.g., age*sex, bmi*diabetes)
+                enable: (includeInteractions)
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: 📊 Variable Selection
             children:
               - type: CheckBox
                 name: useStepwise
-                label: Stepwise variable selection
+                label: Automatic variable selection
               - type: ComboBox
                 name: stepwiseDirection
-                label: Selection direction
+                label: Selection method
                 enable: (useStepwise)
               - type: ComboBox
                 name: selectionCriterion
                 label: Selection criterion
                 enable: (useStepwise)
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Penalized Regression
-            children:
-              - type: CheckBox
-                name: penalizedRegression
-                label: Use penalized regression
-              - type: ComboBox
-                name: penaltyType
-                label: Penalty type
-                enable: (penalizedRegression)
+
+  # =============================================================================
+  # MODEL VALIDATION - Performance assessment
+  # =============================================================================
   - type: CollapseBox
-    label: Model Validation
+    label: ✅ Model Validation
     margin: normal
     collapsed: true
     children:
@@ -186,32 +250,37 @@ children:
         margin: large
         children:
           - type: Label
-            label: Cross-Validation
+            label: 🔄 Cross-Validation
             children:
               - type: CheckBox
                 name: crossValidation
-                label: Perform cross-validation
+                label: Perform k-fold cross-validation
               - type: TextBox
                 name: cvFolds
                 format: number
                 label: Number of folds
                 enable: (crossValidation)
+
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Bootstrap Validation
+            label: 🔁 Bootstrap Validation
             children:
               - type: CheckBox
                 name: bootstrapValidation
-                label: Bootstrap validation
+                label: Perform bootstrap validation
               - type: TextBox
                 name: bootstrapReps
                 format: number
                 label: Bootstrap replications
                 enable: (bootstrapValidation)
+
+  # =============================================================================
+  # MODEL COMPARISON - Advanced metrics
+  # =============================================================================
   - type: CollapseBox
-    label: Model Comparison
+    label: ⚖️ Model Comparison
     margin: normal
     collapsed: true
     children:
@@ -219,21 +288,25 @@ children:
         margin: large
         children:
           - type: Label
-            label: Improvement Metrics
+            label: 📊 Improvement Metrics
             children:
               - type: CheckBox
                 name: calculateNRI
-                label: Calculate Net Reclassification Index
+                label: Net Reclassification Index (NRI)
               - type: TextBox
                 name: nriThresholds
                 format: string
-                label: NRI risk thresholds
+                label: Risk thresholds (e.g., 0.10, 0.20)
                 enable: (calculateNRI)
               - type: CheckBox
                 name: calculateIDI
-                label: Calculate Integrated Discrimination Index
+                label: Integrated Discrimination Index (IDI)
+
+  # =============================================================================
+  # OUTPUT OPTIONS - What to display/export
+  # =============================================================================
   - type: CollapseBox
-    label: Output Options
+    label: 📋 Output Options
     margin: normal
     collapsed: true
     children:
@@ -241,53 +314,62 @@ children:
         margin: large
         children:
           - type: Label
-            label: Tables and Summaries
+            label: 📊 Tables & Performance
             children:
               - type: CheckBox
                 name: showModelSummary
-                label: Show model coefficients
+                label: Show model coefficients and statistics
               - type: CheckBox
                 name: showPerformanceMetrics
-                label: Show performance metrics
+                label: Show performance metrics (AUC, calibration, etc.)
               - type: CheckBox
                 name: compareModels
                 label: Model comparison table
+
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Plots and Visualizations
+            label: 📈 Plots & Visualizations
             children:
               - type: CheckBox
                 name: showROCCurves
-                label: Show ROC curves
+                label: ROC curves for discrimination
               - type: CheckBox
                 name: showCalibrationPlots
-                label: Show calibration plots
+                label: Calibration plots for reliability
+
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Data Export
+            label: 💾 Data Export & Integration
             children:
               - type: CheckBox
                 name: createPredictions
-                label: Add predictions to dataset
+                label: Add predictions to dataset (for further analysis)
               - type: CheckBox
                 name: exportForDCA
                 label: Prepare for Decision Curve Analysis
+
+  # =============================================================================
+  # CLINICAL RISK SCORE - Practical application
+  # =============================================================================
   - type: CollapseBox
-    label: Clinical Risk Score
+    label: 🏥 Clinical Risk Score
     margin: normal
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: generateRiskScore
-            label: Generate clinical risk score
-          - type: ComboBox
-            name: riskScorePoints
-            label: Point system type
-            enable: (generateRiskScore)
+          - type: Label
+            label: 📋 Risk Score Generation
+            children:
+              - type: CheckBox
+                name: generateRiskScore
+                label: Generate clinical risk score for bedside use
+              - type: ComboBox
+                name: riskScorePoints
+                label: Point system complexity
+                enable: (generateRiskScore)

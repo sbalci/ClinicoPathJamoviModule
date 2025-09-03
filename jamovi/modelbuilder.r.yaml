@@ -12,8 +12,23 @@ items:
       type: Html
       visible: true
 
+    - name: clinicalGuidance
+      title: 🩺 Clinical Guidance
+      type: Html
+      visible: true
+      
     - name: dataSummary
       title: Data Summary
+      type: Html
+      visible: true
+      
+    - name: clinicalSummary
+      title: 📋 Clinical Interpretation Summary
+      type: Html
+      visible: true
+      
+    - name: glossary
+      title: 📚 Statistical Glossary
       type: Html
       visible: true
 
@@ -21,6 +36,11 @@ items:
       title: Ready for Decision Curve Analysis
       type: Html
       visible: (createPredictions)
+      
+    - name: reportSentences
+      title: 📝 Copy-Ready Report Sentences
+      type: Html
+      visible: true
 
     # ==========================================
     # MODEL SUMMARIES

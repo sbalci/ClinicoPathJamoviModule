@@ -427,8 +427,12 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        clinicalGuidance = function() private$.items[["clinicalGuidance"]],
         dataSummary = function() private$.items[["dataSummary"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        glossary = function() private$.items[["glossary"]],
         dcaReadyMessage = function() private$.items[["dcaReadyMessage"]],
+        reportSentences = function() private$.items[["reportSentences"]],
         basicModelSummary = function() private$.items[["basicModelSummary"]],
         enhancedModelSummary = function() private$.items[["enhancedModelSummary"]],
         biomarkerModelSummary = function() private$.items[["biomarkerModelSummary"]],
@@ -464,14 +468,34 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="clinicalGuidance",
+                title="\uD83E\uDE7A Clinical Guidance",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="dataSummary",
                 title="Data Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="\uD83D\uDCCB Clinical Interpretation Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="\uD83D\uDCDA Statistical Glossary",
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dcaReadyMessage",
                 title="Ready for Decision Curve Analysis",
                 visible="(createPredictions)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentences",
+                title="\uD83D\uDCDD Copy-Ready Report Sentences",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="basicModelSummary",
@@ -1020,8 +1044,12 @@ modelbuilderBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalGuidance} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dcaReadyMessage} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$basicModelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$enhancedModelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$biomarkerModelSummary} \tab \tab \tab \tab \tab a table \cr
