@@ -1232,11 +1232,16 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
-    description: Analysis of diagnostic tests without a gold standard reference
+    description: >
+      Analysis of diagnostic tests without a gold standard reference using
+      multiple statistical approaches. Implements Latent Class Analysis (Hui &
+      Walter, 1980), Bayesian methods (Joseph et al., 1995),  and composite
+      reference standards for estimating test performance when no perfect
+      reference test exists.
     ribbon: analyses
     category: analyses
   - title: Compare Medical Decision Tests
@@ -1399,7 +1404,7 @@ analyses:
   - title: Prediction Model Builder
     name: modelbuilder
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Prediction Model Builder
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Build prediction models for Decision Curve Analysis

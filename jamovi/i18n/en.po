@@ -69,6 +69,10 @@ msgid " observations. "
 msgstr ""
 
 #: R/modelbuilder.b.R
+msgid " observations). Consider sampling for faster processing."
+msgstr ""
+
+#: R/modelbuilder.b.R
 msgid " patients). Consider collecting more data for robust clinical predictions."
 msgstr ""
 
@@ -1317,11 +1321,11 @@ msgstr ""
 msgid "≥ (higher values indicate positive class)"
 msgstr ""
 
-#: modelbuilder/ui[6].label
+#: modelbuilder/ui[8].label
 msgid "⚖️ Model Comparison"
 msgstr ""
 
-#: modelbuilder/ui[4].label
+#: modelbuilder/ui[6].label
 msgid "⚙️ Feature Engineering"
 msgstr ""
 
@@ -1345,7 +1349,7 @@ msgstr ""
 msgid "✅ Linear relationship assumption appears reasonable."
 msgstr ""
 
-#: modelbuilder/ui[5].label
+#: modelbuilder/ui[7].label
 msgid "✅ Model Validation"
 msgstr ""
 
@@ -1365,28 +1369,44 @@ msgstr ""
 msgid "✓ Pairwise comparisons enabled"
 msgstr ""
 
-#: modelbuilder/ui[2][3][0].label
+#: modelbuilder/options/clinicalPreset/cancer_prognosis.title
+msgid "🎗️ Cancer Prognosis Model"
+msgstr ""
+
+#: modelbuilder/ui[4][3][0].label
 msgid "🎛️ Custom Model"
 msgstr ""
 
-#: modelbuilder/ui[0][4].label
+#: modelbuilder/ui[2][0][3].label
 msgid "🎛️ Custom Variables (User-Defined Combination)"
+msgstr ""
+
+#: modelbuilder/ui[1][0][0].label
+msgid "🎨 Predefined Clinical Scenarios"
+msgstr ""
+
+#: modelbuilder/ui[1].label
+msgid "🎯 Clinical Presets (Quick Setup)"
 msgstr ""
 
 #: modelbuilder/ui[0][0].label
 msgid "🎯 Outcome Variable"
 msgstr ""
 
-#: modelbuilder/ui[2].label
+#: modelbuilder/ui[4].label
 msgid "🏗️ Model Types to Build"
 msgstr ""
 
-#: modelbuilder/ui[8].label
+#: modelbuilder/ui[10].label
 msgid "🏥 Clinical Risk Score"
 msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "💊 <strong>Treatment Response:</strong> Optimized for clinical treatment monitoring<br>"
+msgstr ""
+
+#: modelbuilder/options/clinicalPreset/cardiac_risk.title
+msgid "💗 Cardiac Risk Assessment"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -1405,15 +1425,19 @@ msgstr ""
 msgid "💡 Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"
 msgstr ""
 
-#: modelbuilder/ui[7][2][0].label
+#: modelbuilder/ui[9][2][0].label
 msgid "💾 Data Export & Integration"
 msgstr ""
 
-#: modelbuilder/ui[7][1][0].label
+#: modelbuilder/results/exportOptions.title
+msgid "💾 Export Options"
+msgstr ""
+
+#: modelbuilder/ui[9][1][0].label
 msgid "📈 Plots & Visualizations"
 msgstr ""
 
-#: modelbuilder/ui[3][0][0].label
+#: modelbuilder/ui[5][0][0].label
 msgid "📈 Regression Type"
 msgstr ""
 
@@ -1421,19 +1445,19 @@ msgstr ""
 msgid "📊 Advanced Raincloud Statistics"
 msgstr ""
 
-#: modelbuilder/ui[1].label
+#: modelbuilder/ui[3].label
 msgid "📊 Data Preparation"
 msgstr ""
 
-#: modelbuilder/ui[6][0][0].label
+#: modelbuilder/ui[8][0][0].label
 msgid "📊 Improvement Metrics"
 msgstr ""
 
-#: modelbuilder/ui[7][0][0].label
+#: modelbuilder/ui[9][0][0].label
 msgid "📊 Tables & Performance"
 msgstr ""
 
-#: modelbuilder/ui[4][2][0].label
+#: modelbuilder/ui[6][2][0].label
 msgid "📊 Variable Selection"
 msgstr ""
 
@@ -1441,12 +1465,16 @@ msgstr ""
 msgid "📋 Clinical Interpretation Summary"
 msgstr ""
 
-#: modelbuilder/ui[7].label
+#: modelbuilder/ui[9].label
 msgid "📋 Output Options"
 msgstr ""
 
-#: modelbuilder/ui[8][0][0].label
+#: modelbuilder/ui[10][0][0].label
 msgid "📋 Risk Score Generation"
+msgstr ""
+
+#: modelbuilder/ui[2].label
+msgid "📋 Variable Selection"
 msgstr ""
 
 #: modelbuilder/results/glossary.title
@@ -1457,15 +1485,15 @@ msgstr ""
 msgid "📝 Copy-Ready Report Sentences"
 msgstr ""
 
-#: modelbuilder/ui[5][1][0].label
+#: modelbuilder/ui[7][1][0].label
 msgid "🔁 Bootstrap Validation"
 msgstr ""
 
-#: modelbuilder/ui[5][0][0].label
+#: modelbuilder/ui[7][0][0].label
 msgid "🔄 Cross-Validation"
 msgstr ""
 
-#: modelbuilder/ui[4][0][0].label
+#: modelbuilder/ui[6][0][0].label
 msgid "🔄 Variable Transformations"
 msgstr ""
 
@@ -1473,7 +1501,11 @@ msgstr ""
 msgid "🔍 <strong>What to look for:</strong><br>• Statistical significance (p < 0.05) indicates real changes over time<br>• Effect sizes show practical importance<br>• Individual trajectories reveal response patterns<br>• Outliers may indicate treatment non-responders or measurement errors"
 msgstr ""
 
-#: modelbuilder/ui[4][1][0].label
+#: modelbuilder/options/clinicalPreset/diagnostic_test.title
+msgid "🔍 Diagnostic Test Evaluation"
+msgstr ""
+
+#: modelbuilder/ui[6][1][0].label
 msgid "🔗 Variable Interactions"
 msgstr ""
 
@@ -1485,23 +1517,27 @@ msgstr ""
 msgid "🔬 <strong>Laboratory Values:</strong> Optimized for clinical lab value monitoring<br>"
 msgstr ""
 
-#: modelbuilder/ui[3].label
+#: modelbuilder/ui[5].label
 msgid "🔬 Modeling Method"
 msgstr ""
 
-#: modelbuilder/ui[2][2][0].label
+#: modelbuilder/ui[4][2][0].label
 msgid "🧬 Biomarker Model"
 msgstr ""
 
-#: modelbuilder/ui[0][3].label
+#: modelbuilder/options/clinicalPreset/biomarker_validation.title
+msgid "🧬 Biomarker Validation Study"
+msgstr ""
+
+#: modelbuilder/ui[2][0][2].label
 msgid "🧬 Biomarker Variables (Laboratory & Advanced Diagnostics)"
 msgstr ""
 
-#: modelbuilder/ui[2][0][0].label
+#: modelbuilder/ui[4][0][0].label
 msgid "🩺 Basic Clinical Model"
 msgstr ""
 
-#: modelbuilder/ui[0][1].label
+#: modelbuilder/ui[2][0][0].label
 msgid "🩺 Basic Clinical Variables (Demographics & Primary Risk Factors)"
 msgstr ""
 
@@ -1509,11 +1545,11 @@ msgstr ""
 msgid "🩺 Clinical Guidance"
 msgstr ""
 
-#: modelbuilder/ui[2][1][0].label
+#: modelbuilder/ui[4][1][0].label
 msgid "🩺+ Enhanced Clinical Model"
 msgstr ""
 
-#: modelbuilder/ui[0][2].label
+#: modelbuilder/ui[2][0][1].label
 msgid "🩺+ Enhanced Clinical Variables (Additional Clinical Factors)"
 msgstr ""
 
@@ -3319,7 +3355,7 @@ msgstr ""
 msgid "Add Predictions to Data"
 msgstr ""
 
-#: modelbuilder/ui[7][2][0]/createPredictions.label
+#: modelbuilder/ui[9][2][0]/createPredictions.label
 msgid "Add predictions to dataset (for further analysis)"
 msgstr ""
 
@@ -4666,6 +4702,22 @@ msgstr ""
 
 #: screeningevaluation/results/age_stratified_plot.title
 msgid "Age-Stratified Performance"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Age, Sex, Disease Duration"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Age, Sex, Smoking, Diabetes, Hypertension, Family History"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Age, Sex, Stage, Grade, Histology"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Age, Sex, Symptoms, Risk Factors"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -7329,7 +7381,7 @@ msgstr ""
 msgid "Automatic Variable Selection"
 msgstr ""
 
-#: modelbuilder/ui[4][2][0]/useStepwise.label
+#: modelbuilder/ui[6][2][0]/useStepwise.label
 msgid "Automatic variable selection"
 msgstr ""
 
@@ -7960,6 +8012,10 @@ msgstr ""
 
 #: R/modelbuilder.b.R
 msgid "Basic Clinical Model:"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Basic Clinical:"
 msgstr ""
 
 #: jjdotplotstats/options/clinicalPreset/basic.title
@@ -9419,6 +9475,10 @@ msgstr ""
 msgid "Biomarker Type"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Biomarker Validation Preset"
+msgstr ""
+
 #: advancedtrials/options/biomarker_var.title
 #: advancedtrials/ui[0][3].label
 #: biomarkerresponse/options/biomarker.title
@@ -9461,6 +9521,10 @@ msgstr ""
 
 #: biomarkerdiscovery/results/pathway_enrichment.columns.title
 msgid "Biomarkers in Pathway"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Biomarkers:"
 msgstr ""
 
 #: biopsysimulation/options/biopsy1.title
@@ -9686,6 +9750,10 @@ msgstr ""
 
 #: spikeslabpriors/options/prediction_method/bma.title
 msgid "BMA (Model Averaging)"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "BMI, Exercise, Diet, Medication History"
 msgstr ""
 
 #: continuousrelationship/results/guidance.title
@@ -9986,7 +10054,7 @@ msgstr ""
 
 #: decisioncurve/ui[5][0][0]/bootReps.label
 #: decisionpanel/ui[7][1][0]/bootReps.label
-#: modelbuilder/ui[5][1][0]/bootstrapReps.label
+#: modelbuilder/ui[7][1][0]/bootstrapReps.label
 #: psychopdaroc/ui[6][1][0]/bootstrapReps.label
 msgid "Bootstrap replications"
 msgstr ""
@@ -10148,6 +10216,10 @@ msgstr ""
 #: treecompare/options/validation/bootstrap.title
 #: treemedical/options/validation/bootstrap.title
 msgid "Bootstrap Validation"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Bootstrap validation for time-to-event endpoints"
 msgstr ""
 
 #: optimalcutpoint/results/validation.description
@@ -10516,7 +10588,7 @@ msgstr ""
 msgid "Build Basic Clinical Model"
 msgstr ""
 
-#: modelbuilder/ui[2][0][0]/buildBasicModel.label
+#: modelbuilder/ui[4][0][0]/buildBasicModel.label
 msgid "Build basic clinical model (uses Basic Clinical Variables above)"
 msgstr ""
 
@@ -10524,7 +10596,7 @@ msgstr ""
 msgid "Build Biomarker Model"
 msgstr ""
 
-#: modelbuilder/ui[2][2][0]/buildBiomarkerModel.label
+#: modelbuilder/ui[4][2][0]/buildBiomarkerModel.label
 msgid "Build biomarker model (uses Biomarker Variables above)"
 msgstr ""
 
@@ -10532,7 +10604,7 @@ msgstr ""
 msgid "Build Custom Model"
 msgstr ""
 
-#: modelbuilder/ui[2][3][0]/buildCustomModel.label
+#: modelbuilder/ui[4][3][0]/buildCustomModel.label
 msgid "Build custom model (uses Custom Variables above)"
 msgstr ""
 
@@ -10540,7 +10612,7 @@ msgstr ""
 msgid "Build Enhanced Clinical Model"
 msgstr ""
 
-#: modelbuilder/ui[2][1][0]/buildEnhancedModel.label
+#: modelbuilder/ui[4][1][0]/buildEnhancedModel.label
 msgid "Build enhanced clinical model (uses Enhanced Clinical Variables above)"
 msgstr ""
 
@@ -11579,7 +11651,7 @@ msgstr ""
 msgid "Calibration Plots"
 msgstr ""
 
-#: modelbuilder/ui[7][1][0]/showCalibrationPlots.label
+#: modelbuilder/ui[9][1][0]/showCalibrationPlots.label
 msgid "Calibration plots for reliability"
 msgstr ""
 
@@ -11641,6 +11713,10 @@ msgstr ""
 msgid "Cancer Epidemiology"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Cancer Prognosis Preset"
+msgstr ""
+
 #: screeningevaluation/options/target_disease/cancer.title
 #: treemedical/options/clinical_context/screening.title
 msgid "Cancer Screening"
@@ -11693,6 +11769,10 @@ msgstr ""
 
 #: economistplots/options/caption_text.title
 msgid "Caption Text"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Cardiac Risk Assessment Preset"
 msgstr ""
 
 #: screeningevaluation/options/target_disease/cardiovascular.title
@@ -12882,7 +12962,15 @@ msgid "ChiSq vs Fisher"
 msgstr ""
 
 #: R/modelbuilder.b.R
+msgid "Cholesterol, Troponin, CRP, BNP"
+msgstr ""
+
+#: R/modelbuilder.b.R
 msgid "Choose a binary outcome to predict"
+msgstr ""
+
+#: modelbuilder/ui[1][0][0]/clinicalPreset.label
+msgid "Choose a clinical preset for optimized settings"
 msgstr ""
 
 #: jjhistostats/options/clinicalPreset.description.ui
@@ -13831,6 +13919,10 @@ msgstr ""
 msgid "Clinical context, interpretation guidelines, and next steps"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Clinical Context:"
+msgstr ""
+
 #: imagingcorrelation/results/treatmentResponseTable.columns.title
 msgid "Clinical Correlation"
 msgstr ""
@@ -14427,6 +14519,7 @@ msgid "Clinical Prediction Models & ML Interpretability"
 msgstr ""
 
 #: jjcorrmat/options/clinicalpreset.title
+#: modelbuilder/options/clinicalPreset.title
 #: riverplot/options/clinicalPreset.title
 msgid "Clinical Preset"
 msgstr ""
@@ -21494,6 +21587,10 @@ msgstr ""
 msgid "Cross-Validation Deviance"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Cross-validation enabled for robust estimates"
+msgstr ""
+
 #: ncvregcox/results/cv_error_plot.title
 #: nonparametricregression/options/model_selection_criterion/cv_error.title
 #: sparsegrouplasso/results/cvErrorPlot.title
@@ -22225,6 +22322,10 @@ msgstr ""
 
 #: jjcorrmat/options/clinicalpreset/custom.title
 msgid "Custom Analysis"
+msgstr ""
+
+#: modelbuilder/options/clinicalPreset/none.title
+msgid "Custom Analysis (no preset)"
 msgstr ""
 
 #: jjridges/options/custom_annotations.title
@@ -23488,8 +23589,12 @@ msgid "Data Specification"
 msgstr ""
 
 #: modelbuilder/options/splitData.title
-#: modelbuilder/ui[1][0][0].label
+#: modelbuilder/ui[3][0][0].label
 msgid "Data Splitting"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Data splitting for unbiased validation"
 msgstr ""
 
 #: continuousmarkov/results/dataStructure.title
@@ -23959,6 +24064,10 @@ msgstr ""
 #: package/analyses/decisioncurve.description
 #: decisioncurve/options.description.main
 msgid "Decision Curve Analysis for evaluating the clinical utility of prediction models and diagnostic tests. Calculates net benefit across threshold probabilities to determine if using a model provides more benefit than default strategies."
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Decision curve analysis integration for clinical utility"
 msgstr ""
 
 #: biomarkerdiscovery/results/decision_curve_plot.title
@@ -25435,6 +25544,10 @@ msgstr ""
 #: diagnosticmeta/ui.title
 #: diagnosticmeta/results.title
 msgid "Diagnostic Test Meta-Analysis for Pathology"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Diagnostic Test Preset"
 msgstr ""
 
 #: likelihoodratio/options/testVariable.description
@@ -27723,6 +27836,10 @@ msgstr ""
 msgid "Doubly Robust Estimation"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Download model results and visualizations for reports and presentations:"
+msgstr ""
+
 #: eurostatmap/results/downloaded_data.title
 msgid "Downloaded Data"
 msgstr ""
@@ -29043,6 +29160,10 @@ msgstr ""
 
 #: R/modelbuilder.b.R
 msgid "Enhanced Clinical Model:"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Enhanced Clinical:"
 msgstr ""
 
 #: package/analyses/enhancedcorrelation.title
@@ -31749,6 +31870,10 @@ msgstr ""
 msgid "Exponentiate coefficients to show odds ratios (logistic), hazard ratios (Cox), or rate ratios (Poisson). Automatically enabled for logistic and Cox models."
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Export & Download Options"
+msgstr ""
+
 #: ihccluster/options/exportClusters.title
 msgid "Export Cluster Assignments"
 msgstr ""
@@ -31847,6 +31972,10 @@ msgstr ""
 msgid "Export Information"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Export Model Summary (CSV)"
+msgstr ""
+
 #: clinicalnomograms/options/export_formats.description.ui
 msgid "Export nomogram in multiple formats (PDF, PNG, HTML)"
 msgstr ""
@@ -31862,6 +31991,10 @@ msgstr ""
 
 #: missingdataexplorer/options/export_patterns.title
 msgid "Export Pattern Data"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Export Performance (CSV)"
 msgstr ""
 
 #: survivalpower/results/exported_results.title
@@ -31881,6 +32014,10 @@ msgstr ""
 #: flexparametricadvanced/options/export_predictions.title
 #: timedependent/options/export_predictions.title
 msgid "Export Predictions"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Export Predictions (CSV)"
 msgstr ""
 
 #: grafify/options/export_data.title
@@ -31934,6 +32071,10 @@ msgstr ""
 
 #: timedependent/options/export_roc_data.title
 msgid "Export ROC Data"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Export ROC Data (CSV)"
 msgstr ""
 
 #: biomarkerdiscovery/options/export_biomarkers.title
@@ -32535,6 +32676,10 @@ msgstr ""
 
 #: biomarkerdiscovery/results/quality_control_summary.columns.title
 msgid "Failed"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Failed to build model: "
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -33727,6 +33872,10 @@ msgstr ""
 #: clinicalvalidationinteractive/options/fn_fp_cost_ratio.title
 #: treeadvanced/options/fn_fp_cost_ratio.title
 msgid "FN:FP Cost Ratio"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Focus on calibration for probability interpretation"
 msgstr ""
 
 #: ihcstats/options/immuneSignatureFocus.title
@@ -35219,7 +35368,7 @@ msgstr ""
 msgid "Generate Clinical Report"
 msgstr ""
 
-#: modelbuilder/ui[8][0][0]/generateRiskScore.label
+#: modelbuilder/ui[10][0][0]/generateRiskScore.label
 msgid "Generate clinical risk score for bedside use"
 msgstr ""
 
@@ -39957,7 +40106,7 @@ msgstr ""
 msgid "Include Interaction Terms"
 msgstr ""
 
-#: modelbuilder/ui[4][1][0]/includeInteractions.label
+#: modelbuilder/ui[6][1][0]/includeInteractions.label
 msgid "Include interaction terms"
 msgstr ""
 
@@ -41104,7 +41253,7 @@ msgstr ""
 msgid "Integrated Discrimination Index"
 msgstr ""
 
-#: modelbuilder/ui[6][0][0]/calculateIDI.label
+#: modelbuilder/ui[8][0][0]/calculateIDI.label
 msgid "Integrated Discrimination Index (IDI)"
 msgstr ""
 
@@ -43416,6 +43565,10 @@ msgstr ""
 
 #: jforester/options/point_size_range/large.title
 msgid "Large (4-8)"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Large dataset ("
 msgstr ""
 
 #: R/riverplot.b.R
@@ -49150,7 +49303,7 @@ msgstr ""
 #: idi/options/missing_handling.title
 #: ihccluster/ui[2][1][0].label
 #: modelbuilder/options/missingDataMethod.title
-#: modelbuilder/ui[1][1][0].label
+#: modelbuilder/ui[3][1][0].label
 #: netreclassification/options/missing_handling.title
 #: nonparametric/options/missing_data_handling.title
 #: nonparametricregression/options/missing_data_handling.title
@@ -49217,7 +49370,7 @@ msgstr ""
 msgid "Missing Data Sensitivity"
 msgstr ""
 
-#: modelbuilder/ui[1][1][0]/missingDataMethod.label
+#: modelbuilder/ui[3][1][0]/missingDataMethod.label
 msgid "Missing data strategy"
 msgstr ""
 
@@ -49720,6 +49873,10 @@ msgstr ""
 msgid "Model Coefficients"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Model coefficients and statistics (CSV/Excel format)"
+msgstr ""
+
 #: aalenhazard/results/modelComparison.title
 #: bayesianmetaanalysis/results/modelComparison.title
 #: causespecifichazards/options/model_comparison.title
@@ -49795,6 +49952,10 @@ msgstr ""
 msgid "Model Comparison Criteria"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Model comparison enabled (clinical vs biomarker-enhanced)"
+msgstr ""
+
 #: aivalidation/results/comparisonPlot.title
 msgid "Model Comparison Forest Plot"
 msgstr ""
@@ -49845,7 +50006,7 @@ msgstr ""
 msgid "Model Comparison Table"
 msgstr ""
 
-#: modelbuilder/ui[7][0][0]/compareModels.label
+#: modelbuilder/ui[9][0][0]/compareModels.label
 msgid "Model comparison table"
 msgstr ""
 
@@ -49969,10 +50130,10 @@ msgstr ""
 msgid "Model discrimination assessment"
 msgstr ""
 
-#: modelbuilder/ui[2][0][0]/basicModelName.label
-#: modelbuilder/ui[2][1][0]/enhancedModelName.label
-#: modelbuilder/ui[2][2][0]/biomarkerModelName.label
-#: modelbuilder/ui[2][3][0]/customModelName.label
+#: modelbuilder/ui[4][0][0]/basicModelName.label
+#: modelbuilder/ui[4][1][0]/enhancedModelName.label
+#: modelbuilder/ui[4][2][0]/biomarkerModelName.label
+#: modelbuilder/ui[4][3][0]/customModelName.label
 msgid "Model display name"
 msgstr ""
 
@@ -50626,6 +50787,10 @@ msgstr ""
 msgid "Molecular Classification Results"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Molecular Markers, IHC Scores, Gene Expression"
+msgstr ""
+
 #: package/analyses/ggoncoplot.menuSubgroup
 #: ggoncoplot/options.menuSubgroup
 msgid "Molecular Pathology Plots"
@@ -51230,6 +51395,10 @@ msgstr ""
 
 #: R/modelbuilder.b.R
 msgid "Multiple imputation for missing data"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Multiple imputation for missing pathology data"
 msgstr ""
 
 #: advancedimputation/options/sensitivity_methods/multiple_methods.title
@@ -52135,7 +52304,7 @@ msgstr ""
 msgid "Net Reclassification Index"
 msgstr ""
 
-#: modelbuilder/ui[6][0][0]/calculateNRI.label
+#: modelbuilder/ui[8][0][0]/calculateNRI.label
 #: psychopdaroc/results/nriTable.title
 msgid "Net Reclassification Index (NRI)"
 msgstr ""
@@ -52271,6 +52440,10 @@ msgstr ""
 
 #: decisionpanel/results/panelBuilding.columns.title
 msgid "New Accuracy"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "New Biomarker(s) + Clinical Variables"
 msgstr ""
 
 #: stagemigration/results/landmarkAnalysisResults.columns.title
@@ -53436,6 +53609,10 @@ msgstr ""
 msgid "NRI and IDI Analysis"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "NRI and IDI calculation for added value assessment"
+msgstr ""
+
 #: stagemigration/options/nriClinicalThreshold.title
 #: stagemigration/ui[4][0][0]/nriClinicalThreshold.label
 msgid "NRI Clinical Threshold"
@@ -53825,7 +54002,7 @@ msgid "Number of Folds"
 msgstr ""
 
 #: decisionpanel/ui[7][1][0]/nFolds.label
-#: modelbuilder/ui[5][0][0]/cvFolds.label
+#: modelbuilder/ui[7][0][0]/cvFolds.label
 msgid "Number of folds"
 msgstr ""
 
@@ -53869,7 +54046,7 @@ msgstr ""
 msgid "Number of hidden states in the model"
 msgstr ""
 
-#: modelbuilder/ui[1][1][0]/imputationSets.label
+#: modelbuilder/ui[3][1][0]/imputationSets.label
 msgid "Number of imputation sets"
 msgstr ""
 
@@ -55124,6 +55301,10 @@ msgstr ""
 #: package/analyses/decisionpanel.menuSubtitle
 #: decisionpanel/options.menuSubtitle
 msgid "Optimize test panels and decision trees"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Optimized Settings:"
 msgstr ""
 
 #: hierarchicalpathology/options/optimizer.title
@@ -58477,6 +58658,10 @@ msgstr ""
 msgid "Penalized Regression"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Penalized regression for high-dimensional data"
+msgstr ""
+
 #: package/analyses/grouplasso.menuSubtitle
 #: grouplasso/options.menuSubtitle
 msgid "Penalized regression with group-wise variable selection"
@@ -58503,7 +58688,7 @@ msgstr ""
 msgid "Penalty Function"
 msgstr ""
 
-#: modelbuilder/ui[3][0][0]/penaltyType.label
+#: modelbuilder/ui[5][0][0]/penaltyType.label
 msgid "Penalty method"
 msgstr ""
 
@@ -58768,7 +58953,7 @@ msgstr ""
 msgid "Perform Bootstrap Validation"
 msgstr ""
 
-#: modelbuilder/ui[5][1][0]/bootstrapValidation.label
+#: modelbuilder/ui[7][1][0]/bootstrapValidation.label
 msgid "Perform bootstrap validation"
 msgstr ""
 
@@ -58951,7 +59136,7 @@ msgstr ""
 msgid "Perform internal validation using cross-validation"
 msgstr ""
 
-#: modelbuilder/ui[5][0][0]/crossValidation.label
+#: modelbuilder/ui[7][0][0]/crossValidation.label
 msgid "Perform k-fold cross-validation"
 msgstr ""
 
@@ -59324,6 +59509,10 @@ msgstr ""
 msgid "Performance Metrics Comparison"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Performance metrics focused on discrimination and calibration"
+msgstr ""
+
 #: aivalidation/results/cvFoldResults.description
 msgid "Performance metrics for each cross-validation fold"
 msgstr ""
@@ -59337,6 +59526,10 @@ msgstr ""
 msgid "Performance Metrics to Report"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Performance metrics with confidence intervals"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Performance Note:"
 msgstr ""
@@ -59348,6 +59541,10 @@ msgstr ""
 #: populationhealth/results/qualityMetricsTable.columns.title
 #: screeningevaluation/results/program_coverage.columns.title
 msgid "Performance Status"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Performance Status, Comorbidities, Treatment Response"
 msgstr ""
 
 #: screeningevaluation/results/time_trend_plot.title
@@ -60925,7 +61122,7 @@ msgstr ""
 msgid "Point Styling"
 msgstr ""
 
-#: modelbuilder/ui[8][0][0]/riskScorePoints.label
+#: modelbuilder/ui[10][0][0]/riskScorePoints.label
 msgid "Point system complexity"
 msgstr ""
 
@@ -62279,6 +62476,10 @@ msgid "Predicted Probabilities"
 msgstr ""
 
 #: R/modelbuilder.b.R
+msgid "Predicted probabilities for external validation"
+msgstr ""
+
+#: R/modelbuilder.b.R
 #: clinicalprediction/results/individual_explanations.columns.title
 msgid "Predicted Probability"
 msgstr ""
@@ -62789,7 +62990,7 @@ msgid "Preparation time"
 msgstr ""
 
 #: modelbuilder/options/exportForDCA.title
-#: modelbuilder/ui[7][2][0]/exportForDCA.label
+#: modelbuilder/ui[9][2][0]/exportForDCA.label
 msgid "Prepare for Decision Curve Analysis"
 msgstr ""
 
@@ -63015,6 +63216,10 @@ msgstr ""
 
 #: advancedtrials/options/statistical_test.title
 msgid "Primary Statistical Test"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Primary Test Result, Reference Standard"
 msgstr ""
 
 #: simonmakuch/ui[1][0][0].label
@@ -64313,6 +64518,10 @@ msgstr ""
 msgid "Publication-ready forest plot of effect sizes"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Publication-Ready Formats:"
+msgstr ""
+
 #: psychopdaroc/options/cleanPlot.title
 msgid "Publication-Ready Plot"
 msgstr ""
@@ -65223,7 +65432,7 @@ msgid "Random Seed"
 msgstr ""
 
 #: ihccluster/ui[3][2][0].label
-#: modelbuilder/ui[1][0][0]/randomSeed.label
+#: modelbuilder/ui[3][0][0]/randomSeed.label
 msgid "Random seed (for reproducibility)"
 msgstr ""
 
@@ -65968,6 +66177,10 @@ msgstr ""
 
 #: featurequality/results/transformation_recommendations.columns.title
 msgid "Recommended Transformation"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "Recommended Variables:"
 msgstr ""
 
 #: singlearm/results/medianTable.columns.title
@@ -68123,7 +68336,7 @@ msgstr ""
 msgid "Risk Thresholds"
 msgstr ""
 
-#: modelbuilder/ui[6][0][0]/nriThresholds.label
+#: modelbuilder/ui[8][0][0]/nriThresholds.label
 msgid "Risk thresholds (e.g., 0.10, 0.20)"
 msgstr ""
 
@@ -68629,6 +68842,10 @@ msgstr ""
 msgid "ROC Analysis with Optimal Cut-point"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "ROC analysis with optimal threshold identification"
+msgstr ""
+
 #: package/analyses/psychopdaroc.menuSubtitle
 #: psychopdaroc/options.menuSubtitle
 msgid "ROC Analysis, AUC, Cutpoints"
@@ -68679,8 +68896,16 @@ msgstr ""
 msgid "ROC Curve Comparison"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "ROC curve comparison for discrimination improvement"
+msgstr ""
+
 #: enhancedroc/results/results/rocComparisons.title
 msgid "ROC Curve Comparisons"
+msgstr ""
+
+#: R/modelbuilder.b.R
+msgid "ROC curve coordinates for plotting software"
 msgstr ""
 
 #: enhancedroc/options/rocCurve.title
@@ -68733,7 +68958,7 @@ msgstr ""
 msgid "ROC Curves Comparison"
 msgstr ""
 
-#: modelbuilder/ui[7][1][0]/showROCCurves.label
+#: modelbuilder/ui[9][1][0]/showROCCurves.label
 msgid "ROC curves for discrimination"
 msgstr ""
 
@@ -70602,7 +70827,7 @@ msgstr ""
 msgid "Selection Criterion"
 msgstr ""
 
-#: modelbuilder/ui[4][2][0]/selectionCriterion.label
+#: modelbuilder/ui[6][2][0]/selectionCriterion.label
 msgid "Selection criterion"
 msgstr ""
 
@@ -70629,7 +70854,7 @@ msgstr ""
 msgid "Selection Method"
 msgstr ""
 
-#: modelbuilder/ui[4][2][0]/stepwiseDirection.label
+#: modelbuilder/ui[6][2][0]/stepwiseDirection.label
 msgid "Selection method"
 msgstr ""
 
@@ -72900,7 +73125,7 @@ msgstr ""
 msgid "Show Missing Values"
 msgstr ""
 
-#: modelbuilder/ui[7][0][0]/showModelSummary.label
+#: modelbuilder/ui[9][0][0]/showModelSummary.label
 msgid "Show model coefficients and statistics"
 msgstr ""
 
@@ -73279,7 +73504,7 @@ msgstr ""
 msgid "Show Performance Metrics"
 msgstr ""
 
-#: modelbuilder/ui[7][0][0]/showPerformanceMetrics.label
+#: modelbuilder/ui[9][0][0]/showPerformanceMetrics.label
 msgid "Show performance metrics (AUC, calibration, etc.)"
 msgstr ""
 
@@ -75660,7 +75885,7 @@ msgstr ""
 msgid "Specific Interactions"
 msgstr ""
 
-#: modelbuilder/ui[4][1][0]/interactionTerms.label
+#: modelbuilder/ui[6][1][0]/interactionTerms.label
 msgid "Specific interactions (e.g., age*sex, bmi*diabetes)"
 msgstr ""
 
@@ -76110,7 +76335,7 @@ msgstr ""
 msgid "Split By (Optional)"
 msgstr ""
 
-#: modelbuilder/ui[1][0][0]/splitData.label
+#: modelbuilder/ui[3][0][0]/splitData.label
 msgid "Split data for validation (training 70% / testing 30%)"
 msgstr ""
 
@@ -81346,6 +81571,10 @@ msgstr ""
 msgid "Test Results Variable"
 msgstr ""
 
+#: R/modelbuilder.b.R
+msgid "Test Results:"
+msgstr ""
+
 #: bayesianci/results/robustnessCheck.columns.title
 msgid "Test Scenario"
 msgstr ""
@@ -84250,7 +84479,7 @@ msgstr ""
 msgid "Transform coefficients to odds ratios or hazard ratios"
 msgstr ""
 
-#: modelbuilder/ui[4][0][0]/transformVariables.label
+#: modelbuilder/ui[6][0][0]/transformVariables.label
 msgid "Transform continuous variables"
 msgstr ""
 
@@ -84329,7 +84558,7 @@ msgstr ""
 msgid "Transformation Suggestion"
 msgstr ""
 
-#: modelbuilder/ui[4][0][0]/transformMethod.label
+#: modelbuilder/ui[6][0][0]/transformMethod.label
 msgid "Transformation type"
 msgstr ""
 
@@ -87076,7 +87305,7 @@ msgstr ""
 msgid "Use Parallel Processing"
 msgstr ""
 
-#: modelbuilder/ui[3][0][0]/penalizedRegression.label
+#: modelbuilder/ui[5][0][0]/penalizedRegression.label
 msgid "Use penalized regression (for high-dimensional data)"
 msgstr ""
 
