@@ -41,6 +41,11 @@ items:
       title: 📝 Copy-Ready Report Sentences
       type: Html
       visible: true
+      
+    - name: exportOptions
+      title: 💾 Export Options
+      type: Html
+      visible: true
 
     # ==========================================
     # MODEL SUMMARIES

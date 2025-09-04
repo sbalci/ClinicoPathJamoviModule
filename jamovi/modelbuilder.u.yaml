@@ -9,7 +9,7 @@ children:
   # VARIABLE SELECTION - Always visible at top
   # =============================================================================
   - type: VariableSupplier
-    persistentItems: false
+    persistentItems: true
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
@@ -23,9 +23,9 @@ children:
             name: outcomePositive
             label: Positive Outcome Level
             enable: (outcome)
-      
+
       - type: TargetLayoutBox
-        label: 🩺 Basic Clinical Variables (Demographics & Primary Risk Factors)
+        label: 🩺 Basic Clinical Variables 
         children:
           - type: VariablesListBox
             name: basicPredictors
@@ -33,7 +33,7 @@ children:
             height: normal
             
       - type: TargetLayoutBox
-        label: 🩺+ Enhanced Clinical Variables (Additional Clinical Factors)
+        label: 🩺+ Enhanced Clinical Variables 
         children:
           - type: VariablesListBox
             name: enhancedPredictors
@@ -41,7 +41,7 @@ children:
             height: normal
             
       - type: TargetLayoutBox
-        label: 🧬 Biomarker Variables (Laboratory & Advanced Diagnostics)
+        label: 🧬 Biomarker Variables 
         children:
           - type: VariablesListBox
             name: biomarkerPredictors
@@ -49,12 +49,34 @@ children:
             height: normal
             
       - type: TargetLayoutBox
-        label: 🎛️ Custom Variables (User-Defined Combination)
+        label: 🎛️ Custom Variables 
         children:
           - type: VariablesListBox
             name: customPredictors
             isTarget: true
             height: normal
+
+            
+  # =============================================================================
+  # CLINICAL PRESETS - Quick setup for common scenarios  
+  # =============================================================================
+  - type: CollapseBox
+    label: 🎯 Clinical Presets (Quick Setup)
+    margin: normal
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: 🎨 Predefined Clinical Scenarios
+            children:
+              - type: ComboBox
+                name: clinicalPreset
+                label: Choose a clinical preset for optimized settings
+                
+
+
 
   # =============================================================================
   # DATA PREPARATION - Essential setup
