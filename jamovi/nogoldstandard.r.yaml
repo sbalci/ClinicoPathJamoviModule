@@ -4,20 +4,20 @@ title: Analysis Without Gold Standard
 jrs: '1.1'
 
 items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
 
+    - name: clinical_summary
+      title: Clinical Summary
+      type: Html
+      visible: false
 
-    # - name:  text1
-    #   title: text1
-    #   type: Preformatted
-    # - name:  text2
-    #   title: text2
-    #   type: Preformatted
-    # - name:  todo2
-    #   title: To Do 2
-    #   type: Preformatted
-    # - name:  todo
-    #   title: To Do
-    #   type: Preformatted
+    - name: method_guide
+      title: Method Selection Guide
+      type: Html
+      visible: true
 
     - name: prevalence
       title: Disease Prevalence
@@ -93,16 +93,31 @@ items:
           title: Value
           type: number
 
+    - name: crosstab
+      title: Test Cross-Tabulation
+      type: Table
+      visible: true
+      columns:
+        - name: test_combination
+          title: Test Combination
+          type: text
+        - name: count
+          title: Count
+          type: integer
+        - name: percentage
+          title: Percentage
+          type: number
+          format: pc
+
     - name: agreement_plot
-      title: Test Agreement Plot
+      title: Test Agreement Plot (Base)
       type: Image
       renderFun: .plot
       width: 500
       height: 400
 
-
     - name: agreement_plot2
-      title: Test Agreement Plot 2
+      title: Test Agreement Plot (ggplot2)
       type: Image
       renderFun: .plot_ggplot
       width: 500

@@ -43,19 +43,7 @@ echo "/document-function FUNC_NAME" | claude
 
 ## meddecideT (11 functions)
 
-- modelbuilder - Prediction Model Builder
 
-
-echo "/fix-function modelbuilder" | claude
-echo "/document-function modelbuilder" | claude
-
-- nogoldstandard - Analysis Without Gold Standard
-echo "/check-function nogoldstandard" | claude
-echo "/checkpoint nogoldstandard" | claude
-echo "/prepare-translation nogoldstandard" | claude
-echo "/review-function nogoldstandard" | claude
-echo "/fix-function nogoldstandard" | claude
-echo "/document-function nogoldstandard" | claude
 
 - decisionpanel - Decision Panel Optimization
 echo "/check-function decisionpanel" | claude
@@ -133,6 +121,9 @@ echo "/document-function decisioncompare" | claude
 
 ## SurvivalT (5 functions)
 
+implement escapeVariableNames logic from modelbuilder to oddsratio
+
+
 - oddsratio - Odds Ratio Table and Plot
 echo "/check-function oddsratio" | claude
 echo "/checkpoint oddsratio" | claude
@@ -140,6 +131,8 @@ echo "/prepare-translation oddsratio" | claude
 echo "/review-function oddsratio" | claude
 echo "/fix-function oddsratio" | claude
 echo "/document-function oddsratio" | claude
+
+
 
 - singlearm - Single Arm Survival
 echo "/check-function singlearm" | claude
@@ -149,6 +142,9 @@ echo "/review-function singlearm" | claude
 echo "/fix-function singlearm" | claude
 echo "/document-function singlearm" | claude
 
+implement escapeVariableNames logic from modelbuilder to survival
+
+
 - survival - Survival Analysis
 echo "/check-function survival" | claude
 echo "/checkpoint survival" | claude
@@ -157,6 +153,9 @@ echo "/review-function survival" | claude
 echo "/fix-function survival" | claude
 echo "/document-function survival" | claude
 
+implement escapeVariableNames logic from modelbuilder to multisurvival
+
+
 - multisurvival - Multivariable Survival Analysis
 echo "/check-function multisurvival" | claude
 echo "/checkpoint multisurvival" | claude
@@ -164,6 +163,9 @@ echo "/prepare-translation multisurvival" | claude
 echo "/review-function multisurvival" | claude
 echo "/fix-function multisurvival" | claude
 echo "/document-function multisurvival" | claude
+
+implement escapeVariableNames logic from modelbuilder to survivalcont
+
 
 - survivalcont - Survival Analysis for Continuous Variable
 echo "/check-function survivalcont" | claude
@@ -201,6 +203,9 @@ echo "/review-function venn" | claude
 echo "/fix-function venn" | claude
 echo "/document-function venn" | claude
 
+
+implement escapeVariableNames logic from modelbuilder to crosstable 
+
 - crosstable - Cross Tables
 echo "/check-function crosstable" | claude
 echo "/checkpoint crosstable" | claude
@@ -216,6 +221,10 @@ echo "/prepare-translation tableone" | claude
 echo "/review-function tableone" | claude
 echo "/fix-function tableone" | claude
 echo "/document-function tableone" | claude
+
+
+implement escapeVariableNames logic from modelbuilder to vartree
+
 
 - vartree - Variable Tree
 echo "/check-function vartree" | claude

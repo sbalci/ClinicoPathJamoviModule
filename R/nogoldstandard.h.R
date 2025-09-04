@@ -6,6 +6,7 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            clinicalPreset = "none",
             test1 = NULL,
             test1Positive = NULL,
             test2 = NULL,
@@ -16,10 +17,11 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             test4Positive = NULL,
             test5 = NULL,
             test5Positive = NULL,
-            method = "latent_class",
+            method = "all_positive",
             bootstrap = FALSE,
             nboot = 1000,
-            alpha = 0.05, ...) {
+            alpha = 0.05,
+            verbose = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -27,6 +29,16 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 requiresData=TRUE,
                 ...)
 
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "none",
+                    "diagnostic_validation",
+                    "pathology_agreement",
+                    "tumor_markers",
+                    "screening_evaluation"),
+                default="none")
             private$..test1 <- jmvcore::OptionVariable$new(
                 "test1",
                 test1,
@@ -91,7 +103,7 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "all_positive",
                     "any_positive",
                     "bayesian"),
-                default="latent_class")
+                default="all_positive")
             private$..bootstrap <- jmvcore::OptionBool$new(
                 "bootstrap",
                 bootstrap,
@@ -108,7 +120,12 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 default=0.05,
                 min=0.01,
                 max=0.2)
+            private$..verbose <- jmvcore::OptionBool$new(
+                "verbose",
+                verbose,
+                default=FALSE)
 
+            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..test1)
             self$.addOption(private$..test1Positive)
             self$.addOption(private$..test2)
@@ -123,8 +140,10 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..bootstrap)
             self$.addOption(private$..nboot)
             self$.addOption(private$..alpha)
+            self$.addOption(private$..verbose)
         }),
     active = list(
+        clinicalPreset = function() private$..clinicalPreset$value,
         test1 = function() private$..test1$value,
         test1Positive = function() private$..test1Positive$value,
         test2 = function() private$..test2$value,
@@ -138,8 +157,10 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         method = function() private$..method$value,
         bootstrap = function() private$..bootstrap$value,
         nboot = function() private$..nboot$value,
-        alpha = function() private$..alpha$value),
+        alpha = function() private$..alpha$value,
+        verbose = function() private$..verbose$value),
     private = list(
+        ..clinicalPreset = NA,
         ..test1 = NA,
         ..test1Positive = NA,
         ..test2 = NA,
@@ -153,16 +174,21 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..method = NA,
         ..bootstrap = NA,
         ..nboot = NA,
-        ..alpha = NA)
+        ..alpha = NA,
+        ..verbose = NA)
 )
 
 nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "nogoldstandardResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
+        clinical_summary = function() private$.items[["clinical_summary"]],
+        method_guide = function() private$.items[["method_guide"]],
         prevalence = function() private$.items[["prevalence"]],
         test_metrics = function() private$.items[["test_metrics"]],
         model_fit = function() private$.items[["model_fit"]],
+        crosstab = function() private$.items[["crosstab"]],
         agreement_plot = function() private$.items[["agreement_plot"]],
         agreement_plot2 = function() private$.items[["agreement_plot2"]]),
     private = list(),
@@ -175,6 +201,21 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "NoGoldDiagnostic",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_summary",
+                title="Clinical Summary",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="method_guide",
+                title="Method Selection Guide",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="prevalence",
@@ -263,17 +304,36 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `name`="value", 
                         `title`="Value", 
                         `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="crosstab",
+                title="Test Cross-Tabulation",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="test_combination", 
+                        `title`="Test Combination", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="agreement_plot",
-                title="Test Agreement Plot",
+                title="Test Agreement Plot (Base)",
                 renderFun=".plot",
                 width=500,
                 height=400))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="agreement_plot2",
-                title="Test Agreement Plot 2",
+                title="Test Agreement Plot (ggplot2)",
                 renderFun=".plot_ggplot",
                 width=500,
                 height=400))}))
@@ -301,13 +361,64 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Analysis Without Gold Standard
 #'
-#' Analysis of diagnostic tests without a gold standard reference
+#' Analysis of diagnostic tests without a gold standard reference using 
+#' multiple statistical approaches. Implements Latent Class Analysis (Hui & 
+#' Walter, 1980), Bayesian methods (Joseph et al., 1995),  and composite 
+#' reference standards for estimating test performance when no perfect 
+#' reference test exists.
+#' 
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Basic example with simulated diagnostic test data
+#' set.seed(123)
+#' n <- 200
+#'
+#' # Simulate disease status (latent, unknown)
+#' disease <- rbinom(n, 1, 0.3)  # 30\% prevalence
+#'
+#' # Simulate test results with known sensitivity/specificity
+#' test1_result <- ifelse(disease == 1,
+#'                        rbinom(sum(disease), 1, 0.85),     # sensitivity 0.85
+#'                        rbinom(sum(1-disease), 1, 0.15))   # 1-specificity 0.15
+#' test1_result <- factor(test1_result, levels=c(0,1), labels=c("Negative", "Positive"))
+#'
+#' test2_result <- ifelse(disease == 1,
+#'                        rbinom(sum(disease), 1, 0.80),     # sensitivity 0.80
+#'                        rbinom(sum(1-disease), 1, 0.10))   # 1-specificity 0.10
+#' test2_result <- factor(test2_result, levels=c(0,1), labels=c("Negative", "Positive"))
+#'
+#' # Create data frame
+#' test_data <- data.frame(
+#'     Test1 = test1_result,
+#'     Test2 = test2_result
+#' )
+#'
+#' # Latent Class Analysis (recommended method)
+#' nogoldstandard(
+#'     data = test_data,
+#'     test1 = "Test1",
+#'     test1Positive = "Positive",
+#'     test2 = "Test2",
+#'     test2Positive = "Positive",
+#'     method = "latent_class"
+#' )
+#'
+#' # With bootstrap confidence intervals
+#' nogoldstandard(
+#'     data = test_data,
+#'     test1 = "Test1",
+#'     test1Positive = "Positive",
+#'     test2 = "Test2",
+#'     test2Positive = "Positive",
+#'     method = "latent_class",
+#'     bootstrap = TRUE,
+#'     nboot = 500,
+#'     verbose = TRUE
+#' )
+#'
 #' @param data The data as a data frame.
+#' @param clinicalPreset Predefined clinical scenarios with optimized settings
+#'   and method recommendations.
 #' @param test1 First diagnostic test variable.
 #' @param test1Positive The positive level for Test 1.
 #' @param test2 Second diagnostic test variable.
@@ -322,11 +433,16 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param bootstrap Calculate bootstrap confidence intervals.
 #' @param nboot Number of bootstrap samples for confidence intervals.
 #' @param alpha Alpha level for confidence intervals.
+#' @param verbose Show detailed progress messages during bootstrap analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$method_guide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$crosstab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
@@ -340,6 +456,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @export
 nogoldstandard <- function(
     data,
+    clinicalPreset = "none",
     test1,
     test1Positive,
     test2,
@@ -350,10 +467,11 @@ nogoldstandard <- function(
     test4Positive,
     test5,
     test5Positive,
-    method = "latent_class",
+    method = "all_positive",
     bootstrap = FALSE,
     nboot = 1000,
-    alpha = 0.05) {
+    alpha = 0.05,
+    verbose = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("nogoldstandard requires jmvcore to be installed (restart may be required)")
@@ -379,6 +497,7 @@ nogoldstandard <- function(
     for (v in test5) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- nogoldstandardOptions$new(
+        clinicalPreset = clinicalPreset,
         test1 = test1,
         test1Positive = test1Positive,
         test2 = test2,
@@ -392,7 +511,8 @@ nogoldstandard <- function(
         method = method,
         bootstrap = bootstrap,
         nboot = nboot,
-        alpha = alpha)
+        alpha = alpha,
+        verbose = verbose)
 
     analysis <- nogoldstandardClass$new(
         options = options,
