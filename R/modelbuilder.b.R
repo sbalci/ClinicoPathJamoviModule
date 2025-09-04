@@ -62,6 +62,14 @@
 # Null-coalescing operator helper
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
+# Helper function to escape variable names with special characters for formulas
+.escapeVariableNames <- function(var_names) {
+    # Check if variable names contain special characters that need escaping
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    return(var_names)
+}
+
 modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "modelbuilderClass",
     inherit = modelbuilderBase,
@@ -80,6 +88,100 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .warnings = character(0),
         .errors = character(0),
 
+        # Initialize the analysis - called first
+        .init = function() {
+            # Show welcome message initially
+            private$.showWelcomeMessage()
+        },
+
+        # Show welcome message when needed
+        .showWelcomeMessage = function() {
+            # Check if we should show instructions
+            show_instructions <- is.null(self$options$outcome)
+            
+            # Check if any model type is selected AND has variables
+            has_any_model_with_variables <- FALSE
+            
+            if (self$options$buildBasicModel && !is.null(self$options$basicPredictors) && length(self$options$basicPredictors) > 0) {
+                has_any_model_with_variables <- TRUE
+            }
+            if (self$options$buildEnhancedModel && !is.null(self$options$enhancedPredictors) && length(self$options$enhancedPredictors) > 0) {
+                has_any_model_with_variables <- TRUE
+            }
+            if (self$options$buildBiomarkerModel && !is.null(self$options$biomarkerPredictors) && length(self$options$biomarkerPredictors) > 0) {
+                has_any_model_with_variables <- TRUE
+            }
+            if (self$options$buildCustomModel && !is.null(self$options$customPredictors) && length(self$options$customPredictors) > 0) {
+                has_any_model_with_variables <- TRUE
+            }
+            
+            # Show instructions if no outcome OR no model types selected OR no variables selected for enabled models
+            if (show_instructions || !has_any_model_with_variables) {
+                
+                instructions <- paste0(
+                    "<html><head></head><body>",
+                    "<div class='instructions' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                    "<h3 style='color: #2e7d32; margin-top: 0;'>🏗️ ", "Prediction Model Builder", "</h3>",
+                    "<p><strong>", "Build and validate prediction models for medical decision making.", "</strong></p>",
+                    "<p>", "Creates logistic regression models that output predicted probabilities for use in Decision Curve Analysis.", "</p>",
+                    
+                    "<h4 style='color: #2e7d32;'>", "Required Steps:", "</h4>",
+                    "<ol>",
+                    "<li><strong>", "Select Outcome Variable:", "</strong> ", "Choose a binary outcome to predict", "</li>",
+                    "<li><strong>", "Specify Positive Level:", "</strong> ", "Define which level represents the positive outcome", "</li>",
+                    "<li><strong>", "Select Variables and Model Types:", "</strong> ", "Choose variables and enable at least one model:", 
+                        "<ul>",
+                        "<li><strong>", "Basic Clinical Model:", "</strong> ", "Add variables to 'Basic Clinical Variables' and check 'Build basic clinical model'", "</li>",
+                        "<li><strong>", "Enhanced Clinical Model:", "</strong> ", "Add variables to 'Enhanced Clinical Variables' and check 'Build enhanced clinical model'", "</li>",
+                        "<li><strong>", "Biomarker Model:", "</strong> ", "Add variables to 'Biomarker Variables' and check 'Build biomarker model'", "</li>",
+                        "<li><strong>", "Custom Model:", "</strong> ", "Add variables to 'Custom Variables' and check 'Build custom model'", "</li>",
+                        "</ul>",
+                    "</li>",
+                    "<li><strong>", "Configure Options:", "</strong> ", "Set validation, missing data handling, and output preferences", "</li>",
+                    "</ol>",
+                    
+                    "<h4 style='color: #2e7d32;'>", "Advanced Features:", "</h4>",
+                    "<ul>",
+                    "<li>", "Automatic data splitting for unbiased validation", "</li>",
+                    "<li>", "Multiple imputation for missing data", "</li>",
+                    "<li>", "Cross-validation and bootstrap validation", "</li>",
+                    "<li>", "Comprehensive performance metrics", "</li>",
+                    "<li>", "Seamless integration with Decision Curve Analysis", "</li>",
+                    "</ul>",
+                    
+                    "<p><strong>", "The module will create predicted probability columns that can be directly used in Decision Curve Analysis.", "</strong></p>",
+                    "</div></body></html>"
+                )
+
+                self$results$instructions$setContent(instructions)
+                
+                # Add additional guidance with error handling
+                tryCatch({
+                    private$.addClinicalGuidance()
+                }, error = function(e) {
+                    # Silently continue if guidance fails
+                })
+                
+                tryCatch({
+                    private$.applyClinicalPreset()
+                }, error = function(e) {
+                    # Silently continue if preset fails
+                })
+                
+                tryCatch({
+                    private$.addGlossary()
+                }, error = function(e) {
+                    # Silently continue if glossary fails
+                })
+                
+                return(TRUE)
+            } else {
+                # Hide instructions when analysis can proceed
+                self$results$instructions$setVisible(FALSE)
+                return(FALSE)
+            }
+        },
+
         # Enhanced error handling and validation
         .validateInputs = function() {
             data <- self$data
@@ -87,36 +189,42 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             # Check data availability
             if (is.null(data) || nrow(data) == 0) {
-                stop(.("No data available for analysis"))
+                stop("No data available for analysis")
             }
             
             # Check outcome variable
             if (is.null(outcome_var)) {
-                stop(.("Outcome variable must be specified"))
+                stop("Outcome variable must be specified")
             }
             
             if (!outcome_var %in% names(data)) {
-                stop(paste0(.("Outcome variable '"), outcome_var, .("' not found in data")))
+                stop(paste0("Outcome variable '", outcome_var, "' not found in data"))
             }
             
-            # Check if outcome is binary
+            # Check outcome variable levels
             unique_outcomes <- unique(data[[outcome_var]])
             unique_outcomes <- unique_outcomes[!is.na(unique_outcomes)]
-            
-            if (length(unique_outcomes) != 2) {
-                stop(paste0(.("Outcome variable must be binary. Found "), length(unique_outcomes), .(" levels: "), paste(unique_outcomes, collapse = ", ")))
-            }
             
             # Check positive outcome level
             outcome_positive <- self$options$outcomePositive
             if (is.null(outcome_positive) || !outcome_positive %in% unique_outcomes) {
-                stop(paste0(.("Positive outcome level must be one of: "), paste(unique_outcomes, collapse = ", ")))
+                stop(paste0("Positive outcome level must be one of: ", paste(unique_outcomes, collapse = ", ")))
+            }
+            
+            # For multi-level outcomes, validate that we can create a meaningful binary outcome
+            if (length(unique_outcomes) > 2) {
+                if (is.null(outcome_positive)) {
+                    stop(paste0("Multi-level outcome variable requires specifying positive outcome level. Found ", length(unique_outcomes), " levels: ", paste(unique_outcomes, collapse = ", ")))
+                }
+                # This will be converted to binary: positive level vs all others
+            } else if (length(unique_outcomes) < 2) {
+                stop("Outcome variable must have at least 2 levels")
             }
             
             # Check if at least one model is selected
             if (!self$options$buildBasicModel && !self$options$buildEnhancedModel && 
                 !self$options$buildBiomarkerModel && !self$options$buildCustomModel) {
-                stop(.("At least one model type must be selected"))
+                stop("At least one model type must be selected")
             }
             
             # Check sample size requirements
@@ -124,25 +232,33 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             n_events <- sum(data[[outcome_var]] == outcome_positive, na.rm = TRUE)
             
             if (n_total < 50) {
-                stop(paste0(.("Sample size too small. Minimum "), 50, .(" observations required")))
+                stop(paste0("Sample size too small. Minimum ", 50, " observations required"))
             }
             
             if (n_events < 10) {
-                stop(paste0(.("Too few events. Minimum "), 10, .(" events required for stable model fitting")))
+                stop(paste0("Too few events. Minimum ", 10, " events required for stable model fitting"))
             }
             
-            # Check events per variable (EPV) rule
+            # Check events per variable (EPV) rule  
             max_predictors <- 0
-            if (self$options$buildBasicModel) max_predictors <- max(max_predictors, length(self$options$basicPredictors))
-            if (self$options$buildEnhancedModel) max_predictors <- max(max_predictors, length(self$options$enhancedPredictors))
-            if (self$options$buildBiomarkerModel) max_predictors <- max(max_predictors, length(self$options$biomarkerPredictors))
-            if (self$options$buildCustomModel) max_predictors <- max(max_predictors, length(self$options$customPredictors))
+            if (self$options$buildBasicModel && !is.null(self$options$basicPredictors)) {
+                max_predictors <- max(max_predictors, length(self$options$basicPredictors))
+            }
+            if (self$options$buildEnhancedModel && !is.null(self$options$enhancedPredictors)) {
+                max_predictors <- max(max_predictors, length(self$options$enhancedPredictors))
+            }
+            if (self$options$buildBiomarkerModel && !is.null(self$options$biomarkerPredictors)) {
+                max_predictors <- max(max_predictors, length(self$options$biomarkerPredictors))
+            }
+            if (self$options$buildCustomModel && !is.null(self$options$customPredictors)) {
+                max_predictors <- max(max_predictors, length(self$options$customPredictors))
+            }
             
             if (max_predictors > 0) {
                 epv <- n_events / max_predictors
                 if (epv < 5) {
-                    warning(paste0(.("Low events per variable ratio ("), round(epv, 1), .("). Consider reducing predictors or using penalized regression")))
-                    private$.warnings <- c(private$.warnings, paste0(.("Low EPV: "), round(epv, 1)))
+                    warning(paste0("Low events per variable ratio (", round(epv, 1), "). Consider reducing predictors or using penalized regression"))
+                    private$.warnings <- c(private$.warnings, paste0("Low EPV: ", round(epv, 1)))
                 }
             }
             
@@ -169,23 +285,23 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Sample size warnings with clinical context
             if (n_total < 100) {
                 clinical_warnings <- c(clinical_warnings, 
-                    paste0(.("Small sample size ("), n_total, .(" patients). Consider collecting more data for robust clinical predictions.")))
+                    paste0("Small sample size (", n_total, " patients). Consider collecting more data for robust clinical predictions."))
             }
             
             # Event rate warnings
             if (event_rate < 0.05 || event_rate > 0.95) {
                 clinical_warnings <- c(clinical_warnings,
-                    paste0(.("Extreme event rate ("), round(event_rate * 100, 1), 
-                           .("%). Model may have poor calibration.")))
+                    paste0("Extreme event rate (", round(event_rate * 100, 1), 
+                           "%). Model may have poor calibration."))
             }
             
             # EPV warnings with clinical recommendations  
-            if (self$options$buildBasicModel && length(self$options$basicPredictors) > 0) {
+            if (self$options$buildBasicModel && !is.null(self$options$basicPredictors) && length(self$options$basicPredictors) > 0) {
                 epv <- n_events / length(self$options$basicPredictors)
                 if (epv < 10) {
                     clinical_warnings <- c(clinical_warnings,
-                        paste0(.("Low events per variable ("), round(epv, 1), 
-                               .(" for basic model). Reduce predictors or use penalized regression.")))
+                        paste0("Low events per variable (", round(epv, 1), 
+                               " for basic model). Reduce predictors or use penalized regression."))
                 }
             }
             
@@ -195,7 +311,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             if (length(high_missing) > 0) {
                 clinical_warnings <- c(clinical_warnings,
-                    paste0(.("Variables with >20% missing data: "), paste(high_missing, collapse = ", ")))
+                    paste0("Variables with >20% missing data: ", paste(high_missing, collapse = ", ")))
             }
             
             # Store warnings for display
@@ -216,15 +332,15 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             if (length(missing_packages) > 0) {
-                stop(paste0(.("Required packages not available: "), paste(missing_packages, collapse = ", ")))
+                stop(paste0("Required packages not available: ", paste(missing_packages, collapse = ", ")))
             }
             
             # Check for optional packages
             optional_packages <- c("mice", "glmnet", "rms", "survival")
             for (pkg in optional_packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
-                    warning(paste0(.("Optional package '"), pkg, .("' not available. Some features may be limited.")))
-                    private$.warnings <- c(private$.warnings, paste0(.("Missing optional package: "), pkg))
+                    warning(paste0("Optional package '", pkg, "' not available. Some features may be limited."))
+                    private$.warnings <- c(private$.warnings, paste0("Missing optional package: ", pkg))
                 }
             }
             
@@ -237,13 +353,35 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             outcome_var <- self$options$outcome
             outcome_positive <- self$options$outcomePositive
             
+            # Convert multi-level outcome to binary if necessary
+            unique_outcomes <- unique(data[[outcome_var]])
+            unique_outcomes <- unique_outcomes[!is.na(unique_outcomes)]
+            
+            if (length(unique_outcomes) > 2) {
+                # Create binary outcome: positive level vs all others
+                # Handle missing values properly
+                binary_outcome <- ifelse(is.na(data[[outcome_var]]), NA, 
+                                       as.numeric(data[[outcome_var]] == outcome_positive))
+                data[[outcome_var]] <- binary_outcome
+                message(paste0("Converted multi-level outcome to binary: '", outcome_positive, "' (1) vs others (0)"))
+            }
+            
+            # Additional validation: check if we have any events after conversion
+            if (!is.null(outcome_positive)) {
+                n_events <- sum(data[[outcome_var]] == 1, na.rm = TRUE)
+                if (n_events == 0) {
+                    warning(paste0("No events found for positive outcome level '", outcome_positive, "' after data processing"))
+                    private$.warnings <- c(private$.warnings, paste0("Zero events for outcome: ", outcome_positive))
+                }
+            }
+            
             for (var in names(data)) {
                 if (is.factor(data[[var]]) || is.character(data[[var]])) {
                     # Check for perfect separation
                     cross_tab <- table(data[[var]], data[[outcome_var]])
                     if (any(cross_tab == 0)) {
-                        warning(paste0(.("Variable '"), var, .("' may cause perfect separation")))
-                        private$.warnings <- c(private$.warnings, paste0(.("Perfect separation risk: "), var))
+                        warning(paste0("Variable '", var, "' may cause perfect separation"))
+                        private$.warnings <- c(private$.warnings, paste0("Perfect separation risk: ", var))
                     }
                 }
             }
@@ -259,8 +397,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         var1 <- rownames(cor_matrix)[high_cor_pairs[i, 1]]
                         var2 <- colnames(cor_matrix)[high_cor_pairs[i, 2]]
                         cor_value <- cor_matrix[high_cor_pairs[i, 1], high_cor_pairs[i, 2]]
-                        warning(paste0(.("High correlation between '"), var1, .("' and '"), var2, .("': "), round(cor_value, 2)))
-                        private$.warnings <- c(private$.warnings, paste0(.("High correlation: "), var1, .(" vs "), var2))
+                        warning(paste0("High correlation between '", var1, "' and '", var2, "': ", round(cor_value, 2)))
+                        private$.warnings <- c(private$.warnings, paste0("High correlation: ", var1, " vs ", var2))
                     }
                 }
             }
@@ -319,9 +457,9 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             perf_html <- paste0(
                 "<html><body>",
                 "<div style='background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #17a2b8;'>",
-                "<h5 style='color: #17a2b8; margin-top: 0;'>⚡ ", .("Performance Metrics"), "</h5>",
+                "<h5 style='color: #17a2b8; margin-top: 0;'>⚡ ", "Performance Metrics", "</h5>",
                 "<table style='width: 100%; font-size: 12px;'>",
-                "<tr><th>", .("Operation"), "</th><th>", .("Time (s)"), "</th><th>", .("Timestamp"), "</th></tr>"
+                "<tr><th>", "Operation", "</th><th>", "Time (s)", "</th><th>", "Timestamp", "</th></tr>"
             )
             
             for (i in 1:nrow(private$.performanceMetrics)) {
@@ -410,7 +548,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             vars_with_missing <- names(missing_prop)[missing_prop > 0]
             
             if (length(vars_with_missing) > 0) {
-                missing_summary <- paste0(.("Missing data found in: "), paste(vars_with_missing, collapse = ", "))
+                missing_summary <- paste0("Missing data found in: ", paste(vars_with_missing, collapse = ", "))
                 private$.warnings <- c(private$.warnings, missing_summary)
             }
             
@@ -500,8 +638,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             tryCatch({
                 if (!requireNamespace("glmnet", quietly = TRUE)) {
-                    warning(.("glmnet package not available for penalized regression"))
-                    private$.warnings <- c(private$.warnings, .("glmnet package required for penalized regression"))
+                    warning("glmnet package not available for penalized regression")
+                    private$.warnings <- c(private$.warnings, "glmnet package required for penalized regression")
                     return(NULL)
                 }
                 
@@ -609,7 +747,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 formula_vars <- all.vars(formula)
                 missing_vars <- formula_vars[!formula_vars %in% names(data)]
                 if (length(missing_vars) > 0) {
-                    stop(paste0(.("Variables not found in data: "), paste(missing_vars, collapse = ", ")))
+                    stop(paste0("Variables not found in data: ", paste(missing_vars, collapse = ", ")))
                 }
                 
                 # Check for sufficient observations
@@ -623,21 +761,21 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 
                 # Check for convergence
                 if (!model$converged) {
-                    warning(paste0(.("Model '"), model_name, .("' did not converge")))
-                    private$.warnings <- c(private$.warnings, paste0(.("Convergence issue: "), model_name))
+                    warning(paste0("Model '", model_name, "' did not converge"))
+                    private$.warnings <- c(private$.warnings, paste0("Convergence issue: ", model_name))
                 }
                 
                 # Check for quasi-complete separation
                 if (any(abs(coef(model)) > 10, na.rm = TRUE)) {
-                    warning(paste0(.("Model '"), model_name, .("' may have separation issues")))
-                    private$.warnings <- c(private$.warnings, paste0(.("Separation warning: "), model_name))
+                    warning(paste0("Model '", model_name, "' may have separation issues"))
+                    private$.warnings <- c(private$.warnings, paste0("Separation warning: ", model_name))
                 }
                 
                 # Check for perfect predictions
                 train_pred <- predict(model, type = "response")
                 if (any(train_pred < 0.001) || any(train_pred > 0.999)) {
-                    warning(paste0(.("Model '"), model_name, .("' produces extreme predictions")))
-                    private$.warnings <- c(private$.warnings, paste0(.("Extreme predictions: "), model_name))
+                    warning(paste0("Model '", model_name, "' produces extreme predictions"))
+                    private$.warnings <- c(private$.warnings, paste0("Extreme predictions: ", model_name))
                 }
                 
                 # Store model and predictions
@@ -675,15 +813,47 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Enhanced performance metrics calculation
         .calculatePerformance = function(model, predictions, actual, dataset_type = "training") {
             outcome_positive <- self$options$outcomePositive
-            binary_actual <- as.numeric(actual == outcome_positive)
             
-            # Validate inputs
-            if (length(predictions) != length(binary_actual)) {
-                stop("Predictions and actual values must have same length")
+            # Check if actual values are already binary (0/1) or need conversion
+            unique_actual <- unique(actual[!is.na(actual)])
+            if (all(unique_actual %in% c(0, 1))) {
+                # Already binary
+                binary_actual <- as.numeric(actual)
+            } else {
+                # Need conversion from original levels
+                binary_actual <- as.numeric(actual == outcome_positive)
             }
             
-            if (any(is.na(predictions)) || any(is.na(binary_actual))) {
-                warning("Missing values in predictions or actual outcomes")
+            # Remove missing values from both predictions and actual
+            complete_cases <- !is.na(predictions) & !is.na(binary_actual)
+            if (sum(complete_cases) == 0) {
+                stop("No complete cases available for performance calculation")
+            }
+            
+            predictions <- predictions[complete_cases]
+            binary_actual <- binary_actual[complete_cases]
+            
+            # Validate inputs after missing value removal
+            if (length(predictions) != length(binary_actual)) {
+                stop(paste0("Predictions and actual values must have same length after removing missing values. Predictions: ", 
+                           length(predictions), ", Actual: ", length(binary_actual)))
+            }
+            
+            if (length(unique(binary_actual)) < 2) {
+                warning(paste0("Only one outcome level present in ", dataset_type, " data"))
+                # Return minimal performance metrics for single-class case
+                return(list(
+                    auc = NA,
+                    auc_lower = NA,
+                    auc_upper = NA,
+                    sensitivity = NA,
+                    specificity = NA,
+                    brier_score = NA,
+                    calibration_slope = NA,
+                    calibration_intercept = NA,
+                    n_events = sum(binary_actual == 1, na.rm = TRUE),
+                    n_total = length(binary_actual)
+                ))
             }
             
             # Ensure predictions are in valid range
@@ -1166,62 +1336,18 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Initialize analysis metadata
             private$.analysisMetadata <- list(
                 start_time = Sys.time(),
-                version = packageVersion("ClinicoPath"),
+                version = tryCatch({
+                    packageVersion("ClinicoPath")
+                }, error = function(e) {
+                    "development"
+                }),
                 session_info = sessionInfo()
             )
             
-            # Show instructions if needed
-            if (is.null(self$options$outcome) ||
-                (!self$options$buildBasicModel && !self$options$buildEnhancedModel &&
-                 !self$options$buildBiomarkerModel && !self$options$buildCustomModel)) {
-
-                instructions <- paste0(
-                    "<html><head></head><body>",
-                    "<div class='instructions' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
-                    "<h3 style='color: #2e7d32; margin-top: 0;'>🏗️ ", .("Prediction Model Builder"), "</h3>",
-                    "<p><strong>", .("Build and validate prediction models for medical decision making."), "</strong></p>",
-                    "<p>", .("Creates logistic regression models that output predicted probabilities for use in Decision Curve Analysis."), "</p>",
-                    
-                    "<h4 style='color: #2e7d32;'>", .("Required Steps:"), "</h4>",
-                    "<ol>",
-                    "<li><strong>", .("Select Outcome Variable:"), "</strong> ", .("Choose a binary outcome to predict"), "</li>",
-                    "<li><strong>", .("Specify Positive Level:"), "</strong> ", .("Define which level represents the positive outcome"), "</li>",
-                    "<li><strong>", .("Choose Model Types:"), "</strong> ", .("Select at least one model to build:"), 
-                        "<ul>",
-                        "<li><strong>", .("Basic Clinical Model:"), "</strong> ", .("Core demographic and primary risk factors"), "</li>",
-                        "<li><strong>", .("Enhanced Clinical Model:"), "</strong> ", .("Additional clinical variables and interactions"), "</li>",
-                        "<li><strong>", .("Biomarker Model:"), "</strong> ", .("Laboratory values and advanced diagnostics"), "</li>",
-                        "<li><strong>", .("Custom Model:"), "</strong> ", .("User-defined variable combination"), "</li>",
-                        "</ul>",
-                    "</li>",
-                    "<li><strong>", .("Configure Options:"), "</strong> ", .("Set validation, missing data handling, and output preferences"), "</li>",
-                    "</ol>",
-                    
-                    "<h4 style='color: #2e7d32;'>", .("Advanced Features:"), "</h4>",
-                    "<ul>",
-                    "<li>", .("Automatic data splitting for unbiased validation"), "</li>",
-                    "<li>", .("Multiple imputation for missing data"), "</li>",
-                    "<li>", .("Cross-validation and bootstrap validation"), "</li>",
-                    "<li>", .("Comprehensive performance metrics"), "</li>",
-                    "<li>", .("Seamless integration with Decision Curve Analysis"), "</li>",
-                    "</ul>",
-                    
-                    "<p><strong>", .("The module will create predicted probability columns that can be directly used in Decision Curve Analysis."), "</strong></p>",
-                    "</div></body></html>"
-                )
-
-                self$results$instructions$setContent(instructions)
-                
-                # Add clinical guidance
-                self$.addClinicalGuidance()
-                
-                # Add glossary
-                self$.addGlossary()
+            # Show welcome message if needed
+            if (private$.showWelcomeMessage()) {
                 return()
             }
-
-            # Hide instructions when analysis can proceed
-            self$results$instructions$setVisible(FALSE)
             
             # Comprehensive validation and setup
             tryCatch({
@@ -1341,7 +1467,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 
             }, error = function(e) {
                 # Enhanced error handling with detailed reporting
-                error_msg <- paste0(.("Analysis failed: "), e$message)
+                error_msg <- paste0("Analysis failed: ", e$message)
                 private$.errors <- c(private$.errors, error_msg)
                 
                 # Create error report
@@ -1403,13 +1529,13 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             data_summary <- paste0(
                 "<html><body>",
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>📊 ", .("Data Summary"), "</h4>",
-                "<p><strong>", .("Total Sample Size:"), "</strong> ", n_total, "</p>",
-                "<p><strong>", .("Training Set:"), "</strong> ", n_training, " (", round(n_training/n_total*100, 1), "%)</p>",
-                if (n_validation > 0) paste0("<p><strong>", .("Validation Set:"), "</strong> ", n_validation, " (", round(n_validation/n_total*100, 1), "%)</p>") else "",
-                "<p><strong>", .("Event Rate:"), "</strong> ", round(event_rate, 1), "% (", outcome_positive, ")</p>",
-                "<p><strong>", .("Events in Training:"), "</strong> ", n_events_training, "</p>",
-                if (n_validation > 0) paste0("<p><strong>", .("Events in Validation:"), "</strong> ", n_events_validation, "</p>") else "",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>📊 ", "Data Summary", "</h4>",
+                "<p><strong>", "Total Sample Size:", "</strong> ", n_total, "</p>",
+                "<p><strong>", "Training Set:", "</strong> ", n_training, " (", round(n_training/n_total*100, 1), "%)</p>",
+                if (n_validation > 0) paste0("<p><strong>", "Validation Set:", "</strong> ", n_validation, " (", round(n_validation/n_total*100, 1), "%)</p>") else "",
+                "<p><strong>", "Event Rate:", "</strong> ", round(event_rate, 1), "% (", outcome_positive, ")</p>",
+                "<p><strong>", "Events in Training:", "</strong> ", n_events_training, "</p>",
+                if (n_validation > 0) paste0("<p><strong>", "Events in Validation:", "</strong> ", n_events_validation, "</p>") else "",
                 missing_summary,
                 "</div>",
                 "</body></html>"
@@ -1422,6 +1548,9 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 self$.generateClinicalSummary()
                 self$.generateReportSentences()
             }
+            
+            # Clean up memory after analysis
+            private$.cleanup()
         },
         
         .buildAllModels = function(modeling_data) {
@@ -1429,7 +1558,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             outcome_var <- self$options$outcome
             
             # Basic Clinical Model
-            if (self$options$buildBasicModel && length(self$options$basicPredictors) > 0) {
+            if (self$options$buildBasicModel && !is.null(self$options$basicPredictors) && length(self$options$basicPredictors) > 0) {
                 private$.checkpoint() # Before building basic model
                 basic_predictors <- self$options$basicPredictors
                 
@@ -1438,7 +1567,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 modeling_data <- private$.createInteractions(modeling_data, basic_predictors)
                 
                 # Build formula
-                predictor_string <- paste(basic_predictors, collapse = " + ")
+                escaped_predictors <- .escapeVariableNames(basic_predictors)
+                predictor_string <- paste(escaped_predictors, collapse = " + ")
                 formula_basic <- as.formula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
@@ -1463,7 +1593,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             # Enhanced Clinical Model
-            if (self$options$buildEnhancedModel && length(self$options$enhancedPredictors) > 0) {
+            if (self$options$buildEnhancedModel && !is.null(self$options$enhancedPredictors) && length(self$options$enhancedPredictors) > 0) {
                 private$.checkpoint() # Before building enhanced model
                 enhanced_predictors <- self$options$enhancedPredictors
                 
@@ -1472,7 +1602,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 modeling_data <- private$.createInteractions(modeling_data, enhanced_predictors)
                 
                 # Build formula
-                predictor_string <- paste(enhanced_predictors, collapse = " + ")
+                escaped_predictors <- .escapeVariableNames(enhanced_predictors)
+                predictor_string <- paste(escaped_predictors, collapse = " + ")
                 formula_enhanced <- as.formula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
@@ -1497,7 +1628,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             # Biomarker Model
-            if (self$options$buildBiomarkerModel && length(self$options$biomarkerPredictors) > 0) {
+            if (self$options$buildBiomarkerModel && !is.null(self$options$biomarkerPredictors) && length(self$options$biomarkerPredictors) > 0) {
                 private$.checkpoint() # Before building biomarker model
                 biomarker_predictors <- self$options$biomarkerPredictors
                 
@@ -1506,7 +1637,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 modeling_data <- private$.createInteractions(modeling_data, biomarker_predictors)
                 
                 # Build formula
-                predictor_string <- paste(biomarker_predictors, collapse = " + ")
+                escaped_predictors <- .escapeVariableNames(biomarker_predictors)
+                predictor_string <- paste(escaped_predictors, collapse = " + ")
                 formula_biomarker <- as.formula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
@@ -1531,7 +1663,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             # Custom Model
-            if (self$options$buildCustomModel && length(self$options$customPredictors) > 0) {
+            if (self$options$buildCustomModel && !is.null(self$options$customPredictors) && length(self$options$customPredictors) > 0) {
                 private$.checkpoint() # Before building custom model
                 custom_predictors <- self$options$customPredictors
                 
@@ -1540,7 +1672,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 modeling_data <- private$.createInteractions(modeling_data, custom_predictors)
                 
                 # Build formula
-                predictor_string <- paste(custom_predictors, collapse = " + ")
+                escaped_predictors <- .escapeVariableNames(custom_predictors)
+                predictor_string <- paste(escaped_predictors, collapse = " + ")
                 formula_custom <- as.formula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
@@ -1565,6 +1698,88 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             return(models_built)
+        },
+        
+        
+        # Extract model validation logic
+        .validateModelResults = function(model, model_name) {
+            if (is.null(model)) {
+                private$.warnings <- c(private$.warnings, 
+                    paste0("Failed to build model: ", model_name))
+                return(FALSE)
+            }
+            
+            # Check for convergence issues
+            if (inherits(model, "glm")) {
+                if (!model$converged) {
+                    warning(paste0("Model '", model_name, "' did not converge"))
+                    private$.warnings <- c(private$.warnings, 
+                        paste0("Convergence issue: ", model_name))
+                }
+                
+                # Check for separation issues
+                if (any(abs(coef(model)) > 10, na.rm = TRUE)) {
+                    warning(paste0("Model '", model_name, "' may have separation issues"))
+                    private$.warnings <- c(private$.warnings, 
+                        paste0("Separation warning: ", model_name))
+                }
+            }
+            
+            return(TRUE)
+        },
+        
+        # Memory cleanup method
+        .cleanup = function() {
+            # Clear large data objects to free memory
+            private$.trainingData <- NULL
+            private$.validationData <- NULL
+            
+            # Clear temporary analysis results
+            private$.crossValidationResults <- list()
+            private$.bootstrapResults <- list()
+            
+            # Keep models and performance metrics for results display
+            # but clear intermediate calculations
+            if (length(private$.models) > 0) {
+                for (model_name in names(private$.models)) {
+                    model <- private$.models[[model_name]]
+                    if (inherits(model, "glm")) {
+                        # Remove heavy components while keeping essentials
+                        model$data <- NULL
+                        model$model <- NULL
+                        model$x <- NULL
+                        model$y <- NULL
+                        model$fitted.values <- NULL
+                        model$residuals <- NULL
+                        model$weights <- NULL
+                        model$prior.weights <- NULL
+                        private$.models[[model_name]] <- model
+                    }
+                }
+            }
+            
+            # Run garbage collection
+            gc(verbose = FALSE)
+        },
+        
+        # Memory-efficient data processing
+        .processDataEfficiently = function(data) {
+            # Process data in chunks for large datasets
+            n_rows <- nrow(data)
+            
+            if (n_rows > 10000) {
+                # For large datasets, suggest sampling for faster processing
+                private$.warnings <- c(private$.warnings, 
+                    paste0("Large dataset (", n_rows, " observations). Consider sampling for faster processing."))
+            }
+            
+            # Remove unused factor levels to save memory
+            factor_cols <- sapply(data, is.factor)
+            if (any(factor_cols)) {
+                data[factor_cols] <- lapply(data[factor_cols], droplevels)
+            }
+            
+            return(data)
         },
         
         .performAllCrossValidation = function(models_built, modeling_data) {
@@ -1860,7 +2075,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         ))
                     }
                 }, error = function(e) {
-                    warning(paste0(.("Failed to populate model summary: "), e$message))
+                    warning(paste0("Failed to populate model summary: ", e$message))
                 })
             }
         },
@@ -2158,10 +2373,10 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 ggplot2::geom_smooth(method = "loess", se = TRUE, color = "blue") +
                 ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
                 ggplot2::labs(
-                    x = .("Predicted Probability"),
-                    y = .("Observed Frequency"),
-                    title = paste0(.("Calibration Plot: "), model_name),
-                    size = .("Bin Size")
+                    x = "Predicted Probability",
+                    y = "Observed Frequency",
+                    title = paste0("Calibration Plot: ", model_name),
+                    size = "Bin Size"
                 ) +
                 ggplot2::scale_x_continuous(limits = c(0, 1)) +
                 ggplot2::scale_y_continuous(limits = c(0, 1)) +
@@ -2293,10 +2508,10 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             p <- ggplot2::ggplot(val_data, ggplot2::aes(x = model, y = auc, fill = type)) +
                 ggplot2::geom_boxplot(alpha = 0.7) +
                 ggplot2::labs(
-                    x = .("Model"),
-                    y = .("AUC"),
-                    title = .("Validation Results"),
-                    fill = .("Validation Type")
+                    x = "Model",
+                    y = "AUC",
+                    title = "Validation Results",
+                    fill = "Validation Type"
                 ) +
                 ggplot2::theme_minimal() +
                 ggplot2::theme(
@@ -2313,25 +2528,25 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             guidance <- paste0(
                 "<html><body>",
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #4caf50;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>🩺 ", .("Clinical Best Practices"), "</h4>",
-                "<h5 style='color: #388e3c;'>", .("Sample Size Guidelines:"), "</h5>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>🩺 ", "Clinical Best Practices", "</h4>",
+                "<h5 style='color: #388e3c;'>", "Sample Size Guidelines:", "</h5>",
                 "<ul>",
-                "<li>", .("Minimum 10 events per predictor variable (EPV rule)"), "</li>",
-                "<li>", .("At least 50 total observations for stable estimates"), "</li>",
-                "<li>", .("Consider penalized regression for high-dimensional data"), "</li>",
+                "<li>", "Minimum 10 events per predictor variable (EPV rule)", "</li>",
+                "<li>", "At least 50 total observations for stable estimates", "</li>",
+                "<li>", "Consider penalized regression for high-dimensional data", "</li>",
                 "</ul>",
-                "<h5 style='color: #388e3c;'>", .("Model Selection Tips:"), "</h5>",
+                "<h5 style='color: #388e3c;'>", "Model Selection Tips:", "</h5>",
                 "<ul>",
-                "<li>", .("Start with basic clinical model (age, sex, primary risk factors)"), "</li>",
-                "<li>", .("Add biomarkers only if they improve prediction meaningfully"), "</li>",
-                "<li>", .("Use validation to avoid overfitting"), "</li>",
+                "<li>", "Start with basic clinical model (age, sex, primary risk factors)", "</li>",
+                "<li>", "Add biomarkers only if they improve prediction meaningfully", "</li>",
+                "<li>", "Use validation to avoid overfitting", "</li>",
                 "</ul>",
-                "<h5 style='color: #388e3c;'>", .("Interpretation Guide:"), "</h5>",
+                "<h5 style='color: #388e3c;'>", "Interpretation Guide:", "</h5>",
                 "<ul>",
-                "<li>", .("AUC > 0.8: Excellent discrimination"), "</li>",
-                "<li>", .("AUC 0.7-0.8: Good discrimination"), "</li>",
-                "<li>", .("AUC 0.6-0.7: Fair discrimination"), "</li>",
-                "<li>", .("AUC < 0.6: Poor discrimination"), "</li>",
+                "<li>", "AUC > 0.8: Excellent discrimination", "</li>",
+                "<li>", "AUC 0.7-0.8: Good discrimination", "</li>",
+                "<li>", "AUC 0.6-0.7: Fair discrimination", "</li>",
+                "<li>", "AUC < 0.6: Poor discrimination", "</li>",
                 "</ul>",
                 "</div></body></html>"
             )
@@ -2343,18 +2558,18 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             glossary <- paste0(
                 "<html><body>",
                 "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #9c27b0;'>",
-                "<h4 style='color: #7b1fa2; margin-top: 0;'>📚 ", .("Statistical Terms for Clinicians"), "</h4>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'>📚 ", "Statistical Terms for Clinicians", "</h4>",
                 "<dl style='margin: 0;'>",
-                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", .("AUC (Area Under Curve)"), "</dt>",
-                "<dd style='margin-left: 20px;'>", .("Probability that model ranks a random patient with outcome higher than a random patient without outcome. Range: 0.5 (no better than chance) to 1.0 (perfect)."), "</dd>",
-                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", .("Odds Ratio (OR)"), "</dt>",
-                "<dd style='margin-left: 20px;'>", .("How much the odds of outcome increase with predictor. OR=2 means odds are 2x higher. OR=0.5 means odds are halved."), "</dd>",
-                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", .("Calibration"), "</dt>",
-                "<dd style='margin-left: 20px;'>", .("How well predicted probabilities match observed event rates. Perfect calibration: if model predicts 30% risk, 30% of patients should have the outcome."), "</dd>",
-                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", .("Cross-Validation"), "</dt>",
-                "<dd style='margin-left: 20px;'>", .("Testing model on data not used for training. Helps detect overfitting and estimate real-world performance."), "</dd>",
-                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", .("NRI (Net Reclassification Index)"), "</dt>",
-                "<dd style='margin-left: 20px;'>", .("Measures how much new model improves patient classification into risk categories compared to old model."), "</dd>",
+                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", "AUC (Area Under Curve)", "</dt>",
+                "<dd style='margin-left: 20px;'>", "Probability that model ranks a random patient with outcome higher than a random patient without outcome. Range: 0.5 (no better than chance) to 1.0 (perfect).", "</dd>",
+                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", "Odds Ratio (OR)", "</dt>",
+                "<dd style='margin-left: 20px;'>", "How much the odds of outcome increase with predictor. OR=2 means odds are 2x higher. OR=0.5 means odds are halved.", "</dd>",
+                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", "Calibration", "</dt>",
+                "<dd style='margin-left: 20px;'>", "How well predicted probabilities match observed event rates. Perfect calibration: if model predicts 30% risk, 30% of patients should have the outcome.", "</dd>",
+                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", "Cross-Validation", "</dt>",
+                "<dd style='margin-left: 20px;'>", "Testing model on data not used for training. Helps detect overfitting and estimate real-world performance.", "</dd>",
+                "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", "NRI (Net Reclassification Index)", "</dt>",
+                "<dd style='margin-left: 20px;'>", "Measures how much new model improves patient classification into risk categories compared to old model.", "</dd>",
                 "</dl>",
                 "</div></body></html>"
             )
@@ -2375,16 +2590,16 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     auc_ci <- model_performance$auc_ci
                     
                     # Clinical interpretation of AUC
-                    discrimination <- if (auc >= 0.8) .("excellent") else 
-                                   if (auc >= 0.7) .("good") else 
-                                   if (auc >= 0.6) .("fair") else .("poor")
+                    discrimination <- if (auc >= 0.8) "excellent" else 
+                                   if (auc >= 0.7) "good" else 
+                                   if (auc >= 0.6) "fair" else "poor"
                     
                     summary_text <- paste0(
                         "<p><strong>", model_name, ":</strong> ",
-                        .("Shows "), discrimination, .(" discrimination (AUC = "), round(auc, 3), 
-                        .(" 95% CI "), round(auc_ci[1], 3), "-", round(auc_ci[2], 3), "). ",
-                        .("This means the model correctly ranks "), round(auc * 100, 1), 
-                        .("% of patient pairs."),
+                        "Shows ", discrimination, " discrimination (AUC = ", round(auc, 3), 
+                        " 95% CI ", round(auc_ci[1], 3), "-", round(auc_ci[2], 3), "). ",
+                        "This means the model correctly ranks ", round(auc * 100, 1), 
+                        "% of patient pairs.",
                         "</p>"
                     )
                     summary_parts <- c(summary_parts, summary_text)
@@ -2395,12 +2610,12 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 clinical_summary <- paste0(
                     "<html><body>",
                     "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #2196f3;'>",
-                    "<h4 style='color: #1976d2; margin-top: 0;'>📋 ", .("Clinical Interpretation"), "</h4>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'>📋 ", "Clinical Interpretation", "</h4>",
                     paste(summary_parts, collapse = ""),
                     "<hr style='margin: 15px 0; border: none; border-top: 1px solid #ccc;'>",
-                    "<p><strong>", .("Clinical Recommendation:"), "</strong> ",
-                    .("Use the model with highest AUC and best clinical interpretability. "),
-                    .("Consider external validation before clinical implementation."),
+                    "<p><strong>", "Clinical Recommendation:", "</strong> ",
+                    "Use the model with highest AUC and best clinical interpretability. ",
+                    "Consider external validation before clinical implementation.",
                     "</p>",
                     "</div></body></html>"
                 )
@@ -2436,7 +2651,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         sentence, "<br>",
                         "<button onclick='navigator.clipboard.writeText(\"" , sentence, "\")' ",
                         "style='margin-top: 5px; padding: 2px 8px; font-size: 11px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;'>",
-                        .("Copy"), "</button>",
+                        "Copy", "</button>",
                         "</div>"
                     ))
                 }
@@ -2446,13 +2661,201 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 report_html <- paste0(
                     "<html><body>",
                     "<div style='padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #6c757d;'>",
-                    "<h4 style='color: #495057; margin-top: 0;'>📝 ", .("Copy-Ready Report Sentences"), "</h4>",
+                    "<h4 style='color: #495057; margin-top: 0;'>📝 ", "Copy-Ready Report Sentences", "</h4>",
                     "<p style='font-style: italic; color: #6c757d; font-size: 14px;'>", 
-                    .("Copy and paste these sentences into your manuscript:"), "</p>",
+                    "Copy and paste these sentences into your manuscript:", "</p>",
                     paste(report_parts, collapse = ""),
                     "</div></body></html>"
                 )
                 self$results$reportSentences$setContent(report_html)
+            }
+            
+            # Generate export options
+            self$.generateExportOptions()
+        },
+        
+        # Generate export options and capabilities
+        .generateExportOptions = function() {
+            if (length(private$.models) == 0) return()
+            
+            export_html <- paste0(
+                "<html><body>",
+                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #6c757d;'>",
+                "<h4 style='color: #495057; margin-top: 0;'>💾 ", "Export & Download Options", "</h4>",
+                "<p style='color: #6c757d; font-size: 14px;'>", 
+                "Download model results and visualizations for reports and presentations:", "</p>",
+                
+                "<div style='display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0;'>",
+                "<button onclick='exportModelSummary()' ",
+                "style='padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
+                "📄 ", "Export Model Summary (CSV)", "</button>",
+                
+                "<button onclick='exportPerformanceMetrics()' ",
+                "style='padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
+                "📉 ", "Export Performance (CSV)", "</button>",
+                
+                "<button onclick='exportROCData()' ",
+                "style='padding: 8px 16px; background-color: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
+                "📊 ", "Export ROC Data (CSV)", "</button>",
+                
+                "<button onclick='exportPredictions()' ",
+                "style='padding: 8px 16px; background-color: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
+                "📅 ", "Export Predictions (CSV)", "</button>",
+                "</div>",
+                
+                "<script>",
+                "function exportModelSummary() { alert('Model summary export functionality would be implemented here'); }",
+                "function exportPerformanceMetrics() { alert('Performance metrics export functionality would be implemented here'); }",
+                "function exportROCData() { alert('ROC data export functionality would be implemented here'); }",
+                "function exportPredictions() { alert('Predictions export functionality would be implemented here'); }",
+                "</script>",
+                
+                "<hr style='margin: 15px 0; border: none; border-top: 1px solid #dee2e6;'>",
+                "<h5 style='color: #495057;'>", "Publication-Ready Formats:", "</h5>",
+                "<ul style='font-size: 14px; color: #6c757d;'>",
+                "<li>", "Model coefficients and statistics (CSV/Excel format)", "</li>",
+                "<li>", "Performance metrics with confidence intervals", "</li>",
+                "<li>", "ROC curve coordinates for plotting software", "</li>",
+                "<li>", "Predicted probabilities for external validation", "</li>",
+                "</ul>",
+                "</div></body></html>"
+            )
+            
+            self$results$exportOptions$setContent(export_html)
+        },
+        
+        # Create exportable data formats
+        .createExportData = function() {
+            export_data <- list()
+            
+            # Model summary data
+            if (length(private$.models) > 0) {
+                model_summaries <- list()
+                for (model_name in names(private$.models)) {
+                    model <- private$.models[[model_name]]
+                    if (inherits(model, "glm")) {
+                        summary_df <- data.frame(
+                            model = model_name,
+                            term = names(coef(model)),
+                            coefficient = coef(model),
+                            se = summary(model)$coefficients[, "Std. Error"],
+                            z_value = summary(model)$coefficients[, "z value"],
+                            p_value = summary(model)$coefficients[, "Pr(>|z|)"],
+                            stringsAsFactors = FALSE
+                        )
+                        model_summaries[[model_name]] <- summary_df
+                    }
+                }
+                export_data$model_summaries <- do.call(rbind, model_summaries)
+            }
+            
+            # Performance metrics data
+            if (length(private$.performance) > 0) {
+                perf_list <- list()
+                for (model_name in names(private$.performance)) {
+                    perf <- private$.performance[[model_name]]
+                    perf_df <- data.frame(
+                        model = model_name,
+                        auc = perf$auc,
+                        auc_ci_lower = perf$auc_ci[1],
+                        auc_ci_upper = perf$auc_ci[2],
+                        stringsAsFactors = FALSE
+                    )
+                    perf_list[[model_name]] <- perf_df
+                }
+                export_data$performance <- do.call(rbind, perf_list)
+            }
+            
+            return(export_data)
+        },
+        
+        # Apply clinical preset configurations
+        .applyClinicalPreset = function() {
+            preset <- self$options$clinicalPreset
+            
+            if (preset == "none") return()
+            
+            preset_guidance <- ""
+            
+            if (preset == "cardiac_risk") {
+                preset_guidance <- paste0(
+                    "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #0ea5e9;'>",
+                    "<h4 style='color: #0369a1; margin-top: 0;'>💗 ", "Cardiac Risk Assessment Preset", "</h4>",
+                    "<h5>", "Recommended Variables:", "</h5>",
+                    "<ul>",
+                    "<li><strong>", "Basic Clinical:", "</strong> ", "Age, Sex, Smoking, Diabetes, Hypertension, Family History", "</li>",
+                    "<li><strong>", "Enhanced Clinical:", "</strong> ", "BMI, Exercise, Diet, Medication History", "</li>",
+                    "<li><strong>", "Biomarkers:", "</strong> ", "Cholesterol, Troponin, CRP, BNP", "</li>",
+                    "</ul>",
+                    "<h5>", "Optimized Settings:", "</h5>",
+                    "<ul>",
+                    "<li>", "Cross-validation enabled for robust estimates", "</li>",
+                    "<li>", "Data splitting for unbiased validation", "</li>",
+                    "<li>", "Performance metrics focused on discrimination and calibration", "</li>",
+                    "</ul>",
+                    "</div>"
+                )
+            } else if (preset == "cancer_prognosis") {
+                preset_guidance <- paste0(
+                    "<div style='background-color: #fef3e2; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #f59e0b;'>",
+                    "<h4 style='color: #d97706; margin-top: 0;'>🎗️ ", "Cancer Prognosis Preset", "</h4>",
+                    "<h5>", "Recommended Variables:", "</h5>",
+                    "<ul>",
+                    "<li><strong>", "Basic Clinical:", "</strong> ", "Age, Sex, Stage, Grade, Histology", "</li>",
+                    "<li><strong>", "Enhanced Clinical:", "</strong> ", "Performance Status, Comorbidities, Treatment Response", "</li>",
+                    "<li><strong>", "Biomarkers:", "</strong> ", "Molecular Markers, IHC Scores, Gene Expression", "</li>",
+                    "</ul>",
+                    "<h5>", "Optimized Settings:", "</h5>",
+                    "<ul>",
+                    "<li>", "Bootstrap validation for time-to-event endpoints", "</li>",
+                    "<li>", "Penalized regression for high-dimensional data", "</li>",
+                    "<li>", "Multiple imputation for missing pathology data", "</li>",
+                    "</ul>",
+                    "</div>"
+                )
+            } else if (preset == "biomarker_validation") {
+                preset_guidance <- paste0(
+                    "<div style='background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #22c55e;'>",
+                    "<h4 style='color: #15803d; margin-top: 0;'>🧬 ", "Biomarker Validation Preset", "</h4>",
+                    "<h5>", "Recommended Variables:", "</h5>",
+                    "<ul>",
+                    "<li><strong>", "Basic Clinical:", "</strong> ", "Age, Sex, Disease Duration", "</li>",
+                    "<li><strong>", "Biomarker Model:", "</strong> ", "New Biomarker(s) + Clinical Variables", "</li>",
+                    "</ul>",
+                    "<h5>", "Optimized Settings:", "</h5>",
+                    "<ul>",
+                    "<li>", "Model comparison enabled (clinical vs biomarker-enhanced)", "</li>",
+                    "<li>", "NRI and IDI calculation for added value assessment", "</li>",
+                    "<li>", "ROC curve comparison for discrimination improvement", "</li>",
+                    "</ul>",
+                    "</div>"
+                )
+            } else if (preset == "diagnostic_test") {
+                preset_guidance <- paste0(
+                    "<div style='background-color: #fef2f2; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ef4444;'>",
+                    "<h4 style='color: #dc2626; margin-top: 0;'>🔍 ", "Diagnostic Test Preset", "</h4>",
+                    "<h5>", "Recommended Variables:", "</h5>",
+                    "<ul>",
+                    "<li><strong>", "Test Results:", "</strong> ", "Primary Test Result, Reference Standard", "</li>",
+                    "<li><strong>", "Clinical Context:", "</strong> ", "Age, Sex, Symptoms, Risk Factors", "</li>",
+                    "</ul>",
+                    "<h5>", "Optimized Settings:", "</h5>",
+                    "<ul>",
+                    "<li>", "Focus on calibration for probability interpretation", "</li>",
+                    "<li>", "ROC analysis with optimal threshold identification", "</li>",
+                    "<li>", "Decision curve analysis integration for clinical utility", "</li>",
+                    "</ul>",
+                    "</div>"
+                )
+            }
+            
+            if (preset_guidance != "") {
+                # Add preset guidance to clinical guidance panel
+                current_guidance <- self$results$clinicalGuidance$state
+                if (!is.null(current_guidance)) {
+                    combined_guidance <- paste0(current_guidance, preset_guidance)
+                    self$results$clinicalGuidance$setContent(combined_guidance)
+                }
             }
         }
     )

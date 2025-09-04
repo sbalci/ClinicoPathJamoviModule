@@ -6,9 +6,10 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            clinicalPreset = "none",
             outcome = NULL,
             outcomePositive = NULL,
-            splitData = TRUE,
+            splitData = FALSE,
             randomSeed = 123,
             buildBasicModel = TRUE,
             basicPredictors = NULL,
@@ -37,11 +38,11 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             bootstrapReps = 1000,
             showModelSummary = TRUE,
             showPerformanceMetrics = TRUE,
-            showCalibrationPlots = TRUE,
-            showROCCurves = TRUE,
-            compareModels = TRUE,
-            createPredictions = TRUE,
-            exportForDCA = TRUE,
+            showCalibrationPlots = FALSE,
+            showROCCurves = FALSE,
+            compareModels = FALSE,
+            createPredictions = FALSE,
+            exportForDCA = FALSE,
             calculateNRI = FALSE,
             nriThresholds = "0.05, 0.10, 0.20",
             calculateIDI = FALSE,
@@ -56,6 +57,16 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 requiresData=TRUE,
                 ...)
 
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "none",
+                    "cardiac_risk",
+                    "cancer_prognosis",
+                    "biomarker_validation",
+                    "diagnostic_test"),
+                default="none")
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -70,7 +81,7 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..splitData <- jmvcore::OptionBool$new(
                 "splitData",
                 splitData,
-                default=TRUE)
+                default=FALSE)
             private$..randomSeed <- jmvcore::OptionNumber$new(
                 "randomSeed",
                 randomSeed,
@@ -234,23 +245,23 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..showCalibrationPlots <- jmvcore::OptionBool$new(
                 "showCalibrationPlots",
                 showCalibrationPlots,
-                default=TRUE)
+                default=FALSE)
             private$..showROCCurves <- jmvcore::OptionBool$new(
                 "showROCCurves",
                 showROCCurves,
-                default=TRUE)
+                default=FALSE)
             private$..compareModels <- jmvcore::OptionBool$new(
                 "compareModels",
                 compareModels,
-                default=TRUE)
+                default=FALSE)
             private$..createPredictions <- jmvcore::OptionBool$new(
                 "createPredictions",
                 createPredictions,
-                default=TRUE)
+                default=FALSE)
             private$..exportForDCA <- jmvcore::OptionBool$new(
                 "exportForDCA",
                 exportForDCA,
-                default=TRUE)
+                default=FALSE)
             private$..calculateNRI <- jmvcore::OptionBool$new(
                 "calculateNRI",
                 calculateNRI,
@@ -288,6 +299,7 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "deciles"),
                 default="simple")
 
+            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomePositive)
             self$.addOption(private$..splitData)
@@ -333,6 +345,7 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..riskScorePoints)
         }),
     active = list(
+        clinicalPreset = function() private$..clinicalPreset$value,
         outcome = function() private$..outcome$value,
         outcomePositive = function() private$..outcomePositive$value,
         splitData = function() private$..splitData$value,
@@ -377,6 +390,7 @@ modelbuilderOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         generateRiskScore = function() private$..generateRiskScore$value,
         riskScorePoints = function() private$..riskScorePoints$value),
     private = list(
+        ..clinicalPreset = NA,
         ..outcome = NA,
         ..outcomePositive = NA,
         ..splitData = NA,
@@ -433,6 +447,7 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         glossary = function() private$.items[["glossary"]],
         dcaReadyMessage = function() private$.items[["dcaReadyMessage"]],
         reportSentences = function() private$.items[["reportSentences"]],
+        exportOptions = function() private$.items[["exportOptions"]],
         basicModelSummary = function() private$.items[["basicModelSummary"]],
         enhancedModelSummary = function() private$.items[["enhancedModelSummary"]],
         biomarkerModelSummary = function() private$.items[["biomarkerModelSummary"]],
@@ -495,6 +510,11 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="reportSentences",
                 title="\uD83D\uDCDD Copy-Ready Report Sentences",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="exportOptions",
+                title="\uD83D\uDCBE Export Options",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -972,6 +992,8 @@ modelbuilderBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # example will be added
 #'}
 #' @param data The data as a data frame.
+#' @param clinicalPreset Predefined clinical scenarios with optimized settings
+#'   and variable recommendations.
 #' @param outcome Binary outcome variable to predict (e.g., disease presence,
 #'   adverse event occurrence).
 #' @param outcomePositive Which level of the outcome variable represents the
@@ -1050,6 +1072,7 @@ modelbuilderBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dcaReadyMessage} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$exportOptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$basicModelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$enhancedModelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$biomarkerModelSummary} \tab \tab \tab \tab \tab a table \cr
@@ -1075,9 +1098,10 @@ modelbuilderBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 modelbuilder <- function(
     data,
+    clinicalPreset = "none",
     outcome,
     outcomePositive,
-    splitData = TRUE,
+    splitData = FALSE,
     randomSeed = 123,
     buildBasicModel = TRUE,
     basicPredictors,
@@ -1106,11 +1130,11 @@ modelbuilder <- function(
     bootstrapReps = 1000,
     showModelSummary = TRUE,
     showPerformanceMetrics = TRUE,
-    showCalibrationPlots = TRUE,
-    showROCCurves = TRUE,
-    compareModels = TRUE,
-    createPredictions = TRUE,
-    exportForDCA = TRUE,
+    showCalibrationPlots = FALSE,
+    showROCCurves = FALSE,
+    compareModels = FALSE,
+    createPredictions = FALSE,
+    exportForDCA = FALSE,
     calculateNRI = FALSE,
     nriThresholds = "0.05, 0.10, 0.20",
     calculateIDI = FALSE,
@@ -1139,6 +1163,7 @@ modelbuilder <- function(
     for (v in outcome) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- modelbuilderOptions$new(
+        clinicalPreset = clinicalPreset,
         outcome = outcome,
         outcomePositive = outcomePositive,
         splitData = splitData,

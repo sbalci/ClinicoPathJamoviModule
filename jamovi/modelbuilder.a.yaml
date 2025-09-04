@@ -1,7 +1,7 @@
 ---
 name: modelbuilder
 title: Prediction Model Builder
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Build prediction models for Decision Curve Analysis
 version: '0.0.31'
@@ -22,6 +22,25 @@ options:
       type: Data
       description:
           R: The data as a data frame.
+          
+    - name: clinicalPreset
+      title: Clinical Preset
+      type: List
+      options:
+        - name: none
+          title: Custom Analysis (no preset)
+        - name: cardiac_risk
+          title: 💗 Cardiac Risk Assessment
+        - name: cancer_prognosis
+          title: 🎗️ Cancer Prognosis Model
+        - name: biomarker_validation
+          title: 🧬 Biomarker Validation Study
+        - name: diagnostic_test
+          title: 🔍 Diagnostic Test Evaluation
+      default: none
+      description:
+          R: >
+            Predefined clinical scenarios with optimized settings and variable recommendations.
 
     # ==========================================
     # OUTCOME AND BASIC SETUP
@@ -48,7 +67,7 @@ options:
     - name: splitData
       title: Data Splitting
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Split data into training (70%) and validation (30%) sets for
@@ -341,7 +360,7 @@ options:
     - name: showCalibrationPlots
       title: Show Calibration Plots
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display calibration plots for each model.
@@ -349,7 +368,7 @@ options:
     - name: showROCCurves
       title: Show ROC Curves
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display ROC curves for discrimination assessment.
@@ -357,7 +376,7 @@ options:
     - name: compareModels
       title: Model Comparison Table
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display side-by-side comparison of all models.
@@ -365,7 +384,7 @@ options:
     - name: createPredictions
       title: Add Predictions to Data
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Add predicted probability columns to dataset for DCA use.
@@ -373,7 +392,7 @@ options:
     - name: exportForDCA
       title: Prepare for Decision Curve Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Format output specifically for use in Decision Curve Analysis module.
