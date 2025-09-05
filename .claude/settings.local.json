@@ -18,7 +18,8 @@
       "WebFetch(domain:r-graph-gallery.com)",
       "WebFetch(domain:rdrr.io)",
       "Read(/var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T/TemporaryItems/NSIRD_screencaptureui_pLmnpg/**)",
-      "Read(/Users/serdarbalci/Downloads/**)"
+      "Read(/Users/serdarbalci/Downloads/**)",
+      "Bash(rg:*)"
     ],
     "deny": [],
     "ask": [],

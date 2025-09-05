@@ -1426,9 +1426,9 @@ analyses:
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Decision Tree Graph
-    menuSubgroup: DecisionD
+    menuSubgroup: Decision
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization
     description: >
       Creates decision tree graphs for cost-effectiveness analysis with typical
@@ -1439,7 +1439,7 @@ analyses:
   - title: Decision Panel Optimization
     name: decisionpanel
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Decision Panel Optimization
     menuSubgroup: Decision
     menuSubtitle: Optimize test panels and decision trees

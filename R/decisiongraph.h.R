@@ -55,7 +55,10 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ceacThresholds = "0,100000,5000",
             psa_distributions = "normal",
             correlatedParameters = FALSE,
-            correlationMatrix = NULL, ...) {
+            correlationMatrix = NULL,
+            performanceMode = "standard",
+            memoryOptimization = TRUE,
+            parallelProcessing = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -335,6 +338,22 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..performanceMode <- jmvcore::OptionList$new(
+                "performanceMode",
+                performanceMode,
+                options=list(
+                    "standard",
+                    "fast",
+                    "comprehensive"),
+                default="standard")
+            private$..memoryOptimization <- jmvcore::OptionBool$new(
+                "memoryOptimization",
+                memoryOptimization,
+                default=TRUE)
+            private$..parallelProcessing <- jmvcore::OptionBool$new(
+                "parallelProcessing",
+                parallelProcessing,
+                default=FALSE)
 
             self$.addOption(private$..treeType)
             self$.addOption(private$..decisions)
@@ -386,6 +405,9 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..psa_distributions)
             self$.addOption(private$..correlatedParameters)
             self$.addOption(private$..correlationMatrix)
+            self$.addOption(private$..performanceMode)
+            self$.addOption(private$..memoryOptimization)
+            self$.addOption(private$..parallelProcessing)
         }),
     active = list(
         treeType = function() private$..treeType$value,
@@ -437,7 +459,10 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ceacThresholds = function() private$..ceacThresholds$value,
         psa_distributions = function() private$..psa_distributions$value,
         correlatedParameters = function() private$..correlatedParameters$value,
-        correlationMatrix = function() private$..correlationMatrix$value),
+        correlationMatrix = function() private$..correlationMatrix$value,
+        performanceMode = function() private$..performanceMode$value,
+        memoryOptimization = function() private$..memoryOptimization$value,
+        parallelProcessing = function() private$..parallelProcessing$value),
     private = list(
         ..treeType = NA,
         ..decisions = NA,
@@ -488,7 +513,10 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..ceacThresholds = NA,
         ..psa_distributions = NA,
         ..correlatedParameters = NA,
-        ..correlationMatrix = NA)
+        ..correlationMatrix = NA,
+        ..performanceMode = NA,
+        ..memoryOptimization = NA,
+        ..parallelProcessing = NA)
 )
 
 decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -524,13 +552,30 @@ decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Decision Tree",
                 width=700,
                 height=500,
-                renderFun=".treeplot"))
+                renderFun=".treeplot",
+                clearWith=list(
+                    "treeType",
+                    "decisions",
+                    "probabilities",
+                    "costs",
+                    "utilities",
+                    "outcomes",
+                    "healthStates",
+                    "transitionProbs")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summaryTable",
                 title="Expected Values Summary",
                 visible="(summaryTable)",
                 rows=0,
+                clearWith=list(
+                    "treeType",
+                    "decisions",
+                    "probabilities",
+                    "costs",
+                    "utilities",
+                    "calculateExpectedValues",
+                    "willingnessToPay"),
                 columns=list(
                     list(
                         `name`="strategy", 
@@ -944,6 +989,11 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   parameters in PSA.
 #' @param correlationMatrix Variables defining correlation structure between
 #'   uncertain parameters.
+#' @param performanceMode Balance between speed and completeness of analysis.
+#' @param memoryOptimization Enable memory-efficient processing for large
+#'   simulations.
+#' @param parallelProcessing Enable parallel processing for faster PSA
+#'   calculations.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$treeplot} \tab \tab \tab \tab \tab Decision tree visualization with nodes and branches \cr
@@ -1022,7 +1072,10 @@ decisiongraph <- function(
     ceacThresholds = "0,100000,5000",
     psa_distributions = "normal",
     correlatedParameters = FALSE,
-    correlationMatrix) {
+    correlationMatrix,
+    performanceMode = "standard",
+    memoryOptimization = TRUE,
+    parallelProcessing = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisiongraph requires jmvcore to be installed (restart may be required)")
@@ -1108,7 +1161,10 @@ decisiongraph <- function(
         ceacThresholds = ceacThresholds,
         psa_distributions = psa_distributions,
         correlatedParameters = correlatedParameters,
-        correlationMatrix = correlationMatrix)
+        correlationMatrix = correlationMatrix,
+        performanceMode = performanceMode,
+        memoryOptimization = memoryOptimization,
+        parallelProcessing = parallelProcessing)
 
     analysis <- decisiongraphClass$new(
         options = options,
