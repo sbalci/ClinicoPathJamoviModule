@@ -6,8 +6,16 @@
 \usage{
 decisionpanel(
   data,
-  tests,
-  testLevels = "",
+  test1,
+  test1Positive,
+  test2,
+  test2Positive,
+  test3,
+  test3Positive,
+  test4,
+  test4Positive,
+  test5,
+  test5Positive,
   gold,
   goldPositive,
   useCosts = FALSE,
@@ -48,12 +56,25 @@ decisionpanel(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{tests}{Variables representing different diagnostic tests.  Can select
-multiple tests (up to 10) for panel optimization.}
+\item{test1}{First diagnostic test variable.}
 
-\item{testLevels}{String specifying positive test levels. Can be: - Single
-value (used for all tests): "Positive" - Multiple values (comma-separated):
-"Positive,Yes,1"   - Empty string (auto-detection): ""}
+\item{test1Positive}{The positive level for Test 1.}
+
+\item{test2}{Second diagnostic test variable.}
+
+\item{test2Positive}{The positive level for Test 2.}
+
+\item{test3}{Third diagnostic test variable (optional).}
+
+\item{test3Positive}{The positive level for Test 3.}
+
+\item{test4}{Fourth diagnostic test variable (optional).}
+
+\item{test4Positive}{The positive level for Test 4.}
+
+\item{test5}{Fifth diagnostic test variable (optional).}
+
+\item{test5Positive}{The positive level for Test 5.}
 
 \item{gold}{The gold standard variable for disease classification.}
 
@@ -140,6 +161,10 @@ like bootstrap and cross-validation.}
 A results object containing:
 \tabular{llllll}{
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$optimalPanel} \tab \tab \tab \tab \tab a table \cr
 \code{results$strategyComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTests} \tab \tab \tab \tab \tab a table \cr

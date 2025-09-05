@@ -6,6 +6,7 @@
 \usage{
 nogoldstandard(
   data,
+  clinicalPreset = "none",
   test1,
   test1Positive,
   test2,
@@ -16,14 +17,18 @@ nogoldstandard(
   test4Positive,
   test5,
   test5Positive,
-  method = "latent_class",
+  method = "all_positive",
   bootstrap = FALSE,
   nboot = 1000,
-  alpha = 0.05
+  alpha = 0.05,
+  verbose = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
+
+\item{clinicalPreset}{Predefined clinical scenarios with optimized settings
+and method recommendations.}
 
 \item{test1}{First diagnostic test variable.}
 
@@ -52,13 +57,19 @@ nogoldstandard(
 \item{nboot}{Number of bootstrap samples for confidence intervals.}
 
 \item{alpha}{Alpha level for confidence intervals.}
+
+\item{verbose}{Show detailed progress messages during bootstrap analysis.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$method_guide} \tab \tab \tab \tab \tab a html \cr
 \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
 \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
+\code{results$crosstab} \tab \tab \tab \tab \tab a table \cr
 \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr
 }
@@ -70,10 +81,58 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$prevalence)}
 }
 \description{
-Analysis of diagnostic tests without a gold standard reference
+Analysis of diagnostic tests without a gold standard reference using
+multiple statistical approaches. Implements Latent Class Analysis (Hui &
+Walter, 1980), Bayesian methods (Joseph et al., 1995),  and composite
+reference standards for estimating test performance when no perfect
+reference test exists.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Basic example with simulated diagnostic test data
+set.seed(123)
+n <- 200
+
+# Simulate disease status (latent, unknown)
+disease <- rbinom(n, 1, 0.3)  # 30\\% prevalence
+
+# Simulate test results with known sensitivity/specificity
+test1_result <- ifelse(disease == 1,
+                       rbinom(sum(disease), 1, 0.85),     # sensitivity 0.85
+                       rbinom(sum(1-disease), 1, 0.15))   # 1-specificity 0.15
+test1_result <- factor(test1_result, levels=c(0,1), labels=c("Negative", "Positive"))
+
+test2_result <- ifelse(disease == 1,
+                       rbinom(sum(disease), 1, 0.80),     # sensitivity 0.80
+                       rbinom(sum(1-disease), 1, 0.10))   # 1-specificity 0.10
+test2_result <- factor(test2_result, levels=c(0,1), labels=c("Negative", "Positive"))
+
+# Create data frame
+test_data <- data.frame(
+    Test1 = test1_result,
+    Test2 = test2_result
+)
+
+# Latent Class Analysis (recommended method)
+nogoldstandard(
+    data = test_data,
+    test1 = "Test1",
+    test1Positive = "Positive",
+    test2 = "Test2",
+    test2Positive = "Positive",
+    method = "latent_class"
+)
+
+# With bootstrap confidence intervals
+nogoldstandard(
+    data = test_data,
+    test1 = "Test1",
+    test1Positive = "Positive",
+    test2 = "Test2",
+    test2Positive = "Positive",
+    method = "latent_class",
+    bootstrap = TRUE,
+    nboot = 500,
+    verbose = TRUE
+)
+
 }

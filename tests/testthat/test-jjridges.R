@@ -1,9 +1,9 @@
-test_that("jjridgestats works with basic ridgeline plot", {
+test_that("jjridges works with basic ridgeline plot", {
   # Load test data with continuous and categorical variables
   data(iris)
   
   # Test basic functionality
-  result <- jjridgestats(
+  result <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",
@@ -15,11 +15,11 @@ test_that("jjridgestats works with basic ridgeline plot", {
   expect_true("todo" %in% names(result))
 })
 
-test_that("jjridgestats works with different plot styles", {
+test_that("jjridges works with different plot styles", {
   data(iris)
   
   # Test density plot
-  result_density <- jjridgestats(
+  result_density <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",
@@ -29,7 +29,7 @@ test_that("jjridgestats works with different plot styles", {
   expect_s3_class(result_density, "Group")
   
   # Test histogram plot
-  result_histogram <- jjridgestats(
+  result_histogram <- jjridges(
     data = iris,
     dep = "Sepal.Length", 
     group = "Species",
@@ -39,7 +39,7 @@ test_that("jjridgestats works with different plot styles", {
   expect_s3_class(result_histogram, "Group")
   
   # Test gradient plot
-  result_gradient <- jjridgestats(
+  result_gradient <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species", 
@@ -49,11 +49,11 @@ test_that("jjridgestats works with different plot styles", {
   expect_s3_class(result_gradient, "Group")
 })
 
-test_that("jjridgestats handles customization options", {
+test_that("jjridges handles customization options", {
   data(iris)
   
   # Test with custom scaling and bandwidth
-  result <- jjridgestats(
+  result <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",
@@ -66,13 +66,13 @@ test_that("jjridgestats handles customization options", {
   expect_s3_class(result, "Group")
 })
 
-test_that("jjridgestats works with different color schemes", {
+test_that("jjridges works with different color schemes", {
   data(iris)
   
   color_schemes <- c("viridis", "plasma", "magma", "blues", "custom")
   
   for (scheme in color_schemes) {
-    result <- jjridgestats(
+    result <- jjridges(
       data = iris,
       dep = "Sepal.Length",
       group = "Species",
@@ -84,13 +84,13 @@ test_that("jjridgestats works with different color schemes", {
   }
 })
 
-test_that("jjridgestats works with different themes", {
+test_that("jjridges works with different themes", {
   data(iris)
   
   themes <- c("minimal", "classic", "dark")
   
   for (theme in themes) {
-    result <- jjridgestats(
+    result <- jjridges(
       data = iris,
       dep = "Sepal.Length",
       group = "Species",
@@ -101,13 +101,13 @@ test_that("jjridgestats works with different themes", {
   }
 })
 
-test_that("jjridgestats handles legend positioning", {
+test_that("jjridges handles legend positioning", {
   data(iris)
   
   legend_positions <- c("none", "right", "bottom")
   
   for (pos in legend_positions) {
-    result <- jjridgestats(
+    result <- jjridges(
       data = iris,
       dep = "Sepal.Length",
       group = "Species",
@@ -119,11 +119,11 @@ test_that("jjridgestats handles legend positioning", {
   }
 })
 
-test_that("jjridgestats handles custom titles", {
+test_that("jjridges handles custom titles", {
   data(iris)
   
   # Test with custom titles
-  result <- jjridgestats(
+  result <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",
@@ -135,11 +135,11 @@ test_that("jjridgestats handles custom titles", {
   expect_s3_class(result, "Group")
 })
 
-test_that("jjridgestats handles edge cases", {
+test_that("jjridges handles edge cases", {
   data(iris)
   
   # Test with no dep (should return early)
-  result_no_dep <- jjridgestats(
+  result_no_dep <- jjridges(
     data = iris,
     dep = NULL,
     group = "Species"
@@ -148,7 +148,7 @@ test_that("jjridgestats handles edge cases", {
   expect_s3_class(result_no_dep, "Group")
   
   # Test with no group (should return early)
-  result_no_group <- jjridgestats(
+  result_no_group <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = NULL
@@ -160,7 +160,7 @@ test_that("jjridgestats handles edge cases", {
   iris_na <- iris
   iris_na[1:5, "Sepal.Length"] <- NA
   
-  result_na <- jjridgestats(
+  result_na <- jjridges(
     data = iris_na,
     dep = "Sepal.Length",
     group = "Species"
@@ -169,12 +169,12 @@ test_that("jjridgestats handles edge cases", {
   expect_s3_class(result_na, "Group")
 })
 
-test_that("jjridgestats validates input parameters", {
+test_that("jjridges validates input parameters", {
   data(iris)
   
   # Test with empty data
   expect_error(
-    jjridgestats(
+    jjridges(
       data = data.frame(),
       dep = "Sepal.Length",
       group = "Species"
@@ -183,17 +183,17 @@ test_that("jjridgestats validates input parameters", {
   )
 })
 
-test_that("jjridgestats performance optimization works", {
+test_that("jjridges performance optimization works", {
   # Test that cached data is being used efficiently
   data(iris)
   
   # Create a class instance to test caching
-  options <- ClinicoPath:::jjridgestatsOptions$new(
+  options <- ClinicoPath:::jjridgesOptions$new(
     dep = "Sepal.Length",
     group = "Species"
   )
   
-  analysis <- ClinicoPath:::jjridgestatsClass$new(
+  analysis <- ClinicoPath:::jjridgesClass$new(
     options = options,
     data = iris
   )
@@ -203,11 +203,11 @@ test_that("jjridgestats performance optimization works", {
   expect_true(exists(".prepareOptions", envir = analysis$.__enclos_env__$private))
 })
 
-test_that("jjridgestats works with histogram parameters", {
+test_that("jjridges works with histogram parameters", {
   data(iris)
   
   # Test histogram with different bin widths
-  result <- jjridgestats(
+  result <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",
@@ -218,11 +218,11 @@ test_that("jjridgestats works with histogram parameters", {
   expect_s3_class(result, "Group")
 })
 
-test_that("jjridgestats works with fill options", {
+test_that("jjridges works with fill options", {
   data(iris)
   
   # Test with fill enabled
-  result_fill <- jjridgestats(
+  result_fill <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",
@@ -232,7 +232,7 @@ test_that("jjridgestats works with fill options", {
   expect_s3_class(result_fill, "Group")
   
   # Test with fill disabled
-  result_no_fill <- jjridgestats(
+  result_no_fill <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",
@@ -242,7 +242,7 @@ test_that("jjridgestats works with fill options", {
   expect_s3_class(result_no_fill, "Group")
 })
 
-test_that("jjridgestats handles complex datasets", {
+test_that("jjridges handles complex datasets", {
   # Create a more complex test dataset
   test_data <- data.frame(
     values = c(rnorm(50, 10, 2), rnorm(50, 15, 3), rnorm(50, 12, 1.5)),
@@ -251,7 +251,7 @@ test_that("jjridgestats handles complex datasets", {
   )
   
   # Test with complex data
-  result <- jjridgestats(
+  result <- jjridges(
     data = test_data,
     dep = "values",
     group = "groups",
@@ -263,7 +263,7 @@ test_that("jjridgestats handles complex datasets", {
   expect_s3_class(result, "Group")
 })
 
-test_that("jjridgestats works with many groups", {
+test_that("jjridges works with many groups", {
   # Create dataset with many groups
   test_data <- data.frame(
     values = rnorm(200),
@@ -271,7 +271,7 @@ test_that("jjridgestats works with many groups", {
   )
   
   # Test with many groups
-  result <- jjridgestats(
+  result <- jjridges(
     data = test_data,
     dep = "values",
     group = "groups",
@@ -281,11 +281,11 @@ test_that("jjridgestats works with many groups", {
   expect_s3_class(result, "Group")
 })
 
-test_that("jjridgestats handles extreme parameter values", {
+test_that("jjridges handles extreme parameter values", {
   data(iris)
   
   # Test with extreme scaling
-  result_extreme <- jjridgestats(
+  result_extreme <- jjridges(
     data = iris,
     dep = "Sepal.Length",
     group = "Species",

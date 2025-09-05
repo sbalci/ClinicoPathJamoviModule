@@ -1,7 +1,7 @@
 ---
 name: decisionpanel
 title: Decision Panel Optimization
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Optimize test panels and decision trees
 version: '0.0.31'
@@ -104,36 +104,90 @@ options:
     # TEST VARIABLES
     # ==========================================
     
-    - name: tests
-      title: Diagnostic Tests
-      type: Variables
+    - name: test1
+      title: Test 1
+      type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
-      rejectUnusedLevels: true
       description:
           R: >
-            Variables representing different diagnostic tests. 
-            Can select multiple tests (up to 10) for panel optimization.
+            First diagnostic test variable.
 
-
-    - name: testLevels
-      title: Positive Test Levels
-      type: String
-      default: ""
+    - name: test1Positive
+      title: Positive Level
+      type: Level
+      variable: (test1)
       description:
-          ui: >
-            Specify which level indicates a positive test result for each test.
-            
-            For single test: "Positive" 
-            For multiple tests: "Positive,Yes,1" (comma-separated)
-            
-            Leave blank to auto-detect common positive values like:
-            "Positive", "Yes", "True", "1"
           R: >
-            String specifying positive test levels. Can be:
-            - Single value (used for all tests): "Positive"
-            - Multiple values (comma-separated): "Positive,Yes,1"  
-            - Empty string (auto-detection): ""
+            The positive level for Test 1.
+
+    - name: test2
+      title: Test 2
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Second diagnostic test variable.
+
+    - name: test2Positive
+      title: Positive Level
+      type: Level
+      variable: (test2)
+      description:
+          R: >
+            The positive level for Test 2.
+
+    - name: test3
+      title: Test 3 (Optional)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Third diagnostic test variable (optional).
+
+    - name: test3Positive
+      title: Positive Level
+      type: Level
+      variable: (test3)
+      description:
+          R: >
+            The positive level for Test 3.
+
+    - name: test4
+      title: Test 4 (Optional)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Fourth diagnostic test variable (optional).
+
+    - name: test4Positive
+      title: Positive Level
+      type: Level
+      variable: (test4)
+      description:
+          R: >
+            The positive level for Test 4.
+
+    - name: test5
+      title: Test 5 (Optional)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Fifth diagnostic test variable (optional).
+
+    - name: test5Positive
+      title: Positive Level
+      type: Level
+      variable: (test5)
+      description:
+          R: >
+            The positive level for Test 5.
 
 
     - name: gold

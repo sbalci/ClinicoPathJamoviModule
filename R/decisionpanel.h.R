@@ -6,8 +6,16 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            tests = NULL,
-            testLevels = "",
+            test1 = NULL,
+            test1Positive = NULL,
+            test2 = NULL,
+            test2Positive = NULL,
+            test3 = NULL,
+            test3Positive = NULL,
+            test4 = NULL,
+            test4Positive = NULL,
+            test5 = NULL,
+            test5Positive = NULL,
             gold = NULL,
             goldPositive = NULL,
             useCosts = FALSE,
@@ -50,18 +58,61 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 requiresData=TRUE,
                 ...)
 
-            private$..tests <- jmvcore::OptionVariables$new(
-                "tests",
-                tests,
+            private$..test1 <- jmvcore::OptionVariable$new(
+                "test1",
+                test1,
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"),
-                rejectUnusedLevels=TRUE)
-            private$..testLevels <- jmvcore::OptionString$new(
-                "testLevels",
-                testLevels,
-                default="")
+                    "factor"))
+            private$..test1Positive <- jmvcore::OptionLevel$new(
+                "test1Positive",
+                test1Positive,
+                variable="(test1)")
+            private$..test2 <- jmvcore::OptionVariable$new(
+                "test2",
+                test2,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..test2Positive <- jmvcore::OptionLevel$new(
+                "test2Positive",
+                test2Positive,
+                variable="(test2)")
+            private$..test3 <- jmvcore::OptionVariable$new(
+                "test3",
+                test3,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..test3Positive <- jmvcore::OptionLevel$new(
+                "test3Positive",
+                test3Positive,
+                variable="(test3)")
+            private$..test4 <- jmvcore::OptionVariable$new(
+                "test4",
+                test4,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..test4Positive <- jmvcore::OptionLevel$new(
+                "test4Positive",
+                test4Positive,
+                variable="(test4)")
+            private$..test5 <- jmvcore::OptionVariable$new(
+                "test5",
+                test5,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..test5Positive <- jmvcore::OptionLevel$new(
+                "test5Positive",
+                test5Positive,
+                variable="(test5)")
             private$..gold <- jmvcore::OptionVariable$new(
                 "gold",
                 gold,
@@ -265,8 +316,16 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 showProgress,
                 default=TRUE)
 
-            self$.addOption(private$..tests)
-            self$.addOption(private$..testLevels)
+            self$.addOption(private$..test1)
+            self$.addOption(private$..test1Positive)
+            self$.addOption(private$..test2)
+            self$.addOption(private$..test2Positive)
+            self$.addOption(private$..test3)
+            self$.addOption(private$..test3Positive)
+            self$.addOption(private$..test4)
+            self$.addOption(private$..test4Positive)
+            self$.addOption(private$..test5)
+            self$.addOption(private$..test5Positive)
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
             self$.addOption(private$..useCosts)
@@ -304,8 +363,16 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showProgress)
         }),
     active = list(
-        tests = function() private$..tests$value,
-        testLevels = function() private$..testLevels$value,
+        test1 = function() private$..test1$value,
+        test1Positive = function() private$..test1Positive$value,
+        test2 = function() private$..test2$value,
+        test2Positive = function() private$..test2Positive$value,
+        test3 = function() private$..test3$value,
+        test3Positive = function() private$..test3Positive$value,
+        test4 = function() private$..test4$value,
+        test4Positive = function() private$..test4Positive$value,
+        test5 = function() private$..test5$value,
+        test5Positive = function() private$..test5Positive$value,
         gold = function() private$..gold$value,
         goldPositive = function() private$..goldPositive$value,
         useCosts = function() private$..useCosts$value,
@@ -342,8 +409,16 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         seed = function() private$..seed$value,
         showProgress = function() private$..showProgress$value),
     private = list(
-        ..tests = NA,
-        ..testLevels = NA,
+        ..test1 = NA,
+        ..test1Positive = NA,
+        ..test2 = NA,
+        ..test2Positive = NA,
+        ..test3 = NA,
+        ..test3Positive = NA,
+        ..test4 = NA,
+        ..test4Positive = NA,
+        ..test5 = NA,
+        ..test5Positive = NA,
         ..gold = NA,
         ..goldPositive = NA,
         ..useCosts = NA,
@@ -386,6 +461,10 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         summary = function() private$.items[["summary"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
+        clinicalReport = function() private$.items[["clinicalReport"]],
+        clinicalWarnings = function() private$.items[["clinicalWarnings"]],
         optimalPanel = function() private$.items[["optimalPanel"]],
         strategyComparison = function() private$.items[["strategyComparison"]],
         individualTests = function() private$.items[["individualTests"]],
@@ -421,12 +500,126 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="summary",
                 title="Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "optimizationCriteria")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "optimizationCriteria")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretation",
+                title="Clinical Interpretation",
+                visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "optimizationCriteria")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalReport",
+                title="Copy-Ready Report",
+                visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "optimizationCriteria")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalWarnings",
+                title="Clinical Considerations",
+                visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "minSensitivity",
+                    "minSpecificity")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="optimalPanel",
                 title="Optimal Test Panel",
                 visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "optimizationCriteria",
+                    "panelOptimization",
+                    "maxTests",
+                    "topN",
+                    "useCosts",
+                    "testCosts",
+                    "fpCost",
+                    "fnCost"),
                 columns=list(
                     list(
                         `name`="rank", 
@@ -493,6 +686,25 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="strategyComparison",
                 title="Testing Strategy Comparison",
                 visible="(compareStrategies)",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "optimizationCriteria",
+                    "useCosts",
+                    "testCosts",
+                    "fpCost",
+                    "fnCost"),
                 columns=list(
                     list(
                         `name`="strategy", 
@@ -537,6 +749,21 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="individualTests",
                 title="Individual Test Performance (Ranked by Diagnostic Value)",
                 visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "useCosts",
+                    "testCosts"),
                 columns=list(
                     list(
                         `name`="rank", 
@@ -602,6 +829,22 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="panelBuilding",
                 title="Panel Building Analysis (Forward Selection)",
                 visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "panelOptimization",
+                    "optimizationCriteria",
+                    "minImprovement"),
                 columns=list(
                     list(
                         `name`="step", 
@@ -644,6 +887,26 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="optimalPanelsBySize",
                 title="Optimal Panels by Size",
                 visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "optimizationCriteria",
+                    "maxTests",
+                    "useCosts",
+                    "testCosts",
+                    "fpCost",
+                    "fnCost"),
                 columns=list(
                     list(
                         `name`="panelSize", 
@@ -692,6 +955,18 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="testRedundancy",
                 title="Test Redundancy Analysis",
                 visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "redundancyThreshold"),
                 columns=list(
                     list(
                         `name`="testPair", 
@@ -720,6 +995,19 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="incrementalValue",
                 title="Incremental Diagnostic Value",
                 visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive"),
                 columns=list(
                     list(
                         `name`="test", 
@@ -759,6 +1047,19 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="resultImportance",
                 title="Test Result Importance Analysis",
                 visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive"),
                 columns=list(
                     list(
                         `name`="test", 
@@ -796,6 +1097,25 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="allCombinations",
                 title="All Test Combinations",
                 visible="(showAllCombinations)",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "maxTests",
+                    "useCosts",
+                    "testCosts",
+                    "fpCost",
+                    "fnCost"),
                 columns=list(
                     list(
                         `name`="tests", 
@@ -850,12 +1170,44 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="treeStructure",
                 title="Decision Tree Structure",
-                visible="(createTree)"))
+                visible="(createTree)",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "treeMethod",
+                    "maxDepth",
+                    "minSplit")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="treePerformance",
                 title="Decision Tree Performance",
                 visible="(createTree)",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "treeMethod",
+                    "maxDepth",
+                    "minSplit"),
                 columns=list(
                     list(
                         `name`="node", 
@@ -888,6 +1240,23 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="crossValidation",
                 title="Cross-Validation Results",
                 visible="(crossValidate)",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "optimizationCriteria",
+                    "nFolds",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="panel", 
@@ -932,6 +1301,23 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="bootstrapResults",
                 title="Bootstrap Confidence Intervals",
                 visible="(bootstrap)",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "optimizationCriteria",
+                    "bootReps",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="panel", 
@@ -1016,7 +1402,25 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="recommendations",
                 title="Recommendations",
-                visible=TRUE))}))
+                visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test4",
+                    "test5",
+                    "gold",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive",
+                    "test4Positive",
+                    "test5Positive",
+                    "goldPositive",
+                    "strategies",
+                    "optimizationCriteria",
+                    "useCosts",
+                    "minSensitivity",
+                    "minSpecificity")))}))
 
 decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionpanelBase",
@@ -1129,11 +1533,16 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' )
 #'}
 #' @param data The data as a data frame.
-#' @param tests Variables representing different diagnostic tests.  Can select
-#'   multiple tests (up to 10) for panel optimization.
-#' @param testLevels String specifying positive test levels. Can be: - Single
-#'   value (used for all tests): "Positive" - Multiple values (comma-separated):
-#'   "Positive,Yes,1"   - Empty string (auto-detection): ""
+#' @param test1 First diagnostic test variable.
+#' @param test1Positive The positive level for Test 1.
+#' @param test2 Second diagnostic test variable.
+#' @param test2Positive The positive level for Test 2.
+#' @param test3 Third diagnostic test variable (optional).
+#' @param test3Positive The positive level for Test 3.
+#' @param test4 Fourth diagnostic test variable (optional).
+#' @param test4Positive The positive level for Test 4.
+#' @param test5 Fifth diagnostic test variable (optional).
+#' @param test5Positive The positive level for Test 5.
 #' @param gold The gold standard variable for disease classification.
 #' @param goldPositive The level of the gold standard variable that indicates
 #'   disease presence.
@@ -1183,6 +1592,10 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$optimalPanel} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$strategyComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$individualTests} \tab \tab \tab \tab \tab a table \cr
@@ -1212,8 +1625,16 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 decisionpanel <- function(
     data,
-    tests,
-    testLevels = "",
+    test1,
+    test1Positive,
+    test2,
+    test2Positive,
+    test3,
+    test3Positive,
+    test4,
+    test4Positive,
+    test5,
+    test5Positive,
     gold,
     goldPositive,
     useCosts = FALSE,
@@ -1253,20 +1674,40 @@ decisionpanel <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisionpanel requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(tests)) tests <- jmvcore::resolveQuo(jmvcore::enquo(tests))
+    if ( ! missing(test1)) test1 <- jmvcore::resolveQuo(jmvcore::enquo(test1))
+    if ( ! missing(test2)) test2 <- jmvcore::resolveQuo(jmvcore::enquo(test2))
+    if ( ! missing(test3)) test3 <- jmvcore::resolveQuo(jmvcore::enquo(test3))
+    if ( ! missing(test4)) test4 <- jmvcore::resolveQuo(jmvcore::enquo(test4))
+    if ( ! missing(test5)) test5 <- jmvcore::resolveQuo(jmvcore::enquo(test5))
     if ( ! missing(gold)) gold <- jmvcore::resolveQuo(jmvcore::enquo(gold))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(tests), tests, NULL),
+            `if`( ! missing(test1), test1, NULL),
+            `if`( ! missing(test2), test2, NULL),
+            `if`( ! missing(test3), test3, NULL),
+            `if`( ! missing(test4), test4, NULL),
+            `if`( ! missing(test5), test5, NULL),
             `if`( ! missing(gold), gold, NULL))
 
-    for (v in tests) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in test1) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in test2) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in test3) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in test4) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in test5) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in gold) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- decisionpanelOptions$new(
-        tests = tests,
-        testLevels = testLevels,
+        test1 = test1,
+        test1Positive = test1Positive,
+        test2 = test2,
+        test2Positive = test2Positive,
+        test3 = test3,
+        test3Positive = test3Positive,
+        test4 = test4,
+        test4Positive = test4Positive,
+        test5 = test5,
+        test5Positive = test5Positive,
         gold = gold,
         goldPositive = goldPositive,
         useCosts = useCosts,

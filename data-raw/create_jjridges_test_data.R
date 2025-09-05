@@ -1,4 +1,4 @@
-# Create test data for jjridgestats function
+# Create test data for jjridges function
 set.seed(42)
 
 # Create ridgeline plot test data suitable for clinical research
@@ -7,7 +7,7 @@ set.seed(42)
 # Generate realistic clinical scenarios where ridgeline plots are useful
 n_total <- 400
 
-jjridgestats_test_data <- data.frame(
+jjridges_test_data <- data.frame(
   patient_id = 1:n_total,
   
   # Biomarker levels by disease stage (typical ridgeline plot use case)
@@ -62,53 +62,53 @@ jjridgestats_test_data <- data.frame(
 # Create realistic continuous variables with different distributions by groups
 
 # 1. Biomarker expression (log-normal distribution, varies by disease stage)
-jjridgestats_test_data$biomarker_expression <- numeric(n_total)
+jjridges_test_data$biomarker_expression <- numeric(n_total)
 for (i in 1:n_total) {
-  stage <- jjridgestats_test_data$disease_stage[i]
+  stage <- jjridges_test_data$disease_stage[i]
   if (stage == "Stage I") {
     # Early stage: lower, tighter distribution
-    jjridgestats_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 1.5, sdlog = 0.4)
+    jjridges_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 1.5, sdlog = 0.4)
   } else if (stage == "Stage II") {
     # Moderate stage: slightly higher
-    jjridgestats_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 2.0, sdlog = 0.5)
+    jjridges_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 2.0, sdlog = 0.5)
   } else if (stage == "Stage III") {
     # Advanced stage: higher, more variable
-    jjridgestats_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 2.5, sdlog = 0.6)
+    jjridges_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 2.5, sdlog = 0.6)
   } else {
     # Stage IV: highest, very variable
-    jjridgestats_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 3.0, sdlog = 0.8)
+    jjridges_test_data$biomarker_expression[i] <- rlnorm(1, meanlog = 3.0, sdlog = 0.8)
   }
 }
 
 # 2. Treatment response (varies by treatment group)
-jjridgestats_test_data$response_score <- numeric(n_total)
+jjridges_test_data$response_score <- numeric(n_total)
 for (i in 1:n_total) {
-  treatment <- jjridgestats_test_data$treatment_group[i]
+  treatment <- jjridges_test_data$treatment_group[i]
   if (treatment == "Control") {
     # Control: lower response, normal distribution
-    jjridgestats_test_data$response_score[i] <- rnorm(1, mean = 50, sd = 15)
+    jjridges_test_data$response_score[i] <- rnorm(1, mean = 50, sd = 15)
   } else if (treatment == "Treatment A") {
     # Treatment A: moderate improvement
-    jjridgestats_test_data$response_score[i] <- rnorm(1, mean = 65, sd = 18)
+    jjridges_test_data$response_score[i] <- rnorm(1, mean = 65, sd = 18)
   } else if (treatment == "Treatment B") {
     # Treatment B: good improvement
-    jjridgestats_test_data$response_score[i] <- rnorm(1, mean = 75, sd = 20)
+    jjridges_test_data$response_score[i] <- rnorm(1, mean = 75, sd = 20)
   } else {
     # Treatment C: best improvement, bimodal (responders vs non-responders)
     if (runif(1) < 0.7) {
       # Responders (70%)
-      jjridgestats_test_data$response_score[i] <- rnorm(1, mean = 85, sd = 12)
+      jjridges_test_data$response_score[i] <- rnorm(1, mean = 85, sd = 12)
     } else {
       # Non-responders (30%)
-      jjridgestats_test_data$response_score[i] <- rnorm(1, mean = 45, sd = 10)
+      jjridges_test_data$response_score[i] <- rnorm(1, mean = 45, sd = 10)
     }
   }
 }
 
 # 3. Laboratory values (varies by hospital center - showing center effects)
-jjridgestats_test_data$lab_value <- numeric(n_total)
+jjridges_test_data$lab_value <- numeric(n_total)
 for (i in 1:n_total) {
-  center <- jjridgestats_test_data$hospital_center[i]
+  center <- jjridges_test_data$hospital_center[i]
   base_mean <- 100  # Target lab value
   
   # Each center has slightly different mean (calibration differences)
@@ -121,127 +121,127 @@ for (i in 1:n_total) {
                          "Center F" = 2,     # Slightly higher
                          0)
   
-  jjridgestats_test_data$lab_value[i] <- rnorm(1, mean = base_mean + center_effect, sd = 20)
+  jjridges_test_data$lab_value[i] <- rnorm(1, mean = base_mean + center_effect, sd = 20)
 }
 
 # 4. Age (years) - varies by age group (for validation)
-jjridgestats_test_data$age_years <- numeric(n_total)
+jjridges_test_data$age_years <- numeric(n_total)
 for (i in 1:n_total) {
-  age_grp <- jjridgestats_test_data$age_group[i]
+  age_grp <- jjridges_test_data$age_group[i]
   if (age_grp == "18-30") {
-    jjridgestats_test_data$age_years[i] <- runif(1, 18, 30)
+    jjridges_test_data$age_years[i] <- runif(1, 18, 30)
   } else if (age_grp == "31-50") {
-    jjridgestats_test_data$age_years[i] <- runif(1, 31, 50)
+    jjridges_test_data$age_years[i] <- runif(1, 31, 50)
   } else if (age_grp == "51-65") {
-    jjridgestats_test_data$age_years[i] <- runif(1, 51, 65)
+    jjridges_test_data$age_years[i] <- runif(1, 51, 65)
   } else if (age_grp == "66-80") {
-    jjridgestats_test_data$age_years[i] <- runif(1, 66, 80)
+    jjridges_test_data$age_years[i] <- runif(1, 66, 80)
   } else {
-    jjridgestats_test_data$age_years[i] <- runif(1, 80, 95)
+    jjridges_test_data$age_years[i] <- runif(1, 80, 95)
   }
 }
 
 # 5. Symptom severity score (varies by time period - longitudinal effect)
-jjridgestats_test_data$symptom_severity <- numeric(n_total)
+jjridges_test_data$symptom_severity <- numeric(n_total)
 for (i in 1:n_total) {
-  time <- jjridgestats_test_data$time_period[i]
+  time <- jjridges_test_data$time_period[i]
   if (time == "Baseline") {
     # Baseline: higher severity
-    jjridgestats_test_data$symptom_severity[i] <- rnorm(1, mean = 70, sd = 20)
+    jjridges_test_data$symptom_severity[i] <- rnorm(1, mean = 70, sd = 20)
   } else if (time == "Month 3") {
     # Improvement at 3 months
-    jjridgestats_test_data$symptom_severity[i] <- rnorm(1, mean = 55, sd = 18)
+    jjridges_test_data$symptom_severity[i] <- rnorm(1, mean = 55, sd = 18)
   } else if (time == "Month 6") {
     # Further improvement at 6 months
-    jjridgestats_test_data$symptom_severity[i] <- rnorm(1, mean = 45, sd = 16)
+    jjridges_test_data$symptom_severity[i] <- rnorm(1, mean = 45, sd = 16)
   } else {
     # Sustained improvement at 12 months
-    jjridgestats_test_data$symptom_severity[i] <- rnorm(1, mean = 40, sd = 15)
+    jjridges_test_data$symptom_severity[i] <- rnorm(1, mean = 40, sd = 15)
   }
 }
 
 # 6. Quality of life score (varies by gender - demographic differences)
-jjridgestats_test_data$quality_of_life <- numeric(n_total)
+jjridges_test_data$quality_of_life <- numeric(n_total)
 for (i in 1:n_total) {
-  gender <- jjridgestats_test_data$gender[i]
+  gender <- jjridges_test_data$gender[i]
   if (gender == "Male") {
     # Male baseline
-    jjridgestats_test_data$quality_of_life[i] <- rnorm(1, mean = 65, sd = 20)
+    jjridges_test_data$quality_of_life[i] <- rnorm(1, mean = 65, sd = 20)
   } else {
     # Female: slightly different distribution
-    jjridgestats_test_data$quality_of_life[i] <- rnorm(1, mean = 62, sd = 22)
+    jjridges_test_data$quality_of_life[i] <- rnorm(1, mean = 62, sd = 22)
   }
 }
 
 # 7. Inflammatory marker (skewed distribution, varies by region)
-jjridgestats_test_data$inflammatory_marker <- numeric(n_total)
+jjridges_test_data$inflammatory_marker <- numeric(n_total)
 for (i in 1:n_total) {
-  region <- jjridgestats_test_data$region[i]
+  region <- jjridges_test_data$region[i]
   
   # Different populations have different inflammatory marker patterns
   if (region == "North America") {
     # Higher baseline inflammation
-    jjridgestats_test_data$inflammatory_marker[i] <- rgamma(1, shape = 2, scale = 15)
+    jjridges_test_data$inflammatory_marker[i] <- rgamma(1, shape = 2, scale = 15)
   } else if (region == "Europe") {
     # Moderate baseline
-    jjridgestats_test_data$inflammatory_marker[i] <- rgamma(1, shape = 2.5, scale = 12)
+    jjridges_test_data$inflammatory_marker[i] <- rgamma(1, shape = 2.5, scale = 12)
   } else if (region == "Asia") {
     # Lower baseline inflammation
-    jjridgestats_test_data$inflammatory_marker[i] <- rgamma(1, shape = 3, scale = 8)
+    jjridges_test_data$inflammatory_marker[i] <- rgamma(1, shape = 3, scale = 8)
   } else {
     # Latin America: intermediate
-    jjridgestats_test_data$inflammatory_marker[i] <- rgamma(1, shape = 2.2, scale = 13)
+    jjridges_test_data$inflammatory_marker[i] <- rgamma(1, shape = 2.2, scale = 13)
   }
 }
 
 # 8. Tumor size (for oncology studies, log-normal distribution)
-jjridgestats_test_data$tumor_size_mm <- rlnorm(n_total, meanlog = 2.5, sdlog = 0.8)
+jjridges_test_data$tumor_size_mm <- rlnorm(n_total, meanlog = 2.5, sdlog = 0.8)
 
 # 9. Blood pressure (normal distribution with age effect)
-jjridgestats_test_data$systolic_bp <- 100 + 0.5 * jjridgestats_test_data$age_years + rnorm(n_total, 0, 15)
+jjridges_test_data$systolic_bp <- 100 + 0.5 * jjridges_test_data$age_years + rnorm(n_total, 0, 15)
 
 # 10. Genetic risk score (beta distribution scaled)
-jjridgestats_test_data$genetic_risk_score <- rbeta(n_total, 2, 5) * 100
+jjridges_test_data$genetic_risk_score <- rbeta(n_total, 2, 5) * 100
 
 # Apply realistic constraints
-jjridgestats_test_data$biomarker_expression <- pmax(0.1, pmin(50, jjridgestats_test_data$biomarker_expression))
-jjridgestats_test_data$response_score <- pmax(0, pmin(100, jjridgestats_test_data$response_score))
-jjridgestats_test_data$lab_value <- pmax(20, pmin(200, jjridgestats_test_data$lab_value))
-jjridgestats_test_data$symptom_severity <- pmax(0, pmin(100, jjridgestats_test_data$symptom_severity))
-jjridgestats_test_data$quality_of_life <- pmax(0, pmin(100, jjridgestats_test_data$quality_of_life))
-jjridgestats_test_data$inflammatory_marker <- pmax(0.5, pmin(100, jjridgestats_test_data$inflammatory_marker))
-jjridgestats_test_data$tumor_size_mm <- pmax(5, pmin(150, jjridgestats_test_data$tumor_size_mm))
-jjridgestats_test_data$systolic_bp <- pmax(80, pmin(200, jjridgestats_test_data$systolic_bp))
+jjridges_test_data$biomarker_expression <- pmax(0.1, pmin(50, jjridges_test_data$biomarker_expression))
+jjridges_test_data$response_score <- pmax(0, pmin(100, jjridges_test_data$response_score))
+jjridges_test_data$lab_value <- pmax(20, pmin(200, jjridges_test_data$lab_value))
+jjridges_test_data$symptom_severity <- pmax(0, pmin(100, jjridges_test_data$symptom_severity))
+jjridges_test_data$quality_of_life <- pmax(0, pmin(100, jjridges_test_data$quality_of_life))
+jjridges_test_data$inflammatory_marker <- pmax(0.5, pmin(100, jjridges_test_data$inflammatory_marker))
+jjridges_test_data$tumor_size_mm <- pmax(5, pmin(150, jjridges_test_data$tumor_size_mm))
+jjridges_test_data$systolic_bp <- pmax(80, pmin(200, jjridges_test_data$systolic_bp))
 
 # Add some realistic missing values
-missing_indices <- sample(nrow(jjridgestats_test_data), size = 20)
-jjridgestats_test_data$biomarker_expression[missing_indices[1:5]] <- NA
-jjridgestats_test_data$response_score[missing_indices[6:10]] <- NA
-jjridgestats_test_data$lab_value[missing_indices[11:15]] <- NA
-jjridgestats_test_data$inflammatory_marker[missing_indices[16:20]] <- NA
+missing_indices <- sample(nrow(jjridges_test_data), size = 20)
+jjridges_test_data$biomarker_expression[missing_indices[1:5]] <- NA
+jjridges_test_data$response_score[missing_indices[6:10]] <- NA
+jjridges_test_data$lab_value[missing_indices[11:15]] <- NA
+jjridges_test_data$inflammatory_marker[missing_indices[16:20]] <- NA
 
 # Round numeric variables to appropriate precision
-jjridgestats_test_data$biomarker_expression <- round(jjridgestats_test_data$biomarker_expression, 2)
-jjridgestats_test_data$response_score <- round(jjridgestats_test_data$response_score, 1)
-jjridgestats_test_data$lab_value <- round(jjridgestats_test_data$lab_value, 1)
-jjridgestats_test_data$age_years <- round(jjridgestats_test_data$age_years, 0)
-jjridgestats_test_data$symptom_severity <- round(jjridgestats_test_data$symptom_severity, 1)
-jjridgestats_test_data$quality_of_life <- round(jjridgestats_test_data$quality_of_life, 1)
-jjridgestats_test_data$inflammatory_marker <- round(jjridgestats_test_data$inflammatory_marker, 2)
-jjridgestats_test_data$tumor_size_mm <- round(jjridgestats_test_data$tumor_size_mm, 1)
-jjridgestats_test_data$systolic_bp <- round(jjridgestats_test_data$systolic_bp, 0)
-jjridgestats_test_data$genetic_risk_score <- round(jjridgestats_test_data$genetic_risk_score, 1)
+jjridges_test_data$biomarker_expression <- round(jjridges_test_data$biomarker_expression, 2)
+jjridges_test_data$response_score <- round(jjridges_test_data$response_score, 1)
+jjridges_test_data$lab_value <- round(jjridges_test_data$lab_value, 1)
+jjridges_test_data$age_years <- round(jjridges_test_data$age_years, 0)
+jjridges_test_data$symptom_severity <- round(jjridges_test_data$symptom_severity, 1)
+jjridges_test_data$quality_of_life <- round(jjridges_test_data$quality_of_life, 1)
+jjridges_test_data$inflammatory_marker <- round(jjridges_test_data$inflammatory_marker, 2)
+jjridges_test_data$tumor_size_mm <- round(jjridges_test_data$tumor_size_mm, 1)
+jjridges_test_data$systolic_bp <- round(jjridges_test_data$systolic_bp, 0)
+jjridges_test_data$genetic_risk_score <- round(jjridges_test_data$genetic_risk_score, 1)
 
 # Save the dataset
-usethis::use_data(jjridgestats_test_data, overwrite = TRUE)
+usethis::use_data(jjridges_test_data, overwrite = TRUE)
 
 # Preview the data
-print("jjridgestats_test_data structure:")
-str(jjridgestats_test_data)
+print("jjridges_test_data structure:")
+str(jjridges_test_data)
 print("First few rows:")
-head(jjridgestats_test_data)
+head(jjridges_test_data)
 print("Summary statistics:")
-summary(jjridgestats_test_data)
+summary(jjridges_test_data)
 
 # Check distributions of key variables by groups
 print("Distribution characteristics for ridgeline plots:")
@@ -249,9 +249,9 @@ continuous_vars <- c("biomarker_expression", "response_score", "lab_value", "sym
 
 for (var in continuous_vars) {
   cat("\n", var, ":\n")
-  cat("  Overall mean:", round(mean(jjridgestats_test_data[[var]], na.rm = TRUE), 2), "\n")
-  cat("  Overall SD:", round(sd(jjridgestats_test_data[[var]], na.rm = TRUE), 2), "\n")
-  cat("  Range:", round(range(jjridgestats_test_data[[var]], na.rm = TRUE), 2), "\n")
+  cat("  Overall mean:", round(mean(jjridges_test_data[[var]], na.rm = TRUE), 2), "\n")
+  cat("  Overall SD:", round(sd(jjridges_test_data[[var]], na.rm = TRUE), 2), "\n")
+  cat("  Range:", round(range(jjridges_test_data[[var]], na.rm = TRUE), 2), "\n")
 }
 
 # Check group distributions for categorical variables
@@ -260,7 +260,7 @@ categorical_vars <- c("disease_stage", "treatment_group", "hospital_center", "ti
 
 for (var in categorical_vars) {
   cat("\n", var, ":\n")
-  print(table(jjridgestats_test_data[[var]]))
+  print(table(jjridges_test_data[[var]]))
 }
 
 # Show examples of good ridgeline plot combinations
@@ -282,23 +282,23 @@ cat("   Demonstrates population-specific distributions\n")
 
 # Data quality summary
 print("\nData quality summary:")
-cat("Total observations:", nrow(jjridgestats_test_data), "\n")
-cat("Complete cases:", sum(complete.cases(jjridgestats_test_data)), "\n")
+cat("Total observations:", nrow(jjridges_test_data), "\n")
+cat("Complete cases:", sum(complete.cases(jjridges_test_data)), "\n")
 cat("Missing values by variable:\n")
-missing_summary <- sapply(jjridgestats_test_data, function(x) sum(is.na(x)))
+missing_summary <- sapply(jjridges_test_data, function(x) sum(is.na(x)))
 print(missing_summary[missing_summary > 0])
 
 # Statistical summaries by key grouping variables
 print("\nBiomarker expression by disease stage (demonstrates ridgeline utility):")
 biomarker_by_stage <- aggregate(biomarker_expression ~ disease_stage, 
-                               data = jjridgestats_test_data, 
+                               data = jjridges_test_data, 
                                FUN = function(x) c(mean = mean(x, na.rm = TRUE), 
                                                   sd = sd(x, na.rm = TRUE)))
 print(biomarker_by_stage)
 
 print("\nResponse score by treatment group:")
 response_by_treatment <- aggregate(response_score ~ treatment_group, 
-                                 data = jjridgestats_test_data, 
+                                 data = jjridges_test_data, 
                                  FUN = function(x) c(mean = mean(x, na.rm = TRUE), 
                                                     sd = sd(x, na.rm = TRUE)))
 print(response_by_treatment)

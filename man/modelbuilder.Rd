@@ -6,9 +6,10 @@
 \usage{
 modelbuilder(
   data,
+  clinicalPreset = "none",
   outcome,
   outcomePositive,
-  splitData = TRUE,
+  splitData = FALSE,
   randomSeed = 123,
   buildBasicModel = TRUE,
   basicPredictors,
@@ -37,11 +38,11 @@ modelbuilder(
   bootstrapReps = 1000,
   showModelSummary = TRUE,
   showPerformanceMetrics = TRUE,
-  showCalibrationPlots = TRUE,
-  showROCCurves = TRUE,
-  compareModels = TRUE,
-  createPredictions = TRUE,
-  exportForDCA = TRUE,
+  showCalibrationPlots = FALSE,
+  showROCCurves = FALSE,
+  compareModels = FALSE,
+  createPredictions = FALSE,
+  exportForDCA = FALSE,
   calculateNRI = FALSE,
   nriThresholds = "0.05, 0.10, 0.20",
   calculateIDI = FALSE,
@@ -53,6 +54,9 @@ modelbuilder(
 }
 \arguments{
 \item{data}{The data as a data frame.}
+
+\item{clinicalPreset}{Predefined clinical scenarios with optimized settings
+and variable recommendations.}
 
 \item{outcome}{Binary outcome variable to predict (e.g., disease presence,
 adverse event occurrence).}
@@ -170,8 +174,13 @@ clinical use.}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalGuidance} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$dcaReadyMessage} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$exportOptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$basicModelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$enhancedModelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$biomarkerModelSummary} \tab \tab \tab \tab \tab a table \cr

@@ -1,5 +1,5 @@
 ---
-title: "jjridgestats: Comprehensive Ridgeline Plot Analysis"
+title: "jjridges: Comprehensive Ridgeline Plot Analysis"
 author: "ClinicoPath"
 date: "`r Sys.Date()`"
 output: html_document
@@ -7,7 +7,7 @@ output: html_document
 
 ## Overview
 
-The `jjridgestats` function provides a comprehensive interface for creating ridgeline plots (also known as ridge plots or joy plots) to visualize and compare distributions of continuous variables across different categorical groups. This function is built on `ggplot2` and `ggridges`, offering multiple visualization styles with performance optimization through internal caching.
+The `jjridges` function provides a comprehensive interface for creating ridgeline plots (also known as ridge plots or joy plots) to visualize and compare distributions of continuous variables across different categorical groups. This function is built on `ggplot2` and `ggridges`, offering multiple visualization styles with performance optimization through internal caching.
 
 ## Key Features
 
@@ -52,11 +52,11 @@ library(ggplot2)
 #| eval: false
 
 # Load test data
-data(jjridgestats_test_data)
+data(jjridges_test_data)
 
 # Basic ridgeline plot
-result <- jjridgestats(
-  data = jjridgestats_test_data,
+result <- jjridges(
+  data = jjridges_test_data,
   dep = "biomarker_expression",
   group = "disease_stage",
   plotStyle = "density"
@@ -73,8 +73,8 @@ result$plot
 #| eval: false
 
 # Customized ridgeline with scaling and colors
-result_custom <- jjridgestats(
-  data = jjridgestats_test_data,
+result_custom <- jjridges(
+  data = jjridges_test_data,
   dep = "response_score",
   group = "treatment_group",
   plotStyle = "gradient",
@@ -95,8 +95,8 @@ result_custom$plot
 #| eval: false
 
 # Histogram-style ridgeline plot
-result_hist <- jjridgestats(
-  data = jjridgestats_test_data,
+result_hist <- jjridges(
+  data = jjridges_test_data,
   dep = "lab_value",
   group = "hospital_center",
   plotStyle = "histogram",
@@ -207,8 +207,8 @@ The function includes significant performance optimizations:
 #| eval: false
 
 # Treatment response distributions
-response_analysis <- jjridgestats(
-  data = jjridgestats_test_data,
+response_analysis <- jjridges(
+  data = jjridges_test_data,
   dep = "response_score",
   group = "treatment_group",
   plotStyle = "density",
@@ -232,8 +232,8 @@ response_analysis <- jjridgestats(
 #| eval: false
 
 # Biomarker expression across disease stages
-biomarker_progression <- jjridgestats(
-  data = jjridgestats_test_data,
+biomarker_progression <- jjridges(
+  data = jjridges_test_data,
   dep = "biomarker_expression",
   group = "disease_stage",
   plotStyle = "gradient",
@@ -257,8 +257,8 @@ biomarker_progression <- jjridgestats(
 #| eval: false
 
 # Laboratory value distributions across centers
-lab_qc <- jjridgestats(
-  data = jjridgestats_test_data,
+lab_qc <- jjridges(
+  data = jjridges_test_data,
   dep = "lab_value",
   group = "hospital_center",
   plotStyle = "density",
@@ -283,8 +283,8 @@ lab_qc <- jjridgestats(
 #| eval: false
 
 # Symptom severity over time
-longitudinal_response <- jjridgestats(
-  data = jjridgestats_test_data,
+longitudinal_response <- jjridges(
+  data = jjridges_test_data,
   dep = "symptom_severity",
   group = "time_period",
   plotStyle = "density",
@@ -308,8 +308,8 @@ longitudinal_response <- jjridgestats(
 #| eval: false
 
 # Inflammatory marker distributions by region
-population_differences <- jjridgestats(
-  data = jjridgestats_test_data,
+population_differences <- jjridges(
+  data = jjridges_test_data,
   dep = "inflammatory_marker",
   group = "region",
   plotStyle = "density",
@@ -338,8 +338,8 @@ variable_of_interest <- "response_score"
 grouping_variable <- "treatment_group"
 
 # Density style
-density_plot <- jjridgestats(
-  data = jjridgestats_test_data,
+density_plot <- jjridges(
+  data = jjridges_test_data,
   dep = variable_of_interest,
   group = grouping_variable,
   plotStyle = "density",
@@ -347,8 +347,8 @@ density_plot <- jjridgestats(
 )
 
 # Histogram style
-histogram_plot <- jjridgestats(
-  data = jjridgestats_test_data,
+histogram_plot <- jjridges(
+  data = jjridges_test_data,
   dep = variable_of_interest,
   group = grouping_variable,
   plotStyle = "histogram",
@@ -357,8 +357,8 @@ histogram_plot <- jjridgestats(
 )
 
 # Gradient style
-gradient_plot <- jjridgestats(
-  data = jjridgestats_test_data,
+gradient_plot <- jjridges(
+  data = jjridges_test_data,
   dep = variable_of_interest,
   group = grouping_variable,
   plotStyle = "gradient",
@@ -384,7 +384,7 @@ The input data should be a data frame with:
 #| eval: false
 
 # Structure of test data
-str(jjridgestats_test_data)
+str(jjridges_test_data)
 
 # Key variables for ridgeline plots:
 # - biomarker_expression: Log-normal distribution (0.1-50 ng/mL)
@@ -495,7 +495,7 @@ str(jjridgestats_test_data)
 
 ### Underlying Functions
 
-The `jjridgestats` function is built on:
+The `jjridges` function is built on:
 
 - **ggplot2**: Core plotting framework
 - **ggridges**: Specialized ridgeline geometries
@@ -556,7 +556,7 @@ The `jjridgestats` function is built on:
 # - Consider grayscale-friendly colors for print
 
 # Example publication-ready plot:
-publication_plot <- jjridgestats(
+publication_plot <- jjridges(
   data = clinical_data,
   dep = "primary_endpoint",
   group = "treatment_arm",
@@ -602,7 +602,7 @@ publication_plot <- jjridgestats(
 
 # Example error handling
 tryCatch({
-  result <- jjridgestats(
+  result <- jjridges(
     data = my_data,
     dep = "continuous_var",
     group = "group_var",
@@ -682,8 +682,8 @@ tryCatch({
 # Advanced styling examples:
 
 # High-contrast presentation theme
-presentation_plot <- jjridgestats(
-  data = jjridgestats_test_data,
+presentation_plot <- jjridges(
+  data = jjridges_test_data,
   dep = "biomarker_expression",
   group = "disease_stage",
   plotStyle = "gradient",
@@ -693,8 +693,8 @@ presentation_plot <- jjridgestats(
 )
 
 # Minimal publication theme
-publication_plot <- jjridgestats(
-  data = jjridgestats_test_data,
+publication_plot <- jjridges(
+  data = jjridges_test_data,
   dep = "response_score",
   group = "treatment_group",
   plotStyle = "density",
@@ -705,8 +705,8 @@ publication_plot <- jjridgestats(
 )
 
 # Custom color example
-custom_color_plot <- jjridgestats(
-  data = jjridgestats_test_data,
+custom_color_plot <- jjridges(
+  data = jjridges_test_data,
   dep = "lab_value",
   group = "hospital_center",
   plotStyle = "density",
@@ -717,7 +717,7 @@ custom_color_plot <- jjridgestats(
 
 ## Conclusion
 
-The optimized `jjridgestats` function provides:
+The optimized `jjridges` function provides:
 
 - **Comprehensive visualization**: Multiple styles for different data types and purposes
 - **High performance**: Significant speed improvements through caching
