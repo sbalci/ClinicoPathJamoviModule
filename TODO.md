@@ -48,13 +48,6 @@ echo "/document-function FUNC_NAME" | claude
 
 
 
-
-- decisiongraph - Decision Tree Graph
-
-
-echo "" | claude
-echo "/document-function decisiongraph" | claude
-
 - enhancedroc - Enhanced ROC Analysis with Youden Index Optimization
 echo "/check-function enhancedroc" | claude
 echo "/checkpoint enhancedroc" | claude

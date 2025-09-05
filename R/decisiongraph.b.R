@@ -21,6 +21,11 @@ if (!exists(".") || !is.function(get(".", inherits = TRUE))) {
     `.` <- function(x) x
 }
 
+# Provide a safe fallback for the null-coalescing operator used as a %||% b
+if (!exists("%||%", inherits = TRUE)) {
+    `%||%` <- function(a, b) if (!is.null(a)) a else b
+}
+
 decisiongraphClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
         "decisiongraphClass",
@@ -54,48 +59,20 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 tunnel_state_support = TRUE
             ),
             
-            # Clinical presets - initialized dynamically to avoid . function issues
-            .currentPreset = NULL,
+            # NO private variables for complex objects to avoid serialization issues
+            # All content generated on-demand in methods
             
             .init = function() {
-                # Initialize tables
+                # MINIMAL INIT - Only basic table references to avoid serialization issues
+                # All dynamic content generation moved to .run() method
+                
+                # Initialize table references (required by jamovi)
                 summaryTable <- self$results$summaryTable
                 nodeTable <- self$results$nodeTable
                 sensitivityTable <- self$results$sensitivityTable
                 
-                # Initialize clinical preset if specified
-                if (!is.null(self$options$clinicalPreset) && self$options$clinicalPreset != "none") {
-                    private$.applyClinicalPreset(self$options$clinicalPreset)
-                }
-                
-                # Generate contextual help content
-                helpContent <- private$.generateContextualHelp()
-                
-                # Set help content in text2 (Calculations section)
-                if (!is.null(self$results$text2)) {
-                    combinedHelp <- paste(
-                        helpContent$basic,
-                        helpContent$specific,
-                        helpContent$variables,
-                        sep = "<hr>"
-                    )
-                    self$results$text2$setContent(combinedHelp)
-                }
-                
-                # Set executive summary
-                if (!is.null(self$results$executiveSummary)) {
-                    summary <- private$.generateExecutiveSummary(NULL)
-                    self$results$executiveSummary$setContent(summary)
-                }
-                
-                # Set glossary content
-                if (!is.null(self$results$glossary)) {
-                    glossaryContent <- private$.generateGlossary()
-                    self$results$glossary$setContent(glossaryContent)
-                }
-                
-                # DO NOT store complex objects in private variables
-                # Use results elements state instead to avoid serialization issues
+                # DO NOT generate content, call methods, or store complex objects here
+                # All clinical presets, help content, etc. will be handled in .run()
             },
             
             .validateInputs = function() {
@@ -382,22 +359,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 tryCatch({
-                    # Log preset application
+                    # Log preset application (serialization-safe)
                     message(paste(.("Applying clinical preset:"), preset$title))
                     
-                    # Apply preset configurations
-                    # Note: In jamovi, we can't directly modify self$options during runtime
-                    # Instead, we return the preset configuration for UI application
-                    
-                    # Store preset information for guidance text
-                    private$.currentPreset <- list(
-                        name = preset$name,
-                        title = preset$title,
-                        description = preset$description,
-                        appliedAt = Sys.time()
-                    )
-                    
-                    # Generate guidance text based on preset
+                    # Generate guidance text based on preset (no storage to avoid serialization issues)
                     guidanceText <- private$.generatePresetGuidance(preset)
                     
                     # Update results with preset information if available
@@ -620,9 +585,9 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 tryCatch({
-                    # Extract key findings
+                    # Extract key findings (serialization-safe)
                     treeType <- self$options$treeType
-                    preset <- private$.currentPreset
+                    clinicalPreset <- self$options$clinicalPreset
                     
                     summaryContent <- list()
                     
@@ -637,9 +602,17 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         paste("<h3>", .("Analysis Type"), ":</h3>", analysisType)
                     ))
                     
-                    if (!is.null(preset)) {
+                    # Show clinical preset if used (get title dynamically to avoid serialization issues)
+                    if (!is.null(clinicalPreset) && clinicalPreset != "none") {
+                        presetTitle <- switch(clinicalPreset,
+                            "diagnostic_test" = .("Diagnostic Test Evaluation"),
+                            "treatment_comparison" = .("Treatment Comparison"), 
+                            "screening_program" = .("Screening Program Evaluation"),
+                            "drug_costeffectiveness" = .("Drug Cost-Effectiveness"),
+                            clinicalPreset  # fallback to preset name
+                        )
                         summaryContent <- c(summaryContent, list(
-                            paste("<h3>", .("Clinical Scenario"), ":</h3>", preset$title)
+                            paste("<h3>", .("Clinical Scenario"), ":</h3>", presetTitle)
                         ))
                     }
                     
@@ -1808,14 +1781,15 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     parameters = parameterSamples
                 )
                 
-                # Store PSA results in HTML element state instead of private variable
-                if (!is.null(self$results$psaResults)) {
-                    # Only store essential, serializable data
-                    essentialResults <- list(
-                        summary = psaResults$summaryStats,
-                        ceac_data = psaResults$ceac_data
-                    )
-                    self$results$psaResults$setState(essentialResults)
+                # Store CEAC and scatter data on their respective image states
+                if (!is.null(self$results$ceacPlot) && !is.null(ceacData)) {
+                    self$results$ceacPlot$setState(list(ceac_data = ceacData))
+                }
+                if (!is.null(self$results$scatterPlot)) {
+                    scatter_df <- psaResults$scatter_data
+                    # Ensure serializable basic types only
+                    scatter_df$strategy <- as.character(scatter_df$strategy)
+                    self$results$scatterPlot$setState(scatter_df)
                 }
                 
                 # Populate PSA results table if available
@@ -2109,14 +2083,15 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 # Calculate probability of cost-effectiveness at each threshold
                 ceacData <- data.frame(
                     threshold = thresholds,
-                    prob_cost_effective = numeric(length(thresholds)),
+                    probability = numeric(length(thresholds)),
+                    strategy = rep("Overall", length(thresholds)),
                     stringsAsFactors = FALSE
                 )
                 
                 for (i in seq_along(thresholds)) {
                     wtp <- thresholds[i]
                     nmb <- results$utility * wtp - results$cost
-                    ceacData$prob_cost_effective[i] <- sum(nmb > 0) / nrow(results)
+                    ceacData$probability[i] <- sum(nmb > 0) / nrow(results)
                 }
                 
                 return(ceacData)
@@ -3093,6 +3068,42 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         return()
                     }
                     
+                    # GENERATE CONTENT SAFELY - moved from .init() to avoid serialization issues
+                    tryCatch({
+                        # Apply clinical preset if specified
+                        if (!is.null(self$options$clinicalPreset) && self$options$clinicalPreset != "none") {
+                            private$.applyClinicalPreset(self$options$clinicalPreset)
+                        }
+                        
+                        # Generate and set help content
+                        if (!is.null(self$results$text2)) {
+                            helpContent <- private$.generateContextualHelp()
+                            combinedHelp <- paste(
+                                helpContent$basic,
+                                helpContent$specific,
+                                helpContent$variables,
+                                sep = "<hr>"
+                            )
+                            self$results$text2$setContent(combinedHelp)
+                        }
+                        
+                        # Generate executive summary (initial version)
+                        if (!is.null(self$results$executiveSummary)) {
+                            summary <- private$.generateExecutiveSummary(NULL)
+                            self$results$executiveSummary$setContent(summary)
+                        }
+                        
+                        # Generate glossary
+                        if (!is.null(self$results$glossary)) {
+                            glossaryContent <- private$.generateGlossary()
+                            self$results$glossary$setContent(glossaryContent)
+                        }
+                        
+                    }, error = function(e) {
+                        # If content generation fails, continue with analysis
+                        # Don't let content generation errors break the main functionality
+                    })
+                    
                     # Prepare tree data with error handling
                     private$.safeExecute("prepareTreeData", "preparing tree data", function() {
                         private$.prepareTreeData()
@@ -3656,8 +3667,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         return(FALSE)
                     }
                     
-                    # Get PSA results
-                    psaData <- self$results$psaResults$state
+                    # Read CEAC data from the image state
+                    psaData <- image$state
                     if (is.null(psaData) || is.null(psaData$ceac_data)) {
                         return(FALSE)
                     }
@@ -3690,14 +3701,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         return(FALSE)
                     }
                     
-                    # Get PSA results
-                    psaData <- self$results$psaResults$state
-                    if (is.null(psaData) || is.null(psaData$scatter_data)) {
+                    # Read scatter data from the image state
+                    psaData <- image$state
+                    if (is.null(psaData)) {
                         return(FALSE)
                     }
                     
                     # Create scatter plot
-                    plot <- ggplot2::ggplot(psaData$scatter_data, 
+                    plot <- ggplot2::ggplot(psaData, 
                                            ggplot2::aes(x = utility, y = cost, color = strategy)) +
                         ggplot2::geom_point(alpha = 0.6, size = 1) +
                         ggplot2::scale_y_continuous(labels = scales::dollar_format()) +
