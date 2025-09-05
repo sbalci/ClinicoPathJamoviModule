@@ -55,7 +55,10 @@ decisiongraph(
   ceacThresholds = "0,100000,5000",
   psa_distributions = "normal",
   correlatedParameters = FALSE,
-  correlationMatrix
+  correlationMatrix,
+  performanceMode = "standard",
+  memoryOptimization = TRUE,
+  parallelProcessing = FALSE
 )
 }
 \arguments{
@@ -189,6 +192,14 @@ parameters in PSA.}
 
 \item{correlationMatrix}{Variables defining correlation structure between
 uncertain parameters.}
+
+\item{performanceMode}{Balance between speed and completeness of analysis.}
+
+\item{memoryOptimization}{Enable memory-efficient processing for large
+simulations.}
+
+\item{parallelProcessing}{Enable parallel processing for faster PSA
+calculations.}
 }
 \value{
 A results object containing:

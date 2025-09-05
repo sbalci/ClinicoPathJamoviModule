@@ -11,12 +11,29 @@ items:
       height: 500
       renderFun: .treeplot
       description: Decision tree visualization with nodes and branches
+      clearWith:
+        - treeType
+        - decisions
+        - probabilities
+        - costs
+        - utilities
+        - outcomes
+        - healthStates
+        - transitionProbs
 
     - name: summaryTable
       title: Expected Values Summary
       type: Table
       visible: (summaryTable)
       rows: 0
+      clearWith:
+        - treeType
+        - decisions
+        - probabilities
+        - costs
+        - utilities
+        - calculateExpectedValues
+        - willingnessToPay
       columns:
         - name: strategy
           title: Strategy
@@ -109,14 +126,14 @@ items:
           format: currency
 
     - name: text1
-      title: Tree Structure
+      title: Clinical Analysis Guide
       type: Html
-      visible: false
+      visible: true
 
     - name: text2
-      title: Calculations
+      title: Help & Instructions
       type: Html
-      visible: false
+      visible: true
 
     - name: markovTable
       title: Markov Transition Matrix
@@ -279,3 +296,15 @@ items:
       renderFun: .scatterPlot
       visible: (probabilisticAnalysis)
       description: Cost-effectiveness plane scatter plot
+
+    - name: executiveSummary
+      title: Executive Summary
+      type: Html
+      visible: true
+      description: Executive summary of analysis results and key findings
+
+    - name: glossary
+      title: Glossary of Terms
+      type: Html
+      visible: true
+      description: Comprehensive glossary of decision analysis terminology

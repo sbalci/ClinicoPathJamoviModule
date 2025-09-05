@@ -2,7 +2,7 @@
 name: decisiongraph
 title: Decision Tree Graph
 menuGroup: meddecideT
-menuSubgroup: DecisionD
+menuSubgroup: Decision
 menuSubtitle: Cost-Effectiveness Decision Tree Visualization
 version: '0.0.31'
 jas: '1.2'
@@ -40,6 +40,27 @@ options:
             Type of decision tree to create.
           R: >
             Type of decision tree to create.
+
+    - name: clinicalPreset
+      title: Clinical Analysis Preset
+      type: List
+      options:
+        - name: none
+          title: None (Custom Analysis)
+        - name: diagnostic_test
+          title: Diagnostic Test Evaluation
+        - name: treatment_comparison
+          title: Treatment Comparison
+        - name: screening_program
+          title: Screening Program Evaluation
+        - name: drug_costeffectiveness
+          title: Drug Cost-Effectiveness
+      default: none
+      description:
+          ui: >
+            Pre-configured analysis templates for common clinical decision analysis scenarios.
+          R: >
+            Pre-configured analysis templates for common clinical decision analysis scenarios.
 
     # Node Definition Options
     - name: decisions
@@ -580,6 +601,7 @@ options:
           R: >
             Default probability distribution for uncertain parameters in PSA.
 
+    # Streamlined correlation parameters
     - name: correlatedParameters
       title: Parameter Correlations
       type: Bool
@@ -600,5 +622,46 @@ options:
             Variables defining correlation structure between uncertain parameters.
           R: >
             Variables defining correlation structure between uncertain parameters.
+
+    # ==========================================
+    # PERFORMANCE AND EFFICIENCY CONTROLS
+    # ==========================================
+    
+    - name: performanceMode
+      title: Performance Mode
+      type: List
+      options:
+        - name: standard
+          title: Standard (recommended)
+        - name: fast
+          title: Fast (reduced accuracy)
+        - name: comprehensive
+          title: Comprehensive (slower but complete)
+      default: standard
+      description:
+          ui: >
+            Balance between speed and completeness of analysis.
+          R: >
+            Balance between speed and completeness of analysis.
+
+    - name: memoryOptimization
+      title: Memory Optimization
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Enable memory-efficient processing for large simulations.
+          R: >
+            Enable memory-efficient processing for large simulations.
+
+    - name: parallelProcessing
+      title: Parallel Processing
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Enable parallel processing for faster PSA calculations (requires multiple CPU cores).
+          R: >
+            Enable parallel processing for faster PSA calculations.
 
 ...
