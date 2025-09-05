@@ -38,6 +38,9 @@ echo "/document-function FUNC_NAME" | claude
 
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
+> implement escapeVariableNames logic from modelbuilder to FUNC_NAME
+
+> implement welcome/introductory message styling of decisionpanel.
 
 ***
 
@@ -45,13 +48,6 @@ echo "/document-function FUNC_NAME" | claude
 
 
 
-- decisionpanel - Decision Panel Optimization
-echo "/check-function decisionpanel" | claude
-echo "/checkpoint decisionpanel" | claude
-echo "/prepare-translation decisionpanel" | claude
-echo "/review-function decisionpanel" | claude
-echo "/fix-function decisionpanel" | claude
-echo "/document-function decisionpanel" | claude
 
 - decisiongraph - Decision Tree Graph
 echo "/check-function decisiongraph" | claude
@@ -123,7 +119,6 @@ echo "/document-function decisioncompare" | claude
 
 implement escapeVariableNames logic from modelbuilder to oddsratio
 
-
 - oddsratio - Odds Ratio Table and Plot
 echo "/check-function oddsratio" | claude
 echo "/checkpoint oddsratio" | claude
@@ -131,8 +126,6 @@ echo "/prepare-translation oddsratio" | claude
 echo "/review-function oddsratio" | claude
 echo "/fix-function oddsratio" | claude
 echo "/document-function oddsratio" | claude
-
-
 
 - singlearm - Single Arm Survival
 echo "/check-function singlearm" | claude
@@ -144,7 +137,6 @@ echo "/document-function singlearm" | claude
 
 implement escapeVariableNames logic from modelbuilder to survival
 
-
 - survival - Survival Analysis
 echo "/check-function survival" | claude
 echo "/checkpoint survival" | claude
@@ -155,7 +147,6 @@ echo "/document-function survival" | claude
 
 implement escapeVariableNames logic from modelbuilder to multisurvival
 
-
 - multisurvival - Multivariable Survival Analysis
 echo "/check-function multisurvival" | claude
 echo "/checkpoint multisurvival" | claude
@@ -165,7 +156,6 @@ echo "/fix-function multisurvival" | claude
 echo "/document-function multisurvival" | claude
 
 implement escapeVariableNames logic from modelbuilder to survivalcont
-
 
 - survivalcont - Survival Analysis for Continuous Variable
 echo "/check-function survivalcont" | claude
@@ -203,8 +193,7 @@ echo "/review-function venn" | claude
 echo "/fix-function venn" | claude
 echo "/document-function venn" | claude
 
-
-implement escapeVariableNames logic from modelbuilder to crosstable 
+implement escapeVariableNames logic from modelbuilder to crosstable
 
 - crosstable - Cross Tables
 echo "/check-function crosstable" | claude
@@ -222,9 +211,7 @@ echo "/review-function tableone" | claude
 echo "/fix-function tableone" | claude
 echo "/document-function tableone" | claude
 
-
 implement escapeVariableNames logic from modelbuilder to vartree
-
 
 - vartree - Variable Tree
 echo "/check-function vartree" | claude
@@ -250,10 +237,8 @@ echo "/review-function benford" | claude
 echo "/fix-function benford" | claude
 echo "/document-function benford" | claude
 
-
 add jjsankeyfier features as additional options and plots to alluvial function
 add riverplot features as additional options and plots to alluvial function
-
 
 - alluvial - Alluvial Diagrams
 echo "/check-function alluvial" | claude
@@ -262,12 +247,6 @@ echo "/prepare-translation alluvial" | claude
 echo "/review-function alluvial" | claude
 echo "/fix-function alluvial" | claude
 echo "/document-function alluvial" | claude
-
-
-
-
-
-
 
 /check-module-ClinicoPathDescriptives
 

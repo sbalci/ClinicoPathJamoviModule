@@ -12,11 +12,125 @@ items:
       title: Summary
       type: Html
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - optimizationCriteria
+      
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - optimizationCriteria
+      
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - optimizationCriteria
+      
+    - name: clinicalReport
+      title: Copy-Ready Report
+      type: Html
+      visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - optimizationCriteria
+      
+    - name: clinicalWarnings
+      title: Clinical Considerations
+      type: Html
+      visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - minSensitivity
+        - minSpecificity
       
     - name: optimalPanel
       title: Optimal Test Panel
       type: Table
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - optimizationCriteria
+        - panelOptimization
+        - maxTests
+        - topN
+        - useCosts
+        - testCosts
+        - fpCost
+        - fnCost
       columns:
         - name: rank
           title: Rank
@@ -75,6 +189,25 @@ items:
       title: Testing Strategy Comparison
       type: Table
       visible: (compareStrategies)
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - optimizationCriteria
+        - useCosts
+        - testCosts
+        - fpCost
+        - fnCost
       columns:
         - name: strategy
           title: Strategy
@@ -115,6 +248,21 @@ items:
       title: Individual Test Performance (Ranked by Diagnostic Value)
       type: Table
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - useCosts
+        - testCosts
       columns:
         - name: rank
           title: Rank
@@ -172,6 +320,22 @@ items:
       title: Panel Building Analysis (Forward Selection)
       type: Table
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - panelOptimization
+        - optimizationCriteria
+        - minImprovement
       columns:
         - name: step
           title: Step
@@ -206,6 +370,26 @@ items:
       title: Optimal Panels by Size
       type: Table
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - optimizationCriteria
+        - maxTests
+        - useCosts
+        - testCosts
+        - fpCost
+        - fnCost
       columns:
         - name: panelSize
           title: Panel Size
@@ -245,6 +429,18 @@ items:
       title: Test Redundancy Analysis
       type: Table
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - redundancyThreshold
       columns:
         - name: testPair
           title: Test Pair
@@ -268,6 +464,19 @@ items:
       title: Incremental Diagnostic Value
       type: Table
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
       columns:
         - name: test
           title: Test
@@ -300,6 +509,19 @@ items:
       title: Test Result Importance Analysis
       type: Table
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
       columns:
         - name: test
           title: Test
@@ -334,6 +556,25 @@ items:
       title: All Test Combinations
       type: Table
       visible: (showAllCombinations)
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - maxTests
+        - useCosts
+        - testCosts
+        - fpCost
+        - fnCost
       columns:
         - name: tests
           title: Tests
@@ -383,11 +624,43 @@ items:
       title: Decision Tree Structure
       type: Html
       visible: (createTree)
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - treeMethod
+        - maxDepth
+        - minSplit
       
     - name: treePerformance
       title: Decision Tree Performance
       type: Table
       visible: (createTree)
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - treeMethod
+        - maxDepth
+        - minSplit
       columns:
         - name: node
           title: Node
@@ -418,6 +691,23 @@ items:
       title: Cross-Validation Results
       type: Table
       visible: (crossValidate)
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - optimizationCriteria
+        - nFolds
+        - seed
       columns:
         - name: panel
           title: Test Panel
@@ -458,6 +748,23 @@ items:
       title: Bootstrap Confidence Intervals
       type: Table
       visible: (bootstrap)
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - optimizationCriteria
+        - bootReps
+        - seed
       columns:
         - name: panel
           title: Test Panel
@@ -545,6 +852,24 @@ items:
       title: Recommendations
       type: Html
       visible: true
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test4
+        - test5
+        - gold
+        - test1Positive
+        - test2Positive
+        - test3Positive
+        - test4Positive
+        - test5Positive
+        - goldPositive
+        - strategies
+        - optimizationCriteria
+        - useCosts
+        - minSensitivity
+        - minSpecificity
 
 refs:
     - rpart

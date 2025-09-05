@@ -1,0 +1,401 @@
+"patient_id","disease_stage","treatment_group","hospital_center","time_period","age_group","gender","region","biomarker_expression","response_score","lab_value","age_years","symptom_severity","quality_of_life","inflammatory_marker","tumor_size_mm","systolic_bp","genetic_risk_score"
+1,"Stage IV","Treatment C","Center B","Month 6","51-65","Male","Europe",50,41.1,122.6,56,50.8,58.5,28.76,5.9,136,23.8
+2,"Stage IV","Treatment C","Center F","Month 3","51-65","Female","Asia",12.5,55,91.8,61,59,18.9,31.19,16.4,135,33.1
+3,"Stage II","Treatment C","Center E","Month 6","66-80","Male","North America",9.69,100,97.9,73,41.2,73.3,51.92,11.7,136,28.1
+4,"Stage III","Control","Center B","Baseline","31-50","Male","Latin America",6.98,49.3,111.6,46,65.3,67.4,8.77,12.9,103,9.9
+5,"Stage I","Treatment C","Center D","Month 6","66-80","Male","North America",3.79,92.8,87.2,80,48.9,54.6,19.36,5,135,33.3
+6,"Stage I","Treatment A","Center C","Month 3","66-80","Male","North America",6.71,52.6,70.1,74,61.1,29.2,23.44,6.6,144,22.6
+7,"Stage III","Treatment C","Center B","Month 12","51-65","Female","North America",11.85,74.3,119.6,61,22,46.4,68.3,40.7,161,37.7
+8,"Stage II","Control","Center B","Month 6","66-80","Male","Latin America",9.06,63.1,122.4,76,69.9,88.9,26.24,17,121,19.1
+9,"Stage III","Treatment C","Center B","Month 3","31-50","Female","Europe",20.1,78.5,111.6,40,29.6,20.7,23.51,6.9,95,26.5
+10,"Stage III","Treatment B","Center B","Month 3","31-50","Male","North America",6.36,95.2,123.1,36,32.1,44.2,14.22,5,102,32.8
+11,"Stage I","Treatment A","Center A","Month 3","66-80","Male","Europe",3.55,89.8,119,78,29.6,66.8,15.61,9.6,134,30.2
+12,"Stage III","Control","Center C","Month 12","31-50","Male","North America",19.45,64.2,121.5,37,69.6,87.4,10.2,26.6,109,10.5
+13,"Stage IV","Treatment B","Center F","Month 6","51-65","Male","Europe",18.33,67,103.7,60,53.4,52.2,15.39,23.6,108,40.8
+14,"Stage II","Treatment A","Center D","Month 6","31-50","Male","North America",5.47,45.5,124,36,44.7,0.2,45.29,5.3,88,23.2
+15,"Stage I","Treatment C","Center C","Baseline","31-50","Male","North America",4.35,79.3,81.4,46,54.2,100,36.14,27.8,149,24.9
+16,"Stage IV","Control","Center B","Month 3","18-30","Male","Europe",4.18,47.4,88.7,18,54.6,43.8,15.97,9.2,109,40.9
+17,"Stage IV","Control","Center E","Month 12","51-65","Female","Europe",8.46,61.9,131.5,55,33.3,94.2,56.08,12.1,116,70.1
+18,"Stage II","Treatment C","Center D","Month 6","66-80","Male","Europe",7.97,45.1,109.1,76,71.2,44.7,44.51,8.7,129,35.3
+19,"Stage I","Control","Center C","Month 3","51-65","Female","Europe",2.22,17.7,74.8,62,63,66.2,48.07,17.4,159,5.8
+20,"Stage I","Treatment C","Center E","Baseline","51-65","Female","Europe",4.47,52.6,92.2,56,39.6,46.4,20.03,5,147,37.9
+21,"Stage IV","Treatment A","Center B","Baseline","66-80","Female","Latin America",23.14,70.1,94.4,76,44.3,60.6,18.08,26.9,127,19.6
+22,"Stage II","Treatment A","Center C","Month 6","18-30","Male","Asia",3.68,53.6,59.3,23,57.2,61.4,10.91,37.3,134,28.5
+23,"Stage IV","Treatment C","Center B","Month 6","51-65","Male","North America",37.7,42.5,103.3,63,29.4,35.7,64.76,36.8,150,22
+24,"Stage IV","Treatment C","Center B","Month 3","31-50","Female","Europe",10.28,95.1,118.2,45,58.3,59.1,19.98,5,129,62.9
+25,"Stage II","Control","Center E","Baseline","51-65","Female","North America",8.04,55.1,113.4,57,59.1,61.1,22.54,5,133,7.7
+26,"Stage I","Treatment B","Center B","Month 3","51-65","Female","Europe",2.59,NA,106.5,58,51.3,80.5,48.27,8.4,90,12.8
+27,"Stage I","Treatment C","Center F","Month 6","51-65","Male","Europe",4.26,88.6,139.3,63,47.4,49.7,13.73,15,131,9.5
+28,"Stage IV","Control","Center D","Month 6","31-50","Male","North America",49.11,29.4,114.8,40,61.3,100,8.13,11.8,101,26.1
+29,"Stage I","Treatment B","Center A","Month 3","51-65","Female","North America",5.94,94.9,51.3,53,56.1,76.3,39.14,10.5,118,40.1
+30,"Stage III","Treatment C","Center D","Baseline","31-50","Female","North America",7.68,80.4,138.2,37,71.8,40.3,6.49,7.1,127,44.5
+31,"Stage III","Treatment A","Center D","Baseline","31-50","Female","Latin America",20.35,49.2,91.5,34,86.3,38,18.91,41.4,91,39.1
+32,"Stage III","Treatment B","Center C","Month 3","31-50","Female","North America",44.66,65.1,89.3,49,56.7,83.2,10.99,46.4,117,28.5
+33,"Stage I","Control","Center A","Month 6","51-65","Male","Asia",4.23,48.7,101,56,46.2,67.2,7.32,5,113,37.1
+34,"Stage III","Treatment A","Center F","Baseline","51-65","Female","Europe",25.15,40.6,87,59,68.6,30.4,38.64,5.9,111,52
+35,"Stage II","Treatment A","Center C","Month 3","66-80","Female","Asia",10.24,85.6,84.3,78,49.5,21.4,17.89,6.6,131,37.9
+36,"Stage III","Treatment A","Center E","Baseline","51-65","Male","Europe",10.57,66.8,102.9,59,100,81,100,11.9,149,38.6
+37,"Stage II","Treatment A","Center C","Baseline","31-50","Male","North America",14.28,91.4,50.9,47,54.2,65.9,41.58,5,135,45.9
+38,"Stage II","Treatment C","Center C","Month 3","18-30","Male","Latin America",2.23,42.7,99.6,28,42.9,86.6,56.14,10.1,93,60.7
+39,"Stage IV","Treatment B","Center D","Baseline","51-65","Female","Europe",18.34,100,117.5,63,29.6,36.9,34.81,7,140,54.6
+40,"Stage I","Control","Center A","Baseline","66-80","Male","Europe",7.47,26.6,102.4,75,42.1,87.4,21.83,7.8,122,36.8
+41,"Stage I","Treatment B","Center B","Month 6","51-65","Male","Europe",6,69.7,121.3,55,34.2,51.2,41.47,13.4,132,23.8
+42,"Stage I","Control","Center D","Month 6","51-65","Male","Asia",5.99,31,123.8,54,56.6,47.1,7.11,5,128,42.4
+43,"Stage II","Treatment C","Center A","Baseline","31-50","Female","Asia",16.37,77.8,114.4,48,64.4,35.4,26.27,10.4,129,18.8
+44,"Stage IV","Treatment B","Center D","Month 6","51-65","Female","Europe",21.84,79.3,140,56,43.2,65.1,56.31,5.6,128,28.1
+45,"Stage I","Control","Center E","Month 3","51-65","Female","North America",5.48,51.4,84.8,58,48.5,37.1,29.45,5,137,17.4
+46,"Stage IV","Treatment A","Center C","Baseline","80+","Male","North America",36.62,26.8,102.1,83,53.3,87.1,15.77,5,144,57.3
+47,"Stage III","Treatment A","Center A","Month 6","51-65","Female","Europe",7.41,80.3,96.4,54,42.9,55.6,20.01,5,138,25.3
+48,"Stage I","Treatment B","Center D","Month 3","80+","Male","Europe",5.95,78.1,NA,81,53,75.2,19.21,26.1,143,49
+49,"Stage IV","Treatment B","Center A","Month 6","18-30","Male","Asia",42.95,55.6,90,20,62.4,69.7,24.49,15.4,130,52
+50,"Stage I","Treatment C","Center D","Baseline","51-65","Male","Europe",3.56,98.2,95.2,57,81.9,51,37.17,13.8,128,12.7
+51,"Stage II","Treatment A","Center A","Baseline","31-50","Female","Asia",3.99,39.2,107.4,41,74.9,34,27.12,12.9,108,43.1
+52,"Stage II","Control","Center B","Month 3","51-65","Female","North America",6.62,65.2,101.5,61,44.5,55.1,27.58,18.5,125,4
+53,"Stage I","Treatment C","Center C","Baseline","18-30","Male","Europe",4.56,100,82.4,30,39.9,38.5,52.15,30.2,113,34.4
+54,"Stage III","Treatment A","Center E","Baseline","80+","Male","Europe",8.29,68.5,95,85,80.5,37.7,5.57,21.1,121,8.1
+55,"Stage II","Control","Center B","Month 3","31-50","Male","North America",4.57,57.9,115.4,45,31.3,71.1,16.86,5,98,27.7
+56,"Stage III","Treatment B","Center A","Baseline","31-50","Male","Latin America",18.26,45.3,96.1,44,53.9,59.5,21.15,18.4,109,43.8
+57,"Stage III","Treatment B","Center E","Month 6","66-80","Female","Asia",7.03,44.2,80.7,72,43.4,86.5,26.78,11.9,145,40.3
+58,"Stage II","Treatment A","Center C","Month 6","31-50","Male","North America",8.52,48.9,106.6,46,68.8,84.6,9.11,9.6,154,31
+59,"Stage II","Treatment B","Center B","Baseline","51-65","Male","Europe",8.84,89.4,82,56,96.8,33.3,60.94,13.8,124,62.4
+60,"Stage I","Treatment B","Center E","Baseline","31-50","Male","Latin America",7,57.3,92.3,40,60.2,85.2,24.48,5.9,101,22.7
+61,"Stage III","Treatment A","Center B","Baseline","31-50","Male","North America",12.1,75.1,100.9,34,100,89.9,50.01,150,108,27.1
+62,"Stage IV","Control","Center D","Baseline","18-30","Female","Europe",3.99,46.7,145.9,22,100,70.4,25.45,16.6,107,24.6
+63,"Stage III","Treatment C","Center A","Month 12","31-50","Male","North America",17.65,88,56.1,31,36.8,38.8,80.11,23,134,8.7
+64,"Stage I","Treatment A","Center C","Baseline","31-50","Male","Latin America",4.28,88.6,102.4,36,74.1,74.4,31.29,6.8,113,54.2
+65,"Stage III","Treatment A","Center D","Month 3","51-65","Female","Asia",31.72,70.9,113.1,60,56,90.5,10.32,12.8,120,18.8
+66,"Stage II","Treatment B","Center B","Baseline","18-30","Male","North America",9.7,66.2,106,23,92.8,55.2,22.37,23.7,106,32.3
+67,"Stage II","Control","Center F","Baseline","51-65","Female","Europe",3.23,56.6,129.5,52,36.1,70.1,17.73,5,126,47.6
+68,"Stage III","Treatment A","Center C","Month 3","31-50","Male","Europe",12.95,57.3,87.2,49,46.4,95.3,14.38,9.1,171,18.3
+69,"Stage III","Treatment B","Center A","Baseline","31-50","Female","Europe",6.47,69.7,99.5,49,64,87.8,24.1,5.2,148,11.8
+70,"Stage II","Treatment A","Center A","Baseline","66-80","Male","Europe",2.65,98.2,117.8,74,94.9,61.3,3.16,17.9,145,6.1
+71,"Stage II","Control","Center F","Month 6","31-50","Male","Asia",11.18,67.4,95.7,40,54.6,99.6,16.38,14.6,144,11.1
+72,"Stage II","Treatment A","Center D","Baseline","51-65","Female","Europe",2.8,68.5,107.9,56,50.9,59,63.1,5,109,41.7
+73,"Stage II","Treatment A","Center B","Month 6","51-65","Female","Latin America",16.68,41.1,102.5,59,39.8,39.5,8.54,7.8,110,39.4
+74,"Stage I","Control","Center E","Baseline","31-50","Female","Asia",3.88,76.3,107.5,37,100,53.4,19.45,10.9,136,43.5
+75,"Stage II","Control","Center D","Month 3","66-80","Male","Asia",5.4,63.4,110.2,73,45.9,79.4,16.04,5,141,19.5
+76,"Stage III","Treatment A","Center C","Baseline","18-30","Female","Europe",7.04,41.1,82,24,74.2,81.8,26.36,16.4,131,36
+77,"Stage II","Treatment B","Center A","Month 6","66-80","Female","North America",3.21,93.3,82.3,78,74.1,87.8,7.75,10.3,140,30.7
+78,"Stage I","Treatment B","Center F","Baseline","31-50","Female","Asia",5.29,89.8,100.3,41,77.1,87.2,31,31.8,96,16.7
+79,"Stage I","Treatment A","Center C","Month 6","51-65","Male","North America",2.26,77,60.9,61,47.3,68.2,15.9,7.9,119,31.3
+80,"Stage II","Treatment C","Center E","Baseline","18-30","Male","Europe",8.67,40.5,99.9,29,48.8,69.8,91.09,13.7,141,10.2
+81,"Stage I","Treatment A","Center E","Baseline","51-65","Male","North America",2.96,90.6,71,57,79.6,61.1,60.63,5,105,19.2
+82,"Stage II","Treatment A","Center B","Month 6","80+","Female","Asia",9.59,41.9,111.8,85,65,65.5,18.93,17.6,138,35.1
+83,"Stage I","Treatment C","Center A","Month 6","51-65","Male","Asia",6.04,77.8,143.7,64,47.8,99.4,15.21,9.1,135,42.9
+84,"Stage I","Control","Center C","Month 6","66-80","Male","North America",4.92,53.1,144,78,41.2,32.1,40.86,5,135,27.6
+85,"Stage III","Treatment A","Center D","Baseline","31-50","Female","North America",3.55,67.9,112,47,57,95.3,21.42,12.4,132,31.1
+86,"Stage I","Control","Center B","Month 3","31-50","Male","North America",2.47,51.6,81.6,36,51.9,59.2,9.89,16.2,140,38.4
+87,"Stage II","Treatment B","Center C","Baseline","80+","Male","North America",21.38,57,118.5,88,91,58.8,20.71,21.3,150,2.1
+88,"Stage II","Control","Center E","Baseline","31-50","Male","Asia",16.66,54,144.8,42,72.7,84,20.96,17.9,121,39.4
+89,"Stage II","Treatment A","Center D","Baseline","66-80","Female","Europe",7.32,61.3,103.7,68,96.1,40.8,22.86,11.8,129,26.7
+90,"Stage II","Treatment C","Center B","Baseline","51-65","Male","Asia",11.81,55.6,147.9,56,88.5,80.8,12.72,33.1,108,54.5
+91,"Stage III","Treatment A","Center F","Month 3","51-65","Male","North America",5.94,61,113.6,64,47.4,68.9,37.55,44.7,132,15.7
+92,"Stage II","Treatment B","Center F","Baseline","80+","Female","Europe",10.21,84.9,81.1,93,57.5,66.3,20.13,5,151,14.2
+93,"Stage II","Treatment C","Center B","Month 6","66-80","Male","Asia",4.96,90.8,89.3,77,49.1,55.3,35.84,17.5,139,12.5
+94,"Stage IV","Treatment B","Center A","Baseline","51-65","Female","Europe",10,64.9,122.4,64,78.7,78.7,32.6,14.2,129,37.1
+95,"Stage IV","Treatment A","Center D","Baseline","31-50","Male","North America",21.19,58.7,125.3,38,47.3,82.6,8.69,5,96,21.9
+96,"Stage III","Treatment C","Center F","Baseline","31-50","Male","Asia",17.97,56.2,102.9,49,52.5,53.4,39.65,19.1,125,17.8
+97,"Stage II","Control","Center C","Baseline","31-50","Female","Latin America",5.56,53.6,57.1,42,71.5,56.2,27.52,9.2,158,22.9
+98,"Stage I","Treatment A","Center A","Baseline","31-50","Male","Europe",3.53,70.2,97.6,45,31.1,80.3,14.46,15.5,131,16.6
+99,"Stage III","Treatment A","Center B","Month 6","31-50","Male","Asia",22.56,100,103.6,33,40.7,78.4,7.74,11.6,96,13.6
+100,"Stage I","Treatment B","Center F","Month 3","31-50","Female","Europe",8.78,83.3,81.6,37,71.8,22.5,66.73,12.9,124,7.3
+101,"Stage I","Treatment B","Center C","Baseline","51-65","Male","North America",4.58,82.2,104.5,62,52,67.7,45.78,5,142,22.7
+102,"Stage II","Control","Center A","Baseline","51-65","Female","North America",3.9,58,110.8,57,59.1,27.7,15.09,5,147,57.9
+103,"Stage II","Treatment A","Center F","Month 3","18-30","Female","North America",6.94,92.9,92.1,18,78.2,79.8,8.15,5.8,94,34
+104,"Stage I","Treatment A","Center D","Baseline","31-50","Male","Latin America",5.73,82.3,107.4,43,61.7,67.1,38.57,9.4,116,38.8
+105,"Stage IV","Control","Center D","Month 6","66-80","Female","North America",7.44,55.1,118.1,77,33.3,54.4,13.06,21.2,152,3.3
+106,"Stage IV","Treatment C","Center A","Month 12","31-50","Female","Asia",11.42,100,111.6,31,21.5,68.5,22.29,8.8,108,2.1
+107,"Stage III","Treatment B","Center A","Month 3","51-65","Male","North America",24.98,39.1,78.5,57,66.8,57.2,26.94,19.4,102,18.6
+108,"Stage III","Treatment A","Center C","Month 6","18-30","Female","Asia",39.71,76.5,107,29,39.4,80.2,24.38,6.5,115,4.9
+109,"Stage I","Treatment B","Center F","Month 12","51-65","Male","Europe",2.66,47.5,100.8,60,44.4,76.2,10.33,41.4,134,44
+110,"Stage II","Control","Center D","Baseline","66-80","Female","North America",5.82,44.3,92.8,68,63.5,26.7,12.66,12.1,118,54
+111,"Stage I","Treatment A","Center F","Baseline","51-65","Male","Europe",4.74,62.6,140.5,54,70.7,89.6,21.51,9.6,113,26.1
+112,"Stage III","Treatment C","Center A","Month 3","18-30","Female","Europe",15.01,92.4,112.3,22,65.1,86.2,63.87,28.4,112,34.3
+113,"Stage III","Treatment A","Center D","Month 3","66-80","Male","North America",11.82,22.7,131.4,75,32.1,78.6,12.58,8,140,17.6
+114,"Stage I","Treatment B","Center F","Baseline","51-65","Male","North America",3.37,84.3,93,64,40.8,93.9,56.5,17.4,134,37.7
+115,"Stage I","Control","Center D","Month 12","66-80","Female","North America",6.39,51,76.1,77,33.6,81.6,73.46,5,120,64.2
+116,"Stage I","Control","Center F","Month 12","31-50","Female","North America",5.72,46.2,90.8,44,29.8,45.4,23,5.8,107,58.1
+117,"Stage II","Treatment A","Center A","Month 3","51-65","Female","Latin America",7.49,51.6,120.5,56,75,29.9,8.25,5,125,47.1
+118,"Stage I","Control","Center C","Baseline","31-50","Male","Asia",4.85,31,110.1,44,69.6,65.3,17.4,7.9,129,32
+119,"Stage I","Treatment C","Center C","Month 3","66-80","Female","Latin America",3.25,52.9,137.6,70,26.1,100,46.45,15.9,150,21.6
+120,"Stage III","Treatment A","Center A","Baseline","66-80","Female","Asia",12.03,85.6,76.9,69,41.6,73.3,10.12,9.5,128,59.5
+121,"Stage I","Control","Center B","Month 12","66-80","Female","Latin America",5.59,43.9,98.7,73,35.3,29.5,35.85,6.7,158,11.5
+122,"Stage I","Treatment B","Center C","Baseline","51-65","Female","North America",2.75,54,101.6,52,100,58,66.34,25.8,123,20.8
+123,"Stage I","Control","Center C","Baseline","80+","Female","Asia",4.7,36.4,106.4,84,65.7,64.5,44.76,6.3,151,31.9
+124,"Stage I","Treatment C","Center A","Month 6","18-30","Male","Europe",2.85,78.5,95.9,21,31.5,76.8,22.1,21.8,108,50.3
+125,"Stage III","Treatment B","Center C","Baseline","66-80","Male","Europe",24.88,80.2,125,70,67.1,59.3,13.23,19.2,161,27.2
+126,"Stage I","Treatment B","Center A","Month 12","51-65","Female","Latin America",3.45,51.4,116.4,61,27.2,98.1,3.93,5.9,155,13.2
+127,"Stage IV","Control","Center A","Month 6","80+","Male","Europe",10.49,54.6,113.4,95,57.8,75.4,7.39,14.1,148,2.6
+128,"Stage IV","Treatment A","Center C","Baseline","51-65","Female","North America",10.19,68.1,91.8,62,56.3,62.1,61.42,5.5,154,34.2
+129,"Stage II","Control","Center B","Month 6","31-50","Male","North America",9.54,53.8,129,38,26,41.9,19.43,26.8,97,47.7
+130,"Stage III","Treatment B","Center A","Month 6","66-80","Male","Asia",10.15,69.4,107.5,73,38.6,69,15.03,25.8,176,35.6
+131,"Stage IV","Control","Center F","Month 3","66-80","Male","Asia",12.64,24.1,89.5,67,44.9,13,34.43,8.7,84,58.1
+132,"Stage I","Treatment A","Center B","Month 6","66-80","Male","Europe",2.51,28.9,105.2,71,46.2,61.6,9.4,68.7,152,12.7
+133,"Stage I","Treatment A","Center F","Month 3","66-80","Female","North America",7.84,41.7,101.6,66,66.6,40.4,17.02,14,125,10
+134,"Stage IV","Treatment C","Center E","Month 12","66-80","Male","Europe",33.64,72.4,61,75,42.5,73.2,22.72,18.9,153,34
+135,"Stage III","Treatment A","Center A","Month 6","31-50","Male","North America",14.97,60.7,99.3,36,55.5,78.6,10.55,16.5,128,5.3
+136,"Stage I","Treatment B","Center F","Month 3","51-65","Male","North America",3.77,84.8,100.7,55,41.1,51.8,3.3,23.8,120,2.7
+137,"Stage III","Treatment C","Center A","Baseline","80+","Female","Latin America",3.59,50.5,111.8,84,51.8,41.2,15.51,5,164,42.4
+138,"Stage II","Control","Center B","Baseline","31-50","Female","Asia",5.71,25.8,99.7,44,64.7,69.7,18.1,16.4,135,48.4
+139,"Stage III","Control","Center D","Month 12","66-80","Male","Latin America",14.53,61.2,86.9,71,41.5,49.1,46.76,5,114,10.7
+140,"Stage I","Treatment C","Center D","Baseline","51-65","Male","North America",3.27,62.2,106.4,53,59.9,30.5,42.55,19.4,137,35.1
+141,"Stage II","Control","Center F","Baseline","18-30","Female","Europe",4.17,59.3,84.5,19,63.4,40.4,17.77,10.9,104,74.8
+142,"Stage II","Treatment B","Center B","Baseline","66-80","Male","Asia",13.98,72.4,85.4,80,84,76.1,21.38,38.2,155,14.6
+143,"Stage I","Treatment A","Center C","Baseline","66-80","Female","Latin America",2.33,89.1,101.1,76,84.8,66.9,29.82,27.7,130,61.6
+144,"Stage III","Treatment A","Center E","Month 6","66-80","Male","Latin America",6.68,89.9,73,66,57,4.4,22.35,27.7,137,23
+145,"Stage III","Treatment B","Center F","Month 3","18-30","Female","North America",6.63,77,104.2,18,61.3,34.9,22.66,16.3,105,20.2
+146,"Stage III","Treatment B","Center E","Month 6","66-80","Male","North America",7.23,44,99.7,79,63.3,84.5,16.93,6.6,121,60.2
+147,"Stage II","Treatment B","Center E","Baseline","31-50","Female","Asia",11.27,75.9,129.8,46,82.2,69.6,21.77,15.4,126,41.9
+148,"Stage IV","Treatment A","Center B","Month 6","66-80","Female","North America",5.3,58.7,106.1,70,40.4,41.1,2.08,99.3,124,31
+149,"Stage II","Treatment A","Center A","Month 6","66-80","Female","Europe",6.69,52.6,118.5,74,65.7,78.2,9.57,12.5,164,29.3
+150,"Stage II","Control","Center C","Baseline","51-65","Female","Asia",6.05,51.2,120.3,64,62.3,67,11.71,21.5,143,55.3
+151,"Stage III","Treatment C","Center C","Baseline","66-80","Male","North America",26.97,93.3,108.9,79,75.7,68.3,91.4,11,119,12.5
+152,"Stage II","Treatment B","Center A","Baseline","31-50","Male","North America",11.24,100,96,32,67.1,36.7,22.52,37.3,96,33.6
+153,"Stage III","Treatment C","Center E","Baseline","18-30","Female","Europe",8.49,50.6,89.6,27,42.7,19.8,7,10.8,112,29.7
+154,"Stage I","Control","Center C","Month 3","51-65","Male","North America",6.5,45.2,103.3,56,60.6,43.4,10.06,7.5,124,22.6
+155,"Stage III","Control","Center E","Baseline","66-80","Male","Europe",6.45,38.4,104.4,79,38.8,100,40.05,44.4,132,14.1
+156,"Stage III","Treatment A","Center C","Month 6","66-80","Female","North America",5.38,73.5,NA,74,64.2,53.4,4.49,18.8,126,22.5
+157,"Stage II","Control","Center B","Month 3","31-50","Male","North America",11.88,73.2,74.1,41,63.9,57.3,4.72,39.7,127,22.3
+158,"Stage II","Treatment A","Center A","Baseline","66-80","Female","Europe",7.84,4.4,117.6,68,75.9,58.4,17.25,10.4,143,15.5
+159,"Stage II","Treatment C","Center B","Month 6","51-65","Female","Europe",2.99,80.3,93.9,60,41.9,62.9,18.03,16.4,109,60.1
+160,"Stage III","Treatment B","Center D","Month 3","51-65","Female","Asia",16.34,87.3,108.2,55,42.4,67.6,19.78,40.8,125,47.2
+161,"Stage IV","Control","Center A","Baseline","51-65","Female","Europe",NA,55.8,75.5,52,95.2,84.9,10.36,5.7,131,30.4
+162,"Stage I","Treatment C","Center B","Month 6","51-65","Female","North America",3.84,77.6,136.7,61,45.3,77.7,46.14,14,159,44.7
+163,"Stage I","Treatment B","Center D","Month 3","51-65","Female","Latin America",7.37,100,133,57,86.7,100,60.56,5,139,39.4
+164,"Stage II","Treatment C","Center F","Baseline","51-65","Male","Europe",5.91,100,109.2,61,76.6,100,7.82,13.7,120,36.2
+165,"Stage I","Treatment A","Center F","Month 12","66-80","Female","Asia",4.01,43,94.5,67,70.8,87.2,28.52,5.3,136,60.6
+166,"Stage II","Treatment C","Center F","Month 12","51-65","Female","Asia",5.44,92.2,79.7,53,42.8,17.8,24.51,8,135,19.2
+167,"Stage I","Treatment A","Center F","Month 6","51-65","Female","Asia",5.12,77.2,104,63,29.8,97.1,13.38,5,130,53.1
+168,"Stage II","Treatment A","Center C","Baseline","18-30","Female","North America",9.45,54.9,115.7,20,96.9,67.6,18.15,16.4,120,41.6
+169,"Stage II","Treatment B","Center B","Month 6","66-80","Female","Asia",10.52,58.6,101.9,73,66.3,80.2,17.43,26,139,7.8
+170,"Stage II","Treatment B","Center A","Baseline","31-50","Female","North America",7.36,62.5,116.1,42,58.1,46.1,5.54,16.3,128,21.1
+171,"Stage III","Treatment B","Center B","Month 12","51-65","Female","North America",9.21,55.5,146.8,51,41,78.3,23.19,13,110,62.6
+172,"Stage I","Treatment A","Center A","Baseline","51-65","Male","Asia",1.7,65.5,77.6,64,51,99.7,11.45,5,137,51.6
+173,"Stage I","Control","Center B","Month 6","66-80","Female","Latin America",NA,73.5,118.5,75,41.8,66.5,54.59,5,142,43.8
+174,"Stage I","Treatment B","Center D","Month 3","66-80","Male","Europe",6.69,76.9,142,77,24.6,55.7,39.89,16,135,17.9
+175,"Stage I","Treatment A","Center D","Baseline","66-80","Male","North America",5.76,56.4,83.8,75,90.1,76.9,40.74,73.2,144,29.8
+176,"Stage II","Treatment C","Center F","Baseline","51-65","Male","North America",5.9,75.4,124.3,52,88.7,73.6,53.62,9.3,136,27.8
+177,"Stage III","Treatment A","Center A","Month 6","51-65","Male","Europe",20.67,65.8,39.6,61,21,64,28.01,66.7,159,25.1
+178,"Stage I","Control","Center B","Baseline","31-50","Male","North America",7,85,115.7,35,66.4,25.8,36.11,8.3,109,11.5
+179,"Stage III","Treatment C","Center E","Month 3","51-65","Female","North America",13.99,89,102.4,65,57,71.6,16.68,10.2,149,22.4
+180,"Stage III","Treatment B","Center A","Month 6","18-30","Female","Asia",11.86,60.2,83.4,18,36.6,62.5,22.63,13.7,102,11.6
+181,"Stage IV","Control","Center A","Month 3","51-65","Male","North America",4.33,33.2,71.8,60,53.3,71.4,100,26.5,146,52.6
+182,"Stage III","Treatment A","Center B","Baseline","31-50","Male","North America",30.33,41.9,154.9,46,68,76.3,27.79,70,127,19.2
+183,"Stage II","Treatment B","Center D","Baseline","51-65","Male","Latin America",8.39,77.2,111.3,64,75.2,68.8,55.8,22.3,145,31.2
+184,"Stage II","Control","Center A","Baseline","18-30","Male","North America",9,37.1,83.1,20,50,79.7,4.19,8.2,86,52.6
+185,"Stage III","Treatment B","Center F","Month 12","66-80","Female","Asia",22.26,84,144.6,72,34.3,65,8.39,7.5,158,43.8
+186,"Stage III","Treatment A","Center F","Baseline","80+","Female","Europe",11.38,70.8,124,87,57.8,76.6,29.73,19.1,161,10.2
+187,"Stage IV","Control","Center C","Month 12","66-80","Male","Europe",9.73,72.6,96.9,71,34.5,18.5,6,5.7,112,23.2
+188,"Stage III","Treatment A","Center F","Baseline","51-65","Female","Asia",10.46,63.8,118.5,61,55.7,81,34.35,7.8,147,45.7
+189,"Stage II","Treatment A","Center A","Month 3","18-30","Female","Asia",4.43,51,103.1,27,59.3,60.5,11.05,12.5,142,25.9
+190,"Stage II","Control","Center D","Month 6","51-65","Female","North America",10.24,80.2,99.5,57,26.1,88.5,53.1,5,123,30.7
+191,"Stage II","Treatment B","Center A","Baseline","31-50","Female","North America",6.56,92.4,92.4,47,77.3,6.3,22.47,32.8,120,34
+192,"Stage III","Control","Center F","Baseline","51-65","Female","Asia",11.3,53.4,98.9,54,82.3,100,13.12,14.6,112,21.5
+193,"Stage II","Treatment A","Center C","Month 6","80+","Female","Asia",6.28,49,78.1,83,18.4,62.6,13.07,5,137,19.1
+194,"Stage II","Treatment A","Center D","Month 6","66-80","Female","Asia",12.84,59.6,107.5,74,68.5,97.6,15.44,6.6,127,16.9
+195,"Stage II","Treatment A","Center C","Baseline","51-65","Female","Europe",3.96,96.7,144.2,64,89.1,72,11.07,9.4,116,29.9
+196,"Stage II","Treatment B","Center A","Month 3","66-80","Female","North America",6.77,60.4,67.8,67,80.6,80.5,32.85,10,152,55.1
+197,"Stage I","Control","Center D","Baseline","31-50","Female","North America",2.43,56.6,111.1,35,74.1,87.4,2.94,18.6,131,22
+198,"Stage II","Treatment B","Center E","Month 12","18-30","Female","Europe",7.29,83.6,115,30,74.1,41.5,17.57,19.6,100,40.3
+199,"Stage III","Control","Center F","Baseline","51-65","Male","Latin America",12.11,56.6,85.1,56,86.7,77.8,15.21,13,130,16.9
+200,"Stage III","Treatment B","Center D","Month 6","18-30","Male","North America",15.18,80.4,152.7,18,48.9,68.7,16.92,5,126,35.5
+201,"Stage III","Treatment C","Center E","Baseline","18-30","Male","Europe",12.32,99.3,55.6,25,69.7,48.2,35.35,15.4,133,8.5
+202,"Stage I","Treatment C","Center C","Month 6","18-30","Male","Asia",5.82,39.2,76.5,30,28,20.1,6.06,7.5,103,15.2
+203,"Stage III","Treatment A","Center D","Month 12","31-50","Female","Europe",12.1,75.8,69.6,42,48.4,74.4,29.06,7.6,135,43.3
+204,"Stage I","Treatment A","Center D","Month 3","66-80","Female","North America",4.67,62.1,68.3,76,55.8,73.8,6.82,5.4,132,31
+205,"Stage II","Treatment C","Center D","Month 6","18-30","Female","North America",14.7,36.2,92.5,25,70.2,67.3,7.15,39.6,138,39.6
+206,"Stage I","Treatment B","Center A","Month 6","31-50","Male","Latin America",6.27,30.4,68.9,36,55.3,54.5,9.88,7.9,103,50
+207,"Stage IV","Treatment C","Center C","Month 3","31-50","Female","Latin America",NA,95.2,77.1,37,41,58.4,67.26,48.8,139,3
+208,"Stage I","Treatment C","Center C","Month 6","51-65","Male","Latin America",5.97,44.8,142.6,60,30.6,65.1,10.89,5,113,13.3
+209,"Stage II","Control","Center B","Baseline","18-30","Female","North America",5.75,56.6,100.1,21,93.5,71.6,30.79,15,98,0.8
+210,"Stage II","Treatment B","Center A","Month 6","51-65","Female","North America",7.7,90.8,128,58,51.9,94.7,34.25,23.3,127,20.1
+211,"Stage I","Treatment C","Center C","Month 3","18-30","Female","Asia",2.28,49.2,61.3,23,46.5,71.4,3.61,19,115,27
+212,"Stage I","Treatment C","Center D","Month 3","66-80","Female","North America",4.87,36.4,100.4,80,43.4,76.7,78.29,14,164,10.9
+213,"Stage II","Treatment C","Center E","Month 3","51-65","Female","Asia",6.93,47.1,83.1,56,22.7,79.8,11.48,5,111,25.8
+214,"Stage II","Treatment C","Center A","Baseline","80+","Male","North America",12.29,26.4,146.6,95,78.9,57.1,44.63,13.9,114,35.7
+215,"Stage I","Treatment B","Center D","Month 3","51-65","Male","Latin America",5.56,72.7,99,60,61.7,59.3,20.24,24.1,109,32.5
+216,"Stage III","Treatment B","Center C","Baseline","80+","Male","Europe",23.84,39.3,108.7,92,100,80.8,46.71,26.9,147,54.3
+217,"Stage I","Treatment C","Center C","Month 3","66-80","Male","Asia",11.34,76.8,112.5,73,87.3,76.4,13.86,6.8,143,23.3
+218,"Stage I","Treatment C","Center E","Baseline","51-65","Male","North America",3.2,78,99.7,56,45.9,55.6,3.96,14,108,29.2
+219,"Stage I","Control","Center C","Month 12","31-50","Male","Asia",4.3,63.9,85.5,46,36.3,74,36.85,5.8,132,18
+220,"Stage III","Treatment B","Center B","Baseline","51-65","Male","Europe",11.77,73.7,119.4,59,52.6,90.1,4.41,10.6,132,37.9
+221,"Stage I","Treatment B","Center F","Baseline","66-80","Male","Europe",3.55,56.3,118.8,70,72.7,69.7,51.3,8.9,141,29.8
+222,"Stage II","Treatment A","Center E","Month 6","18-30","Female","North America",17.71,53.6,79,21,66.5,65,85.9,8,116,15.3
+223,"Stage I","Control","Center A","Month 3","31-50","Male","Europe",3.08,41.4,104.4,39,52.3,81.4,54.09,18.1,113,33.5
+224,"Stage IV","Treatment A","Center E","Month 12","51-65","Female","Europe",17.11,68.4,77.2,53,46.1,89.3,19.17,21.2,133,14.8
+225,"Stage II","Treatment B","Center B","Month 3","31-50","Female","North America",8.78,85.8,115.5,49,100,51.6,NA,15.6,134,16.8
+226,"Stage III","Treatment B","Center A","Baseline","51-65","Male","Europe",13.54,66.6,92.5,56,56.7,89.4,33.71,9,102,51.2
+227,"Stage II","Control","Center D","Baseline","51-65","Male","Europe",NA,44.9,84.1,60,69.1,80.9,39.62,16.7,146,7.9
+228,"Stage II","Control","Center B","Month 6","66-80","Female","North America",6.55,57.8,117.2,79,25.8,76.5,46.15,8.2,125,45.7
+229,"Stage II","Treatment A","Center F","Month 3","51-65","Female","Asia",7.47,49.4,93.6,53,27.8,89.8,3.03,46.2,140,16.7
+230,"Stage II","Treatment B","Center E","Baseline","80+","Male","Europe",5.59,71.8,113.7,85,48.1,64.9,58.89,11.2,133,9.5
+231,"Stage I","Treatment A","Center C","Month 3","51-65","Female","North America",3.69,62.4,68.7,61,84,49.1,27.92,7.4,117,30.6
+232,"Stage II","Treatment C","Center B","Month 3","80+","Male","Europe",11.59,94.7,82.6,89,37.9,70.7,43.01,6,171,29
+233,"Stage II","Control","Center A","Month 3","31-50","Male","Asia",15.54,26.4,89.9,41,77.7,63.2,11.76,12.7,130,23.5
+234,"Stage II","Treatment C","Center F","Baseline","66-80","Female","Europe",4.56,36.2,116.4,79,81.9,74.8,7.63,16.3,159,44.4
+235,"Stage IV","Treatment A","Center E","Month 3","66-80","Female","North America",18.96,63.3,92.8,68,60.5,74.6,19.16,19.3,130,18.3
+236,"Stage III","Treatment B","Center C","Month 6","66-80","Female","Europe",18.76,49.5,105.3,75,45,14.3,90.08,12.9,124,24.2
+237,"Stage II","Control","Center B","Month 6","18-30","Male","Europe",8.65,55.6,88.9,20,46.5,43.1,14.33,5.9,95,15.6
+238,"Stage III","Treatment B","Center B","Month 6","66-80","Female","Europe",30.06,NA,67.5,76,55.8,63.6,16.06,14.4,147,15.3
+239,"Stage I","Treatment A","Center E","Month 3","51-65","Female","Europe",3.56,79.4,102.1,59,62.3,4.6,16.81,21.9,135,40.7
+240,"Stage I","Treatment B","Center A","Baseline","31-50","Male","Europe",3.77,83.5,94.3,36,45.3,60.1,36.99,18.9,129,27.3
+241,"Stage II","Treatment A","Center F","Month 6","66-80","Female","Europe",9.47,55.8,139.3,75,46.2,28,30.21,17.1,147,44.5
+242,"Stage I","Treatment B","Center D","Month 6","51-65","Female","North America",3.87,68,103.4,59,59,74.6,39.85,16.4,120,29.5
+243,"Stage II","Treatment C","Center D","Month 6","51-65","Female","North America",20.12,38.7,128.3,58,46.4,73.9,34.57,6,116,12.1
+244,"Stage II","Control","Center B","Month 6","66-80","Female","Asia",5.73,50.4,92.2,68,49.3,20.7,17.4,22.6,148,23.9
+245,"Stage I","Control","Center F","Month 12","51-65","Male","Europe",5.17,47.9,97,58,34.9,71.3,26.01,7.9,143,9.3
+246,"Stage I","Treatment B","Center E","Month 3","51-65","Male","Europe",6.54,83.3,122.2,54,82.4,52.9,37.18,135.3,103,6
+247,"Stage II","Treatment A","Center B","Baseline","66-80","Male","North America",4.39,79,92.7,71,33.2,100,54.94,5,121,31.5
+248,"Stage II","Treatment B","Center C","Baseline","66-80","Male","Europe",12.89,71.8,102.3,68,56.2,44.2,66.32,7.5,145,45.4
+249,"Stage I","Treatment A","Center D","Month 3","51-65","Male","North America",2.55,82.5,120.6,63,81.6,65.5,29.52,19.3,143,37
+250,"Stage IV","Treatment A","Center C","Baseline","51-65","Male","Asia",9.69,93.8,112.1,56,51.6,71.1,4.85,11.3,155,48.1
+251,"Stage II","Control","Center C","Month 12","66-80","Male","Asia",21.66,60.6,69.6,77,53.1,39.3,8.83,7.1,134,37.4
+252,"Stage II","Control","Center A","Month 3","51-65","Male","Asia",12.62,68.8,87.9,60,89.1,70.7,20.24,27.1,148,3.5
+253,"Stage II","Treatment A","Center B","Month 6","51-65","Female","Latin America",4.75,77.1,NA,52,31.7,18.9,8.48,30.1,141,34.4
+254,"Stage I","Treatment A","Center D","Baseline","18-30","Male","North America",2.02,82.3,139.2,24,75.3,72.4,32.6,50.6,118,42.1
+255,"Stage II","Treatment A","Center F","Month 12","51-65","Male","Asia",2.02,53.8,113.9,52,62.6,98.5,18.27,7.3,114,8.4
+256,"Stage III","Treatment B","Center D","Baseline","31-50","Male","North America",39.29,84.2,95.6,34,73,82.9,60.83,5,138,5
+257,"Stage II","Treatment A","Center D","Baseline","51-65","Male","North America",14.36,74.6,110.1,60,85.9,81.9,4.49,24.4,136,31.3
+258,"Stage I","Control","Center C","Month 6","80+","Male","North America",3.27,28.3,101.9,82,10.1,42,7.41,17.6,143,52.6
+259,"Stage I","Treatment C","Center E","Month 3","31-50","Male","Europe",2.6,32.2,82.5,34,95.1,70.6,39.47,27.9,117,25.5
+260,"Stage I","Treatment C","Center E","Baseline","66-80","Male","North America",9.98,25.8,101,67,34.2,11.9,43.53,18.1,133,4.9
+261,"Stage III","Treatment C","Center A","Baseline","66-80","Male","Europe",20.74,83.7,121.9,68,63.3,65,26.67,5.7,145,19.1
+262,"Stage II","Control","Center B","Month 12","18-30","Male","North America",5.24,64.7,132.3,26,22.1,56.7,25.83,7.9,85,55.6
+263,"Stage II","Treatment A","Center E","Baseline","66-80","Male","Europe",6.84,100,107.6,74,83,64.9,21.95,17.1,125,10.5
+264,"Stage IV","Treatment B","Center C","Month 6","66-80","Female","Europe",50,87.7,86.1,75,64.1,51.2,51.41,34.3,169,7.4
+265,"Stage I","Control","Center A","Baseline","51-65","Female","Europe",6.64,76.6,110.7,58,100,29.5,34.03,24.5,121,8.6
+266,"Stage II","Control","Center C","Month 6","51-65","Female","Europe",4.21,32.8,117.8,52,28.3,64.5,27.86,7.2,114,46.5
+267,"Stage III","Treatment B","Center A","Baseline","51-65","Female","North America",14.66,53.4,113.2,59,100,62.6,20.18,9.3,141,24.4
+268,"Stage II","Treatment C","Center A","Month 3","31-50","Female","Asia",12.43,58.1,96.5,32,60.8,61.7,13.75,34.6,121,49.5
+269,"Stage IV","Control","Center B","Baseline","51-65","Female","Asia",37.92,53.6,130.5,54,56.2,59.8,9.75,6.1,103,6.4
+270,"Stage III","Treatment A","Center C","Month 6","18-30","Female","Europe",20.59,75.5,92.6,24,59.3,65.9,40.96,5,118,10
+271,"Stage II","Treatment A","Center F","Baseline","66-80","Male","North America",5.53,100,116.1,69,92.9,43.2,NA,17,129,32.5
+272,"Stage III","Treatment A","Center E","Month 6","18-30","Female","Asia",17.32,59.4,85.4,22,23.4,29.4,25.64,8.1,100,46.8
+273,"Stage I","Control","Center F","Month 6","66-80","Female","North America",9.81,38.6,96.6,74,23.2,50,9.59,13.8,146,58.4
+274,"Stage II","Treatment C","Center E","Baseline","66-80","Female","North America",3.22,57.4,90.1,68,73.2,58.9,20.64,6.3,161,50.8
+275,"Stage III","Treatment A","Center A","Month 3","80+","Male","Europe",5.75,40.1,143.3,88,63.4,83.2,24.35,11.6,132,48.9
+276,"Stage II","Treatment B","Center C","Baseline","51-65","Male","North America",15.59,NA,133.9,63,63.2,69.7,30.34,5,100,19.1
+277,"Stage II","Treatment C","Center B","Baseline","66-80","Female","Europe",18.98,85.2,99.7,73,57.3,23.8,28.92,7.2,115,29.2
+278,"Stage I","Control","Center B","Baseline","80+","Male","Asia",8.14,82,101.2,87,93.6,57.2,6.16,5.8,155,19.7
+279,"Stage I","Treatment C","Center F","Month 6","51-65","Female","North America",6.83,69.8,126.2,54,71.2,49.6,22.77,29.3,113,18.3
+280,"Stage I","Treatment B","Center B","Month 6","51-65","Female","Asia",5.17,81.6,108.2,58,42.5,81.9,8.76,44.4,160,29.3
+281,"Stage I","Treatment C","Center B","Baseline","51-65","Female","North America",4.49,31,84.7,60,90.8,59.8,7.92,5,130,27.3
+282,"Stage II","Control","Center D","Baseline","51-65","Female","North America",13.67,34.5,134.5,61,58.9,82.8,12.16,9.6,113,51.6
+283,"Stage II","Control","Center A","Month 6","80+","Female","North America",3.58,58.7,99.7,88,38.4,75.8,NA,5,149,18.2
+284,"Stage IV","Treatment C","Center A","Month 3","80+","Male","Asia",50,78,91.2,90,67.7,35,28.83,38.3,114,4.7
+285,"Stage II","Control","Center B","Month 3","31-50","Male","Asia",6.82,40.8,99.1,48,58.3,93.8,16.75,15.3,120,19.9
+286,"Stage II","Control","Center C","Month 3","66-80","Male","North America",15.21,59.1,104.5,71,56,57.1,42.81,11.9,133,56.6
+287,"Stage I","Treatment B","Center C","Baseline","18-30","Female","Asia",3.95,70.3,92.3,22,45.7,89,64.9,22.8,116,27.4
+288,"Stage II","Control","Center B","Month 6","66-80","Female","Europe",18.98,93.6,130.5,68,46.9,71.6,35.29,7.2,142,34.4
+289,"Stage II","Treatment A","Center A","Month 3","66-80","Female","North America",7.26,60.2,115.2,78,42.2,75.3,47.98,12.5,139,37
+290,"Stage II","Treatment A","Center F","Month 6","66-80","Female","North America",5.97,67.7,116.2,78,31.9,71.1,14.69,11,131,44.3
+291,"Stage III","Treatment C","Center C","Month 12","66-80","Male","North America",18.37,70,51.6,68,64.4,42,1.23,7.6,149,37.4
+292,"Stage III","Treatment A","Center C","Baseline","51-65","Female","Europe",8.68,94.9,116,52,45.8,77.4,11.98,5,112,21.7
+293,"Stage II","Treatment B","Center B","Month 6","31-50","Female","North America",8.03,81,89.9,43,36.4,79.1,27.28,9.3,126,13.5
+294,"Stage I","Control","Center E","Baseline","51-65","Female","Asia",8.45,50.5,92.3,64,29.3,39.5,8.34,39.5,125,29.5
+295,"Stage II","Treatment B","Center F","Baseline","51-65","Female","Europe",3.2,68.4,88.4,53,51.8,39.2,55.49,33,125,4.8
+296,"Stage II","Treatment C","Center A","Baseline","31-50","Male","North America",4.82,51.1,97.9,37,56.7,88.3,55.76,34.2,100,23.4
+297,"Stage III","Control","Center C","Month 12","66-80","Male","Asia",13.46,59.8,49.8,78,54.3,81.2,32.34,37.8,121,2.9
+298,"Stage I","Treatment A","Center F","Month 3","51-65","Female","Europe",9.51,67.8,77.8,65,47.1,99.7,35.29,5,143,21.7
+299,"Stage II","Treatment B","Center F","Month 3","66-80","Female","North America",11.24,57.9,129.7,75,76.2,67.1,NA,6.7,157,38.6
+300,"Stage II","Treatment C","Center B","Month 12","51-65","Female","Latin America",5.23,52.8,86.6,57,66.6,100,55.44,8.7,151,14.8
+301,"Stage I","Treatment A","Center C","Month 3","66-80","Female","Latin America",5.05,61.7,70.3,71,49.1,44,20.8,17.8,137,30.9
+302,"Stage I","Treatment B","Center F","Month 3","66-80","Male","North America",5.25,60.7,120,70,54.8,96.4,14.74,5.5,153,40.7
+303,"Stage II","Treatment B","Center A","Month 12","80+","Male","Asia",7.02,55.7,97.2,87,32.6,59.5,12.21,14.2,161,44.9
+304,"Stage II","Treatment B","Center C","Baseline","31-50","Male","North America",7.69,84.4,96.1,41,90.9,56.3,18.51,5,103,12.5
+305,"Stage III","Control","Center B","Month 12","31-50","Female","Europe",6.61,53.1,95.2,43,37.2,52.4,9.28,9.8,106,9.5
+306,"Stage IV","Treatment A","Center F","Month 12","31-50","Female","Europe",27.03,46.7,88.2,48,24.3,39.1,21.25,5,140,34
+307,"Stage I","Treatment B","Center B","Baseline","51-65","Female","Europe",3.01,77.4,131,61,66.7,52.4,42.25,6,132,30.6
+308,"Stage II","Treatment C","Center F","Month 3","66-80","Female","Europe",12.14,73.6,88.9,66,62.7,53.5,63.14,5.5,125,6.2
+309,"Stage II","Treatment C","Center A","Month 3","66-80","Male","Asia",4.07,100,75,78,26.3,60,23.15,19.9,129,21.2
+310,"Stage II","Treatment B","Center F","Month 6","51-65","Female","North America",12.27,100,86.3,56,53.8,50.2,3.29,5.5,101,36.3
+311,"Stage II","Treatment B","Center A","Baseline","31-50","Female","North America",14.15,91,121.4,37,90.6,71.2,9.31,21.2,112,30.9
+312,"Stage IV","Treatment A","Center E","Baseline","66-80","Male","Europe",50,31.6,55.6,75,62,95.1,44.27,10.4,132,17.3
+313,"Stage I","Treatment C","Center A","Baseline","66-80","Male","North America",13.06,54.4,100.9,70,65.5,40.8,3.5,17.3,124,37.3
+314,"Stage II","Treatment B","Center D","Baseline","51-65","Male","Asia",2.84,45.3,104.4,59,45,74,9.71,7.4,124,41.8
+315,"Stage II","Treatment C","Center D","Baseline","51-65","Female","Europe",5.03,48.4,71.3,65,57.6,58.7,23.44,10,135,31
+316,"Stage IV","Treatment B","Center D","Month 6","51-65","Female","Europe",4.58,79.1,118.6,59,62,70.3,9.53,8.9,120,43.6
+317,"Stage II","Control","Center F","Baseline","51-65","Male","Europe",7.51,49.8,99,54,69.4,44.6,19.98,10.2,145,16.3
+318,"Stage III","Treatment C","Center B","Month 3","51-65","Male","Europe",5.73,90.1,96.8,56,52.6,30.2,28.63,11.9,114,28.7
+319,"Stage IV","Treatment B","Center C","Month 3","51-65","Male","Europe",25.56,41.7,129.1,60,25.7,73.8,4.84,28.8,123,55.6
+320,"Stage IV","Treatment C","Center B","Baseline","31-50","Female","Europe",19.66,72.6,85.4,33,85.6,46.3,34.89,6.1,116,36.4
+321,"Stage I","Treatment C","Center F","Baseline","51-65","Female","Asia",1.89,95.1,96.7,63,70.6,76.6,12,7.5,126,21.6
+322,"Stage I","Treatment C","Center A","Month 12","31-50","Female","Asia",5.37,84.1,116.1,50,38,21.1,8.35,5,99,24.3
+323,"Stage II","Treatment C","Center B","Month 12","51-65","Male","Europe",14.19,47.6,74.4,51,26.5,78.1,41.21,16.2,117,24.2
+324,"Stage II","Treatment B","Center E","Baseline","18-30","Female","Asia",5.39,43.2,79,19,39.8,55.5,20.94,14.9,109,53.6
+325,"Stage I","Control","Center C","Month 3","51-65","Female","North America",2.47,44.4,98,64,19,100,26.42,7.7,139,7.8
+326,"Stage IV","Treatment C","Center E","Month 6","31-50","Female","Europe",50,43.5,100.7,47,39.9,43.1,21.12,8.6,114,22.9
+327,"Stage I","Treatment B","Center D","Baseline","66-80","Male","Asia",4.9,85,79.7,77,47.9,95,14.29,8,117,22.3
+328,"Stage III","Control","Center D","Baseline","18-30","Male","North America",29.91,NA,138.9,20,69.4,86,33.9,7.9,105,12.7
+329,"Stage III","Treatment B","Center F","Baseline","66-80","Male","Latin America",8.41,73.1,99.7,70,63.9,52.9,30.94,128.1,123,25.7
+330,"Stage III","Treatment A","Center E","Baseline","80+","Female","Europe",7.6,70,66.7,80,86.5,58.3,28.16,5,156,7
+331,"Stage IV","Treatment B","Center A","Month 12","51-65","Male","North America",48.93,65.8,73.9,56,39.5,53.3,35.52,14,108,19.7
+332,"Stage II","Control","Center D","Baseline","51-65","Male","North America",15.81,96.4,126.3,59,79.7,67.3,28.59,23.1,122,8.2
+333,"Stage II","Control","Center C","Baseline","31-50","Male","Latin America",4,10.7,130.6,42,27.5,68.2,18.91,6.4,139,60
+334,"Stage I","Treatment B","Center D","Month 3","66-80","Male","Europe",5.75,100,91.5,80,59.4,45.2,59,14.9,159,1
+335,"Stage III","Treatment C","Center B","Baseline","66-80","Female","Asia",16.8,39.3,107.1,80,79.5,73.5,18.34,9,159,18.9
+336,"Stage I","Treatment C","Center E","Baseline","51-65","Male","Europe",5.05,96.8,118.1,61,79.8,89.7,5.2,37,130,17.1
+337,"Stage I","Treatment A","Center B","Month 12","66-80","Male","Asia",4.85,58.2,98.3,78,41.2,93.3,17.66,15.4,150,11.5
+338,"Stage II","Treatment B","Center B","Baseline","66-80","Female","Europe",5.58,97.9,100.3,67,34.4,37.8,44.79,27,139,40.9
+339,"Stage III","Control","Center C","Month 3","66-80","Male","North America",9.05,65.8,74.6,69,51.3,63.7,41.13,8.9,138,35.2
+340,"Stage II","Treatment A","Center F","Month 6","51-65","Female","North America",3.75,46.2,101.4,55,7.3,49.5,27.64,18.8,135,13.9
+341,"Stage I","Treatment B","Center E","Baseline","66-80","Female","Asia",15.64,48.5,129.4,70,56.8,63.5,17.18,13.5,151,8.8
+342,"Stage II","Treatment C","Center D","Month 6","51-65","Female","Europe",14.17,86.9,144.9,54,47.2,64.7,19.73,28.8,115,19.7
+343,"Stage III","Treatment C","Center E","Month 12","31-50","Female","Asia",14.32,100,75.1,37,52,43.7,7.93,27.4,125,22.4
+344,"Stage I","Treatment B","Center F","Month 6","66-80","Male","North America",6.92,85.5,114.4,68,50.8,63.9,52.98,5.3,110,32.4
+345,"Stage II","Treatment A","Center F","Month 12","51-65","Female","Europe",5.69,75.3,132.3,61,29.9,85.1,28.64,25.5,122,46.9
+346,"Stage II","Treatment A","Center D","Month 3","31-50","Male","North America",9.8,70.8,119.3,47,61,61.7,15.13,16.6,128,37.7
+347,"Stage IV","Treatment B","Center E","Month 3","31-50","Male","Asia",17.31,83,75.9,50,76.7,57.2,23.52,6.5,95,18.4
+348,"Stage I","Control","Center A","Month 6","66-80","Female","Asia",5.22,68.5,115.7,80,34.2,74.7,21.96,14,144,29.7
+349,"Stage III","Treatment C","Center C","Baseline","66-80","Male","Asia",13.8,81,71.1,72,66.1,68.9,NA,7.6,131,4.6
+350,"Stage IV","Treatment B","Center C","Month 3","31-50","Female","Europe",12.72,97.1,103.7,32,58.9,71.7,69.37,25,88,24.6
+351,"Stage I","Treatment C","Center B","Baseline","51-65","Male","Europe",6.21,96.8,126.2,60,60.4,79.1,22.75,58.3,134,51.5
+352,"Stage I","Treatment C","Center B","Baseline","51-65","Male","Asia",6.38,78.7,97.7,62,63.1,58.8,46.34,22.2,111,1.2
+353,"Stage II","Treatment C","Center B","Month 6","66-80","Female","Latin America",5.34,42.5,92.8,74,60.9,54.3,11.86,5,147,20.7
+354,"Stage II","Control","Center F","Baseline","31-50","Female","Asia",5.76,20.6,NA,34,92.2,38.2,28.76,5.1,110,20.1
+355,"Stage III","Treatment A","Center E","Baseline","66-80","Female","Asia",16.16,46.2,99.8,80,61.1,40,18.75,66.6,123,29.4
+356,"Stage I","Treatment A","Center D","Month 6","18-30","Male","Europe",2.82,64.7,134,28,64.7,81.7,26.89,19.1,116,13.1
+357,"Stage III","Treatment A","Center E","Baseline","31-50","Female","Europe",13.32,46.3,89.2,33,40,56.2,26.72,7.9,125,12.1
+358,"Stage IV","Treatment C","Center D","Baseline","31-50","Male","Asia",12.69,44.2,138.5,42,47.7,64.3,17.97,18.2,139,59.2
+359,"Stage I","Control","Center E","Baseline","31-50","Male","North America",3.15,47.5,88,38,71.8,56.3,24.37,6,122,1.6
+360,"Stage I","Control","Center F","Month 3","51-65","Female","Asia",3.28,59.8,105.6,56,51.5,50.4,6.67,5,117,62
+361,"Stage I","Treatment B","Center A","Baseline","80+","Male","Asia",2.41,53.5,94,91,73.3,79,18.18,5.4,126,24.5
+362,"Stage III","Treatment B","Center F","Baseline","51-65","Male","North America",8.18,100,113.5,62,62.3,58.9,14.03,31.3,172,24.6
+363,"Stage II","Treatment B","Center A","Month 12","31-50","Female","North America",6.46,80.9,113,35,17.2,42.4,20.8,14.9,115,31.7
+364,"Stage IV","Control","Center C","Month 3","51-65","Female","Asia",39,42,98.3,65,62.1,43.1,70.36,5,115,13.5
+365,"Stage I","Treatment B","Center C","Month 3","51-65","Female","North America",2.96,72.1,80.8,53,50.2,70.1,13.14,11.2,139,30.9
+366,"Stage I","Control","Center D","Baseline","51-65","Male","Asia",8.29,58.1,133.5,64,94,31.1,24.08,22.1,140,14.8
+367,"Stage I","Treatment A","Center B","Baseline","66-80","Male","North America",5.72,76.4,85.6,80,98.5,70.9,44.09,7.3,133,26.8
+368,"Stage IV","Treatment B","Center A","Baseline","51-65","Male","Asia",11.02,39.5,103.5,57,64,36.5,31.09,7.7,138,23.1
+369,"Stage I","Control","Center D","Month 6","51-65","Male","North America",11.5,19,72.9,59,66.1,55.6,22.36,5,112,34.9
+370,"Stage II","Treatment A","Center C","Baseline","51-65","Male","North America",3.65,63.4,113.6,62,99.9,39.1,10.36,26.9,137,27.3
+371,"Stage II","Control","Center F","Baseline","51-65","Female","Europe",13.67,62.6,88.9,54,31,100,19,22,121,24.5
+372,"Stage II","Treatment C","Center E","Month 6","66-80","Male","Latin America",3.87,62.3,97.8,68,58.2,78.2,66.03,12.1,145,27.4
+373,"Stage III","Treatment A","Center C","Month 3","51-65","Male","North America",17.88,48.1,NA,60,27.2,70.5,4.32,22.3,132,47.5
+374,"Stage II","Control","Center E","Baseline","66-80","Female","North America",7.81,55.4,132.3,75,76.7,81.7,25.01,8.2,144,26.3
+375,"Stage III","Treatment C","Center C","Baseline","66-80","Female","North America",8.55,100,90.3,70,60,90.7,6.77,22.7,135,57.9
+376,"Stage IV","Treatment A","Center E","Baseline","31-50","Female","Europe",9.73,45.9,108.5,47,66.2,27.3,17.04,5,120,35.2
+377,"Stage II","Treatment B","Center E","Month 3","51-65","Female","North America",NA,59.2,118.6,52,70.9,44.1,11.61,28.9,103,27.3
+378,"Stage II","Treatment A","Center A","Baseline","51-65","Female","Europe",7.43,72,74.3,60,67.2,78.8,17.9,5.2,140,17.2
+379,"Stage II","Control","Center B","Month 3","66-80","Male","Asia",9.8,NA,121.9,76,27,55.4,8.55,11.4,158,45.6
+380,"Stage III","Treatment A","Center D","Month 3","51-65","Male","Europe",17.31,25.6,73.5,55,77.9,73.4,23.64,12.2,157,42.6
+381,"Stage I","Treatment B","Center F","Baseline","51-65","Male","Europe",7.83,85.8,102.3,64,45.2,73.6,17.93,23.2,151,48.7
+382,"Stage I","Control","Center B","Month 3","66-80","Male","Asia",8.31,30.7,92.9,73,81.3,66.1,35.1,18.9,171,8.3
+383,"Stage I","Treatment A","Center A","Baseline","31-50","Female","Asia",2.93,42.9,110.1,50,83.6,100,16.64,31.9,161,40.7
+384,"Stage II","Treatment C","Center F","Baseline","31-50","Male","Europe",16.29,35.2,77.6,36,76.7,65.1,36.86,20.1,120,13.8
+385,"Stage I","Treatment A","Center F","Baseline","31-50","Female","North America",4.31,56.8,123,34,17.3,59.2,11.56,8.7,124,32
+386,"Stage III","Treatment B","Center F","Month 3","66-80","Male","North America",16.12,81.2,157.7,75,25.5,77.2,44.79,10.1,167,20.1
+387,"Stage II","Treatment C","Center F","Month 6","66-80","Male","Europe",8.62,78.6,94.7,66,16.1,67.3,28.88,12.1,136,33.5
+388,"Stage IV","Treatment A","Center D","Baseline","31-50","Female","Latin America",21.77,83.5,133.6,38,30.5,26.1,22.57,17.2,96,15.1
+389,"Stage II","Control","Center D","Month 6","51-65","Male","Latin America",5.81,70.7,52.6,64,18.6,64.8,36.19,8.1,135,40.3
+390,"Stage II","Treatment C","Center C","Baseline","66-80","Male","Europe",6.06,57.9,110.2,72,76.3,40.8,32.68,8.9,131,54.2
+391,"Stage III","Treatment C","Center B","Baseline","66-80","Female","North America",30.48,42.1,91.8,76,69.2,66.4,41.79,6.3,135,31.3
+392,"Stage I","Treatment C","Center F","Month 3","66-80","Male","Asia",12.85,90,117.6,70,39.1,53.7,8.23,5,149,9.4
+393,"Stage III","Treatment B","Center A","Month 3","31-50","Female","Europe",22.77,55.9,126.3,34,74.2,16.5,24.13,44.8,111,28.3
+394,"Stage II","Treatment A","Center A","Baseline","66-80","Male","North America",12.06,56.6,73,78,54.3,54.9,46.64,20.1,148,43.5
+395,"Stage III","Control","Center B","Month 3","80+","Female","Asia",11.37,43.6,98.4,83,47.4,58.9,30.97,10,157,15.8
+396,"Stage I","Treatment C","Center F","Month 3","66-80","Female","North America",2.81,58,122.2,75,45.2,90.3,38.6,19,146,44.6
+397,"Stage IV","Treatment A","Center C","Month 3","80+","Male","Europe",21.62,78.6,115.1,82,28.3,76.4,6.07,34.2,131,12.4
+398,"Stage IV","Control","Center C","Month 6","80+","Male","North America",21.82,72.2,80.9,83,77,78.5,6.82,5,150,17.2
+399,"Stage I","Treatment C","Center B","Baseline","66-80","Male","Latin America",4.75,86.6,106.3,75,100,73.6,59.45,24.6,152,61.1
+400,"Stage II","Treatment A","Center E","Month 3","51-65","Male","North America",7.34,70,49.5,59,24.1,14.6,55.78,5,124,68.4
