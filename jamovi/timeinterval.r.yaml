@@ -35,7 +35,9 @@ items:
           - remove_extreme
 
 refs:
+    - ClinicoPathJamoviModule
     - lubridate
 
     
+
 ...

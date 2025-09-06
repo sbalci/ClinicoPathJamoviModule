@@ -827,5 +827,14 @@ refs:
 
 
 
+    BlueSky:
+        type: 'software'
+        author: BlueSkyStatistics
+        year: 2025
+        title: "BlueSky R package"
+        publisher: '[R package]. Retrieved from https://github.com/BlueSkyStatistics/BlueSky'
+        url: https://github.com/BlueSkyStatistics/BlueSky
+
+
 
 ...

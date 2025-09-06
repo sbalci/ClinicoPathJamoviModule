@@ -60,4 +60,8 @@ items:
         - export_format
         - table_theme
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

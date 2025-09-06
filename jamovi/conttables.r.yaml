@@ -307,3 +307,8 @@ items:
           title: p
           type: number
           format: zto,pvalue
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

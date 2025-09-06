@@ -169,3 +169,8 @@ items:
         This analysis evaluates classification performance using comprehensive
         diagnostic metrics including sensitivity, specificity, PPV, NPV,
         F1 scores, and ROC analysis.
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

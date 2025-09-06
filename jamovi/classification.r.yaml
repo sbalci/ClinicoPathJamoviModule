@@ -134,4 +134,8 @@ items:
   - name:  text
     title: ''
     type:  Preformatted
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

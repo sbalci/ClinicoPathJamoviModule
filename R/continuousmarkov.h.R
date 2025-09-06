@@ -272,7 +272,9 @@ continuousmarkovResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="Continuous-Time Markov Models")
+                title="Continuous-Time Markov Models",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

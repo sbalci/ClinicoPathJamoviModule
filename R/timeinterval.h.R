@@ -151,6 +151,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Comprehensive Time Interval Calculator",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "lubridate"))
             self$add(jmvcore::Html$new(
                 options=options,

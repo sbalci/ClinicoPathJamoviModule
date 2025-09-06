@@ -313,7 +313,9 @@ imagingcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 options=options,
                 name="",
-                title="Imaging Findings Correlation")
+                title="Imaging Findings Correlation",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

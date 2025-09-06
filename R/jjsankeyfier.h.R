@@ -267,7 +267,9 @@ jjsankeyfierResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 options=options,
                 name="",
-                title="Sankey & Alluvial Diagrams")
+                title="Sankey & Alluvial Diagrams",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

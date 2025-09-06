@@ -30,4 +30,8 @@ items:
       description: "Comprehensive analysis summary and interpretation"
       visible: true
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

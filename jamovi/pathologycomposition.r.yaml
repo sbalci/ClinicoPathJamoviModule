@@ -69,3 +69,8 @@ items:
       title: Clinical Interpretation and Guidelines
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

@@ -24,4 +24,8 @@ items:
       description: "Detailed performance metrics and comparisons"
       visible: false
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

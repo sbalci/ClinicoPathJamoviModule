@@ -29,3 +29,8 @@ items:
       type: Html
       visible: (show_interpretation)
       refs: []
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

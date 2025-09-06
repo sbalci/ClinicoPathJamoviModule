@@ -169,7 +169,9 @@ penalizedcoxregressionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Penalized Cox Regression")
+                title="Penalized Cox Regression",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

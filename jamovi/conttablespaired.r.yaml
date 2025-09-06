@@ -103,3 +103,8 @@ items:
         - name: p[n]
           title: p
           content: ''
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

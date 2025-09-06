@@ -527,7 +527,9 @@ nonparametricregressionResults <- if (requireNamespace("jmvcore", quietly=TRUE))
             super$initialize(
                 options=options,
                 name="",
-                title="Analysis Results")
+                title="Analysis Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

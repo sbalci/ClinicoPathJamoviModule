@@ -370,6 +370,7 @@ ggprismResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="GraphPad Prism Style Plots",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggprism",
                     "ggplot2",
                     "dplyr"))

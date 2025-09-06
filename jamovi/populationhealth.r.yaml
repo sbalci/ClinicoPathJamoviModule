@@ -492,3 +492,8 @@ items:
         - demographics
         - geographic
         - interactive_dashboard
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

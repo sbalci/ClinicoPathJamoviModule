@@ -395,3 +395,8 @@ items:
       title: Regulatory Summary
       type:  Html
       visible: (regulatory_endpoints)
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

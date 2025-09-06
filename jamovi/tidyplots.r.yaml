@@ -60,10 +60,12 @@ items:
           - removeYAxisTitle
 
 refs:
+    - ClinicoPathJamoviModule
     - tidyplots
     - ggplot2
     - dplyr
     - rlang
     - jmvcore
     - R6
+
 ...

@@ -430,3 +430,8 @@ items:
       clearWith:
           - screening_result
           - disease_status
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

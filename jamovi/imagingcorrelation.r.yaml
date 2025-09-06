@@ -375,3 +375,8 @@ items:
         - imagingFindings
         - pathologyData
         - roc_curves
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

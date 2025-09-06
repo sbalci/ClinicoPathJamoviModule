@@ -354,7 +354,9 @@ clinicalnomogramsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Clinical Nomograms & Risk Calculators")
+                title="Clinical Nomograms & Risk Calculators",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -299,7 +299,9 @@ clinicaltrialdesignResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             super$initialize(
                 options=options,
                 name="",
-                title="Clinical Trial Design & Power Analysis")
+                title="Clinical Trial Design & Power Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

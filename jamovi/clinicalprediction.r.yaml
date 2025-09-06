@@ -560,4 +560,8 @@ items:
           - predictor_vars
           - model_type
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

@@ -308,3 +308,8 @@ items:
       type: Html
       visible: true
       description: Comprehensive glossary of decision analysis terminology
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

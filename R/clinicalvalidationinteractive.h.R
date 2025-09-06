@@ -426,7 +426,9 @@ clinicalvalidationinteractiveResults <- if (requireNamespace("jmvcore", quietly=
             super$initialize(
                 options=options,
                 name="",
-                title="Interactive Clinical Model Validation")
+                title="Interactive Clinical Model Validation",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

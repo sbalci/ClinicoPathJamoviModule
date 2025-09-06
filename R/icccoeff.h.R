@@ -153,6 +153,7 @@ icccoeffResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Intraclass Correlation Coefficient",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.",
                     "Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations - uses in assessing rater reliability. Psychological Bulletin, 86(2), 420-428.",
                     "Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass correlation coefficients for reliability research. Journal of Chiropractic Medicine, 15(2), 155-163."))

@@ -550,7 +550,9 @@ biomarkerdiscoveryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 options=options,
                 name="",
-                title="Biomarker Discovery Platform with ML Interpretability")
+                title="Biomarker Discovery Platform with ML Interpretability",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="discovery_overview",

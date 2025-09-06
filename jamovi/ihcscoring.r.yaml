@@ -792,4 +792,8 @@ items:
           - proportion_var
           - molecular_classification
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

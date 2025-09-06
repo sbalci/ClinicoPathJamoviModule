@@ -125,3 +125,8 @@ items:
       visible: (show_interpretation)
       clearWith:
         - distribution_type
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

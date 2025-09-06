@@ -321,7 +321,9 @@ factoranalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Comprehensive Factor Analysis Results")
+                title="Comprehensive Factor Analysis Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(

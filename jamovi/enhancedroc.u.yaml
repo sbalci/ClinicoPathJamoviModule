@@ -1,5 +1,5 @@
-title: Enhanced ROC Analysis
-name: enhancedroc
+title: Clinical ROC Analysis
+name: enhancedROC
 jus: '3.0'
 stage: 0
 compilerMode: tame
@@ -16,6 +16,9 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
+          - type: LevelSelector
+            name: positiveClass
+            enable: (outcome)
       - type: TargetLayoutBox
         label: Predictor Variables
         children:
@@ -23,93 +26,94 @@ children:
             name: predictors
             isTarget: true
             itemDropBehaviour: emptyspace
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
     stretchFactor: 1
     children:
       - type: LayoutBox
-        cell:
-          column: 0
-          row: 0
-        stretchFactor: 1
+        margin: large
         children:
-          - type: Label
-            label: Analysis Options
-            children:
-              - type: ComboBox
-                name: analysisType
-              - type: ComboBox
-                name: direction
-              - type: CheckBox
-                name: youdenOptimization
-      - type: LayoutBox
-        cell:
-          column: 1
-          row: 0
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Output Tables
-            children:
-              - type: CheckBox
-                name: aucTable
-              - type: CheckBox
-                name: cutoffTable
-              - type: CheckBox
-                name: optimalCutoffs
-              - type: CheckBox
-                name: diagnosticMetrics
-              - type: CheckBox
-                name: clinicalMetrics
-      - type: LayoutBox
-        cell:
-          column: 0
-          row: 1
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Thresholds
-            children:
-              - type: TextBox
-                name: sensitivityThreshold
-                format: number
-              - type: TextBox
-                name: specificityThreshold
-                format: number
-              - type: TextBox
-                name: customCutoffs
-                format: string
-      - type: LayoutBox
-        cell:
-          column: 1
-          row: 1
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Plot Options
-            children:
-              - type: CheckBox
-                name: rocCurve
-              - type: CheckBox
-                name: showCutoffPoints
-                enable: (rocCurve)
-              - type: CheckBox
-                name: showConfidenceBands
-                enable: (rocCurve)
-              - type: ComboBox
-                name: plotTheme
-                enable: (rocCurve)
           - type: LayoutBox
-            margin: large
+            cell:
+              column: 0
+              row: 0
             children:
-              - type: CheckBox
-                name: showMetricsDiff
-              - type: CheckBox
-                name: statisticalComparison
-              - type: CheckBox
-                name: effectSizeAnalysis
-              - type: CheckBox
-                name: powerAnalysis
+              - type: Label
+                label: Analysis Settings
+                children:
+                  - type: ComboBox
+                    name: analysisType
+                  - type: ComboBox
+                    name: direction
+                  - type: CheckBox
+                    name: youdenOptimization
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 1
+            children:
+              - type: Label
+                label: Threshold Settings
+                children:
+                  - type: TextBox
+                    name: sensitivityThreshold
+                    format: number
+                  - type: TextBox
+                    name: specificityThreshold
+                    format: number
+                  - type: TextBox
+                    name: customCutoffs
+                    format: string
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Tables
+                children:
+                  - type: CheckBox
+                    name: aucTable
+                  - type: CheckBox
+                    name: cutoffTable
+                  - type: CheckBox
+                    name: optimalCutoffs
+                  - type: CheckBox
+                    name: diagnosticMetrics
+                  - type: CheckBox
+                    name: clinicalMetrics
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Plots
+                children:
+                  - type: CheckBox
+                    name: rocCurve
+                  - type: CheckBox
+                    name: showCutoffPoints
+                    enable: (rocCurve)
+                  - type: CheckBox
+                    name: showConfidenceBands
+                    enable: (rocCurve)
+                  - type: ComboBox
+                    name: plotTheme
+                    enable: (rocCurve)
+                  - type: CheckBox
+                    name: showMetricsDiff
+                  - type: CheckBox
+                    name: statisticalComparison
   - type: CollapseBox
     label: Statistical Options
     collapsed: true
@@ -187,15 +191,13 @@ children:
                     format: string
                     enable: (partialAuc)
   - type: CollapseBox
-    label: BlueSky Integration
+    label: Advanced Output
     collapsed: true
     stretchFactor: 1
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: bluesky_integration
           - type: CheckBox
             name: comprehensive_output
           - type: CheckBox

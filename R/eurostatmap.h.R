@@ -153,7 +153,9 @@ eurostatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 options=options,
                 name="",
-                title="Eurostat Map")
+                title="Eurostat Map",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

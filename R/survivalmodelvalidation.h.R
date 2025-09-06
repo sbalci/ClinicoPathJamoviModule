@@ -359,7 +359,9 @@ survivalmodelvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE))
             super$initialize(
                 options=options,
                 name="",
-                title="Enhanced Survival Model Validation")
+                title="Enhanced Survival Model Validation",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

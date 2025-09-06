@@ -140,7 +140,9 @@ items:
       - show_interpretation
 
 refs:
+  - ClinicoPathJamoviModule
   - survival
   - survminer
   - car
+
 ...

@@ -532,7 +532,9 @@ effectsizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Comprehensive Effect Size Analysis Results")
+                title="Comprehensive Effect Size Analysis Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(

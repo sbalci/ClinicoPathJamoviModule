@@ -343,4 +343,8 @@ items:
         - residual_analysis
         - estimation_method
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

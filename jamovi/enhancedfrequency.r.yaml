@@ -231,3 +231,8 @@ items:
             renderFun: .plotCategoryBalance
             width: 800
             height: 600
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

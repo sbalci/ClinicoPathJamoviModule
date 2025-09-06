@@ -189,7 +189,9 @@ hierarchicalpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
             super$initialize(
                 options=options,
                 name="",
-                title="Hierarchical Mixed-Effects Models")
+                title="Hierarchical Mixed-Effects Models",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

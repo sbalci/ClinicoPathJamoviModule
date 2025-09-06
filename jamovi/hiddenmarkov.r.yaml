@@ -208,4 +208,8 @@ items:
       type: Html
       visible: (showEducational)
       refs: msm
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

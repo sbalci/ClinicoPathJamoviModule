@@ -293,3 +293,8 @@ items:
       width: 600
       height: 400
       renderFun: .plotPredictivePower
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

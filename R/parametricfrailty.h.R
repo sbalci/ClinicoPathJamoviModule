@@ -215,7 +215,7 @@ parametricfrailtyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="",
                 title="Parametric Frailty Models",
-                refs="survival")
+                refs="survival - ClinicoPathJamoviModule")
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overview",

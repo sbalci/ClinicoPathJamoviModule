@@ -1,9 +1,9 @@
 ---
-name: psychopdaroc
-title: ROC Analysis
-menuGroup: meddecideT2
+name: psychopdaROC
+title: Advanced ROC Analysis
+menuGroup: meddecideT
 menuSubgroup: ROC
-menuSubtitle: ROC Analysis, AUC, Cutpoints
+menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
 version: '0.0.31'
 jas: '1.2'
 
@@ -562,5 +562,179 @@ options:
       description:
           R: >
             Number of bootstrap iterations for IDI and NRI confidence intervals.
+
+    # ==========================================
+    # ADVANCED STATISTICAL ANALYSES
+    # ==========================================
+
+    - name: effectSizeAnalysis
+      title: Effect Size Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate effect sizes for ROC curve differences using Cohen's conventions
+            and standardized mean differences between AUC values.
+
+    - name: effectSizeMethod
+      title: Effect Size Method
+      type: List
+      options:
+        - name: cohens_d
+          title: Cohen's d for AUC differences
+        - name: delta_auc
+          title: Standardized AUC difference
+        - name: overlap_coefficient
+          title: ROC curve overlap coefficient
+        - name: net_benefit_difference
+          title: Net benefit effect size
+      default: cohens_d
+      description:
+          R: >
+            Method for calculating effect sizes between ROC curves.
+
+    - name: powerAnalysis
+      title: Statistical Power Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform statistical power analysis for ROC curve comparisons including
+            sample size estimation and power calculations for detecting AUC differences.
+
+    - name: powerAnalysisType
+      title: Power Analysis Type
+      type: List
+      options:
+        - name: post_hoc
+          title: Post-hoc power (observed data)
+        - name: prospective
+          title: Prospective power (planning)
+        - name: sample_size
+          title: Sample size estimation
+      default: post_hoc
+      description:
+          R: >
+            Type of power analysis to perform.
+
+    - name: expectedAUCDifference
+      title: Expected AUC Difference
+      type: Number
+      default: 0.1
+      min: 0.01
+      max: 0.5
+      description:
+          R: >
+            Expected difference in AUC values for power calculations and sample size estimation.
+
+    - name: targetPower
+      title: Target Statistical Power
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Target statistical power for sample size calculations (typically 0.8 or 0.9).
+
+    - name: significanceLevel
+      title: Significance Level (Alpha)
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.1
+      description:
+          R: >
+            Type I error rate for power calculations (typically 0.05).
+
+    - name: correlationROCs
+      title: ROC Correlation
+      type: Number
+      default: 0.5
+      min: -1.0
+      max: 1.0
+      description:
+          R: >
+            Expected correlation between paired ROC curves for power calculations.
+            Use 0.5 for moderate correlation, 0.0 for independent samples.
+
+    - name: advancedMetrics
+      title: Advanced Performance Metrics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate additional advanced metrics including H-measure, Kolmogorov-Smirnov
+            statistic, and Gini coefficient for comprehensive model evaluation.
+
+    - name: bayesianAnalysis
+      title: Bayesian ROC Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform Bayesian analysis of ROC curves with credible intervals
+            and posterior probability assessments.
+
+    - name: priorAUC
+      title: Prior AUC Belief
+      type: Number
+      default: 0.7
+      min: 0.5
+      max: 1.0
+      description:
+          R: >
+            Prior belief about AUC value for Bayesian analysis (center of prior distribution).
+
+    - name: priorPrecision
+      title: Prior Precision
+      type: Number
+      default: 10
+      min: 1
+      max: 100
+      description:
+          R: >
+            Precision of prior belief (higher values = more confident prior).
+
+    # ==========================================
+    # CLINICAL UTILITY ANALYSIS
+    # ==========================================
+
+    - name: clinicalUtilityAnalysis
+      title: Clinical Utility Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform clinical utility analysis including net benefit curves,
+            decision curve analysis, and clinical impact assessment.
+
+    - name: treatmentThreshold
+      title: Treatment Threshold Range
+      type: String
+      default: "0.05,0.5,0.05"
+      description:
+          R: >
+            Treatment threshold range for decision curve analysis (min,max,step).
+            Example: "0.05,0.5,0.05" creates thresholds from 5% to 50% in 5% steps.
+
+    - name: harmBenefitRatio
+      title: Harm-to-Benefit Ratio
+      type: Number
+      default: 0.25
+      min: 0.01
+      max: 10.0
+      description:
+          R: >
+            Ratio of harm from unnecessary treatment to benefit from necessary treatment.
+            Lower values favor more aggressive treatment policies.
+
+    - name: interventionCost
+      title: Intervention Cost Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include cost-effectiveness considerations in clinical utility analysis.
 
 ...

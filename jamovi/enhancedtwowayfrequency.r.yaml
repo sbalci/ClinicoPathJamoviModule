@@ -246,3 +246,8 @@ items:
     width: 500
     height: 400
     renderFun: .plotResiduals
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

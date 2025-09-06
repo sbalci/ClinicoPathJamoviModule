@@ -96,6 +96,9 @@ items:
       visible: true
 
 refs:
+  - ClinicoPathJamoviModule
   - ggprism
   - ggplot2
   - dplyr
+
+...

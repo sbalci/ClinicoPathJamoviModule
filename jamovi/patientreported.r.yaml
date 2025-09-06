@@ -615,4 +615,8 @@ items:
       clearWith:
           - scale_items
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

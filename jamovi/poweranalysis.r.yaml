@@ -337,3 +337,8 @@ items:
       title: Clinical Interpretation and Recommendations
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

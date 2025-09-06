@@ -191,6 +191,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Lasso-Cox Regression",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "glmnet",
                     "survival",
                     "survminer"))

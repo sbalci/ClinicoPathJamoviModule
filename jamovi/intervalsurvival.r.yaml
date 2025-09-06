@@ -125,3 +125,8 @@ items:
           - mcmc_iterations
           - mcmc_burnin
           - convergence_tolerance
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

@@ -128,3 +128,8 @@ items:
       title: Methodology
       type: Html
       visible: (showExplanations)
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

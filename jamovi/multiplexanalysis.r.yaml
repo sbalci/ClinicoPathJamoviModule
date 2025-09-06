@@ -190,4 +190,8 @@ items:
       visible: false
       description: Formatted data for external analysis
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

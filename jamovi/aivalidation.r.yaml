@@ -361,4 +361,8 @@ items:
       title: Recommendations
       type: Html
       visible: (showSummaries)
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

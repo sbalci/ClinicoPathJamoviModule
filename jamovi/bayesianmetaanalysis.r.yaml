@@ -131,3 +131,8 @@ items:
     title: Analysis Report
     type: Html
     visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

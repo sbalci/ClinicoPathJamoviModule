@@ -2,7 +2,7 @@
 # COMPREHENSIVE TESTS FOR PSYCHOPDAROC ROC ANALYSIS MODULE
 # =============================================================================
 # 
-# This test suite covers the highly sophisticated psychopdaroc function which
+# This test suite covers the highly sophisticated psychopdaROC function which
 # includes advanced ROC analysis features like IDI/NRI, DeLong test, multiple
 # cutpoint optimization methods, and comprehensive plotting capabilities.
 
@@ -48,10 +48,10 @@ create_roc_test_data <- function(n = 200, seed = 123) {
 # BASIC FUNCTIONALITY TESTS
 # =============================================================================
 
-test_that("psychopdaroc function exists and loads properly", {
+test_that("psychopdaROC function exists and loads properly", {
   # Check function existence
-  expect_true(exists("psychopdaroc"))
-  expect_true(is.function(psychopdaroc))
+  expect_true(exists("psychopdaROC"))
+  expect_true(is.function(psychopdaROC))
 })
 
 test_that("basic ROC analysis works with default parameters", {
@@ -60,7 +60,7 @@ test_that("basic ROC analysis works with default parameters", {
   
   # Test basic functionality
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -69,14 +69,14 @@ test_that("basic ROC analysis works with default parameters", {
   })
   
   # Check result structure
-  result <- psychopdaroc(
+  result <- psychopdaROC(
     data = data,
     dependentVars = "test1", 
     classVar = "outcome",
     positiveClass = "Disease"
   )
   
-  expect_s3_class(result, "psychopdarocResults")
+  expect_s3_class(result, "psychopdaROCResults")
   expect_true("resultsTable" %in% names(result))
   expect_true("plotROC" %in% names(result))
 })
@@ -85,7 +85,7 @@ test_that("multiple test variables work correctly", {
   data <- create_roc_test_data(n = 150)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2", "test3"),
       classVar = "outcome", 
@@ -108,7 +108,7 @@ test_that("different cutpoint methods work correctly", {
   for (method in methods) {
     if (method == "oc_manual") {
       expect_no_error({
-        result <- psychopdaroc(
+        result <- psychopdaROC(
           data = data,
           dependentVars = "test1",
           classVar = "outcome",
@@ -119,7 +119,7 @@ test_that("different cutpoint methods work correctly", {
       })
     } else {
       expect_no_error({
-        result <- psychopdaroc(
+        result <- psychopdaROC(
           data = data,
           dependentVars = "test1", 
           classVar = "outcome",
@@ -139,7 +139,7 @@ test_that("custom cutpoint methods work correctly", {
   
   for (method in custom_methods) {
     expect_no_error({
-      result <- psychopdaroc(
+      result <- psychopdaROC(
         data = data,
         dependentVars = "test1",
         classVar = "outcome", 
@@ -158,7 +158,7 @@ test_that("different optimization metrics work correctly", {
   
   for (metric in metrics) {
     expect_no_error({
-      result <- psychopdaroc(
+      result <- psychopdaROC(
         data = data,
         dependentVars = "test1",
         classVar = "outcome",
@@ -177,7 +177,7 @@ test_that("DeLong test works for comparing multiple AUCs", {
   data <- create_roc_test_data(n = 150)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
@@ -187,7 +187,7 @@ test_that("DeLong test works for comparing multiple AUCs", {
   })
   
   # Check that DeLong test results are visible
-  result <- psychopdaroc(
+  result <- psychopdaROC(
     data = data,
     dependentVars = c("test1", "test2"),
     classVar = "outcome", 
@@ -202,7 +202,7 @@ test_that("IDI calculation works correctly", {
   data <- create_roc_test_data(n = 100)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
@@ -218,7 +218,7 @@ test_that("NRI calculation works correctly", {
   data <- create_roc_test_data(n = 100)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"), 
       classVar = "outcome",
@@ -235,7 +235,7 @@ test_that("partial AUC calculation works", {
   data <- create_roc_test_data(n = 100)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -251,7 +251,7 @@ test_that("bootstrap confidence intervals work", {
   data <- create_roc_test_data(n = 80)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -270,7 +270,7 @@ test_that("subgroup analysis works correctly", {
   data <- create_roc_test_data(n = 120)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -284,7 +284,7 @@ test_that("subgroup analysis with DeLong test throws appropriate error", {
   data <- create_roc_test_data(n = 100)
   
   expect_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
@@ -303,7 +303,7 @@ test_that("basic ROC plotting works", {
   data <- create_roc_test_data(n = 80)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1", 
       classVar = "outcome",
@@ -317,7 +317,7 @@ test_that("combined plotting works with multiple variables", {
   data <- create_roc_test_data(n = 100)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
@@ -332,7 +332,7 @@ test_that("additional plot types work", {
   data <- create_roc_test_data(n = 80)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome", 
@@ -349,7 +349,7 @@ test_that("precision-recall curves work", {
   data <- create_roc_test_data(n = 80)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -367,7 +367,7 @@ test_that("sensitivity/specificity table works", {
   data <- create_roc_test_data(n = 80)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -381,7 +381,7 @@ test_that("threshold table works", {
   data <- create_roc_test_data(n = 80)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -396,7 +396,7 @@ test_that("classifier comparison table works", {
   data <- create_roc_test_data(n = 100)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome", 
@@ -415,7 +415,7 @@ test_that("function handles missing inputs appropriately", {
   
   # Test missing dependent vars
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       classVar = "outcome",
       positiveClass = "Disease"
@@ -424,7 +424,7 @@ test_that("function handles missing inputs appropriately", {
   
   # Test missing class var  
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       positiveClass = "Disease"
@@ -437,7 +437,7 @@ test_that("function handles insufficient variables for advanced tests", {
   
   # Test DeLong with only one variable
   expect_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -448,7 +448,7 @@ test_that("function handles insufficient variables for advanced tests", {
   
   # Test IDI with only one variable
   expect_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -462,7 +462,7 @@ test_that("function handles manual cutpoint without score", {
   data <- create_roc_test_data(n = 50)
   
   expect_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -481,7 +481,7 @@ test_that("function handles small sample sizes", {
   data <- create_roc_test_data(n = 20)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
@@ -501,7 +501,7 @@ test_that("function handles imbalanced classes", {
   )
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test_vals",
       classVar = "outcome",
@@ -521,7 +521,7 @@ test_that("function handles perfect separation", {
   )
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = "test_vals", 
       classVar = "outcome",
@@ -623,7 +623,7 @@ test_that("function performs reasonably with larger datasets", {
   
   start_time <- Sys.time()
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
@@ -644,7 +644,7 @@ test_that("comprehensive analysis with all features works", {
   data <- create_roc_test_data(n = 150)
   
   expect_no_error({
-    result <- psychopdaroc(
+    result <- psychopdaROC(
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
@@ -669,7 +669,7 @@ test_that("comprehensive analysis with all features works", {
 test_that("results contain expected components", {
   data <- create_roc_test_data(n = 100)
   
-  result <- psychopdaroc(
+  result <- psychopdaROC(
     data = data,
     dependentVars = "test1",
     classVar = "outcome", 

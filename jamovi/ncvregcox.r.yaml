@@ -174,3 +174,8 @@ items:
       title: Model Interpretation and Clinical Insights
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

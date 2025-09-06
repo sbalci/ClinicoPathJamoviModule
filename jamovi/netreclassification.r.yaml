@@ -267,4 +267,8 @@ items:
         - sensitivity_analysis
         - risk_thresholds
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

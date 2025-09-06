@@ -246,3 +246,8 @@ items:
     title: Validation Report Summary
     type: Html
     description: Comprehensive validation summary for clinical reporting
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

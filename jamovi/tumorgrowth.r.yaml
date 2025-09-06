@@ -177,4 +177,8 @@ items:
       type:  Html
       visible: true
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

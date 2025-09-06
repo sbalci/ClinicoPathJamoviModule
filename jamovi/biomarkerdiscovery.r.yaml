@@ -619,4 +619,8 @@ items:
           - nomogram_development
           - selected_biomarkers
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

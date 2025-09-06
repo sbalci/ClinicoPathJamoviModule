@@ -184,3 +184,8 @@ items:
     #   height: 600
     #   renderFun: .plotCombined
     #   visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

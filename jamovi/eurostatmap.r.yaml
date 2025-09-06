@@ -70,4 +70,8 @@ items:
         - use_local_data
       columns: []
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

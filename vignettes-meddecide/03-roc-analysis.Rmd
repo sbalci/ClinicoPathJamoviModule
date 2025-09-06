@@ -11,7 +11,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>",  echo = TRUE,
 ```
 
 This vignette shows how to perform Receiver Operating Characteristic
-(ROC) analysis with **meddecide** using the `psychopdaroc()` function.
+(ROC) analysis with **meddecide** using the `psychopdaROC()` function.
 
 ## Loading the Data
 
@@ -23,7 +23,7 @@ head(df_roc)
 ## Creating the ROC Curve
 
 ```{r, eval=FALSE}
-roc_res <- psychopdaroc(data = df_roc, class = df_roc$class, value = df_roc$value)
+roc_res <- psychopdaROC(data = df_roc, class = df_roc$class, value = df_roc$value)
 roc_res$plot
 ```
 

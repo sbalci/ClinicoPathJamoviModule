@@ -179,7 +179,9 @@ pathologycompositionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             super$initialize(
                 options=options,
                 name="",
-                title="Pathology Composition Analysis")
+                title="Pathology Composition Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

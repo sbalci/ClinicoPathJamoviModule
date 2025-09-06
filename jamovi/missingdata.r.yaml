@@ -128,3 +128,8 @@ items:
       visible: (show_interpretation)
       clearWith:
         - analysis_type
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

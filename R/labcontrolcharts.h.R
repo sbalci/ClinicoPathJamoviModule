@@ -263,7 +263,9 @@ labcontrolchartsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="Laboratory Control Charts (Shewhart, CUSUM, EWMA)")
+                title="Laboratory Control Charts (Shewhart, CUSUM, EWMA)",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

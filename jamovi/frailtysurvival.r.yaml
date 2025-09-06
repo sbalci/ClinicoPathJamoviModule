@@ -119,3 +119,8 @@ items:
           - estimation_method
           - mcmc_iterations
           - burnin_samples
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

@@ -46,3 +46,8 @@ items:
     title: Note
     type: Html
     visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

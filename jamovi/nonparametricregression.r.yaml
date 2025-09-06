@@ -254,3 +254,8 @@ items:
       width: 500
       height: 350
       renderFun: .plotBandwidthSelection
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

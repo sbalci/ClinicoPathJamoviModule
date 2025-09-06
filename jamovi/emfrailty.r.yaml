@@ -108,3 +108,8 @@ items:
       title: Method Explanation
       type: Html
       visible: (showExplanations)
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

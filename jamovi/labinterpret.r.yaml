@@ -300,3 +300,8 @@ items:
         - labValues
         - correlation_matrix
         - clinical_correlation
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

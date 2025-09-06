@@ -46,3 +46,8 @@ items:
     - name: interpretation
       title: Heatmap Interpretation
       type: Html
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

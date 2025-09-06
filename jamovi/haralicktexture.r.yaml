@@ -130,4 +130,8 @@ items:
             description: Coefficient of variation and reliability
             columns: []
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

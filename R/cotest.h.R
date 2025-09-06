@@ -131,6 +131,7 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Co-Testing Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "DiagnosticTests",
                     "MultipleDiagnosticTests"))
             self$add(jmvcore::Table$new(

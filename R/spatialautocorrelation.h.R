@@ -290,7 +290,9 @@ spatialautocorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Spatial Autocorrelation Analysis (Moran's I, Geary's C)")
+                title="Spatial Autocorrelation Analysis (Moran's I, Geary's C)",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

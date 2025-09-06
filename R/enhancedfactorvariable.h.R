@@ -292,7 +292,9 @@ enhancedfactorvariableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Enhanced Factor Variable Analysis Results")
+                title="Enhanced Factor Variable Analysis Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(

@@ -427,4 +427,8 @@ items:
       description: Detailed documentation of imputation methods and assumptions
       visible: (show_detailed_output)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

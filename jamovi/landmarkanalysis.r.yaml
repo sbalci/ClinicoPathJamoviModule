@@ -173,4 +173,8 @@ items:
       title: Technical Notes
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

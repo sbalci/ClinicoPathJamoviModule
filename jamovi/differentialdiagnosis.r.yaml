@@ -231,3 +231,8 @@ items:
       title: Technical Notes & Methodology
       type: Html
       visible: false
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

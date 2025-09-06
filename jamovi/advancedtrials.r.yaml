@@ -358,3 +358,8 @@ items:
       title: Design Recommendations and Interpretation
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

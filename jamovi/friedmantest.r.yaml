@@ -289,3 +289,8 @@ items:
       title: 'Method and Clinical Context'
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

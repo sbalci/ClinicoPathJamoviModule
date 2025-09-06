@@ -258,8 +258,10 @@ items:
           - survival_plot
 
 refs:
+    - ClinicoPathJamoviModule
     - glmnet
     - survival
     - survminer
+
 
 ...

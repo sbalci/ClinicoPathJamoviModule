@@ -277,7 +277,9 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Multiplex Immunofluorescence Analysis")
+                title="Multiplex Immunofluorescence Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",

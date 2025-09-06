@@ -225,4 +225,8 @@ items:
       title: Clinical Interpretation
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

@@ -17,4 +17,8 @@ items:
       type: Html
       visible: (check_duplicates || check_missing)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

@@ -232,3 +232,8 @@ items:
       height: 400
       requiresData: true
       visible: (risk_stratification)
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

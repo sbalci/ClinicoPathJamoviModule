@@ -396,3 +396,8 @@ items:
           - time_dependent_vars
           - baseline_vars
           - model_type
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

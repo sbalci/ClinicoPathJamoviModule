@@ -240,6 +240,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Cox Proportional Hazards Model Diagnostics",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survival",
                     "survminer",
                     "car"))

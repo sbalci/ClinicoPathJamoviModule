@@ -244,7 +244,9 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 options=options,
                 name="",
-                title="Enhanced Partial Correlation Analysis Results")
+                title="Enhanced Partial Correlation Analysis Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

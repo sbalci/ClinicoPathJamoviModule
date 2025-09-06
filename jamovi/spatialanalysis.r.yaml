@@ -176,4 +176,8 @@ items:
       visible: true
       description: Clinical significance and pathology applications of spatial patterns
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

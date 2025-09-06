@@ -180,4 +180,8 @@ items:
           title: Bandwidth
           type: number
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

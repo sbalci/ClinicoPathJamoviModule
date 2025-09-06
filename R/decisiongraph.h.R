@@ -7,6 +7,7 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     public = list(
         initialize = function(
             treeType = "costeffectiveness",
+            clinicalPreset = "none",
             decisions = NULL,
             healthStates = NULL,
             transitionProbs = NULL,
@@ -74,6 +75,16 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "markov",
                     "costeffectiveness"),
                 default="costeffectiveness")
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "none",
+                    "diagnostic_test",
+                    "treatment_comparison",
+                    "screening_program",
+                    "drug_costeffectiveness"),
+                default="none")
             private$..decisions <- jmvcore::OptionVariables$new(
                 "decisions",
                 decisions,
@@ -356,6 +367,7 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=FALSE)
 
             self$.addOption(private$..treeType)
+            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..decisions)
             self$.addOption(private$..healthStates)
             self$.addOption(private$..transitionProbs)
@@ -411,6 +423,7 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         }),
     active = list(
         treeType = function() private$..treeType$value,
+        clinicalPreset = function() private$..clinicalPreset$value,
         decisions = function() private$..decisions$value,
         healthStates = function() private$..healthStates$value,
         transitionProbs = function() private$..transitionProbs$value,
@@ -465,6 +478,7 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         parallelProcessing = function() private$..parallelProcessing$value),
     private = list(
         ..treeType = NA,
+        ..clinicalPreset = NA,
         ..decisions = NA,
         ..healthStates = NA,
         ..transitionProbs = NA,
@@ -538,14 +552,18 @@ decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         icerTable = function() private$.items[["icerTable"]],
         psaResults = function() private$.items[["psaResults"]],
         ceacPlot = function() private$.items[["ceacPlot"]],
-        scatterPlot = function() private$.items[["scatterPlot"]]),
+        scatterPlot = function() private$.items[["scatterPlot"]],
+        executiveSummary = function() private$.items[["executiveSummary"]],
+        glossary = function() private$.items[["glossary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Tree Graph")
+                title="Decision Tree Graph",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="treeplot",
@@ -686,13 +704,13 @@ decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Tree Structure",
-                visible=FALSE))
+                title="Clinical Analysis Guide",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
-                title="Calculations",
-                visible=FALSE))
+                title="Help & Instructions",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="markovTable",
@@ -875,7 +893,17 @@ decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=600,
                 height=400,
                 renderFun=".scatterPlot",
-                visible="(probabilisticAnalysis)"))}))
+                visible="(probabilisticAnalysis)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="executiveSummary",
+                title="Executive Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Glossary of Terms",
+                visible=TRUE))}))
 
 decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisiongraphBase",
@@ -911,6 +939,8 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'}
 #' @param data The data as a data frame containing decision tree parameters.
 #' @param treeType Type of decision tree to create.
+#' @param clinicalPreset Pre-configured analysis templates for common clinical
+#'   decision analysis scenarios.
 #' @param decisions Variables representing decision nodes (treatment options).
 #' @param healthStates Variables defining health states for Markov model.
 #' @param transitionProbs Variables containing transition probabilities
@@ -1012,6 +1042,8 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$psaResults} \tab \tab \tab \tab \tab Monte Carlo simulation results \cr
 #'   \code{results$ceacPlot} \tab \tab \tab \tab \tab CEAC showing probability of cost-effectiveness \cr
 #'   \code{results$scatterPlot} \tab \tab \tab \tab \tab Cost-effectiveness plane scatter plot \cr
+#'   \code{results$executiveSummary} \tab \tab \tab \tab \tab Executive summary of analysis results and key findings \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab Comprehensive glossary of decision analysis terminology \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1024,6 +1056,7 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 decisiongraph <- function(
     data,
     treeType = "costeffectiveness",
+    clinicalPreset = "none",
     decisions,
     healthStates,
     transitionProbs,
@@ -1113,6 +1146,7 @@ decisiongraph <- function(
 
     options <- decisiongraphOptions$new(
         treeType = treeType,
+        clinicalPreset = clinicalPreset,
         decisions = decisions,
         healthStates = healthStates,
         transitionProbs = transitionProbs,

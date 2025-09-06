@@ -283,7 +283,9 @@ deeplearningpredictionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Deep Learning Image Prediction")
+                title="Deep Learning Image Prediction",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelSummary",

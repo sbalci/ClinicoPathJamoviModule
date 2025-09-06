@@ -126,3 +126,8 @@ items:
           - power_level
           - effect_size
           - replicates
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

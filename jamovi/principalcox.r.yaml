@@ -203,3 +203,8 @@ items:
       height: 500
       requiresData: true
       visible: (survival_plot)
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

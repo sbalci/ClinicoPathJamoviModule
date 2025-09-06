@@ -410,4 +410,8 @@ items:
       description: Diagnostic information and warnings
       visible: true
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

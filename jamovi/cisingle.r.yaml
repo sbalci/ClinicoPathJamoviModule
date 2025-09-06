@@ -74,4 +74,8 @@ items:
       height: 400
       visible: (showPlot)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

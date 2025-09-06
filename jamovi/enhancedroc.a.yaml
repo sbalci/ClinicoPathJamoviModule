@@ -1,18 +1,18 @@
 ---
-name: enhancedroc
-title: Enhanced ROC Analysis with Youden Index Optimization
-menuGroup: meddecideT2
-menuSubgroup: Diagnostic Performance
-menuSubtitle: "ROC analysis with BlueSky integration"
+name: enhancedROC
+title: Clinical ROC Analysis
+menuGroup: meddecideT
+menuSubgroup: ROC
+menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
 version: '0.0.31'
 jas: '1.2'
 
 description:
     main: |
-        Enhanced ROC analysis toolkit with BlueSky integration for comprehensive
-        diagnostic performance evaluation. Includes ROC curve analysis, Youden Index
-        optimization, sensitivity/specificity analysis, optimal cutoff determination,
-        and comparative ROC analysis. Essential for biomarker validation, diagnostic
+        Clinical ROC analysis toolkit for comprehensive diagnostic performance 
+        evaluation. Includes ROC curve analysis, Youden Index optimization, 
+        sensitivity/specificity analysis, optimal cutoff determination, and 
+        comparative ROC analysis. Essential for biomarker validation, diagnostic
         test evaluation, and clinical decision support in medical research.
 
 options:
@@ -32,6 +32,12 @@ options:
           - factor
           - numeric
       description: 'Binary outcome variable (disease status)'
+
+    - name: positiveClass
+      title: 'Positive Class'
+      type: Level
+      variable: (outcome)
+      description: 'Select which level represents the positive class (disease/condition present)'
 
     - name: predictors
       title: 'Predictor Variables'
@@ -228,13 +234,7 @@ options:
       default: general
       description: 'Clinical application context for interpretation'
 
-    # BlueSky Integration
-    - name: bluesky_integration
-      title: 'Enhanced BlueSky Integration'
-      type: Bool
-      default: true
-      description: 'Use BlueSky R statistical environment features'
-
+    # Advanced Output Options
     - name: comprehensive_output
       title: 'Comprehensive Statistical Output'
       type: Bool
@@ -302,14 +302,6 @@ options:
       default: true
       description: 'Perform comprehensive statistical comparison between models'
 
-    - name: effectSizeAnalysis
-      title: 'Effect Size Analysis'
-      type: Bool
-      default: false
-      description: 'Calculate effect sizes for model differences'
-
-    - name: powerAnalysis
-      title: 'Power Analysis'
-      type: Bool
-      default: false
-      description: 'Estimate statistical power for detecting differences'
+# Advanced analyses removed - can be added in future versions if needed
+    # - name: effectSizeAnalysis
+    # - name: powerAnalysis

@@ -320,6 +320,7 @@ bbcplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="BBC-Style Data Visualization Results",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "bbplot",
                     "ggplot2",
                     "ggpubr"))

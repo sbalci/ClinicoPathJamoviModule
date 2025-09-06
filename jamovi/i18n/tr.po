@@ -76,7 +76,7 @@ msgstr ""
 
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/resultImportance.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 msgid "-LR"
 msgstr ""
 
@@ -324,7 +324,7 @@ msgstr ""
 #: enhancedfactorvariable/ui[2][0][0][0]/minimumPercentage.suffix
 #: enhancedfactorvariable/ui[2][0][1][0]/rareFactorThreshold.suffix
 #: enhancednonparametric/ui[0][2][0]/confidence_level.suffix
-#: enhancedroc/ui[2][0][0][0]/confidenceLevel.suffix
+#: enhancedROC/ui[2][0][0][0]/confidenceLevel.suffix
 #: exacttests/ui[1][1]/ciWidth.suffix
 #: jjsegmentedtotalbar/ui[3][0]/label_threshold.suffix
 #: likelihoodratio/ui[1][2]/confidenceLevel.suffix
@@ -342,7 +342,7 @@ msgstr ""
 msgid "%"
 msgstr ""
 
-#: enhancedroc/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
 #: labinterpret/results/deltaChecksTable.columns.title
 #: stagemigration/results/frailtyModelsVarianceComponents.columns.title
 #: tumorgrowth/results/treatmentEffectTable.columns.title
@@ -631,12 +631,12 @@ msgstr ""
 
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/resultImportance.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 msgid "+LR"
 msgstr ""
 
 #: bayesdca/options/directionIndicator/<=.title
-#: psychopdaroc/options/direction/<=.title
+#: psychopdaROC/options/direction/<=.title
 msgid "<= (lower values indicate positive class)"
 msgstr ""
 
@@ -1216,7 +1216,7 @@ msgid "<strong>R² ≥ 0.50:</strong> Large effect - clinically significant rela
 msgstr ""
 
 #: bayesdca/options/directionIndicator/>=.title
-#: psychopdaroc/options/direction/>=.title
+#: psychopdaROC/options/direction/>=.title
 msgid ">= (higher values indicate positive class)"
 msgstr ""
 
@@ -1375,7 +1375,7 @@ msgstr ""
 msgid "0.1, 0.9"
 msgstr ""
 
-#: psychopdaroc/options/quantiles.default
+#: psychopdaROC/options/quantiles.default
 msgid "0.1,0.25,0.5,0.75,0.9"
 msgstr ""
 
@@ -1440,7 +1440,7 @@ msgstr ""
 msgid "0.8, 0.9, 1.0, 1.1, 1.2"
 msgstr ""
 
-#: enhancedroc/options/partialRange.default
+#: enhancedROC/options/partialRange.default
 msgid "0.8,1.0"
 msgstr ""
 
@@ -1497,7 +1497,7 @@ msgstr ""
 msgid "1-SE Rule CV"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
 msgid "1-Specificity"
 msgstr ""
 
@@ -2096,13 +2096,13 @@ msgstr ""
 #: progressionsurvival/results/progression_patterns.columns.title
 #: progressionsurvival/results/sensitivity_analysis_table.columns.title
 #: progressionsurvival/results/biomarker_interaction_table.columns.title
-#: psychopdaroc/results/simpleResultsTable.columns.title
-#: psychopdaroc/results/aucSummaryTable.columns.title
-#: psychopdaroc/results/delongComparisonTable.columns.title
-#: psychopdaroc/results/idiTable.columns.title
-#: psychopdaroc/results/nriTable.columns.title
-#: psychopdaroc/results/partialAUCTable.columns.title
-#: psychopdaroc/results/bootstrapCITable.columns.title
+#: psychopdaROC/results/simpleResultsTable.columns.title
+#: psychopdaROC/results/aucSummaryTable.columns.title
+#: psychopdaROC/results/delongComparisonTable.columns.title
+#: psychopdaROC/results/idiTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
+#: psychopdaROC/results/partialAUCTable.columns.title
+#: psychopdaROC/results/bootstrapCITable.columns.title
 #: qualityoflife/results/group_comparison_domains.columns.title
 #: screeningevaluation/results/diagnostic_accuracy_summary.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
@@ -2193,13 +2193,13 @@ msgstr ""
 #: progressionsurvival/results/progression_patterns.columns.title
 #: progressionsurvival/results/sensitivity_analysis_table.columns.title
 #: progressionsurvival/results/biomarker_interaction_table.columns.title
-#: psychopdaroc/results/simpleResultsTable.columns.title
-#: psychopdaroc/results/aucSummaryTable.columns.title
-#: psychopdaroc/results/delongComparisonTable.columns.title
-#: psychopdaroc/results/idiTable.columns.title
-#: psychopdaroc/results/nriTable.columns.title
-#: psychopdaroc/results/partialAUCTable.columns.title
-#: psychopdaroc/results/bootstrapCITable.columns.title
+#: psychopdaROC/results/simpleResultsTable.columns.title
+#: psychopdaROC/results/aucSummaryTable.columns.title
+#: psychopdaROC/results/delongComparisonTable.columns.title
+#: psychopdaROC/results/idiTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
+#: psychopdaROC/results/partialAUCTable.columns.title
+#: psychopdaROC/results/bootstrapCITable.columns.title
 #: qualityoflife/results/group_comparison_domains.columns.title
 #: screeningevaluation/results/diagnostic_accuracy_summary.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
@@ -2625,11 +2625,11 @@ msgstr ""
 #: decisionpanel/results/optimalPanelsBySize.columns.title
 #: decisionpanel/results/allCombinations.columns.title
 #: deeplearningprediction/results/crossValidationResults/cvMetrics.columns.title
-#: enhancedroc/results/results/optimalCutoffSummary.columns.title
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
+#: enhancedROC/results/results/optimalCutoffSummary.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
-#: psychopdaroc/results/rocComparisonTable.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 #: treecompare/options/primary_metric/accuracy.title
 #: treecompare/results/comparison_table.columns.title
 msgid "Accuracy"
@@ -3293,7 +3293,7 @@ msgstr ""
 msgid "Additional Partitioning Factors"
 msgstr ""
 
-#: psychopdaroc/ui[5].label
+#: psychopdaROC/ui[5].label
 #: robustcorrelation/ui[5][4].label
 msgid "Additional Plots"
 msgstr ""
@@ -3975,7 +3975,7 @@ msgstr ""
 #: decisioncurve/ui[5].label
 #: diagnosticmeta/ui[1][1].label
 #: enhancednonparametric/ui[0][2].label
-#: enhancedroc/ui[3][0][1][0].label
+#: enhancedROC/ui[3][0][1][0].label
 #: factoranalysis/ui[2].label
 #: flexrstpm2/ui[6][0].label
 #: hiddenmarkov/ui[2].label
@@ -4086,12 +4086,12 @@ msgstr ""
 msgid "Advanced Ridge Plot"
 msgstr ""
 
-#: psychopdaroc/ui[6].label
+#: psychopdaROC/ui[6].label
 msgid "Advanced ROC Analysis"
 msgstr ""
 
 #: ihcscoring/ui[1][5].label
-#: psychopdaroc/ui[1][1][0].label
+#: psychopdaROC/ui[1][1][0].label
 msgid "Advanced Settings"
 msgstr ""
 
@@ -4884,7 +4884,7 @@ msgstr ""
 msgid "All Tests Positive"
 msgstr ""
 
-#: psychopdaroc/options/break_ties/c.title
+#: psychopdaROC/options/break_ties/c.title
 msgid "All tied cutpoints"
 msgstr ""
 
@@ -5406,7 +5406,7 @@ msgstr ""
 #: directbinomial/ui[1].label
 #: effectsize/ui[1][0][0].label
 #: enhancedfactorvariable/ui[1][0][0].label
-#: enhancedroc/ui[1][0][0].label
+#: enhancedROC/ui[1][0][0].label
 #: excessmortality/ui[1][1].label
 #: flexcomprisk/ui[4].label
 #: flexiblerelativesurvival/ui[1][2].label
@@ -5428,7 +5428,7 @@ msgstr ""
 #: pathologycomposition/ui[1][0].label
 #: pheval/ui[6][0].label
 #: powercomprisk/ui[6].label
-#: psychopdaroc/ui[2].label
+#: psychopdaROC/ui[2].label
 #: qualitycontrol/ui[1][8].label
 #: rmst/ui[1].label
 #: sigmametrics/ui[1][1].label
@@ -5497,7 +5497,7 @@ msgstr ""
 #: effectsize/results/results.title
 #: enhancedfactorvariable/results/results.title
 #: enhancedfrequency/results/results.title
-#: enhancedroc/results/results.title
+#: enhancedROC/results/results.title
 #: factoranalysis/results/results.title
 #: grouplasso/results.title
 #: idi/results.title
@@ -5692,7 +5692,7 @@ msgstr ""
 #: clinicalalerts/results/trendAnalysis.columns.title
 #: competingsurvival/ui[2][0]/analysistype.label
 #: effectsize/options/analysisType.title
-#: enhancedroc/options/analysisType.title
+#: enhancedROC/options/analysisType.title
 #: epidemiosurvival/options/analysis_type.title
 #: explainableai/options/analysis_type.title
 #: jextractggstats/options/analysis_type.title
@@ -6089,11 +6089,11 @@ msgstr ""
 msgid "Apply left-alignment typical of Economist style."
 msgstr ""
 
-#: psychopdaroc/options/smoothing.title
+#: psychopdaROC/options/smoothing.title
 msgid "Apply LOESS Smoothing"
 msgstr ""
 
-#: psychopdaroc/ui[4][1][0]/smoothing.label
+#: psychopdaROC/ui[4][1][0]/smoothing.label
 msgid "Apply LOESS smoothing"
 msgstr ""
 
@@ -6242,11 +6242,11 @@ msgstr ""
 msgid "Area Under ROC Curve (AUC)"
 msgstr ""
 
-#: enhancedroc/results/results/aucSummary.title
+#: enhancedROC/results/results/aucSummary.title
 msgid "Area Under the Curve (AUC) Summary"
 msgstr ""
 
-#: psychopdaroc/results/aucSummaryTable.title
+#: psychopdaROC/results/aucSummaryTable.title
 msgid "Area Under the ROC Curve"
 msgstr ""
 
@@ -6683,14 +6683,14 @@ msgstr ""
 #: deeplearningprediction/results/performanceAnalysis/rocAnalysis.columns.title
 #: deeplearningprediction/results/crossValidationResults/cvMetrics.columns.title
 #: dynamicprediction/results/accuracyMetrics.columns.title
-#: enhancedroc/results/results/aucSummary.columns.title
+#: enhancedROC/results/results/aucSummary.columns.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.columns.title
 #: landmarkanalysis/results/modelComparison.columns.title
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
-#: psychopdaroc/results/simpleResultsTable.columns.title
-#: psychopdaroc/results/resultsTable.template.columns.title
-#: psychopdaroc/results/aucSummaryTable.columns.title
-#: psychopdaroc/results/rocComparisonTable.columns.title
+#: psychopdaROC/results/simpleResultsTable.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
+#: psychopdaROC/results/aucSummaryTable.columns.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 #: survivalvalidation/results/aucTable.columns.title
 #: timedependent/results/roc_results.columns.title
 #: timeroc/results/aucTable.columns.title
@@ -6729,16 +6729,16 @@ msgstr ""
 msgid "AUC 95% CI Upper"
 msgstr ""
 
-#: enhancedroc/results/results/rocComparisons.columns.title
-#: psychopdaroc/results/delongComparisonTable.columns.title
+#: enhancedROC/results/results/rocComparisons.columns.title
+#: psychopdaROC/results/delongComparisonTable.columns.title
 msgid "AUC Difference"
 msgstr ""
 
-#: enhancedroc/results/results/aucSummary.columns.title
+#: enhancedROC/results/results/aucSummary.columns.title
 msgid "AUC Interpretation"
 msgstr ""
 
-#: enhancedroc/results/results/aucSummary.columns.title
+#: enhancedROC/results/results/aucSummary.columns.title
 #: timedependent/results/roc_results.columns.title
 msgid "AUC Lower CI"
 msgstr ""
@@ -6748,16 +6748,16 @@ msgstr ""
 msgid "AUC Over Time"
 msgstr ""
 
-#: enhancedroc/options/aucTable.title
+#: enhancedROC/options/aucTable.title
 msgid "AUC Summary Table"
 msgstr ""
 
-#: enhancedroc/results/results/aucSummary.columns.title
+#: enhancedROC/results/results/aucSummary.columns.title
 #: timedependent/results/roc_results.columns.title
 msgid "AUC Upper CI"
 msgstr ""
 
-#: enhancedroc/results/results/aucSummary.description
+#: enhancedROC/results/results/aucSummary.description
 msgid "AUC values with confidence intervals for each predictor"
 msgstr ""
 
@@ -6769,7 +6769,7 @@ msgstr ""
 msgid "AUC-ROC"
 msgstr ""
 
-#: psychopdaroc/results/rocComparisonTable.columns.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 msgid "AUPRC"
 msgstr ""
 
@@ -6793,7 +6793,7 @@ msgstr ""
 msgid "Auto (Default)"
 msgstr ""
 
-#: enhancedroc/options/direction/auto.title
+#: enhancedROC/options/direction/auto.title
 msgid "Auto (determine automatically)"
 msgstr ""
 
@@ -7218,8 +7218,8 @@ msgid "Balance Status"
 msgstr ""
 
 #: decisioncalculator/results/advancedMetricsTable.columns.title
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
-#: psychopdaroc/results/rocComparisonTable.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 #: treeadvanced/options/tuning_metric/bacc.title
 #: treecompare/options/primary_metric/bacc.title
 #: treecompare/results/comparison_table.columns.title
@@ -7665,7 +7665,7 @@ msgstr ""
 msgid "Basic Parameters"
 msgstr ""
 
-#: psychopdaroc/ui[4][0][0].label
+#: psychopdaROC/ui[4][0][0].label
 msgid "Basic Plot Settings"
 msgstr ""
 
@@ -8767,7 +8767,7 @@ msgstr ""
 msgid "Binary Outcome Variable"
 msgstr ""
 
-#: enhancedroc/options/outcome.description
+#: enhancedROC/options/outcome.description
 msgid "Binary outcome variable (disease status)"
 msgstr ""
 
@@ -8817,8 +8817,8 @@ msgstr ""
 msgid "Binomial (logistic)"
 msgstr ""
 
-#: enhancedroc/options/smoothMethod/binormal.title
-#: psychopdaroc/options/rocSmoothingMethod/binormal.title
+#: enhancedROC/options/smoothMethod/binormal.title
+#: psychopdaROC/options/rocSmoothingMethod/binormal.title
 msgid "Binormal"
 msgstr ""
 
@@ -9334,7 +9334,7 @@ msgstr ""
 
 #: enhancedfactorvariable/ui[5].label
 #: enhancedfrequency/ui[4].label
-#: enhancedroc/ui[4].label
+#: enhancedROC/ui[4].label
 #: enhancedtwowayfrequency/ui[6][0].label
 #: factoranalysis/ui[4].label
 msgid "BlueSky Integration"
@@ -9443,7 +9443,7 @@ msgstr ""
 #: classification/options/validateMethod/bootstrap.title
 #: cohenskappa/options/ci_method/bootstrap.title
 #: emfrailty/options/variance_estimation/bootstrap.title
-#: enhancedroc/options/comparisonMethod/bootstrap.title
+#: enhancedROC/options/comparisonMethod/bootstrap.title
 #: flexcomprisk/options/validationType/bootstrap.title
 #: jsummarytools/options/output_style/bootstrap.title
 #: methodcomparison/options/limits_method/bootstrap.title
@@ -9503,8 +9503,8 @@ msgstr ""
 #: nonparametric/options/bootstrap_ci.title
 #: nonparametricregression/options/bootstrap_ci.title
 #: partialcorrelation/options/bootstrapCI.title
-#: psychopdaroc/options/bootstrapCI.title
-#: psychopdaroc/results/bootstrapCITable.title
+#: psychopdaROC/options/bootstrapCI.title
+#: psychopdaROC/results/bootstrapCITable.title
 #: rmst/options/bootstrap_ci.title
 #: robustaft/options/bootstrap_ci.title
 #: robustcorrelation/options/bootstrap_ci.title
@@ -9523,7 +9523,7 @@ msgid "Bootstrap Confidence Intervals"
 msgstr ""
 
 #: decisionpanel/ui[7][1][0]/bootstrap.label
-#: psychopdaroc/ui[6][1][0]/bootstrapCI.label
+#: psychopdaROC/ui[6][1][0]/bootstrapCI.label
 msgid "Bootstrap confidence intervals"
 msgstr ""
 
@@ -9568,15 +9568,15 @@ msgstr ""
 #: aivalidation/options/nBootstrap.title
 #: highdimcox/options/bootstrap_iterations.title
 #: ihccluster/options/nBootstrap.title
-#: psychopdaroc/options/boot_runs.title
-#: psychopdaroc/ui[1][1][0]/boot_runs.label
+#: psychopdaROC/options/boot_runs.title
+#: psychopdaROC/ui[1][1][0]/boot_runs.label
 #: rmst/options/bootstrap_n.title
 #: robustcorrelation/options/n_bootstrap.title
 msgid "Bootstrap Iterations"
 msgstr ""
 
 #: ihccluster/ui[3][1][0].label
-#: psychopdaroc/ui[7][1][0]/idiNriBootRuns.label
+#: psychopdaROC/ui[7][1][0]/idiNriBootRuns.label
 msgid "Bootstrap iterations"
 msgstr ""
 
@@ -9637,7 +9637,7 @@ msgstr ""
 #: generalpseudo/options/bootstrap_reps.title
 #: modelbuilder/options/bootstrapReps.title
 #: plscox/options/n_bootstrap.title
-#: psychopdaroc/options/bootstrapReps.title
+#: psychopdaROC/options/bootstrapReps.title
 #: rmstregression/options/bootstrap_reps.title
 #: stagemigration/options/cureBootstrapReps.title
 msgid "Bootstrap Replications"
@@ -9646,7 +9646,7 @@ msgstr ""
 #: decisioncurve/ui[5][0][0]/bootReps.label
 #: decisionpanel/ui[7][1][0]/bootReps.label
 #: modelbuilder/ui[5][1][0]/bootstrapReps.label
-#: psychopdaroc/ui[6][1][0]/bootstrapReps.label
+#: psychopdaROC/ui[6][1][0]/bootstrapReps.label
 msgid "Bootstrap replications"
 msgstr ""
 
@@ -9678,7 +9678,7 @@ msgstr ""
 #: distributionfit/ui[2][0][0]/bootstrap_samples.label
 #: effectsize/options/bootstrap_samples.title
 #: emfrailty/options/bootstrap_samples.title
-#: enhancedroc/options/bootstrapSamples.title
+#: enhancedROC/options/bootstrapSamples.title
 #: flexcomprisk/options/bootstrapSamples.title
 #: flexparametricadv/options/bootstrap_samples.title
 #: flexparametricadvanced/options/bootstrap_samples.title
@@ -9946,7 +9946,7 @@ msgstr ""
 #: jjridges/options/legend_position/bottom.title
 #: jjtreemap/options/labelAlignV/bottom.title
 #: jvisr/options/legend_position/bottom.title
-#: psychopdaroc/options/legendPosition/bottom.title
+#: psychopdaROC/options/legendPosition/bottom.title
 msgid "Bottom"
 msgstr ""
 
@@ -10136,7 +10136,7 @@ msgstr ""
 #: landmarkanalysis/results/modelComparison.columns.title
 #: modelbuilder/results/modelComparisonTable.columns.title
 #: netreclassification/results/performance.columns.title
-#: psychopdaroc/results/rocComparisonTable.columns.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 #: spatialbayesiansurvival/results/spatialValidation.columns.title
 #: survivalbart/results/crossValidationResults.columns.title
 #: survivalvalidation/results/brierTable.columns.title
@@ -10619,7 +10619,7 @@ msgstr ""
 msgid "Calculate Effect Sizes"
 msgstr ""
 
-#: enhancedroc/options/effectSizeAnalysis.description
+#: enhancedROC/options/effectSizeAnalysis.description
 msgid "Calculate effect sizes for model differences"
 msgstr ""
 
@@ -10677,8 +10677,8 @@ msgstr ""
 msgid "Calculate Hedges' g effect size (bias-corrected)"
 msgstr ""
 
-#: psychopdaroc/options/calculateIDI.title
-#: psychopdaroc/ui[7][1][0]/calculateIDI.label
+#: psychopdaROC/options/calculateIDI.title
+#: psychopdaROC/ui[7][1][0]/calculateIDI.label
 msgid "Calculate IDI"
 msgstr ""
 
@@ -10755,8 +10755,8 @@ msgstr ""
 msgid "Calculate Net Reclassification Index"
 msgstr ""
 
-#: psychopdaroc/options/calculateNRI.title
-#: psychopdaroc/ui[7][1][0]/calculateNRI.label
+#: psychopdaROC/options/calculateNRI.title
+#: psychopdaROC/ui[7][1][0]/calculateNRI.label
 msgid "Calculate NRI"
 msgstr ""
 
@@ -10776,15 +10776,15 @@ msgstr ""
 msgid "Calculate overall and category-specific agreement percentages"
 msgstr ""
 
-#: psychopdaroc/options/partialAUC.title
+#: psychopdaROC/options/partialAUC.title
 msgid "Calculate Partial AUC"
 msgstr ""
 
-#: psychopdaroc/ui[6][0][0]/partialAUC.label
+#: psychopdaROC/ui[6][0][0]/partialAUC.label
 msgid "Calculate partial AUC"
 msgstr ""
 
-#: enhancedroc/options/partialAuc.description
+#: enhancedROC/options/partialAuc.description
 msgid "Calculate partial AUC for specific sensitivity/specificity ranges"
 msgstr ""
 
@@ -12492,7 +12492,7 @@ msgstr ""
 msgid "Chi-squared"
 msgstr ""
 
-#: psychopdaroc/options/metric/p_chisquared.title
+#: psychopdaROC/options/metric/p_chisquared.title
 msgid "Chi-squared statistic"
 msgstr ""
 
@@ -13002,8 +13002,8 @@ msgstr ""
 msgid "class name"
 msgstr ""
 
-#: psychopdaroc/options/classVar.title
-#: psychopdaroc/ui[0][1].label
+#: psychopdaROC/options/classVar.title
+#: psychopdaROC/ui[0][1].label
 msgid "Class Variable (Gold Standard)"
 msgstr ""
 
@@ -13014,7 +13014,7 @@ msgstr ""
 #: advancedbarplot/options/theme_style/classic.title
 #: autoeda/options/plot_theme/classic.title
 #: enhancedfactorvariable/options/plotTheme/classic.title
-#: enhancedroc/options/plotTheme/classic.title
+#: enhancedROC/options/plotTheme/classic.title
 #: groupedforest/options/plot_theme/classic.title
 #: hullplot/options/plot_theme/classic.title
 #: jcomplexupset/options/theme_style/theme_classic.title
@@ -13072,8 +13072,8 @@ msgid "Classification Cut-off Values (%)"
 msgstr ""
 
 #: bayesdca/ui[2][0][0].label
-#: psychopdaroc/options/direction.title
-#: psychopdaroc/ui[1][0]/direction.label
+#: psychopdaROC/options/direction.title
+#: psychopdaROC/ui[1][0]/direction.label
 msgid "Classification Direction"
 msgstr ""
 
@@ -13111,7 +13111,7 @@ msgstr ""
 msgid "Classifier"
 msgstr ""
 
-#: psychopdaroc/results/rocComparisonTable.title
+#: psychopdaROC/results/rocComparisonTable.title
 msgid "Classifier Performance Comparison"
 msgstr ""
 
@@ -13151,7 +13151,7 @@ msgstr ""
 #: autoeda/options/plot_theme/clinical.title
 #: crosstablepivot/options/format_style/clinical.title
 #: enhancedfactorvariable/options/plotTheme/clinical.title
-#: enhancedroc/options/plotTheme/clinical.title
+#: enhancedROC/options/plotTheme/clinical.title
 #: ggoncoplot/options/colorScheme/clinical.title
 #: hullplot/options/plot_theme/clinical.title
 #: linechart/options/colorPalette/clinical.title
@@ -13257,7 +13257,7 @@ msgstr ""
 
 #: clinicalvalidation/options/clinical_context.title
 #: clinicalvalidationinteractive/options/clinical_context.title
-#: enhancedroc/ui[3][0][0][0].label
+#: enhancedROC/ui[3][0][0][0].label
 #: treeadvanced/options/clinical_context.title
 #: treecompare/options/clinical_context.title
 #: treeensemble/options/clinical_context.title
@@ -13276,21 +13276,21 @@ msgstr ""
 msgid "Clinical application context affects interpretation guidelines."
 msgstr ""
 
-#: enhancedroc/options/clinicalContext.description
+#: enhancedROC/options/clinicalContext.description
 msgid "Clinical application context for interpretation"
 msgstr ""
 
 #: effectsize/results/results/clinicalGuidance.title
 #: enhancedfactorvariable/results/results/clinicalInterpretationGuide.title
 #: enhancedfrequency/results/results/clinicalInterpretationGuide.title
-#: enhancedroc/results/results/clinicalInterpretationGuide.title
+#: enhancedROC/results/results/clinicalInterpretationGuide.title
 #: enhancedtwowayfrequency/results/clinicalInterpretationGuide.title
 #: factoranalysis/results/results/clinicalInterpretation.title
 #: partialcorrelation/results/clinicalInterpretationGuide.title
 msgid "Clinical Application Guidance"
 msgstr ""
 
-#: enhancedroc/results/results/clinicalApplicationMetrics.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.title
 msgid "Clinical Application Metrics"
 msgstr ""
 
@@ -13344,8 +13344,8 @@ msgstr ""
 #: clinicalalerts/ui[1][5].label
 #: enhancedfactorvariable/options/clinical_interpretation.title
 #: enhancedfrequency/options/clinical_interpretation.title
-#: enhancedroc/options/clinicalContext.title
-#: enhancedroc/ui[3].label
+#: enhancedROC/options/clinicalContext.title
+#: enhancedROC/ui[3].label
 #: haralicktexture/options/texture_interpretation/clinical.title
 #: ihcscoring/results/biomarkerspecific/clinicalcutpoints.columns.title
 #: treeadvanced/ui[4].label
@@ -13459,11 +13459,11 @@ msgstr ""
 msgid "Clinical Decision Analysis"
 msgstr ""
 
-#: enhancedroc/results/results/clinicalDecisionPlot.title
+#: enhancedROC/results/results/clinicalDecisionPlot.title
 msgid "Clinical Decision Analysis Plot"
 msgstr ""
 
-#: enhancedroc/results/results/clinicalDecisionPlot.description
+#: enhancedROC/results/results/clinicalDecisionPlot.description
 msgid "Clinical decision curves and threshold analysis"
 msgstr ""
 
@@ -13674,9 +13674,9 @@ msgstr ""
 #: differentialdiagnosis/results/likelihoodRatios.columns.title
 #: differentialdiagnosis/results/modelPerformance.columns.title
 #: effectsize/results/results/clinicalSignificance.columns.title
-#: enhancedroc/options/clinical_interpretation.title
-#: enhancedroc/results/results/detailedComparison.columns.title
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/options/clinical_interpretation.title
+#: enhancedROC/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: enhancedtables/results/interpretation.title
 #: enhancedtwowayfrequency/options/clinicalInterpretation.title
 #: factoranalysis/options/clinical_interpretation.title
@@ -13910,11 +13910,11 @@ msgstr ""
 msgid "Clinical Meaning"
 msgstr ""
 
-#: enhancedroc/options/clinicalMetrics.title
+#: enhancedROC/options/clinicalMetrics.title
 msgid "Clinical Metrics"
 msgstr ""
 
-#: enhancedroc/results/results/clinicalApplicationMetrics.description
+#: enhancedROC/results/results/clinicalApplicationMetrics.description
 msgid "Clinical metrics including predictive values and likelihood ratios"
 msgstr ""
 
@@ -14049,7 +14049,7 @@ msgstr ""
 #: clinicalalerts/results/clinicalRecommendations.columns.title
 #: cochranq/results/clinicalInterpretation.columns.title
 #: decisioncalculator/results/multipleCutoffTable.columns.title
-#: enhancedroc/results/results/optimalCutoffSummary.columns.title
+#: enhancedROC/results/results/optimalCutoffSummary.columns.title
 #: friedmantest/results/clinicalInterpretation.columns.title
 #: pagetrendtest/results/clinicalInterpretation.columns.title
 #: qualityoflife/results/clinical_interpretation_summary.columns.title
@@ -14079,7 +14079,7 @@ msgstr ""
 #: biomarkerdiscovery/results/selected_biomarkers.columns.title
 #: biomarkerdiscovery/results/biomarker_interactions.columns.title
 #: differentialdiagnosis/results/clinicalContext.columns.title
-#: enhancedroc/results/results/partialAucAnalysis.columns.title
+#: enhancedROC/results/results/partialAucAnalysis.columns.title
 #: featurequality/results/feature_importance.columns.title
 #: labinterpret/results/deltaChecksTable.columns.title
 #: labinterpret/results/correlationAnalysisTable.columns.title
@@ -14199,8 +14199,8 @@ msgstr ""
 #: effectsize/results/results/comprehensiveEffectSizes.columns.title
 #: enhancedfactorvariable/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedfrequency/results/results/comprehensiveAnalysisSummary.columns.title
-#: enhancedroc/results/results/rocComparisons.columns.title
-#: enhancedroc/results/results/comprehensiveAnalysisSummary.columns.title
+#: enhancedROC/results/results/rocComparisons.columns.title
+#: enhancedROC/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedtwowayfrequency/results/associationMeasuresTable.columns.title
 #: enhancedtwowayfrequency/results/comprehensiveAnalysisSummary.columns.title
 #: ihcscoring/results/biomarkerspecific/biomarkerresults.columns.title
@@ -14320,7 +14320,7 @@ msgid "Clinical Trial Settings"
 msgstr ""
 
 #: clinicalvalidationinteractive/results/thresholdOptimization.columns.title
-#: enhancedroc/results/results/aucSummary.columns.title
+#: enhancedROC/results/results/aucSummary.columns.title
 #: likelihoodratio/results/postTestProbabilities.columns.title
 #: stagemigration/results/stageSpecificCureAnalysis.columns.title
 msgid "Clinical Utility"
@@ -14900,7 +14900,7 @@ msgstr ""
 msgid "Closest to (0,1)"
 msgstr ""
 
-#: psychopdaroc/options/method/oc_closest_01.title
+#: psychopdaROC/options/method/oc_closest_01.title
 msgid "Closest to perfect classifier"
 msgstr ""
 
@@ -15405,7 +15405,7 @@ msgstr ""
 msgid "Cohen's d (standardized mean difference)"
 msgstr ""
 
-#: psychopdaroc/options/metric/cohens_kappa.title
+#: psychopdaROC/options/metric/cohens_kappa.title
 msgid "Cohen's Kappa"
 msgstr ""
 
@@ -15850,7 +15850,7 @@ msgstr ""
 msgid "Combination Rule"
 msgstr ""
 
-#: psychopdaroc/ui[4][0][0]/combinePlots.label
+#: psychopdaROC/ui[4][0][0]/combinePlots.label
 msgid "Combine all curves in one plot"
 msgstr ""
 
@@ -15866,7 +15866,7 @@ msgstr ""
 msgid "Combine Medical Decision Tests"
 msgstr ""
 
-#: psychopdaroc/options/combinePlots.title
+#: psychopdaROC/options/combinePlots.title
 msgid "Combine Multiple ROC Curves"
 msgstr ""
 
@@ -16004,7 +16004,7 @@ msgstr ""
 msgid "Comma-separated list of coefficient names to include or exclude  (depending on selection method). Leave blank to use all coefficients."
 msgstr ""
 
-#: enhancedroc/options/customCutoffs.description
+#: enhancedROC/options/customCutoffs.description
 msgid "Comma-separated list of custom cutoffs to evaluate (e.g., 0.1, 0.5, 0.9)"
 msgstr ""
 
@@ -16156,8 +16156,8 @@ msgstr ""
 msgid "Comparative Population Analysis"
 msgstr ""
 
-#: enhancedroc/options/analysisType/comparative.title
-#: enhancedroc/results/results/comparativeROCPlot.title
+#: enhancedROC/options/analysisType/comparative.title
+#: enhancedROC/results/results/comparativeROCPlot.title
 msgid "Comparative ROC Analysis"
 msgstr ""
 
@@ -16177,11 +16177,11 @@ msgstr ""
 msgid "Compare Across Cut-offs"
 msgstr ""
 
-#: psychopdaroc/options/delongTest.title
+#: psychopdaROC/options/delongTest.title
 msgid "Compare AUCs (DeLong's Test)"
 msgstr ""
 
-#: psychopdaroc/ui[3][0]/delongTest.label
+#: psychopdaROC/ui[3][0]/delongTest.label
 msgid "Compare AUCs (DeLong's test)"
 msgstr ""
 
@@ -16197,11 +16197,11 @@ msgstr ""
 msgid "Compare Censoring Across Stages"
 msgstr ""
 
-#: psychopdaroc/options/compareClassifiers.title
+#: psychopdaROC/options/compareClassifiers.title
 msgid "Compare Classifier Performance"
 msgstr ""
 
-#: psychopdaroc/ui[7][0]/compareClassifiers.label
+#: psychopdaROC/ui[7][0]/compareClassifiers.label
 msgid "Compare classifier performance"
 msgstr ""
 
@@ -16397,7 +16397,7 @@ msgstr ""
 #: permutationsurvival/results/permutationTestsTable.columns.title
 #: poweranalysis/results/multi_arm_table.columns.title
 #: progressionsurvival/results/treatment_effects.columns.title
-#: psychopdaroc/results/delongComparisonTable.columns.title
+#: psychopdaROC/results/delongComparisonTable.columns.title
 #: qualityoflife/results/cost_effectiveness_results.columns.title
 #: rmst/results/comparisonTable.columns.title
 #: rmstregression/results/rmstDifferences.columns.title
@@ -16435,7 +16435,7 @@ msgstr ""
 msgid "Comparison Groups (x-axis)"
 msgstr ""
 
-#: enhancedroc/options/comparisonMethod.title
+#: enhancedROC/options/comparisonMethod.title
 #: methodcomparison/options/comparison_method.title
 #: patientreported/options/comparison_method.title
 #: raincloud/options/comparison_method.title
@@ -16526,7 +16526,7 @@ msgstr ""
 msgid "Comparison-Specific"
 msgstr ""
 
-#: enhancedroc/ui[2][0][1][0].label
+#: enhancedROC/ui[2][0][1][0].label
 msgid "Comparisons"
 msgstr ""
 
@@ -17045,7 +17045,7 @@ msgstr ""
 msgid "Comprehensive Analysis (both methods)"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.description
+#: enhancedROC/results/results/cutoffAnalysis.description
 msgid "Comprehensive analysis across multiple cutoff values"
 msgstr ""
 
@@ -17145,7 +17145,7 @@ msgid "Comprehensive comparison of decision tree algorithms for clinical researc
 "statistical testing, and clinical performance assessment."
 msgstr ""
 
-#: enhancedroc/results/results/detailedComparison.description
+#: enhancedROC/results/results/detailedComparison.description
 msgid "Comprehensive comparison of diagnostic metrics between models"
 msgstr ""
 
@@ -17174,11 +17174,11 @@ msgid "Comprehensive descriptive statistics using the summarytools package.\n"
 "descriptive statistics with publication-ready output for clinical research."
 msgstr ""
 
-#: enhancedroc/options/analysisType/comprehensive.title
+#: enhancedROC/options/analysisType/comprehensive.title
 msgid "Comprehensive Diagnostic Performance"
 msgstr ""
 
-#: enhancedroc/results/results/diagnosticPerformance.description
+#: enhancedROC/results/results/diagnosticPerformance.description
 msgid "Comprehensive diagnostic performance measures at optimal cutoff"
 msgstr ""
 
@@ -17540,7 +17540,7 @@ msgid "Comprehensive robust correlation analysis with multiple correlation metho
 "correlation methods."
 msgstr ""
 
-#: enhancedroc/results/results/comprehensiveAnalysisSummary.title
+#: enhancedROC/results/results/comprehensiveAnalysisSummary.title
 msgid "Comprehensive ROC Analysis Summary"
 msgstr ""
 
@@ -17569,7 +17569,7 @@ msgstr ""
 #: effectsize/options/comprehensive_output.title
 #: enhancedfactorvariable/options/comprehensive_output.title
 #: enhancedfrequency/options/comprehensive_output.title
-#: enhancedroc/options/comprehensive_output.title
+#: enhancedROC/options/comprehensive_output.title
 #: enhancedtwowayfrequency/options/comprehensive_output.title
 #: factoranalysis/options/comprehensive_output.title
 #: partialcorrelation/options/comprehensive_output.title
@@ -18146,11 +18146,11 @@ msgstr ""
 #: contTables/results/odds.columns.superTitle
 #: contTables/results/gamma.columns.superTitle
 #: enhancedcorrelation/ui[1][1].label
-#: enhancedroc/ui[2][0][0][0].label
+#: enhancedROC/ui[2][0][0][0].label
 #: exacttests/ui[1][1].label
 #: mixedcox/options/confidence_intervals.title
 #: plscox/options/confidence_intervals.title
-#: psychopdaroc/ui[4][2][0].label
+#: psychopdaROC/ui[4][2][0].label
 msgid "Confidence Intervals"
 msgstr ""
 
@@ -18211,7 +18211,7 @@ msgstr ""
 #: dynamicprediction/options/confidence_level.title
 #: emfrailty/options/confidence_level.title
 #: enhancednonparametric/options/confidence_level.title
-#: enhancedroc/options/confidenceLevel.title
+#: enhancedROC/options/confidenceLevel.title
 #: enhancedtables/options/confidence_level.title
 #: epidemiosurvival/options/confidence_level.title
 #: explainableai/options/confidence_level.title
@@ -18371,7 +18371,7 @@ msgstr ""
 msgid "Confidence level for all confidence intervals and hypothesis tests."
 msgstr ""
 
-#: enhancedroc/options/confidenceLevel.description
+#: enhancedROC/options/confidenceLevel.description
 msgid "Confidence level for AUC confidence intervals"
 msgstr ""
 
@@ -18509,7 +18509,7 @@ msgstr ""
 msgid "Confusion matric"
 msgstr ""
 
-#: psychopdaroc/results/sensSpecTable.title
+#: psychopdaROC/results/sensSpecTable.title
 msgid "Confusion Matrices"
 msgstr ""
 
@@ -19726,8 +19726,8 @@ msgstr ""
 msgid "Cost Ratio (False Positive : False Negative)"
 msgstr ""
 
-#: psychopdaroc/options/costratioFP.title
-#: psychopdaroc/ui[1][0]/costratioFP.label
+#: psychopdaROC/options/costratioFP.title
+#: psychopdaROC/ui[1][0]/costratioFP.label
 msgid "Cost Ratio (FP:FN)"
 msgstr ""
 
@@ -19740,7 +19740,7 @@ msgstr ""
 msgid "Cost Variables"
 msgstr ""
 
-#: psychopdaroc/options/method/oc_cost_ratio.title
+#: psychopdaROC/options/method/oc_cost_ratio.title
 msgid "Cost-benefit optimized"
 msgstr ""
 
@@ -20401,11 +20401,11 @@ msgstr ""
 msgid "Create heatmap visualization of frequency table"
 msgstr ""
 
-#: psychopdaroc/options/interactiveROC.title
+#: psychopdaROC/options/interactiveROC.title
 msgid "Create Interactive Plot"
 msgstr ""
 
-#: psychopdaroc/ui[4][1][0]/interactiveROC.label
+#: psychopdaROC/ui[4][1][0]/interactiveROC.label
 msgid "Create interactive plot"
 msgstr ""
 
@@ -21767,7 +21767,7 @@ msgstr ""
 msgid "Custom CSS styling for HTML output"
 msgstr ""
 
-#: enhancedroc/options/customCutoffs.title
+#: enhancedROC/options/customCutoffs.title
 msgid "Custom Cutoffs"
 msgstr ""
 
@@ -22248,7 +22248,7 @@ msgid "Cut Point"
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/comparisonstats.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 msgid "Cut-off"
 msgstr ""
 
@@ -22333,16 +22333,16 @@ msgstr ""
 msgid "Cut-point Validation Results"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
 msgid "Cutoff"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysisPlot.title
+#: enhancedROC/results/results/cutoffAnalysisPlot.title
 msgid "Cutoff Analysis Plot"
 msgstr ""
 
-#: enhancedroc/options/cutoffTable.title
+#: enhancedROC/options/cutoffTable.title
 msgid "Cutoff Analysis Table"
 msgstr ""
 
@@ -22350,7 +22350,7 @@ msgstr ""
 msgid "Cutoff for hiding small loadings"
 msgstr ""
 
-#: psychopdaroc/results/resultsTable.template.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
 msgid "Cutpoint"
 msgstr ""
 
@@ -22359,13 +22359,13 @@ msgid "Cutpoint Determination"
 msgstr ""
 
 #: optimalcutpoint/options/cutpoint_method.title
-#: psychopdaroc/options/method.title
-#: psychopdaroc/ui[1][0]/method.label
+#: psychopdaROC/options/method.title
+#: psychopdaROC/ui[1][0]/method.label
 #: timedependent/options/cutpoint_method.title
 msgid "Cutpoint Method"
 msgstr ""
 
-#: psychopdaroc/ui[1].label
+#: psychopdaROC/ui[1].label
 msgid "Cutpoint Optimization"
 msgstr ""
 
@@ -23717,7 +23717,7 @@ msgstr ""
 msgid "Degrees of freedom for spline functions"
 msgstr ""
 
-#: enhancedroc/options/comparisonMethod/delong.title
+#: enhancedROC/options/comparisonMethod/delong.title
 msgid "DeLong et al. (1988)"
 msgstr ""
 
@@ -23731,11 +23731,11 @@ msgstr ""
 msgid "DeLong Test (Binary)"
 msgstr ""
 
-#: psychopdaroc/results/delongTest.title
+#: psychopdaROC/results/delongTest.title
 msgid "DeLong Test Details"
 msgstr ""
 
-#: psychopdaroc/results/delongComparisonTable.title
+#: psychopdaROC/results/delongComparisonTable.title
 msgid "DeLong Test Pairwise Comparisons"
 msgstr ""
 
@@ -23876,7 +23876,7 @@ msgstr ""
 msgid "Density with Gradient"
 msgstr ""
 
-#: psychopdaroc/options/rocSmoothingMethod/density.title
+#: psychopdaROC/options/rocSmoothingMethod/density.title
 msgid "Density-based"
 msgstr ""
 
@@ -24195,7 +24195,7 @@ msgstr ""
 msgid "Detailed counts and percentages for each factor level"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.title
+#: enhancedROC/results/results/cutoffAnalysis.title
 msgid "Detailed Cutoff Analysis"
 msgstr ""
 
@@ -24228,7 +24228,7 @@ msgstr ""
 msgid "Detailed Methodology Notes"
 msgstr ""
 
-#: enhancedroc/results/results/detailedComparison.title
+#: enhancedROC/results/results/detailedComparison.title
 msgid "Detailed Model Comparison"
 msgstr ""
 
@@ -24279,7 +24279,7 @@ msgstr ""
 msgid "Detailed Statistics"
 msgstr ""
 
-#: psychopdaroc/results/thresholdTable.title
+#: psychopdaROC/results/thresholdTable.title
 msgid "Detailed Threshold Performance"
 msgstr ""
 
@@ -24511,7 +24511,7 @@ msgid "Diabetes/Prediabetes"
 msgstr ""
 
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
-#: enhancedroc/options/clinicalContext/diagnosis.title
+#: enhancedROC/options/clinicalContext/diagnosis.title
 #: treeadvanced/options/clinical_context/diagnosis.title
 #: treecompare/options/clinical_context/diagnosis.title
 #: treeensemble/options/clinical_context/diagnosis.title
@@ -24627,7 +24627,7 @@ msgstr ""
 msgid "Diagnostic measures for interval-censored survival models"
 msgstr ""
 
-#: enhancedroc/options/diagnosticMetrics.title
+#: enhancedROC/options/diagnosticMetrics.title
 msgid "Diagnostic Metrics"
 msgstr ""
 
@@ -24649,7 +24649,7 @@ msgid "Diagnostic Odds Ratio"
 msgstr ""
 
 #: likelihoodratio/ui[6]/showDiagnosticOdds.label
-#: psychopdaroc/options/metric/odds_ratio.title
+#: psychopdaROC/options/metric/odds_ratio.title
 msgid "Diagnostic odds ratio"
 msgstr ""
 
@@ -24657,7 +24657,7 @@ msgstr ""
 msgid "Diagnostic Options"
 msgstr ""
 
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 msgid "Diagnostic OR"
 msgstr ""
 
@@ -24665,9 +24665,9 @@ msgstr ""
 msgid "Diagnostic Pattern Recognition"
 msgstr ""
 
-#: package/analyses/enhancedroc.menuSubgroup
+#: package/analyses/enhancedROC.menuSubgroup
 #: package/analyses/multiclassdiagnostics.menuSubgroup
-#: enhancedroc/options.menuSubgroup
+#: enhancedROC/options.menuSubgroup
 #: multiclassdiagnostics/options.menuSubgroup
 #: nonparametric/options/clinical_context/diagnostic.title
 msgid "Diagnostic Performance"
@@ -24686,7 +24686,7 @@ msgid "Diagnostic Performance Heatmap"
 msgstr ""
 
 #: bayesiandiagnostic/results/diagnosticPerformance.title
-#: enhancedroc/results/results/diagnosticPerformance.title
+#: enhancedROC/results/results/diagnosticPerformance.title
 #: imagingcorrelation/options/sensitivity_specificity.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.title
 msgid "Diagnostic Performance Metrics"
@@ -24888,7 +24888,7 @@ msgstr ""
 
 #: decisioncompare/results/diffTable.columns.title
 #: directbinomial/results/covariateEffectsTable.columns.title
-#: enhancedroc/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
 #: ihcscoring/results/automatedanalysis/validationcomparison.columns.title
 #: methodcomparison/results/outlierAnalysis.columns.title
 #: methodvalidation/results/linearityData.columns.title
@@ -25028,7 +25028,7 @@ msgstr ""
 msgid "Direct Connection"
 msgstr ""
 
-#: psychopdaroc/options/directLabel.title
+#: psychopdaROC/options/directLabel.title
 msgid "Direct Curve Labels"
 msgstr ""
 
@@ -25075,7 +25075,7 @@ msgid "Directed Network"
 msgstr ""
 
 #: clinicalprediction/results/feature_importance.columns.title
-#: enhancedroc/options/direction.title
+#: enhancedROC/options/direction.title
 #: flowchart/options/direction.title
 #: labcontrolcharts/results/shiftDetection.columns.title
 #: modalitycomparison/results/discordanceTable.columns.title
@@ -25094,7 +25094,7 @@ msgstr ""
 msgid "Direction of test values relative to disease presence"
 msgstr ""
 
-#: enhancedroc/options/direction.description
+#: enhancedROC/options/direction.description
 msgid "Direction of the predictor-outcome relationship"
 msgstr ""
 
@@ -25304,7 +25304,7 @@ msgstr ""
 #: cotest/options/prevalence.title
 #: cotest/ui[3].label
 #: decisionpanel/options/prevalence.title
-#: enhancedroc/options/prevalence.title
+#: enhancedROC/options/prevalence.title
 #: nogoldstandard/results/prevalence.title
 #: sequentialtests/options/prevalence.title
 #: sequentialtests/results/summary_table.columns.title
@@ -25321,7 +25321,7 @@ msgstr ""
 msgid "Disease Prevalence ="
 msgstr ""
 
-#: enhancedroc/options/prevalence.description
+#: enhancedROC/options/prevalence.description
 msgid "Disease prevalence for calculating predictive values"
 msgstr ""
 
@@ -25466,7 +25466,7 @@ msgstr ""
 msgid "Display at-risk tables below survival curves."
 msgstr ""
 
-#: enhancedroc/options/aucTable.description
+#: enhancedROC/options/aucTable.description
 msgid "Display AUC summary table"
 msgstr ""
 
@@ -25494,7 +25494,7 @@ msgstr ""
 msgid "Display calibration plots for landmark models"
 msgstr ""
 
-#: enhancedroc/options/clinicalMetrics.description
+#: enhancedROC/options/clinicalMetrics.description
 msgid "Display clinical application metrics (PPV, NPV, LR+, LR-)"
 msgstr ""
 
@@ -25538,7 +25538,7 @@ msgstr ""
 msgid "Display comprehensive comparison table with all metrics."
 msgstr ""
 
-#: enhancedroc/options/diagnosticMetrics.description
+#: enhancedROC/options/diagnosticMetrics.description
 msgid "Display comprehensive diagnostic metrics"
 msgstr ""
 
@@ -25546,7 +25546,7 @@ msgstr ""
 msgid "Display comprehensive table summarizing all statistical comparisons."
 msgstr ""
 
-#: enhancedroc/options/showConfidenceBands.description
+#: enhancedROC/options/showConfidenceBands.description
 msgid "Display confidence bands around ROC curve"
 msgstr ""
 
@@ -25648,11 +25648,11 @@ msgstr ""
 msgid "Display detailed cross-tabulation matrix showing exactly how patients moved between stages. Rows represent the original staging system and columns represent the new staging system. Diagonal values indicate patients who remained in the same stage, while off-diagonal values show stage migrations. This is essential for understanding the specific migration patterns and identifying which stages are most affected by the new criteria."
 msgstr ""
 
-#: enhancedroc/options/cutoffTable.description
+#: enhancedROC/options/cutoffTable.description
 msgid "Display detailed cutoff analysis"
 msgstr ""
 
-#: enhancedroc/options/showMetricsDiff.description
+#: enhancedROC/options/showMetricsDiff.description
 msgid "Display detailed differences between model metrics"
 msgstr ""
 
@@ -26033,7 +26033,7 @@ msgstr ""
 msgid "Display only the most frequent factor levels instead of all levels"
 msgstr ""
 
-#: enhancedroc/options/optimalCutoffs.description
+#: enhancedROC/options/optimalCutoffs.description
 msgid "Display optimal cutoff summary"
 msgstr ""
 
@@ -26237,7 +26237,7 @@ msgstr ""
 msgid "Display results of stepwise model selection showing which variables (including staging systems) are selected in the final model."
 msgstr ""
 
-#: enhancedroc/options/rocCurve.description
+#: enhancedROC/options/rocCurve.description
 msgid "Display ROC curve plot"
 msgstr ""
 
@@ -26587,7 +26587,7 @@ msgstr ""
 msgid "Distance threshold for defining neighbors (km)"
 msgstr ""
 
-#: psychopdaroc/options/metric/roc01.title
+#: psychopdaROC/options/metric/roc01.title
 msgid "Distance to (0,1) in ROC space"
 msgstr ""
 
@@ -26671,7 +26671,7 @@ msgstr ""
 msgid "Distribution Fill Color"
 msgstr ""
 
-#: psychopdaroc/options/rocSmoothingMethod/fitdistr.title
+#: psychopdaROC/options/rocSmoothingMethod/fitdistr.title
 msgid "Distribution fitting"
 msgstr ""
 
@@ -27008,7 +27008,7 @@ msgstr ""
 msgid "Dot Plot (Incidence Comparison)"
 msgstr ""
 
-#: psychopdaroc/results/dotPlotMessage.title
+#: psychopdaROC/results/dotPlotMessage.title
 msgid "Dot Plot Note"
 msgstr ""
 
@@ -27502,7 +27502,7 @@ msgid "Effect Estimates (Lower)"
 msgstr ""
 
 #: effectsize/results/results/powerAnalysisResults.columns.title
-#: enhancedroc/results/results/statisticalSummary.columns.title
+#: enhancedROC/results/results/statisticalSummary.columns.title
 #: labinterpret/results/medicationEffectsTable.columns.title
 msgid "Effect Magnitude"
 msgstr ""
@@ -27558,7 +27558,7 @@ msgstr ""
 #: effectsize/results/results/bootstrapResults.columns.title
 #: enhancednonparametric/results/tests.columns.title
 #: enhancednonparametric/results/posthoc.columns.title
-#: enhancedroc/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
 #: enhancedtwowayfrequency/results/testResults.columns.title
 #: friedmantest/results/effectSize.columns.title
 #: friedmantest/results/pairwiseComparisons.columns.title
@@ -27617,7 +27617,7 @@ msgstr ""
 #: desctools/options/effect_size_analysis.title
 #: desctools/results/effect_size_results.title
 #: effectsize/ui.title
-#: enhancedroc/options/effectSizeAnalysis.title
+#: enhancedROC/options/effectSizeAnalysis.title
 #: patientreported/options/effect_size_analysis.title
 #: qualityoflife/options/change_analysis/effect_size.title
 msgid "Effect Size Analysis"
@@ -28331,7 +28331,7 @@ msgstr ""
 #: effectsize/options/bluesky_integration.title
 #: enhancedfactorvariable/options/bluesky_integration.title
 #: enhancedfrequency/options/bluesky_integration.title
-#: enhancedroc/options/bluesky_integration.title
+#: enhancedROC/options/bluesky_integration.title
 #: enhancedtwowayfrequency/options/bluesky_integration.title
 #: factoranalysis/options/bluesky_integration.title
 #: partialcorrelation/options/bluesky_integration.title
@@ -28553,18 +28553,18 @@ msgstr ""
 
 #: package/analyses/timeroc.title
 #: package/analyses/timeroc.menuTitle
-#: enhancedroc/ui.title
+#: enhancedROC/ui.title
 #: timeroc/options.title
 #: timeroc/ui.title
 msgid "Enhanced ROC Analysis"
 msgstr ""
 
-#: enhancedroc/results.title
+#: enhancedROC/results.title
 msgid "Enhanced ROC Analysis Results"
 msgstr ""
 
-#: package/analyses/enhancedroc.description
-#: enhancedroc/options.description.main
+#: package/analyses/enhancedROC.description
+#: enhancedROC/options.description.main
 msgid "Enhanced ROC analysis toolkit with BlueSky integration for comprehensive\n"
 "diagnostic performance evaluation. Includes ROC curve analysis, Youden Index\n"
 "optimization, sensitivity/specificity analysis, optimal cutoff determination,\n"
@@ -28572,9 +28572,9 @@ msgid "Enhanced ROC analysis toolkit with BlueSky integration for comprehensive\
 "test evaluation, and clinical decision support in medical research."
 msgstr ""
 
-#: package/analyses/enhancedroc.title
-#: package/analyses/enhancedroc.menuTitle
-#: enhancedroc/options.title
+#: package/analyses/enhancedROC.title
+#: package/analyses/enhancedROC.menuTitle
+#: enhancedROC/options.title
 msgid "Enhanced ROC Analysis with Youden Index Optimization"
 msgstr ""
 
@@ -28584,7 +28584,7 @@ msgstr ""
 
 #: enhancedfactorvariable/results/results/comprehensiveAnalysisSummary.description
 #: enhancedfrequency/results/results/comprehensiveAnalysisSummary.description
-#: enhancedroc/results/results/comprehensiveAnalysisSummary.description
+#: enhancedROC/results/results/comprehensiveAnalysisSummary.description
 #: enhancedtwowayfrequency/results/comprehensiveAnalysisSummary.description
 #: partialcorrelation/results/comprehensiveAnalysisSummary.description
 msgid "Enhanced statistical summary with BlueSky integration"
@@ -29026,7 +29026,7 @@ msgstr ""
 msgid "Equal Quantiles"
 msgstr ""
 
-#: psychopdaroc/options/method/oc_equal_sens_spec.title
+#: psychopdaROC/options/method/oc_equal_sens_spec.title
 msgid "Equal sensitivity and specificity"
 msgstr ""
 
@@ -29271,7 +29271,7 @@ msgstr ""
 #: nogoldstandard/results/prevalence.columns.title
 #: nonparametricregression/results/parameterEstimates.columns.title
 #: parametricfrailty/results/coefficients.columns.title
-#: psychopdaroc/results/bootstrapCITable.columns.title
+#: psychopdaROC/results/bootstrapCITable.columns.title
 #: qualitycontrol/results/methodValidation.columns.title
 #: qualitycontrol/results/capabilityAnalysis.columns.title
 #: raftgee/results/coefficients.columns.title
@@ -29315,7 +29315,7 @@ msgstr ""
 msgid "Estimate shrinkage factor for model calibration"
 msgstr ""
 
-#: enhancedroc/options/powerAnalysis.description
+#: enhancedROC/options/powerAnalysis.description
 msgid "Estimate statistical power for detecting differences"
 msgstr ""
 
@@ -29633,7 +29633,7 @@ msgstr ""
 msgid "Event Marker Summary"
 msgstr ""
 
-#: psychopdaroc/results/nriTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
 msgid "Event NRI"
 msgstr ""
 
@@ -31562,8 +31562,8 @@ msgstr ""
 #: clinicalvalidationinteractive/options/optimization_metric/f1.title
 #: decisioncalculator/results/advancedMetricsTable.columns.title
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
-#: psychopdaroc/options/metric/F1_score.title
-#: psychopdaroc/results/rocComparisonTable.columns.title
+#: psychopdaROC/options/metric/F1_score.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 #: treeadvanced/options/tuning_metric/f1.title
 #: treecompare/options/primary_metric/f1.title
 #: treecompare/results/comparison_table.columns.title
@@ -31856,7 +31856,7 @@ msgstr ""
 msgid "False Discovery Rate (BY)"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
 msgid "False Negative"
 msgstr ""
 
@@ -31884,7 +31884,7 @@ msgstr ""
 msgid "False Negatives (FN)"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
 msgid "False Positive"
 msgstr ""
 
@@ -32375,7 +32375,7 @@ msgstr ""
 msgid "Find Optimal Cut-off"
 msgstr ""
 
-#: enhancedroc/options/youdenOptimization.description
+#: enhancedROC/options/youdenOptimization.description
 msgid "Find optimal cutoff using Youden Index (Sensitivity + Specificity - 1)"
 msgstr ""
 
@@ -33788,7 +33788,7 @@ msgstr ""
 msgid "From Node"
 msgstr ""
 
-#: psychopdaroc/ui[6][0][0]/partialAUCfrom.label
+#: psychopdaROC/ui[6][0][0]/partialAUCfrom.label
 msgid "From specificity"
 msgstr ""
 
@@ -34255,7 +34255,7 @@ msgid "Gene Variables"
 msgstr ""
 
 #: classification/results/classificationMetrics/general.title
-#: enhancedroc/options/clinicalContext/general.title
+#: enhancedROC/options/clinicalContext/general.title
 msgid "General"
 msgstr ""
 
@@ -35826,7 +35826,7 @@ msgstr ""
 #: ihcscoring/options/group_var.title
 #: multiplexanalysis/options/group_var.title
 #: patientreported/options/group_var.title
-#: psychopdaroc/ui[0][2].label
+#: psychopdaROC/ui[0][2].label
 #: spatialanalysis/options/groups.title
 #: spatialanalysis/ui[0][3].label
 msgid "Group Variable (Optional)"
@@ -36773,7 +36773,7 @@ msgstr ""
 msgid "Height of plots"
 msgstr ""
 
-#: enhancedroc/options/plotHeight.description
+#: enhancedROC/options/plotHeight.description
 msgid "Height of ROC plots"
 msgstr ""
 
@@ -37198,7 +37198,7 @@ msgstr ""
 msgid "Higher values indicate disease"
 msgstr ""
 
-#: enhancedroc/options/direction/higher.title
+#: enhancedROC/options/direction/higher.title
 msgid "Higher values indicate positive outcome"
 msgstr ""
 
@@ -37257,7 +37257,7 @@ msgstr ""
 msgid "Highlight level"
 msgstr ""
 
-#: enhancedroc/options/showCutoffPoints.description
+#: enhancedROC/options/showCutoffPoints.description
 msgid "Highlight optimal cutoff points on ROC curve"
 msgstr ""
 
@@ -38193,7 +38193,7 @@ msgstr ""
 
 #: idi/results/subgroupAnalysis.columns.title
 #: modelbuilder/results/idiTable.columns.title
-#: psychopdaroc/results/idiTable.columns.title
+#: psychopdaROC/results/idiTable.columns.title
 #: stagemigration/results/idiResults.columns.title
 msgid "IDI"
 msgstr ""
@@ -38206,7 +38206,7 @@ msgstr ""
 msgid "IDI (without outliers)"
 msgstr ""
 
-#: psychopdaroc/ui[7][1][0].label
+#: psychopdaROC/ui[7][1][0].label
 msgid "IDI and NRI Analysis"
 msgstr ""
 
@@ -38235,7 +38235,7 @@ msgstr ""
 msgid "IDI Summary"
 msgstr ""
 
-#: psychopdaroc/options/idiNriBootRuns.title
+#: psychopdaROC/options/idiNriBootRuns.title
 msgid "IDI/NRI Bootstrap Iterations"
 msgstr ""
 
@@ -38886,7 +38886,7 @@ msgid "Include comprehensive model summary."
 msgstr ""
 
 #: effectsize/options/comprehensive_output.description
-#: enhancedroc/options/comprehensive_output.description
+#: enhancedROC/options/comprehensive_output.description
 #: factoranalysis/options/comprehensive_output.description
 msgid "Include comprehensive statistical details"
 msgstr ""
@@ -40051,7 +40051,7 @@ msgstr ""
 #: enhancedcrosstable/results/instructions.title
 #: enhancedfactorvariable/results/results/instructions.title
 #: enhancedfrequency/results/results/instructions.title
-#: enhancedroc/results/results/instructions.title
+#: enhancedROC/results/results/instructions.title
 #: enhancedtables/results/instructions.title
 #: enhancedtwowayfrequency/results/instructions.title
 #: epidemiosurvival/results/instructions.title
@@ -40222,7 +40222,7 @@ msgstr ""
 #: package/analyses/idi.menuTitle
 #: idi/options.title
 #: idi/ui.title
-#: psychopdaroc/results/idiTable.title
+#: psychopdaROC/results/idiTable.title
 #: stagemigration/options/calculateIDI.title
 #: stagemigration/ui[4][0][0]/calculateIDI.label
 #: stagemigration/results/idiResults.title
@@ -40407,7 +40407,7 @@ msgstr ""
 msgid "Interactive Population Health Dashboard"
 msgstr ""
 
-#: psychopdaroc/results/interactivePlot.title
+#: psychopdaROC/results/interactivePlot.title
 msgid "Interactive ROC Plot"
 msgstr ""
 
@@ -40629,7 +40629,7 @@ msgstr ""
 #: enhancednonparametric/results/tests.columns.title
 #: enhancednonparametric/results/effectsizes.columns.title
 #: enhancednonparametric/results/posthoc.columns.title
-#: enhancedroc/results/results/comprehensiveAnalysisSummary.columns.title
+#: enhancedROC/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedtwowayfrequency/results/testResults.columns.title
 #: enhancedtwowayfrequency/results/associationMeasuresTable.columns.title
 #: enhancedtwowayfrequency/results/diagnostics.columns.title
@@ -41760,7 +41760,7 @@ msgstr ""
 msgid "Kendall's τ"
 msgstr ""
 
-#: enhancedroc/options/smoothMethod/kernel.title
+#: enhancedROC/options/smoothMethod/kernel.title
 msgid "Kernel"
 msgstr ""
 
@@ -42059,7 +42059,7 @@ msgstr ""
 msgid "Label Background"
 msgstr ""
 
-#: psychopdaroc/ui[4][0][0]/directLabel.label
+#: psychopdaROC/ui[4][0][0]/directLabel.label
 msgid "Label curves directly"
 msgstr ""
 
@@ -42816,11 +42816,11 @@ msgstr ""
 #: jjridges/options/legend_position.title
 #: jjridges/ui[5][0]/legend_position.label
 #: jvisr/options/legend_position.title
-#: psychopdaroc/options/legendPosition.title
+#: psychopdaROC/options/legendPosition.title
 msgid "Legend Position"
 msgstr ""
 
-#: psychopdaroc/ui[4][1][0]/legendPosition.label
+#: psychopdaROC/ui[4][1][0]/legendPosition.label
 msgid "Legend position"
 msgstr ""
 
@@ -44399,7 +44399,7 @@ msgstr ""
 msgid "Lower values indicate disease"
 msgstr ""
 
-#: enhancedroc/options/direction/lower.title
+#: enhancedROC/options/direction/lower.title
 msgid "Lower values indicate positive outcome"
 msgstr ""
 
@@ -44465,13 +44465,13 @@ msgid "LR Test Statistic"
 msgstr ""
 
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: likelihoodratio/results/stratifiedAnalysis.columns.title
 msgid "LR-"
 msgstr ""
 
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: likelihoodratio/results/stratifiedAnalysis.columns.title
 msgid "LR+"
 msgstr ""
@@ -44683,17 +44683,17 @@ msgstr ""
 msgid "Manual Colors"
 msgstr ""
 
-#: psychopdaroc/ui[1][0]/specifyCutScore.label
+#: psychopdaROC/ui[1][0]/specifyCutScore.label
 msgid "Manual Cut Score"
 msgstr ""
 
-#: psychopdaroc/options/method/oc_manual.title
+#: psychopdaROC/options/method/oc_manual.title
 msgid "Manual cutpoint"
 msgstr ""
 
 #: likelihoodratio/options/manualCutpoint.title
 #: likelihoodratio/ui[2][1][0].label
-#: psychopdaroc/options/specifyCutScore.title
+#: psychopdaROC/options/specifyCutScore.title
 msgid "Manual Cutpoint Value"
 msgstr ""
 
@@ -44836,7 +44836,7 @@ msgstr ""
 msgid "Marginal Settings"
 msgstr ""
 
-#: psychopdaroc/options/showOptimalPoint.title
+#: psychopdaROC/options/showOptimalPoint.title
 msgid "Mark Optimal Cutpoint"
 msgstr ""
 
@@ -45195,19 +45195,19 @@ msgstr ""
 msgid "Maximize efficiency (accuracy/cost)"
 msgstr ""
 
-#: psychopdaroc/options/method/maximize_metric.title
+#: psychopdaROC/options/method/maximize_metric.title
 msgid "Maximize metric"
 msgstr ""
 
-#: psychopdaroc/options/method/maximize_boot_metric.title
+#: psychopdaROC/options/method/maximize_boot_metric.title
 msgid "Maximize metric (bootstrapped)"
 msgstr ""
 
-#: psychopdaroc/options/method/maximize_loess_metric.title
+#: psychopdaROC/options/method/maximize_loess_metric.title
 msgid "Maximize metric (LOESS smoothed)"
 msgstr ""
 
-#: psychopdaroc/options/method/maximize_spline_metric.title
+#: psychopdaROC/options/method/maximize_spline_metric.title
 msgid "Maximize metric (spline smoothed)"
 msgstr ""
 
@@ -45485,11 +45485,11 @@ msgstr ""
 msgid "Maximum Threshold"
 msgstr ""
 
-#: psychopdaroc/options/maxThresholds.title
+#: psychopdaROC/options/maxThresholds.title
 msgid "Maximum Thresholds to Display"
 msgstr ""
 
-#: psychopdaroc/ui[3][0]/maxThresholds.label
+#: psychopdaROC/ui[3][0]/maxThresholds.label
 msgid "Maximum thresholds to display"
 msgstr ""
 
@@ -45959,7 +45959,7 @@ msgstr ""
 msgid "Mean of Log"
 msgstr ""
 
-#: psychopdaroc/options/break_ties/mean.title
+#: psychopdaROC/options/break_ties/mean.title
 msgid "Mean of tied cutpoints"
 msgstr ""
 
@@ -46086,7 +46086,7 @@ msgstr ""
 #: enhancedfactorvariable/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedfrequency/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancednonparametric/results/tests.columns.title
-#: enhancedroc/results/results/comprehensiveAnalysisSummary.columns.title
+#: enhancedROC/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedtwowayfrequency/results/associationMeasuresTable.columns.title
 #: enhancedtwowayfrequency/results/comprehensiveAnalysisSummary.columns.title
 #: factoranalysis/results/results/comprehensiveResults.columns.title
@@ -46231,7 +46231,7 @@ msgstr ""
 #: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/nogoldstandard.menuGroup
 #: package/analyses/decisioncompare.menuGroup
-#: package/analyses/psychopdaroc.menuGroup
+#: package/analyses/psychopdaROC.menuGroup
 #: package/analyses/decisioncombine.menuGroup
 #: package/analyses/cotest.menuGroup
 #: package/analyses/decisioncurve.menuGroup
@@ -46249,7 +46249,7 @@ msgstr ""
 #: package/analyses/aivalidation.menuGroup
 #: package/analyses/clinicalvalidation.menuGroup
 #: package/analyses/modalitycomparison.menuGroup
-#: package/analyses/enhancedroc.menuGroup
+#: package/analyses/enhancedROC.menuGroup
 #: package/analyses/multiclassdiagnostics.menuGroup
 #: agreement/options.menuGroup
 #: aivalidation/options.menuGroup
@@ -46263,7 +46263,7 @@ msgstr ""
 #: decisiongraph/options.menuGroup
 #: decisionpanel/options.menuGroup
 #: dendrogram/options.menuGroup
-#: enhancedroc/options.menuGroup
+#: enhancedROC/options.menuGroup
 #: icccoeff/options.menuGroup
 #: idi/options.menuGroup
 #: methodcomparison/options.menuGroup
@@ -46273,7 +46273,7 @@ msgstr ""
 #: multiclassdiagnostics/options.menuGroup
 #: netreclassification/options.menuGroup
 #: nogoldstandard/options.menuGroup
-#: psychopdaroc/options.menuGroup
+#: psychopdaROC/options.menuGroup
 #: treeadvanced/options.menuGroup
 #: treemedical/options.menuGroup
 msgid "meddecideT2"
@@ -46402,7 +46402,7 @@ msgstr ""
 msgid "Median Lines"
 msgstr ""
 
-#: psychopdaroc/options/break_ties/median.title
+#: psychopdaROC/options/break_ties/median.title
 msgid "Median of tied cutpoints"
 msgstr ""
 
@@ -47028,7 +47028,7 @@ msgstr ""
 msgid "Method for classifying data into color categories."
 msgstr ""
 
-#: enhancedroc/options/comparisonMethod.description
+#: enhancedROC/options/comparisonMethod.description
 msgid "Method for comparing ROC curves"
 msgstr ""
 
@@ -47167,7 +47167,7 @@ msgstr ""
 msgid "Method for selecting variables in the model"
 msgstr ""
 
-#: enhancedroc/options/smoothMethod.description
+#: enhancedROC/options/smoothMethod.description
 msgid "Method for smoothing ROC curves"
 msgstr ""
 
@@ -47343,7 +47343,7 @@ msgstr ""
 #: deeplearningprediction/results/trainingMetrics/finalMetrics.columns.title
 #: deeplearningprediction/results/crossValidationResults/cvSummary.columns.title
 #: dynamiccoeff/results/adaptationMetrics.columns.title
-#: enhancedroc/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
 #: excessmortality/results/goodnessOfFit.columns.title
 #: flexiblerelativesurvival/results/goodnessOfFit.columns.title
 #: gradientboosting/results/convergenceStats.columns.title
@@ -47398,7 +47398,7 @@ msgstr ""
 msgid "Metric for model comparison"
 msgstr ""
 
-#: psychopdaroc/results/resultsTable.template.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
 msgid "Metric Score"
 msgstr ""
 
@@ -47406,8 +47406,8 @@ msgstr ""
 msgid "Metric Stability"
 msgstr ""
 
-#: psychopdaroc/options/tol_metric.title
-#: psychopdaroc/ui[1][1][0]/tol_metric.label
+#: psychopdaROC/options/tol_metric.title
+#: psychopdaROC/ui[1][1][0]/tol_metric.label
 msgid "Metric Tolerance"
 msgstr ""
 
@@ -47694,11 +47694,11 @@ msgstr ""
 msgid "Minimally Important Difference Analysis"
 msgstr ""
 
-#: psychopdaroc/options/metric/abs_d_ppv_npv.title
+#: psychopdaROC/options/metric/abs_d_ppv_npv.title
 msgid "Minimize |PPV - NPV|"
 msgstr ""
 
-#: psychopdaroc/options/metric/abs_d_sens_spec.title
+#: psychopdaROC/options/metric/abs_d_sens_spec.title
 msgid "Minimize |Sens - Spec|"
 msgstr ""
 
@@ -47706,19 +47706,19 @@ msgstr ""
 msgid "Minimize cost-weighted errors"
 msgstr ""
 
-#: psychopdaroc/options/method/minimize_metric.title
+#: psychopdaROC/options/method/minimize_metric.title
 msgid "Minimize metric"
 msgstr ""
 
-#: psychopdaroc/options/method/minimize_boot_metric.title
+#: psychopdaROC/options/method/minimize_boot_metric.title
 msgid "Minimize metric (bootstrapped)"
 msgstr ""
 
-#: psychopdaroc/options/method/minimize_loess_metric.title
+#: psychopdaROC/options/method/minimize_loess_metric.title
 msgid "Minimize metric (LOESS smoothed)"
 msgstr ""
 
-#: psychopdaroc/options/method/minimize_spline_metric.title
+#: psychopdaROC/options/method/minimize_spline_metric.title
 msgid "Minimize metric (spline smoothed)"
 msgstr ""
 
@@ -47980,7 +47980,7 @@ msgstr ""
 msgid "Minimum Required Sensitivity"
 msgstr ""
 
-#: enhancedroc/options/sensitivityThreshold.description
+#: enhancedROC/options/sensitivityThreshold.description
 msgid "Minimum required sensitivity for screening applications"
 msgstr ""
 
@@ -47988,7 +47988,7 @@ msgstr ""
 msgid "Minimum Required Specificity"
 msgstr ""
 
-#: enhancedroc/options/specificityThreshold.description
+#: enhancedROC/options/specificityThreshold.description
 msgid "Minimum required specificity for confirmatory testing"
 msgstr ""
 
@@ -48056,7 +48056,7 @@ msgstr ""
 msgid "Minor Ticks"
 msgstr ""
 
-#: psychopdaroc/options/metric/misclassification_cost.title
+#: psychopdaROC/options/metric/misclassification_cost.title
 msgid "Misclassification cost"
 msgstr ""
 
@@ -48615,7 +48615,7 @@ msgstr ""
 msgid "Model 1 Probabilities"
 msgstr ""
 
-#: enhancedroc/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
 msgid "Model 1 Value"
 msgstr ""
 
@@ -48644,7 +48644,7 @@ msgstr ""
 msgid "Model 2 Probabilities"
 msgstr ""
 
-#: enhancedroc/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
 msgid "Model 2 Value"
 msgstr ""
 
@@ -48739,7 +48739,7 @@ msgstr ""
 #: ncvregcox/results/model_comparison.title
 #: nonparametricregression/results/modelComparison.title
 #: principalcox/results/modelComparison.title
-#: psychopdaroc/ui[7].label
+#: psychopdaROC/ui[7].label
 #: raftgee/results/modelComparison.title
 #: recurrentsurvival/results/model_comparison_plot.title
 #: robustaft/results/modelComparison.title
@@ -49555,7 +49555,7 @@ msgid "Moderators/Subgroups"
 msgstr ""
 
 #: enhancedfactorvariable/options/plotTheme/modern.title
-#: enhancedroc/options/plotTheme/modern.title
+#: enhancedROC/options/plotTheme/modern.title
 #: jiwillsurvive/options/plot_style/modern.title
 #: tinytable/options/table_theme/modern.title
 msgid "Modern"
@@ -49643,7 +49643,7 @@ msgstr ""
 msgid "Molecular Subtyping Analysis"
 msgstr ""
 
-#: enhancedroc/options/clinicalContext/monitoring.title
+#: enhancedROC/options/clinicalContext/monitoring.title
 msgid "Monitoring"
 msgstr ""
 
@@ -50240,7 +50240,7 @@ msgstr ""
 msgid "Multiple predictor variables (for predictors analysis)"
 msgstr ""
 
-#: enhancedroc/results/results/comparativeROCPlot.description
+#: enhancedROC/results/results/comparativeROCPlot.description
 msgid "Multiple ROC curves for comparison"
 msgstr ""
 
@@ -51096,7 +51096,7 @@ msgstr ""
 msgid "Net Reclassification Index"
 msgstr ""
 
-#: psychopdaroc/results/nriTable.title
+#: psychopdaROC/results/nriTable.title
 msgid "Net Reclassification Index (NRI)"
 msgstr ""
 
@@ -51458,7 +51458,7 @@ msgstr ""
 msgid "No Internal Validation"
 msgstr ""
 
-#: psychopdaroc/options/legendPosition/none.title
+#: psychopdaROC/options/legendPosition/none.title
 msgid "No legend"
 msgstr ""
 
@@ -51722,7 +51722,7 @@ msgstr ""
 msgid "Non-Cases (N)"
 msgstr ""
 
-#: psychopdaroc/results/nriTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
 msgid "Non-Event NRI"
 msgstr ""
 
@@ -51948,7 +51948,7 @@ msgstr ""
 #: effectsize/options/correction_method/none.title
 #: enhancednonparametric/options/posthoc/none.title
 #: enhancednonparametric/options/posthoc_correction/none.title
-#: enhancedroc/options/smoothMethod/none.title
+#: enhancedROC/options/smoothMethod/none.title
 #: epidemiosurvival/options/age_standardization/none.title
 #: extratrees/options/importance/none.title
 #: factoranalysis/options/rotation/none.title
@@ -51981,7 +51981,7 @@ msgstr ""
 #: optimalcutpoint/options/multiple_testing/none.title
 #: partialcorrelation/options/multipleComparison/none.title
 #: permutationsurvival/options/multiple_comparison/none.title
-#: psychopdaroc/options/rocSmoothingMethod/none.title
+#: psychopdaROC/options/rocSmoothingMethod/none.title
 #: relativesurvival/options/regression_model/none.title
 #: robustcorrelation/options/p_adjust_method/none.title
 #: spikeslabpriors/options/dimension_reduction/none.title
@@ -52234,8 +52234,8 @@ msgstr ""
 msgid "Normalized OPSpecs Chart"
 msgstr ""
 
-#: enhancedroc/results/results/partialAucAnalysis.columns.title
-#: psychopdaroc/results/partialAUCTable.columns.title
+#: enhancedROC/results/results/partialAucAnalysis.columns.title
+#: psychopdaROC/results/partialAUCTable.columns.title
 msgid "Normalized pAUC"
 msgstr ""
 
@@ -52317,12 +52317,12 @@ msgstr ""
 #: decisionpanel/results/optimalPanel.columns.title
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/allCombinations.columns.title
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.columns.title
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
 #: nogoldstandard/results/test_metrics.columns.title
-#: psychopdaroc/results/resultsTable.template.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 msgid "NPV"
 msgstr ""
@@ -52351,7 +52351,7 @@ msgstr ""
 
 #: decisionpanel/results/incrementalValue.columns.title
 #: netreclassification/results/subgroupAnalysis.columns.title
-#: psychopdaroc/results/nriTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
 #: stagemigration/results/nriResults.columns.title
 msgid "NRI"
 msgstr ""
@@ -52389,7 +52389,7 @@ msgstr ""
 msgid "NRI Decomposition"
 msgstr ""
 
-#: psychopdaroc/options/nriThresholds.title
+#: psychopdaROC/options/nriThresholds.title
 msgid "NRI Risk Categories"
 msgstr ""
 
@@ -52405,7 +52405,7 @@ msgstr ""
 msgid "NRI Summary"
 msgstr ""
 
-#: psychopdaroc/ui[7][1][0]/nriThresholds.label
+#: psychopdaROC/ui[7][1][0]/nriThresholds.label
 msgid "NRI thresholds (comma-separated)"
 msgstr ""
 
@@ -52554,7 +52554,7 @@ msgstr ""
 msgid "Number of bootstrap samples for CI estimation"
 msgstr ""
 
-#: enhancedroc/options/bootstrapSamples.description
+#: enhancedROC/options/bootstrapSamples.description
 #: methodcomparison/options/bootstrap_samples.description
 #: partialcorrelation/options/bootstrapSamples.description
 #: semimarkov/options/bootstrapSamples.description
@@ -53217,7 +53217,7 @@ msgstr ""
 msgid "Numeric code for the event of interest (primary event)"
 msgstr ""
 
-#: enhancedroc/options/predictors.description
+#: enhancedROC/options/predictors.description
 msgid "Numeric predictor variables for ROC analysis"
 msgstr ""
 
@@ -53820,13 +53820,13 @@ msgstr ""
 msgid "Optimal Cut-point Determination Results"
 msgstr ""
 
-#: enhancedroc/results/results/optimalCutoffSummary.columns.title
+#: enhancedROC/results/results/optimalCutoffSummary.columns.title
 #: timeroc/results/cutoffTable.columns.title
 #: timeroc/results/binaryROCTable.columns.title
 msgid "Optimal Cutoff"
 msgstr ""
 
-#: enhancedroc/results/results/optimalCutoffSummary.title
+#: enhancedROC/results/results/optimalCutoffSummary.title
 msgid "Optimal Cutoff Analysis"
 msgstr ""
 
@@ -53834,7 +53834,7 @@ msgstr ""
 msgid "Optimal Cutoff Values"
 msgstr ""
 
-#: enhancedroc/options/optimalCutoffs.title
+#: enhancedROC/options/optimalCutoffs.title
 msgid "Optimal Cutoffs Summary"
 msgstr ""
 
@@ -53873,7 +53873,7 @@ msgstr ""
 msgid "Optimal cutpoint values and associated metrics"
 msgstr ""
 
-#: psychopdaroc/results/resultsTable.title
+#: psychopdaROC/results/resultsTable.title
 msgid "Optimal Cutpoints and Performance"
 msgstr ""
 
@@ -54004,8 +54004,8 @@ msgid "Optimization method for parameter estimation"
 msgstr ""
 
 #: clinicalvalidationinteractive/options/optimization_metric.title
-#: psychopdaroc/options/metric.title
-#: psychopdaroc/ui[1][0]/metric.label
+#: psychopdaROC/options/metric.title
+#: psychopdaROC/ui[1][0]/metric.label
 #: treeadvanced/options/tuning_metric.title
 msgid "Optimization Metric"
 msgstr ""
@@ -54614,8 +54614,8 @@ msgstr ""
 #: continuousrelationship/ui[0][0].label
 #: decisioncurve/options/outcome.title
 #: decisioncurve/ui[0][0].label
-#: enhancedroc/options/outcome.title
-#: enhancedroc/ui[0][0].label
+#: enhancedROC/options/outcome.title
+#: enhancedROC/ui[0][0].label
 #: idi/options/outcome.title
 #: idi/ui[0][0].label
 #: modelbuilder/options/outcome.title
@@ -54965,7 +54965,7 @@ msgstr ""
 #: patientreported/ui[10][0].label
 #: penalizedcox/ui[8].label
 #: permutationsurvival/ui[4].label
-#: psychopdaroc/ui[3].label
+#: psychopdaROC/ui[3].label
 #: qualityoflife/ui[9][0].label
 #: rmst/ui[5].label
 #: stratifiedparametric/ui[5][0].label
@@ -54982,7 +54982,7 @@ msgstr ""
 
 #: enhancedfactorvariable/ui[1][1][0].label
 #: enhancedfrequency/ui[1][1][0].label
-#: enhancedroc/ui[1][1][0].label
+#: enhancedROC/ui[1][1][0].label
 #: ihccluster/ui[5].label
 #: likelihoodratio/ui[6].label
 msgid "Output Tables"
@@ -55017,7 +55017,7 @@ msgstr ""
 msgid "Overall"
 msgstr ""
 
-#: psychopdaroc/options/metric/accuracy.title
+#: psychopdaROC/options/metric/accuracy.title
 msgid "Overall accuracy"
 msgstr ""
 
@@ -55416,9 +55416,9 @@ msgstr ""
 #: distributionfit/results/goodnessOfFit.columns.title
 #: enhancednonparametric/results/normality.columns.title
 #: enhancednonparametric/results/tests.columns.title
-#: enhancedroc/results/results/rocComparisons.columns.title
-#: enhancedroc/results/results/detailedComparison.columns.title
-#: enhancedroc/results/results/statisticalSummary.columns.title
+#: enhancedROC/results/results/rocComparisons.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
+#: enhancedROC/results/results/statisticalSummary.columns.title
 #: excessmortality/results/coefficients.columns.title
 #: flexcomprisk/results/coefficientsTable.columns.title
 #: flexcomprisk/results/timeVaryingEffects.columns.title
@@ -55494,11 +55494,11 @@ msgstr ""
 #: pheval/results/stratifiedResults.columns.title
 #: plscox/results/modelCoefficients.columns.title
 #: plscox/results/riskStratification.columns.title
-#: psychopdaroc/results/simpleResultsTable.columns.title
-#: psychopdaroc/results/aucSummaryTable.columns.title
-#: psychopdaroc/results/delongComparisonTable.columns.title
-#: psychopdaroc/results/idiTable.columns.title
-#: psychopdaroc/results/nriTable.columns.title
+#: psychopdaROC/results/simpleResultsTable.columns.title
+#: psychopdaROC/results/aucSummaryTable.columns.title
+#: psychopdaROC/results/delongComparisonTable.columns.title
+#: psychopdaROC/results/idiTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
 #: qualitycontrol/results/trendAnalysis.columns.title
 #: qualitycontrol/results/outlierAnalysis.columns.title
 #: relativesurvival/results/excessMortalityTable.columns.title
@@ -55977,7 +55977,7 @@ msgstr ""
 #: comparingSurvival/options/pairwise.title
 #: crosstable/results/pairwiseTable.title
 #: economistplots/results/comparison_results.title
-#: enhancedroc/options/pairwiseComparisons.title
+#: enhancedROC/options/pairwiseComparisons.title
 #: grafify/options/comparison_method/pairwise.title
 #: jextractggstats/options/extract_components/pairwise_data.title
 #: jextractggstats/options/pairwise_comparisons.title
@@ -55995,7 +55995,7 @@ msgstr ""
 msgid "Pairwise comparisons"
 msgstr ""
 
-#: enhancedroc/results/results/rocComparisons.description
+#: enhancedROC/results/results/rocComparisons.description
 msgid "Pairwise comparisons between ROC curves"
 msgstr ""
 
@@ -56234,7 +56234,7 @@ msgstr ""
 #: poweranalysis/results/sensitivity_analysis_table.columns.title
 #: powercomprisk/results/powerResults.columns.title
 #: powercomprisk/results/sensitivityTable.columns.title
-#: psychopdaroc/results/bootstrapCITable.columns.title
+#: psychopdaROC/results/bootstrapCITable.columns.title
 #: raftgee/results/geeDiagnostics.columns.title
 #: rmstregression/results/bootstrapResults.columns.title
 #: robustaft/results/scaleEstimates.columns.title
@@ -56496,34 +56496,34 @@ msgstr ""
 msgid "Partial"
 msgstr ""
 
-#: enhancedroc/results/results/partialAucAnalysis.columns.title
-#: psychopdaroc/ui[6][0][0].label
-#: psychopdaroc/results/partialAUCTable.columns.title
+#: enhancedROC/results/results/partialAucAnalysis.columns.title
+#: psychopdaROC/ui[6][0][0].label
+#: psychopdaROC/results/partialAUCTable.columns.title
 msgid "Partial AUC"
 msgstr ""
 
-#: enhancedroc/options/partialAuc.title
-#: enhancedroc/results/results/partialAucAnalysis.title
+#: enhancedROC/options/partialAuc.title
+#: enhancedROC/results/results/partialAucAnalysis.title
 msgid "Partial AUC Analysis"
 msgstr ""
 
-#: enhancedroc/results/results/partialAucAnalysis.description
+#: enhancedROC/results/results/partialAucAnalysis.description
 msgid "Partial AUC analysis for specific sensitivity/specificity ranges"
 msgstr ""
 
-#: psychopdaroc/options/partialAUCfrom.title
+#: psychopdaROC/options/partialAUCfrom.title
 msgid "Partial AUC From (Specificity)"
 msgstr ""
 
-#: enhancedroc/options/partialRange.title
+#: enhancedROC/options/partialRange.title
 msgid "Partial AUC Range"
 msgstr ""
 
-#: psychopdaroc/results/partialAUCTable.title
+#: psychopdaROC/results/partialAUCTable.title
 msgid "Partial AUC Results"
 msgstr ""
 
-#: psychopdaroc/options/partialAUCto.title
+#: psychopdaROC/options/partialAUCto.title
 msgid "Partial AUC To (Specificity)"
 msgstr ""
 
@@ -57666,7 +57666,7 @@ msgstr ""
 msgid "Perform comprehensive stage migration analysis including monotonicity  checks, Will Rogers phenomenon detection, stage-specific validation,  and enhanced discrimination metrics. Provides detailed assessment of  staging system quality and migration patterns."
 msgstr ""
 
-#: enhancedroc/options/statisticalComparison.description
+#: enhancedROC/options/statisticalComparison.description
 msgid "Perform comprehensive statistical comparison between models"
 msgstr ""
 
@@ -57879,7 +57879,7 @@ msgstr ""
 msgid "Perform Pairwise Comparisons"
 msgstr ""
 
-#: enhancedroc/options/pairwiseComparisons.description
+#: enhancedROC/options/pairwiseComparisons.description
 msgid "Perform pairwise comparisons between ROC curves"
 msgstr ""
 
@@ -59025,7 +59025,7 @@ msgstr ""
 #: dendrogram/options/plotHeight.title
 #: economistplots/options/plot_height.title
 #: effectsize/options/plotHeight.title
-#: enhancedroc/options/plotHeight.title
+#: enhancedROC/options/plotHeight.title
 #: factoranalysis/options/plotHeight.title
 #: ggoncoplot/options/plotHeight.title
 #: jjsegmentedtotalbar/options/plot_height.title
@@ -59173,7 +59173,7 @@ msgstr ""
 #: biomarkerresponse/ui[3].label
 #: directbinomial/ui[4].label
 #: enhancedfactorvariable/ui[4][0][0][0].label
-#: enhancedroc/ui[1][3][0].label
+#: enhancedROC/ui[1][3][0].label
 #: flexcomprisk/ui[6].label
 #: jjriverplot/ui[1].label
 #: jjtreemap/ui[1].label
@@ -59287,7 +59287,7 @@ msgstr ""
 msgid "Plot Schoenfeld Residuals"
 msgstr ""
 
-#: enhancedroc/ui[5].label
+#: enhancedROC/ui[5].label
 #: factoranalysis/ui[5].label
 msgid "Plot Settings"
 msgstr ""
@@ -59337,7 +59337,7 @@ msgstr ""
 #: jiwillsurvive/options/plot_style.title
 #: jjridges/ui[1].label
 #: multisurvival/options/sty.title
-#: psychopdaroc/ui[4][1][0].label
+#: psychopdaROC/ui[4][1][0].label
 msgid "Plot Style"
 msgstr ""
 
@@ -59395,7 +59395,7 @@ msgstr ""
 #: autoeda/options/plot_theme.title
 #: enhancedfactorvariable/options/plotTheme.title
 #: enhancedfactorvariable/ui[4][0][1][0].label
-#: enhancedroc/options/plotTheme.title
+#: enhancedROC/options/plotTheme.title
 #: groupedforest/options/plot_theme.title
 #: hullplot/options/plot_theme.title
 #: jviolin/options/themex.title
@@ -59528,7 +59528,7 @@ msgstr ""
 #: dendrogram/options/plotWidth.title
 #: economistplots/options/plot_width.title
 #: effectsize/options/plotWidth.title
-#: enhancedroc/options/plotWidth.title
+#: enhancedROC/options/plotWidth.title
 #: factoranalysis/options/plotWidth.title
 #: ggoncoplot/options/plotWidth.title
 #: jjsegmentedtotalbar/options/plot_width.title
@@ -60131,8 +60131,8 @@ msgstr ""
 msgid "Positive Cases"
 msgstr ""
 
-#: psychopdaroc/options/positiveClass.title
-#: psychopdaroc/ui[0][1]/positiveClass.label
+#: psychopdaROC/options/positiveClass.title
+#: psychopdaROC/ui[0][1]/positiveClass.label
 msgid "Positive Class"
 msgstr ""
 
@@ -60640,7 +60640,7 @@ msgstr ""
 #: assayoptimization/options/power_analysis.title
 #: biopsysimulation/options/power_analysis.title
 #: effectsize/options/power_analysis.title
-#: enhancedroc/options/powerAnalysis.title
+#: enhancedROC/options/powerAnalysis.title
 #: kappaSizeCI/options.menuSubgroup
 #: kappaSizeFixedN/options.menuSubgroup
 #: kappaSizePower/options.menuSubgroup
@@ -60838,12 +60838,12 @@ msgstr ""
 #: decisionpanel/results/optimalPanel.columns.title
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/allCombinations.columns.title
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.columns.title
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
 #: nogoldstandard/results/test_metrics.columns.title
-#: psychopdaroc/results/resultsTable.template.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 msgid "PPV"
 msgstr ""
@@ -60952,12 +60952,12 @@ msgstr ""
 msgid "Precision Study Visualization"
 msgstr ""
 
-#: psychopdaroc/options/precisionRecallCurve.title
-#: psychopdaroc/ui[5][0]/precisionRecallCurve.label
+#: psychopdaROC/options/precisionRecallCurve.title
+#: psychopdaROC/ui[5][0]/precisionRecallCurve.label
 msgid "Precision-Recall Curve"
 msgstr ""
 
-#: psychopdaroc/results/precisionRecallPlot.title
+#: psychopdaROC/results/precisionRecallPlot.title
 msgid "Precision-Recall Curves"
 msgstr ""
 
@@ -61426,13 +61426,13 @@ msgstr ""
 msgid "Predictive Values Analysis"
 msgstr ""
 
-#: psychopdaroc/options/showPrevalencePlot.title
+#: psychopdaROC/options/showPrevalencePlot.title
 msgid "Predictive Values vs Prevalence"
 msgstr ""
 
 #: bayesiandiagnostic/results/predictiveValuesPlot.title
-#: psychopdaroc/ui[5][0]/showPrevalencePlot.label
-#: psychopdaroc/results/prevalencePlot.title
+#: psychopdaROC/ui[5][0]/showPrevalencePlot.label
+#: psychopdaROC/results/prevalencePlot.title
 msgid "Predictive Values vs. Prevalence"
 msgstr ""
 
@@ -61446,22 +61446,22 @@ msgstr ""
 msgid "Predictive variables for survival"
 msgstr ""
 
-#: enhancedroc/results/results/aucSummary.columns.title
-#: enhancedroc/results/results/optimalCutoffSummary.columns.title
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
-#: enhancedroc/results/results/partialAucAnalysis.columns.title
+#: enhancedROC/results/results/aucSummary.columns.title
+#: enhancedROC/results/results/optimalCutoffSummary.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/results/results/partialAucAnalysis.columns.title
 #: jpps/results/pps_scores.columns.title
 #: nonparametricregression/results/parameterEstimates.columns.title
 msgid "Predictor"
 msgstr ""
 
-#: enhancedroc/results/results/rocComparisons.columns.title
+#: enhancedROC/results/results/rocComparisons.columns.title
 msgid "Predictor 1"
 msgstr ""
 
-#: enhancedroc/results/results/rocComparisons.columns.title
+#: enhancedROC/results/results/rocComparisons.columns.title
 msgid "Predictor 2"
 msgstr ""
 
@@ -61493,8 +61493,8 @@ msgstr ""
 #: conditionalinference/ui[0][1].label
 #: curemodels/options/predictors.title
 #: curemodels/ui[0][2].label
-#: enhancedroc/options/predictors.title
-#: enhancedroc/ui[0][1].label
+#: enhancedROC/options/predictors.title
+#: enhancedROC/ui[0][1].label
 #: extratrees/options/predictors.title
 #: extratrees/ui[0][1].label
 #: flexmultistate/options/predictors.title
@@ -61598,7 +61598,7 @@ msgstr ""
 #: cotest/ui[3][0]/prevalence.label
 #: decision/results/ratioTable.columns.title
 #: decisioncalculator/results/ratioTable.columns.title
-#: enhancedroc/results/results/clinicalApplicationMetrics.columns.title
+#: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: hiddenmarkov/results/statePrevalence.columns.title
 #: hierarchicalbayes/results/studySummary.columns.title
 #: screeningcalculator/results/singleTestTable.columns.title
@@ -61946,11 +61946,11 @@ msgstr ""
 msgid "Prior PIP"
 msgstr ""
 
-#: psychopdaroc/options/priorPrev.title
+#: psychopdaROC/options/priorPrev.title
 msgid "Prior Prevalence Value"
 msgstr ""
 
-#: psychopdaroc/ui[2][0]/priorPrev.label
+#: psychopdaROC/ui[2][0]/priorPrev.label
 msgid "Prior prevalence value"
 msgstr ""
 
@@ -62385,11 +62385,11 @@ msgstr ""
 msgid "Product Kernel"
 msgstr ""
 
-#: psychopdaroc/options/metric/prod_ppv_npv.title
+#: psychopdaROC/options/metric/prod_ppv_npv.title
 msgid "Product of PPV and NPV"
 msgstr ""
 
-#: psychopdaroc/options/metric/prod_sens_spec.title
+#: psychopdaROC/options/metric/prod_sens_spec.title
 msgid "Product of sensitivity and specificity"
 msgstr ""
 
@@ -62454,7 +62454,7 @@ msgstr ""
 msgid "Progesterone Receptor (PR)"
 msgstr ""
 
-#: enhancedroc/options/clinicalContext/prognosis.title
+#: enhancedROC/options/clinicalContext/prognosis.title
 #: ihcstats/results/prognosticTable.columns.title
 #: treeadvanced/options/clinical_context/prognosis.title
 #: treecompare/options/clinical_context/prognosis.title
@@ -62797,7 +62797,7 @@ msgstr ""
 msgid "Provide clinical context for frequency analysis results"
 msgstr ""
 
-#: enhancedroc/options/clinical_interpretation.description
+#: enhancedROC/options/clinical_interpretation.description
 msgid "Provide clinical context for ROC analysis results"
 msgstr ""
 
@@ -63066,7 +63066,7 @@ msgstr ""
 msgid "Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding."
 msgstr ""
 
-#: psychopdaroc/ui[4][1][0]/cleanPlot.label
+#: psychopdaROC/ui[4][1][0]/cleanPlot.label
 msgid "Publication-quality plot"
 msgstr ""
 
@@ -63078,7 +63078,7 @@ msgstr ""
 msgid "Publication-ready forest plot of effect sizes"
 msgstr ""
 
-#: psychopdaroc/options/cleanPlot.title
+#: psychopdaROC/options/cleanPlot.title
 msgid "Publication-Ready Plot"
 msgstr ""
 
@@ -63535,11 +63535,11 @@ msgstr ""
 msgid "Quantile Plot"
 msgstr ""
 
-#: psychopdaroc/options/quantiles.title
+#: psychopdaROC/options/quantiles.title
 msgid "Quantile Positions"
 msgstr ""
 
-#: psychopdaroc/ui[4][2][0]/quantiles.label
+#: psychopdaROC/ui[4][2][0]/quantiles.label
 msgid "Quantile positions"
 msgstr ""
 
@@ -64110,11 +64110,11 @@ msgstr ""
 msgid "Range for k Selection"
 msgstr ""
 
-#: enhancedroc/options/partialRange.description
+#: enhancedROC/options/partialRange.description
 msgid "Range for partial AUC (specificity_min,specificity_max)"
 msgstr ""
 
-#: enhancedroc/results/results/partialAucAnalysis.columns.title
+#: enhancedROC/results/results/partialAucAnalysis.columns.title
 msgid "Range Max"
 msgstr ""
 
@@ -64122,7 +64122,7 @@ msgstr ""
 msgid "Range maximum"
 msgstr ""
 
-#: enhancedroc/results/results/partialAucAnalysis.columns.title
+#: enhancedROC/results/results/partialAucAnalysis.columns.title
 msgid "Range Min"
 msgstr ""
 
@@ -64146,7 +64146,7 @@ msgstr ""
 msgid "Range to test when auto-selecting k"
 msgstr ""
 
-#: enhancedroc/results/results/partialAucAnalysis.columns.title
+#: enhancedROC/results/results/partialAucAnalysis.columns.title
 msgid "Range Type"
 msgstr ""
 
@@ -64572,8 +64572,8 @@ msgstr ""
 msgid "Recalled (N)"
 msgstr ""
 
-#: package/analyses/psychopdaroc.description
-#: psychopdaroc/options.description.main
+#: package/analyses/psychopdaROC.description
+#: psychopdaROC/options.description.main
 msgid "Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination."
 msgstr ""
 
@@ -64871,8 +64871,8 @@ msgstr ""
 #: clinicaltrialdesign/results/regulatory_considerations.columns.title
 #: epidemiosurvival/results/age_standardized_rates.columns.title
 #: linechart/options/reflineLabel.default
-#: psychopdaroc/results/idiTable.columns.title
-#: psychopdaroc/results/nriTable.columns.title
+#: psychopdaROC/results/idiTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
 msgid "Reference"
 msgstr ""
 
@@ -65079,8 +65079,8 @@ msgstr ""
 msgid "Reference Value for Testing"
 msgstr ""
 
-#: psychopdaroc/options/refVar.title
-#: psychopdaroc/ui[7][1][0]/refVar.label
+#: psychopdaROC/options/refVar.title
+#: psychopdaROC/ui[7][1][0]/refVar.label
 msgid "Reference Variable"
 msgstr ""
 
@@ -66222,7 +66222,7 @@ msgstr ""
 #: clinicaldataintegration/results/consistencyChecks.columns.title
 #: decisionpanel/results/resultImportance.columns.title
 #: effectsize/results/results/assumptions.columns.title
-#: enhancedroc/results/results/rocComparisons.columns.title
+#: enhancedROC/results/results/rocComparisons.columns.title
 #: factoranalysis/results/results/adequacyTable.columns.title
 #: factoranalysis/results/results/goodnessOfFit.columns.title
 #: methodcomparison/results/clinicalAssessment.columns.title
@@ -66461,7 +66461,7 @@ msgstr ""
 #: jjridges/options/legend_position/right.title
 #: jjtreemap/options/labelAlignH/right.title
 #: jvisr/options/legend_position/right.title
-#: psychopdaroc/options/legendPosition/right.title
+#: psychopdaROC/options/legendPosition/right.title
 #: raincloud/options/dots_side/right.title
 msgid "Right"
 msgstr ""
@@ -66681,7 +66681,7 @@ msgstr ""
 msgid "Risk Ratio"
 msgstr ""
 
-#: psychopdaroc/options/metric/risk_ratio.title
+#: psychopdaROC/options/metric/risk_ratio.title
 msgid "Risk ratio"
 msgstr ""
 
@@ -67280,19 +67280,19 @@ msgstr ""
 msgid "Robustness Testing"
 msgstr ""
 
-#: package/analyses/psychopdaroc.menuSubgroup
-#: psychopdaroc/options.menuSubgroup
+#: package/analyses/psychopdaROC.menuSubgroup
+#: psychopdaROC/options.menuSubgroup
 msgid "ROC"
 msgstr ""
 
-#: package/analyses/psychopdaroc.title
-#: package/analyses/psychopdaroc.menuTitle
+#: package/analyses/psychopdaROC.title
+#: package/analyses/psychopdaROC.menuTitle
 #: clinicalprediction/options/roc_analysis.title
 #: deeplearningprediction/results/performanceAnalysis/rocAnalysis.title
 #: mlpathology/options/roc_analysis.title
-#: psychopdaroc/options.title
-#: psychopdaroc/ui.title
-#: psychopdaroc/results.title
+#: psychopdaROC/options.title
+#: psychopdaROC/ui.title
+#: psychopdaROC/results.title
 #: screeningevaluation/options/roc_analysis.title
 #: timedependent/ui[5][0].label
 msgid "ROC Analysis"
@@ -67306,12 +67306,12 @@ msgstr ""
 msgid "ROC Analysis Results"
 msgstr ""
 
-#: psychopdaroc/results/simpleResultsTable.title
+#: psychopdaROC/results/simpleResultsTable.title
 msgid "ROC Analysis Summary"
 msgstr ""
 
-#: package/analyses/enhancedroc.menuSubtitle
-#: enhancedroc/options.menuSubtitle
+#: package/analyses/enhancedROC.menuSubtitle
+#: enhancedROC/options.menuSubtitle
 msgid "ROC analysis with BlueSky integration"
 msgstr ""
 
@@ -67320,8 +67320,8 @@ msgstr ""
 msgid "ROC Analysis with Optimal Cut-point"
 msgstr ""
 
-#: package/analyses/psychopdaroc.menuSubtitle
-#: psychopdaroc/options.menuSubtitle
+#: package/analyses/psychopdaROC.menuSubtitle
+#: psychopdaROC/options.menuSubtitle
 msgid "ROC Analysis, AUC, Cutpoints"
 msgstr ""
 
@@ -67354,7 +67354,7 @@ msgid "ROC Curve"
 msgstr ""
 
 #: clinicalprediction/results/roc_plot.title
-#: enhancedroc/results/results/rocCurvePlot.title
+#: enhancedROC/results/results/rocCurvePlot.title
 #: imagingcorrelation/options/roc_curves.title
 #: imagingcorrelation/results/rocPlot.title
 #: screeningevaluation/results/roc_curve_plot.title
@@ -67370,11 +67370,11 @@ msgstr ""
 msgid "ROC Curve Comparison"
 msgstr ""
 
-#: enhancedroc/results/results/rocComparisons.title
+#: enhancedROC/results/results/rocComparisons.title
 msgid "ROC Curve Comparisons"
 msgstr ""
 
-#: enhancedroc/options/rocCurve.title
+#: enhancedROC/options/rocCurve.title
 #: optimalcutpoint/options/plot_roc.title
 msgid "ROC Curve Plot"
 msgstr ""
@@ -67387,7 +67387,7 @@ msgstr ""
 msgid "ROC curve showing optimal decision thresholds"
 msgstr ""
 
-#: enhancedroc/options/smoothMethod.title
+#: enhancedROC/options/smoothMethod.title
 msgid "ROC Curve Smoothing"
 msgstr ""
 
@@ -67411,7 +67411,7 @@ msgstr ""
 #: deeplearningprediction/results/rocCurvePlot.title
 #: multiclassdiagnostics/options/showROC.title
 #: multiclassdiagnostics/results/rocPlot.title
-#: psychopdaroc/results/plotROC.title
+#: psychopdaROC/results/plotROC.title
 #: timeroc/results/rocPlot.title
 msgid "ROC Curves"
 msgstr ""
@@ -67440,7 +67440,7 @@ msgstr ""
 msgid "ROC Curves with Cross-Validation Bands"
 msgstr ""
 
-#: enhancedroc/results/results/rocCurvePlot.description
+#: enhancedROC/results/results/rocCurvePlot.description
 msgid "ROC curves with optimal cutoff points"
 msgstr ""
 
@@ -67460,11 +67460,11 @@ msgstr ""
 msgid "ROC Plot"
 msgstr ""
 
-#: psychopdaroc/ui[6][1][0].label
+#: psychopdaROC/ui[6][1][0].label
 msgid "ROC Smoothing"
 msgstr ""
 
-#: psychopdaroc/options/rocSmoothingMethod.title
+#: psychopdaROC/options/rocSmoothingMethod.title
 msgid "ROC Smoothing Method"
 msgstr ""
 
@@ -68465,7 +68465,7 @@ msgstr ""
 msgid "Screened (N)"
 msgstr ""
 
-#: enhancedroc/options/clinicalContext/screening.title
+#: enhancedROC/options/clinicalContext/screening.title
 #: treeadvanced/options/clinical_context/screening.title
 #: treecompare/options/clinical_context/screening.title
 msgid "Screening"
@@ -69133,7 +69133,7 @@ msgstr ""
 msgid "Select whether data represents independent groups or repeated measurements"
 msgstr ""
 
-#: psychopdaroc/options/positiveClass.description.ui
+#: psychopdaROC/options/positiveClass.description.ui
 msgid "Select which level of the class variable represents the positive class (disease/condition present)."
 msgstr ""
 
@@ -69402,9 +69402,9 @@ msgstr ""
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/optimalPanelsBySize.columns.title
 #: decisionpanel/results/allCombinations.columns.title
-#: enhancedroc/results/results/optimalCutoffSummary.columns.title
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
+#: enhancedROC/results/results/optimalCutoffSummary.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
 #: hierarchicalbayes/results/studySummary.columns.title
 #: ihcscoring/results/biomarkerspecific/clinicalcutpoints.columns.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.columns.title
@@ -69412,8 +69412,8 @@ msgstr ""
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
 #: nogoldstandard/results/test_metrics.columns.title
 #: nogoldstandard/results/test_metrics.columns.superTitle
-#: psychopdaroc/results/resultsTable.template.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 #: screeningcalculator/results/singleTestTable.columns.title
 #: sequentialtests/options/test1_sens.title
 #: sequentialtests/options/test2_sens.title
@@ -69445,7 +69445,7 @@ msgstr ""
 msgid "Sensitivity ="
 msgstr ""
 
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
 msgid "Sensitivity 95% CI"
 msgstr ""
 
@@ -69541,7 +69541,7 @@ msgstr ""
 msgid "Sensitivity analysis tornado diagram"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysisPlot.description
+#: enhancedROC/results/results/cutoffAnalysisPlot.description
 msgid "Sensitivity and specificity across cutoff values"
 msgstr ""
 
@@ -69562,7 +69562,7 @@ msgstr ""
 msgid "Sensitivity Parameter"
 msgstr ""
 
-#: enhancedroc/options/sensitivityThreshold.title
+#: enhancedROC/options/sensitivityThreshold.title
 msgid "Sensitivity Threshold"
 msgstr ""
 
@@ -69583,12 +69583,12 @@ msgstr ""
 msgid "Sensitivity, Specificity, PPV, NPV, ..."
 msgstr ""
 
-#: psychopdaroc/options/showCriterionPlot.title
+#: psychopdaROC/options/showCriterionPlot.title
 msgid "Sensitivity/Specificity vs Threshold"
 msgstr ""
 
-#: psychopdaroc/ui[5][0]/showCriterionPlot.label
-#: psychopdaroc/results/criterionPlot.title
+#: psychopdaROC/ui[5][0]/showCriterionPlot.label
+#: psychopdaROC/results/criterionPlot.title
 msgid "Sensitivity/Specificity vs. Threshold"
 msgstr ""
 
@@ -70141,11 +70141,11 @@ msgstr ""
 msgid "Show All"
 msgstr ""
 
-#: psychopdaroc/options/allObserved.title
+#: psychopdaROC/options/allObserved.title
 msgid "Show All Observed Cutpoints"
 msgstr ""
 
-#: psychopdaroc/ui[2][0]/allObserved.label
+#: psychopdaROC/ui[2][0]/allObserved.label
 msgid "Show all observed cutpoints"
 msgstr ""
 
@@ -70299,11 +70299,11 @@ msgstr ""
 msgid "Show CI Plot"
 msgstr ""
 
-#: psychopdaroc/options/quantileCIs.title
+#: psychopdaROC/options/quantileCIs.title
 msgid "Show CIs at Quantiles"
 msgstr ""
 
-#: psychopdaroc/ui[4][2][0]/quantileCIs.label
+#: psychopdaROC/ui[4][2][0]/quantileCIs.label
 msgid "Show CIs at quantiles"
 msgstr ""
 
@@ -70475,15 +70475,15 @@ msgstr ""
 msgid "Show Computational Time"
 msgstr ""
 
-#: enhancedroc/options/showConfidenceBands.title
+#: enhancedROC/options/showConfidenceBands.title
 #: jiwillsurvive/options/show_confidence_bands.title
 #: mediansurvival/options/show_confidence_bands.title
 #: nonparametricregression/options/show_confidence_bands.title
-#: psychopdaroc/options/showConfidenceBands.title
+#: psychopdaROC/options/showConfidenceBands.title
 msgid "Show Confidence Bands"
 msgstr ""
 
-#: psychopdaroc/ui[4][2][0]/showConfidenceBands.label
+#: psychopdaROC/ui[4][2][0]/showConfidenceBands.label
 msgid "Show confidence bands"
 msgstr ""
 
@@ -70516,11 +70516,11 @@ msgstr ""
 msgid "Show confidence intervals"
 msgstr ""
 
-#: psychopdaroc/options/sensSpecTable.title
+#: psychopdaROC/options/sensSpecTable.title
 msgid "Show Confusion Matrices"
 msgstr ""
 
-#: psychopdaroc/ui[3][0]/sensSpecTable.label
+#: psychopdaROC/ui[3][0]/sensSpecTable.label
 msgid "Show confusion matrices"
 msgstr ""
 
@@ -70667,7 +70667,7 @@ msgstr ""
 msgid "Show Cumulative Statistics"
 msgstr ""
 
-#: enhancedroc/options/showCutoffPoints.title
+#: enhancedROC/options/showCutoffPoints.title
 msgid "Show Cutoff Points"
 msgstr ""
 
@@ -71448,7 +71448,7 @@ msgstr ""
 msgid "Show methodology explanations"
 msgstr ""
 
-#: enhancedroc/options/showMetricsDiff.title
+#: enhancedROC/options/showMetricsDiff.title
 msgid "Show Metrics Differences"
 msgstr ""
 
@@ -71700,7 +71700,7 @@ msgstr ""
 msgid "Show Optimal Cutoff Values"
 msgstr ""
 
-#: psychopdaroc/ui[4][0][0]/showOptimalPoint.label
+#: psychopdaROC/ui[4][0][0]/showOptimalPoint.label
 msgid "Show optimal cutpoint"
 msgstr ""
 
@@ -72169,12 +72169,12 @@ msgstr ""
 
 #: modelbuilder/options/showROCCurves.title
 #: multiclassdiagnostics/ui[1][0][0]/showROC.label
-#: psychopdaroc/options/plotROC.title
+#: psychopdaROC/options/plotROC.title
 msgid "Show ROC Curves"
 msgstr ""
 
 #: modelbuilder/ui[7][1][0]/showROCCurves.label
-#: psychopdaroc/ui[4][0][0]/plotROC.label
+#: psychopdaROC/ui[4][0][0]/plotROC.label
 msgid "Show ROC curves"
 msgstr ""
 
@@ -72310,11 +72310,11 @@ msgstr ""
 msgid "Show Standard Error"
 msgstr ""
 
-#: psychopdaroc/options/displaySE.title
+#: psychopdaROC/options/displaySE.title
 msgid "Show Standard Error Bands"
 msgstr ""
 
-#: psychopdaroc/ui[4][1][0]/displaySE.label
+#: psychopdaROC/ui[4][1][0]/displaySE.label
 msgid "Show standard error bands"
 msgstr ""
 
@@ -72556,11 +72556,11 @@ msgstr ""
 msgid "Show Threshold Optimization Plot"
 msgstr ""
 
-#: psychopdaroc/options/showThresholdTable.title
+#: psychopdaROC/options/showThresholdTable.title
 msgid "Show Threshold Table"
 msgstr ""
 
-#: psychopdaroc/ui[3][0]/showThresholdTable.label
+#: psychopdaROC/ui[3][0]/showThresholdTable.label
 msgid "Show threshold table"
 msgstr ""
 
@@ -73176,7 +73176,7 @@ msgstr ""
 msgid "Single Predictor vs Target"
 msgstr ""
 
-#: enhancedroc/options/analysisType/single.title
+#: enhancedROC/options/analysisType/single.title
 msgid "Single ROC Analysis"
 msgstr ""
 
@@ -73494,7 +73494,7 @@ msgstr ""
 
 #: flexiblerelativesurvival/options/smoothingMethod.title
 #: flexiblerelativesurvival/ui[1][0]/smoothingMethod.label
-#: psychopdaroc/ui[6][1][0]/rocSmoothingMethod.label
+#: psychopdaROC/ui[6][1][0]/rocSmoothingMethod.label
 msgid "Smoothing method"
 msgstr ""
 
@@ -74221,9 +74221,9 @@ msgstr ""
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/optimalPanelsBySize.columns.title
 #: decisionpanel/results/allCombinations.columns.title
-#: enhancedroc/results/results/optimalCutoffSummary.columns.title
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
+#: enhancedROC/results/results/optimalCutoffSummary.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
 #: hierarchicalbayes/results/studySummary.columns.title
 #: ihcscoring/results/biomarkerspecific/clinicalcutpoints.columns.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.columns.title
@@ -74231,8 +74231,8 @@ msgstr ""
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
 #: nogoldstandard/results/test_metrics.columns.title
 #: nogoldstandard/results/test_metrics.columns.superTitle
-#: psychopdaroc/results/resultsTable.template.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 #: screeningcalculator/results/singleTestTable.columns.title
 #: sequentialtests/options/test1_spec.title
 #: sequentialtests/options/test2_spec.title
@@ -74264,7 +74264,7 @@ msgstr ""
 msgid "Specificity ="
 msgstr ""
 
-#: enhancedroc/results/results/diagnosticPerformance.columns.title
+#: enhancedROC/results/results/diagnosticPerformance.columns.title
 msgid "Specificity 95% CI"
 msgstr ""
 
@@ -74276,11 +74276,11 @@ msgstr ""
 msgid "Specificity 95% CI Upper"
 msgstr ""
 
-#: psychopdaroc/results/partialAUCTable.columns.title
+#: psychopdaROC/results/partialAUCTable.columns.title
 msgid "Specificity Range"
 msgstr ""
 
-#: enhancedroc/options/specificityThreshold.title
+#: enhancedROC/options/specificityThreshold.title
 msgid "Specificity Threshold"
 msgstr ""
 
@@ -75003,7 +75003,7 @@ msgstr ""
 #: conditionalsurvival/results/condsurvTable.columns.title
 #: contTables/results/gamma.columns.title
 #: effectsize/results/results/metaAnalysisFormat.columns.title
-#: enhancedroc/results/results/aucSummary.columns.title
+#: enhancedROC/results/results/aucSummary.columns.title
 #: explainableai/results/featureimportance/importancetable.columns.title
 #: extratrees/results/variableImportance.columns.title
 #: flexparametricadvanced/results/distribution_parameters.columns.title
@@ -75587,7 +75587,7 @@ msgstr ""
 msgid "Statistical comparison of digital vs manual scoring"
 msgstr ""
 
-#: enhancedroc/results/results/statisticalSummary.title
+#: enhancedROC/results/results/statisticalSummary.title
 msgid "Statistical Comparison Summary"
 msgstr ""
 
@@ -75603,7 +75603,7 @@ msgstr ""
 msgid "Statistical comparisons between molecular subtypes"
 msgstr ""
 
-#: enhancedroc/results/results/statisticalSummary.columns.title
+#: enhancedROC/results/results/statisticalSummary.columns.title
 msgid "Statistical Conclusion"
 msgstr ""
 
@@ -75727,7 +75727,7 @@ msgstr ""
 #: effectsize/results/results/methodsExplanation.title
 #: enhancedfactorvariable/results/results/methodsExplanation.title
 #: enhancedfrequency/results/results/methodsExplanation.title
-#: enhancedroc/results/results/methodsExplanation.title
+#: enhancedROC/results/results/methodsExplanation.title
 #: enhancedtwowayfrequency/results/methodsExplanation.title
 #: partialcorrelation/results/methodsExplanation.title
 msgid "Statistical Methods and References"
@@ -75750,7 +75750,7 @@ msgstr ""
 msgid "Statistical model comparison"
 msgstr ""
 
-#: enhancedroc/options/statisticalComparison.title
+#: enhancedROC/options/statisticalComparison.title
 msgid "Statistical Model Comparison"
 msgstr ""
 
@@ -75781,7 +75781,7 @@ msgstr ""
 
 #: chisqposttest/ui[1].label
 #: enhancedfactorvariable/ui[1][2][0].label
-#: enhancedroc/ui[2].label
+#: enhancedROC/ui[2].label
 #: jjbetweenstats/ui[1][1].label
 #: jjcorrmat/ui[1][1].label
 #: jjdotplotstats/ui[1][1].label
@@ -75925,7 +75925,7 @@ msgstr ""
 #: bbcplots/options/stat_method.title
 #: clinicaltrialdesign/options/test_type.title
 #: economistplots/options/stat_method.title
-#: enhancedroc/results/results/statisticalSummary.columns.title
+#: enhancedROC/results/results/statisticalSummary.columns.title
 #: jextractggstats/options/statistical_test.title
 #: jjridges/options/test_type.title
 #: jjridges/ui[3][0]/test_type.label
@@ -76995,7 +76995,7 @@ msgstr ""
 msgid "Subgroup Variable (optional)"
 msgstr ""
 
-#: psychopdaroc/options/subGroup.title
+#: psychopdaROC/options/subGroup.title
 #: treatmentmeta/options/subgroup_var.title
 msgid "Subgroup Variable (Optional)"
 msgstr ""
@@ -77173,11 +77173,11 @@ msgstr ""
 msgid "Sum"
 msgstr ""
 
-#: psychopdaroc/options/metric/sum_ppv_npv.title
+#: psychopdaROC/options/metric/sum_ppv_npv.title
 msgid "Sum of PPV and NPV"
 msgstr ""
 
-#: psychopdaroc/options/metric/sum_sens_spec.title
+#: psychopdaROC/options/metric/sum_sens_spec.title
 msgid "Sum of sensitivity and specificity"
 msgstr ""
 
@@ -77317,7 +77317,7 @@ msgstr ""
 msgid "Summary of Outcome Recoding"
 msgstr ""
 
-#: enhancedroc/results/results/statisticalSummary.description
+#: enhancedROC/results/results/statisticalSummary.description
 msgid "Summary of statistical tests for model comparison"
 msgstr ""
 
@@ -79839,8 +79839,8 @@ msgstr ""
 #: condsurvival/results/groupComparisonTable.columns.title
 #: continuousrelationship/results/linearityTest.columns.title
 #: enhancednonparametric/results/posthoc.columns.title
-#: enhancedroc/results/results/rocComparisons.columns.title
-#: enhancedroc/results/results/statisticalSummary.columns.title
+#: enhancedROC/results/results/rocComparisons.columns.title
+#: enhancedROC/results/results/statisticalSummary.columns.title
 #: featurequality/results/normality_analysis.columns.title
 #: flexparametricadv/results/goodnessOfFitTests.columns.title
 #: flexparametricadvanced/results/goodness_of_fit_tests.columns.title
@@ -79939,12 +79939,12 @@ msgstr ""
 msgid "Test Value (for one-sample test)"
 msgstr ""
 
-#: psychopdaroc/options/showDotPlot.title
+#: psychopdaROC/options/showDotPlot.title
 msgid "Test Value Distribution"
 msgstr ""
 
-#: psychopdaroc/ui[5][0]/showDotPlot.label
-#: psychopdaroc/results/dotPlot.title
+#: psychopdaROC/ui[5][0]/showDotPlot.label
+#: psychopdaROC/results/dotPlot.title
 msgid "Test Values Distribution"
 msgstr ""
 
@@ -79953,8 +79953,8 @@ msgstr ""
 msgid "Test Variable"
 msgstr ""
 
-#: psychopdaroc/options/dependentVars.title
-#: psychopdaroc/ui[0][0].label
+#: psychopdaROC/options/dependentVars.title
+#: psychopdaROC/ui[0][0].label
 msgid "Test Variables"
 msgstr ""
 
@@ -80730,7 +80730,7 @@ msgstr ""
 msgid "Threshold Violation Plots"
 msgstr ""
 
-#: enhancedroc/ui[1][2][0].label
+#: enhancedROC/ui[1][2][0].label
 msgid "Thresholds"
 msgstr ""
 
@@ -80752,8 +80752,8 @@ msgid "Tie Breaking"
 msgstr ""
 
 #: agreement/options/tie_breaking.title
-#: psychopdaroc/options/break_ties.title
-#: psychopdaroc/ui[1][1][0]/break_ties.label
+#: psychopdaROC/options/break_ties.title
+#: psychopdaROC/ui[1][1][0]/break_ties.label
 msgid "Tie Breaking Method"
 msgstr ""
 
@@ -82156,7 +82156,7 @@ msgstr ""
 msgid "To Node"
 msgstr ""
 
-#: psychopdaroc/ui[6][0][0]/partialAUCto.label
+#: psychopdaROC/ui[6][0][0]/partialAUCto.label
 msgid "To specificity"
 msgstr ""
 
@@ -82247,7 +82247,7 @@ msgstr ""
 msgid "Top Feature 3"
 msgstr ""
 
-#: psychopdaroc/options/legendPosition/topleft.title
+#: psychopdaROC/options/legendPosition/topleft.title
 msgid "Top left"
 msgstr ""
 
@@ -82273,7 +82273,7 @@ msgstr ""
 msgid "Top Probability Models"
 msgstr ""
 
-#: psychopdaroc/options/legendPosition/topright.title
+#: psychopdaROC/options/legendPosition/topright.title
 msgid "Top right"
 msgstr ""
 
@@ -82487,7 +82487,7 @@ msgstr ""
 msgid "Total Uncertainty"
 msgstr ""
 
-#: psychopdaroc/options/metric/total_utility.title
+#: psychopdaROC/options/metric/total_utility.title
 msgid "Total utility"
 msgstr ""
 
@@ -83644,7 +83644,7 @@ msgstr ""
 msgid "True Effect Size Scenarios"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
 msgid "True Negative"
 msgstr ""
 
@@ -83666,7 +83666,7 @@ msgstr ""
 msgid "True Negatives (TN)"
 msgstr ""
 
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
 msgid "True Positive"
 msgstr ""
 
@@ -84091,7 +84091,7 @@ msgstr ""
 msgid "Type of regression model to fit: - Linear: For continuous outcomes - Logistic: For binary outcomes (odds ratios) - Cox: For survival analysis (hazard ratios) - Poisson: For count outcomes (rate ratios)"
 msgstr ""
 
-#: enhancedroc/options/analysisType.description
+#: enhancedROC/options/analysisType.description
 msgid "Type of ROC analysis to perform"
 msgstr ""
 
@@ -85174,7 +85174,7 @@ msgstr ""
 
 #: effectsize/options/bluesky_integration.description
 #: enhancedfrequency/options/bluesky_integration.description
-#: enhancedroc/options/bluesky_integration.description
+#: enhancedROC/options/bluesky_integration.description
 #: enhancedtwowayfrequency/options/bluesky_integration.description
 #: factoranalysis/options/bluesky_integration.description
 #: partialcorrelation/options/bluesky_integration.description
@@ -85190,7 +85190,7 @@ msgstr ""
 msgid "Use BlueSky-style error handling with graceful degradation"
 msgstr ""
 
-#: enhancedroc/options/useBootstrap.title
+#: enhancedROC/options/useBootstrap.title
 msgid "Use Bootstrap"
 msgstr ""
 
@@ -85212,7 +85212,7 @@ msgid "Use bootstrap methods for confidence interval estimation"
 msgstr ""
 
 #: effectsize/options/bootstrap_ci.description
-#: enhancedroc/options/useBootstrap.description
+#: enhancedROC/options/useBootstrap.description
 msgid "Use bootstrap methods for confidence intervals"
 msgstr ""
 
@@ -85476,11 +85476,11 @@ msgstr ""
 msgid "Use Pretrained Weights"
 msgstr ""
 
-#: psychopdaroc/options/usePriorPrev.title
+#: psychopdaROC/options/usePriorPrev.title
 msgid "Use Prior Prevalence"
 msgstr ""
 
-#: psychopdaroc/ui[2][0]/usePriorPrev.label
+#: psychopdaROC/ui[2][0]/usePriorPrev.label
 msgid "Use prior prevalence"
 msgstr ""
 
@@ -85939,7 +85939,7 @@ msgstr ""
 #: enhancedfrequency/results/results/datasetOverview.columns.title
 #: enhancedfrequency/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancednonparametric/results/effectsizes.columns.title
-#: enhancedroc/results/results/comprehensiveAnalysisSummary.columns.title
+#: enhancedROC/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedtwowayfrequency/results/associationMeasuresTable.columns.title
 #: enhancedtwowayfrequency/results/diagnostics.columns.title
 #: enhancedtwowayfrequency/results/comprehensiveAnalysisSummary.columns.title
@@ -86284,13 +86284,13 @@ msgstr ""
 #: principalcox/results/componentLoadings.columns.title
 #: principalcox/results/variableImportance.columns.title
 #: principalcox/results/scalingSummary.columns.title
-#: psychopdaroc/results/simpleResultsTable.columns.title
-#: psychopdaroc/results/aucSummaryTable.columns.title
-#: psychopdaroc/results/idiTable.columns.title
-#: psychopdaroc/results/nriTable.columns.title
-#: psychopdaroc/results/partialAUCTable.columns.title
-#: psychopdaroc/results/bootstrapCITable.columns.title
-#: psychopdaroc/results/rocComparisonTable.columns.title
+#: psychopdaROC/results/simpleResultsTable.columns.title
+#: psychopdaROC/results/aucSummaryTable.columns.title
+#: psychopdaROC/results/idiTable.columns.title
+#: psychopdaROC/results/nriTable.columns.title
+#: psychopdaROC/results/partialAUCTable.columns.title
+#: psychopdaROC/results/bootstrapCITable.columns.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 #: relativesurvival/results/regressionTable.columns.title
 #: simonmakuch/results/timeDependentCox.columns.title
 #: simonmakuch/results/timeVaryingEffects.columns.title
@@ -87343,7 +87343,7 @@ msgstr ""
 msgid "Varimax (Orthogonal)"
 msgstr ""
 
-#: enhancedroc/options/comparisonMethod/venkatraman.title
+#: enhancedROC/options/comparisonMethod/venkatraman.title
 msgid "Venkatraman (2000)"
 msgstr ""
 
@@ -87633,7 +87633,7 @@ msgstr ""
 msgid "Visual theme for factor analysis plots"
 msgstr ""
 
-#: enhancedroc/options/plotTheme.description
+#: enhancedROC/options/plotTheme.description
 msgid "Visual theme for ROC plots"
 msgstr ""
 
@@ -87644,7 +87644,7 @@ msgstr ""
 #: enhancedfactorvariable/ui[4].label
 #: enhancedtwowayfrequency/ui[5][0].label
 #: pathologycomposition/ui[1][3].label
-#: psychopdaroc/ui[4].label
+#: psychopdaROC/ui[4].label
 #: waterfall/ui[1][1][0].label
 msgid "Visualization"
 msgstr ""
@@ -88453,7 +88453,7 @@ msgstr ""
 msgid "Width of plots"
 msgstr ""
 
-#: enhancedroc/options/plotWidth.description
+#: enhancedROC/options/plotWidth.description
 msgid "Width of ROC plots"
 msgstr ""
 
@@ -89176,8 +89176,8 @@ msgstr ""
 #: biomarkerdiscovery/results/optimal_cutpoints.columns.title
 #: clinicalprediction/results/classification_metrics.columns.title
 #: decisioncalculator/results/multipleCutoffTable.columns.title
-#: enhancedroc/results/results/optimalCutoffSummary.columns.title
-#: enhancedroc/results/results/cutoffAnalysis.columns.title
+#: enhancedROC/results/results/optimalCutoffSummary.columns.title
+#: enhancedROC/results/results/cutoffAnalysis.columns.title
 #: likelihoodratio/results/optimalCutpoint.columns.title
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
 #: timedependent/options/cutpoint_method/youden.title
@@ -89185,7 +89185,7 @@ msgstr ""
 msgid "Youden Index"
 msgstr ""
 
-#: psychopdaroc/options/method/oc_youden_kernel.title
+#: psychopdaROC/options/method/oc_youden_kernel.title
 msgid "Youden Index (kernel smoothed)"
 msgstr ""
 
@@ -89193,12 +89193,12 @@ msgstr ""
 msgid "Youden Index (maximize Se + Sp - 1)"
 msgstr ""
 
-#: psychopdaroc/options/method/oc_youden_normal.title
+#: psychopdaROC/options/method/oc_youden_normal.title
 msgid "Youden Index (parametric normal)"
 msgstr ""
 
 #: clinicalvalidationinteractive/options/optimization_metric/youden.title
-#: psychopdaroc/options/metric/youden.title
+#: psychopdaROC/options/metric/youden.title
 msgid "Youden Index (Sens + Spec - 1)"
 msgstr ""
 
@@ -89206,19 +89206,19 @@ msgstr ""
 msgid "Youden Index (Sensitivity + Specificity - 1)"
 msgstr ""
 
-#: enhancedroc/options/youdenOptimization.title
+#: enhancedROC/options/youdenOptimization.title
 msgid "Youden Index Optimization"
 msgstr ""
 
-#: enhancedroc/results/results/youdenIndexPlot.title
+#: enhancedROC/results/results/youdenIndexPlot.title
 msgid "Youden Index Optimization Plot"
 msgstr ""
 
-#: enhancedroc/results/results/optimalCutoffSummary.description
+#: enhancedROC/results/results/optimalCutoffSummary.description
 msgid "Youden Index optimization results for each predictor"
 msgstr ""
 
-#: enhancedroc/results/results/youdenIndexPlot.description
+#: enhancedROC/results/results/youdenIndexPlot.description
 msgid "Youden Index values across cutoff range"
 msgstr ""
 
@@ -89230,8 +89230,8 @@ msgstr ""
 #: decisionpanel/results/optimalPanel.columns.title
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/optimalPanelsBySize.columns.title
-#: psychopdaroc/results/resultsTable.template.columns.title
-#: psychopdaroc/results/thresholdTable.columns.title
+#: psychopdaROC/results/resultsTable.template.columns.title
+#: psychopdaROC/results/thresholdTable.columns.title
 msgid "Youden's J"
 msgstr ""
 
@@ -89337,7 +89337,7 @@ msgid "Z-Score Threshold"
 msgstr ""
 
 #: mixedcox/results/fixedEffectsTable.columns.title
-#: psychopdaroc/results/delongComparisonTable.columns.title
+#: psychopdaROC/results/delongComparisonTable.columns.title
 #: surveysurvival/results/coxCoefficients.columns.title
 msgid "Z-statistic"
 msgstr ""

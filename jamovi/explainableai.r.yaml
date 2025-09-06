@@ -429,4 +429,8 @@ items:
           height: 400
           renderFun: .plotExplanationValidation
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

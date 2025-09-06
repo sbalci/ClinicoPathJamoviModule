@@ -2320,6 +2320,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Advanced TNM Stage Migration Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "harrell2015",
                     "pencina2008",
                     "vickers2006",

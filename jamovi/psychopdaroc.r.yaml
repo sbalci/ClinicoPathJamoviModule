@@ -1,6 +1,6 @@
 ---
-name: psychopdaroc
-title: ROC Analysis
+name: psychopdaROC
+title: Advanced ROC Analysis
 jrs: '1.1'
 
 items:
@@ -447,6 +447,262 @@ items:
         - Pencina2011
 
     # ==========================================
+    # ADVANCED STATISTICAL ANALYSES
+    # ==========================================
+    - name: effectSizeTable
+      title: Effect Size Analysis
+      type: Table
+      visible: (effectSizeAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: cohens_d
+          title: Cohen's d
+          type: number
+          format: zto
+        - name: glass_delta
+          title: Glass' Δ
+          type: number
+          format: zto
+        - name: hedges_g
+          title: Hedges' g
+          type: number
+          format: zto
+        - name: effect_magnitude
+          title: Effect Magnitude
+          type: text
+        - name: clinical_importance
+          title: Clinical Importance
+          type: text
+      refs:
+        - Cohen1988
+        - Hedges1981
+
+    - name: powerAnalysisTable
+      title: Power Analysis Results
+      type: Table
+      visible: (powerAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - targetPower
+        - targetEffectSize
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: observed_power
+          title: Observed Power
+          type: number
+          format: pc
+        - name: required_n
+          title: Required N
+          type: integer
+        - name: target_effect_size
+          title: Target Effect Size
+          type: number
+          format: zto
+        - name: power_adequacy
+          title: Power Adequacy
+          type: text
+        - name: recommendation
+          title: Recommendation
+          type: text
+      refs:
+        - Cohen1988
+        - Faul2007
+
+    - name: bayesianROCTable
+      title: Bayesian ROC Analysis
+      type: Table
+      visible: (bayesianAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - bayesianPrior
+        - mcmcSamples
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: posterior_auc_mean
+          title: Posterior AUC Mean
+          type: number
+          format: zto
+        - name: credible_lower
+          title: 95% Credible Lower
+          type: number
+          format: zto
+        - name: credible_upper
+          title: 95% Credible Upper
+          type: number
+          format: zto
+        - name: bayes_factor
+          title: Bayes Factor
+          type: number
+          format: zto
+        - name: evidence_strength
+          title: Evidence Strength
+          type: text
+        - name: prior_influence
+          title: Prior Influence
+          type: text
+      refs:
+        - Kruschke2014
+        - McElreath2020
+
+    - name: clinicalUtilityTable
+      title: Clinical Utility Analysis
+      type: Table
+      visible: (clinicalUtilityAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - treatmentBenefit
+        - treatmentHarm
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: threshold_probability
+          title: Threshold Probability
+          type: number
+          format: pc
+        - name: net_benefit
+          title: Net Benefit
+          type: number
+          format: zto
+        - name: treat_all_benefit
+          title: Treat All Net Benefit
+          type: number
+          format: zto
+        - name: treat_none_benefit
+          title: Treat None Net Benefit
+          type: number
+          format: zto
+        - name: standardized_net_benefit
+          title: Standardized Net Benefit
+          type: number
+          format: zto
+        - name: clinical_utility
+          title: Clinical Utility
+          type: text
+      refs:
+        - Vickers2006
+        - Steyerberg2010
+
+    - name: metaAnalysisTable
+      title: Meta-Analysis Results
+      type: Table
+      visible: (metaAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+      columns:
+        - name: model_type
+          title: Model Type
+          type: text
+        - name: pooled_auc
+          title: Pooled AUC
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: heterogeneity_i2
+          title: I² Heterogeneity
+          type: number
+          format: pc
+        - name: tau_squared
+          title: τ² Between-Study Variance
+          type: number
+          format: zto
+        - name: cochran_q
+          title: Cochran's Q
+          type: number
+          format: zto
+        - name: q_p_value
+          title: Q p-value
+          type: number
+          format: zto,pvalue
+      refs:
+        - Higgins2003
+        - DerSimonian1986
+
+    - name: sensitivityAnalysisTable
+      title: Sensitivity Analysis
+      type: Table
+      visible: (sensitivityAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+      columns:
+        - name: scenario
+          title: Scenario
+          type: text
+        - name: auc_change
+          title: AUC Change
+          type: number
+          format: zto
+        - name: percent_change
+          title: Percent Change
+          type: number
+          format: pc
+        - name: robustness
+          title: Robustness
+          type: text
+        - name: clinical_impact
+          title: Clinical Impact
+          type: text
+
+    - name: decisionCurveTable
+      title: Decision Curve Analysis
+      type: Table
+      visible: (clinicalUtilityAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - treatmentBenefit
+        - treatmentHarm
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: threshold
+          title: Threshold
+          type: number
+          format: pc
+        - name: net_benefit
+          title: Net Benefit
+          type: number
+          format: zto
+        - name: interventions_avoided
+          title: Interventions Avoided
+          type: integer
+        - name: cases_detected
+          title: Cases Detected
+          type: integer
+        - name: clinical_value
+          title: Clinical Value
+          type: text
+
+    # ==========================================
     # ADVANCED ANALYSES - Additional metrics
     # ==========================================
     - name: partialAUCTable
@@ -551,6 +807,98 @@ items:
           type: number
           format: pc
 
+    # ==========================================
+    # ADVANCED VISUALIZATIONS
+    # ==========================================
+    - name: effectSizePlot
+      title: Effect Size Visualization
+      type: Array
+      visible: (effectSizeAnalysis)
+      template:
+        type: Image
+        width: 600
+        height: 400
+        renderFun: .plotEffectSize
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+
+    - name: powerCurvePlot
+      title: Power Analysis Curves
+      type: Array
+      visible: (powerAnalysis)
+      template:
+        type: Image
+        width: 650
+        height: 450
+        renderFun: .plotPowerCurves
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - targetPower
+          - targetEffectSize
+
+    - name: bayesianTracePlot
+      title: Bayesian MCMC Traces
+      type: Array
+      visible: (bayesianAnalysis)
+      template:
+        type: Image
+        width: 700
+        height: 500
+        renderFun: .plotBayesianTrace
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - mcmcSamples
+
+    - name: decisionCurvePlot
+      title: Decision Curve Analysis
+      type: Array
+      visible: (clinicalUtilityAnalysis)
+      template:
+        type: Image
+        width: 700
+        height: 500
+        renderFun: .plotDecisionCurve
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - treatmentBenefit
+          - treatmentHarm
+
+    - name: metaAnalysisForestPlot
+      title: Meta-Analysis Forest Plot
+      type: Array
+      visible: (metaAnalysis)
+      template:
+        type: Image
+        width: 800
+        height: 600
+        renderFun: .plotMetaAnalysisForest
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+
+    - name: sensitivityAnalysisPlot
+      title: Sensitivity Analysis Plot
+      type: Array
+      visible: (sensitivityAnalysis)
+      template:
+        type: Image
+        width: 650
+        height: 450
+        renderFun: .plotSensitivityAnalysis
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+
 # ==========================================
 # REFERENCES
 # ==========================================
@@ -560,9 +908,20 @@ items:
     # - McClish1989: "McClish DK (1989). Analyzing a portion of the ROC curve. Medical Decision Making, 9(3), 190-195."
 
 refs:
+    - ClinicoPathJamoviModule
     - cutpointr
     - pROC
     - MASS
     - plotROC
+    - Cohen1988
+    - Hedges1981
+    - Faul2007
+    - Kruschke2014
+    - McElreath2020
+    - Vickers2006
+    - Steyerberg2010
+    - Higgins2003
+    - DerSimonian1986
+
 
 ...

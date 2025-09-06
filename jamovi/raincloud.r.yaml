@@ -39,4 +39,8 @@ items:
       title: Interpretation Guide
       type: Html
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

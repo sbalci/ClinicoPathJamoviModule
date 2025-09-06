@@ -347,3 +347,8 @@ items:
       clearWith:
           - outcome_var
           - treatment_var
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

@@ -197,7 +197,9 @@ rmstResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Restricted Mean Survival Time Tests")
+                title="Restricted Mean Survival Time Tests",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

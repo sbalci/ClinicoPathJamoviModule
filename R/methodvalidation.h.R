@@ -321,7 +321,9 @@ methodvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="Laboratory Method Validation Protocols")
+                title="Laboratory Method Validation Protocols",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

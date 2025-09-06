@@ -24,4 +24,8 @@ items:
       description: "Clinical interpretation of the results"
       visible: true
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

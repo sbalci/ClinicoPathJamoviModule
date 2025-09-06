@@ -298,3 +298,8 @@ items:
           - outcome_var
           - covariates
           - causal_method
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

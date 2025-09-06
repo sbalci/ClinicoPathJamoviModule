@@ -21,7 +21,7 @@ Please systematically check these key functions:
 - `kappaSizePower`
 - `kappaSizeCI`
 - `kappaSizeFixedN`
-- `psychopdaroc`
+- `psychopdaROC`
 
 ## Analysis Approach
 
@@ -46,7 +46,7 @@ For each function, perform a focused check on:
 | kappaSizePower      | ✅⚠️❌    | #               | #             | ✅❌   |
 | kappaSizeCI         | ✅⚠️❌    | #               | #             | ✅❌   |
 | kappaSizeFixedN     | ✅⚠️❌    | #               | #             | ✅❌   |
-| psychopdaroc        | ✅⚠️❌    | #               | #             | ✅❌   |
+| psychopdaROC        | ✅⚠️❌    | #               | #             | ✅❌   |
 
 ### 🔥 CRITICAL ISSUES SUMMARY
 

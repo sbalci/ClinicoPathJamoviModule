@@ -3,6 +3,7 @@ name: groupedbar
 title: Grouped Bar Chart Comparison
 jrs: '1.1'
 refs: ClinicoPath
+    - ClinicoPathJamoviModule
 items:
     - name: instructions
       title: Instructions
@@ -119,5 +120,6 @@ items:
       title: Data Export
       type: Html
       visible: false
+
 
 ...
