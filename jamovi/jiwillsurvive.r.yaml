@@ -114,4 +114,8 @@ items:
       type: Html
       visible: (analysis_type:data_prep && export_data)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

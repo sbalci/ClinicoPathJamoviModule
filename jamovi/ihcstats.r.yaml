@@ -406,9 +406,11 @@ items:
       height: 400
 
 refs:
+    - ClinicoPathJamoviModule
     - sterlacci2020
     - olsen2006  
     - matsuoka2011
     - carvalho2011
     - laas2019
+
 ...

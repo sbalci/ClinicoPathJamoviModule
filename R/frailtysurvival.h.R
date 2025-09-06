@@ -269,7 +269,9 @@ frailtysurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Frailty & Random Effects Survival Models")
+                title="Frailty & Random Effects Survival Models",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -325,4 +325,8 @@ items:
         - outlier_detection
         - outlier_method
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

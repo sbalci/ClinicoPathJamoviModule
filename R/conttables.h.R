@@ -248,7 +248,9 @@ contTablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Contingency Tables")
+                title="Contingency Tables",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="freqs",

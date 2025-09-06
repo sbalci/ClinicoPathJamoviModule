@@ -270,7 +270,9 @@ flexrstpm2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Flexible Parametric Models (Royston-Parmar)")
+                title="Flexible Parametric Models (Royston-Parmar)",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -405,7 +405,9 @@ likelihoodratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Likelihood Ratio Analysis")
+                title="Likelihood Ratio Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

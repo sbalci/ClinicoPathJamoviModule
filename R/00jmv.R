@@ -688,4 +688,11 @@
         `year`=2024, 
         `title`="ggrain: A Rainclouds Geom for ggplot2", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggrain", 
-        `url`="https://CRAN.R-project.org/package=ggrain"))
+        `url`="https://CRAN.R-project.org/package=ggrain"), 
+    `BlueSky`=list(
+        `type`="software", 
+        `author`="BlueSkyStatistics", 
+        `year`=2025, 
+        `title`="BlueSky R package", 
+        `publisher`="[R package]. Retrieved from https://github.com/BlueSkyStatistics/BlueSky", 
+        `url`="https://github.com/BlueSkyStatistics/BlueSky"))

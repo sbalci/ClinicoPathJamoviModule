@@ -188,11 +188,11 @@ create_enhanced_result(results, function_name, success)
 - **Publication Ready Output**: Clinical report format with methodology references
 
 **Files Created**:
-- `enhancedroc.a.yaml` - Analysis configuration with comprehensive diagnostic options
-- `enhancedroc.b.R` - Implementation with R6 class system and ROC calculations  
-- `enhancedroc.r.yaml` - Results structure with specialized diagnostic tables
-- `enhancedroc.u.yaml` - User interface with clinical parameter organization
-- `enhancedroc.h.R` - Auto-generated header file
+- `enhancedROC.a.yaml` - Analysis configuration with comprehensive diagnostic options
+- `enhancedROC.b.R` - Implementation with R6 class system and ROC calculations  
+- `enhancedROC.r.yaml` - Results structure with specialized diagnostic tables
+- `enhancedROC.u.yaml` - User interface with clinical parameter organization
+- `enhancedROC.h.R` - Auto-generated header file
 
 **Clinical Applications**:
 - Biomarker validation studies with optimal cutoff determination

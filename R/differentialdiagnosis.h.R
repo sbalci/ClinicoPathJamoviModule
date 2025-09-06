@@ -263,7 +263,9 @@ differentialdiagnosisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
             super$initialize(
                 options=options,
                 name="",
-                title="Differential Diagnosis Assistance")
+                title="Differential Diagnosis Assistance",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

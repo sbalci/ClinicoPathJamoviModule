@@ -280,6 +280,7 @@ survivalpowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Survival Analysis Power & Sample Size",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "gsDesign",
                     "survival",
                     "ggplot2"))

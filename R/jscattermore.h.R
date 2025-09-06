@@ -269,7 +269,9 @@ jscattermoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 options=options,
                 name="",
-                title="High-Performance Scatter Plots")
+                title="High-Performance Scatter Plots",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

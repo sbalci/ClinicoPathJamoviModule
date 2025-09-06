@@ -131,3 +131,8 @@ items:
       type: Html
       description: Clinical context and interpretation for optimal cutpoints
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

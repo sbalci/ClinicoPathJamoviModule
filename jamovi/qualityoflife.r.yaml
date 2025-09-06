@@ -699,4 +699,8 @@ items:
       clearWith:
           - instrument_type
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

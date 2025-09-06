@@ -110,3 +110,8 @@ items:
     width: 600
     height: 400
     renderFun: .cumHazardPlot
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

@@ -441,6 +441,7 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Comprehensive Tidy Plots",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "tidyplots",
                     "ggplot2",
                     "dplyr",

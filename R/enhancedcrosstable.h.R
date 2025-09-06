@@ -221,6 +221,7 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Enhanced Cross Tables with danchaltiel/crosstable",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "crosstable",
                     "officer"))
             self$add(jmvcore::Html$new(

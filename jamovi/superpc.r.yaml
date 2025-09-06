@@ -210,3 +210,8 @@ items:
       title: Clinical Interpretation and Biological Insights
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

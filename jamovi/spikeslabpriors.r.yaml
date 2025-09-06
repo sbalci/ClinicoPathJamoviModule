@@ -281,3 +281,8 @@ items:
       width: 600
       height: 400
       renderFun: .plotPredictionPerformance
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

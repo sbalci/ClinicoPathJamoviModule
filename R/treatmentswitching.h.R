@@ -266,7 +266,9 @@ treatmentswitchingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 options=options,
                 name="",
-                title="Treatment Switching Analysis")
+                title="Treatment Switching Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

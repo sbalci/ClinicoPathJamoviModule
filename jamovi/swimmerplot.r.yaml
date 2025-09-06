@@ -232,10 +232,12 @@ items:
           - personTimeAnalysis
 
 refs:
+    - ClinicoPathJamoviModule
     - ggswim
     - ggplot2
     - dplyr
     - lubridate
     - RColorBrewer
     - gridExtra
+
 ...

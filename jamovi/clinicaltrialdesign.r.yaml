@@ -247,4 +247,8 @@ items:
       description: Template sections for study protocol statistical analysis plan
       visible: (show_interpretation)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

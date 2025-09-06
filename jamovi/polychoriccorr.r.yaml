@@ -63,3 +63,8 @@ items:
     width: 500
     height: 400
     renderFun: .plot
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

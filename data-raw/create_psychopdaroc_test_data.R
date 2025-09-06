@@ -3,7 +3,7 @@
 # =============================================================================
 # 
 # This script creates example datasets for testing and demonstrating the
-# sophisticated psychopdaroc ROC analysis function.
+# sophisticated psychopdaROC ROC analysis function.
 
 library(usethis)
 
@@ -375,7 +375,7 @@ cat('
 cat("\\n=============================================================================\\n")
 cat("EXAMPLE DATA CREATION COMPLETE\\n")
 cat("=============================================================================\\n")
-cat("Created 4 comprehensive datasets for psychopdaroc ROC analysis:\\n\\n")
+cat("Created 4 comprehensive datasets for psychopdaROC ROC analysis:\\n\\n")
 cat("1. medical_roc_data (n=300)      - Medical diagnostic biomarkers\\n")
 cat("2. education_roc_data (n=250)    - Educational assessment scores\\n")  
 cat("3. financial_roc_data (n=400)    - Financial risk indicators\\n")
@@ -385,7 +385,7 @@ cat("- Binary outcome variable\\n")
 cat("- Multiple continuous predictors with different discrimination abilities\\n")
 cat("- Subgroup variables for stratified analysis\\n")
 cat("- Realistic data characteristics and missing values\\n\\n")
-cat("These datasets can be used to demonstrate all features of psychopdaroc:\\n")
+cat("These datasets can be used to demonstrate all features of psychopdaROC:\\n")
 cat("- Basic ROC analysis and AUC calculation\\n")
 cat("- Multiple cutpoint optimization methods\\n")
 cat("- DeLong test for AUC comparison\\n")

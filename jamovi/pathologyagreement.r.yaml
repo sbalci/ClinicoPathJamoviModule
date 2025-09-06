@@ -80,4 +80,8 @@ items:
       visible: (show_plots)
       renderFun: .blandaltmanplot
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

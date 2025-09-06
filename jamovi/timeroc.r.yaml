@@ -155,4 +155,8 @@ items:
       type: Html
       visible: (analysisType:binary)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

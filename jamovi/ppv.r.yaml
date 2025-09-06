@@ -88,4 +88,8 @@ items:
         - alpha
         - power
         - percHack
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

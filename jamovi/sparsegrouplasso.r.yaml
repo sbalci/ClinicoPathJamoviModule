@@ -346,4 +346,8 @@ items:
       title: Sparse Group LASSO Explanations
       type: Html
       visible: (showExplanations)
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

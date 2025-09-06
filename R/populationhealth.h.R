@@ -348,7 +348,9 @@ populationhealthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="Population Health Analytics")
+                title="Population Health Analytics",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

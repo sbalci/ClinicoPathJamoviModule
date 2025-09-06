@@ -74,6 +74,8 @@ items:
       - exclude_missing
 
 refs:
+  - ClinicoPathJamoviModule
   - crosstable
   - officer
+
 ...

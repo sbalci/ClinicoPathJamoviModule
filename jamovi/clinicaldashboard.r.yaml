@@ -97,3 +97,8 @@ items:
     title: Dashboard Summary
     type: Html
     visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

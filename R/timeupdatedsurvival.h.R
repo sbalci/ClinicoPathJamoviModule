@@ -198,7 +198,9 @@ timeupdatedsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             super$initialize(
                 options=options,
                 name="",
-                title="Time-Updated Survival Estimates")
+                title="Time-Updated Survival Estimates",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

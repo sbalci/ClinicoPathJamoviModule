@@ -474,7 +474,9 @@ bayesianclinicalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="Bayesian Clinical Analysis & Decision Making")
+                title="Bayesian Clinical Analysis & Decision Making",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bayesian_overview",

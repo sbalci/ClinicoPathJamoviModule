@@ -95,7 +95,10 @@ items:
         - stat_type
 
 refs:
+  - ClinicoPathJamoviModule
   - ggplot2
   - plotly
   - RColorBrewer
   - viridis
+
+...

@@ -152,4 +152,8 @@ items:
       visible: (spatial_id && show_variability_plots)
       renderFun: .spatialplot
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

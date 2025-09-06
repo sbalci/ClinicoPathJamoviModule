@@ -287,7 +287,9 @@ multistatesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 options=options,
                 name="",
-                title="Multistate Survival Models")
+                title="Multistate Survival Models",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

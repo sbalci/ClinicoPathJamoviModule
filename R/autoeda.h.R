@@ -190,7 +190,9 @@ autoedaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Automated Exploratory Data Analysis")
+                title="Automated Exploratory Data Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -503,3 +503,8 @@ items:
             renderFun: .plotPowerCurves
             width: 600
             height: 450
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

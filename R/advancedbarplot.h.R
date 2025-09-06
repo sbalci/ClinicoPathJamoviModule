@@ -376,6 +376,7 @@ advancedbarplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Advanced Bar Charts - 5 Ways",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "plotly",
                     "RColorBrewer",

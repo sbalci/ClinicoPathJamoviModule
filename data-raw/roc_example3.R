@@ -1,4 +1,4 @@
-# Comprehensive Test Dataset for psychopdaroc Function
+# Comprehensive Test Dataset for psychopdaROC Function
 
 # ============================================================================
 # COMPREHENSIVE TEST DATASET FOR ROC ANALYSIS
@@ -320,11 +320,11 @@ summarize_dataset(thyroid_data, "thyroid_status",
                   c("tsh", "ft4", "ft3", "anti_tpo", "symptom_score"))
 
 # ============================================================================
-# 8. EXAMPLE USAGE WITH psychopdaroc
+# 8. EXAMPLE USAGE WITH psychopdaROC
 # ============================================================================
 
 cat("\n\n", paste(rep("=", 50), collapse = ""), "\n")
-cat("Example Usage with psychopdaroc Function\n")
+cat("Example Usage with psychopdaROC Function\n")
 cat(paste(rep("=", 50), collapse = ""), "\n\n")
 
 cat("1. Basic ROC analysis for single biomarker:\n")

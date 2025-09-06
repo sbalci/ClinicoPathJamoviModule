@@ -174,7 +174,9 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Cure Models for Long-term Survivors")
+                title="Cure Models for Long-term Survivors",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

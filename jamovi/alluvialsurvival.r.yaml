@@ -81,4 +81,8 @@ items:
         - showSurvival
         - stageVar
         - treatmentVar
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

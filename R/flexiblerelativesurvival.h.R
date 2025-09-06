@@ -214,7 +214,9 @@ flexiblerelativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)
             super$initialize(
                 options=options,
                 name="",
-                title="Flexible Relative Survival Analysis")
+                title="Flexible Relative Survival Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

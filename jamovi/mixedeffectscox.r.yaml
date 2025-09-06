@@ -405,4 +405,8 @@ items:
       type: Html
       visible: (showExplanations)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

@@ -28,11 +28,11 @@ The `meddecide` package provides comprehensive tools for medical decision-making
 
 ---
 
-## Vignette 1: ROC Analysis with `psychopdaroc`
+## Vignette 1: ROC Analysis with `psychopdaROC`
 
 ### Introduction
 
-ROC (Receiver Operating Characteristic) analysis is fundamental in evaluating diagnostic tests. The `psychopdaroc` function provides comprehensive ROC analysis with multiple methods for determining optimal cutpoints.
+ROC (Receiver Operating Characteristic) analysis is fundamental in evaluating diagnostic tests. The `psychopdaROC` function provides comprehensive ROC analysis with multiple methods for determining optimal cutpoints.
 
 ### Basic Usage
 
@@ -43,7 +43,7 @@ library(ClinicoPath)
 data(cancer_biomarker)  # Hypothetical dataset
 
 # Basic ROC analysis
-roc_result <- psychopdaroc(
+roc_result <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = "PSA",           # Test variable
   classVar = "cancer_status",      # Binary outcome (0/1)
@@ -66,7 +66,7 @@ The package offers several methods to determine optimal cutpoints:
 
 ```r
 # Method 1: Maximize Youden's Index (default)
-roc_youden <- psychopdaroc(
+roc_youden <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = "PSA",
   classVar = "cancer_status",
@@ -76,7 +76,7 @@ roc_youden <- psychopdaroc(
 )
 
 # Method 2: Cost-benefit optimization
-roc_cost <- psychopdaroc(
+roc_cost <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = "PSA",
   classVar = "cancer_status",
@@ -86,7 +86,7 @@ roc_cost <- psychopdaroc(
 )
 
 # Method 3: Equal sensitivity and specificity
-roc_equal <- psychopdaroc(
+roc_equal <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = "PSA",
   classVar = "cancer_status",
@@ -99,7 +99,7 @@ roc_equal <- psychopdaroc(
 
 ```r
 # Compare multiple biomarkers
-roc_comparison <- psychopdaroc(
+roc_comparison <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = c("PSA", "CA125", "CEA"),  # Multiple tests
   classVar = "cancer_status",
@@ -113,7 +113,7 @@ roc_comparison <- psychopdaroc(
 
 ```r
 # Bootstrap confidence intervals
-roc_bootstrap <- psychopdaroc(
+roc_bootstrap <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = "PSA",
   classVar = "cancer_status",
@@ -123,7 +123,7 @@ roc_bootstrap <- psychopdaroc(
 )
 
 # Partial AUC (focus on high specificity region)
-roc_partial <- psychopdaroc(
+roc_partial <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = "PSA",
   classVar = "cancer_status",
@@ -134,7 +134,7 @@ roc_partial <- psychopdaroc(
 )
 
 # Net Reclassification Index (NRI) and IDI
-roc_nri <- psychopdaroc(
+roc_nri <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = c("PSA", "NewBiomarker"),
   classVar = "cancer_status",
@@ -150,7 +150,7 @@ roc_nri <- psychopdaroc(
 
 ```r
 # Publication-ready plots
-roc_publication <- psychopdaroc(
+roc_publication <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = c("PSA", "CA125"),
   classVar = "cancer_status",
@@ -162,7 +162,7 @@ roc_publication <- psychopdaroc(
 )
 
 # Additional diagnostic plots
-roc_diagnostic <- psychopdaroc(
+roc_diagnostic <- psychopdaROC(
   data = cancer_biomarker,
   dependentVars = "PSA",
   classVar = "cancer_status",

@@ -196,7 +196,9 @@ categoricaladvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             super$initialize(
                 options=options,
                 name="",
-                title="Enhanced Chi-Square and Fisher's Tests")
+                title="Enhanced Chi-Square and Fisher's Tests",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

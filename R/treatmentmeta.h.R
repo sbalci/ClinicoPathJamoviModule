@@ -489,7 +489,9 @@ treatmentmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Treatment Effect Meta-Analysis")
+                title="Treatment Effect Meta-Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

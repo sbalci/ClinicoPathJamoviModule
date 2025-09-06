@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.58
+version: 0.0.31.59
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-03'
+date: '2025-09-06'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1292,13 +1292,13 @@ analyses:
       Power Analysis for Interobserver Agreement Analysis.
     ribbon: analyses
     category: analyses
-  - title: ROC Analysis
-    name: psychopdaroc
+  - title: Advanced ROC Analysis
+    name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecideT2
-    menuTitle: ROC Analysis
+    menuGroup: meddecideT
+    menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
-    menuSubtitle: ROC Analysis, AUC, Cutpoints
+    menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
     description: >
       Receiver Operating Characteristic (ROC) curve analysis with optimal
       cutpoint determination.
@@ -1426,7 +1426,7 @@ analyses:
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Decision Tree Graph
     menuSubgroup: Decision
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization
@@ -4425,26 +4425,19 @@ analyses:
       multiple rotation methods, and factor score extraction. Essential for
       dimensionality reduction, scale development, and multivariate analysis
       in clinical and pathological research.
-  - title: Enhanced ROC Analysis with Youden Index Optimization
-    name: enhancedroc
+  - title: Clinical ROC Analysis
+    name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
-    menuSubgroup: Diagnostic Performance
-    menuTitle: Enhanced ROC Analysis with Youden Index Optimization
-    menuSubtitle: ROC analysis with BlueSky integration
-    description: >
-      Enhanced ROC analysis toolkit with BlueSky integration for comprehensive
-
-      diagnostic performance evaluation. Includes ROC curve analysis, Youden
-      Index
-
-      optimization, sensitivity/specificity analysis, optimal cutoff
-      determination,
-
-      and comparative ROC analysis. Essential for biomarker validation,
-      diagnostic
-
+    menuGroup: meddecideT
+    menuSubgroup: ROC
+    menuTitle: Clinical ROC Analysis
+    menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
+    description: |
+      Clinical ROC analysis toolkit for comprehensive diagnostic performance 
+      evaluation. Includes ROC curve analysis, Youden Index optimization, 
+      sensitivity/specificity analysis, optimal cutoff determination, and 
+      comparative ROC analysis. Essential for biomarker validation, diagnostic
       test evaluation, and clinical decision support in medical research.
   - title: Enhanced Frequency Analysis with BlueSky Integration
     name: enhancedfrequency
@@ -4599,6 +4592,38 @@ analyses:
       demographics,
 
       or any metric that varies by categorical groupings.
+  - title: Clinical ROC Analysis
+    name: enhancedROC
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: ROC
+    menuTitle: Clinical ROC Analysis
+    menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
+    description: >
+      Enhanced ROC analysis toolkit with BlueSky integration for comprehensive
+
+      diagnostic performance evaluation. Includes ROC curve analysis, Youden
+      Index
+
+      optimization, sensitivity/specificity analysis, optimal cutoff
+      determination,
+
+      and comparative ROC analysis. Essential for biomarker validation,
+      diagnostic
+
+      test evaluation, and clinical decision support in medical research.
+  - title: Advanced ROC Analysis
+    name: psychopdaROC
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: ROC
+    menuTitle: Advanced ROC Analysis
+    menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
+    description: >
+      Receiver Operating Characteristic (ROC) curve analysis with optimal
+      cutpoint determination.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

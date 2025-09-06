@@ -196,7 +196,9 @@ continuousrelationshipResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Continuous Variable Relationship Analysis")
+                title="Continuous Variable Relationship Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="guidance",

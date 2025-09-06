@@ -299,4 +299,8 @@ items:
         - alpha
         - beta
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

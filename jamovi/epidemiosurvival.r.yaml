@@ -422,3 +422,8 @@ items:
       title: Epidemiological Interpretation
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

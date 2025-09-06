@@ -344,7 +344,9 @@ transformationmodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             super$initialize(
                 options=options,
                 name="",
-                title="Transformation Models")
+                title="Transformation Models",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

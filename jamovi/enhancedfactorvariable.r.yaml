@@ -279,3 +279,8 @@ items:
             renderFun: .plotBalanceAnalysis
             width: 700
             height: 500
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

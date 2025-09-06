@@ -134,3 +134,8 @@ items:
       height: 400
       requiresData: true
       visible: (prediction_plot)
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

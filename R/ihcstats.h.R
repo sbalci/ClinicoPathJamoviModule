@@ -467,6 +467,7 @@ ihcstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="IHC Expression Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "sterlacci2020",
                     "olsen2006",
                     "matsuoka2011",

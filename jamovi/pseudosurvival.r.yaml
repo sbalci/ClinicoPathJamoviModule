@@ -121,3 +121,8 @@ items:
           - tau_rmst
           - analysis_type
           - covariates
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

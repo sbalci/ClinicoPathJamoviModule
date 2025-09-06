@@ -61,4 +61,8 @@ items:
       clearWith:
         - correction_method
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

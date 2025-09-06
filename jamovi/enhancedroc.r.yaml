@@ -1,6 +1,6 @@
 ---
-name: enhancedroc
-title: Enhanced ROC Analysis Results
+name: enhancedROC
+title: Clinical ROC Analysis Results
 jrs: '1.1'
 
 items:
@@ -195,6 +195,9 @@ items:
                   title: 'Cutoff'
                   type: number
                   format: zto
+                - name: cutoff_type
+                  title: 'Cutoff Type'
+                  type: text
                 - name: sensitivity
                   title: 'Sensitivity'
                   type: number
@@ -339,8 +342,8 @@ items:
           - name: comprehensiveAnalysisSummary
             title: Comprehensive ROC Analysis Summary
             type: Table
-            description: Enhanced statistical summary with BlueSky integration
-            visible: (bluesky_integration && comprehensive_output)
+            description: Enhanced statistical summary for comprehensive output
+            visible: (comprehensive_output)
             
             columns:
                 - name: measure
@@ -385,7 +388,7 @@ items:
             description: Multiple ROC curves for comparison
             visible: (rocCurve && analysisType:comparative)
             renderFun: .plotComparativeROC
-            width: 800
+            width: 600
             height: 600
 
           # Cutoff Analysis Plot
@@ -395,8 +398,8 @@ items:
             description: Sensitivity and specificity across cutoff values
             visible: (cutoffTable)
             renderFun: .plotCutoffAnalysis
-            width: 700
-            height: 500
+            width: 600
+            height: 600
 
           # Youden Index Plot
           - name: youdenIndexPlot
@@ -406,7 +409,7 @@ items:
             visible: (youdenOptimization)
             renderFun: .plotYoudenIndex
             width: 600
-            height: 400
+            height: 600
 
           # Clinical Decision Plot
           - name: clinicalDecisionPlot
@@ -415,5 +418,11 @@ items:
             description: Clinical decision curves and threshold analysis
             visible: (clinicalMetrics)
             renderFun: .plotClinicalDecision
-            width: 700
-            height: 500
+            width: 600
+            height: 600
+
+refs:
+    - ClinicoPathJamoviModule
+    - BlueSky
+
+...

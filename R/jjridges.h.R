@@ -473,6 +473,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Advanced Ridge Plot",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "ggridges",
                     "ggstatsplot",

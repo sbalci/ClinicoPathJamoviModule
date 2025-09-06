@@ -427,4 +427,8 @@ items:
       description: Template text for publication methods section
       visible: (show_interpretation)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

@@ -313,4 +313,8 @@ items:
         - group_definition
         - group_structure
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

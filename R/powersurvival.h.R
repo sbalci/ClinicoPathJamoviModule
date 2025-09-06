@@ -155,6 +155,7 @@ powersurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Power Analysis for Survival Studies",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "powerSurvEpi",
                     "powerSurvival",
                     "survivalStats",

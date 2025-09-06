@@ -110,4 +110,8 @@ items:
           - custom_correlation_threshold
           - custom_icc_threshold
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

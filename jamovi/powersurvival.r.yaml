@@ -32,6 +32,7 @@ items:
       visible: true
 
 refs:
+    - ClinicoPathJamoviModule
     - powerSurvEpi
     - powerSurvival
     - survivalStats
@@ -39,4 +40,5 @@ refs:
     - FreedmanAndSchoenfeld1982
     - LachinAndFoulkes1986
     
+
 ...

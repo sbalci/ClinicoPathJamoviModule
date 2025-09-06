@@ -199,6 +199,12 @@ marginalrecurrentClass <- R6::R6Class(
                 )
 
                 # Fit model based on type
+                if (!requireNamespace("reReg", quietly = TRUE)) {
+                    error_msg <- "The 'reReg' package is required but not available. Please install it."
+                    self$results$todo$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    return(NULL)
+                }
+                
                 if (model_type == "marginal") {
                     fit <- reReg::reReg(model_formula, 
                                       data = prepared_data,

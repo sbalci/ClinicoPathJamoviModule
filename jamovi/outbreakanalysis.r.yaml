@@ -422,3 +422,8 @@ items:
       clearWith:
           - case_status
           - exposure_vars
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

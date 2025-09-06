@@ -55,4 +55,8 @@ items:
       type: Html
       description: Automated recommendations for further analysis
 
+refs:
+    - ClinicoPathJamoviModule
+
+
 ...

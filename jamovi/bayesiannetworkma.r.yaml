@@ -322,3 +322,8 @@ items:
       width: 600
       height: 500
       renderFun: .plotComparisonMatrix
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

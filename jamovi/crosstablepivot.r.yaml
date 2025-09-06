@@ -48,4 +48,8 @@ items:
       type: Html
       visible: (export_excel)
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

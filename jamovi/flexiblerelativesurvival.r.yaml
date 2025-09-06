@@ -128,3 +128,8 @@ items:
     width: 650
     height: 450
     renderFun: .lifeExpectancyPlot
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

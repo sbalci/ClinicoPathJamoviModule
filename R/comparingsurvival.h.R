@@ -152,7 +152,9 @@ comparingSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Comparing Survival Outcomes")
+                title="Comparing Survival Outcomes",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",

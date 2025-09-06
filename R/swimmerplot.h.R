@@ -419,6 +419,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Swimmer Plot",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggswim",
                     "ggplot2",
                     "dplyr",

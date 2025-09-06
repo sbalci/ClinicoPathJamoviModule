@@ -139,5 +139,8 @@ items:
         - analysis_preset
 
 refs:
+  - ClinicoPathJamoviModule
   - ggplot2
   - ggsegmentedtotalbar
+
+...

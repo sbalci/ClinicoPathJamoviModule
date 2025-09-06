@@ -226,6 +226,7 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Base Graphics Visualization",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "base",
                     "graphics",
                     "grDevices"))

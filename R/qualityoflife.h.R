@@ -612,7 +612,9 @@ qualityoflifeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Quality of Life Analysis & Patient-Centered Outcomes")
+                title="Quality of Life Analysis & Patient-Centered Outcomes",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="qol_overview",

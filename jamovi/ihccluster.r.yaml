@@ -332,3 +332,8 @@ items:
       title: Analysis Notes (Legacy)
       type: Preformatted
       visible: false
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

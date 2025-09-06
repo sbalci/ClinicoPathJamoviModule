@@ -3,6 +3,7 @@ name: riverplot
 title: River Plots & Alluvial Diagrams
 jrs: '1.1'
 refs: ClinicoPath
+    - ClinicoPathJamoviModule
 items:
     - name: todo
       title: Welcome & Instructions
@@ -117,5 +118,6 @@ items:
       title: CRAN Riverplot Compatible Code
       type: Html
       visible: (exportRiverplotObject)
+
 
 ...

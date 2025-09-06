@@ -136,4 +136,8 @@ items:
         - predictor
         - outcome
         - modelType
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

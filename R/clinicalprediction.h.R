@@ -497,7 +497,9 @@ clinicalpredictionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 options=options,
                 name="",
-                title="Clinical Prediction Models & ML Interpretability")
+                title="Clinical Prediction Models & ML Interpretability",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overview",

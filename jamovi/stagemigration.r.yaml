@@ -4853,6 +4853,7 @@ items:
           type: text
 
 refs:
+    - ClinicoPathJamoviModule
     - harrell2015
     - pencina2008
     - vickers2006
@@ -4862,4 +4863,5 @@ refs:
     - ggplot2
     - timeROC
     - dcurves
+
 ...

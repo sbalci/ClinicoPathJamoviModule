@@ -398,3 +398,8 @@ items:
       title: 'Method and Interpretation Guide'
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

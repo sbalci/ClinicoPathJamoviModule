@@ -282,7 +282,9 @@ jcomplexupsetResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Complex UpSet Plot Results")
+                title="Complex UpSet Plot Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

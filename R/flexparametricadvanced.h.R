@@ -240,7 +240,9 @@ flexparametricadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Advanced Flexible Parametric Survival Results")
+                title="Advanced Flexible Parametric Survival Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

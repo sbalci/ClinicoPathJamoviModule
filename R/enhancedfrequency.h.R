@@ -253,7 +253,9 @@ enhancedfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Enhanced Frequency Analysis Results")
+                title="Enhanced Frequency Analysis Results",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(

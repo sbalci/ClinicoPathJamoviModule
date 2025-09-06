@@ -75,3 +75,8 @@ items:
         - method_category
         - univariate_methods
         - multivariate_methods
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

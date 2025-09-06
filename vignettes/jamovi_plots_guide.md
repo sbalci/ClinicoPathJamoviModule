@@ -404,6 +404,7 @@ All jamovi plot functions follow this signature:
 ### Return Values
 
 Plot functions should return:
+
 - `TRUE`: Successful plot generation
 - `FALSE`: Failed or skipped plot generation
 - `NULL` or nothing: Equivalent to FALSE
@@ -500,7 +501,7 @@ if (self$options$sc) {
 }
 ```
 
-### Example 2: ROC Analysis Plot (psychopdaroc.b.R)
+### Example 2: ROC Analysis Plot (psychopdaROC.b.R)
 
 #### .r.yaml Definition
 
@@ -1217,12 +1218,14 @@ testPlotFunction <- function(plot_function, test_data) {
 #### Issue: Plot Not Appearing
 
 **Possible Causes:**
+
 - `visible` condition not met
 - `requiresData` is true but no data available
 - Plot function returning FALSE
 - Error in plot generation
 
 **Solutions:**
+
 ```R
 # Debug visibility
 cat("Plot visible:", self$options$showPlot, "\n")
@@ -1250,6 +1253,7 @@ cat("Data rows:", nrow(plotData), "\n")
 **Problem:** jamovi theme not properly integrated
 
 **Solution:**
+
 ```R
 # Correct theme application
 plot <- plot + ggtheme
@@ -1262,6 +1266,7 @@ plot <- plot + ggtheme
 **Problem:** Variables in title not being replaced
 
 **Check:**
+
 - Variable names match exactly
 - Variables are available in current scope
 - Syntax is correct: `${variableName}`
@@ -1269,6 +1274,7 @@ plot <- plot + ggtheme
 #### Issue: Memory Issues with Large Plots
 
 **Solutions:**
+
 ```R
 # Sample large datasets
 if (nrow(data) > 10000) {
@@ -1287,6 +1293,7 @@ ggplot2::geom_hex()
 **Problem:** Plot state not maintained between renders
 
 **Check:**
+
 - State being set in `.run()` function
 - Clear conditions not too aggressive
 - State object structure consistent

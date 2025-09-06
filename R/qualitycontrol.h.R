@@ -357,7 +357,9 @@ qualitycontrolResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Laboratory Quality Control Statistics")
+                title="Laboratory Quality Control Statistics",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

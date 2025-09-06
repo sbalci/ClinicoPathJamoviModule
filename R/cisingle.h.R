@@ -103,7 +103,9 @@ ciSingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Confidence Intervals for Mean Values")
+                title="Confidence Intervals for Mean Values",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="conflevel",

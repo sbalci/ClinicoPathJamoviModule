@@ -293,7 +293,9 @@ labinterpretResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 options=options,
                 name="",
-                title="Laboratory Result Interpretation")
+                title="Laboratory Result Interpretation",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -162,6 +162,7 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Screening Test Calculator",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "DiagnosticTests",
                     "sensspecwiki"))
             self$add(jmvcore::Html$new(

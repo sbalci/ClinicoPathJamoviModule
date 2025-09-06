@@ -203,7 +203,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Diagnostic Test Meta-Analysis for Pathology")
+                title="Diagnostic Test Meta-Analysis for Pathology",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

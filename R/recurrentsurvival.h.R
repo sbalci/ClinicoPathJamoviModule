@@ -337,7 +337,9 @@ recurrentsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Recurrent Event Survival Analysis")
+                title="Recurrent Event Survival Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

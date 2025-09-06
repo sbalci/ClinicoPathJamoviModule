@@ -103,7 +103,9 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 options=options,
                 name="",
-                title="Data Quality Assessment")
+                title="Data Quality Assessment",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

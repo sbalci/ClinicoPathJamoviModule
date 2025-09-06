@@ -97,7 +97,9 @@ crosstablepivotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Enhanced Cross Tables (Pivot)")
+                title="Enhanced Cross Tables (Pivot)",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -1,11 +1,11 @@
 # ============================================================================
 # UTILITY FUNCTIONS FOR PSYCHOPDAROC
 # ============================================================================
-# This file contains shared utility functions used by the psychopdaroc module
+# This file contains shared utility functions used by the psychopdaROC module
 # Functions here should be generic and reusable, not class-specific
 # 
 # Note: Core utility functions have been moved to R/utils.R
-# This file now contains psychopdaroc-specific utility functions only
+# This file now contains psychopdaROC-specific utility functions only
 
 #' Bootstrap NRI calculation with confidence intervals
 #'

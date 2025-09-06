@@ -41,9 +41,11 @@ items:
       visible: (showStats)
 
 refs:
+    - ClinicoPathJamoviModule
     - arcdiagram
     - igraph
     - RColorBrewer
     - scales
+
 
 ...

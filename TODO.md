@@ -44,25 +44,24 @@ echo "/document-function FUNC_NAME" | claude
 
 ***
 
-## meddecideT (11 functions)
+## meddecideT
+
+- enhancedROC - Enhanced ROC Analysis with Youden Index Optimization
 
 
 
-- enhancedroc - Enhanced ROC Analysis with Youden Index Optimization
-echo "/check-function enhancedroc" | claude
-echo "/checkpoint enhancedroc" | claude
-echo "/prepare-translation enhancedroc" | claude
-echo "/review-function enhancedroc" | claude
-echo "/fix-function enhancedroc" | claude
-echo "/document-function enhancedroc" | claude
 
-- psychopdaroc - ROC Analysis
-echo "/check-function psychopdaroc" | claude
-echo "/checkpoint psychopdaroc" | claude
-echo "/prepare-translation psychopdaroc" | claude
-echo "/review-function psychopdaroc" | claude
-echo "/fix-function psychopdaroc" | claude
-echo "/document-function psychopdaroc" | claude
+echo "/review-function enhancedROC" | claude
+echo "/fix-function enhancedROC" | claude
+echo "/document-function enhancedROC" | claude
+
+- psychopdaROC - ROC Analysis
+echo "/check-function psychopdaROC" | claude
+echo "/checkpoint psychopdaROC" | claude
+echo "/prepare-translation psychopdaROC" | claude
+echo "/review-function psychopdaROC" | claude
+echo "/fix-function psychopdaROC" | claude
+echo "/document-function psychopdaROC" | claude
 
 - agreement - Interrater Reliability
 echo "/check-function agreement" | claude
@@ -243,6 +242,34 @@ echo "/document-function alluvial" | claude
 
 ## OncoPathologyT (26 functions)
 
+
+- waterfall - Treatment Response Analysis
+echo "/check-function waterfall" | claude
+echo "/checkpoint waterfall" | claude
+echo "/prepare-translation waterfall" | claude
+echo "/review-function waterfall" | claude
+echo "/fix-function waterfall" | claude
+echo "/document-function waterfall" | claude
+
+
+- swimmerplot - Swimmer Plot
+echo "/check-function swimmerplot" | claude
+echo "/checkpoint swimmerplot" | claude
+echo "/prepare-translation swimmerplot" | claude
+echo "/review-function swimmerplot" | claude
+echo "/fix-function swimmerplot" | claude
+echo "/document-function swimmerplot" | claude
+
+- stagemigration - Advanced TNM Stage Migration Analysis
+echo "/check-function stagemigration" | claude
+echo "/checkpoint stagemigration" | claude
+echo "/prepare-translation stagemigration" | claude
+echo "/review-function stagemigration" | claude
+echo "/fix-function stagemigration" | claude
+echo "/document-function stagemigration" | claude
+
+
+
 - ggoncoplot - Genomic Landscape Visualization
 echo "/check-function ggoncoplot" | claude
 echo "/checkpoint ggoncoplot" | claude
@@ -275,13 +302,7 @@ echo "/review-function ihcstats" | claude
 echo "/fix-function ihcstats" | claude
 echo "/document-function ihcstats" | claude
 
-- waterfall - Treatment Response Analysis
-echo "/check-function waterfall" | claude
-echo "/checkpoint waterfall" | claude
-echo "/prepare-translation waterfall" | claude
-echo "/review-function waterfall" | claude
-echo "/fix-function waterfall" | claude
-echo "/document-function waterfall" | claude
+
 
 - spatialanalysis - Spatial Statistics from Coordinates
 echo "/check-function spatialanalysis" | claude
@@ -403,13 +424,6 @@ echo "/review-function flowchart" | claude
 echo "/fix-function flowchart" | claude
 echo "/document-function flowchart" | claude
 
-- swimmerplot - Swimmer Plot
-echo "/check-function swimmerplot" | claude
-echo "/checkpoint swimmerplot" | claude
-echo "/prepare-translation swimmerplot" | claude
-echo "/review-function swimmerplot" | claude
-echo "/fix-function swimmerplot" | claude
-echo "/document-function swimmerplot" | claude
 
 - multiplexanalysis - Multiplex Immunofluorescence Analysis
 echo "/check-function multiplexanalysis" | claude
@@ -427,13 +441,8 @@ echo "/review-function condsurvival" | claude
 echo "/fix-function condsurvival" | claude
 echo "/document-function condsurvival" | claude
 
-- stagemigration - Advanced TNM Stage Migration Analysis
-echo "/check-function stagemigration" | claude
-echo "/checkpoint stagemigration" | claude
-echo "/prepare-translation stagemigration" | claude
-echo "/review-function stagemigration" | claude
-echo "/fix-function stagemigration" | claude
-echo "/document-function stagemigration" | claude
+
+
 
 - pathologycomposition - Pathology Composition Analysis
 echo "/check-function pathologycomposition" | claude

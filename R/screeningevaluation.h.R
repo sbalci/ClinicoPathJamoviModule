@@ -520,7 +520,9 @@ screeningevaluationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             super$initialize(
                 options=options,
                 name="",
-                title="Screening Program Evaluation & Performance Analysis")
+                title="Screening Program Evaluation & Performance Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="screening_overview",

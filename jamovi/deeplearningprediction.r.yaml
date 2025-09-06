@@ -333,4 +333,8 @@ items:
       height: 600
       renderFun: .plotModelArchitecture
 
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

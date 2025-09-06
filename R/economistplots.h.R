@@ -347,6 +347,7 @@ economistplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Economist-Style Distribution Plots",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggeconodist",
                     "ggplot2",
                     "dplyr"))

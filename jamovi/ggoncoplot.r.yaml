@@ -126,6 +126,8 @@ items:
           type: text
 
 refs:
+  - ClinicoPathJamoviModule
   - ggoncoplot
+
 
 ...

@@ -321,3 +321,8 @@ items:
       title: Clinical Interpretation and Health Economic Implications
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

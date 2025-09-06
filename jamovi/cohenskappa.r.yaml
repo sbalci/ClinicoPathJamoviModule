@@ -171,3 +171,8 @@ items:
       title: Technical Notes and Assumptions
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

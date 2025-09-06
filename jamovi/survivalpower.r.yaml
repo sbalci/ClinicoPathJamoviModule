@@ -135,7 +135,9 @@ items:
       - export_power_curve
 
 refs:
+  - ClinicoPathJamoviModule
   - gsDesign
   - survival
   - ggplot2
+
 ...

@@ -48,7 +48,9 @@ items:
       - y_max
 
 refs:
+  - ClinicoPathJamoviModule
   - base
   - graphics
   - grDevices
+
 ...

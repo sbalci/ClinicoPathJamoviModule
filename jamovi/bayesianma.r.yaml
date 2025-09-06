@@ -368,4 +368,8 @@ items:
       title: Bayesian Model Averaging Explanations
       type: Html
       visible: (showExplanations)
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

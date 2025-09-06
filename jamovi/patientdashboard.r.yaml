@@ -336,3 +336,8 @@ items:
         - labValues
         - interactive_plots
         - realtime_monitoring
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

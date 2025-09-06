@@ -16,4 +16,8 @@ items:
       height: 600
       renderFun: .plot
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
 ...

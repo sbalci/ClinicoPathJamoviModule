@@ -247,3 +247,8 @@ items:
       height: 400
       requiresData: true
       visible: (pseudo_plot)
+
+refs:
+    - ClinicoPathJamoviModule
+
+...
