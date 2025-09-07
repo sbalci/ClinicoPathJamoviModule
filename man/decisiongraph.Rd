@@ -7,6 +7,7 @@
 decisiongraph(
   data,
   treeType = "costeffectiveness",
+  clinicalPreset = "none",
   decisions,
   healthStates,
   transitionProbs,
@@ -65,6 +66,9 @@ decisiongraph(
 \item{data}{The data as a data frame containing decision tree parameters.}
 
 \item{treeType}{Type of decision tree to create.}
+
+\item{clinicalPreset}{Pre-configured analysis templates for common clinical
+decision analysis scenarios.}
 
 \item{decisions}{Variables representing decision nodes (treatment options).}
 
@@ -220,6 +224,8 @@ A results object containing:
 \code{results$psaResults} \tab \tab \tab \tab \tab Monte Carlo simulation results \cr
 \code{results$ceacPlot} \tab \tab \tab \tab \tab CEAC showing probability of cost-effectiveness \cr
 \code{results$scatterPlot} \tab \tab \tab \tab \tab Cost-effectiveness plane scatter plot \cr
+\code{results$executiveSummary} \tab \tab \tab \tab \tab Executive summary of analysis results and key findings \cr
+\code{results$glossary} \tab \tab \tab \tab \tab Comprehensive glossary of decision analysis terminology \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

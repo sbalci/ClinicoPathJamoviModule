@@ -2,14 +2,16 @@
 % Please edit documentation in R/psychopdaROC.h.R
 \name{psychopdaROC}
 \alias{psychopdaROC}
-\title{ROC Analysis}
+\title{Advanced ROC Analysis}
 \usage{
 psychopdaROC(
+  clinicalMode = "basic",
   data,
   dependentVars,
   classVar,
   positiveClass,
   subGroup,
+  clinicalPreset = "none",
   method = "maximize_metric",
   metric = "youden",
   direction = ">=",
@@ -52,10 +54,35 @@ psychopdaROC(
   calculateNRI = FALSE,
   refVar,
   nriThresholds = "",
-  idiNriBootRuns = 1000
+  idiNriBootRuns = 1000,
+  effectSizeAnalysis = FALSE,
+  effectSizeMethod = "cohens_d",
+  powerAnalysis = FALSE,
+  powerAnalysisType = "post_hoc",
+  expectedAUCDifference = 0.1,
+  targetPower = 0.8,
+  significanceLevel = 0.05,
+  correlationROCs = 0.5,
+  advancedMetrics = FALSE,
+  bayesianAnalysis = FALSE,
+  priorAUC = 0.7,
+  priorPrecision = 10,
+  clinicalUtilityAnalysis = FALSE,
+  treatmentThreshold = "0.05,0.5,0.05",
+  harmBenefitRatio = 0.25,
+  interventionCost = FALSE,
+  metaAnalysis = FALSE,
+  metaAnalysisMethod = "both",
+  heterogeneityTest = TRUE,
+  forestPlot = FALSE
 )
 }
 \arguments{
+\item{clinicalMode}{Select the complexity level of analysis: Basic -
+Essential ROC metrics for clinical decision making Advanced - Additional
+statistical comparisons and metrics Comprehensive - Full research-grade
+analysis with all options}
+
 \item{data}{The data as a data frame.}
 
 \item{dependentVars}{Test variable(s) to be evaluated for classification
@@ -69,6 +96,12 @@ treated as the positive class.}
 
 \item{subGroup}{Optional grouping variable for stratified analysis.  ROC
 curves will be calculated separately for each group.}
+
+\item{clinicalPreset}{Choose a preset configuration optimized for specific
+clinical scenarios: Screening - High sensitivity to avoid missing cases
+Confirmation - High specificity to avoid false positives Balanced - Equal
+weight to sensitivity and specificity Research - Comprehensive analysis for
+publication}
 
 \item{method}{Method for determining the optimal cutpoint. Different
 methods optimize different aspects of classifier performance.}
@@ -113,8 +146,9 @@ at multiple thresholds.}
 \item{maxThresholds}{Maximum number of threshold values to show in the
 threshold table.}
 
-\item{delongTest}{Perform DeLong's test for comparing AUCs between multiple
-test variables. Requires at least two test variables.}
+\item{delongTest}{Test whether the diagnostic performance differs
+significantly between multiple tests. Uses DeLong's method to compare Area
+Under the Curve (AUC) values. Requires at least two test variables.}
 
 \item{plotROC}{Display ROC curves for visual assessment of classifier
 performance.}
@@ -181,11 +215,13 @@ display confidence intervals.}
 \item{compareClassifiers}{Perform comprehensive comparison of classifier
 performance metrics.}
 
-\item{calculateIDI}{Calculate Integrated Discrimination Improvement for
-model comparison.}
+\item{calculateIDI}{Calculate how much better one test is at discriminating
+between diseased and healthy patients. IDI (Integrated Discrimination
+Improvement) measures the average improvement in predicted probabilities.}
 
-\item{calculateNRI}{Calculate Net Reclassification Index for model
-comparison.}
+\item{calculateNRI}{Calculate how many patients are correctly reclassified
+when using a new test. NRI (Net Reclassification Index) measures the net
+improvement in patient classification.}
 
 \item{refVar}{Reference test variable for IDI and NRI calculations. Other
 variables will be compared against this reference.}
@@ -195,6 +231,73 @@ risk categories for NRI. Leave empty for continuous NRI.}
 
 \item{idiNriBootRuns}{Number of bootstrap iterations for IDI and NRI
 confidence intervals.}
+
+\item{effectSizeAnalysis}{Calculate effect sizes for ROC curve differences
+using Cohen's conventions and standardized mean differences between AUC
+values.}
+
+\item{effectSizeMethod}{Method for calculating effect sizes between ROC
+curves.}
+
+\item{powerAnalysis}{Perform statistical power analysis for ROC curve
+comparisons including sample size estimation and power calculations for
+detecting AUC differences.}
+
+\item{powerAnalysisType}{Type of power analysis to perform.}
+
+\item{expectedAUCDifference}{Expected difference in AUC values for power
+calculations and sample size estimation.}
+
+\item{targetPower}{Target statistical power for sample size calculations
+(typically 0.8 or 0.9).}
+
+\item{significanceLevel}{Type I error rate for power calculations
+(typically 0.05).}
+
+\item{correlationROCs}{Expected correlation between paired ROC curves for
+power calculations. Use 0.5 for moderate correlation, 0.0 for independent
+samples.}
+
+\item{advancedMetrics}{Calculate additional advanced metrics including
+H-measure, Kolmogorov-Smirnov statistic, and Gini coefficient for
+comprehensive model evaluation.}
+
+\item{bayesianAnalysis}{Perform Bayesian analysis of ROC curves with
+credible intervals and posterior probability assessments.}
+
+\item{priorAUC}{Prior belief about AUC value for Bayesian analysis (center
+of prior distribution).}
+
+\item{priorPrecision}{Precision of prior belief (higher values = more
+confident prior).}
+
+\item{clinicalUtilityAnalysis}{Perform clinical utility analysis including
+net benefit curves, decision curve analysis, and clinical impact
+assessment.}
+
+\item{treatmentThreshold}{Treatment threshold range for decision curve
+analysis (min,max,step). Example: "0.05,0.5,0.05" creates thresholds from
+5\\% to 50\\% in 5\\% steps.}
+
+\item{harmBenefitRatio}{Ratio of harm from unnecessary treatment to benefit
+from necessary treatment. Lower values favor more aggressive treatment
+policies.}
+
+\item{interventionCost}{Include cost-effectiveness considerations in
+clinical utility analysis.}
+
+\item{metaAnalysis}{Perform meta-analysis of AUC values across multiple
+test variables. Requires at least 3 test variables to enable pooled effect
+estimation.}
+
+\item{metaAnalysisMethod}{Statistical method for combining AUC estimates
+across studies/variables.}
+
+\item{heterogeneityTest}{Perform Cochran's Q test and calculate I²
+statistic to assess heterogeneity between AUC estimates.}
+
+\item{forestPlot}{Create forest plot visualization of individual and pooled
+AUC estimates with confidence intervals.}
 }
 \value{
 A results object containing:
@@ -202,6 +305,7 @@ A results object containing:
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
 \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
@@ -217,9 +321,22 @@ A results object containing:
 \code{results$precisionRecallPlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$idiTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nriTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$effectSizeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$powerAnalysisTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bayesianROCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilityTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$metaAnalysisTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$sensitivityAnalysisTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$decisionCurveTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$partialAUCTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocComparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$effectSizePlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$powerCurvePlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$bayesianTracePlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$decisionCurvePlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$metaAnalysisForestPlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$sensitivityAnalysisPlot} \tab \tab \tab \tab \tab an array of images \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

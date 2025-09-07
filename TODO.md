@@ -42,26 +42,13 @@ echo "/document-function FUNC_NAME" | claude
 
 > implement welcome/introductory message styling of decisionpanel.
 
+! Rscript -e "jmvtools::prepare()"
+! Rscript -e "devtools::document()"
+
 ***
 
 ## meddecideT
 
-- enhancedROC - Enhanced ROC Analysis with Youden Index Optimization
-
-
-
-
-echo "/review-function enhancedROC" | claude
-echo "/fix-function enhancedROC" | claude
-echo "/document-function enhancedROC" | claude
-
-- psychopdaROC - ROC Analysis
-echo "/check-function psychopdaROC" | claude
-echo "/checkpoint psychopdaROC" | claude
-echo "/prepare-translation psychopdaROC" | claude
-echo "/review-function psychopdaROC" | claude
-echo "/fix-function psychopdaROC" | claude
-echo "/document-function psychopdaROC" | claude
 
 - agreement - Interrater Reliability
 echo "/check-function agreement" | claude
@@ -242,7 +229,6 @@ echo "/document-function alluvial" | claude
 
 ## OncoPathologyT (26 functions)
 
-
 - waterfall - Treatment Response Analysis
 echo "/check-function waterfall" | claude
 echo "/checkpoint waterfall" | claude
@@ -250,7 +236,6 @@ echo "/prepare-translation waterfall" | claude
 echo "/review-function waterfall" | claude
 echo "/fix-function waterfall" | claude
 echo "/document-function waterfall" | claude
-
 
 - swimmerplot - Swimmer Plot
 echo "/check-function swimmerplot" | claude
@@ -267,8 +252,6 @@ echo "/prepare-translation stagemigration" | claude
 echo "/review-function stagemigration" | claude
 echo "/fix-function stagemigration" | claude
 echo "/document-function stagemigration" | claude
-
-
 
 - ggoncoplot - Genomic Landscape Visualization
 echo "/check-function ggoncoplot" | claude
@@ -301,8 +284,6 @@ echo "/prepare-translation ihcstats" | claude
 echo "/review-function ihcstats" | claude
 echo "/fix-function ihcstats" | claude
 echo "/document-function ihcstats" | claude
-
-
 
 - spatialanalysis - Spatial Statistics from Coordinates
 echo "/check-function spatialanalysis" | claude
@@ -424,7 +405,6 @@ echo "/review-function flowchart" | claude
 echo "/fix-function flowchart" | claude
 echo "/document-function flowchart" | claude
 
-
 - multiplexanalysis - Multiplex Immunofluorescence Analysis
 echo "/check-function multiplexanalysis" | claude
 echo "/checkpoint multiplexanalysis" | claude
@@ -440,9 +420,6 @@ echo "/prepare-translation condsurvival" | claude
 echo "/review-function condsurvival" | claude
 echo "/fix-function condsurvival" | claude
 echo "/document-function condsurvival" | claude
-
-
-
 
 - pathologycomposition - Pathology Composition Analysis
 echo "/check-function pathologycomposition" | claude

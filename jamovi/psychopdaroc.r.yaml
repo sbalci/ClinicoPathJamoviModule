@@ -43,6 +43,24 @@ items:
           type: number
           format: zto,pvalue
 
+    - name: clinicalInterpretationTable
+      title: Clinical Interpretation
+      type: Table
+      visible: (clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)
+      columns:
+        - name: variable
+          title: Test
+          type: text
+        - name: performance_level
+          title: Performance Level
+          type: text
+        - name: clinical_recommendation
+          title: Clinical Recommendation
+          type: text
+        - name: interpretation_text
+          title: Detailed Interpretation
+          type: text
+
     # ==========================================
     # OPTIMAL CUTPOINTS AND DETAILED RESULTS
     # ==========================================
@@ -646,7 +664,7 @@ items:
     - name: sensitivityAnalysisTable
       title: Sensitivity Analysis
       type: Table
-      visible: (sensitivityAnalysis)
+      visible: false
       clearWith:
         - dependentVars
         - classVar
@@ -874,7 +892,7 @@ items:
     - name: metaAnalysisForestPlot
       title: Meta-Analysis Forest Plot
       type: Array
-      visible: (metaAnalysis)
+      visible: (metaAnalysis && forestPlot)
       template:
         type: Image
         width: 800
@@ -888,7 +906,7 @@ items:
     - name: sensitivityAnalysisPlot
       title: Sensitivity Analysis Plot
       type: Array
-      visible: (sensitivityAnalysis)
+      visible: false
       template:
         type: Image
         width: 650

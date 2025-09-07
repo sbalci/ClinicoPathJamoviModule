@@ -32,6 +32,42 @@ children:
             name: subGroup
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: normal
+    children:
+      - type: Label
+        label: Analysis Configuration
+      - type: ComboBox
+        name: clinicalMode
+        label: Analysis Level
+      - type: ComboBox
+        name: clinicalPreset
+        label: Clinical Use Case
+        enable: (clinicalMode:basic || clinicalMode:advanced)
+  - type: CollapseBox
+    label: Meta-Analysis (3+ Variables Required)
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: metaAnalysis
+            label: Perform meta-analysis of AUC values
+            enable: (dependentVars)
+          - type: ComboBox
+            name: metaAnalysisMethod
+            label: Meta-analysis method
+            enable: (metaAnalysis)
+          - type: CheckBox
+            name: heterogeneityTest
+            label: Test for heterogeneity (Q-test, I²)
+            enable: (metaAnalysis)
+          - type: CheckBox
+            name: forestPlot
+            label: Show forest plot
+            enable: (metaAnalysis)
   - type: CollapseBox
     label: Cutpoint Optimization
     margin: normal
@@ -67,24 +103,23 @@ children:
         children:
           - type: Label
             label: Advanced Settings
-            children:
-              - type: TextBox
-                name: tol_metric
-                format: number
-                label: Metric Tolerance
-                enable: >-
-                  (method:maximize_metric || method:minimize_metric ||
-                  method:maximize_loess_metric || method:minimize_loess_metric
-                  || method:maximize_spline_metric ||
-                  method:minimize_spline_metric)
-              - type: ComboBox
-                name: break_ties
-                label: Tie Breaking Method
-              - type: TextBox
-                name: boot_runs
-                format: number
-                label: Bootstrap Iterations
-                enable: (method:maximize_boot_metric || method:minimize_boot_metric)
+          - type: TextBox
+            name: tol_metric
+            format: number
+            label: Metric Tolerance
+            enable: >-
+              (method:maximize_metric || method:minimize_metric ||
+              method:maximize_loess_metric || method:minimize_loess_metric
+              || method:maximize_spline_metric ||
+              method:minimize_spline_metric)
+          - type: ComboBox
+            name: break_ties
+            label: Tie Breaking Method
+          - type: TextBox
+            name: boot_runs
+            format: number
+            label: Bootstrap Iterations
+            enable: (method:maximize_boot_metric || method:minimize_boot_metric)
   - type: CollapseBox
     label: Analysis Options
     margin: normal
@@ -136,67 +171,64 @@ children:
         children:
           - type: Label
             label: Basic Plot Settings
-            children:
-              - type: CheckBox
-                name: plotROC
-                label: Show ROC curves
-              - type: CheckBox
-                name: combinePlots
-                label: Combine all curves in one plot
-                enable: (plotROC)
-              - type: CheckBox
-                name: showOptimalPoint
-                label: Show optimal cutpoint
-                enable: (plotROC)
-              - type: CheckBox
-                name: directLabel
-                label: Label curves directly
-                enable: (plotROC && combinePlots)
+          - type: CheckBox
+            name: plotROC
+            label: Show ROC curves
+          - type: CheckBox
+            name: combinePlots
+            label: Combine all curves in one plot
+            enable: (plotROC)
+          - type: CheckBox
+            name: showOptimalPoint
+            label: Show optimal cutpoint
+            enable: (plotROC)
+          - type: CheckBox
+            name: directLabel
+            label: Label curves directly
+            enable: (plotROC && combinePlots)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
             label: Plot Style
-            children:
-              - type: CheckBox
-                name: cleanPlot
-                label: Publication-quality plot
-                enable: (plotROC)
-              - type: ComboBox
-                name: legendPosition
-                label: Legend position
-                enable: (plotROC && combinePlots && !directLabel)
-              - type: CheckBox
-                name: smoothing
-                label: Apply LOESS smoothing
-                enable: (plotROC)
-              - type: CheckBox
-                name: displaySE
-                label: Show standard error bands
-                enable: (plotROC && smoothing && !cleanPlot)
-              - type: CheckBox
-                name: interactiveROC
-                label: Create interactive plot
-                enable: (plotROC)
+          - type: CheckBox
+            name: cleanPlot
+            label: Publication-quality plot
+            enable: (plotROC)
+          - type: ComboBox
+            name: legendPosition
+            label: Legend position
+            enable: (plotROC && combinePlots && !directLabel)
+          - type: CheckBox
+            name: smoothing
+            label: Apply LOESS smoothing
+            enable: (plotROC)
+          - type: CheckBox
+            name: displaySE
+            label: Show standard error bands
+            enable: (plotROC && smoothing && !cleanPlot)
+          - type: CheckBox
+            name: interactiveROC
+            label: Create interactive plot
+            enable: (plotROC)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
             label: Confidence Intervals
-            children:
-              - type: CheckBox
-                name: showConfidenceBands
-                label: Show confidence bands
-                enable: (plotROC && !cleanPlot)
-              - type: CheckBox
-                name: quantileCIs
-                label: Show CIs at quantiles
-                enable: (plotROC && !cleanPlot)
-              - type: TextBox
-                name: quantiles
-                format: string
-                label: Quantile positions
-                enable: (quantileCIs)
+          - type: CheckBox
+            name: showConfidenceBands
+            label: Show confidence bands
+            enable: (plotROC && !cleanPlot)
+          - type: CheckBox
+            name: quantileCIs
+            label: Show CIs at quantiles
+            enable: (plotROC && !cleanPlot)
+          - type: TextBox
+            name: quantiles
+            format: string
+            label: Quantile positions
+            enable: (quantileCIs)
   - type: CollapseBox
     label: Additional Plots
     margin: normal
@@ -227,37 +259,35 @@ children:
         children:
           - type: Label
             label: Partial AUC
-            children:
-              - type: CheckBox
-                name: partialAUC
-                label: Calculate partial AUC
-              - type: TextBox
-                name: partialAUCfrom
-                format: number
-                label: From specificity
-                enable: (partialAUC)
-              - type: TextBox
-                name: partialAUCto
-                format: number
-                label: To specificity
-                enable: (partialAUC)
+          - type: CheckBox
+            name: partialAUC
+            label: Calculate partial AUC
+          - type: TextBox
+            name: partialAUCfrom
+            format: number
+            label: From specificity
+            enable: (partialAUC)
+          - type: TextBox
+            name: partialAUCto
+            format: number
+            label: To specificity
+            enable: (partialAUC)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
             label: ROC Smoothing
-            children:
-              - type: ComboBox
-                name: rocSmoothingMethod
-                label: Smoothing method
-              - type: CheckBox
-                name: bootstrapCI
-                label: Bootstrap confidence intervals
-              - type: TextBox
-                name: bootstrapReps
-                format: number
-                label: Bootstrap replications
-                enable: (bootstrapCI)
+          - type: ComboBox
+            name: rocSmoothingMethod
+            label: Smoothing method
+          - type: CheckBox
+            name: bootstrapCI
+            label: Bootstrap confidence intervals
+          - type: TextBox
+            name: bootstrapReps
+            format: number
+            label: Bootstrap replications
+            enable: (bootstrapCI)
   - type: CollapseBox
     label: Model Comparison
     margin: normal
@@ -274,109 +304,109 @@ children:
         children:
           - type: Label
             label: IDI and NRI Analysis
-            children:
-              - type: CheckBox
-                name: calculateIDI
-                label: Calculate IDI
-              - type: CheckBox
-                name: calculateNRI
-                label: Calculate NRI
-              - type: LevelSelector
-                name: refVar
-                label: Reference Variable
-                enable: (calculateIDI || calculateNRI)
-              - type: TextBox
-                name: nriThresholds
-                format: string
-                label: NRI thresholds (comma-separated)
-                enable: (calculateNRI)
-              - type: TextBox
-                name: idiNriBootRuns
-                format: number
-                label: Bootstrap iterations
-                enable: (calculateIDI || calculateNRI)
+          - type: CheckBox
+            name: calculateIDI
+            label: Calculate IDI
+          - type: CheckBox
+            name: calculateNRI
+            label: Calculate NRI
+          - type: LevelSelector
+            name: refVar
+            label: Reference Variable
+            enable: (calculateIDI || calculateNRI)
+          - type: TextBox
+            name: nriThresholds
+            format: string
+            label: NRI thresholds (comma-separated)
+            enable: (calculateNRI)
+          - type: TextBox
+            name: idiNriBootRuns
+            format: number
+            label: Bootstrap iterations
+            enable: (calculateIDI || calculateNRI)
           - type: LayoutBox
             margin: large
             children:
+              - type: Label
+                label: Statistical Analysis
               - type: CheckBox
                 name: effectSizeAnalysis
-  - type: LayoutBox
-    margin: large
+                label: Effect Size Analysis
+              - type: ComboBox
+                name: effectSizeMethod
+                label: Effect Size Method
+                enable: (effectSizeAnalysis)
+              - type: CheckBox
+                name: powerAnalysis
+                label: Statistical Power Analysis
+              - type: ComboBox
+                name: powerAnalysisType
+                label: Power Analysis Type
+                enable: (powerAnalysis)
+              - type: TextBox
+                name: expectedAUCDifference
+                format: number
+                label: Expected AUC Difference
+                enable: (powerAnalysis)
+              - type: TextBox
+                name: targetPower
+                format: number
+                label: Target Power
+                enable: (powerAnalysis)
+              - type: TextBox
+                name: significanceLevel
+                format: number
+                label: Significance Level
+                enable: (powerAnalysis)
+              - type: TextBox
+                name: correlationROCs
+                format: number
+                label: ROC Correlation
+                enable: (powerAnalysis)
+  - type: CollapseBox
+    label: Advanced Analysis
+    margin: normal
+    collapsed: true
     children:
-      - type: ComboBox
-        name: effectSizeMethod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: powerAnalysis
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: powerAnalysisType
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: expectedAUCDifference
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: targetPower
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: significanceLevel
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: correlationROCs
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: advancedMetrics
-      - type: CheckBox
-        name: bayesianAnalysis
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: priorAUC
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: priorPrecision
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: clinicalUtilityAnalysis
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: treatmentThreshold
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: harmBenefitRatio
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: interventionCost
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Advanced Metrics
+          - type: CheckBox
+            name: advancedMetrics
+            label: Advanced Performance Metrics
+          - type: Label
+            label: Bayesian Analysis
+          - type: CheckBox
+            name: bayesianAnalysis
+            label: Bayesian ROC Analysis
+          - type: TextBox
+            name: priorAUC
+            format: number
+            label: Prior AUC
+            enable: (bayesianAnalysis)
+          - type: TextBox
+            name: priorPrecision
+            format: number
+            label: Prior Precision
+            enable: (bayesianAnalysis)
+          - type: Label
+            label: Clinical Utility
+          - type: CheckBox
+            name: clinicalUtilityAnalysis
+            label: Clinical Utility Analysis
+          - type: TextBox
+            name: treatmentThreshold
+            format: string
+            label: Treatment Threshold
+            enable: (clinicalUtilityAnalysis)
+          - type: TextBox
+            name: harmBenefitRatio
+            format: number
+            label: Harm-Benefit Ratio
+            enable: (clinicalUtilityAnalysis)
+          - type: CheckBox
+            name: interventionCost
+            label: Intervention Cost Analysis
+            enable: (clinicalUtilityAnalysis)

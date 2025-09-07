@@ -31,6 +31,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             partialRange = "0.8,1.0",
             prevalence = 0.1,
             clinicalContext = "general",
+            clinicalPresets = "custom",
             comprehensive_output = FALSE,
             clinical_interpretation = TRUE,
             plotTheme = "clinical",
@@ -186,6 +187,16 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "monitoring",
                     "general"),
                 default="general")
+            private$..clinicalPresets <- jmvcore::OptionList$new(
+                "clinicalPresets",
+                clinicalPresets,
+                options=list(
+                    "custom",
+                    "biomarker_screening",
+                    "diagnostic_validation",
+                    "confirmatory_testing",
+                    "research_comprehensive"),
+                default="custom")
             private$..comprehensive_output <- jmvcore::OptionBool$new(
                 "comprehensive_output",
                 comprehensive_output,
@@ -256,6 +267,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..partialRange)
             self$.addOption(private$..prevalence)
             self$.addOption(private$..clinicalContext)
+            self$.addOption(private$..clinicalPresets)
             self$.addOption(private$..comprehensive_output)
             self$.addOption(private$..clinical_interpretation)
             self$.addOption(private$..plotTheme)
@@ -292,6 +304,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         partialRange = function() private$..partialRange$value,
         prevalence = function() private$..prevalence$value,
         clinicalContext = function() private$..clinicalContext$value,
+        clinicalPresets = function() private$..clinicalPresets$value,
         comprehensive_output = function() private$..comprehensive_output$value,
         clinical_interpretation = function() private$..clinical_interpretation$value,
         plotTheme = function() private$..plotTheme$value,
@@ -327,6 +340,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..partialRange = NA,
         ..prevalence = NA,
         ..clinicalContext = NA,
+        ..clinicalPresets = NA,
         ..comprehensive_output = NA,
         ..clinical_interpretation = NA,
         ..plotTheme = NA,
@@ -357,6 +371,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 inherit = jmvcore::Group,
                 active = list(
                     instructions = function() private$.items[["instructions"]],
+                    analysisSummary = function() private$.items[["analysisSummary"]],
+                    clinicalReport = function() private$.items[["clinicalReport"]],
                     aucSummary = function() private$.items[["aucSummary"]],
                     rocComparisons = function() private$.items[["rocComparisons"]],
                     detailedComparison = function() private$.items[["detailedComparison"]],
@@ -385,6 +401,16 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="instructions",
                             title="Instructions",
+                            visible=TRUE))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="analysisSummary",
+                            title="Analysis Summary",
+                            visible=TRUE))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="clinicalReport",
+                            title="Clinical Report Sentences",
                             visible=TRUE))
                         self$add(jmvcore::Table$new(
                             options=options,
@@ -888,6 +914,8 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param partialRange Range for partial AUC (specificity_min,specificity_max)
 #' @param prevalence Disease prevalence for calculating predictive values
 #' @param clinicalContext Clinical application context for interpretation
+#' @param clinicalPresets Pre-configured settings for common clinical
+#'   scenarios
 #' @param comprehensive_output Include comprehensive statistical details
 #' @param clinical_interpretation Provide clinical context for ROC analysis
 #'   results
@@ -902,6 +930,8 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$results$analysisSummary} \tab \tab \tab \tab \tab Plain language summary of key findings \cr
+#'   \code{results$results$clinicalReport} \tab \tab \tab \tab \tab Copy-ready clinical report sentences for publications and reports \cr
 #'   \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
 #'   \code{results$results$rocComparisons} \tab \tab \tab \tab \tab Pairwise comparisons between ROC curves \cr
 #'   \code{results$results$detailedComparison} \tab \tab \tab \tab \tab Comprehensive comparison of diagnostic metrics between models \cr
@@ -949,6 +979,7 @@ enhancedROC <- function(
     partialRange = "0.8,1.0",
     prevalence = 0.1,
     clinicalContext = "general",
+    clinicalPresets = "custom",
     comprehensive_output = FALSE,
     clinical_interpretation = TRUE,
     plotTheme = "clinical",
@@ -997,6 +1028,7 @@ enhancedROC <- function(
         partialRange = partialRange,
         prevalence = prevalence,
         clinicalContext = clinicalContext,
+        clinicalPresets = clinicalPresets,
         comprehensive_output = comprehensive_output,
         clinical_interpretation = clinical_interpretation,
         plotTheme = plotTheme,

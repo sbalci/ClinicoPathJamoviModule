@@ -54,8 +54,10 @@ children:
               row: 1
             children:
               - type: Label
-                label: Threshold Settings
+                label: Clinical Presets & Thresholds
                 children:
+                  - type: ComboBox
+                    name: clinicalPresets
                   - type: TextBox
                     name: sensitivityThreshold
                     format: number
