@@ -2,11 +2,12 @@
 % Please edit documentation in R/enhancedROC.h.R
 \name{enhancedROC}
 \alias{enhancedROC}
-\title{Enhanced ROC Analysis with Youden Index Optimization}
+\title{Clinical ROC Analysis}
 \usage{
 enhancedROC(
   data,
   outcome,
+  positiveClass,
   predictors,
   analysisType = "single",
   direction = "auto",
@@ -30,7 +31,7 @@ enhancedROC(
   partialRange = "0.8,1.0",
   prevalence = 0.1,
   clinicalContext = "general",
-  bluesky_integration = TRUE,
+  clinicalPresets = "custom",
   comprehensive_output = FALSE,
   clinical_interpretation = TRUE,
   plotTheme = "clinical",
@@ -39,15 +40,16 @@ enhancedROC(
   showCutoffPoints = TRUE,
   showConfidenceBands = FALSE,
   showMetricsDiff = TRUE,
-  statisticalComparison = TRUE,
-  effectSizeAnalysis = FALSE,
-  powerAnalysis = FALSE
+  statisticalComparison = TRUE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{outcome}{Binary outcome variable (disease status)}
+
+\item{positiveClass}{Select which level represents the positive class
+(disease/condition present)}
 
 \item{predictors}{Numeric predictor variables for ROC analysis}
 
@@ -102,7 +104,8 @@ sensitivity/specificity ranges}
 
 \item{clinicalContext}{Clinical application context for interpretation}
 
-\item{bluesky_integration}{Use BlueSky R statistical environment features}
+\item{clinicalPresets}{Pre-configured settings for common clinical
+scenarios}
 
 \item{comprehensive_output}{Include comprehensive statistical details}
 
@@ -123,15 +126,13 @@ results}
 
 \item{statisticalComparison}{Perform comprehensive statistical comparison
 between models}
-
-\item{effectSizeAnalysis}{Calculate effect sizes for model differences}
-
-\item{powerAnalysis}{Estimate statistical power for detecting differences}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$results$analysisSummary} \tab \tab \tab \tab \tab Plain language summary of key findings \cr
+\code{results$results$clinicalReport} \tab \tab \tab \tab \tab Copy-ready clinical report sentences for publications and reports \cr
 \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
 \code{results$results$rocComparisons} \tab \tab \tab \tab \tab Pairwise comparisons between ROC curves \cr
 \code{results$results$detailedComparison} \tab \tab \tab \tab \tab Comprehensive comparison of diagnostic metrics between models \cr
@@ -141,7 +142,7 @@ A results object containing:
 \code{results$results$diagnosticPerformance} \tab \tab \tab \tab \tab Comprehensive diagnostic performance measures at optimal cutoff \cr
 \code{results$results$clinicalApplicationMetrics} \tab \tab \tab \tab \tab Clinical metrics including predictive values and likelihood ratios \cr
 \code{results$results$partialAucAnalysis} \tab \tab \tab \tab \tab Partial AUC analysis for specific sensitivity/specificity ranges \cr
-\code{results$results$comprehensiveAnalysisSummary} \tab \tab \tab \tab \tab Enhanced statistical summary with BlueSky integration \cr
+\code{results$results$comprehensiveAnalysisSummary} \tab \tab \tab \tab \tab Enhanced statistical summary for comprehensive output \cr
 \code{results$results$clinicalInterpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$rocCurvePlot} \tab \tab \tab \tab \tab ROC curves with optimal cutoff points \cr
@@ -152,12 +153,9 @@ A results object containing:
 }
 }
 \description{
-Enhanced ROC analysis toolkit with BlueSky integration for comprehensive
-diagnostic performance evaluation. Includes ROC curve analysis, Youden
-Index
-optimization, sensitivity/specificity analysis, optimal cutoff
-determination,
-and comparative ROC analysis. Essential for biomarker validation,
-diagnostic
+Clinical ROC analysis toolkit for comprehensive diagnostic performance
+evaluation. Includes ROC curve analysis, Youden Index optimization,
+sensitivity/specificity analysis, optimal cutoff determination, and
+comparative ROC analysis. Essential for biomarker validation, diagnostic
 test evaluation, and clinical decision support in medical research.
 }

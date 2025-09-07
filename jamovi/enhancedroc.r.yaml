@@ -13,6 +13,20 @@ items:
             type: Html
             visible: true
 
+          # Natural Language Summary
+          - name: analysisSummary
+            title: Analysis Summary
+            type: Html
+            visible: true
+            description: Plain language summary of key findings
+
+          # Clinical Report Sentences
+          - name: clinicalReport
+            title: Clinical Report Sentences
+            type: Html
+            visible: true
+            description: Copy-ready clinical report sentences for publications and reports
+
           # AUC Summary Table
           - name: aucSummary
             title: Area Under the Curve (AUC) Summary

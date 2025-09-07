@@ -1,5 +1,51 @@
 # ClinicoPath News
 
+## Version 0.0.31.59
+
+### 🗓️ **September 7, 2025 - Enhanced ROC Analysis & Clinical Workflow Optimization**
+
+#### 🎯 **ROC Analysis Module Enhancements - Dual-Function Clinical & Research Approach**
+
+##### **Clinical ROC Analysis (enhancedROC) - Streamlined Clinical Decision Support**
+
+* **Clinical Workflow Focus:** Simplified interface optimized for clinical practitioners and diagnostic workflow
+* **Preset Configurations:** Pre-configured settings for biomarker screening, diagnostic validation, and confirmatory testing
+* **Clinical Context Awareness:** Automatic interpretation based on screening, diagnosis, prognosis, or monitoring applications
+* **Streamlined Interface:** Essential ROC analysis features with clinical terminology and practical guidance
+* **Publication-Ready Output:** Clean visualizations and clinical interpretation suitable for clinical publications
+
+##### **Advanced ROC Analysis (psychopdaROC) - Comprehensive Research Toolkit**
+
+* **Clinical Mode System:** Progressive disclosure with Basic, Advanced, and Comprehensive analysis levels
+* **Clinical Workflow Presets:** Screening (sensitivity prioritized), Confirmation (specificity prioritized), Balanced diagnostic, and Research configurations
+* **Clinical Utility Methods:** Enhanced backend with clinical interpretation framework and AUC performance level assessment
+* **Enhanced Initialization:** Clinical feature integration with internationalization support using jamovi's `.()` wrapper
+* **Advanced Statistical Features:** Meta-analysis, power analysis, effect sizes, IDI/NRI, Bayesian analysis, and clinical utility curves
+
+#### 🔧 **Strategic Dual-Function Architecture**
+
+##### **Clear Market Positioning:**
+* **enhancedROC:** "Clinical ROC Analysis" - Primary clinical decision-making tool (323-line configuration)
+* **psychopdaROC:** "Advanced ROC Analysis" - Research and methodological tool (838-line configuration)
+
+##### **Complementary Use Cases:**
+* **Clinical Practice:** enhancedROC for routine diagnostic test evaluation with clinical presets
+* **Research Publications:** psychopdaROC for comprehensive statistical analysis with methodological rigor
+* **User Progression:** Natural advancement path from clinical (enhancedROC) to research (psychopdaROC) applications
+
+##### **Menu Organization Optimization:**
+* **Menu Group:** Unified under `meddecide` (was `meddecideT`) for consistent navigation
+* **Menu Subgroup:** Both functions organized under `ROC` subgroup for intuitive access
+* **Clear Differentiation:** Distinct subtitles highlighting clinical vs. advanced research focus
+
+#### ✅ **Technical Improvements**
+
+* **Module Compilation:** Successfully validated with `jmvtools::prepare()` - both modules compile without errors
+* **Clinical Interpretation Framework:** AUC performance levels (Excellent ≥0.9, Good ≥0.8, Fair ≥0.7, Poor <0.7)
+* **Internationalization Ready:** All user-facing strings properly wrapped with jamovi's `.()` function
+* **Progressive Disclosure UI:** Context-aware interface that adapts to user expertise level
+* **Clinical Preset Logic:** Automated configuration for common clinical scenarios with appropriate defaults
+
 ## Version 0.0.31.48
 
 ### 🗓️ **August 26, 2025 - Advanced AI and Deep Learning Integration**

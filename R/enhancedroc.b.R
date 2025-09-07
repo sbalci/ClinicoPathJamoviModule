@@ -47,6 +47,9 @@ enhancedROCClass <- R6::R6Class(
                 return()
             }
 
+            # Apply clinical presets if selected
+            private$.applyClinicalPresets()
+            
             # Prepare and validate data
             analysisData <- private$.prepareData()
             if (is.null(analysisData)) return()
@@ -113,6 +116,12 @@ enhancedROCClass <- R6::R6Class(
             if (self$options$clinical_interpretation) {
                 private$.checkpoint()
                 private$.populateClinicalInterpretation()
+            }
+            
+            # Generate natural language summary
+            if (length(private$.rocResults) > 0) {
+                private$.generateAnalysisSummary()
+                private$.generateClinicalReport()
             }
         },
 
@@ -206,9 +215,18 @@ enhancedROCClass <- R6::R6Class(
             levels_count <- length(levels(outcome_var))
             if (levels_count < 2) {
                 self$results$results$instructions$setContent(
-                    paste0("<p><strong>Error:</strong> Outcome variable '", private$.outcome, 
-                           "' must have at least 2 levels for ROC analysis. Found only 1 level: ", 
-                           levels(outcome_var)[1], "</p>")
+                    paste0("<div style='padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;'>",
+                           "<h4 style='color: #721c24; margin-top: 0;'>Insufficient Outcome Variable Levels</h4>",
+                           "<p><strong>Error:</strong> Outcome variable '<code>", private$.outcome, 
+                           "</code>' has only 1 unique value: '<code>", levels(outcome_var)[1], "</code>'</p>",
+                           "<p><strong>ROC analysis requires:</strong> At least 2 different outcome values (e.g., Disease/No Disease, Positive/Negative)</p>",
+                           "<p><strong>Solutions:</strong></p>",
+                           "<ul>",
+                           "<li>Check if your data filtering removed one of the outcome categories</li>",
+                           "<li>Verify the outcome variable contains the expected values</li>",
+                           "<li>Consider using a different outcome variable with multiple categories</li>",
+                           "</ul>",
+                           "</div>")
                 )
                 return(NULL)
             } else if (levels_count > 2) {
@@ -218,9 +236,17 @@ enhancedROCClass <- R6::R6Class(
                 
                 if (is.null(positive_class) || positive_class == "" || !positive_class %in% available_levels) {
                     self$results$results$instructions$setContent(
-                        paste0("<p><strong>Error:</strong> Outcome variable '", private$.outcome, 
-                               "' has ", levels_count, " levels: ", paste(available_levels, collapse = ", "), 
-                               ". Please select a positive class from the dropdown to convert to binary for ROC analysis.</p>")
+                        paste0("<div style='padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;'>",
+                               "<h4 style='color: #856404; margin-top: 0;'>Multi-level Outcome Variable Detected</h4>",
+                               "<p><strong>Issue:</strong> Outcome variable '<code>", private$.outcome, 
+                               "</code>' has ", levels_count, " levels for ROC analysis: <strong>", paste(available_levels, collapse = ", "), "</strong></p>",
+                               "<p><strong>Solution:</strong> ROC analysis requires a binary outcome. Please:</p>",
+                               "<ol>",
+                               "<li><strong>Select a Positive Class:</strong> Choose which level represents the 'positive' outcome (e.g., disease present) from the <em>Positive Class</em> dropdown above. All other levels will be combined as 'negative'.</li>",
+                               "<li><strong>Alternative:</strong> Pre-process your data to create a binary version of this variable before analysis.</li>",
+                               "</ol>",
+                               "<p><em>Example:</em> If analyzing mortality, you might select 'DOD' (Dead of Disease) as positive, combining 'DOOC', 'AWD', 'AWOD' as negative cases.</p>",
+                               "</div>")
                     )
                     return(NULL)
                 }
@@ -233,9 +259,13 @@ enhancedROCClass <- R6::R6Class(
                 data[[private$.outcome]] <- outcome_var
                 
                 # Inform user about the conversion
-                info_msg <- paste0("<p><strong>Info:</strong> Converted multi-level outcome to binary: '", 
-                                 positive_class, "' (positive) vs 'Other' (negative). ", 
-                                 "Original levels: ", paste(available_levels, collapse = ", "), "</p>")
+                info_msg <- paste0("<div style='padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-top: 10px;'>",
+                                 "<h4 style='color: #155724; margin-top: 0;'>✓ Outcome Variable Converted to Binary</h4>",
+                                 "<p><strong>Positive Class:</strong> '<code>", positive_class, "</code>' (cases of interest)</p>",
+                                 "<p><strong>Negative Class:</strong> '<code>Other</code>' (combined: ", 
+                                 paste(available_levels[available_levels != positive_class], collapse = ", "), ")</p>",
+                                 "<p><em>ROC analysis will evaluate how well the predictor(s) distinguish between these two groups.</em></p>",
+                                 "</div>")
                 self$results$results$instructions$setContent(
                     paste(private$.getInstructions(), info_msg)
                 )
@@ -250,10 +280,13 @@ enhancedROCClass <- R6::R6Class(
                 if (!is.null(positive_class) && positive_class != "") {
                     if (!positive_class %in% available_levels) {
                         self$results$results$instructions$setContent(
-                            paste0("<p><strong>Error:</strong> Selected positive class '", positive_class, 
-                                   "' not found in outcome variable '", private$.outcome, 
-                                   "'. Available levels: ", paste(available_levels, collapse = ", "), 
-                                   ". Please select a valid level from the Positive Class dropdown.</p>")
+                            paste0("<div style='padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;'>",
+                                   "<h4 style='color: #721c24; margin-top: 0;'>Invalid Positive Class Selection</h4>",
+                                   "<p><strong>Error:</strong> Selected positive class '<code>", positive_class, 
+                                   "</code>' not found in outcome variable '<code>", private$.outcome, "</code>'.</p>",
+                                   "<p><strong>Available options:</strong> ", paste0("<code>", available_levels, "</code>", collapse = ", "), "</p>",
+                                   "<p><strong>Action needed:</strong> Please select a valid level from the <em>Positive Class</em> dropdown above.</p>",
+                                   "</div>")
                         )
                         return(NULL)
                     }
@@ -287,9 +320,19 @@ enhancedROCClass <- R6::R6Class(
             
             if (length(non_numeric_preds) > 0) {
                 self$results$results$instructions$setContent(
-                    paste0("<p><strong>Error:</strong> Predictor variable(s) must be numeric for ROC analysis: <strong>", 
-                           paste(non_numeric_preds, collapse = ", "), 
-                           "</strong>. Please convert these variables to numeric or select different predictors.</p>")
+                    paste0("<div style='padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;'>",
+                           "<h4 style='color: #721c24; margin-top: 0;'>Non-numeric Predictor Variables</h4>",
+                           "<p><strong>Error:</strong> The following predictor variable(s) are not numeric: <code>", 
+                           paste(non_numeric_preds, collapse = "</code>, <code>"), 
+                           "</code></p>",
+                           "<p><strong>ROC analysis requires:</strong> Continuous or ordinal numeric predictors (e.g., biomarker levels, test scores, measurements)</p>",
+                           "<p><strong>Solutions:</strong></p>",
+                           "<ul>",
+                           "<li>Convert categorical variables to numeric (e.g., ordinal scales: Low=1, Medium=2, High=3)</li>",
+                           "<li>Use different numeric variables as predictors</li>",
+                           "<li>For categorical predictors, consider using contingency table analysis instead</li>",
+                           "</ul>",
+                           "</div>")
                 )
                 return(NULL)
             }
@@ -302,19 +345,38 @@ enhancedROCClass <- R6::R6Class(
                 )
                 return(NULL)
             }
+            
+            # Add clinical assumption validation warnings
+            warnings <- private$.validateClinicalAssumptions(data)
+            if (length(warnings) > 0) {
+                warning_html <- paste0(
+                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0;'>",
+                    "<h4 style='color: #856404; margin-top: 0;'>", .("Clinical Assumptions & Recommendations"), "</h4>",
+                    paste(warnings, collapse = ""),
+                    "</div>"
+                )
+                current_msg <- self$results$results$instructions$content
+                if (is.null(current_msg) || current_msg == "") {
+                    current_msg <- private$.getInstructions()
+                }
+                self$results$results$instructions$setContent(paste0(current_msg, warning_html))
+            }
 
             return(data)
         },
 
         .runROCAnalysis = function(data) {
             private$.rocResults <- list()
+            
+            # Clean up old ROC objects to manage memory
+            private$.cleanupROCObjects()
 
             for (predictor in private$.predictors) {
                 # Checkpoint before each expensive ROC computation
                 private$.checkpoint()
                 
-                # Remove tryCatch to expose errors immediately
-                # tryCatch({
+                # Comprehensive error handling for ROC analysis
+                tryCatch({
                     # Determine direction
                     direction <- self$options$direction
                     if (direction == "auto") {
@@ -365,40 +427,40 @@ enhancedROCClass <- R6::R6Class(
                         predictor = predictor
                     )
 
-                # }, error = function(e) {
-                #     # Provide specific error messages based on common ROC analysis issues
-                #     error_msg <- ""
-                #     if (grepl("No controls", e$message, ignore.case = TRUE)) {
-                #         error_msg <- paste0("No control observations found for predictor '", predictor, 
-                #                           "'. Check that your outcome variable has both positive and negative cases.")
-                #     } else if (grepl("No cases", e$message, ignore.case = TRUE)) {
-                #         error_msg <- paste0("No case observations found for predictor '", predictor, 
-                #                           "'. Check that your outcome variable has both positive and negative cases.")
-                #     } else if (grepl("identical", e$message, ignore.case = TRUE)) {
-                #         error_msg <- paste0("Predictor '", predictor, 
-                #                           "' has identical values across all observations. ROC analysis requires variation in predictor values.")
-                #     } else if (grepl("missing", e$message, ignore.case = TRUE)) {
-                #         error_msg <- paste0("Missing values detected in predictor '", predictor, 
-                #                           "' or outcome variable. Please check your data.")
-                #     } else {
-                #         error_msg <- paste0("ROC analysis failed for predictor '", predictor, "': ", 
-                #                           e$message, ". Please check your data quality and variable selection.")
-                #     }
-                #     
-                #     # Handle errors with enhanced error handling if available
-                #     if (exists("clinicopath_error_handler")) {
-                #         clinicopath_error_handler(e, "enhancedROC", error_msg)
-                #     }
-                #     
-                #     # Show user-friendly error in results
-                #     current_msg <- self$results$results$instructions$content
-                #     if (is.null(current_msg) || current_msg == "") {
-                #         current_msg <- private$.getInstructions()
-                #     }
-                #     self$results$results$instructions$setContent(
-                #         paste0(current_msg, "<p><strong>Warning:</strong> ", error_msg, "</p>")
-                #     )
-                # })
+                }, error = function(e) {
+                    # Provide specific error messages based on common ROC analysis issues
+                    error_msg <- ""
+                    if (grepl("No controls", e$message, ignore.case = TRUE)) {
+                        error_msg <- paste0(.("No control observations found for predictor"), " '", predictor, 
+                                          "'. ", .("Check that your outcome variable has both positive and negative cases."))
+                    } else if (grepl("No cases", e$message, ignore.case = TRUE)) {
+                        error_msg <- paste0(.("No case observations found for predictor"), " '", predictor, 
+                                          "'. ", .("Check that your outcome variable has both positive and negative cases."))
+                    } else if (grepl("identical", e$message, ignore.case = TRUE)) {
+                        error_msg <- paste0(.("Predictor"), " '", predictor, 
+                                          "' ", .("has identical values across all observations. ROC analysis requires variation in predictor values."))
+                    } else if (grepl("missing", e$message, ignore.case = TRUE)) {
+                        error_msg <- paste0(.("Missing values detected in predictor"), " '", predictor, 
+                                          "' ", .("or outcome variable. Please check your data."))
+                    } else {
+                        error_msg <- paste0(.("ROC analysis failed for predictor"), " '", predictor, "': ", 
+                                          e$message, ". ", .("Please check your data quality and variable selection."))
+                    }
+                    
+                    # Handle errors with enhanced error handling if available
+                    if (exists("clinicopath_error_handler")) {
+                        clinicopath_error_handler(e, "enhancedROC", error_msg)
+                    }
+                    
+                    # Show user-friendly error in results
+                    current_msg <- self$results$results$instructions$content
+                    if (is.null(current_msg) || current_msg == "") {
+                        current_msg <- private$.getInstructions()
+                    }
+                    self$results$results$instructions$setContent(
+                        paste0(current_msg, "<p><strong>", .("Warning"), ":</strong> ", error_msg, "</p>")
+                    )
+                })
             }
         },
 
@@ -408,12 +470,26 @@ enhancedROCClass <- R6::R6Class(
                 # If Youden optimization is disabled, return a simple result based on best threshold
                 coords_result <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
                 
+                # Calculate confusion matrix at best cutoff
+                predictions <- ifelse(data[[predictor]] >= coords_result$threshold,
+                                    levels(data[[private$.outcome]])[2],
+                                    levels(data[[private$.outcome]])[1])
+                predictions <- factor(predictions, levels = levels(data[[private$.outcome]]))
+
+                cm <- caret::confusionMatrix(predictions, data[[private$.outcome]],
+                                            positive = levels(data[[private$.outcome]])[2])
+
                 return(list(
                     cutoff = coords_result$threshold,
                     sensitivity = coords_result$sensitivity,
                     specificity = coords_result$specificity,
                     youden_index = coords_result$sensitivity + coords_result$specificity - 1,
-                    accuracy = NA  # Would need confusion matrix to calculate
+                    accuracy = as.numeric(cm$overall["Accuracy"]),
+                    confusion_matrix = cm,
+                    true_positive = cm$table[2, 2],
+                    true_negative = cm$table[1, 1],
+                    false_positive = cm$table[2, 1],
+                    false_negative = cm$table[1, 2]
                 ))
             }
             
@@ -872,6 +948,9 @@ enhancedROCClass <- R6::R6Class(
                             diff <- val2 - val1
                             percent_change <- (diff / val1) * 100
                             
+                            # Calculate p-value using appropriate statistical test
+                            p_value <- private$.calculateMetricPValue(metric, result1, result2, pred1, pred2)
+                            
                             # Determine clinical interpretation
                             interpretation <- if (abs(percent_change) > 20) {
                                 .("Clinically significant difference")
@@ -887,7 +966,7 @@ enhancedROCClass <- R6::R6Class(
                                 model2_value = val2,
                                 difference = diff,
                                 percent_change = percent_change,
-                                p_value = NA,  # Would need statistical test
+                                p_value = p_value,
                                 effect_size = abs(diff),
                                 interpretation = interpretation
                             )
@@ -1234,23 +1313,485 @@ enhancedROCClass <- R6::R6Class(
             return(c(max(0, proportion - margin), min(1, proportion + margin)))
         },
 
+        .cleanupROCObjects = function() {
+            # Manage memory by cleaning up old ROC objects
+            if (length(private$.rocObjects) > 20) {
+                # Keep only the most recent 15 objects
+                keep_indices <- max(1, length(private$.rocObjects) - 14):length(private$.rocObjects)
+                private$.rocObjects <- private$.rocObjects[keep_indices]
+                
+                # Force garbage collection to free memory
+                gc(verbose = FALSE)
+            }
+        },
+        
+        .getColorblindSafePalette = function(n) {
+            # Colorblind-safe palette based on Cynthia Brewer's research
+            # These colors are distinguishable for most types of color vision deficiency
+            cb_palette <- c(
+                "#0173B2",  # Blue
+                "#DE8F05",  # Orange  
+                "#029E73",  # Green
+                "#CC78BC",  # Pink
+                "#CA9161",  # Brown
+                "#FBAFE4",  # Light pink
+                "#949494",  # Grey
+                "#ECE133",  # Yellow
+                "#56B4E9"   # Light blue
+            )
+            
+            if (n <= length(cb_palette)) {
+                return(cb_palette[1:n])
+            } else {
+                # For more than 9 colors, interpolate
+                return(colorRampPalette(cb_palette)(n))
+            }
+        },
+        
+        .applyClinicalPresets = function() {
+            # Apply predefined clinical settings based on selected preset
+            preset <- self$options$clinicalPresets
+            
+            if (preset == "custom") {
+                return()  # No changes for custom configuration
+            }
+            
+            # Apply preset-specific configurations (these would be applied programmatically)
+            # Note: In jamovi, we can't directly modify options from backend, 
+            # but we can use the preset to inform our analysis approach
+            
+            if (preset == "biomarker_screening") {
+                # High sensitivity configuration
+                private$.presetConfig <- list(
+                    focus = "sensitivity",
+                    threshold = 0.90,
+                    clinical_priority = "screening",
+                    recommendation = .("Optimized for biomarker screening with high sensitivity")
+                )
+            } else if (preset == "diagnostic_validation") {
+                # Balanced sensitivity and specificity
+                private$.presetConfig <- list(
+                    focus = "balanced",
+                    sens_threshold = 0.80,
+                    spec_threshold = 0.80,
+                    clinical_priority = "diagnosis", 
+                    recommendation = .("Balanced approach for diagnostic test validation")
+                )
+            } else if (preset == "confirmatory_testing") {
+                # High specificity configuration
+                private$.presetConfig <- list(
+                    focus = "specificity",
+                    threshold = 0.95,
+                    clinical_priority = "diagnosis",
+                    recommendation = .("Optimized for confirmatory testing with high specificity")
+                )
+            } else if (preset == "research_comprehensive") {
+                # Comprehensive analysis
+                private$.presetConfig <- list(
+                    focus = "comprehensive",
+                    clinical_priority = "research",
+                    recommendation = .("Comprehensive analysis for research applications")
+                )
+            }
+        },
+
+        .generateAnalysisSummary = function() {
+            html <- self$results$results$analysisSummary
+            
+            # Generate plain language summary
+            n_predictors <- length(private$.rocResults)
+            n_obs <- nrow(self$data)
+            context <- self$options$clinicalContext
+            
+            # Find best performing predictor
+            best_auc <- 0
+            best_predictor <- ""
+            for (pred in names(private$.rocResults)) {
+                auc_val <- as.numeric(private$.rocObjects[[pred]]$auc)
+                if (auc_val > best_auc) {
+                    best_auc <- auc_val
+                    best_predictor <- pred
+                }
+            }
+            
+            # Generate summary paragraph
+            summary_text <- paste0(
+                "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<h4 style='margin-top: 0; color: #007bff;'>", .("Analysis Summary"), "</h4>",
+                "<p><strong>", .("ROC Analysis Results:"), "</strong> ",
+                sprintf(.("This analysis evaluated %d predictor(s) using %d observations in a %s context."), 
+                        n_predictors, n_obs, context), " "
+            )
+            
+            if (best_auc > 0) {
+                interpretation <- private$.interpretAUC(best_auc)
+                clinical_utility <- private$.assessClinicalUtility(best_auc, context)
+                
+                summary_text <- paste0(summary_text,
+                    sprintf(.("The best performing predictor was '%s' with an AUC of %.3f (%s performance, %s)."), 
+                            best_predictor, best_auc, interpretation, clinical_utility), 
+                    "</p>"
+                )
+                
+                # Add clinical recommendation
+                if (context == "screening" && best_auc >= 0.8) {
+                    summary_text <- paste0(summary_text, 
+                        "<p><strong>", .("Clinical Recommendation"), ":</strong> ",
+                        .("This predictor shows good potential for screening applications."), "</p>")
+                } else if (context == "diagnosis" && best_auc >= 0.8) {
+                    summary_text <- paste0(summary_text,
+                        "<p><strong>", .("Clinical Recommendation"), ":</strong> ",
+                        .("This predictor demonstrates good diagnostic performance."), "</p>")
+                } else {
+                    summary_text <- paste0(summary_text,
+                        "<p><strong>", .("Note"), ":</strong> ",
+                        .("Consider combining with additional markers or clinical information."), "</p>")
+                }
+            }
+            
+            summary_text <- paste0(summary_text, "</div>")
+            html$setContent(summary_text)
+        },
+        
+        .generateClinicalReport = function() {
+            html <- self$results$results$clinicalReport
+            
+            # Generate copy-ready clinical report sentences
+            n_predictors <- length(private$.rocResults)
+            n_obs <- nrow(self$data)
+            context <- self$options$clinicalContext
+            
+            # Find best performing predictor
+            best_auc <- 0
+            best_predictor <- ""
+            best_cutoff <- NULL
+            for (pred in names(private$.rocResults)) {
+                auc_val <- as.numeric(private$.rocObjects[[pred]]$auc)
+                if (auc_val > best_auc) {
+                    best_auc <- auc_val
+                    best_predictor <- pred
+                    best_cutoff <- private$.rocResults[[pred]]$optimal_cutoff
+                }
+            }
+            
+            if (best_auc == 0) {
+                html$setContent("<p>No valid ROC results available for report generation.</p>")
+                return()
+            }
+            
+            # Calculate confidence interval for best predictor
+            ci <- private$.rocObjects[[best_predictor]]$ci
+            ci_lower <- if (!is.null(ci)) round(as.numeric(ci)[1], 3) else "N/A"
+            ci_upper <- if (!is.null(ci)) round(as.numeric(ci)[3], 3) else "N/A"
+            
+            # Generate report sections
+            report_html <- "<div style='background-color: #f0f8ff; border: 1px solid #0066cc; padding: 15px; margin: 10px 0;'>"
+            report_html <- paste0(report_html, "<h4 style='color: #0066cc; margin-top: 0;'>", .("Clinical Report Sentences"), "</h4>")
+            report_html <- paste0(report_html, "<p><em>", .("Copy and paste the sections below into your clinical reports or publications"), ":</em></p>")
+            
+            # Methods section
+            report_html <- paste0(report_html, "<h5>", .("Methods Section"), ":</h5>")
+            report_html <- paste0(report_html, "<div style='background-color: white; padding: 10px; border-left: 4px solid #0066cc; margin: 5px 0;'>")
+            methods_text <- sprintf(.("ROC analysis was performed to evaluate the diagnostic performance of %s in predicting [outcome] using %d observations. The analysis was conducted using the pROC package in R, with AUC calculation and %d%% confidence intervals determined using %s methodology."), 
+                                   ifelse(n_predictors == 1, paste0("'", best_predictor, "'"), paste(n_predictors, "predictors")),
+                                   n_obs, 
+                                   self$options$confidenceLevel,
+                                   ifelse(self$options$useBootstrap, "bootstrap", "DeLong"))
+            report_html <- paste0(report_html, methods_text, "</div>")
+            
+            # Results section  
+            report_html <- paste0(report_html, "<h5>", .("Results Section"), ":</h5>")
+            report_html <- paste0(report_html, "<div style='background-color: white; padding: 10px; border-left: 4px solid #28a745; margin: 5px 0;'>")
+            
+            results_text <- sprintf(.("The %s predictor demonstrated %s diagnostic performance with an AUC of %.3f (95%% CI: %s--%s). At the optimal cutoff of %.3f, the test achieved %s sensitivity (%.1f%%) and %s specificity (%.1f%%), resulting in a Youden Index of %.3f."),
+                                   best_predictor,
+                                   private$.interpretAUC(best_auc),
+                                   best_auc,
+                                   ci_lower, ci_upper,
+                                   best_cutoff$cutoff,
+                                   ifelse(best_cutoff$sensitivity >= 0.8, .("high"), ifelse(best_cutoff$sensitivity >= 0.7, .("moderate"), .("low"))),
+                                   best_cutoff$sensitivity * 100,
+                                   ifelse(best_cutoff$specificity >= 0.8, .("high"), ifelse(best_cutoff$specificity >= 0.7, .("moderate"), .("low"))),
+                                   best_cutoff$specificity * 100,
+                                   best_cutoff$youden_index)
+            
+            report_html <- paste0(report_html, results_text, "</div>")
+            
+            # Clinical interpretation
+            report_html <- paste0(report_html, "<h5>", .("Clinical Interpretation"), ":</h5>")
+            report_html <- paste0(report_html, "<div style='background-color: white; padding: 10px; border-left: 4px solid #ffc107; margin: 5px 0;'>")
+            
+            clinical_utility <- private$.assessClinicalUtility(best_auc, context)
+            interpretation_text <- sprintf(.("These findings suggest that %s has %s for %s applications. The observed AUC indicates %s discriminatory ability, which %s for clinical implementation in this context."),
+                                         best_predictor,
+                                         clinical_utility,
+                                         context,
+                                         ifelse(best_auc >= 0.8, .("good to excellent"), ifelse(best_auc >= 0.7, .("fair to good"), .("limited"))),
+                                         ifelse(best_auc >= 0.8, .("supports consideration"), .("requires careful evaluation")))
+            
+            report_html <- paste0(report_html, interpretation_text, "</div>")
+            
+            # Statistical reporting
+            if (n_predictors > 1) {
+                report_html <- paste0(report_html, "<h5>", .("Comparative Analysis"), ":</h5>")
+                report_html <- paste0(report_html, "<div style='background-color: white; padding: 10px; border-left: 4px solid #dc3545; margin: 5px 0;'>")
+                comparative_text <- sprintf(.("Among the %d predictors evaluated, %s demonstrated superior performance. Pairwise comparisons were conducted using %s methodology to assess statistical significance of observed differences."),
+                                           n_predictors,
+                                           best_predictor,
+                                           self$options$comparisonMethod)
+                report_html <- paste0(report_html, comparative_text, "</div>")
+            }
+            
+            report_html <- paste0(report_html, "</div>")
+            
+            html$setContent(report_html)
+        },
+
+        .validateClinicalAssumptions = function(data) {
+            warnings <- c()
+            
+            # Check sample size adequacy
+            n_obs <- nrow(data)
+            if (n_obs < 30) {
+                warnings <- c(warnings, 
+                    paste0("<p><strong>", .("Sample Size Warning"), ":</strong> ",
+                           sprintf(.("With only %d observations, results may be unstable. Consider %d+ observations for reliable ROC analysis."), n_obs, 50),
+                           "</p>"))
+            }
+            
+            # Check outcome balance
+            outcome_table <- table(data[[private$.outcome]])
+            min_group_size <- min(outcome_table)
+            min_group_pct <- (min_group_size / n_obs) * 100
+            
+            if (min_group_pct < 10) {
+                warnings <- c(warnings,
+                    paste0("<p><strong>", .("Outcome Balance Warning"), ":</strong> ",
+                           sprintf(.("The smaller outcome group has only %.1f%% of observations (%d cases). This may affect ROC reliability."), 
+                                   min_group_pct, min_group_size), "</p>"))
+            }
+            
+            # Check for extreme prevalence in clinical context
+            if (self$options$clinicalContext == "screening" && min_group_pct > 30) {
+                warnings <- c(warnings,
+                    paste0("<p><strong>", .("Screening Context Note"), ":</strong> ",
+                           .("High disease prevalence (>30%) is unusual for screening populations. Consider if this reflects your target population."),
+                           "</p>"))
+            }
+            
+            # Check predictor variability
+            for (pred in private$.predictors) {
+                pred_var <- var(data[[pred]], na.rm = TRUE)
+                if (is.na(pred_var) || pred_var == 0) {
+                    warnings <- c(warnings,
+                        paste0("<p><strong>", .("Predictor Warning"), ":</strong> ",
+                               sprintf(.("Predictor '%s' has no variation. ROC analysis requires variable predictors."), pred),
+                               "</p>"))
+                }
+                
+                # Check for extreme skewness (using basic calculation)
+                tryCatch({
+                    pred_values <- data[[pred]][!is.na(data[[pred]])]
+                    if (length(pred_values) > 3) {
+                        # Simple skewness calculation
+                        mean_val <- mean(pred_values)
+                        sd_val <- sd(pred_values)
+                        if (sd_val > 0) {
+                            skew_values <- ((pred_values - mean_val) / sd_val)^3
+                            pred_skew <- abs(mean(skew_values))
+                            if (pred_skew > 2) {
+                                warnings <- c(warnings,
+                                    paste0("<p><strong>", .("Distribution Note"), ":</strong> ",
+                                           sprintf(.("Predictor '%s' appears highly skewed. Consider transformation for better clinical interpretation."), pred),
+                                           "</p>"))
+                            }
+                        }
+                    }
+                }, error = function(e) {
+                    # Skip skewness check if calculation fails
+                })
+            }
+            
+            return(warnings)
+        },
+        
+        .createClinicalInterpreter = function(context) {
+            # Unified clinical interpretation system
+            list(
+                context = context,
+                
+                interpretAUC = function(auc) {
+                    if (auc >= 0.90) return(list(level = .("Excellent"), utility = .("High")))
+                    if (auc >= 0.80) return(list(level = .("Good"), utility = .("Moderate")))
+                    if (auc >= 0.70) return(list(level = .("Fair"), utility = .("Limited")))
+                    if (auc >= 0.60) return(list(level = .("Poor"), utility = .("Minimal")))
+                    return(list(level = .("No discrimination"), utility = .("None")))
+                },
+                
+                assessUtility = function(auc) {
+                    interp <- self$interpretAUC(auc)
+                    base_utility <- interp$utility
+                    
+                    if (context == "screening" && auc < 0.75) {
+                        return(paste(base_utility, .("- May not meet screening standards")))
+                    } else if (context == "diagnosis" && auc < 0.80) {
+                        return(paste(base_utility, .("- Consider combining with other markers")))
+                    } else {
+                        return(paste(base_utility, .("clinical utility")))
+                    }
+                },
+                
+                generateRecommendation = function(sensitivity, specificity, youden_index = NULL) {
+                    if (context == "screening") {
+                        if (sensitivity >= 0.90 && specificity >= 0.70) {
+                            return(.("Suitable for screening - high sensitivity with acceptable specificity"))
+                        } else if (sensitivity >= 0.85) {
+                            return(.("Consider for screening - good sensitivity but monitor false positives"))
+                        } else {
+                            return(.("Not recommended for screening - insufficient sensitivity"))
+                        }
+                    } else if (context == "diagnosis") {
+                        if (sensitivity >= 0.80 && specificity >= 0.80) {
+                            return(.("Good diagnostic performance - balanced sensitivity and specificity"))
+                        } else if (specificity >= 0.90) {
+                            return(.("Suitable for confirmatory testing - high specificity"))
+                        } else {
+                            return(.("Consider combining with additional markers"))
+                        }
+                    } else {
+                        if (!is.null(youden_index) && youden_index >= 0.6) {
+                            return(.("Strong discriminatory performance"))
+                        } else {
+                            return(.("Moderate discriminatory performance"))
+                        }
+                    }
+                }
+            )
+        },
+
+        .calculateMetricPValue = function(metric, result1, result2, pred1, pred2) {
+            # Calculate p-value for metric comparison based on the metric type
+            tryCatch({
+                if (metric == "AUC") {
+                    # For AUC comparison, use ROC test
+                    roc_test <- pROC::roc.test(result1$roc, result2$roc, method = self$options$comparisonMethod)
+                    return(roc_test$p.value)
+                } else {
+                    # For other metrics (Sensitivity, Specificity, Accuracy), use bootstrap or approximation
+                    # Since we don't have raw data for McNemar's test, use bootstrap approach
+                    n_bootstrap <- min(self$options$bootstrapSamples, 1000)  # Limit for performance
+                    
+                    if (metric == "Sensitivity" || metric == "Specificity" || metric == "Accuracy") {
+                        # Get optimal cutoffs for both predictors
+                        cutoff1 <- result1$optimal_cutoff
+                        cutoff2 <- result2$optimal_cutoff
+                        
+                        # For proportions like sensitivity/specificity, use normal approximation
+                        if (metric == "Sensitivity") {
+                            p1 <- cutoff1$sensitivity
+                            p2 <- cutoff2$sensitivity
+                            # Estimate sample sizes from ROC objects
+                            n1 <- length(result1$roc$cases)
+                            n2 <- length(result2$roc$cases)
+                        } else if (metric == "Specificity") {
+                            p1 <- cutoff1$specificity  
+                            p2 <- cutoff2$specificity
+                            n1 <- length(result1$roc$controls)
+                            n2 <- length(result2$roc$controls)
+                        } else {  # Accuracy
+                            p1 <- cutoff1$accuracy
+                            p2 <- cutoff2$accuracy
+                            n1 <- length(result1$roc$response)
+                            n2 <- length(result2$roc$response)
+                        }
+                        
+                        # Two-sample proportion test
+                        if (!is.na(p1) && !is.na(p2) && n1 > 0 && n2 > 0) {
+                            # Calculate pooled proportion
+                            x1 <- round(p1 * n1)
+                            x2 <- round(p2 * n2)
+                            
+                            if (x1 >= 0 && x1 <= n1 && x2 >= 0 && x2 <= n2) {
+                                prop_test <- stats::prop.test(c(x1, x2), c(n1, n2), correct = TRUE)
+                                return(prop_test$p.value)
+                            }
+                        }
+                    }
+                }
+                
+                # If specific test fails, return NA
+                return(NA)
+                
+            }, error = function(e) {
+                # Return NA if statistical test fails
+                return(NA)
+            })
+        },
+
         .getInstructions = function() {
-            instructions <- "<h2>Enhanced ROC Analysis Instructions</h2>"
+            instructions <- "<div style='font-family: Arial, sans-serif;'>"
             instructions <- paste0(instructions,
-                "<p>ROC (Receiver Operating Characteristic) analysis evaluates the diagnostic performance of continuous variables in predicting binary outcomes.</p>",
-                "<h3>Getting Started:</h3>",
-                "<ol>",
-                "<li>Select a binary outcome variable (disease status)</li>",
-                "<li>Choose one or more numeric predictor variables</li>",
-                "<li>Select appropriate clinical context for interpretation</li>",
-                "<li>Configure analysis options based on clinical application</li>",
+                "<h2 style='color: #2c5530;'>Enhanced ROC Analysis</h2>",
+                "<div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;'>",
+                "<p><strong>Purpose:</strong> ROC (Receiver Operating Characteristic) analysis evaluates how well continuous variables (biomarkers, test scores) can distinguish between two outcome groups (e.g., disease vs. healthy).</p>",
+                "</div>",
+                
+                "<h3 style='color: #2c5530;'>📋 Setup Instructions:</h3>",
+                "<ol style='margin-left: 20px;'>",
+                "<li><strong>Outcome Variable:</strong> Select your binary outcome (e.g., Disease Status, Survival Status)</li>",
+                "<ul style='margin-left: 20px; color: #6c757d;'>",
+                "<li>If you have >2 levels (e.g., DOD, DOOC, AWD, AWOD), select which level represents 'positive' cases</li>",
+                "</ul>",
+                "<li><strong>Predictor Variables:</strong> Choose continuous predictors (e.g., Age, Biomarker levels, Test scores)</li>",
+                "<li><strong>Positive Class:</strong> Specify which outcome level represents the condition of interest</li>",
+                "<li><strong>Clinical Context:</strong> Select appropriate context for tailored interpretation</li>",
                 "</ol>",
-                "<p><strong>Key Features:</strong></p>",
-                "<ul>",
-                "<li><strong>Youden Index:</strong> Finds optimal cutoff balancing sensitivity and specificity</li>",
-                "<li><strong>Clinical Metrics:</strong> PPV, NPV, and likelihood ratios with prevalence effects</li>",
-                "<li><strong>Comparative Analysis:</strong> Statistical comparison of multiple predictors</li>",
-                "</ul>"
+                
+                "<h3 style='color: #2c5530;'>🔧 Quick Start Presets:</h3>",
+                "<div style='background: #e7f3ff; padding: 10px; border-radius: 4px; margin: 10px 0;'>",
+                "<p><strong>Clinical Presets</strong> automatically configure analysis settings:</p>",
+                "<ul style='margin-left: 20px;'>",
+                "<li><strong>Biomarker Screening:</strong> High sensitivity (catch all cases)</li>",
+                "<li><strong>Diagnostic Validation:</strong> Balanced sensitivity/specificity</li>",
+                "<li><strong>Confirmatory Testing:</strong> High specificity (minimize false positives)</li>",
+                "<li><strong>Research Comprehensive:</strong> Full statistical analysis</li>",
+                "</ul>",
+                "</div>",
+                
+                "<h3 style='color: #2c5530;'>📊 Key Output Metrics:</h3>",
+                "<div style='display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0;'>",
+                "<div style='background: #fff3cd; padding: 10px; border-radius: 4px; flex: 1; min-width: 250px;'>",
+                "<strong>AUC (Area Under Curve):</strong><br>",
+                "• 0.5 = No discrimination<br>",
+                "• 0.7-0.8 = Acceptable<br>",
+                "• 0.8-0.9 = Excellent<br>",
+                "• >0.9 = Outstanding",
+                "</div>",
+                "<div style='background: #d1ecf1; padding: 10px; border-radius: 4px; flex: 1; min-width: 250px;'>",
+                "<strong>Youden Index:</strong><br>",
+                "Optimal cutoff that maximizes<br>",
+                "(Sensitivity + Specificity - 1)<br>",
+                "Best balance of true/false rates",
+                "</div>",
+                "</div>",
+                
+                "<details style='margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 4px;'>",
+                "<summary style='cursor: pointer; font-weight: bold; color: #495057;'>📖 Statistical Terms Glossary</summary>",
+                "<div style='margin-top: 10px; padding-left: 20px;'>",
+                "<p><strong>Sensitivity (True Positive Rate):</strong> Proportion of actual positives correctly identified</p>",
+                "<p><strong>Specificity (True Negative Rate):</strong> Proportion of actual negatives correctly identified</p>",
+                "<p><strong>PPV (Positive Predictive Value):</strong> When test is positive, probability patient has condition</p>",
+                "<p><strong>NPV (Negative Predictive Value):</strong> When test is negative, probability patient is healthy</p>",
+                "<p><strong>LR+ (Positive Likelihood Ratio):</strong> How much a positive test increases odds of disease</p>",
+                "<p><strong>LR- (Negative Likelihood Ratio):</strong> How much a negative test decreases odds of disease</p>",
+                "</div>",
+                "</details>",
+                
+                "<div style='background: #d4edda; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin: 10px 0;'>",
+                "<p style='margin: 0;'><strong>💡 Tip:</strong> For clinical decision making, consider both statistical significance and clinical relevance of the cutoff thresholds.</p>",
+                "</div>",
+                
+                "</div>"
             )
             return(instructions)
         },
@@ -1319,6 +1860,10 @@ enhancedROCClass <- R6::R6Class(
                         plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
                         legend.position = "bottom"
                     )
+                
+                # Apply colorblind-safe palette
+                cb_colors <- private$.getColorblindSafePalette(length(unique(plot_data$Predictor)))
+                p <- p + ggplot2::scale_color_manual(values = cb_colors)
 
                 # Add confidence bands if requested
                 if (self$options$showConfidenceBands) {

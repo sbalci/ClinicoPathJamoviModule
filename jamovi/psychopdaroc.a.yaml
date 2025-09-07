@@ -1,7 +1,7 @@
 ---
 name: psychopdaROC
 title: Advanced ROC Analysis
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
 version: '0.0.31'
@@ -12,6 +12,28 @@ description:
         Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination.
 
 options:
+    # ==========================================
+    # CLINICAL ANALYSIS MODE SELECTION
+    # ==========================================
+    
+    - name: clinicalMode
+      title: Analysis Level
+      type: List
+      options:
+        - name: basic
+          title: Basic ROC Analysis (Recommended for Clinical Use)
+        - name: advanced
+          title: Advanced Research Analysis
+        - name: comprehensive
+          title: Comprehensive Statistical Analysis
+      default: basic
+      description:
+          R: >
+            Select the complexity level of analysis:
+            Basic - Essential ROC metrics for clinical decision making
+            Advanced - Additional statistical comparisons and metrics
+            Comprehensive - Full research-grade analysis with all options
+
     # ==========================================
     # DATA INPUT SECTION
     # ==========================================
@@ -66,6 +88,33 @@ options:
           R: >
             Optional grouping variable for stratified analysis. 
             ROC curves will be calculated separately for each group.
+
+    # ==========================================
+    # CLINICAL WORKFLOW PRESETS
+    # ==========================================
+    
+    - name: clinicalPreset
+      title: Clinical Use Case
+      type: List
+      options:
+        - name: none
+          title: Custom Analysis
+        - name: screening
+          title: Screening Test (Prioritize Sensitivity)
+        - name: confirmation
+          title: Confirmation Test (Prioritize Specificity)  
+        - name: balanced
+          title: Balanced Diagnostic Test
+        - name: research
+          title: Research Comparison
+      default: none
+      description:
+          R: >
+            Choose a preset configuration optimized for specific clinical scenarios:
+            Screening - High sensitivity to avoid missing cases
+            Confirmation - High specificity to avoid false positives
+            Balanced - Equal weight to sensitivity and specificity
+            Research - Comprehensive analysis for publication
 
     # ==========================================
     # CUTPOINT OPTIMIZATION SECTION
@@ -285,12 +334,13 @@ options:
             Maximum number of threshold values to show in the threshold table.
 
     - name: delongTest
-      title: Compare AUCs (DeLong's Test)
+      title: Compare Test Performance Statistically
       type: Bool
       default: false
       description:
           R: >
-            Perform DeLong's test for comparing AUCs between multiple test variables.
+            Test whether the diagnostic performance differs significantly between multiple tests.
+            Uses DeLong's method to compare Area Under the Curve (AUC) values.
             Requires at least two test variables.
 
     # ==========================================
@@ -520,20 +570,22 @@ options:
             Perform comprehensive comparison of classifier performance metrics.
 
     - name: calculateIDI
-      title: Calculate IDI
+      title: Calculate Discrimination Improvement
       type: Bool
       default: false
       description:
           R: >
-            Calculate Integrated Discrimination Improvement for model comparison.
+            Calculate how much better one test is at discriminating between diseased and healthy patients.
+            IDI (Integrated Discrimination Improvement) measures the average improvement in predicted probabilities.
 
     - name: calculateNRI
-      title: Calculate NRI
+      title: Calculate Reclassification Improvement
       type: Bool
       default: false
       description:
           R: >
-            Calculate Net Reclassification Index for model comparison.
+            Calculate how many patients are correctly reclassified when using a new test.
+            NRI (Net Reclassification Index) measures the net improvement in patient classification.
 
     - name: refVar
       title: Reference Variable
@@ -668,7 +720,7 @@ options:
             statistic, and Gini coefficient for comprehensive model evaluation.
 
     - name: bayesianAnalysis
-      title: Bayesian ROC Analysis
+      title: Probabilistic ROC Analysis
       type: Bool
       default: false
       description:
@@ -736,5 +788,51 @@ options:
       description:
           R: >
             Include cost-effectiveness considerations in clinical utility analysis.
+
+    # ==========================================
+    # META-ANALYSIS OPTIONS
+    # ==========================================
+
+    - name: metaAnalysis
+      title: Meta-Analysis of ROC Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform meta-analysis of AUC values across multiple test variables.
+            Requires at least 3 test variables to enable pooled effect estimation.
+
+    - name: metaAnalysisMethod
+      title: Meta-Analysis Method
+      type: List
+      options:
+        - name: fixed
+          title: Fixed Effects Model
+        - name: random
+          title: Random Effects Model (DerSimonian-Laird)
+        - name: both
+          title: Both Fixed and Random Effects
+      default: both
+      description:
+          R: >
+            Statistical method for combining AUC estimates across studies/variables.
+
+    - name: heterogeneityTest
+      title: Test for Heterogeneity
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Cochran's Q test and calculate I² statistic to assess
+            heterogeneity between AUC estimates.
+
+    - name: forestPlot
+      title: Forest Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create forest plot visualization of individual and pooled AUC estimates
+            with confidence intervals.
 
 ...

@@ -1,7 +1,7 @@
 ---
 name: enhancedROC
 title: Clinical ROC Analysis
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
 version: '0.0.31'
@@ -233,6 +233,23 @@ options:
             name: general
       default: general
       description: 'Clinical application context for interpretation'
+
+    - name: clinicalPresets
+      title: 'Clinical Presets'
+      type: List
+      options:
+          - title: 'Custom Configuration'
+            name: custom
+          - title: 'Biomarker Screening (High Sensitivity)'
+            name: biomarker_screening
+          - title: 'Diagnostic Test Validation (Balanced)'
+            name: diagnostic_validation
+          - title: 'Confirmatory Testing (High Specificity)'
+            name: confirmatory_testing
+          - title: 'Research Analysis (Comprehensive)'
+            name: research_comprehensive
+      default: custom
+      description: 'Pre-configured settings for common clinical scenarios'
 
     # Advanced Output Options
     - name: comprehensive_output

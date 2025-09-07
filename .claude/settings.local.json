@@ -31,7 +31,9 @@
       "Bash(then echo \"Has refs but missing ClinicoPathJamoviModule: $file\")",
       "Bash(do if ! grep -q \"ClinicoPathJamoviModule\" \"$file\")",
       "Bash(then echo \"Still missing ClinicoPathJamoviModule: $file\")",
-      "Read(//Users/serdarbalci/Downloads/**)"
+      "Read(//Users/serdarbalci/Downloads/**)",
+      "Read(//var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T/TemporaryItems/NSIRD_screencaptureui_jFfFqp/**)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": [],

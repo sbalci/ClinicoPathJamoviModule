@@ -6,10 +6,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            clinicalMode = "basic",
             dependentVars = NULL,
             classVar = NULL,
             positiveClass = NULL,
             subGroup = NULL,
+            clinicalPreset = "none",
             method = "maximize_metric",
             metric = "youden",
             direction = ">=",
@@ -68,7 +70,11 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             clinicalUtilityAnalysis = FALSE,
             treatmentThreshold = "0.05,0.5,0.05",
             harmBenefitRatio = 0.25,
-            interventionCost = FALSE, ...) {
+            interventionCost = FALSE,
+            metaAnalysis = FALSE,
+            metaAnalysisMethod = "both",
+            heterogeneityTest = TRUE,
+            forestPlot = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -76,6 +82,14 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 requiresData=TRUE,
                 ...)
 
+            private$..clinicalMode <- jmvcore::OptionList$new(
+                "clinicalMode",
+                clinicalMode,
+                options=list(
+                    "basic",
+                    "advanced",
+                    "comprehensive"),
+                default="basic")
             private$..dependentVars <- jmvcore::OptionVariables$new(
                 "dependentVars",
                 dependentVars,
@@ -101,6 +115,16 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "none",
+                    "screening",
+                    "confirmation",
+                    "balanced",
+                    "research"),
+                default="none")
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -428,11 +452,33 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "interventionCost",
                 interventionCost,
                 default=FALSE)
+            private$..metaAnalysis <- jmvcore::OptionBool$new(
+                "metaAnalysis",
+                metaAnalysis,
+                default=FALSE)
+            private$..metaAnalysisMethod <- jmvcore::OptionList$new(
+                "metaAnalysisMethod",
+                metaAnalysisMethod,
+                options=list(
+                    "fixed",
+                    "random",
+                    "both"),
+                default="both")
+            private$..heterogeneityTest <- jmvcore::OptionBool$new(
+                "heterogeneityTest",
+                heterogeneityTest,
+                default=TRUE)
+            private$..forestPlot <- jmvcore::OptionBool$new(
+                "forestPlot",
+                forestPlot,
+                default=FALSE)
 
+            self$.addOption(private$..clinicalMode)
             self$.addOption(private$..dependentVars)
             self$.addOption(private$..classVar)
             self$.addOption(private$..positiveClass)
             self$.addOption(private$..subGroup)
+            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..method)
             self$.addOption(private$..metric)
             self$.addOption(private$..direction)
@@ -492,12 +538,18 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..treatmentThreshold)
             self$.addOption(private$..harmBenefitRatio)
             self$.addOption(private$..interventionCost)
+            self$.addOption(private$..metaAnalysis)
+            self$.addOption(private$..metaAnalysisMethod)
+            self$.addOption(private$..heterogeneityTest)
+            self$.addOption(private$..forestPlot)
         }),
     active = list(
+        clinicalMode = function() private$..clinicalMode$value,
         dependentVars = function() private$..dependentVars$value,
         classVar = function() private$..classVar$value,
         positiveClass = function() private$..positiveClass$value,
         subGroup = function() private$..subGroup$value,
+        clinicalPreset = function() private$..clinicalPreset$value,
         method = function() private$..method$value,
         metric = function() private$..metric$value,
         direction = function() private$..direction$value,
@@ -556,12 +608,18 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         clinicalUtilityAnalysis = function() private$..clinicalUtilityAnalysis$value,
         treatmentThreshold = function() private$..treatmentThreshold$value,
         harmBenefitRatio = function() private$..harmBenefitRatio$value,
-        interventionCost = function() private$..interventionCost$value),
+        interventionCost = function() private$..interventionCost$value,
+        metaAnalysis = function() private$..metaAnalysis$value,
+        metaAnalysisMethod = function() private$..metaAnalysisMethod$value,
+        heterogeneityTest = function() private$..heterogeneityTest$value,
+        forestPlot = function() private$..forestPlot$value),
     private = list(
+        ..clinicalMode = NA,
         ..dependentVars = NA,
         ..classVar = NA,
         ..positiveClass = NA,
         ..subGroup = NA,
+        ..clinicalPreset = NA,
         ..method = NA,
         ..metric = NA,
         ..direction = NA,
@@ -620,7 +678,11 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..clinicalUtilityAnalysis = NA,
         ..treatmentThreshold = NA,
         ..harmBenefitRatio = NA,
-        ..interventionCost = NA)
+        ..interventionCost = NA,
+        ..metaAnalysis = NA,
+        ..metaAnalysisMethod = NA,
+        ..heterogeneityTest = NA,
+        ..forestPlot = NA)
 )
 
 psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -630,6 +692,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         instructions = function() private$.items[["instructions"]],
         procedureNotes = function() private$.items[["procedureNotes"]],
         simpleResultsTable = function() private$.items[["simpleResultsTable"]],
+        clinicalInterpretationTable = function() private$.items[["clinicalInterpretationTable"]],
         resultsTable = function() private$.items[["resultsTable"]],
         sensSpecTable = function() private$.items[["sensSpecTable"]],
         thresholdTable = function() private$.items[["thresholdTable"]],
@@ -721,6 +784,28 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clinicalInterpretationTable",
+                title="Clinical Interpretation",
+                visible="(clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="performance_level", 
+                        `title`="Performance Level", 
+                        `type`="text"),
+                    list(
+                        `name`="clinical_recommendation", 
+                        `title`="Clinical Recommendation", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation_text", 
+                        `title`="Detailed Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="resultsTable",
@@ -1380,7 +1465,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="sensitivityAnalysisTable",
                 title="Sensitivity Analysis",
-                visible="(sensitivityAnalysis)",
+                visible=FALSE,
                 clearWith=list(
                     "dependentVars",
                     "classVar",
@@ -1631,7 +1716,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="metaAnalysisForestPlot",
                 title="Meta-Analysis Forest Plot",
-                visible="(metaAnalysis)",
+                visible="(metaAnalysis && forestPlot)",
                 template=jmvcore::Image$new(
                     options=options,
                     width=800,
@@ -1645,7 +1730,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="sensitivityAnalysisPlot",
                 title="Sensitivity Analysis Plot",
-                visible="(sensitivityAnalysis)",
+                visible=FALSE,
                 template=jmvcore::Image$new(
                     options=options,
                     width=650,
@@ -1682,6 +1767,10 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Receiver Operating Characteristic (ROC) curve analysis with optimal 
 #' cutpoint determination.
 #' 
+#' @param clinicalMode Select the complexity level of analysis: Basic -
+#'   Essential ROC metrics for clinical decision making Advanced - Additional
+#'   statistical comparisons and metrics Comprehensive - Full research-grade
+#'   analysis with all options
 #' @param data The data as a data frame.
 #' @param dependentVars Test variable(s) to be evaluated for classification
 #'   performance. Multiple variables can be selected for comparison.
@@ -1691,6 +1780,11 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   treated as the positive class.
 #' @param subGroup Optional grouping variable for stratified analysis.  ROC
 #'   curves will be calculated separately for each group.
+#' @param clinicalPreset Choose a preset configuration optimized for specific
+#'   clinical scenarios: Screening - High sensitivity to avoid missing cases
+#'   Confirmation - High specificity to avoid false positives Balanced - Equal
+#'   weight to sensitivity and specificity Research - Comprehensive analysis for
+#'   publication
 #' @param method Method for determining the optimal cutpoint. Different
 #'   methods optimize different aspects of classifier performance.
 #' @param metric Metric to optimize when determining the cutpoint.  Only
@@ -1720,8 +1814,9 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   at multiple thresholds.
 #' @param maxThresholds Maximum number of threshold values to show in the
 #'   threshold table.
-#' @param delongTest Perform DeLong's test for comparing AUCs between multiple
-#'   test variables. Requires at least two test variables.
+#' @param delongTest Test whether the diagnostic performance differs
+#'   significantly between multiple tests. Uses DeLong's method to compare Area
+#'   Under the Curve (AUC) values. Requires at least two test variables.
 #' @param plotROC Display ROC curves for visual assessment of classifier
 #'   performance.
 #' @param combinePlots When multiple test variables are selected, combine all
@@ -1764,10 +1859,12 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   display confidence intervals.
 #' @param compareClassifiers Perform comprehensive comparison of classifier
 #'   performance metrics.
-#' @param calculateIDI Calculate Integrated Discrimination Improvement for
-#'   model comparison.
-#' @param calculateNRI Calculate Net Reclassification Index for model
-#'   comparison.
+#' @param calculateIDI Calculate how much better one test is at discriminating
+#'   between diseased and healthy patients. IDI (Integrated Discrimination
+#'   Improvement) measures the average improvement in predicted probabilities.
+#' @param calculateNRI Calculate how many patients are correctly reclassified
+#'   when using a new test. NRI (Net Reclassification Index) measures the net
+#'   improvement in patient classification.
 #' @param refVar Reference test variable for IDI and NRI calculations. Other
 #'   variables will be compared against this reference.
 #' @param nriThresholds Comma-separated probability thresholds (0-1) defining
@@ -1812,11 +1909,21 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   policies.
 #' @param interventionCost Include cost-effectiveness considerations in
 #'   clinical utility analysis.
+#' @param metaAnalysis Perform meta-analysis of AUC values across multiple
+#'   test variables. Requires at least 3 test variables to enable pooled effect
+#'   estimation.
+#' @param metaAnalysisMethod Statistical method for combining AUC estimates
+#'   across studies/variables.
+#' @param heterogeneityTest Perform Cochran's Q test and calculate I²
+#'   statistic to assess heterogeneity between AUC estimates.
+#' @param forestPlot Create forest plot visualization of individual and pooled
+#'   AUC estimates with confidence intervals.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 #'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
 #'   \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
@@ -1858,11 +1965,13 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 psychopdaROC <- function(
+    clinicalMode = "basic",
     data,
     dependentVars,
     classVar,
     positiveClass,
     subGroup,
+    clinicalPreset = "none",
     method = "maximize_metric",
     metric = "youden",
     direction = ">=",
@@ -1921,7 +2030,11 @@ psychopdaROC <- function(
     clinicalUtilityAnalysis = FALSE,
     treatmentThreshold = "0.05,0.5,0.05",
     harmBenefitRatio = 0.25,
-    interventionCost = FALSE) {
+    interventionCost = FALSE,
+    metaAnalysis = FALSE,
+    metaAnalysisMethod = "both",
+    heterogeneityTest = TRUE,
+    forestPlot = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("psychopdaROC requires jmvcore to be installed (restart may be required)")
@@ -1940,10 +2053,12 @@ psychopdaROC <- function(
     for (v in subGroup) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- psychopdaROCOptions$new(
+        clinicalMode = clinicalMode,
         dependentVars = dependentVars,
         classVar = classVar,
         positiveClass = positiveClass,
         subGroup = subGroup,
+        clinicalPreset = clinicalPreset,
         method = method,
         metric = metric,
         direction = direction,
@@ -2002,7 +2117,11 @@ psychopdaROC <- function(
         clinicalUtilityAnalysis = clinicalUtilityAnalysis,
         treatmentThreshold = treatmentThreshold,
         harmBenefitRatio = harmBenefitRatio,
-        interventionCost = interventionCost)
+        interventionCost = interventionCost,
+        metaAnalysis = metaAnalysis,
+        metaAnalysisMethod = metaAnalysisMethod,
+        heterogeneityTest = heterogeneityTest,
+        forestPlot = forestPlot)
 
     analysis <- psychopdaROCClass$new(
         options = options,
