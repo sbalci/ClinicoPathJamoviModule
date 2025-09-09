@@ -49,9 +49,8 @@ echo "/document-function FUNC_NAME" | claude
 
 ## meddecideT
 
-
 - agreement - Interrater Reliability
-echo "/check-function agreement" | claude
+
 echo "/checkpoint agreement" | claude
 echo "/prepare-translation agreement" | claude
 echo "/review-function agreement" | claude
@@ -180,13 +179,7 @@ echo "/review-function crosstable" | claude
 echo "/fix-function crosstable" | claude
 echo "/document-function crosstable" | claude
 
-- tableone - Table One
-echo "/check-function tableone" | claude
-echo "/checkpoint tableone" | claude
-echo "/prepare-translation tableone" | claude
-echo "/review-function tableone" | claude
-echo "/fix-function tableone" | claude
-echo "/document-function tableone" | claude
+
 
 implement escapeVariableNames logic from modelbuilder to vartree
 

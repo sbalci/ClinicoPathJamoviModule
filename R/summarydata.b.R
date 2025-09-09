@@ -107,30 +107,126 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             self$results$text$setContent(results)
 
 
-            # Simplified gtExtras implementation with fallback
+            # CORRECT IMPLEMENTATION: Use gtExtras as intended by the package
             plot_dataset <- tryCatch({
-                # Primary approach: Direct gtExtras call (version compatibility verified)
-                private$.create_summary_table(dataset, var_list)
+                # Filter to numeric variables for gtExtras
+                numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
+                
+                # Debug: Show which variables were found
+                debug_info <- paste0(
+                    "<div style='background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 10px; margin: 5px 0;'>",
+                    "<small><strong>Debug:</strong> Found ", length(numeric_vars), " numeric variables: ",
+                    paste(numeric_vars, collapse = ", "), "</small>",
+                    "</div>"
+                )
+                
+                if (length(numeric_vars) > 0) {
+                    clean_data <- dataset[numeric_vars]
+                    
+                    # Ensure proper data types
+                    clean_data <- as.data.frame(lapply(clean_data, function(x) {
+                        if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
+                    }))
+                    
+                    # Use gtExtras with default styling as intended
+                    summary_table <- clean_data %>% 
+                        gtExtras::gt_plt_summary()
+                    
+                    # Convert to HTML using multiple methods for compatibility
+                    html_result <- tryCatch({
+                        # Method 1: Direct as_raw_html conversion (most reliable)
+                        html_output <- as.character(gt::as_raw_html(summary_table))
+                        return(html_output)
+                    }, error = function(e2) {
+                        # Method 2: Print method fallback
+                        print_table <- print(summary_table)
+                        if (is.list(print_table) && "children" %in% names(print_table)) {
+                            return(print_table[["children"]][[2]])
+                        } else {
+                            # Method 3: Direct print output
+                            return(as.character(print_table))
+                        }
+                    })
+                    
+                    # Combine debug info with result
+                    return(htmltools::HTML(paste0(debug_info, html_result)))
+                } else {
+                    return(htmltools::HTML("<p>No numeric variables selected for gtExtras summary table.</p>"))
+                }
             }, error = function(e) {
-                # Fallback: Custom gt table with comprehensive statistics
-                tryCatch({
-                    private$.gtExtras_style_fallback(dataset, var_list)
-                }, error = function(e2) {
-                    # Final fallback: Error message with diagnostics
-                    htmltools::HTML(paste0(
-                        "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
-                        "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
-                        "<p><strong>Primary error:</strong> ", e$message, "</p>",
-                        "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
-                        "<p>Ensure variables are numeric and gtExtras package is properly installed.</p>",
-                        "</div>"
-                    ))
-                })
+                # Debug information and fallback to simple table if gtExtras fails
+                warning_msg <- paste0(
+                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 3px;'>",
+                    "<strong>gtExtras Note:</strong> Using fallback table format. ",
+                    "Error: ", e$message, 
+                    "</div>"
+                )
+                simple_table <- private$.create_simple_summary_table(dataset, var_list)
+                return(htmltools::HTML(paste0(warning_msg, as.character(simple_table))))
             })
+            
+            # COMMENTED OUT: Fallback methods for testing original gtExtra functions
+            # plot_dataset <- tryCatch({
+            #     # Primary approach: Direct gtExtras call (version compatibility verified)
+            #     private$.create_summary_table(dataset, var_list)
+            # }, error = function(e) {
+            #     # Fallback: Custom gt table with comprehensive statistics
+            #     tryCatch({
+            #         private$.gtExtras_style_fallback(dataset, var_list)
+            #     }, error = function(e2) {
+            #         # Final fallback: Error message with diagnostics
+            #         htmltools::HTML(paste0(
+            #             "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
+            #             "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
+            #             "<p><strong>Primary error:</strong> ", e$message, "</p>",
+            #             "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
+            #             "<p>Ensure variables are numeric and gtExtras package is properly installed.</p>",
+            #             "</div>"
+            #         ))
+            #     })
+            # })
             
             self$results$text1$setContent(plot_dataset)
 
         }
+        },
+
+        # Simple summary table without resource-intensive gtExtras
+        .create_simple_summary_table = function(dataset, var_list) {
+            # Filter to numeric variables only
+            numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
+            
+            if (length(numeric_vars) == 0) {
+                return(htmltools::HTML("<p>No numeric variables selected for summary table.</p>"))
+            }
+            
+            # Create simple HTML table
+            html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
+            html <- paste0(html, "<tr style='background-color: #f8f9fa;'>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Variable</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>N</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Mean</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>SD</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Min</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Max</th>")
+            html <- paste0(html, "</tr>")
+            
+            for (var in numeric_vars) {
+                data_col <- dataset[[var]]
+                data_col <- as.numeric(data_col[!is.na(data_col)])
+                
+                html <- paste0(html, "<tr>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", var, "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", length(data_col), "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(mean(data_col, na.rm = TRUE), 2), "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(sd(data_col, na.rm = TRUE), 2), "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(min(data_col, na.rm = TRUE), 2), "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(max(data_col, na.rm = TRUE), 2), "</td>")
+                html <- paste0(html, "</tr>")
+            }
+            
+            html <- paste0(html, "</table>")
+            return(htmltools::HTML(html))
         },
 
         # Simplified gtExtras wrapper (compatibility verified)

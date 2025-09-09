@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.59
+version: 0.0.31.62
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-06'
+date: '2025-09-09'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -16,7 +16,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
@@ -1194,10 +1194,14 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
-    description: Function for Interrater Reliability.
+    description: >
+      Comprehensive interrater reliability analysis including Cohen's kappa (2
+      raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
+      analysis. Provides agreement statistics, visualization, and clinical
+      interpretation for categorical rating data.
     ribbon: analyses
     category: analyses
   - title: Medical Decision
@@ -4429,7 +4433,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs

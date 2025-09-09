@@ -8,6 +8,7 @@ items:
       title: Getting Started
       type: Html
 
+
     - name: overviewTable
       title: Agreement Analysis Summary
       type: Table
@@ -65,155 +66,237 @@ items:
           title: 'Interpretation'
           type: text
 
-    # - name: iccTable
-    #   title: 'Intraclass Correlation Coefficients'
-    #   type: Table
-    #   visible: (icc)
-    #   columns:
-    #     - name: type
-    #       title: 'ICC Type'
-    #       type: text
-    #     - name: icc_value
-    #       title: 'ICC'
-    #       type: number
-    #       format: zto
-    #     - name: ci_lower
-    #       title: 'CI Lower'
-    #       type: number
-    #       format: zto
-    #     - name: ci_upper
-    #       title: 'CI Upper'
-    #       type: number
-    #       format: zto
-    #     - name: f_value
-    #       title: 'F-value'
-    #       type: number
-    #       format: zto
-    #     - name: p
-    #       title: 'p-value'
-    #       type: number
-    #       format: zto,pvalue
-    #     - name: interpretation
-    #       title: 'Interpretation'
-    #       type: text
-# 
-    # # - name: pairwiseTable
-    # #   title: 'Pairwise Rater Agreements'
-    # #   type: Table
-    # #   visible: (pairwiseAnalysis)
-    #   columns:
-    #     - name: rater_pair
-    #       title: 'Rater Pair'
-    #       type: text
-    #     - name: agreement_percent
-    #       title: 'Agreement %'
-    #       type: number
-    #       format: zto
-    #     - name: kappa
-    #       title: 'Kappa'
-    #       type: number
-    #       format: zto
-    #     - name: ci_lower
-    #       title: 'CI Lower'
-    #       type: number
-    #       format: zto
-    #     - name: ci_upper
-    #       title: 'CI Upper'
-    #       type: number
-    #       format: zto
-    #     - name: p
-    #       title: 'p-value'
-    #       type: number
-    #       format: zto,pvalue
-    #     - name: interpretation
-    #       title: 'Agreement Level'
-    #       type: text
+    - name: iccTable
+      title: 'Intraclass Correlation Coefficients'
+      type: Table
+      visible: (icc)
+      columns:
+        - name: type
+          title: 'ICC Type'
+          type: text
+        - name: icc_value
+          title: 'ICC'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 'CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 'CI Upper'
+          type: number
+          format: zto
+        - name: f_value
+          title: 'F-value'
+          type: number
+          format: zto
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
 
-    # - name: categoryTable
-    #   title: 'Category-Specific Agreement'
-    #   type: Table
-    #   visible: (categoryAnalysis)
-    #   columns:
-    #     - name: category
-    #       title: 'Category'
-    #       type: text
-    #     - name: frequency
-    #       title: 'Frequency'
-    #       type: integer
-    #     - name: agreement_percent
-    #       title: 'Agreement %'
-    #       type: number
-    #       format: zto
-    #     - name: kappa
-    #       title: 'Category Kappa'
-    #       type: number
-    #       format: zto
-    #     - name: sensitivity
-    #       title: 'Sensitivity'
-    #       type: number
-    #       format: zto
-    #       visible: (pathologyContext)
-    #     - name: specificity
-    #       title: 'Specificity'
-    #       type: number
-    #       format: zto
-    #       visible: (pathologyContext)
+    - name: pairwiseTable
+      title: 'Pairwise Rater Agreements'
+      type: Table
+      visible: (pairwiseAnalysis)
+      columns:
+        - name: rater_pair
+          title: 'Rater Pair'
+          type: text
+        - name: agreement_percent
+          title: 'Agreement %'
+          type: number
+          format: zto
+        - name: kappa
+          title: 'Kappa'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 'CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 'CI Upper'
+          type: number
+          format: zto
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Agreement Level'
+          type: text
 
-    # - name: outlierTable
-    #   title: 'Cases with Poor Agreement'
-    #   type: Table
-    #   visible: (outlierAnalysis)
-    #  columns:
-    #    - name: case_id
-    #      title: 'Case ID'
-    #      type: text
-    #    - name: disagreement_count
-    #      title: 'Disagreements'
-    #      type: integer
-    #    - name: agreement_score
-    #      title: 'Agreement Score'
-    #      type: number
-    #      format: zto
-    #    - name: rater_assignments
-    #      title: 'Rater Assignments'
-    #      type: text
-    #    - name: consensus_diagnosis
-    #      title: 'Consensus'
-    #      type: text
-    #      visible: (pathologyContext)
+    - name: categoryTable
+      title: 'Category-Specific Agreement'
+      type: Table
+      visible: (categoryAnalysis)
+      columns:
+        - name: category
+          title: 'Category'
+          type: text
+        - name: frequency
+          title: 'Frequency'
+          type: integer
+        - name: agreement_percent
+          title: 'Agreement %'
+          type: number
+          format: zto
+        - name: kappa
+          title: 'Category Kappa'
+          type: number
+          format: zto
+        - name: sensitivity
+          title: 'Sensitivity'
+          type: number
+          format: zto
+          visible: (pathologyContext)
+        - name: specificity
+          title: 'Specificity'
+          type: number
+          format: zto
+          visible: (pathologyContext)
 
-    #- name: diagnosticAccuracyTable
-    #  title: 'Diagnostic Accuracy by Rater'
-    #  type: Table
-    #  visible: (pathologyContext)
-    #  columns:
-    #    - name: rater
-    #      title: 'Rater'
-    #      type: text
-    #    - name: accuracy
-    #      title: 'Accuracy %'
-    #      type: number
-    #      format: zto
-    #    - name: sensitivity
-    #      title: 'Sensitivity %'
-    #      type: number
-    #      format: zto
-    #    - name: specificity
-    #      title: 'Specificity %'
-    #      type: number
-    #      format: zto
-    #    - name: ppv
-    #      title: 'PPV %'
-    #      type: number
-    #      format: zto
-    #    - name: npv
-    #      title: 'NPV %'
-    #      type: number
-    #      format: zto
-    #    - name: kappa_vs_gold
-    #      title: 'Kappa vs Gold Standard'
-    #      type: number
-    #      format: zto
+    - name: outlierTable
+      title: 'Cases with Poor Agreement'
+      type: Table
+      visible: (outlierAnalysis)
+      columns:
+        - name: case_id
+          title: 'Case ID'
+          type: text
+        - name: disagreement_count
+          title: 'Disagreements'
+          type: integer
+        - name: agreement_score
+          title: 'Agreement Score'
+          type: number
+          format: zto
+        - name: rater_assignments
+          title: 'Rater Assignments'
+          type: text
+        - name: consensus_diagnosis
+          title: 'Consensus'
+          type: text
+          visible: (pathologyContext)
+
+    - name: diagnosticAccuracyTable
+      title: 'Diagnostic Accuracy by Rater'
+      type: Table
+      visible: (pathologyContext)
+      columns:
+        - name: rater
+          title: 'Rater'
+          type: text
+        - name: accuracy
+          title: 'Accuracy %'
+          type: number
+          format: zto
+        - name: sensitivity
+          title: 'Sensitivity %'
+          type: number
+          format: zto
+        - name: specificity
+          title: 'Specificity %'
+          type: number
+          format: zto
+        - name: ppv
+          title: 'PPV %'
+          type: number
+          format: zto
+        - name: npv
+          title: 'NPV %'
+          type: number
+          format: zto
+        - name: kappa_vs_gold
+          title: 'Kappa vs Gold Standard'
+          type: number
+          format: zto
+
+    - name: diagnosticStyleTable
+      title: 'Diagnostic Style Clustering Results'
+      type: Table
+      visible: (diagnosticStyleAnalysis)
+      columns:
+        - name: rater
+          title: 'Rater'
+          type: text
+        - name: style_group
+          title: 'Style Group'
+          type: text
+        - name: within_group_agreement
+          title: 'Within-Group Agreement %'
+          type: number
+          format: zto
+        - name: experience
+          title: 'Experience'
+          type: text
+          visible: (raterCharacteristics)
+        - name: training
+          title: 'Training Institution'
+          type: text
+          visible: (raterCharacteristics)
+        - name: institution
+          title: 'Current Institution'
+          type: text
+          visible: (raterCharacteristics)
+        - name: specialty
+          title: 'Specialty'
+          type: text
+          visible: (raterCharacteristics)
+
+    - name: styleSummaryTable
+      title: 'Diagnostic Style Group Summary'
+      type: Table
+      visible: (diagnosticStyleAnalysis)
+      columns:
+        - name: style_group
+          title: 'Style Group'
+          type: text
+        - name: n_members
+          title: 'Members'
+          type: integer
+        - name: members
+          title: 'Member Names'
+          type: text
+        - name: avg_within_agreement
+          title: 'Avg Within-Group Agreement %'
+          type: number
+          format: zto
+        - name: predominant_experience
+          title: 'Predominant Experience'
+          type: text
+          visible: (raterCharacteristics)
+        - name: predominant_training
+          title: 'Predominant Training'
+          type: text
+          visible: (raterCharacteristics)
+        - name: predominant_institution
+          title: 'Predominant Institution'
+          type: text
+          visible: (raterCharacteristics)
+
+    - name: discordantCasesTable
+      title: 'Cases Distinguishing Diagnostic Styles'
+      type: Table
+      visible: (identifyDiscordantCases)
+      columns:
+        - name: case_id
+          title: 'Case ID'
+          type: text
+        - name: discord_score
+          title: 'Discord Score'
+          type: number
+          format: zto
+        - name: style_group_diagnoses
+          title: 'Style Group Diagnoses'
+          type: text
+        - name: case_interpretation
+          title: 'Interpretation'
+          type: text
 
     - name: krippTable
       title: "Krippendorff's Alpha Results"
@@ -301,132 +384,313 @@ items:
       renderFun: .heatmapPlot
       visible: (heatmap)
 
-    # - name: pairwisePlot
-    #   title: 'Pairwise Agreement Plot'
-    #   type: Image
-    #   width: 700
-    #   height: 500
-    #   renderFun: .pairwisePlot
-    #   visible: (pairwiseAnalysis)
+    - name: pairwisePlot
+      title: 'Pairwise Agreement Plot'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .pairwisePlot
+      visible: (pairwiseAnalysis)
 
-    # - name: categoryPlot
-    #   title: 'Category Agreement Plot'
-    #   type: Image
-    #   width: 700
-    #   height: 500
-    #   renderFun: .categoryPlot
-    #   visible: (categoryAnalysis)
+    - name: categoryPlot
+      title: 'Category Agreement Plot'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .categoryPlot
+      visible: (categoryAnalysis)
 
-    # - name: confusionMatrixPlot
-    #   title: 'Confusion Matrix'
-    #   type: Image
-    #   width: 600
-    #   height: 600
-    #   renderFun: .confusionMatrixPlot
-    #   visible: (pathologyContext)
+    - name: confusionMatrixPlot
+      title: 'Confusion Matrix'
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .confusionMatrixPlot
+      visible: (pathologyContext)
 
-    # - name: diagnosticStyleTable
-    #   title: 'Diagnostic Style Clustering Results'
-    #   type: Table
-    #   visible: (diagnosticStyleAnalysis)
-    #  columns:
-    #    - name: rater
-    #      title: 'Rater'
-    #      type: text
-    #    - name: style_group
-    #      title: 'Style Group'
-    #      type: text
-    #    - name: within_group_agreement
-    #      title: 'Within-Group Agreement %'
-    #      type: number
-    #      format: zto
-    #    - name: experience
-    #      title: 'Experience'
-    #      type: text
-    #      visible: (raterCharacteristics)
-    #    - name: training
-    #      title: 'Training Institution'
-    #      type: text
-    #      visible: (raterCharacteristics)
-    #    - name: institution
-    #      title: 'Current Institution'
-    #      type: text
-    #      visible: (raterCharacteristics)
-    #    - name: specialty
-    #      title: 'Specialty'
-    #      type: text
-    #      visible: (raterCharacteristics)
+    - name: diagnosticStyleDendrogram
+      title: 'Diagnostic Style Dendrogram'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .diagnosticStyleDendrogram
+      visible: (diagnosticStyleAnalysis)
 
-    # - name: styleSummaryTable
-    #   title: 'Diagnostic Style Group Summary'
-    #   type: Table
-    #   visible: (diagnosticStyleAnalysis)
-    #  columns:
-    #    - name: style_group
-    #      title: 'Style Group'
-    #      type: text
-    #    - name: n_members
-    #      title: 'Members'
-    #      type: integer
-    #    - name: members
-    #      title: 'Member Names'
-    #      type: text
-    #    - name: avg_within_agreement
-    #      title: 'Avg Within-Group Agreement %'
-    #      type: number
-    #      format: zto
-    #    - name: predominant_experience
-    #      title: 'Predominant Experience'
-    #      type: text
-    #      visible: (raterCharacteristics)
-    #    - name: predominant_training
-    #      title: 'Predominant Training'
-    #      type: text
-    #      visible: (raterCharacteristics)
-    #    - name: predominant_institution
-    #      title: 'Predominant Institution'
-    #      type: text
-    #      visible: (raterCharacteristics)
+    - name: diagnosticStyleHeatmap
+      title: 'Diagnostic Style Heatmap'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .diagnosticStyleHeatmap
+      visible: (diagnosticStyleAnalysis)
+    - name: diagnosticStyleCombined
+      title: 'Combined Dendrogram + Heatmap (Usubutun Style)'
+      type: Image
+      width: 1000
+      height: 1000
+      renderFun: .diagnosticStyleCombined
+      visible: (diagnosticStyleAnalysis)
 
-    # - name: discordantCasesTable
-    #   title: 'Cases Distinguishing Diagnostic Styles'
-    #   type: Table
-    #   visible: (identifyDiscordantCases)
-    #  columns:
-    #    - name: case_id
-    #      title: 'Case ID'
-    #      type: text
-    #    - name: discord_score
-    #      title: 'Discord Score'
-    #      type: number
-    #      format: zto
-    #    - name: style_group_diagnoses
-    #      title: 'Style Group Diagnoses'
-    #      type: text
-    #    - name: case_interpretation
-    #      title: 'Interpretation'
-    #      type: text
-
-    # - name: diagnosticStyleDendrogram
-    #   title: 'Diagnostic Style Dendrogram'
-    #   type: Image
-    #   width: 800
-    #   height: 600
-    #   renderFun: .diagnosticStyleDendrogram
-    #   visible: (diagnosticStyleAnalysis)
-
-    # - name: diagnosticStyleHeatmap
-    #   title: 'Diagnostic Style Heatmap'
-    #   type: Image
-    #   width: 800
-    #   height: 600
-    #   renderFun: .diagnosticStyleHeatmap
-    #   visible: (diagnosticStyleAnalysis)
-
-    - name: frequencyTables
-      title: 'Frequency Tables'
-      type: Html
+    - name: raterFrequencyTables
+      title: 'Individual Rater Frequencies'
+      type: Group
       visible: (sft)
+      items:
+        - name: frequencyTable
+          title: 'Frequency Distribution'
+          type: Table
+          columns:
+            - name: rater
+              title: 'Rater'
+              type: text
+            - name: category
+              title: 'Category'
+              type: text
+            - name: frequency
+              title: 'Frequency'
+              type: integer
+            - name: percentage
+              title: 'Percentage'
+              type: number
+              format: zto
+
+    - name: crosstabTable
+      title: 'Cross-tabulation Matrix'
+      type: Table
+      visible: (sft)
+      clearWith: [vars]
+      columns:
+        - name: rater1_category
+          title: 'Category'
+          type: text
+        - name: frequencies
+          title: 'Frequencies by Rater 2'
+          type: text
+
+
+
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      visible: (showClinicalSummary)
+
+    - name: aboutAnalysis
+      title: About This Analysis
+      type: Html
+      visible: (showAboutAnalysis)
+
+    - name: assumptions
+      title: Assumptions & Caveats
+      type: Html
+      visible: (showAssumptions)
+
+    - name: weightedKappaGuide
+      title: Weighted Kappa Guide
+      type: Html
+      visible: (showWeightedKappaGuide && wght != 'unweighted')
+
+
+
+
+
+
+
+
+
+
+
+    # Enhanced Analysis Results
+    - name: gwetACTable
+      title: "Gwet's Agreement Coefficients"
+      type: Table
+      visible: (gwetAC)
+      columns:
+        - name: coefficient
+          title: 'Coefficient'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: se
+          title: 'Standard Error'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 'CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 'CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: pabakTable
+      title: 'PABAK Analysis Results'
+      type: Table
+      visible: (pabak)
+      columns:
+        - name: measure
+          title: 'Measure'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: standard_kappa
+          title: 'Standard Kappa'
+          type: number
+          format: zto
+        - name: adjusted_kappa
+          title: 'PABAK'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: sampleSizeTable
+      title: 'Sample Size Planning Results'
+      type: Table
+      visible: (sampleSizePlanning)
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: raterBiasTable
+      title: 'Rater Bias Analysis'
+      type: Table
+      visible: (raterBiasAnalysis)
+      columns:
+        - name: rater
+          title: 'Rater'
+          type: text
+        - name: bias_score
+          title: 'Bias Score'
+          type: number
+          format: zto
+        - name: tendency
+          title: 'Systematic Tendency'
+          type: text
+        - name: severity
+          title: 'Bias Severity'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: agreementTrendTable
+      title: 'Agreement Trend Analysis'
+      type: Table
+      visible: (agreementTrendAnalysis)
+      columns:
+        - name: sequence_group
+          title: 'Sequence Group'
+          type: text
+        - name: agreement_percent
+          title: 'Agreement %'
+          type: number
+          format: zto
+        - name: kappa
+          title: 'Kappa'
+          type: number
+          format: zto
+        - name: trend_direction
+          title: 'Trend'
+          type: text
+        - name: significance
+          title: 'Significance'
+          type: text
+
+    - name: caseDifficultyTable
+      title: 'Case Difficulty Analysis'
+      type: Table
+      visible: (caseDifficultyScoring)
+      columns:
+        - name: case_id
+          title: 'Case ID'
+          type: text
+        - name: difficulty_score
+          title: 'Difficulty Score'
+          type: number
+          format: zto
+        - name: disagreement_pattern
+          title: 'Disagreement Pattern'
+          type: text
+        - name: difficulty_level
+          title: 'Difficulty Level'
+          type: text
+        - name: rater_variability
+          title: 'Rater Variability'
+          type: number
+          format: zto
+
+    - name: stabilityTable
+      title: 'Agreement Stability Analysis'
+      type: Table
+      visible: (agreementStabilityAnalysis)
+      columns:
+        - name: statistic
+          title: 'Statistic'
+          type: text
+        - name: original_value
+          title: 'Original Value'
+          type: number
+          format: zto
+        - name: bootstrap_mean
+          title: 'Bootstrap Mean'
+          type: number
+          format: zto
+        - name: bootstrap_se
+          title: 'Bootstrap SE'
+          type: number
+          format: zto
+        - name: stability_index
+          title: 'Stability Index'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Stability'
+          type: text
+
+    - name: trendPlot
+      title: 'Agreement Trend Plot'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .trendPlot
+      visible: (agreementTrendAnalysis)
+
+    - name: biasPlot
+      title: 'Rater Bias Visualization'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .biasPlot
+      visible: (raterBiasAnalysis)
+
+    - name: difficultyPlot
+      title: 'Case Difficulty Distribution'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .difficultyPlot
+      visible: (caseDifficultyScoring)
+
+    - name: inlineComments
+      title: Statistical Commentary
+      type: Html
+      visible: (showInlineComments)
 
 refs:
     - irr

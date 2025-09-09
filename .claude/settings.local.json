@@ -33,7 +33,11 @@
       "Bash(then echo \"Still missing ClinicoPathJamoviModule: $file\")",
       "Read(//Users/serdarbalci/Downloads/**)",
       "Read(//var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T/TemporaryItems/NSIRD_screencaptureui_jFfFqp/**)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:www.rdocumentation.org)",
+      "Bash(/dev/null)",
+      "Read(//Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives/R/**)",
+      "WebFetch(domain:jthomasmock.github.io)"
     ],
     "deny": [],
     "ask": [],

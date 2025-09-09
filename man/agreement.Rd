@@ -10,6 +10,7 @@ agreement(
   sft = FALSE,
   heatmap = FALSE,
   heatmapDetails = FALSE,
+  heatmapTheme = "ryg",
   wght = "unweighted",
   exct = FALSE,
   multiraterMethod = "auto",
@@ -19,7 +20,36 @@ agreement(
   consensus = FALSE,
   consensus_method = "majority",
   tie_breaking = "exclude",
-  show_consensus_table = TRUE
+  show_consensus_table = TRUE,
+  showClinicalSummary = TRUE,
+  showAboutAnalysis = FALSE,
+  showAssumptions = FALSE,
+  showWeightedKappaGuide = TRUE,
+  diagnosticStyleAnalysis = FALSE,
+  styleClusterMethod = "ward",
+  styleDistanceMetric = "agreement",
+  styleGroups = 3,
+  raterCharacteristics = FALSE,
+  identifyDiscordantCases = FALSE,
+  icc = FALSE,
+  bootstrap = FALSE,
+  bootstrapSamples = 1000,
+  pairwiseAnalysis = FALSE,
+  categoryAnalysis = FALSE,
+  outlierAnalysis = FALSE,
+  pathologyContext = FALSE,
+  gwetAC = FALSE,
+  pabak = FALSE,
+  sampleSizePlanning = FALSE,
+  targetKappa = 0.8,
+  targetPrecision = 0.1,
+  raterBiasAnalysis = FALSE,
+  agreementTrendAnalysis = FALSE,
+  caseDifficultyScoring = FALSE,
+  agreementStabilityAnalysis = FALSE,
+  showInlineComments = FALSE,
+  enhancedErrorGuidance = TRUE,
+  showProgressIndicators = TRUE
 )
 }
 \arguments{
@@ -38,6 +68,9 @@ agreement levels.}
 
 \item{heatmapDetails}{Show detailed heatmap with kappa values and
 confidence intervals for all rater pairs.}
+
+\item{heatmapTheme}{Choose color scheme for the agreement heatmap
+visualization.}
 
 \item{wght}{Weighting scheme for kappa analysis. Use 'squared' or 'equal'
 only with ordinal variables. Weighted kappa accounts for the degree of
@@ -69,6 +102,96 @@ using the selected method.}
 
 \item{show_consensus_table}{Display detailed consensus scoring results
 including individual rater scores and consensus outcomes.}
+
+\item{showClinicalSummary}{Show clinical summary with plain-language
+interpretation of agreement statistics and their practical implications.}
+
+\item{showAboutAnalysis}{Show educational information about inter-rater
+reliability analysis, when to use it, and what the outputs mean.}
+
+\item{showAssumptions}{Show important assumptions, data requirements,
+common pitfalls, and interpretation guidelines for the analysis.}
+
+\item{showWeightedKappaGuide}{Show explanatory guide for weighted kappa
+options, including when to use linear vs quadratic weighting schemes.}
+
+\item{diagnosticStyleAnalysis}{Enable diagnostic style clustering analysis
+using the Usubutun method to identify pathologist "schools" or diagnostic
+approaches.}
+
+\item{styleClusterMethod}{Hierarchical clustering method for diagnostic
+style analysis. Ward's linkage is the Usubutun standard.}
+
+\item{styleDistanceMetric}{Distance metric for measuring diagnostic
+similarity between raters for style clustering.}
+
+\item{styleGroups}{Number of diagnostic style groups to identify. Usubutun
+et al. found 3 groups optimal for most analyses.}
+
+\item{raterCharacteristics}{Include rater background characteristics
+(experience, training, institution) in style analysis.}
+
+\item{identifyDiscordantCases}{Identify cases that distinguish different
+diagnostic styles - useful for training and consensus development.}
+
+\item{icc}{Calculate ICC for continuous or ordinal data. Provides
+additional reliability measures beyond kappa.}
+
+\item{bootstrap}{Calculate bootstrap confidence intervals for
+Krippendorff's alpha and other statistics.}
+
+\item{bootstrapSamples}{Number of bootstrap samples for confidence interval
+calculation.}
+
+\item{pairwiseAnalysis}{Detailed analysis of agreement between each pair of
+raters.}
+
+\item{categoryAnalysis}{Agreement analysis for each diagnostic category
+separately.}
+
+\item{outlierAnalysis}{Identify cases with unusually poor agreement across
+raters.}
+
+\item{pathologyContext}{Calculate pathology-specific metrics including
+diagnostic accuracy, sensitivity, and specificity when gold standard is
+available.}
+
+\item{gwetAC}{Calculate Gwet's AC1 and AC2 coefficients, which are more
+robust than kappa for high agreement scenarios and less affected by
+prevalence.}
+
+\item{pabak}{Calculate Prevalence-Adjusted Bias-Adjusted Kappa (PABAK) to
+address prevalence and bias issues in agreement studies.}
+
+\item{sampleSizePlanning}{Perform sample size planning calculations for
+agreement studies with specified precision requirements.}
+
+\item{targetKappa}{Target kappa value for sample size planning
+calculations.}
+
+\item{targetPrecision}{Target precision for confidence interval width in
+sample size planning.}
+
+\item{raterBiasAnalysis}{Analyze systematic tendencies and biases for each
+rater compared to the consensus or average ratings.}
+
+\item{agreementTrendAnalysis}{Analyze how agreement changes over time or
+case sequence, useful for training effect assessment.}
+
+\item{caseDifficultyScoring}{Quantify inherent case difficulty based on
+inter-rater disagreement patterns and provide difficulty scores.}
+
+\item{agreementStabilityAnalysis}{Bootstrap-based stability measures to
+assess the consistency of agreement statistics across different samples.}
+
+\item{showInlineComments}{Show detailed statistical explanations and
+interpretations inline with results for educational purposes.}
+
+\item{enhancedErrorGuidance}{Provide detailed error messages and
+suggestions for resolving common issues in agreement analysis.}
+
+\item{showProgressIndicators}{Display progress indicators for
+computationally intensive operations like bootstrap calculations.}
 }
 \value{
 A results object containing:
@@ -76,11 +199,40 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$categoryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$outlierTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticAccuracyTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticStyleTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$styleSummaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$discordantCasesTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$consensusSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$frequencyTables} \tab \tab \tab \tab \tab a html \cr
+\code{results$pairwisePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$categoryPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$confusionMatrixPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticStyleDendrogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticStyleHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterFrequencyTables$frequencyTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$crosstabTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$gwetACTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$pabakTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$sampleSizeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$agreementTrendTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$caseDifficultyTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$stabilityTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$trendPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$biasPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$difficultyPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$inlineComments} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -90,10 +242,41 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$overviewTable)}
 }
 \description{
-Function for Interrater Reliability.
+Comprehensive interrater reliability analysis including Cohen's kappa (2
+raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
+analysis. Provides agreement statistics, visualization, and clinical
+interpretation for categorical rating data.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Load example data
+data('pathology_ratings', package = 'ClinicoPath')
+
+# Basic agreement analysis with 2 raters
+agreement(pathology_ratings,
+          vars = c('rater1', 'rater2'))
+
+# Advanced analysis with 3+ raters including visualization
+agreement(pathology_ratings,
+          vars = c('rater1', 'rater2', 'rater3'),
+          multiraterMethod = 'fleiss',
+          fleissCI = TRUE,
+          heatmap = TRUE,
+          heatmapDetails = TRUE,
+          sft = TRUE)
+
+# Krippendorff's alpha for ordinal data
+agreement(pathology_ratings,
+          vars = c('rater1', 'rater2', 'rater3'),
+          multiraterMethod = 'krippendorff',
+          kripp = TRUE,
+          krippMethod = 'ordinal')
+
+# Consensus analysis
+agreement(pathology_ratings,
+          vars = c('rater1', 'rater2', 'rater3'),
+          consensus = TRUE,
+          consensus_method = 'majority',
+          tie_breaking = 'arbitration',
+          show_consensus_table = TRUE)
+
 }

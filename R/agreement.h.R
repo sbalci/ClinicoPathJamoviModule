@@ -10,6 +10,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sft = FALSE,
             heatmap = FALSE,
             heatmapDetails = FALSE,
+            heatmapTheme = "ryg",
             wght = "unweighted",
             exct = FALSE,
             multiraterMethod = "auto",
@@ -19,7 +20,41 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             consensus = FALSE,
             consensus_method = "majority",
             tie_breaking = "exclude",
-            show_consensus_table = TRUE, ...) {
+            show_consensus_table = TRUE,
+            showClinicalSummary = TRUE,
+            showAboutAnalysis = FALSE,
+            showAssumptions = FALSE,
+            showWeightedKappaGuide = TRUE,
+            diagnosticStyleAnalysis = FALSE,
+            styleClusterMethod = "ward",
+            styleDistanceMetric = "agreement",
+            styleGroups = 3,
+            raterCharacteristics = FALSE,
+            experienceVar = NULL,
+            trainingVar = NULL,
+            institutionVar = NULL,
+            specialtyVar = NULL,
+            identifyDiscordantCases = FALSE,
+            caseID = NULL,
+            icc = FALSE,
+            bootstrap = FALSE,
+            bootstrapSamples = 1000,
+            pairwiseAnalysis = FALSE,
+            categoryAnalysis = FALSE,
+            outlierAnalysis = FALSE,
+            pathologyContext = FALSE,
+            gwetAC = FALSE,
+            pabak = FALSE,
+            sampleSizePlanning = FALSE,
+            targetKappa = 0.8,
+            targetPrecision = 0.1,
+            raterBiasAnalysis = FALSE,
+            agreementTrendAnalysis = FALSE,
+            caseDifficultyScoring = FALSE,
+            agreementStabilityAnalysis = FALSE,
+            showInlineComments = FALSE,
+            enhancedErrorGuidance = TRUE,
+            showProgressIndicators = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -47,6 +82,15 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "heatmapDetails",
                 heatmapDetails,
                 default=FALSE)
+            private$..heatmapTheme <- jmvcore::OptionList$new(
+                "heatmapTheme",
+                heatmapTheme,
+                options=list(
+                    "ryg",
+                    "bwr",
+                    "viridis",
+                    "plasma"),
+                default="ryg")
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
                 wght,
@@ -109,11 +153,174 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "show_consensus_table",
                 show_consensus_table,
                 default=TRUE)
+            private$..showClinicalSummary <- jmvcore::OptionBool$new(
+                "showClinicalSummary",
+                showClinicalSummary,
+                default=TRUE)
+            private$..showAboutAnalysis <- jmvcore::OptionBool$new(
+                "showAboutAnalysis",
+                showAboutAnalysis,
+                default=FALSE)
+            private$..showAssumptions <- jmvcore::OptionBool$new(
+                "showAssumptions",
+                showAssumptions,
+                default=FALSE)
+            private$..showWeightedKappaGuide <- jmvcore::OptionBool$new(
+                "showWeightedKappaGuide",
+                showWeightedKappaGuide,
+                default=TRUE)
+            private$..diagnosticStyleAnalysis <- jmvcore::OptionBool$new(
+                "diagnosticStyleAnalysis",
+                diagnosticStyleAnalysis,
+                default=FALSE)
+            private$..styleClusterMethod <- jmvcore::OptionList$new(
+                "styleClusterMethod",
+                styleClusterMethod,
+                options=list(
+                    "ward",
+                    "complete",
+                    "average"),
+                default="ward")
+            private$..styleDistanceMetric <- jmvcore::OptionList$new(
+                "styleDistanceMetric",
+                styleDistanceMetric,
+                options=list(
+                    "agreement",
+                    "correlation",
+                    "euclidean"),
+                default="agreement")
+            private$..styleGroups <- jmvcore::OptionNumber$new(
+                "styleGroups",
+                styleGroups,
+                min=2,
+                max=10,
+                default=3)
+            private$..raterCharacteristics <- jmvcore::OptionBool$new(
+                "raterCharacteristics",
+                raterCharacteristics,
+                default=FALSE)
+            private$..experienceVar <- jmvcore::OptionVariable$new(
+                "experienceVar",
+                experienceVar,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "nominal"))
+            private$..trainingVar <- jmvcore::OptionVariable$new(
+                "trainingVar",
+                trainingVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"))
+            private$..institutionVar <- jmvcore::OptionVariable$new(
+                "institutionVar",
+                institutionVar,
+                suggested=list(
+                    "nominal"))
+            private$..specialtyVar <- jmvcore::OptionVariable$new(
+                "specialtyVar",
+                specialtyVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"))
+            private$..identifyDiscordantCases <- jmvcore::OptionBool$new(
+                "identifyDiscordantCases",
+                identifyDiscordantCases,
+                default=FALSE)
+            private$..caseID <- jmvcore::OptionVariable$new(
+                "caseID",
+                caseID,
+                suggested=list(
+                    "id",
+                    "nominal"))
+            private$..icc <- jmvcore::OptionBool$new(
+                "icc",
+                icc,
+                default=FALSE)
+            private$..bootstrap <- jmvcore::OptionBool$new(
+                "bootstrap",
+                bootstrap,
+                default=FALSE)
+            private$..bootstrapSamples <- jmvcore::OptionNumber$new(
+                "bootstrapSamples",
+                bootstrapSamples,
+                min=100,
+                max=5000,
+                default=1000)
+            private$..pairwiseAnalysis <- jmvcore::OptionBool$new(
+                "pairwiseAnalysis",
+                pairwiseAnalysis,
+                default=FALSE)
+            private$..categoryAnalysis <- jmvcore::OptionBool$new(
+                "categoryAnalysis",
+                categoryAnalysis,
+                default=FALSE)
+            private$..outlierAnalysis <- jmvcore::OptionBool$new(
+                "outlierAnalysis",
+                outlierAnalysis,
+                default=FALSE)
+            private$..pathologyContext <- jmvcore::OptionBool$new(
+                "pathologyContext",
+                pathologyContext,
+                default=FALSE)
+            private$..gwetAC <- jmvcore::OptionBool$new(
+                "gwetAC",
+                gwetAC,
+                default=FALSE)
+            private$..pabak <- jmvcore::OptionBool$new(
+                "pabak",
+                pabak,
+                default=FALSE)
+            private$..sampleSizePlanning <- jmvcore::OptionBool$new(
+                "sampleSizePlanning",
+                sampleSizePlanning,
+                default=FALSE)
+            private$..targetKappa <- jmvcore::OptionNumber$new(
+                "targetKappa",
+                targetKappa,
+                min=0,
+                max=1,
+                default=0.8)
+            private$..targetPrecision <- jmvcore::OptionNumber$new(
+                "targetPrecision",
+                targetPrecision,
+                min=0.01,
+                max=0.5,
+                default=0.1)
+            private$..raterBiasAnalysis <- jmvcore::OptionBool$new(
+                "raterBiasAnalysis",
+                raterBiasAnalysis,
+                default=FALSE)
+            private$..agreementTrendAnalysis <- jmvcore::OptionBool$new(
+                "agreementTrendAnalysis",
+                agreementTrendAnalysis,
+                default=FALSE)
+            private$..caseDifficultyScoring <- jmvcore::OptionBool$new(
+                "caseDifficultyScoring",
+                caseDifficultyScoring,
+                default=FALSE)
+            private$..agreementStabilityAnalysis <- jmvcore::OptionBool$new(
+                "agreementStabilityAnalysis",
+                agreementStabilityAnalysis,
+                default=FALSE)
+            private$..showInlineComments <- jmvcore::OptionBool$new(
+                "showInlineComments",
+                showInlineComments,
+                default=FALSE)
+            private$..enhancedErrorGuidance <- jmvcore::OptionBool$new(
+                "enhancedErrorGuidance",
+                enhancedErrorGuidance,
+                default=TRUE)
+            private$..showProgressIndicators <- jmvcore::OptionBool$new(
+                "showProgressIndicators",
+                showProgressIndicators,
+                default=TRUE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
             self$.addOption(private$..heatmap)
             self$.addOption(private$..heatmapDetails)
+            self$.addOption(private$..heatmapTheme)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
             self$.addOption(private$..multiraterMethod)
@@ -124,12 +331,47 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..consensus_method)
             self$.addOption(private$..tie_breaking)
             self$.addOption(private$..show_consensus_table)
+            self$.addOption(private$..showClinicalSummary)
+            self$.addOption(private$..showAboutAnalysis)
+            self$.addOption(private$..showAssumptions)
+            self$.addOption(private$..showWeightedKappaGuide)
+            self$.addOption(private$..diagnosticStyleAnalysis)
+            self$.addOption(private$..styleClusterMethod)
+            self$.addOption(private$..styleDistanceMetric)
+            self$.addOption(private$..styleGroups)
+            self$.addOption(private$..raterCharacteristics)
+            self$.addOption(private$..experienceVar)
+            self$.addOption(private$..trainingVar)
+            self$.addOption(private$..institutionVar)
+            self$.addOption(private$..specialtyVar)
+            self$.addOption(private$..identifyDiscordantCases)
+            self$.addOption(private$..caseID)
+            self$.addOption(private$..icc)
+            self$.addOption(private$..bootstrap)
+            self$.addOption(private$..bootstrapSamples)
+            self$.addOption(private$..pairwiseAnalysis)
+            self$.addOption(private$..categoryAnalysis)
+            self$.addOption(private$..outlierAnalysis)
+            self$.addOption(private$..pathologyContext)
+            self$.addOption(private$..gwetAC)
+            self$.addOption(private$..pabak)
+            self$.addOption(private$..sampleSizePlanning)
+            self$.addOption(private$..targetKappa)
+            self$.addOption(private$..targetPrecision)
+            self$.addOption(private$..raterBiasAnalysis)
+            self$.addOption(private$..agreementTrendAnalysis)
+            self$.addOption(private$..caseDifficultyScoring)
+            self$.addOption(private$..agreementStabilityAnalysis)
+            self$.addOption(private$..showInlineComments)
+            self$.addOption(private$..enhancedErrorGuidance)
+            self$.addOption(private$..showProgressIndicators)
         }),
     active = list(
         vars = function() private$..vars$value,
         sft = function() private$..sft$value,
         heatmap = function() private$..heatmap$value,
         heatmapDetails = function() private$..heatmapDetails$value,
+        heatmapTheme = function() private$..heatmapTheme$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
         multiraterMethod = function() private$..multiraterMethod$value,
@@ -139,12 +381,47 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         consensus = function() private$..consensus$value,
         consensus_method = function() private$..consensus_method$value,
         tie_breaking = function() private$..tie_breaking$value,
-        show_consensus_table = function() private$..show_consensus_table$value),
+        show_consensus_table = function() private$..show_consensus_table$value,
+        showClinicalSummary = function() private$..showClinicalSummary$value,
+        showAboutAnalysis = function() private$..showAboutAnalysis$value,
+        showAssumptions = function() private$..showAssumptions$value,
+        showWeightedKappaGuide = function() private$..showWeightedKappaGuide$value,
+        diagnosticStyleAnalysis = function() private$..diagnosticStyleAnalysis$value,
+        styleClusterMethod = function() private$..styleClusterMethod$value,
+        styleDistanceMetric = function() private$..styleDistanceMetric$value,
+        styleGroups = function() private$..styleGroups$value,
+        raterCharacteristics = function() private$..raterCharacteristics$value,
+        experienceVar = function() private$..experienceVar$value,
+        trainingVar = function() private$..trainingVar$value,
+        institutionVar = function() private$..institutionVar$value,
+        specialtyVar = function() private$..specialtyVar$value,
+        identifyDiscordantCases = function() private$..identifyDiscordantCases$value,
+        caseID = function() private$..caseID$value,
+        icc = function() private$..icc$value,
+        bootstrap = function() private$..bootstrap$value,
+        bootstrapSamples = function() private$..bootstrapSamples$value,
+        pairwiseAnalysis = function() private$..pairwiseAnalysis$value,
+        categoryAnalysis = function() private$..categoryAnalysis$value,
+        outlierAnalysis = function() private$..outlierAnalysis$value,
+        pathologyContext = function() private$..pathologyContext$value,
+        gwetAC = function() private$..gwetAC$value,
+        pabak = function() private$..pabak$value,
+        sampleSizePlanning = function() private$..sampleSizePlanning$value,
+        targetKappa = function() private$..targetKappa$value,
+        targetPrecision = function() private$..targetPrecision$value,
+        raterBiasAnalysis = function() private$..raterBiasAnalysis$value,
+        agreementTrendAnalysis = function() private$..agreementTrendAnalysis$value,
+        caseDifficultyScoring = function() private$..caseDifficultyScoring$value,
+        agreementStabilityAnalysis = function() private$..agreementStabilityAnalysis$value,
+        showInlineComments = function() private$..showInlineComments$value,
+        enhancedErrorGuidance = function() private$..enhancedErrorGuidance$value,
+        showProgressIndicators = function() private$..showProgressIndicators$value),
     private = list(
         ..vars = NA,
         ..sft = NA,
         ..heatmap = NA,
         ..heatmapDetails = NA,
+        ..heatmapTheme = NA,
         ..wght = NA,
         ..exct = NA,
         ..multiraterMethod = NA,
@@ -154,7 +431,41 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..consensus = NA,
         ..consensus_method = NA,
         ..tie_breaking = NA,
-        ..show_consensus_table = NA)
+        ..show_consensus_table = NA,
+        ..showClinicalSummary = NA,
+        ..showAboutAnalysis = NA,
+        ..showAssumptions = NA,
+        ..showWeightedKappaGuide = NA,
+        ..diagnosticStyleAnalysis = NA,
+        ..styleClusterMethod = NA,
+        ..styleDistanceMetric = NA,
+        ..styleGroups = NA,
+        ..raterCharacteristics = NA,
+        ..experienceVar = NA,
+        ..trainingVar = NA,
+        ..institutionVar = NA,
+        ..specialtyVar = NA,
+        ..identifyDiscordantCases = NA,
+        ..caseID = NA,
+        ..icc = NA,
+        ..bootstrap = NA,
+        ..bootstrapSamples = NA,
+        ..pairwiseAnalysis = NA,
+        ..categoryAnalysis = NA,
+        ..outlierAnalysis = NA,
+        ..pathologyContext = NA,
+        ..gwetAC = NA,
+        ..pabak = NA,
+        ..sampleSizePlanning = NA,
+        ..targetKappa = NA,
+        ..targetPrecision = NA,
+        ..raterBiasAnalysis = NA,
+        ..agreementTrendAnalysis = NA,
+        ..caseDifficultyScoring = NA,
+        ..agreementStabilityAnalysis = NA,
+        ..showInlineComments = NA,
+        ..enhancedErrorGuidance = NA,
+        ..showProgressIndicators = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -164,11 +475,41 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         overviewTable = function() private$.items[["overviewTable"]],
         kappaTable = function() private$.items[["kappaTable"]],
+        iccTable = function() private$.items[["iccTable"]],
+        pairwiseTable = function() private$.items[["pairwiseTable"]],
+        categoryTable = function() private$.items[["categoryTable"]],
+        outlierTable = function() private$.items[["outlierTable"]],
+        diagnosticAccuracyTable = function() private$.items[["diagnosticAccuracyTable"]],
+        diagnosticStyleTable = function() private$.items[["diagnosticStyleTable"]],
+        styleSummaryTable = function() private$.items[["styleSummaryTable"]],
+        discordantCasesTable = function() private$.items[["discordantCasesTable"]],
         krippTable = function() private$.items[["krippTable"]],
         consensusTable = function() private$.items[["consensusTable"]],
         consensusSummary = function() private$.items[["consensusSummary"]],
         heatmapPlot = function() private$.items[["heatmapPlot"]],
-        frequencyTables = function() private$.items[["frequencyTables"]]),
+        pairwisePlot = function() private$.items[["pairwisePlot"]],
+        categoryPlot = function() private$.items[["categoryPlot"]],
+        confusionMatrixPlot = function() private$.items[["confusionMatrixPlot"]],
+        diagnosticStyleDendrogram = function() private$.items[["diagnosticStyleDendrogram"]],
+        diagnosticStyleHeatmap = function() private$.items[["diagnosticStyleHeatmap"]],
+        diagnosticStyleCombined = function() private$.items[["diagnosticStyleCombined"]],
+        raterFrequencyTables = function() private$.items[["raterFrequencyTables"]],
+        crosstabTable = function() private$.items[["crosstabTable"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        assumptions = function() private$.items[["assumptions"]],
+        weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
+        gwetACTable = function() private$.items[["gwetACTable"]],
+        pabakTable = function() private$.items[["pabakTable"]],
+        sampleSizeTable = function() private$.items[["sampleSizeTable"]],
+        raterBiasTable = function() private$.items[["raterBiasTable"]],
+        agreementTrendTable = function() private$.items[["agreementTrendTable"]],
+        caseDifficultyTable = function() private$.items[["caseDifficultyTable"]],
+        stabilityTable = function() private$.items[["stabilityTable"]],
+        trendPlot = function() private$.items[["trendPlot"]],
+        biasPlot = function() private$.items[["biasPlot"]],
+        difficultyPlot = function() private$.items[["difficultyPlot"]],
+        inlineComments = function() private$.items[["inlineComments"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -258,6 +599,288 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="iccTable",
+                title="Intraclass Correlation Coefficients",
+                visible="(icc)",
+                columns=list(
+                    list(
+                        `name`="type", 
+                        `title`="ICC Type", 
+                        `type`="text"),
+                    list(
+                        `name`="icc_value", 
+                        `title`="ICC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="f_value", 
+                        `title`="F-value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pairwiseTable",
+                title="Pairwise Rater Agreements",
+                visible="(pairwiseAnalysis)",
+                columns=list(
+                    list(
+                        `name`="rater_pair", 
+                        `title`="Rater Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="agreement_percent", 
+                        `title`="Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Agreement Level", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="categoryTable",
+                title="Category-Specific Agreement",
+                visible="(categoryAnalysis)",
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="frequency", 
+                        `title`="Frequency", 
+                        `type`="integer"),
+                    list(
+                        `name`="agreement_percent", 
+                        `title`="Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Category Kappa", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(pathologyContext)"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(pathologyContext)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="outlierTable",
+                title="Cases with Poor Agreement",
+                visible="(outlierAnalysis)",
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case ID", 
+                        `type`="text"),
+                    list(
+                        `name`="disagreement_count", 
+                        `title`="Disagreements", 
+                        `type`="integer"),
+                    list(
+                        `name`="agreement_score", 
+                        `title`="Agreement Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rater_assignments", 
+                        `title`="Rater Assignments", 
+                        `type`="text"),
+                    list(
+                        `name`="consensus_diagnosis", 
+                        `title`="Consensus", 
+                        `type`="text", 
+                        `visible`="(pathologyContext)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="diagnosticAccuracyTable",
+                title="Diagnostic Accuracy by Rater",
+                visible="(pathologyContext)",
+                columns=list(
+                    list(
+                        `name`="rater", 
+                        `title`="Rater", 
+                        `type`="text"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="kappa_vs_gold", 
+                        `title`="Kappa vs Gold Standard", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="diagnosticStyleTable",
+                title="Diagnostic Style Clustering Results",
+                visible="(diagnosticStyleAnalysis)",
+                columns=list(
+                    list(
+                        `name`="rater", 
+                        `title`="Rater", 
+                        `type`="text"),
+                    list(
+                        `name`="style_group", 
+                        `title`="Style Group", 
+                        `type`="text"),
+                    list(
+                        `name`="within_group_agreement", 
+                        `title`="Within-Group Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="experience", 
+                        `title`="Experience", 
+                        `type`="text", 
+                        `visible`="(raterCharacteristics)"),
+                    list(
+                        `name`="training", 
+                        `title`="Training Institution", 
+                        `type`="text", 
+                        `visible`="(raterCharacteristics)"),
+                    list(
+                        `name`="institution", 
+                        `title`="Current Institution", 
+                        `type`="text", 
+                        `visible`="(raterCharacteristics)"),
+                    list(
+                        `name`="specialty", 
+                        `title`="Specialty", 
+                        `type`="text", 
+                        `visible`="(raterCharacteristics)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="styleSummaryTable",
+                title="Diagnostic Style Group Summary",
+                visible="(diagnosticStyleAnalysis)",
+                columns=list(
+                    list(
+                        `name`="style_group", 
+                        `title`="Style Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n_members", 
+                        `title`="Members", 
+                        `type`="integer"),
+                    list(
+                        `name`="members", 
+                        `title`="Member Names", 
+                        `type`="text"),
+                    list(
+                        `name`="avg_within_agreement", 
+                        `title`="Avg Within-Group Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="predominant_experience", 
+                        `title`="Predominant Experience", 
+                        `type`="text", 
+                        `visible`="(raterCharacteristics)"),
+                    list(
+                        `name`="predominant_training", 
+                        `title`="Predominant Training", 
+                        `type`="text", 
+                        `visible`="(raterCharacteristics)"),
+                    list(
+                        `name`="predominant_institution", 
+                        `title`="Predominant Institution", 
+                        `type`="text", 
+                        `visible`="(raterCharacteristics)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="discordantCasesTable",
+                title="Cases Distinguishing Diagnostic Styles",
+                visible="(identifyDiscordantCases)",
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case ID", 
+                        `type`="text"),
+                    list(
+                        `name`="discord_score", 
+                        `title`="Discord Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="style_group_diagnoses", 
+                        `title`="Style Group Diagnoses", 
+                        `type`="text"),
+                    list(
+                        `name`="case_interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="krippTable",
                 title="Krippendorff's Alpha Results",
                 visible="(kripp)",
@@ -338,11 +961,350 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=600,
                 renderFun=".heatmapPlot",
                 visible="(heatmap)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="pairwisePlot",
+                title="Pairwise Agreement Plot",
+                width=700,
+                height=500,
+                renderFun=".pairwisePlot",
+                visible="(pairwiseAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="categoryPlot",
+                title="Category Agreement Plot",
+                width=700,
+                height=500,
+                renderFun=".categoryPlot",
+                visible="(categoryAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="confusionMatrixPlot",
+                title="Confusion Matrix",
+                width=600,
+                height=600,
+                renderFun=".confusionMatrixPlot",
+                visible="(pathologyContext)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="diagnosticStyleDendrogram",
+                title="Diagnostic Style Dendrogram",
+                width=800,
+                height=600,
+                renderFun=".diagnosticStyleDendrogram",
+                visible="(diagnosticStyleAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="diagnosticStyleHeatmap",
+                title="Diagnostic Style Heatmap",
+                width=800,
+                height=600,
+                renderFun=".diagnosticStyleHeatmap",
+                visible="(diagnosticStyleAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="diagnosticStyleCombined",
+                title="Combined Dendrogram + Heatmap (Usubutun Style)",
+                width=1000,
+                height=1000,
+                renderFun=".diagnosticStyleCombined",
+                visible="(diagnosticStyleAnalysis)"))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    frequencyTable = function() private$.items[["frequencyTable"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="raterFrequencyTables",
+                            title="Individual Rater Frequencies")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="frequencyTable",
+                            title="Frequency Distribution",
+                            columns=list(
+                                list(
+                                    `name`="rater", 
+                                    `title`="Rater", 
+                                    `type`="text"),
+                                list(
+                                    `name`="category", 
+                                    `title`="Category", 
+                                    `type`="text"),
+                                list(
+                                    `name`="frequency", 
+                                    `title`="Frequency", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="percentage", 
+                                    `title`="Percentage", 
+                                    `type`="number", 
+                                    `format`="zto"))))}))$new(options=options))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="crosstabTable",
+                title="Cross-tabulation Matrix",
+                visible="(sft)",
+                clearWith=list(
+                    "vars"),
+                columns=list(
+                    list(
+                        `name`="rater1_category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="frequencies", 
+                        `title`="Frequencies by Rater 2", 
+                        `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="frequencyTables",
-                title="Frequency Tables",
-                visible="(sft)"))}))
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible="(showClinicalSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(showAboutAnalysis)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Assumptions & Caveats",
+                visible="(showAssumptions)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="weightedKappaGuide",
+                title="Weighted Kappa Guide",
+                visible="(showWeightedKappaGuide && wght != 'unweighted')"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="gwetACTable",
+                title="Gwet's Agreement Coefficients",
+                visible="(gwetAC)",
+                columns=list(
+                    list(
+                        `name`="coefficient", 
+                        `title`="Coefficient", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="se", 
+                        `title`="Standard Error", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pabakTable",
+                title="PABAK Analysis Results",
+                visible="(pabak)",
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="standard_kappa", 
+                        `title`="Standard Kappa", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="adjusted_kappa", 
+                        `title`="PABAK", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="sampleSizeTable",
+                title="Sample Size Planning Results",
+                visible="(sampleSizePlanning)",
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="raterBiasTable",
+                title="Rater Bias Analysis",
+                visible="(raterBiasAnalysis)",
+                columns=list(
+                    list(
+                        `name`="rater", 
+                        `title`="Rater", 
+                        `type`="text"),
+                    list(
+                        `name`="bias_score", 
+                        `title`="Bias Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="tendency", 
+                        `title`="Systematic Tendency", 
+                        `type`="text"),
+                    list(
+                        `name`="severity", 
+                        `title`="Bias Severity", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="agreementTrendTable",
+                title="Agreement Trend Analysis",
+                visible="(agreementTrendAnalysis)",
+                columns=list(
+                    list(
+                        `name`="sequence_group", 
+                        `title`="Sequence Group", 
+                        `type`="text"),
+                    list(
+                        `name`="agreement_percent", 
+                        `title`="Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="trend_direction", 
+                        `title`="Trend", 
+                        `type`="text"),
+                    list(
+                        `name`="significance", 
+                        `title`="Significance", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="caseDifficultyTable",
+                title="Case Difficulty Analysis",
+                visible="(caseDifficultyScoring)",
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case ID", 
+                        `type`="text"),
+                    list(
+                        `name`="difficulty_score", 
+                        `title`="Difficulty Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="disagreement_pattern", 
+                        `title`="Disagreement Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="difficulty_level", 
+                        `title`="Difficulty Level", 
+                        `type`="text"),
+                    list(
+                        `name`="rater_variability", 
+                        `title`="Rater Variability", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stabilityTable",
+                title="Agreement Stability Analysis",
+                visible="(agreementStabilityAnalysis)",
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="original_value", 
+                        `title`="Original Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="bootstrap_mean", 
+                        `title`="Bootstrap Mean", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="bootstrap_se", 
+                        `title`="Bootstrap SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="stability_index", 
+                        `title`="Stability Index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Stability", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="trendPlot",
+                title="Agreement Trend Plot",
+                width=700,
+                height=500,
+                renderFun=".trendPlot",
+                visible="(agreementTrendAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="biasPlot",
+                title="Rater Bias Visualization",
+                width=700,
+                height=500,
+                renderFun=".biasPlot",
+                visible="(raterBiasAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="difficultyPlot",
+                title="Case Difficulty Distribution",
+                width=700,
+                height=500,
+                renderFun=".difficultyPlot",
+                visible="(caseDifficultyScoring)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="inlineComments",
+                title="Statistical Commentary",
+                visible="(showInlineComments)"))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -367,12 +1329,44 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Interrater Reliability
 #'
-#' Function for Interrater Reliability.
+#' Comprehensive interrater reliability analysis including Cohen's kappa (2 
+#' raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus 
+#' analysis. Provides agreement statistics, visualization, and clinical 
+#' interpretation for categorical rating data.
+#' 
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Load example data
+#' data('pathology_ratings', package = 'ClinicoPath')
+#'
+#' # Basic agreement analysis with 2 raters
+#' agreement(pathology_ratings,
+#'           vars = c('rater1', 'rater2'))
+#'
+#' # Advanced analysis with 3+ raters including visualization
+#' agreement(pathology_ratings,
+#'           vars = c('rater1', 'rater2', 'rater3'),
+#'           multiraterMethod = 'fleiss',
+#'           fleissCI = TRUE,
+#'           heatmap = TRUE,
+#'           heatmapDetails = TRUE,
+#'           sft = TRUE)
+#'
+#' # Krippendorff's alpha for ordinal data
+#' agreement(pathology_ratings,
+#'           vars = c('rater1', 'rater2', 'rater3'),
+#'           multiraterMethod = 'krippendorff',
+#'           kripp = TRUE,
+#'           krippMethod = 'ordinal')
+#'
+#' # Consensus analysis
+#' agreement(pathology_ratings,
+#'           vars = c('rater1', 'rater2', 'rater3'),
+#'           consensus = TRUE,
+#'           consensus_method = 'majority',
+#'           tie_breaking = 'arbitration',
+#'           show_consensus_table = TRUE)
+#'
 #' @param data The data as a data frame. Each row represents a case/subject,
 #'   and columns represent different raters/observers.
 #' @param vars Variables representing different raters/observers. Each
@@ -384,6 +1378,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   agreement levels.
 #' @param heatmapDetails Show detailed heatmap with kappa values and
 #'   confidence intervals for all rater pairs.
+#' @param heatmapTheme Choose color scheme for the agreement heatmap
+#'   visualization.
 #' @param wght Weighting scheme for kappa analysis. Use 'squared' or 'equal'
 #'   only with ordinal variables. Weighted kappa accounts for the degree of
 #'   disagreement.
@@ -405,16 +1401,117 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   using the selected method.
 #' @param show_consensus_table Display detailed consensus scoring results
 #'   including individual rater scores and consensus outcomes.
+#' @param showClinicalSummary Show clinical summary with plain-language
+#'   interpretation of agreement statistics and their practical implications.
+#' @param showAboutAnalysis Show educational information about inter-rater
+#'   reliability analysis, when to use it, and what the outputs mean.
+#' @param showAssumptions Show important assumptions, data requirements,
+#'   common pitfalls, and interpretation guidelines for the analysis.
+#' @param showWeightedKappaGuide Show explanatory guide for weighted kappa
+#'   options, including when to use linear vs quadratic weighting schemes.
+#' @param diagnosticStyleAnalysis Enable diagnostic style clustering analysis
+#'   using the Usubutun method to identify pathologist "schools" or diagnostic
+#'   approaches.
+#' @param styleClusterMethod Hierarchical clustering method for diagnostic
+#'   style analysis. Ward's linkage is the Usubutun standard.
+#' @param styleDistanceMetric Distance metric for measuring diagnostic
+#'   similarity between raters for style clustering.
+#' @param styleGroups Number of diagnostic style groups to identify. Usubutun
+#'   et al. found 3 groups optimal for most analyses.
+#' @param raterCharacteristics Include rater background characteristics
+#'   (experience, training, institution) in style analysis.
+#' @param experienceVar Optional variable containing rater experience
+#'   information (years of experience, level of training, etc.)
+#' @param trainingVar Optional variable containing rater training institution
+#'   or background information
+#' @param institutionVar Optional variable containing rater current
+#'   institution or location information
+#' @param specialtyVar Optional variable containing rater medical specialty or
+#'   subspecialty information
+#' @param identifyDiscordantCases Identify cases that distinguish different
+#'   diagnostic styles - useful for training and consensus development.
+#' @param caseID Optional variable containing case identifiers. If not
+#'   specified, cases will be numbered automatically.
+#' @param icc Calculate ICC for continuous or ordinal data. Provides
+#'   additional reliability measures beyond kappa.
+#' @param bootstrap Calculate bootstrap confidence intervals for
+#'   Krippendorff's alpha and other statistics.
+#' @param bootstrapSamples Number of bootstrap samples for confidence interval
+#'   calculation.
+#' @param pairwiseAnalysis Detailed analysis of agreement between each pair of
+#'   raters.
+#' @param categoryAnalysis Agreement analysis for each diagnostic category
+#'   separately.
+#' @param outlierAnalysis Identify cases with unusually poor agreement across
+#'   raters.
+#' @param pathologyContext Calculate pathology-specific metrics including
+#'   diagnostic accuracy, sensitivity, and specificity when gold standard is
+#'   available.
+#' @param gwetAC Calculate Gwet's AC1 and AC2 coefficients, which are more
+#'   robust than kappa for high agreement scenarios and less affected by
+#'   prevalence.
+#' @param pabak Calculate Prevalence-Adjusted Bias-Adjusted Kappa (PABAK) to
+#'   address prevalence and bias issues in agreement studies.
+#' @param sampleSizePlanning Perform sample size planning calculations for
+#'   agreement studies with specified precision requirements.
+#' @param targetKappa Target kappa value for sample size planning
+#'   calculations.
+#' @param targetPrecision Target precision for confidence interval width in
+#'   sample size planning.
+#' @param raterBiasAnalysis Analyze systematic tendencies and biases for each
+#'   rater compared to the consensus or average ratings.
+#' @param agreementTrendAnalysis Analyze how agreement changes over time or
+#'   case sequence, useful for training effect assessment.
+#' @param caseDifficultyScoring Quantify inherent case difficulty based on
+#'   inter-rater disagreement patterns and provide difficulty scores.
+#' @param agreementStabilityAnalysis Bootstrap-based stability measures to
+#'   assess the consistency of agreement statistics across different samples.
+#' @param showInlineComments Show detailed statistical explanations and
+#'   interpretations inline with results for educational purposes.
+#' @param enhancedErrorGuidance Provide detailed error messages and
+#'   suggestions for resolving common issues in agreement analysis.
+#' @param showProgressIndicators Display progress indicators for
+#'   computationally intensive operations like bootstrap calculations.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$categoryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$outlierTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$diagnosticAccuracyTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$diagnosticStyleTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$styleSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$discordantCasesTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$consensusSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$frequencyTables} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$pairwisePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$categoryPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$confusionMatrixPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticStyleDendrogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticStyleHeatmap} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticStyleCombined} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterFrequencyTables$frequencyTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$crosstabTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$gwetACTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pabakTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$sampleSizeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$agreementTrendTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$caseDifficultyTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stabilityTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$trendPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$biasPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$difficultyPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$inlineComments} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -430,6 +1527,7 @@ agreement <- function(
     sft = FALSE,
     heatmap = FALSE,
     heatmapDetails = FALSE,
+    heatmapTheme = "ryg",
     wght = "unweighted",
     exct = FALSE,
     multiraterMethod = "auto",
@@ -439,16 +1537,60 @@ agreement <- function(
     consensus = FALSE,
     consensus_method = "majority",
     tie_breaking = "exclude",
-    show_consensus_table = TRUE) {
+    show_consensus_table = TRUE,
+    showClinicalSummary = TRUE,
+    showAboutAnalysis = FALSE,
+    showAssumptions = FALSE,
+    showWeightedKappaGuide = TRUE,
+    diagnosticStyleAnalysis = FALSE,
+    styleClusterMethod = "ward",
+    styleDistanceMetric = "agreement",
+    styleGroups = 3,
+    raterCharacteristics = FALSE,
+    experienceVar,
+    trainingVar,
+    institutionVar,
+    specialtyVar,
+    identifyDiscordantCases = FALSE,
+    caseID,
+    icc = FALSE,
+    bootstrap = FALSE,
+    bootstrapSamples = 1000,
+    pairwiseAnalysis = FALSE,
+    categoryAnalysis = FALSE,
+    outlierAnalysis = FALSE,
+    pathologyContext = FALSE,
+    gwetAC = FALSE,
+    pabak = FALSE,
+    sampleSizePlanning = FALSE,
+    targetKappa = 0.8,
+    targetPrecision = 0.1,
+    raterBiasAnalysis = FALSE,
+    agreementTrendAnalysis = FALSE,
+    caseDifficultyScoring = FALSE,
+    agreementStabilityAnalysis = FALSE,
+    showInlineComments = FALSE,
+    enhancedErrorGuidance = TRUE,
+    showProgressIndicators = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(experienceVar)) experienceVar <- jmvcore::resolveQuo(jmvcore::enquo(experienceVar))
+    if ( ! missing(trainingVar)) trainingVar <- jmvcore::resolveQuo(jmvcore::enquo(trainingVar))
+    if ( ! missing(institutionVar)) institutionVar <- jmvcore::resolveQuo(jmvcore::enquo(institutionVar))
+    if ( ! missing(specialtyVar)) specialtyVar <- jmvcore::resolveQuo(jmvcore::enquo(specialtyVar))
+    if ( ! missing(caseID)) caseID <- jmvcore::resolveQuo(jmvcore::enquo(caseID))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(experienceVar), experienceVar, NULL),
+            `if`( ! missing(trainingVar), trainingVar, NULL),
+            `if`( ! missing(institutionVar), institutionVar, NULL),
+            `if`( ! missing(specialtyVar), specialtyVar, NULL),
+            `if`( ! missing(caseID), caseID, NULL))
 
     for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -457,6 +1599,7 @@ agreement <- function(
         sft = sft,
         heatmap = heatmap,
         heatmapDetails = heatmapDetails,
+        heatmapTheme = heatmapTheme,
         wght = wght,
         exct = exct,
         multiraterMethod = multiraterMethod,
@@ -466,7 +1609,41 @@ agreement <- function(
         consensus = consensus,
         consensus_method = consensus_method,
         tie_breaking = tie_breaking,
-        show_consensus_table = show_consensus_table)
+        show_consensus_table = show_consensus_table,
+        showClinicalSummary = showClinicalSummary,
+        showAboutAnalysis = showAboutAnalysis,
+        showAssumptions = showAssumptions,
+        showWeightedKappaGuide = showWeightedKappaGuide,
+        diagnosticStyleAnalysis = diagnosticStyleAnalysis,
+        styleClusterMethod = styleClusterMethod,
+        styleDistanceMetric = styleDistanceMetric,
+        styleGroups = styleGroups,
+        raterCharacteristics = raterCharacteristics,
+        experienceVar = experienceVar,
+        trainingVar = trainingVar,
+        institutionVar = institutionVar,
+        specialtyVar = specialtyVar,
+        identifyDiscordantCases = identifyDiscordantCases,
+        caseID = caseID,
+        icc = icc,
+        bootstrap = bootstrap,
+        bootstrapSamples = bootstrapSamples,
+        pairwiseAnalysis = pairwiseAnalysis,
+        categoryAnalysis = categoryAnalysis,
+        outlierAnalysis = outlierAnalysis,
+        pathologyContext = pathologyContext,
+        gwetAC = gwetAC,
+        pabak = pabak,
+        sampleSizePlanning = sampleSizePlanning,
+        targetKappa = targetKappa,
+        targetPrecision = targetPrecision,
+        raterBiasAnalysis = raterBiasAnalysis,
+        agreementTrendAnalysis = agreementTrendAnalysis,
+        caseDifficultyScoring = caseDifficultyScoring,
+        agreementStabilityAnalysis = agreementStabilityAnalysis,
+        showInlineComments = showInlineComments,
+        enhancedErrorGuidance = enhancedErrorGuidance,
+        showProgressIndicators = showProgressIndicators)
 
     analysis <- agreementClass$new(
         options = options,

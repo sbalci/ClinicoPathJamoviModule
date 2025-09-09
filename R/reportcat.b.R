@@ -90,29 +90,111 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summary_text <- paste(summaries, collapse = "<br><br>")
                 self$results$text$setContent(summary_text)
 
-                # Version-compatible gtExtras implementation with fallbacks for categorical data
+                # CORRECT IMPLEMENTATION: Use gtExtras as intended for categorical data
                 plot_dataset <- tryCatch({
-                    # Primary approach: Use gtExtras with version compatibility for categorical data
-                    private$.safe_gt_plt_summary_cat(mydata, myvars)
+                    # gtExtras works better with numeric data, so for categorical we use basic gt
+                    cat_vars <- myvars[sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
+                    
+                    if (length(cat_vars) > 0) {
+                        clean_data <- mydata[cat_vars]
+                        
+                        # Convert character to factor for better handling
+                        clean_data <- as.data.frame(lapply(clean_data, function(x) {
+                            if (is.character(x)) as.factor(x) else x
+                        }))
+                        
+                        # For categorical data, create summary stats first
+                        summary_stats <- data.frame(
+                            Variable = names(clean_data),
+                            Type = sapply(clean_data, function(x) "categorical"),
+                            Levels = sapply(clean_data, function(x) length(levels(x))),
+                            N = sapply(clean_data, function(x) sum(!is.na(x))),
+                            Missing = sapply(clean_data, function(x) sum(is.na(x)))
+                        )
+                        
+                        # Create gt table
+                        gt_table <- summary_stats %>%
+                            gt::gt() %>%
+                            gt::tab_header(
+                                title = "Categorical Variables Summary"
+                            )
+                        
+                        # Convert to HTML
+                        html_output <- as.character(gt::as_raw_html(gt_table))
+                        return(htmltools::HTML(html_output))
+                    } else {
+                        return(htmltools::HTML("<p>No categorical variables found.</p>"))
+                    }
                 }, error = function(e) {
-                    # Secondary approach: Custom gt table with gtExtras-like styling for categorical data
-                    tryCatch({
-                        private$.gtExtras_style_fallback_cat(mydata, myvars)
-                    }, error = function(e2) {
-                        # Final fallback: Simple HTML message
-                        htmltools::HTML(paste0(
-                            "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
-                            "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
-                            "<p><strong>gtExtras error:</strong> ", e$message, "</p>",
-                            "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
-                            "<p>Please check your data types and ensure variables are categorical.</p>",
-                            "</div>"
-                        ))
-                    })
+                    # Fallback to simple table if gt fails
+                    return(private$.create_simple_cat_summary_table(mydata, myvars))
                 })
+                
+                # COMMENTED OUT: Fallback methods for testing original gtExtra functions
+                # plot_dataset <- tryCatch({
+                #     # Primary approach: Use gtExtras with version compatibility for categorical data
+                #     private$.safe_gt_plt_summary_cat(mydata, myvars)
+                # }, error = function(e) {
+                #     # Secondary approach: Custom gt table with gtExtras-like styling for categorical data
+                #     tryCatch({
+                #         private$.gtExtras_style_fallback_cat(mydata, myvars)
+                #     }, error = function(e2) {
+                #         # Final fallback: Simple HTML message
+                #         htmltools::HTML(paste0(
+                #             "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
+                #             "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
+                #             "<p><strong>gtExtras error:</strong> ", e$message, "</p>",
+                #             "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
+                #             "<p>Please check your data types and ensure variables are categorical.</p>",
+                #             "</div>"
+                #         ))
+                #     })
+                # })
                 
                 self$results$text1$setContent(plot_dataset)
             }
+        },
+
+        # Simple categorical summary table without resource-intensive operations
+        .create_simple_cat_summary_table = function(dataset, var_list) {
+            # Filter to categorical/factor variables only
+            cat_vars <- var_list[sapply(dataset[var_list], function(x) is.factor(x) || is.character(x))]
+            
+            if (length(cat_vars) == 0) {
+                return(htmltools::HTML("<p>No categorical variables available for summary table.</p>"))
+            }
+            
+            # Create simple HTML table
+            html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
+            html <- paste0(html, "<tr style='background-color: #f8f9fa;'>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Variable</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Levels</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>N</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Missing</th>")
+            html <- paste0(html, "</tr>")
+            
+            for (var in cat_vars) {
+                data_col <- dataset[[var]]
+                
+                # Convert to factor if character
+                if (is.character(data_col)) {
+                    data_col <- factor(data_col)
+                }
+                
+                levels_count <- length(levels(data_col))
+                n_valid <- sum(!is.na(data_col))
+                n_missing <- sum(is.na(data_col))
+                
+                html <- paste0(html, "<tr>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", var, "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", levels_count, "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", n_valid, "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", n_missing, "</td>")
+                html <- paste0(html, "</tr>")
+            }
+            
+            html <- paste0(html, "</table>")
+            return(htmltools::HTML(html))
         },
 
         # Version-compatible gtExtras wrapper for categorical data
@@ -135,19 +217,22 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check gt version and handle missing value formatting
             gt_version <- utils::packageVersion("gt")
             
-            # Try gtExtras with version compatibility
-            summary_table <- tryCatch({
-                if (gt_version >= "0.6.0") {
-                    # For newer gt versions, gtExtras should handle sub_missing internally
-                    clean_data %>% gtExtras::gt_plt_summary()
-                } else {
-                    # For older gt versions, use fmt_missing approach
-                    clean_data %>% gtExtras::gt_plt_summary()
-                }
-            }, error = function(e) {
-                # If gtExtras fails, create basic summary without problematic columns
-                clean_data %>% gtExtras::gt_plt_summary()
-            })
+            # Direct gtExtras call - fallback commented out for testing
+            summary_table <- clean_data %>% gtExtras::gt_plt_summary()
+            
+            # COMMENTED OUT: Version compatibility fallback for testing original gtExtra functions
+            # summary_table <- tryCatch({
+            #     if (gt_version >= "0.6.0") {
+            #         # For newer gt versions, gtExtras should handle sub_missing internally
+            #         clean_data %>% gtExtras::gt_plt_summary()
+            #     } else {
+            #         # For older gt versions, use fmt_missing approach
+            #         clean_data %>% gtExtras::gt_plt_summary()
+            #     }
+            # }, error = function(e) {
+            #     # If gtExtras fails, create basic summary without problematic columns
+            #     clean_data %>% gtExtras::gt_plt_summary()
+            # })
             
             # Safely hide numeric columns that might not be relevant for categorical data
             summary_table <- tryCatch({

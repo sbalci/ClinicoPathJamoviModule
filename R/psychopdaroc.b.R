@@ -566,6 +566,324 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       ))
     },
 
+    # ============================================================================
+    # FIXED SENSITIVITY/SPECIFICITY ANALYSIS METHODS
+    # ============================================================================
+    
+    # Calculate cutpoint for fixed sensitivity or specificity value
+    .calculateFixedSensSpec = function(confusionMatrix, target_value, analysis_type, interpolation_method = "linear") {
+      n_thresholds <- length(confusionMatrix$x.sorted)
+      
+      # Calculate sensitivity and specificity for all thresholds
+      sensitivities <- numeric(n_thresholds)
+      specificities <- numeric(n_thresholds)
+      
+      for (i in 1:n_thresholds) {
+        tp <- confusionMatrix$tp[i]
+        fp <- confusionMatrix$fp[i]
+        tn <- confusionMatrix$tn[i]
+        fn <- confusionMatrix$fn[i]
+        
+        sensitivities[i] <- tp / (tp + fn)
+        specificities[i] <- tn / (tn + fp)
+      }
+      
+      # Find closest point based on analysis type
+      if (analysis_type == "sensitivity") {
+        target_values <- sensitivities
+        target_name <- "sensitivity"
+      } else {
+        target_values <- specificities
+        target_name <- "specificity"
+      }
+      
+      # Handle interpolation methods
+      if (interpolation_method == "nearest") {
+        # Find nearest point
+        best_idx <- which.min(abs(target_values - target_value))
+        cutpoint <- confusionMatrix$x.sorted[best_idx]
+        achieved_sens <- sensitivities[best_idx]
+        achieved_spec <- specificities[best_idx]
+        interpolation_used <- "Nearest Point"
+        
+      } else if (interpolation_method == "stepwise") {
+        # Conservative approach - use the next more conservative cutpoint
+        if (analysis_type == "sensitivity") {
+          # For sensitivity, we want >= target, so find first point that meets or exceeds
+          valid_indices <- which(target_values >= target_value)
+        } else {
+          # For specificity, we want >= target, so find first point that meets or exceeds
+          valid_indices <- which(target_values >= target_value)
+        }
+        
+        if (length(valid_indices) > 0) {
+          best_idx <- valid_indices[1]
+        } else {
+          # If no point meets target, use the closest
+          best_idx <- which.min(abs(target_values - target_value))
+        }
+        
+        cutpoint <- confusionMatrix$x.sorted[best_idx]
+        achieved_sens <- sensitivities[best_idx]
+        achieved_spec <- specificities[best_idx]
+        interpolation_used <- "Stepwise (Conservative)"
+        
+      } else {
+        # Linear interpolation (default)
+        if (target_value <= min(target_values)) {
+          # Target below minimum, use minimum point
+          best_idx <- which.min(target_values)
+          cutpoint <- confusionMatrix$x.sorted[best_idx]
+          achieved_sens <- sensitivities[best_idx]
+          achieved_spec <- specificities[best_idx]
+        } else if (target_value >= max(target_values)) {
+          # Target above maximum, use maximum point
+          best_idx <- which.max(target_values)
+          cutpoint <- confusionMatrix$x.sorted[best_idx]
+          achieved_sens <- sensitivities[best_idx]
+          achieved_spec <- specificities[best_idx]
+        } else {
+          # Interpolate between two closest points
+          below_indices <- which(target_values <= target_value)
+          above_indices <- which(target_values >= target_value)
+          
+          if (length(below_indices) > 0 && length(above_indices) > 0) {
+            below_idx <- below_indices[which.max(target_values[below_indices])]
+            above_idx <- above_indices[which.min(target_values[above_indices])]
+            
+            # Linear interpolation
+            below_val <- target_values[below_idx]
+            above_val <- target_values[above_idx]
+            weight <- (target_value - below_val) / (above_val - below_val)
+            
+            cutpoint <- confusionMatrix$x.sorted[below_idx] + 
+              weight * (confusionMatrix$x.sorted[above_idx] - confusionMatrix$x.sorted[below_idx])
+            achieved_sens <- sensitivities[below_idx] + 
+              weight * (sensitivities[above_idx] - sensitivities[below_idx])
+            achieved_spec <- specificities[below_idx] + 
+              weight * (specificities[above_idx] - specificities[below_idx])
+          } else {
+            # Fallback to nearest
+            best_idx <- which.min(abs(target_values - target_value))
+            cutpoint <- confusionMatrix$x.sorted[best_idx]
+            achieved_sens <- sensitivities[best_idx]
+            achieved_spec <- specificities[best_idx]
+          }
+        }
+        interpolation_used <- "Linear Interpolation"
+      }
+      
+      return(list(
+        cutpoint = cutpoint,
+        achieved_sensitivity = achieved_sens,
+        achieved_specificity = achieved_spec,
+        interpolation_method = interpolation_used
+      ))
+    },
+
+    # Populate fixed sensitivity/specificity results table
+    .populateFixedSensSpecTable = function(var, confusionMatrix, positiveClass) {
+      table <- self$results$fixedSensSpecTable
+      
+      if (!self$options$fixedSensSpecAnalysis) return()
+      
+      analysis_type <- self$options$fixedAnalysisType
+      target_value <- if (analysis_type == "sensitivity") {
+        self$options$fixedSensitivityValue
+      } else {
+        self$options$fixedSpecificityValue
+      }
+      
+      interpolation_method <- self$options$fixedInterpolation
+      
+      # Calculate fixed sensitivity/specificity cutpoint
+      fixed_result <- private$.calculateFixedSensSpec(
+        confusionMatrix, target_value, analysis_type, interpolation_method
+      )
+      
+      # Calculate additional metrics at the determined cutpoint
+      cutpoint <- fixed_result$cutpoint
+      achieved_sens <- fixed_result$achieved_sensitivity
+      achieved_spec <- fixed_result$achieved_specificity
+      
+      # Calculate PPV, NPV, accuracy, and Youden's J
+      # Find the closest threshold in the confusion matrix for exact calculations
+      closest_idx <- which.min(abs(confusionMatrix$x.sorted - cutpoint))
+      tp <- confusionMatrix$tp[closest_idx]
+      fp <- confusionMatrix$fp[closest_idx]
+      tn <- confusionMatrix$tn[closest_idx]
+      fn <- confusionMatrix$fn[closest_idx]
+      
+      ppv <- tp / (tp + fp)
+      npv <- tn / (tn + fn)
+      accuracy <- (tp + tn) / (tp + fp + tn + fn)
+      youden <- achieved_sens + achieved_spec - 1
+      
+      # Add row to table
+      table$addRow(rowKey = var, values = list(
+        variable = var,
+        analysis_type = paste("Fixed", tools::toTitleCase(analysis_type)),
+        target_value = target_value,
+        cutpoint = cutpoint,
+        achieved_sensitivity = achieved_sens,
+        achieved_specificity = achieved_spec,
+        ppv = ppv,
+        npv = npv,
+        accuracy = accuracy,
+        youden = youden,
+        interpolation_used = fixed_result$interpolation_method
+      ))
+    },
+
+    # Generate explanatory content for fixed sensitivity/specificity analysis
+    .generateFixedSensSpecExplanation = function() {
+      if (!self$options$fixedSensSpecAnalysis || !self$options$showFixedExplanation) return()
+      
+      analysis_type <- self$options$fixedAnalysisType
+      target_value <- if (analysis_type == "sensitivity") {
+        self$options$fixedSensitivityValue
+      } else {
+        self$options$fixedSpecificityValue
+      }
+      interpolation_method <- self$options$fixedInterpolation
+      
+      # Generate comprehensive explanation
+      explanation <- paste0(
+        "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+        "<h4 style='color: #007bff; margin-top: 0;'>📊 Fixed ", tools::toTitleCase(analysis_type), " Analysis Guide</h4>",
+        
+        "<h5 style='color: #495057; margin-top: 20px;'>🎯 Analysis Overview</h5>",
+        "<p>This analysis determines the <strong>cutpoint threshold</strong> that achieves a target ", analysis_type, " of <strong>", round(target_value, 3), "</strong> (", round(target_value * 100, 1), "%). ",
+        "The corresponding ", if (analysis_type == "sensitivity") "specificity" else "sensitivity", " and other performance metrics are then calculated.</p>",
+        
+        "<h5 style='color: #495057;'>🏥 Clinical Context</h5>"
+      )
+      
+      # Add clinical context based on analysis type
+      if (analysis_type == "sensitivity") {
+        explanation <- paste0(explanation,
+          "<p><strong>High Sensitivity Strategy (Screening Focus):</strong></p>",
+          "<ul>",
+          "<li>🔍 <strong>Screening Tests</strong>: Minimizes false negatives - few cases are missed</li>",
+          "<li>🚨 <strong>Rule-Out Tests</strong>: When a negative result effectively rules out the condition</li>",
+          "<li>⚡ <strong>Emergency Settings</strong>: When missing a case has severe consequences</li>",
+          "<li>💰 <strong>Cost Consideration</strong>: Accept more false positives to avoid missed diagnoses</li>",
+          "</ul>",
+          "<div style='background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+          "<strong>💡 Clinical Pearl:</strong> High sensitivity = \"SnOUT\" (Sensitivity rules OUT) - a negative test with high sensitivity confidently excludes the condition.",
+          "</div>"
+        )
+      } else {
+        explanation <- paste0(explanation,
+          "<p><strong>High Specificity Strategy (Confirmation Focus):</strong></p>",
+          "<ul>",
+          "<li>✅ <strong>Confirmatory Tests</strong>: Minimizes false positives - few healthy patients are incorrectly diagnosed</li>",
+          "<li>🎯 <strong>Rule-In Tests</strong>: When a positive result confirms the condition</li>",
+          "<li>💊 <strong>Treatment Decision</strong>: Before starting costly or risky treatments</li>",
+          "<li>⚖️ <strong>Legal/Insurance</strong>: When false positives have significant consequences</li>",
+          "</ul>",
+          "<div style='background-color: #d1ecf1; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+          "<strong>💡 Clinical Pearl:</strong> High specificity = \"SpIN\" (Specificity rules IN) - a positive test with high specificity confidently confirms the condition.",
+          "</div>"
+        )
+      }
+      
+      # Add interpolation method explanation
+      explanation <- paste0(explanation,
+        "<h5 style='color: #495057;'>🔧 Interpolation Method: ", tools::toTitleCase(gsub("_", " ", interpolation_method)), "</h5>"
+      )
+      
+      if (interpolation_method == "linear") {
+        explanation <- paste0(explanation,
+          "<p><strong>Linear Interpolation:</strong> Smoothly estimates the cutpoint between observed data points using mathematical interpolation.</p>",
+          "<ul>",
+          "<li>✅ <strong>Most Accurate</strong>: Provides precise cutpoint estimation</li>",
+          "<li>📐 <strong>Mathematical</strong>: Uses weighted average between nearest points</li>",
+          "<li>🎯 <strong>Recommended</strong>: Best for research and precise clinical applications</li>",
+          "<li>⚠️ <strong>Note</strong>: May produce cutpoints not observed in your data</li>",
+          "</ul>"
+        )
+      } else if (interpolation_method == "nearest") {
+        explanation <- paste0(explanation,
+          "<p><strong>Nearest Point:</strong> Uses the observed cutpoint closest to the target value.</p>",
+          "<ul>",
+          "<li>📊 <strong>Data-Driven</strong>: Only uses actually observed cutpoints</li>",
+          "<li>🔍 <strong>Conservative</strong>: No mathematical interpolation</li>",
+          "<li>⚡ <strong>Simple</strong>: Easy to understand and implement</li>",
+          "<li>📉 <strong>Trade-off</strong>: May not achieve exact target value</li>",
+          "</ul>"
+        )
+      } else if (interpolation_method == "stepwise") {
+        explanation <- paste0(explanation,
+          "<p><strong>Stepwise (Conservative):</strong> Chooses the most conservative cutpoint that meets or exceeds the target.</p>",
+          "<ul>",
+          "<li>🛡️ <strong>Conservative Approach</strong>: Errs on the side of caution</li>",
+          "<li>📊 <strong>Observed Data Only</strong>: Uses actual data points</li>",
+          "<li>🎯 <strong>Meets/Exceeds Target</strong>: Ensures target is achieved or surpassed</li>",
+          "<li>🏥 <strong>Clinical Safety</strong>: Preferred when patient safety is paramount</li>",
+          "</ul>"
+        )
+      }
+      
+      # Add interpretation of results
+      explanation <- paste0(explanation,
+        "<h5 style='color: #495057;'>📋 Results Interpretation</h5>",
+        "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+        "<p><strong>Key Metrics to Review:</strong></p>",
+        "<ul style='margin-bottom: 0;'>",
+        "<li><strong>Achieved Value</strong>: How close we got to the target ", analysis_type, "</li>",
+        "<li><strong>Corresponding ", if (analysis_type == "sensitivity") "Specificity" else "Sensitivity", "</strong>: The trade-off metric</li>",
+        "<li><strong>PPV/NPV</strong>: Predictive values depend on disease prevalence</li>",
+        "<li><strong>Youden's J</strong>: Overall balance (Sensitivity + Specificity - 1)</li>",
+        "<li><strong>Cutpoint</strong>: The threshold value to use in practice</li>",
+        "</ul>",
+        "</div>"
+      )
+      
+      # Add clinical decision framework
+      explanation <- paste0(explanation,
+        "<h5 style='color: #495057;'>🎯 Clinical Decision Framework</h5>",
+        "<div style='background-color: #e2e3e5; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+        "<p><strong>Steps for Implementation:</strong></p>",
+        "<ol style='margin-bottom: 0;'>",
+        "<li><strong>Validate Performance</strong>: Confirm achieved ", analysis_type, " meets your requirements</li>",
+        "<li><strong>Assess Trade-offs</strong>: Evaluate the corresponding ", if (analysis_type == "sensitivity") "specificity" else "sensitivity", " value</li>",
+        "<li><strong>Consider Context</strong>: Factor in prevalence, costs, and consequences</li>",
+        "<li><strong>Pilot Testing</strong>: Test the cutpoint in your clinical setting</li>",
+        "<li><strong>Monitor Performance</strong>: Track real-world performance metrics</li>",
+        "</ol>",
+        "</div>"
+      )
+      
+      # Add warnings and considerations
+      explanation <- paste0(explanation,
+        "<h5 style='color: #dc3545;'>⚠️ Important Considerations</h5>",
+        "<div style='background-color: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+        "<ul style='margin-bottom: 0;'>",
+        "<li><strong>Population Specificity</strong>: Results may not generalize to different populations</li>",
+        "<li><strong>Prevalence Impact</strong>: PPV and NPV change with disease prevalence</li>",
+        "<li><strong>Sample Size</strong>: Confidence in cutpoint decreases with smaller samples</li>",
+        "<li><strong>Clinical Validation</strong>: Always validate in your specific clinical context</li>",
+        "<li><strong>Regular Review</strong>: Monitor and update cutpoints as populations change</li>",
+        "</ul>",
+        "</div>"
+      )
+      
+      # Add references and further reading
+      explanation <- paste0(explanation,
+        "<h5 style='color: #495057;'>📚 Further Reading</h5>",
+        "<p style='font-size: 0.9em; color: #6c757d;'>",
+        "For comprehensive guidance on ROC analysis and cutpoint selection, see: ",
+        "<em>Youden WJ (1950). Index for rating diagnostic tests. Cancer 3:32-35</em> | ",
+        "<em>Zweig MH, Campbell G (1993). Receiver-operating characteristic plots. Clin Chem 39:561-577</em>",
+        "</p>",
+        "</div>"
+      )
+      
+      # Set the content
+      self$results$fixedSensSpecExplanation$setContent(explanation)
+    },
+
     # Calculate partial AUC using pROC package
     .calculatePartialAUC = function(x, class, positiveClass, from, to) {
       # Check package dependencies
@@ -1822,6 +2140,39 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         j_max_idx <- metrics_res$j_max_idx
         aucList[[var]] <- results$AUC
         private$.aucList[[var]] <- results$AUC  # Store in private field for clinical interpretation
+
+        # -----------------------------------------------------------------------
+        # 7.5. FIXED SENSITIVITY/SPECIFICITY ANALYSIS
+        # -----------------------------------------------------------------------
+        
+        # Populate fixed sensitivity/specificity table if enabled
+        if (self$options$fixedSensSpecAnalysis) {
+          private$.populateFixedSensSpecTable(var, results$roc_curve[[1]], positiveClass)
+          
+          # Generate explanatory content (only once for first variable)
+          if (var == vars[1]) {
+            private$.generateFixedSensSpecExplanation()
+          }
+          
+          # Add plot item for fixed analysis if enabled and not combining
+          if (self$options$showFixedROC && self$options$combinePlots == FALSE) {
+            if (!var %in% self$results$fixedSensSpecROC$itemKeys) {
+              self$results$fixedSensSpecROC$addItem(key = var)
+            }
+            # Set plot state data for fixed ROC
+            fixedImage <- self$results$fixedSensSpecROC$get(key = var)
+            fixedImage$setTitle(.(paste("Fixed", tools::toTitleCase(self$options$fixedAnalysisType), "ROC:", var)))
+            fixedImage$setState(
+              data.frame(
+                var = rep(var, length(confusionMatrix$x.sorted)),
+                cutpoint = confusionMatrix$x.sorted,
+                sensitivity = sensList,
+                specificity = specList,
+                stringsAsFactors = FALSE
+              )
+            )
+          }
+        }
 
         # -----------------------------------------------------------------------
         # 8. PREPARE PLOTTING DATA
@@ -3411,6 +3762,86 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ggplot2::ylim(0, 1) +
         ggtheme
 
+      print(plot)
+      return(TRUE)
+    },
+
+    # Fixed Sensitivity/Specificity ROC plotting function
+    .plotFixedSensSpecROC = function(image, ggtheme, theme, ...) {
+      var <- image$itemKey
+      plotData <- image$state
+      
+      if (!self$options$fixedSensSpecAnalysis || is.null(plotData)) return(FALSE)
+      
+      # Get fixed analysis parameters
+      analysis_type <- self$options$fixedAnalysisType
+      target_value <- if (analysis_type == "sensitivity") {
+        self$options$fixedSensitivityValue
+      } else {
+        self$options$fixedSpecificityValue
+      }
+      
+      # Get the fixed point from the results table
+      fixedTable <- self$results$fixedSensSpecTable
+      fixed_row <- NULL
+      
+      if (length(fixedTable$rowKeys) > 0) {
+        for (key in fixedTable$rowKeys) {
+          if (fixedTable$getCell(rowKey = key, "variable") == var) {
+            fixed_row <- list(
+              cutpoint = fixedTable$getCell(rowKey = key, "cutpoint"),
+              achieved_sensitivity = fixedTable$getCell(rowKey = key, "achieved_sensitivity"),
+              achieved_specificity = fixedTable$getCell(rowKey = key, "achieved_specificity")
+            )
+            break
+          }
+        }
+      }
+      
+      if (is.null(fixed_row)) return(FALSE)
+      
+      # Create ROC plot with highlighted fixed point
+      plot <- ggplot2::ggplot(plotData, ggplot2::aes(x = 1 - specificity, y = sensitivity)) +
+        ggplot2::geom_line(color = "steelblue", size = 1) +
+        ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+        ggplot2::xlim(0, 1) + 
+        ggplot2::ylim(0, 1) +
+        ggplot2::labs(
+          x = "1 - Specificity (False Positive Rate)",
+          y = "Sensitivity (True Positive Rate)",
+          title = paste("ROC Curve with Fixed", tools::toTitleCase(analysis_type), "Point"),
+          subtitle = paste0(
+            "Target ", analysis_type, ": ", round(target_value, 3),
+            " | Achieved: ", round(if (analysis_type == "sensitivity") fixed_row$achieved_sensitivity else fixed_row$achieved_specificity, 3),
+            " | Cutpoint: ", round(fixed_row$cutpoint, 3)
+          )
+        ) +
+        ggtheme
+      
+      # Add the fixed point
+      plot <- plot + ggplot2::geom_point(
+        x = 1 - fixed_row$achieved_specificity,
+        y = fixed_row$achieved_sensitivity,
+        color = "red",
+        size = 4,
+        shape = 16
+      )
+      
+      # Add annotation for the fixed point
+      plot <- plot + ggplot2::annotate(
+        "text",
+        x = 1 - fixed_row$achieved_specificity + 0.1,
+        y = fixed_row$achieved_sensitivity + 0.05,
+        label = paste0(
+          "Fixed Point\n",
+          "Sens: ", round(fixed_row$achieved_sensitivity, 3), "\n",
+          "Spec: ", round(fixed_row$achieved_specificity, 3)
+        ),
+        hjust = 0,
+        size = 3,
+        color = "red"
+      )
+      
       print(plot)
       return(TRUE)
     },

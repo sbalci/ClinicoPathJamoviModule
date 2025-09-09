@@ -1,7 +1,7 @@
 ---
 name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.3'
 jas: '1.2'
@@ -94,21 +94,21 @@ options:
     - name: showResiduals
       title: Show Residuals Analysis
       type: Bool
-      default: true
+      default: false
       description: >
                   display standardized residuals analysis with interpretation
 
     - name: showEducational
       title: Show Educational Panels
       type: Bool
-      default: true
+      default: false
       description: >
                   display educational guidance and explanations
 
     - name: showDetailedTables
       title: Show Detailed Comparison Tables
       type: Bool
-      default: true
+      default: false
       description: >
                   display individual 2x2 tables for each pairwise comparison
 

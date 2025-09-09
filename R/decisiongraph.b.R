@@ -1,4 +1,5 @@
 #' @title Decision Tree Graph for Cost-Effectiveness Analysis
+#' @name decisiongraph
 #' @description Creates interactive decision tree visualizations for medical cost-effectiveness analysis
 #' @details This module provides comprehensive decision tree visualization capabilities including:
 #'   - Decision nodes (square), chance nodes (circle), and terminal nodes (triangle)
@@ -39,7 +40,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             .psaResults = NULL,
             .nmbAnalysis = NULL,
             .nmbSensitivity = NULL,
-            
+
             # Configuration constants for better maintainability
             DECISIONGRAPH_DEFAULTS = list(
                 psa_chunk_size = 1000,
@@ -52,51 +53,51 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 parallel_threshold = 2000,
                 default_distributions = list(
                     cost = "gamma",
-                    utility = "beta", 
+                    utility = "beta",
                     probability = "beta"
                 ),
                 half_cycle_correction = TRUE,
                 tunnel_state_support = TRUE
             ),
-            
+
             # NO private variables for complex objects to avoid serialization issues
             # All content generated on-demand in methods
-            
+
             .init = function() {
                 # MINIMAL INIT - Only basic table references to avoid serialization issues
                 # All dynamic content generation moved to .run() method
-                
+
                 # Initialize table references (required by jamovi)
                 summaryTable <- self$results$summaryTable
                 nodeTable <- self$results$nodeTable
                 sensitivityTable <- self$results$sensitivityTable
-                
+
                 # DO NOT generate content, call methods, or store complex objects here
                 # All clinical presets, help content, etc. will be handled in .run()
             },
-            
+
             .validateInputs = function() {
                 # Use utility function for comprehensive validation
                 validationResult <- validateDecisionAnalysisInputs(
-                    data = self$data, 
-                    treeType = self$options$treeType, 
+                    data = self$data,
+                    treeType = self$options$treeType,
                     options = self$options
                 )
-                
+
                 # Handle validation errors
                 if (!validationResult$valid) {
                     stop(paste(validationResult$messages, collapse = "\n"))
                 }
-                
+
                 # Call enhanced validation for complex parameters
                 private$.validateComplexInputs()
-                
+
                 # Check minimum requirements met
                 hasDecisions <- !is.null(self$options$decisions) && length(self$options$decisions) > 0
                 hasProbabilities <- !is.null(self$options$probabilities) && length(self$options$probabilities) > 0
                 hasCosts <- !is.null(self$options$costs) && length(self$options$costs) > 0
                 hasUtilities <- !is.null(self$options$utilities) && length(self$options$utilities) > 0
-                
+
                 # Validate probabilistic sensitivity analysis requirements
                 if (self$options$probabilisticAnalysis) {
                     numSims <- self$options$numSimulations
@@ -104,7 +105,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     if (is.null(numSims) || numSims < 100 || numSims > maxSims) {
                         stop(paste(.("PSA requires number of simulations between 100 and"), format(maxSims, big.mark = ",")))
                     }
-                    
+
                     # Check for PSA-specific requirements
                     if (self$options$correlatedParameters) {
                         hasCorrelationMatrix <- !is.null(self$options$correlationMatrix) && length(self$options$correlationMatrix) > 0
@@ -113,12 +114,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         }
                     }
                 }
-                
+
                 # Validate budget impact analysis requirements
                 if (self$options$budgetImpactAnalysis) {
                     targetPop <- self$options$targetPopulationSize
                     marketPen <- self$options$marketPenetration
-                    
+
                     if (is.null(targetPop) || targetPop <= 0) {
                         stop(.("Budget impact analysis requires a positive target population size"))
                     }
@@ -126,19 +127,19 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stop(.("Budget impact analysis requires market penetration rate between 0 and 1"))
                     }
                 }
-                
+
                 # Validate value of information analysis requirements
                 if (self$options$valueOfInformation) {
                     hasEVPIParams <- !is.null(self$options$evpi_parameters) && length(self$options$evpi_parameters) > 0
                     if (!hasEVPIParams) {
                         stop(.("Value of information analysis requires EVPI parameter variables"))
                     }
-                    
+
                     if (!self$options$probabilisticAnalysis) {
                         stop(.("Value of information analysis requires probabilistic sensitivity analysis to be enabled"))
                     }
                 }
-                
+
                 # Validate CEAC threshold format
                 if (self$options$probabilisticAnalysis && self$options$psa_advanced_outputs) {
                     ceacThresholds <- self$options$ceacThresholds
@@ -149,25 +150,25 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         }, error = function(e) {
                             stop(.("CEAC thresholds must be in format 'min,max,step' (e.g., '0,100000,5000')"))
                         })
-                        
+
                         if (length(thresholdParts) != 3 || any(is.na(thresholdParts))) {
                             stop(.("CEAC thresholds must contain exactly 3 numeric values: min,max,step"))
                         }
-                        
+
                         if (thresholdParts[1] >= thresholdParts[2] || thresholdParts[3] <= 0) {
                             stop(.("CEAC thresholds: min must be < max, and step must be > 0"))
                         }
                     }
                 }
-                
+
                 # Check minimum requirements met
                 if (!hasDecisions && !hasProbabilities && !hasCosts && !hasUtilities) {
                     return(FALSE)
                 }
-                
+
                 return(TRUE)
             },
-            
+
             .validateComplexInputs = function() {
                 # Validate CEAC threshold format
                 if (self$options$probabilisticAnalysis && self$options$psa_advanced_outputs) {
@@ -179,29 +180,29 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             if (length(parts) != 3) {
                                 stop("CEAC thresholds must be formatted as 'min,max,step' (e.g., '0,100000,5000')")
                             }
-                            
+
                             min_val <- as.numeric(parts[1])
                             max_val <- as.numeric(parts[2])
                             step_val <- as.numeric(parts[3])
-                            
+
                             if (is.na(min_val) || is.na(max_val) || is.na(step_val)) {
                                 stop("CEAC threshold values must be numeric")
                             }
-                            
+
                             if (min_val < 0 || max_val <= min_val || step_val <= 0) {
                                 stop("CEAC thresholds must have min ≥ 0, max > min, and step > 0")
                             }
-                            
+
                             if ((max_val - min_val) / step_val > 1000) {
                                 stop("CEAC threshold range would create too many points (>1000). Use larger step size.")
                             }
-                            
+
                         }, error = function(e) {
                             stop(paste("Invalid CEAC threshold format:", e$message))
                         })
                     }
                 }
-                
+
                 # Validate discount rate
                 if (!is.null(self$options$discountRate)) {
                     discountRate <- self$options$discountRate
@@ -209,7 +210,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stop("Discount rate must be between 0 and 30% (0.3)")
                     }
                 }
-                
+
                 # Validate time horizon
                 if (!is.null(self$options$timeHorizon)) {
                     timeHorizon <- self$options$timeHorizon
@@ -217,7 +218,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stop("Time horizon must be between 1 and 100 years")
                     }
                 }
-                
+
                 # Validate willingness to pay threshold
                 if (self$options$calculateNMB && !is.null(self$options$willingnessToPay)) {
                     wtp <- self$options$willingnessToPay
@@ -225,7 +226,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stop("Willingness to pay threshold must be between $0 and $1,000,000")
                     }
                 }
-                
+
                 # Validate simulation count for PSA
                 if (self$options$probabilisticAnalysis) {
                     numSims <- self$options$numSimulations
@@ -233,7 +234,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stop("Number of simulations must be between 100 and 50,000 for computational feasibility")
                     }
                 }
-                
+
                 # Validate market penetration for budget impact
                 if (self$options$budgetImpactAnalysis && !is.null(self$options$marketPenetration)) {
                     marketPen <- self$options$marketPenetration
@@ -241,7 +242,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stop("Market penetration rate must be between 0 and 1 (0% to 100%)")
                     }
                 }
-                
+
                 # Validate correlation matrix requirements
                 if (self$options$correlatedParameters && self$options$probabilisticAnalysis) {
                     hasCorrelationMatrix <- !is.null(self$options$correlationMatrix) && length(self$options$correlationMatrix) > 0
@@ -249,7 +250,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stop("Parameter correlation analysis requires correlation matrix variables to be specified")
                     }
                 }
-                
+
                 # Validate numeric data ranges for key variables
                 if (!is.null(self$data)) {
                     # Check probability variables are between 0 and 1
@@ -263,7 +264,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             }
                         }
                     }
-                    
+
                     # Check cost variables are non-negative
                     if (!is.null(self$options$costs) && length(self$options$costs) > 0) {
                         for (cost_var in self$options$costs) {
@@ -275,7 +276,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             }
                         }
                     }
-                    
+
                     # Check utility variables are between 0 and 1 (or allow negative for disutilities)
                     if (!is.null(self$options$utilities) && length(self$options$utilities) > 0) {
                         for (util_var in self$options$utilities) {
@@ -289,10 +290,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
                 }
             },
-            
+
             .getClinicalPresets = function() {
                 # Create clinical presets dynamically to avoid . function issues during class definition
-                
+
                 return(list(
                     diagnostic_test = list(
                         name = "diagnostic_test",
@@ -318,7 +319,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         cycleCorrection = TRUE
                     ),
                     screening_program = list(
-                        name = "screening_program", 
+                        name = "screening_program",
                         title = .("Screening Program Evaluation"),
                         description = .("Evaluate population screening program cost-effectiveness"),
                         treeType = "costeffectiveness",
@@ -343,44 +344,44 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     )
                 ))
             },
-            
+
             .applyClinicalPreset = function(presetName) {
                 # Apply clinical preset configurations to analysis options
-                
+
                 if (is.null(presetName) || presetName == "" || presetName == "none") {
                     return(FALSE)
                 }
-                
+
                 presets <- private$.getClinicalPresets()
                 preset <- presets[[presetName]]
                 if (is.null(preset)) {
                     warning(paste(.("Unknown clinical preset:"), presetName))
                     return(FALSE)
                 }
-                
+
                 tryCatch({
                     # Log preset application (serialization-safe)
                     message(paste(.("Applying clinical preset:"), preset$title))
-                    
+
                     # Generate guidance text based on preset (no storage to avoid serialization issues)
                     guidanceText <- private$.generatePresetGuidance(preset)
-                    
+
                     # Update results with preset information if available
                     if (!is.null(self$results$text1)) {
                         self$results$text1$setContent(guidanceText)
                     }
-                    
+
                     return(TRUE)
-                    
+
                 }, error = function(e) {
                     warning(paste(.("Error applying clinical preset:"), e$message))
                     return(FALSE)
                 })
             },
-            
+
             .generatePresetGuidance = function(preset) {
                 # Generate HTML guidance text for clinical presets
-                
+
                 html <- createSafeHTMLContent(
                     title = .("Clinical Analysis Guide"),
                     content = list(
@@ -392,17 +393,17 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     ),
                     includeStyle = TRUE
                 )
-                
+
                 return(html)
             },
-            
+
             .getPresetSteps = function(presetName) {
                 # Get step-by-step guidance for each clinical preset
-                
+
                 steps <- switch(presetName,
                     "diagnostic_test" = c(
                         .("1. Select variables for test sensitivity and specificity"),
-                        .("2. Include cost variables for test and treatment options"),  
+                        .("2. Include cost variables for test and treatment options"),
                         .("3. Specify utility values for true/false positive outcomes"),
                         .("4. Set appropriate willingness-to-pay threshold"),
                         .("5. Enable incremental analysis for cost-effectiveness ratios")
@@ -430,13 +431,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     ),
                     c(.("Follow the standard decision analysis workflow"))
                 )
-                
+
                 return(paste(steps, collapse = "<br>"))
             },
-            
+
             .generatePlainLanguageExplanations = function() {
                 # Generate user-friendly explanations for complex terms and concepts
-                
+
                 explanations <- list(
                     "icer" = list(
                         term = .("Incremental Cost-Effectiveness Ratio (ICER)"),
@@ -475,21 +476,21 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         interpretation = .("Accounts for the fact that costs and benefits today are worth more than those in the future")
                     )
                 )
-                
+
                 return(explanations)
             },
-            
+
             .createTooltipContent = function(term) {
                 # Create HTML tooltip content for complex terms
-                
+
                 explanations <- private$.generatePlainLanguageExplanations()
-                
+
                 if (!term %in% names(explanations)) {
                     return("")
                 }
-                
+
                 explanation <- explanations[[term]]
-                
+
                 html <- sprintf('
                 <div class="tooltip-content">
                     <div class="tooltip-term">%s</div>
@@ -504,16 +505,16 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 .("Interpretation"),
                 explanation$interpretation
                 )
-                
+
                 return(html)
             },
-            
+
             .generateContextualHelp = function() {
                 # Generate contextual help based on current analysis settings
-                
+
                 treeType <- self$options$treeType
                 helpContent <- list()
-                
+
                 # Basic analysis guidance
                 helpContent$basic <- createSafeHTMLContent(
                     title = .("Getting Started"),
@@ -525,7 +526,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         .("5. Configure analysis options and run")
                     )
                 )
-                
+
                 # Tree-type specific help
                 if (treeType == "simple") {
                     helpContent$specific <- createSafeHTMLContent(
@@ -558,7 +559,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         )
                     )
                 }
-                
+
                 # Variable selection help
                 helpContent$variables <- createSafeHTMLContent(
                     title = .("Variable Selection Guide"),
@@ -570,43 +571,43 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         paste(.("Outcome Variables:"), .("Categorical variables for clinical endpoints"))
                     )
                 )
-                
+
                 return(helpContent)
             },
-            
+
             .generateExecutiveSummary = function(results = NULL) {
                 # Generate executive summary for decision analysis results
-                
+
                 if (is.null(results)) {
                     return(createSafeHTMLContent(
                         title = .("Executive Summary"),
                         content = .("Run the analysis to generate an executive summary of results.")
                     ))
                 }
-                
+
                 tryCatch({
                     # Extract key findings (serialization-safe)
                     treeType <- self$options$treeType
                     clinicalPreset <- self$options$clinicalPreset
-                    
+
                     summaryContent <- list()
-                    
+
                     # Analysis overview
                     analysisType <- switch(treeType,
                         "simple" = .("Simple Decision Tree Analysis"),
                         "markov" = .("Markov Model Analysis"),
                         "costeffectiveness" = .("Cost-Effectiveness Analysis")
                     )
-                    
+
                     summaryContent <- c(summaryContent, list(
                         paste("<h3>", .("Analysis Type"), ":</h3>", analysisType)
                     ))
-                    
+
                     # Show clinical preset if used (get title dynamically to avoid serialization issues)
                     if (!is.null(clinicalPreset) && clinicalPreset != "none") {
                         presetTitle <- switch(clinicalPreset,
                             "diagnostic_test" = .("Diagnostic Test Evaluation"),
-                            "treatment_comparison" = .("Treatment Comparison"), 
+                            "treatment_comparison" = .("Treatment Comparison"),
                             "screening_program" = .("Screening Program Evaluation"),
                             "drug_costeffectiveness" = .("Drug Cost-Effectiveness"),
                             clinicalPreset  # fallback to preset name
@@ -615,7 +616,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             paste("<h3>", .("Clinical Scenario"), ":</h3>", presetTitle)
                         ))
                     }
-                    
+
                     # Key findings based on analysis type
                     if (treeType == "costeffectiveness") {
                         summaryContent <- c(summaryContent, list(
@@ -634,7 +635,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             .("• Discounting applied for future benefits")
                         ))
                     }
-                    
+
                     # Recommendations
                     summaryContent <- c(summaryContent, list(
                         paste("<h3>", .("Recommendations"), ":</h3>"),
@@ -643,15 +644,15 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         .("• Validate assumptions with clinical experts"),
                         .("• Consider budget impact if implementing recommendations")
                     ))
-                    
+
                     html <- createSafeHTMLContent(
                         title = .("Executive Summary"),
                         content = summaryContent,
                         includeStyle = TRUE
                     )
-                    
+
                     return(html)
-                    
+
                 }, error = function(e) {
                     return(createSafeHTMLContent(
                         title = .("Executive Summary"),
@@ -659,10 +660,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     ))
                 })
             },
-            
+
             .generateGlossary = function() {
                 # Generate comprehensive glossary of decision analysis terms
-                
+
                 glossaryTerms <- list(
                     list(
                         term = .("Decision Analysis"),
@@ -745,14 +746,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         definition = .("The maximum value that perfect information about all uncertain parameters would have for the decision maker.")
                     )
                 )
-                
+
                 # Format glossary as HTML
                 glossaryHtml <- "<style>
                     .glossary-item { margin-bottom: 15px; border-left: 3px solid #007ACC; padding-left: 10px; }
                     .glossary-term { font-weight: bold; font-size: 14px; color: #007ACC; margin-bottom: 5px; }
                     .glossary-definition { font-size: 12px; color: #333; line-height: 1.4; }
                 </style>"
-                
+
                 for (item in glossaryTerms) {
                     glossaryHtml <- paste0(glossaryHtml,
                         '<div class="glossary-item">',
@@ -761,24 +762,24 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         '</div>'
                     )
                 }
-                
+
                 return(glossaryHtml)
             },
-            
+
             .prepareTreeData = function() {
                 # Clean data
                 mydata <- jmvcore::naOmit(self$data)
-                
+
                 # Extract variable names
                 decisions <- self$options$decisions
                 probabilities <- self$options$probabilities
                 costs <- self$options$costs
                 utilities <- self$options$utilities
                 outcomes <- self$options$outcomes
-                
+
                 # Create tree structure based on available data
                 treeStructure <- list()
-                
+
                 # Build decision nodes
                 if (!is.null(decisions) && length(decisions) > 0) {
                     for (decision in decisions) {
@@ -788,31 +789,31 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         }
                     }
                 }
-                
+
                 # Build probability data
                 if (!is.null(probabilities) && length(probabilities) > 0) {
                     probData <- mydata[probabilities[probabilities %in% names(mydata)]]
                     treeStructure$probabilities <- probData
                 }
-                
+
                 # Build cost data
                 if (!is.null(costs) && length(costs) > 0) {
                     costData <- mydata[costs[costs %in% names(mydata)]]
                     treeStructure$costs <- costData
                 }
-                
+
                 # Build utility data
                 if (!is.null(utilities) && length(utilities) > 0) {
                     utilityData <- mydata[utilities[utilities %in% names(mydata)]]
                     treeStructure$utilities <- utilityData
                 }
-                
+
                 # Build outcome data
                 if (!is.null(outcomes) && length(outcomes) > 0) {
                     outcomeData <- mydata[outcomes[outcomes %in% names(mydata)]]
                     treeStructure$outcomes <- outcomeData
                 }
-                
+
                 # Store in both private variable (for immediate use) and state (for persistence)
                 private$.treeData <- treeStructure
                 if (!is.null(self$results$treeplot)) {
@@ -820,13 +821,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 }
                 return(treeStructure)
             },
-            
+
             .buildTreeGraph = function() {
                 # Use existing tree data if available
                 if (is.null(private$.treeData)) {
                     return(NULL)
                 }
-                
+
                 # Create basic tree structure
                 nodes <- data.frame(
                     id = character(),
@@ -837,7 +838,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     level = integer(),
                     stringsAsFactors = FALSE
                 )
-                
+
                 edges <- data.frame(
                     from = character(),
                     to = character(),
@@ -845,14 +846,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     probability = numeric(),
                     stringsAsFactors = FALSE
                 )
-                
+
                 nodeId <- 1
-                
+
                 # Root decision node
                 nodes <- rbind(nodes, data.frame(
                     id = as.character(nodeId),
                     label = "Decision",
-                    type = "decision", 
+                    type = "decision",
                     shape = "square",
                     color = private$.getNodeColor("decision"),
                     level = 1,
@@ -860,12 +861,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 ))
                 rootId <- nodeId
                 nodeId <- nodeId + 1
-                
+
                 # Add decision branches
                 if (!is.null(private$.treeData$decisions)) {
                     for (decisionVar in names(private$.treeData$decisions)) {
                         levels <- private$.treeData$decisions[[decisionVar]]
-                        
+
                         for (level in levels) {
                             # Add chance node
                             chanceId <- nodeId
@@ -878,7 +879,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                 level = 2,
                                 stringsAsFactors = FALSE
                             ))
-                            
+
                             # Add edge from root to chance node
                             edges <- rbind(edges, data.frame(
                                 from = as.character(rootId),
@@ -887,46 +888,46 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                 probability = 1.0,
                                 stringsAsFactors = FALSE
                             ))
-                            
+
                             nodeId <- nodeId + 1
-                            
+
                             # Add terminal outcomes
                             private$.addTerminalNodes(chanceId, nodes, edges, nodeId)
                         }
                     }
                 }
-                
+
                 # Store in private variable for immediate use (will be cleaned up later)
                 private$.nodeData <- list(nodes = nodes, edges = edges)
                 return(private$.nodeData)
             },
-            
+
             .addTerminalNodes = function(parentId, nodes, edges, nodeId) {
                 # Add terminal nodes based on outcomes or default success/failure
                 outcomes <- c("Success", "Failure")
                 probabilities <- c(0.7, 0.3) # Default probabilities
                 costs <- c(1000, 2000) # Default costs
                 utilities <- c(0.8, 0.2) # Default utilities
-                
+
                 # Use actual data if available
                 if (!is.null(private$.treeData$probabilities) && nrow(private$.treeData$probabilities) > 0) {
                     probData <- private$.treeData$probabilities[1, ]
                     probabilities <- as.numeric(probData[1:min(2, ncol(probData))])
                 }
-                
+
                 if (!is.null(private$.treeData$costs) && nrow(private$.treeData$costs) > 0) {
                     costData <- private$.treeData$costs[1, ]
                     costs <- as.numeric(costData[1:min(2, ncol(costData))])
                 }
-                
+
                 if (!is.null(private$.treeData$utilities) && nrow(private$.treeData$utilities) > 0) {
                     utilityData <- private$.treeData$utilities[1, ]
                     utilities <- as.numeric(utilityData[1:min(2, ncol(utilityData))])
                 }
-                
+
                 for (i in seq_along(outcomes)) {
                     terminalId <- nodeId + i - 1
-                    
+
                     # Create terminal node label
                     label <- outcomes[i]
                     if (self$options$showCosts && !is.na(costs[i])) {
@@ -935,7 +936,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     if (self$options$showUtilities && !is.na(utilities[i])) {
                         label <- paste0(label, "\nUtility: ", round(utilities[i], 3))
                     }
-                    
+
                     nodes <<- rbind(nodes, data.frame(
                         id = as.character(terminalId),
                         label = label,
@@ -945,13 +946,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         level = 3,
                         stringsAsFactors = FALSE
                     ))
-                    
+
                     # Add edge with probability
                     edgeLabel <- ""
                     if (self$options$showProbabilities && !is.na(probabilities[i])) {
                         edgeLabel <- paste0("p=", round(probabilities[i], 3))
                     }
-                    
+
                     edges <<- rbind(edges, data.frame(
                         from = as.character(parentId),
                         to = as.character(terminalId),
@@ -961,10 +962,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     ))
                 }
             },
-            
+
             .getNodeColor = function(nodeType) {
                 colorScheme <- self$options$colorScheme
-                
+
                 colors <- switch(colorScheme,
                     "default" = list(decision = "#4CAF50", chance = "#2196F3", terminal = "#FF9800"),
                     "colorblind" = list(decision = "#E69F00", chance = "#56B4E9", terminal = "#009E73"),
@@ -972,10 +973,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     "economic" = list(decision = "#228B22", chance = "#4169E1", terminal = "#DC143C"),
                     list(decision = "#4CAF50", chance = "#2196F3", terminal = "#FF9800")
                 )
-                
+
                 return(colors[[nodeType]])
             },
-            
+
             # Calculate Expected Values for Decision Tree
             #
             # Performs backward induction algorithm to compute expected costs, utilities,
@@ -1013,13 +1014,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (is.null(private$.nodeData)) {
                     return(NULL)
                 }
-                
+
                 nodes <- private$.nodeData$nodes
                 edges <- private$.nodeData$edges
-                
+
                 # Simple expected value calculation
                 strategies <- unique(nodes[nodes$type == "decision", "label"])
-                
+
                 results <- data.frame(
                     strategy = character(),
                     expectedCost = numeric(),
@@ -1028,23 +1029,23 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     netBenefit = numeric(),
                     stringsAsFactors = FALSE
                 )
-                
+
                 # Get willingness to pay threshold from options
                 wtp <- if (!is.null(self$options$willingnessToPay)) {
                     self$options$willingnessToPay
                 } else {
                     50000  # Default WTP threshold
                 }
-                
+
                 # Calculate for each strategy
                 for (i in seq_along(strategies)) {
                     strategy <- strategies[i]
-                    
+
                     # Calculate expected values by traversing decision tree
                     pathResults <- private$.traverseDecisionPath(strategy, nodes, edges)
                     expectedCost <- pathResults$expectedCost
                     expectedUtility <- pathResults$expectedUtility
-                    
+
                     # Calculate ICER (Incremental Cost-Effectiveness Ratio)
                     icer <- if (i > 1) {
                         deltaCost <- expectedCost - results$expectedCost[i-1]
@@ -1057,10 +1058,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     } else {
                         NA
                     }
-                    
+
                     # Calculate Net Monetary Benefit (NMB)
                     netBenefit <- expectedUtility * wtp - expectedCost
-                    
+
                     results <- rbind(results, data.frame(
                         strategy = strategy,
                         expectedCost = expectedCost,
@@ -1070,7 +1071,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stringsAsFactors = FALSE
                     ))
                 }
-                
+
                 # Sort by NMB to identify optimal strategy
                 results <- results[order(results$netBenefit, decreasing = TRUE), ]
                 # Store in both private variable (for immediate use) and state (for persistence)
@@ -1082,81 +1083,81 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 }
                 return(results)
             },
-            
+
             .traverseDecisionPath = function(strategy, nodes, edges) {
                 # Function to traverse decision tree and calculate expected values
                 # This implements the recursive calculation as shown in the blog
-                
+
                 # Initialize with actual data if available
-                if (!is.null(self$options$costs) && !is.null(self$options$utilities) && 
+                if (!is.null(self$options$costs) && !is.null(self$options$utilities) &&
                     !is.null(self$options$probabilities)) {
-                    
+
                     mydata <- jmvcore::naOmit(self$data)
-                    
+
                     # Extract actual values from data
-                    costs <- if (length(self$options$costs) > 0 && 
+                    costs <- if (length(self$options$costs) > 0 &&
                                self$options$costs[1] %in% names(mydata)) {
                         mean(mydata[[self$options$costs[1]]], na.rm = TRUE)
                     } else {
                         1500 + runif(1, 0, 500)  # Default if no data
                     }
-                    
-                    utilities <- if (length(self$options$utilities) > 0 && 
+
+                    utilities <- if (length(self$options$utilities) > 0 &&
                                    self$options$utilities[1] %in% names(mydata)) {
                         mean(mydata[[self$options$utilities[1]]], na.rm = TRUE)
                     } else {
                         0.75 + runif(1, -0.1, 0.1)  # Default if no data
                     }
-                    
-                    probabilities <- if (length(self$options$probabilities) > 0 && 
+
+                    probabilities <- if (length(self$options$probabilities) > 0 &&
                                        self$options$probabilities[1] %in% names(mydata)) {
                         mean(mydata[[self$options$probabilities[1]]], na.rm = TRUE)
                     } else {
                         0.7  # Default probability
                     }
-                    
+
                     # Calculate expected values using probability weighting
-                    expectedCost <- costs * probabilities + 
+                    expectedCost <- costs * probabilities +
                                   (costs * 0.5) * (1 - probabilities)  # Weighted average
-                    expectedUtility <- utilities * probabilities + 
+                    expectedUtility <- utilities * probabilities +
                                      (utilities * 0.8) * (1 - probabilities)  # Weighted average
-                    
+
                 } else {
                     # Mock calculations for demonstration
                     expectedCost <- 1500 + runif(1, 0, 1000)
                     expectedUtility <- 0.75 + runif(1, -0.2, 0.2)
                 }
-                
+
                 return(list(
                     expectedCost = expectedCost,
                     expectedUtility = expectedUtility
                 ))
             },
-            
+
             .calculateNMB = function() {
                 # Advanced Net Monetary Benefit calculation
                 # NMB = (Effects * WTP_Threshold) - Costs
                 # Including sensitivity analysis and uncertainty quantification
-                
+
                 if (!self$options$calculateNMB) {
                     return(NULL)
                 }
-                
+
                 wtp <- self$options$willingnessToPay
-                
+
                 if (is.null(private$.results)) {
                     private$.calculateExpectedValues()
                 }
-                
+
                 results <- private$.results
-                
+
                 # Enhanced NMB calculations with configurable WTP thresholds for sensitivity
                 wtp_multiples <- private$DECISIONGRAPH_DEFAULTS$default_wtp_multiples
                 wtp_thresholds <- wtp * wtp_multiples
-                
+
                 # Store NMB calculations for different thresholds
                 nmb_sensitivity <- data.frame()
-                
+
                 for (threshold in wtp_thresholds) {
                     for (i in 1:nrow(results)) {
                         nmb_value <- results$expectedUtility[i] * threshold - results$expectedCost[i]
@@ -1169,39 +1170,39 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         ))
                     }
                 }
-                
+
                 # Identify optimal strategy for each threshold
                 for (threshold in wtp_thresholds) {
                     threshold_data <- nmb_sensitivity[nmb_sensitivity$wtp_threshold == threshold, ]
                     optimal_idx <- which.max(threshold_data$nmb)
                     nmb_sensitivity$is_optimal[nmb_sensitivity$wtp_threshold == threshold][optimal_idx] <- TRUE
                 }
-                
+
                 # Calculate main results using primary WTP threshold
                 results$netBenefit <- results$expectedUtility * wtp - results$expectedCost
-                
+
                 # Add detailed NMB calculation components
                 results$nmb_components <- paste0(
-                    "NMB = (", round(results$expectedUtility, 3), 
-                    " * $", format(wtp, big.mark = ","), 
+                    "NMB = (", round(results$expectedUtility, 3),
+                    " * $", format(wtp, big.mark = ","),
                     ") - $", format(round(results$expectedCost, 2), big.mark = ","),
                     " = $", format(round(results$netBenefit, 2), big.mark = ",")
                 )
-                
+
                 # Calculate incremental NMB if multiple strategies
                 if (nrow(results) > 1) {
                     # Sort by NMB for incremental analysis
                     results <- results[order(results$netBenefit, decreasing = TRUE), ]
-                    
+
                     results$incrementalNMB <- c(0, diff(results$netBenefit))
                     results$nmbRank <- 1:nrow(results)
                 }
-                
+
                 # Identify optimal decision based on maximum NMB
                 optimal_idx <- which.max(results$netBenefit)
                 results$optimal <- FALSE
                 results$optimal[optimal_idx] <- TRUE
-                
+
                 # Calculate NMB confidence intervals if PSA data available
                 results$nmb_uncertainty <- "Not calculated"
                 if (!is.null(private$.psaResults) && !is.null(private$.psaResults$results)) {
@@ -1212,36 +1213,36 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             strategy_psa <- psa_data[psa_data$strategy == results$strategy[i] | i == 1, ]
                             if (nrow(strategy_psa) > 0) {
                                 ci_95 <- quantile(strategy_psa$nmb, c(0.025, 0.975), na.rm = TRUE)
-                                results$nmb_uncertainty[i] <- paste0("95% CI: $", 
+                                results$nmb_uncertainty[i] <- paste0("95% CI: $",
                                     round(ci_95[1], 0), " to $", round(ci_95[2], 0))
                             }
                         }
                     }
                 }
-                
+
                 # Add threshold sensitivity analysis results
                 results$threshold_sensitivity <- "See NMB Analysis for details"
-                
+
                 # Store sensitivity analysis data for later use
                 # Store in sensitivity table state instead of private variable
                 if (!is.null(self$results$sensitivityTable)) {
                     self$results$sensitivityTable$setState(nmb_sensitivity)
                 }
-                
+
                 # Calculate Net Health Benefit (NHB) as alternative measure
                 results$netHealthBenefit <- results$expectedUtility - (results$expectedCost / wtp)
-                
+
                 # Checkpoint before dominance analysis
                 private$.checkpoint(flush = FALSE)
-                
+
                 # Determine dominance relationships
                 for (i in 1:nrow(results)) {
                     results$dominance_status[i] <- "Non-dominated"
-                    
+
                     # Check for simple dominance (higher utility, lower cost)
                     for (j in 1:nrow(results)) {
                         if (i != j) {
-                            if (results$expectedCost[i] > results$expectedCost[j] && 
+                            if (results$expectedCost[i] > results$expectedCost[j] &&
                                 results$expectedUtility[i] < results$expectedUtility[j]) {
                                 results$dominance_status[i] <- "Dominated"
                                 break
@@ -1249,11 +1250,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         }
                     }
                 }
-                
+
                 # Calculate value-based pricing (maximum acceptable price)
                 results$max_acceptable_cost <- results$expectedUtility * wtp
                 results$cost_effectiveness_ratio <- results$expectedCost / results$expectedUtility
-                
+
                 return(list(
                     results = results,
                     sensitivity_analysis = nmb_sensitivity,
@@ -1267,20 +1268,20 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     )
                 ))
             },
-            
+
             .analyzeThresholdSwitching = function(nmb_sensitivity) {
                 # Analyze at which WTP thresholds the optimal strategy changes
-                
+
                 switching_points <- data.frame(
                     threshold_range = character(),
                     optimal_strategy = character(),
                     nmb_advantage = numeric(),
                     stringsAsFactors = FALSE
                 )
-                
+
                 unique_thresholds <- unique(nmb_sensitivity$wtp_threshold)
                 unique_thresholds <- unique_thresholds[order(unique_thresholds)]
-                
+
                 for (i in seq_along(unique_thresholds)) {
                     threshold <- unique_thresholds[i]
                     threshold_data <- nmb_sensitivity[nmb_sensitivity$wtp_threshold == threshold, ]
@@ -1288,7 +1289,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     max_nmb <- max(threshold_data$nmb)
                     second_best_nmb <- sort(threshold_data$nmb, decreasing = TRUE)[2]
                     nmb_advantage <- max_nmb - second_best_nmb
-                    
+
                     range_label <- if (i == 1) {
                         paste("Below $", format(threshold, big.mark = ","))
                     } else if (i == length(unique_thresholds)) {
@@ -1296,7 +1297,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     } else {
                         paste("$", format(unique_thresholds[i-1], big.mark = ","), "- $", format(threshold, big.mark = ","))
                     }
-                    
+
                     switching_points <- rbind(switching_points, data.frame(
                         threshold_range = range_label,
                         optimal_strategy = optimal_strategy,
@@ -1304,30 +1305,30 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stringsAsFactors = FALSE
                     ))
                 }
-                
+
                 return(switching_points)
             },
-            
+
             .performICERAnalysis = function() {
                 # Incremental Cost-Effectiveness Ratio analysis
                 if (!self$options$incrementalAnalysis) {
                     return(NULL)
                 }
-                
+
                 if (is.null(private$.results)) {
                     private$.calculateExpectedValues()
                 }
-                
+
                 results <- private$.results
-                
+
                 # Sort by effectiveness (utility)
                 results <- results[order(results$expectedUtility), ]
-                
+
                 # Calculate incremental values
                 for (i in 2:nrow(results)) {
                     results$incrementalCost[i] <- results$expectedCost[i] - results$expectedCost[i-1]
                     results$incrementalUtility[i] <- results$expectedUtility[i] - results$expectedUtility[i-1]
-                    
+
                     if (results$incrementalUtility[i] > 0) {
                         results$icer[i] <- results$incrementalCost[i] / results$incrementalUtility[i]
                     } else if (results$incrementalUtility[i] < 0 && results$incrementalCost[i] < 0) {
@@ -1336,27 +1337,27 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         results$icer[i] <- Inf  # Dominated strategy
                     }
                 }
-                
+
                 # Mark dominated strategies
                 results$dominated <- results$icer == Inf | is.na(results$icer)
-                
+
                 # Populate ICER table
                 private$.populateICERTable(results)
-                
+
                 return(results)
             },
-            
+
             .populateICERTable = function(results) {
                 # Populate the incremental cost-effectiveness analysis table
-                
+
                 icerTable <- self$results$icerTable
                 if (is.null(icerTable)) {
                     return()
                 }
-                
+
                 # Clear existing data
                 icerTable$setVisible(TRUE)
-                
+
                 for (i in 1:nrow(results)) {
                     # Format values
                     cost <- results$expectedCost[i]
@@ -1365,7 +1366,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     incremental_utility <- if (i > 1) results$incrementalUtility[i] else 0
                     icer_value <- if (i > 1) results$icer[i] else NA
                     dominated_status <- if (results$dominated[i]) "Yes" else "No"
-                    
+
                     # Handle special ICER cases
                     icer_display <- if (is.na(icer_value)) {
                         "Reference"
@@ -1374,7 +1375,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     } else {
                         round(icer_value, 0)
                     }
-                    
+
                     icerTable$addRow(rowKey = i, values = list(
                         strategy = results$strategy[i],
                         cost = round(cost, 2),
@@ -1386,31 +1387,31 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     ))
                 }
             },
-            
+
             .createChanceNode = function(probabilities, outcomes) {
                 # Create chance node structure as per blog's c_node() function
                 # This represents uncertainty in the decision tree
-                
+
                 if (length(probabilities) != length(outcomes)) {
                     stop("Number of probabilities must match number of outcomes")
                 }
-                
+
                 # Ensure probabilities sum to 1
                 if (abs(sum(probabilities) - 1) > 0.001) {
                     warning("Probabilities do not sum to 1, normalizing...")
                     probabilities <- probabilities / sum(probabilities)
                 }
-                
+
                 chanceNode <- list(
                     type = "chance",
                     probabilities = probabilities,
                     outcomes = outcomes,
                     expectedValue = sum(probabilities * outcomes)
                 )
-                
+
                 return(chanceNode)
             },
-            
+
             # Perform One-Way Sensitivity Analysis
             #
             # Conducts deterministic sensitivity analysis by varying individual parameters
@@ -1446,16 +1447,16 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (is.null(private$.results)) {
                     private$.calculateExpectedValues()
                 }
-                
+
                 baseResults <- private$.results
                 wtp <- self$options$willingnessToPay
-                
+
                 # Define parameters to vary
-                parameters <- c("Probability of Success", "Cost of Treatment", "Utility of Success", 
+                parameters <- c("Probability of Success", "Cost of Treatment", "Utility of Success",
                                "Willingness to Pay Threshold")
                 baseValues <- c(0.7, 1000, 0.8, wtp)
                 ranges <- c(0.3, 500, 0.3, 20000)
-                
+
                 sensData <- data.frame(
                     parameter = character(),
                     baseValue = numeric(),
@@ -1466,11 +1467,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     range = numeric(),
                     stringsAsFactors = FALSE
                 )
-                
+
                 for (i in seq_along(parameters)) {
                     lowVal <- baseValues[i] - ranges[i]/2
                     highVal <- baseValues[i] + ranges[i]/2
-                    
+
                     # Calculate NMB at low and high values
                     if (parameters[i] == "Willingness to Pay Threshold") {
                         lowNMB <- baseResults$expectedUtility[1] * lowVal - baseResults$expectedCost[1]
@@ -1480,7 +1481,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         lowNMB <- baseResults$netBenefit[1] - ranges[i] * 10
                         highNMB <- baseResults$netBenefit[1] + ranges[i] * 10
                     }
-                    
+
                     sensData <- rbind(sensData, data.frame(
                         parameter = parameters[i],
                         baseValue = baseValues[i],
@@ -1492,44 +1493,44 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stringsAsFactors = FALSE
                     ))
                 }
-                
+
                 # Sort by impact range for tornado diagram
                 sensData <- sensData[order(sensData$range, decreasing = TRUE), ]
-                
+
                 return(sensData)
             },
-            
+
             .performCohortTraceAnalysis = function() {
                 if (!self$options$cohortTrace || is.null(private$.markovData)) {
                     return(NULL)
                 }
-                
+
                 markovData <- private$.markovData
                 cohortTrace <- markovData$cohortTrace
                 cohortSize <- self$options$cohortSize
-                
+
                 # Calculate absolute numbers instead of proportions
                 absoluteTrace <- cohortTrace * cohortSize
-                
+
                 # Apply half-cycle correction if requested
                 if (self$options$cycleCorrection) {
                     for (cycle in 2:nrow(absoluteTrace)) {
                         absoluteTrace[cycle, ] <- (absoluteTrace[cycle, ] + absoluteTrace[cycle-1, ]) / 2
                     }
                 }
-                
+
                 # Calculate life years and QALYs for each state
                 lifeYears <- colSums(absoluteTrace[-1, ]) * markovData$cycleLength
-                
+
                 # Get state utilities
                 stateUtilities <- rep(0.8, length(markovData$uniqueStates))
                 if (!is.null(private$.treeData$utilities) && nrow(private$.treeData$utilities) > 0) {
                     utilityData <- private$.treeData$utilities[1, ]
                     stateUtilities <- as.numeric(utilityData[1:min(length(markovData$uniqueStates), ncol(utilityData))])
                 }
-                
+
                 qalys <- lifeYears * stateUtilities
-                
+
                 # Use local variables instead of private storage
                 cohortTrace <- list(
                     absoluteTrace = absoluteTrace,
@@ -1538,49 +1539,49 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     totalLifeYears = sum(lifeYears),
                     totalQalys = sum(qalys)
                 )
-                
+
                 return(private$.cohortTrace)
             },
-            
+
             .performBudgetImpactAnalysis = function() {
                 if (!self$options$budgetImpactAnalysis || is.null(private$.results)) {
                     return(NULL)
                 }
-                
+
                 targetPopulation <- self$options$targetPopulationSize
                 marketPenetration <- self$options$marketPenetration
                 timeHorizon <- self$options$timeHorizon
-                
+
                 # Calculate total costs for each strategy
                 strategies <- private$.results
-                
+
                 # Current practice (baseline strategy)
                 baselineStrategy <- strategies[1, ]
                 baselineCostPerPerson <- baselineStrategy$expectedCost
-                
+
                 # New intervention strategy
                 newStrategy <- strategies[strategies$optimal == TRUE, ][1, ]
                 if (nrow(newStrategy) == 0) newStrategy <- strategies[2, ]
                 newCostPerPerson <- newStrategy$expectedCost
-                
+
                 # Calculate budget impact over time horizon
                 yearsData <- data.frame(
                     year = 1:timeHorizon,
                     eligiblePopulation = rep(targetPopulation, timeHorizon),
                     marketPenetrationRate = pmin(seq(0.1, marketPenetration, length.out = timeHorizon), marketPenetration)
                 )
-                
+
                 yearsData$usersNewIntervention <- yearsData$eligiblePopulation * yearsData$marketPenetrationRate
                 yearsData$usersCurrentPractice <- yearsData$eligiblePopulation - yearsData$usersNewIntervention
-                
+
                 yearsData$costNewIntervention <- yearsData$usersNewIntervention * newCostPerPerson
                 yearsData$costCurrentPractice <- yearsData$usersCurrentPractice * baselineCostPerPerson
                 yearsData$totalCost <- yearsData$costNewIntervention + yearsData$costCurrentPractice
-                
+
                 yearsData$baselineCost <- yearsData$eligiblePopulation * baselineCostPerPerson
                 yearsData$budgetImpact <- yearsData$totalCost - yearsData$baselineCost
                 yearsData$cumulativeBudgetImpact <- cumsum(yearsData$budgetImpact)
-                
+
                 # Use local variables instead of private storage
                 budgetImpactData <- list(
                     yearsData = yearsData,
@@ -1592,52 +1593,52 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         difference = newCostPerPerson - baselineCostPerPerson
                     )
                 )
-                
+
                 return(private$.budgetImpactData)
             },
-            
+
             .performValueOfInformationAnalysis = function() {
                 if (!self$options$valueOfInformation || !self$options$probabilisticAnalysis) {
                     return(NULL)
                 }
-                
+
                 if (is.null(private$.psaResults) || nrow(private$.psaResults) == 0) {
                     # Generate PSA results if not already done
                     private$.performProbabilisticAnalysis()
                 }
-                
+
                 if (is.null(private$.psaResults)) {
                     return(NULL)
                 }
-                
+
                 psaResults <- private$.psaResults
                 wtp <- self$options$willingnessToPay
-                
+
                 # Calculate EVPI (Expected Value of Perfect Information)
                 # EVPI = E[max(NMB)] - max(E[NMB])
-                
+
                 # Calculate NMB for each simulation
                 psaResults$nmb <- psaResults$utility * wtp - psaResults$cost
-                
+
                 # Expected NMB (assuming single strategy for simplification)
                 expectedNMB <- mean(psaResults$nmb)
-                
+
                 # Maximum NMB for each simulation (perfect information scenario)
                 # For simplification, assume perfect information increases NMB by uncertainty range
                 maxNMBperSim <- psaResults$nmb + abs(psaResults$nmb - expectedNMB)
                 expectedMaxNMB <- mean(maxNMBperSim)
-                
+
                 evpi <- expectedMaxNMB - expectedNMB
                 evpiPerPerson <- max(0, evpi)  # EVPI cannot be negative
-                
+
                 # Population EVPI
                 targetPopulation <- self$options$targetPopulationSize
                 populationEVPI <- evpiPerPerson * targetPopulation
-                
+
                 # Partial EVPI for specific parameters (if specified)
                 partialEVPI <- NULL
                 evpiParams <- self$options$evpi_parameters
-                
+
                 if (!is.null(evpiParams) && length(evpiParams) > 0) {
                     partialEVPI <- data.frame(
                         parameter = evpiParams,
@@ -1645,7 +1646,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         stringsAsFactors = FALSE
                     )
                 }
-                
+
                 # Use local variables instead of private storage
                 valueOfInformationData <- list(
                     evpi = evpiPerPerson,
@@ -1655,10 +1656,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     expectedMaxNMB = expectedMaxNMB,
                     willingnessToPay = wtp
                 )
-                
+
                 return(private$.valueOfInformationData)
             },
-            
+
             # Perform Probabilistic Sensitivity Analysis
             #
             # Conducts comprehensive Monte Carlo simulation for probabilistic sensitivity analysis
@@ -1696,14 +1697,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (!self$options$probabilisticAnalysis) {
                     return(NULL)
                 }
-                
+
                 numSims <- self$options$numSimulations
                 wtp <- self$options$willingnessToPay
                 distribution <- self$options$psa_distributions
-                
+
                 # Get data for parameter estimation
                 mydata <- jmvcore::naOmit(self$data)
-                
+
                 # Pre-allocate results storage for better performance
                 results <- data.frame(
                     simulation = 1:numSims,
@@ -1713,20 +1714,20 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     nmb = numeric(numSims),
                     stringsAsFactors = FALSE
                 )
-                
+
                 # Generate parameter samples based on specified distributions
                 parameterSamples <- private$.generateParameterSamples(numSims, distribution, mydata)
-                
+
                 # Handle parameter correlations if specified
                 if (self$options$correlatedParameters && !is.null(self$options$correlationMatrix)) {
                     parameterSamples <- private$.applyParameterCorrelations(parameterSamples)
                 }
-                
+
                 # Run Monte Carlo simulations based on performance settings
                 performanceMode <- self$options$performanceMode %||% "standard"
                 memoryOptimization <- self$options$memoryOptimization %||% TRUE
                 parallelProcessing <- self$options$parallelProcessing %||% FALSE
-                
+
                 # Choose optimal processing strategy
                 if (parallelProcessing && numSims > 1000) {
                     # User explicitly enabled parallel processing
@@ -1744,7 +1745,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     # Standard processing for most cases
                     results <- private$.runPSAStandard(results, parameterSamples, wtp, numSims)
                 }
-                
+
                 # Calculate summary statistics
                 summaryStats <- list(
                     meanCost = mean(results$cost),
@@ -1758,19 +1759,19 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     ci95_utility = quantile(results$utility, c(0.025, 0.975)),
                     ci95_nmb = quantile(results$nmb, c(0.025, 0.975))
                 )
-                
+
                 # Generate CEAC data if advanced outputs requested
                 ceacData <- NULL
                 if (self$options$psa_advanced_outputs) {
                     ceacData <- private$.generateCEACData(results)
                 }
-                
+
                 # Calculate Expected Value of Perfect Information (EVPI) if requested
                 evpiResults <- NULL
                 if (self$options$valueOfInformation) {
                     evpiResults <- private$.calculateEVPI(results)
                 }
-                
+
                 # Store comprehensive PSA results
                 psaResults <- list(
                     results = results,
@@ -1780,7 +1781,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     evpi = evpiResults,
                     parameters = parameterSamples
                 )
-                
+
                 # Store CEAC and scatter data on their respective image states
                 if (!is.null(self$results$ceacPlot) && !is.null(ceacData)) {
                     self$results$ceacPlot$setState(list(ceac_data = ceacData))
@@ -1791,35 +1792,35 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     scatter_df$strategy <- as.character(scatter_df$strategy)
                     self$results$scatterPlot$setState(scatter_df)
                 }
-                
+
                 # Populate PSA results table if available
                 if (!is.null(self$results$psaResults)) {
                     private$.populatePSAResults(psaResults)
                 }
-                
+
                 return(psaResults)
             },
-            
+
             .generateParameterSamples = function(numSims, distribution, data) {
                 # Generate parameter samples from specified distributions
-                
+
                 # Extract available parameters from data
                 costs <- self$options$costs
                 utilities <- self$options$utilities
                 probabilities <- self$options$probabilities
-                
+
                 samples <- data.frame(
                     cost_param = numeric(numSims),
                     utility_param = numeric(numSims),
                     prob_param = numeric(numSims)
                 )
-                
+
                 # Sample cost parameters
                 if (!is.null(costs) && length(costs) > 0 && costs[1] %in% names(data)) {
                     costData <- data[[costs[1]]]
                     costMean <- mean(costData, na.rm = TRUE)
                     costSD <- sd(costData, na.rm = TRUE)
-                    
+
                     if (distribution == "gamma") {
                         # Gamma distribution for costs (always positive)
                         shape <- costMean^2 / costSD^2
@@ -1839,13 +1840,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     # Default cost parameters
                     samples$cost_param <- rgamma(numSims, shape = 100, rate = 0.1)
                 }
-                
+
                 # Sample utility parameters
                 if (!is.null(utilities) && length(utilities) > 0 && utilities[1] %in% names(data)) {
                     utilData <- data[[utilities[1]]]
                     utilMean <- mean(utilData, na.rm = TRUE)
                     utilSD <- sd(utilData, na.rm = TRUE)
-                    
+
                     if (distribution == "beta") {
                         # Beta distribution for utilities (0-1 bounded)
                         alpha <- utilMean * ((utilMean * (1 - utilMean)) / utilSD^2 - 1)
@@ -1862,13 +1863,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     # Default utility parameters
                     samples$utility_param <- rbeta(numSims, shape1 = 8, shape2 = 2)
                 }
-                
+
                 # Sample probability parameters
                 if (!is.null(probabilities) && length(probabilities) > 0 && probabilities[1] %in% names(data)) {
                     probData <- data[[probabilities[1]]]
                     probMean <- mean(probData, na.rm = TRUE)
                     probSD <- sd(probData, na.rm = TRUE)
-                    
+
                     # Beta distribution for probabilities (0-1 bounded)
                     alpha <- probMean * ((probMean * (1 - probMean)) / probSD^2 - 1)
                     beta <- (1 - probMean) * ((probMean * (1 - probMean)) / probSD^2 - 1)
@@ -1879,10 +1880,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     # Default probability parameters
                     samples$prob_param <- rbeta(numSims, shape1 = 70, shape2 = 30)
                 }
-                
+
                 return(samples)
             },
-            
+
             .applyParameterCorrelations = function(parameterSamples) {
                 # Apply correlations between parameters using Cholesky decomposition
                 tryCatch({
@@ -1891,14 +1892,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     if (is.null(correlationVars) || length(correlationVars) == 0) {
                         return(parameterSamples)
                     }
-                    
+
                     mydata <- jmvcore::naOmit(self$data)
-                    
+
                     # Create correlation matrix from data
                     if (all(correlationVars %in% names(mydata))) {
                         corrData <- mydata[correlationVars]
                         corrMatrix <- cor(corrData, use = "complete.obs")
-                        
+
                         # Apply correlations using Cholesky decomposition
                         if (nrow(corrMatrix) == ncol(parameterSamples)) {
                             L <- chol(corrMatrix)
@@ -1906,14 +1907,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             parameterSamples[,] <- correlatedSamples
                         }
                     }
-                    
+
                     return(parameterSamples)
                 }, error = function(e) {
                     # Return uncorrelated parameters if correlation fails
                     return(parameterSamples)
                 })
             },
-            
+
             .runPSAStandard = function(results, parameterSamples, wtp, numSims) {
                 # Standard PSA processing for smaller simulations
                 for (i in 1:numSims) {
@@ -1921,9 +1922,9 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     if (i %% 100 == 1) {
                         private$.checkpoint(flush = FALSE)
                     }
-                    
+
                     simResult <- private$.runSinglePSAIteration(i, parameterSamples[i,])
-                    
+
                     results$strategy[i] <- simResult$strategy
                     results$cost[i] <- simResult$cost
                     results$utility[i] <- simResult$utility
@@ -1931,37 +1932,37 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 }
                 return(results)
             },
-            
+
             .runPSAParallel = function(results, parameterSamples, wtp, numSims) {
                 # Parallel processing for very large simulations
-                
+
                 # Check if parallel package is available
                 if (!requireNamespace("parallel", quietly = TRUE)) {
                     # Fall back to chunked processing
                     return(private$.runPSAChunked(results, parameterSamples, wtp, numSims))
                 }
-                
+
                 # Determine optimal number of cores
                 numCores <- min(parallel::detectCores() - 1, 8)  # Leave one core free, max 8
                 if (numCores < 2) {
                     # Not enough cores for parallel processing
                     return(private$.runPSAChunked(results, parameterSamples, wtp, numSims))
                 }
-                
+
                 tryCatch({
                     # Create cluster
                     cl <- parallel::makeCluster(numCores)
-                    
+
                     # Export required functions and data to cluster
                     parallel::clusterExport(cl, c("parameterSamples", "wtp"), envir = environment())
-                    
+
                     # Divide work among cores
                     chunkSize <- ceiling(numSims / numCores)
                     chunks <- split(1:numSims, ceiling(seq_along(1:numSims) / chunkSize))
-                    
+
                     # Checkpoint before parallel computation
                     private$.checkpoint(flush = FALSE)
-                    
+
                     # Process in parallel
                     chunkResults <- parallel::parLapply(cl, chunks, function(chunk_indices) {
                         chunk_results <- data.frame(
@@ -1972,29 +1973,29 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             nmb = numeric(length(chunk_indices)),
                             stringsAsFactors = FALSE
                         )
-                        
+
                         for (i in seq_along(chunk_indices)) {
                             idx <- chunk_indices[i]
                             simResult <- private$.runSinglePSAIteration(idx, parameterSamples[idx,])
-                            
+
                             chunk_results$strategy[i] <- simResult$strategy
                             chunk_results$cost[i] <- simResult$cost
                             chunk_results$utility[i] <- simResult$utility
                             chunk_results$nmb[i] <- simResult$utility * wtp - simResult$cost
                         }
-                        
+
                         return(chunk_results)
                     })
-                    
+
                     # Combine results
                     results <- do.call(rbind, chunkResults)
                     results <- results[order(results$simulation), ]  # Ensure correct order
-                    
+
                     # Clean up cluster
                     parallel::stopCluster(cl)
-                    
+
                     return(results)
-                    
+
                 }, error = function(e) {
                     # Clean up cluster on error
                     if (exists("cl")) {
@@ -2005,52 +2006,52 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     return(private$.runPSAChunked(results, parameterSamples, wtp, numSims))
                 })
             },
-            
+
             .runPSAChunked = function(results, parameterSamples, wtp, numSims) {
                 # Memory-efficient chunked processing for large simulations
                 chunk_size <- private$DECISIONGRAPH_DEFAULTS$psa_chunk_size
                 num_chunks <- ceiling(numSims / chunk_size)
-                
+
                 for (chunk in 1:num_chunks) {
                     # Checkpoint at the start of each chunk for progress feedback
                     private$.checkpoint(flush = FALSE)
-                    
+
                     start_idx <- (chunk - 1) * chunk_size + 1
                     end_idx <- min(chunk * chunk_size, numSims)
-                    
+
                     # Process chunk
                     for (i in start_idx:end_idx) {
                         simResult <- private$.runSinglePSAIteration(i, parameterSamples[i,])
-                        
+
                         results$strategy[i] <- simResult$strategy
                         results$cost[i] <- simResult$cost
                         results$utility[i] <- simResult$utility
                         results$nmb[i] <- simResult$utility * wtp - simResult$cost
                     }
-                    
+
                     # Garbage collection after each chunk to manage memory
                     if (chunk %% 5 == 0) {
                         gc(verbose = FALSE)
                     }
                 }
-                
+
                 return(results)
             },
-            
+
             .runSinglePSAIteration = function(iteration, parameters) {
                 # Run a single PSA iteration with given parameters
-                
+
                 cost <- parameters$cost_param
                 utility <- parameters$utility_param
                 prob <- parameters$prob_param
-                
+
                 # Apply decision tree logic with sampled parameters
                 # For demonstration, using simple expected value calculation
                 # In practice, this would run the full decision tree with sampled parameters
-                
+
                 strategies <- c("Treatment", "No Treatment")
                 strategy <- sample(strategies, 1, prob = c(prob, 1 - prob))
-                
+
                 # Adjust cost and utility based on strategy
                 if (strategy == "Treatment") {
                     finalCost <- cost * (1 + 0.2)  # Treatment adds 20% cost
@@ -2059,17 +2060,17 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     finalCost <- cost * 0.8  # No treatment reduces cost
                     finalUtility <- utility * 0.9  # No treatment reduces utility
                 }
-                
+
                 return(list(
                     strategy = strategy,
                     cost = finalCost,
                     utility = finalUtility
                 ))
             },
-            
+
             .generateCEACData = function(results) {
                 # Generate Cost-Effectiveness Acceptability Curve data
-                
+
                 # Parse CEAC threshold range
                 thresholdStr <- self$options$ceacThresholds
                 if (is.null(thresholdStr) || thresholdStr == "") {
@@ -2079,7 +2080,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     thresholdParts <- as.numeric(strsplit(thresholdStr, ",")[[1]])
                     thresholds <- seq(thresholdParts[1], thresholdParts[2], by = thresholdParts[3])
                 }
-                
+
                 # Calculate probability of cost-effectiveness at each threshold
                 ceacData <- data.frame(
                     threshold = thresholds,
@@ -2087,34 +2088,34 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     strategy = rep("Overall", length(thresholds)),
                     stringsAsFactors = FALSE
                 )
-                
+
                 for (i in seq_along(thresholds)) {
                     wtp <- thresholds[i]
                     nmb <- results$utility * wtp - results$cost
                     ceacData$probability[i] <- sum(nmb > 0) / nrow(results)
                 }
-                
+
                 return(ceacData)
             },
-            
+
             .calculateEVPI = function(results) {
                 # Calculate Expected Value of Perfect Information using utility function
                 wtp <- self$options$willingnessToPay
-                
+
                 # Use utility function for EVPI calculation
                 evpiResult <- calculateEVPI(results, wtp)
-                
+
                 # Extend with population EVPI
                 evpiResult$populationEVPI <- evpiResult$evpi * self$options$cohortSize
-                
+
                 return(evpiResult)
             },
-            
+
             .populatePSAResults = function(psaResults) {
                 # Populate PSA results in the results HTML element
-                
+
                 summaryStats <- psaResults$summaryStats
-                
+
                 # Determine processing method used
                 numSims <- self$options$numSimulations
                 processingMethod <- if (numSims > private$DECISIONGRAPH_DEFAULTS$parallel_threshold) {
@@ -2124,7 +2125,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 } else {
                     "Standard processing"
                 }
-                
+
                 # Use utility function for safe HTML content generation
                 content <- list(
                     paste("Number of Simulations:", format(numSims, big.mark = ",")),
@@ -2135,9 +2136,9 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     paste("Probability Cost-Effective:", round(summaryStats$probCostEffective * 100, 1), "%"),
                     paste("95% CI for NMB: $", round(summaryStats$ci95_nmb[1], 2), " to $", round(summaryStats$ci95_nmb[2], 2), sep="")
                 )
-                
+
                 html_content <- createSafeHTMLContent("Enhanced Probabilistic Sensitivity Analysis Results", content)
-                
+
                 # Add EVPI results if available
                 if (!is.null(psaResults$evpi)) {
                     evpi <- psaResults$evpi
@@ -2147,28 +2148,28 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         "<p><strong>Population EVPI:</strong> $", round(evpi$populationEVPI, 0), " (cohort size: ", self$options$cohortSize, ")</p>"
                     )
                 }
-                
+
                 self$results$psaResults$setContent(html_content)
             },
-            
+
             .populateNMBAnalysis = function(nmbAnalysis) {
                 # Populate enhanced Net Monetary Benefit analysis HTML results
-                
+
                 if (!self$options$calculateNMB || is.null(nmbAnalysis)) {
                     return()
                 }
-                
+
                 wtp <- self$options$willingnessToPay
                 results <- nmbAnalysis$results
                 summary <- nmbAnalysis$summary
                 threshold_analysis <- nmbAnalysis$threshold_analysis
-                
+
                 # Create comprehensive NMB analysis content
                 html_content <- paste0(
                     "<h3>Enhanced Net Monetary Benefit Analysis</h3>",
                     "<p><strong>Primary Willingness-to-Pay Threshold:</strong> $", format(wtp, big.mark = ","), " per QALY</p>",
                     "<p><strong>Analysis Method:</strong> NMB = (Utility × WTP) - Cost</p>",
-                    
+
                     "<div style='background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-left: 4px solid #007bff;'>",
                     "<h4 style='margin-top: 0;'>Key Findings</h4>",
                     "<p><strong>Optimal Strategy:</strong> ", summary$optimal_strategy, "</p>",
@@ -2176,13 +2177,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     "<p><strong>Strategies Evaluated:</strong> ", summary$strategies_evaluated, "</p>",
                     "<p><strong>Dominated Strategies:</strong> ", summary$dominated_strategies, "</p>",
                     "</div>",
-                    
+
                     "<h4>Strategy Rankings by Net Monetary Benefit</h4>",
                     "<table class='table table-striped table-sm'>",
                     "<thead><tr><th>Rank</th><th>Strategy</th><th>NMB</th><th>Cost</th><th>Utility</th><th>Dominance</th><th>NMB Components</th></tr></thead>",
                     "<tbody>"
                 )
-                
+
                 # Add strategy rankings
                 for (i in 1:nrow(results)) {
                     dominance_color <- if (results$dominance_status[i] == "Dominated") " style='color: red;'" else ""
@@ -2198,9 +2199,9 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         "</tr>"
                     )
                 }
-                
+
                 html_content <- paste0(html_content, "</tbody></table>")
-                
+
                 # Add threshold sensitivity analysis
                 if (!is.null(threshold_analysis) && nrow(threshold_analysis) > 0) {
                     html_content <- paste0(html_content,
@@ -2210,7 +2211,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         "<thead><tr><th>WTP Range</th><th>Optimal Strategy</th><th>NMB Advantage</th></tr></thead>",
                         "<tbody>"
                     )
-                    
+
                     for (i in 1:nrow(threshold_analysis)) {
                         html_content <- paste0(html_content,
                             "<tr>",
@@ -2220,10 +2221,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             "</tr>"
                         )
                     }
-                    
+
                     html_content <- paste0(html_content, "</tbody></table>")
                 }
-                
+
                 # Add additional NMB metrics
                 html_content <- paste0(html_content,
                     "<h4>Advanced NMB Metrics</h4>",
@@ -2232,36 +2233,36 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     "<h5>Net Health Benefit (NHB)</h5>",
                     "<p>Alternative measure: NHB = Utility - (Cost / WTP)</p>"
                 )
-                
+
                 for (i in 1:nrow(results)) {
                     html_content <- paste0(html_content,
                         "<p><strong>", results$strategy[i], ":</strong> ", round(results$netHealthBenefit[i], 3), " QALYs</p>"
                     )
                 }
-                
+
                 html_content <- paste0(html_content,
                     "</div>",
                     "<div class='col-md-6'>",
                     "<h5>Value-Based Pricing</h5>",
                     "<p>Maximum acceptable cost for cost-effectiveness:</p>"
                 )
-                
+
                 for (i in 1:nrow(results)) {
                     html_content <- paste0(html_content,
                         "<p><strong>", results$strategy[i], ":</strong> $", format(round(results$max_acceptable_cost[i], 2), big.mark = ","), "</p>"
                     )
                 }
-                
+
                 html_content <- paste0(html_content,
                     "</div></div>",
-                    
+
                     "<h4>Clinical Interpretation</h4>",
                     "<div style='background-color: #d1ecf1; padding: 10px; margin: 10px 0; border-left: 4px solid #bee5eb;'>",
                     "<p><strong>Decision Rule:</strong> Choose the strategy with the highest positive Net Monetary Benefit.</p>",
                     "<p><strong>Threshold Sensitivity:</strong> Consider how robust the decision is to changes in the WTP threshold.</p>",
                     "<p><strong>Dominance Analysis:</strong> Dominated strategies should not be considered regardless of WTP threshold.</p>",
                     "</div>",
-                    
+
                     "<h5>Statistical Notes</h5>",
                     "<ul>",
                     "<li>NMB combines costs and effects in a single metric using a monetary threshold</li>",
@@ -2270,55 +2271,55 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     "<li>Uncertainty in NMB should be considered through confidence intervals and PSA</li>",
                     "</ul>"
                 )
-                
+
                 self$results$nmbAnalysis$setContent(html_content)
             },
-            
+
             .populateAdvancedResults = function() {
                 # Populate all advanced analysis results
-                
+
                 # Populate NMB analysis if enabled
                 if (self$options$calculateNMB && !is.null(private$.nmbAnalysis)) {
                     private$.populateNMBAnalysis(private$.nmbAnalysis)
                 }
-                
+
                 # Populate PSA results if enabled
                 if (self$options$probabilisticAnalysis && !is.null(private$.psaResults)) {
                     private$.populatePSAResults(private$.psaResults)
                 }
-                
+
                 # Populate budget impact analysis if enabled
                 if (self$options$budgetImpactAnalysis) {
                     private$.populateBudgetImpactAnalysis()
                 }
-                
+
                 # Populate value of information analysis if enabled
                 if (self$options$valueOfInformation) {
                     private$.populateValueOfInformationAnalysis()
                 }
             },
-            
+
             .populateBudgetImpactAnalysis = function() {
                 # Populate budget impact analysis results
-                
+
                 if (!self$options$budgetImpactAnalysis || is.null(private$.results)) {
                     return()
                 }
-                
+
                 targetPop <- self$options$targetPopulationSize
                 marketPen <- self$options$marketPenetration
-                
+
                 results <- private$.results
-                
+
                 # Calculate budget impact
                 if (nrow(results) >= 2) {
                     # Compare new intervention vs standard care
                     newCost <- results$expectedCost[1] * targetPop * marketPen
                     standardCost <- results$expectedCost[2] * targetPop * (1 - marketPen)
                     totalCost <- newCost + standardCost
-                    
+
                     budgetImpact <- newCost - (results$expectedCost[2] * targetPop * marketPen)
-                    
+
                     html_content <- paste0(
                         "<h3>Budget Impact Analysis</h3>",
                         "<p><strong>Target Population:</strong> ", format(targetPop, big.mark = ","), " patients</p>",
@@ -2327,17 +2328,17 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         "<p><strong>Cost per Patient (New Intervention):</strong> $", round(results$expectedCost[1], 2), "</p>",
                         "<p><strong>Cost per Patient (Standard Care):</strong> $", round(results$expectedCost[2], 2), "</p>",
                         "<h4>Interpretation</h4>",
-                        "<p>", if (budgetImpact > 0) "The new intervention will increase" else "The new intervention will decrease", 
-                        " healthcare costs by $", format(abs(round(budgetImpact, 0)), big.mark = ","), 
+                        "<p>", if (budgetImpact > 0) "The new intervention will increase" else "The new intervention will decrease",
+                        " healthcare costs by $", format(abs(round(budgetImpact, 0)), big.mark = ","),
                         " annually for the target population.</p>"
                     )
-                    
+
                     # Add to text2 results (reuse existing HTML element)
                     self$results$text2$setContent(html_content)
                     self$results$text2$setVisible(TRUE)
                 }
             },
-            
+
             .safeExecute = function(operationName, description, func) {
                 # Safe execution wrapper with error handling
                 tryCatch({
@@ -2352,13 +2353,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     invokeRestart("muffleWarning")
                 })
             },
-            
+
             .handleError = function(context, error) {
                 # Centralized error handling with user-friendly messages
-                
+
                 error_msg <- error$message
                 user_msg <- paste("An error occurred while", tolower(context), ".")
-                
+
                 # Provide specific user-friendly messages for common errors
                 if (grepl("health state|markov", error_msg, ignore.case = TRUE)) {
                     user_msg <- paste(user_msg, "Please check your health state variables and transition probabilities.")
@@ -2373,7 +2374,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 } else if (grepl("EVPI|information", error_msg, ignore.case = TRUE)) {
                     user_msg <- paste(user_msg, "Please verify your value of information parameters are properly specified.")
                 }
-                
+
                 # Display user-friendly error message
                 html <- self$results$text1
                 if (!is.null(html)) {
@@ -2397,23 +2398,23 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     html$setContent(error_html)
                     html$setVisible(TRUE)
                 }
-                
+
                 # Also log to R console for debugging
                 cat("ERROR in ClinicoPath decisiongraph:", context, "\n", error_msg, "\n")
             },
-            
+
             .populateValueOfInformationAnalysis = function() {
                 # Populate value of information analysis results
-                
+
                 if (!self$options$valueOfInformation || is.null(private$.psaResults)) {
                     return()
                 }
-                
+
                 evpiResults <- private$.psaResults$evpi
                 if (is.null(evpiResults)) {
                     return()
                 }
-                
+
                 html_content <- paste0(
                     "<h3>Value of Information Analysis</h3>",
                     "<p><strong>Expected Value of Perfect Information (EVPI):</strong> $", round(evpiResults$evpi, 2), " per patient</p>",
@@ -2423,7 +2424,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     "<p>The EVPI represents the maximum value that perfect information about all uncertain parameters would have for decision making.</p>",
                     "<p>If the EVPI exceeds the cost of additional research, further studies may be worthwhile.</p>"
                 )
-                
+
                 # Add partial EVPI information if available
                 evpiParams <- self$options$evpi_parameters
                 if (!is.null(evpiParams) && length(evpiParams) > 0) {
@@ -2432,7 +2433,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         "<p><strong>Key Parameters for Future Research:</strong> ", paste(evpiParams, collapse = ", "), "</p>"
                     )
                 }
-                
+
                 # Append to PSA results or use text1
                 existing_content <- self$results$psaResults$content
                 if (!is.null(existing_content) && existing_content != "") {
@@ -2442,26 +2443,26 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     self$results$text1$setVisible(TRUE)
                 }
             },
-            
+
             .createDecisionComparison = function() {
                 # Create comprehensive decision comparison table
                 if (!self$options$decisionComparison || is.null(private$.results)) {
                     return(NULL)
                 }
-                
+
                 results <- private$.results
                 wtp <- self$options$willingnessToPay
-                
+
                 # Add additional comparison metrics
                 results$costPerQALY <- results$expectedCost / results$expectedUtility
                 results$nmbRank <- rank(-results$netBenefit)
-                
+
                 # Determine dominance status
                 results$dominanceStatus <- "Non-dominated"
                 for (i in 1:nrow(results)) {
                     for (j in 1:nrow(results)) {
                         if (i != j) {
-                            if (results$expectedCost[i] > results$expectedCost[j] && 
+                            if (results$expectedCost[i] > results$expectedCost[j] &&
                                 results$expectedUtility[i] < results$expectedUtility[j]) {
                                 results$dominanceStatus[i] <- "Dominated"
                                 break
@@ -2469,7 +2470,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         }
                     }
                 }
-                
+
                 # Update comparison table in results
                 comparisonTable <- self$results$decisionComparisonTable
                 if (!is.null(comparisonTable)) {
@@ -2486,10 +2487,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         ))
                     }
                 }
-                
+
                 return(results)
             },
-            
+
             # Build Enhanced Markov Model
             #
             # Constructs a comprehensive Markov chain model for health economic evaluation.
@@ -2521,88 +2522,88 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             #   - halfCycleCorrection: Whether correction was applied
             #   - converged: Whether simulation achieved convergence
             .buildEnhancedMarkovModel = function() {
-                
+
                 healthStates <- self$options$healthStates
                 transitionProbs <- self$options$transitionProbs
                 cycleLength <- self$options$cycleLength
                 timeHorizon <- self$options$timeHorizon
                 discountRate <- self$options$discountRate
                 halfCycleCorrection <- private$DECISIONGRAPH_DEFAULTS$half_cycle_correction
-                
+
                 if (is.null(healthStates) || is.null(transitionProbs)) {
                     return(NULL)
                 }
-                
+
                 mydata <- jmvcore::naOmit(self$data)
-                
+
                 # Extract unique health states
                 if (healthStates[1] %in% names(mydata)) {
                     uniqueStates <- unique(mydata[[healthStates[1]]])
                 } else {
                     uniqueStates <- c("Healthy", "Sick", "Dead")
                 }
-                
+
                 numStates <- length(uniqueStates)
                 numCycles <- min(ceiling(timeHorizon / cycleLength), private$DECISIONGRAPH_DEFAULTS$markov_max_cycles)
-                
+
                 # Create transition matrix using utility function
                 transMatrix <- calculateMarkovTransitionMatrix(uniqueStates, mydata, validate = TRUE)
-                
+
                 # Initialize cohort (all start in first health state)
                 cohortSize <- self$options$cohortSize
                 cohortTrace <- matrix(0, nrow = numCycles + 1, ncol = numStates)
                 cohortTrace[1, 1] <- cohortSize
-                
+
                 # Track costs and utilities over time
                 cumulativeCosts <- numeric(numCycles + 1)
                 cumulativeUtilities <- numeric(numCycles + 1)
                 discountedCosts <- numeric(numCycles + 1)
                 discountedUtilities <- numeric(numCycles + 1)
-                
+
                 # Extract cost and utility data
                 costs <- private$.extractMarkovCostsUtilities("costs")
                 utilities <- private$.extractMarkovCostsUtilities("utilities")
-                
+
                 # Markov trace with half-cycle correction
                 for (cycle in 2:(numCycles + 1)) {
                     # Checkpoint every 10 cycles for user feedback and change detection
                     if (cycle %% 10 == 2) {
                         private$.checkpoint(flush = FALSE)
                     }
-                    
+
                     # State transition
                     cohortTrace[cycle, ] <- cohortTrace[cycle - 1, ] %*% transMatrix
-                    
+
                     # Calculate cycle costs and utilities
                     cycleCosts <- sum(cohortTrace[cycle, ] * costs)
                     cycleUtilities <- sum(cohortTrace[cycle, ] * utilities)
-                    
+
                     # Apply half-cycle correction if enabled
                     if (halfCycleCorrection && cycle > 1) {
                         # Average of beginning and end of cycle
                         cycleCosts <- (cycleCosts + sum(cohortTrace[cycle - 1, ] * costs)) / 2
                         cycleUtilities <- (cycleUtilities + sum(cohortTrace[cycle - 1, ] * utilities)) / 2
                     }
-                    
+
                     # Apply discounting
                     discountFactor <- 1 / ((1 + discountRate) ^ ((cycle - 1) * cycleLength))
                     discountedCosts[cycle] <- cycleCosts * discountFactor
                     discountedUtilities[cycle] <- cycleUtilities * discountFactor
-                    
+
                     # Cumulative values
                     cumulativeCosts[cycle] <- sum(discountedCosts[1:cycle])
                     cumulativeUtilities[cycle] <- sum(discountedUtilities[1:cycle])
                 }
-                
+
                 # Check for convergence
                 converged <- private$.checkMarkovConvergence(cohortTrace, numCycles)
-                
+
                 # Handle tunnel states if specified
                 tunnelStateData <- NULL
                 if (self$options$markovAdvanced && !is.null(self$options$tunnelStates)) {
                     tunnelStateData <- private$.processTunnelStates()
                 }
-                
+
                 markovData <- list(
                     transitionMatrix = transMatrix,
                     cohortTrace = cohortTrace,
@@ -2620,7 +2621,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     totalCost = tail(cumulativeCosts, 1),
                     totalUtility = tail(cumulativeUtilities, 1)
                 )
-                
+
                 # Store essential Markov data in markov table state
                 if (!is.null(self$results$markovTable)) {
                     # Store only serializable components
@@ -2633,27 +2634,27 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 }
                 return(markovData)
             },
-            
+
             .createValidTransitionMatrix = function(uniqueStates, mydata) {
                 # Create and validate transition probability matrix
-                
+
                 numStates <- length(uniqueStates)
                 transMatrix <- matrix(0, nrow = numStates, ncol = numStates)
                 rownames(transMatrix) <- uniqueStates
                 colnames(transMatrix) <- uniqueStates
-                
+
                 # Extract transition probabilities from data
                 transitionProbs <- self$options$transitionProbs
                 if (!is.null(transitionProbs) && length(transitionProbs) > 0) {
                     probData <- mydata[transitionProbs[transitionProbs %in% names(mydata)]]
-                    
+
                     if (ncol(probData) >= numStates^2) {
                         # Reshape data into transition matrix
                         probVector <- as.numeric(probData[1, 1:(numStates^2)])
                         transMatrix <- matrix(probVector, nrow = numStates, ncol = numStates, byrow = TRUE)
                     }
                 }
-                
+
                 # Ensure matrix is valid (rows sum to 1)
                 for (i in 1:numStates) {
                     rowSum <- sum(transMatrix[i, ])
@@ -2672,16 +2673,16 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         }
                     }
                 }
-                
+
                 return(transMatrix)
             },
-            
+
             .extractMarkovCostsUtilities = function(type) {
                 # Extract cost or utility values for Markov states
-                
+
                 mydata <- jmvcore::naOmit(self$data)
                 variables <- if (type == "costs") self$options$costs else self$options$utilities
-                
+
                 if (!is.null(variables) && length(variables) > 0 && variables[1] %in% names(mydata)) {
                     values <- as.numeric(mydata[[variables[1]]])
                     # Ensure we have values for all states
@@ -2703,41 +2704,41 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
                 }
             },
-            
+
             .checkMarkovConvergence = function(cohortTrace, numCycles) {
                 # Check if Markov model has converged (state proportions stabilized)
-                
+
                 if (numCycles < 5) return(FALSE)
-                
+
                 convergenceThreshold <- private$DECISIONGRAPH_DEFAULTS$convergence_threshold
-                
+
                 # Check change in state proportions over last few cycles
                 recentCycles <- max(1, numCycles - 4):numCycles
                 maxChange <- 0
-                
+
                 for (state in 1:ncol(cohortTrace)) {
                     stateValues <- cohortTrace[recentCycles, state]
                     if (length(stateValues) > 1) {
                         maxChange <- max(maxChange, max(diff(stateValues)))
                     }
                 }
-                
+
                 return(maxChange < convergenceThreshold)
             },
-            
+
             .processTunnelStates = function() {
                 # Process tunnel states for temporary health conditions
-                
-                if (private$DECISIONGRAPH_DEFAULTS$tunnel_state_support && 
-                    !is.null(self$options$tunnelStates) && 
+
+                if (private$DECISIONGRAPH_DEFAULTS$tunnel_state_support &&
+                    !is.null(self$options$tunnelStates) &&
                     length(self$options$tunnelStates) > 0) {
-                    
+
                     mydata <- jmvcore::naOmit(self$data)
                     tunnelVars <- self$options$tunnelStates
-                    
+
                     if (tunnelVars[1] %in% names(mydata)) {
                         tunnelStates <- unique(mydata[[tunnelVars[1]]])
-                        
+
                         return(list(
                             states = tunnelStates,
                             duration = rep(1, length(tunnelStates)),  # Default 1 cycle duration
@@ -2745,46 +2746,46 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         ))
                     }
                 }
-                
+
                 return(NULL)
             },
-            
+
             .buildMarkovModel = function() {
                 # Legacy wrapper - redirect to enhanced version
                 return(private$.buildEnhancedMarkovModel())
             },
-            
+
             .oldBuildMarkovModel = function() {
                 if (self$options$treeType != "markov") {
                     return(NULL)
                 }
-                
+
                 # Extract Markov-specific variables
                 healthStates <- self$options$healthStates
                 transitionProbs <- self$options$transitionProbs
                 cycleLength <- self$options$cycleLength
                 timeHorizon <- self$options$timeHorizon
-                
+
                 if (is.null(healthStates) || length(healthStates) == 0) {
                     return(NULL)
                 }
-                
+
                 mydata <- jmvcore::naOmit(self$data)
-                
+
                 # Extract unique health states
                 uniqueStates <- unique(mydata[[healthStates[1]]])
                 numStates <- length(uniqueStates)
-                
+
                 # Create transition matrix
                 transitionMatrix <- matrix(0, nrow = numStates, ncol = numStates)
                 rownames(transitionMatrix) <- uniqueStates
                 colnames(transitionMatrix) <- uniqueStates
-                
+
                 # Fill transition matrix with probabilities from data
                 if (!is.null(transitionProbs) && length(transitionProbs) > 0) {
                     # Use actual transition probabilities from data
                     probData <- mydata[transitionProbs[transitionProbs %in% names(mydata)]]
-                    
+
                     # Simple mapping - would need more sophisticated logic for real implementation
                     if (ncol(probData) >= numStates^2 - numStates) {
                         probValues <- as.numeric(probData[1, ])
@@ -2797,7 +2798,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                 }
                             }
                         }
-                        
+
                         # Ensure diagonal elements make rows sum to 1
                         for (i in 1:numStates) {
                             transitionMatrix[i, i] <- 1 - sum(transitionMatrix[i, -i])
@@ -2817,59 +2818,59 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         transitionMatrix[3, 3] <- 1.00  # Dead stays dead (absorbing state)
                     }
                 }
-                
+
                 # Perform Markov cohort analysis
                 numCycles <- ceiling(timeHorizon / cycleLength)
                 cohortTrace <- matrix(0, nrow = numCycles + 1, ncol = numStates)
                 colnames(cohortTrace) <- uniqueStates
-                
+
                 # Initial distribution (everyone starts healthy)
                 cohortTrace[1, 1] <- 1.0
-                
+
                 # Run Markov trace
                 for (cycle in 2:(numCycles + 1)) {
                     # Checkpoint every 10 cycles for long simulations
                     if (cycle %% 10 == 2) {
                         private$.checkpoint(flush = FALSE)
                     }
-                    
+
                     cohortTrace[cycle, ] <- cohortTrace[cycle - 1, ] %*% transitionMatrix
                 }
-                
+
                 # Calculate costs and utilities for each state
                 stateCosts <- rep(0, numStates)
                 stateUtilities <- rep(0, numStates)
-                
+
                 if (!is.null(private$.treeData$costs) && nrow(private$.treeData$costs) > 0) {
                     costData <- private$.treeData$costs[1, ]
                     stateCosts <- as.numeric(costData[1:min(numStates, ncol(costData))])
                 }
-                
+
                 if (!is.null(private$.treeData$utilities) && nrow(private$.treeData$utilities) > 0) {
                     utilityData <- private$.treeData$utilities[1, ]
                     stateUtilities <- as.numeric(utilityData[1:min(numStates, ncol(utilityData))])
                 }
-                
+
                 # Calculate cumulative costs and utilities
                 cumulativeCosts <- rep(0, numCycles + 1)
                 cumulativeUtilities <- rep(0, numCycles + 1)
-                
+
                 for (cycle in 2:(numCycles + 1)) {
                     # Checkpoint every 20 cycles for cost/utility calculations
                     if (cycle %% 20 == 2) {
                         private$.checkpoint(flush = FALSE)
                     }
-                    
+
                     cycleCost <- sum(cohortTrace[cycle, ] * stateCosts) * cycleLength
                     cycleUtility <- sum(cohortTrace[cycle, ] * stateUtilities) * cycleLength
-                    
+
                     # Apply discounting
                     discountFactor <- (1 + self$options$discountRate)^(-(cycle - 1) * cycleLength)
-                    
+
                     cumulativeCosts[cycle] <- cumulativeCosts[cycle - 1] + cycleCost * discountFactor
                     cumulativeUtilities[cycle] <- cumulativeUtilities[cycle - 1] + cycleUtility * discountFactor
                 }
-                
+
                 # Use local variable instead of private storage
                 markovData <- list(
                     transitionMatrix = transitionMatrix,
@@ -2880,19 +2881,19 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     numCycles = numCycles,
                     cycleLength = cycleLength
                 )
-                
+
                 return(private$.markovData)
             },
-            
+
             .populateTables = function() {
                 # Populate summary table with serialization protection
                 tryCatch({
                     if (self$options$summaryTable && !is.null(private$.results)) {
                         summaryTable <- self$results$summaryTable
-                        
+
                         # Ensure we have a clean data frame
                         results <- as.data.frame(private$.results)
-                        
+
                         for (i in 1:nrow(results)) {
                             summaryTable$addRow(rowKey = i, values = list(
                                 strategy = as.character(results$strategy[i]),
@@ -2907,26 +2908,26 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     # If table population fails, clear private variable to prevent serialization issues
                     private$.results <- NULL
                 })
-                
+
                 # Populate node table - always populate when tree data exists
                 private$.populateNodeTable()
-                
+
                 # Populate sensitivity table - always populate if enabled
                 private$.populateSensitivityTable()
-                
-                # Populate Markov-specific tables if applicable  
+
+                # Populate Markov-specific tables if applicable
                 if (self$options$treeType == "markov") {
                     private$.populateMarkovTables()
                 }
             },
-            
+
             .populateNodeTable = function() {
                 # Ensure node table is always populated when tree data exists
                 nodeTable <- self$results$nodeTable
-                
+
                 if (!is.null(private$.nodeData) && !is.null(private$.nodeData$nodes)) {
                     nodes <- private$.nodeData$nodes
-                    
+
                     for (i in 1:nrow(nodes)) {
                         nodeTable$addRow(rowKey = i, values = list(
                             nodeId = nodes$id[i],
@@ -2949,12 +2950,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     ))
                 }
             },
-            
+
             .populateSensitivityTable = function() {
                 # Ensure sensitivity table is populated when enabled
                 if (self$options$sensitivityAnalysis) {
                     sensitivityTable <- self$results$sensitivityTable
-                    
+
                     tryCatch({
                         sensData <- private$.performSensitivityAnalysis()
                         if (!is.null(sensData) && nrow(sensData) > 0) {
@@ -2995,16 +2996,16 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     })
                 }
             },
-            
+
             .populateMarkovTables = function() {
                 # Ensure Markov-specific tables are populated
                 markovTable <- self$results$markovTable
                 markovCohortTable <- self$results$markovCohortTable
-                
+
                 # Populate transition matrix table
                 if (!is.null(private$.markovData) && !is.null(private$.markovData$transitions)) {
                     transitions <- private$.markovData$transitions
-                    
+
                     for (i in 1:nrow(transitions)) {
                         markovTable$addRow(rowKey = i, values = list(
                             fromState = transitions$from[i],
@@ -3024,12 +3025,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         annualUtility = NA
                     ))
                 }
-                
+
                 # Populate cohort trace table if enabled
                 if (self$options$cohortTrace) {
                     if (!is.null(private$.markovData) && !is.null(private$.markovData$cohortTrace)) {
                         cohortTrace <- private$.markovData$cohortTrace
-                        
+
                         for (i in 1:nrow(cohortTrace)) {
                             markovCohortTable$addRow(rowKey = i, values = list(
                                 cycle = cohortTrace$cycle[i],
@@ -3053,13 +3054,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
                 }
             },
-            
+
             .run = function() {
                 # Main execution with comprehensive error handling
                 tryCatch({
                     # Try to retrieve previous state first
                     private$.retrieveState()
-                    
+
                     # Validate inputs
                     if (!private$.validateInputs()) {
                         # Create placeholder message
@@ -3067,14 +3068,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         html$setContent(paste0("<p>", .("Please specify decision variables, probabilities, costs, or utilities to create a decision tree."), "</p>"))
                         return()
                     }
-                    
+
                     # GENERATE CONTENT SAFELY - moved from .init() to avoid serialization issues
                     tryCatch({
                         # Apply clinical preset if specified
                         if (!is.null(self$options$clinicalPreset) && self$options$clinicalPreset != "none") {
                             private$.applyClinicalPreset(self$options$clinicalPreset)
                         }
-                        
+
                         # Generate and set help content
                         if (!is.null(self$results$text2)) {
                             helpContent <- private$.generateContextualHelp()
@@ -3086,58 +3087,58 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             )
                             self$results$text2$setContent(combinedHelp)
                         }
-                        
+
                         # Generate executive summary (initial version)
                         if (!is.null(self$results$executiveSummary)) {
                             summary <- private$.generateExecutiveSummary(NULL)
                             self$results$executiveSummary$setContent(summary)
                         }
-                        
+
                         # Generate glossary
                         if (!is.null(self$results$glossary)) {
                             glossaryContent <- private$.generateGlossary()
                             self$results$glossary$setContent(glossaryContent)
                         }
-                        
+
                     }, error = function(e) {
                         # If content generation fails, continue with analysis
                         # Don't let content generation errors break the main functionality
                     })
-                    
+
                     # Prepare tree data with error handling
                     private$.safeExecute("prepareTreeData", "preparing tree data", function() {
                         private$.prepareTreeData()
                     })
-                    
+
                     # Handle Markov model or regular decision tree
                     if (self$options$treeType == "markov") {
                         # Checkpoint before expensive Markov model building
                         private$.checkpoint()
-                        
+
                         # Build Markov model with error handling
                         private$.safeExecute("buildMarkovModel", "building Markov model", function() {
                             private$.buildMarkovModel()
                         })
-                        
+
                         # Populate Markov tables with error handling
                         private$.safeExecute("populateMarkovTables", "populating Markov tables", function() {
                             private$.populateMarkovTables()
                         })
-                        
+
                         # Enhanced output for Markov with new features
                         if (!is.null(private$.markovData)) {
                             html <- self$results$text1
                             markovData <- private$.markovData
-                            
+
                             features <- c()
                             if (markovData$halfCycleCorrection) features <- c(features, "Half-cycle correction")
                             if (!is.null(markovData$tunnelStates)) features <- c(features, "Tunnel states")
                             if (markovData$converged) features <- c(features, "Converged")
-                            
+
                             featuresText <- if (length(features) > 0) {
                                 paste(" with", paste(features, collapse = ", "))
                             } else ""
-                            
+
                             html$setContent(paste0(
                                 "<h3>Enhanced Markov Model Analysis</h3>",
                                 "<p><strong>Model Structure:</strong> ", length(markovData$uniqueStates), " states, ", markovData$numCycles, " cycles", featuresText, "</p>",
@@ -3152,17 +3153,17 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         private$.safeExecute("buildTreeGraph", "building decision tree", function() {
                             private$.buildTreeGraph()
                         })
-                        
+
                         # Calculate expected values
                         if (self$options$calculateExpectedValues) {
                             # Checkpoint before expensive expected value calculations
                             private$.checkpoint()
-                            
+
                             private$.safeExecute("calculateExpectedValues", "calculating expected values", function() {
                                 private$.calculateExpectedValues()
                             })
                         }
-                        
+
                         # Calculate Net Monetary Benefit
                         if (self$options$calculateNMB) {
                             nmbResults <- private$.safeExecute("calculateNMB", "calculating net monetary benefit", function() {
@@ -3183,7 +3184,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                 }
                             }
                         }
-                        
+
                         # Perform ICER analysis
                         if (self$options$incrementalAnalysis) {
                             icerResults <- private$.safeExecute("performICERAnalysis", "performing ICER analysis", function() {
@@ -3196,82 +3197,82 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                 }
                             }
                         }
-                        
+
                         # Perform probabilistic sensitivity analysis
                         if (self$options$probabilisticAnalysis) {
                             # Checkpoint before expensive Monte Carlo simulations
                             private$.checkpoint()
-                            
+
                             private$.safeExecute("performProbabilisticAnalysis", "performing probabilistic sensitivity analysis", function() {
                                 private$.performProbabilisticAnalysis()
                             })
                         }
-                        
+
                         # Perform value of information analysis
                         if (self$options$valueOfInformation) {
                             private$.safeExecute("performValueOfInformationAnalysis", "performing value of information analysis", function() {
                                 private$.performValueOfInformationAnalysis()
                             })
                         }
-                        
+
                         # Populate result tables
                         # Checkpoint before table population
                         private$.checkpoint()
-                        
+
                         private$.safeExecute("populateTables", "populating result tables", function() {
                             private$.populateTables()
                             # Immediately clean up after table population to prevent serialization issues
                             private$.immediateCleanup()
                         })
-                        
+
                         # Populate advanced results
                         private$.safeExecute("populateAdvancedResults", "populating advanced results", function() {
                             private$.populateAdvancedResults()
                         })
-                        
+
                         # Create decision comparison if requested
                         if (self$options$decisionComparison) {
                             private$.safeExecute("createDecisionComparison", "creating decision comparison", function() {
                                 private$.createDecisionComparison()
                             })
                         }
-                        
+
                         # Debug output
                         if (!is.null(private$.treeData)) {
                             html <- self$results$text1
-                            html$setContent(paste("Decision tree created with", 
+                            html$setContent(paste("Decision tree created with",
                                                 length(private$.treeData$nodes), "nodes and",
                                                 length(private$.treeData$edges), "edges"))
                         }
                     }
-                    
+
                     # Store essential state in results elements instead of private variables
                     private$.storeState()
-                    
+
                 }, error = function(e) {
                     # Handle global errors
                     private$.handleError("Main execution", e)
                 })
             },
-            
+
             .immediateCleanup = function() {
                 # Enhanced immediate cleanup to prevent serialization issues during analysis
                 tryCatch({
                     # Sanitize complex objects that might contain functions or environments
                     private$.sanitizeStateObjects()
-                    
+
                     # Ensure all results are serializable
                     private$.ensureSerializableResults()
-                    
+
                     # Validate state integrity
                     private$.validateStateIntegrity()
-                    
+
                 }, error = function(e) {
                     # If cleanup fails, aggressively clear all problematic variables
                     private$.emergencyStateCleanup()
                 })
             },
-            
+
             .sanitizeStateObjects = function() {
                 # Clean PSA results - keep only data frames and basic lists
                 if (!is.null(private$.psaResults)) {
@@ -3295,12 +3296,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         private$.psaResults <- NULL
                     }
                 }
-                
+
                 # Clean tree data - keep only essential serializable components
                 if (!is.null(private$.treeData) && is.list(private$.treeData)) {
                     essential <- list()
                     safe_elements <- c("type", "decisions", "probabilities", "costs", "utilities", "outcomes")
-                    
+
                     for (element in safe_elements) {
                         if (element %in% names(private$.treeData)) {
                             obj <- private$.treeData[[element]]
@@ -3314,7 +3315,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     private$.treeData <- essential
                 }
             },
-            
+
             .ensureSerializableResults = function() {
                 # Ensure all result objects are serializable data frames or vectors
                 if (!is.null(private$.results)) {
@@ -3340,7 +3341,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
                 }
             },
-            
+
             .validateStateIntegrity = function() {
                 # Test serialization of key objects
                 test_objects <- list(
@@ -3348,7 +3349,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     "treeData" = private$.treeData,
                     "psaResults" = private$.psaResults
                 )
-                
+
                 for (name in names(test_objects)) {
                     obj <- test_objects[[name]]
                     if (!is.null(obj)) {
@@ -3363,7 +3364,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
                 }
             },
-            
+
             .emergencyStateCleanup = function() {
                 # Nuclear option - clear everything if normal cleanup fails
                 private$.results <- NULL
@@ -3378,7 +3379,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 private$.nmbAnalysis <- NULL
                 gc(full = TRUE)
             },
-            
+
             # Store State with Enhanced Memory Management
             #
             # Implements sophisticated state storage with memory optimization techniques.
@@ -3393,11 +3394,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 tryCatch({
                     # Monitor memory usage before cleanup
                     memBefore <- private$.getMemoryUsage()
-                    
+
                     # Smart cleanup - preserve cacheable results if memory allows
                     memoryOptimization <- self$options$memoryOptimization %||% TRUE
                     performanceMode <- self$options$performanceMode %||% "standard"
-                    
+
                     if (memoryOptimization && performanceMode != "comprehensive") {
                         # Progressive cleanup based on memory pressure
                         if (memBefore$used > private$DECISIONGRAPH_DEFAULTS$memory_efficient_threshold * 1e6) {
@@ -3411,21 +3412,21 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         # Standard cleanup for comprehensive mode
                         private$.standardMemoryCleanup()
                     }
-                    
+
                     # Smart garbage collection
                     private$.performSmartGarbageCollection()
-                    
+
                     # Monitor memory usage after cleanup
                     memAfter <- private$.getMemoryUsage()
                     private$.logMemoryOptimization(memBefore, memAfter)
-                    
+
                 }, error = function(e) {
                     # Fallback to aggressive cleanup on error
                     private$.aggressiveMemoryCleanup()
                     gc(full = TRUE)
                 })
             },
-            
+
             # Get Current Memory Usage
             # Returns: List with memory statistics
             .getMemoryUsage = function() {
@@ -3441,19 +3442,19 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     )
                 }
             },
-            
+
             # Perform Smart Garbage Collection
             .performSmartGarbageCollection = function() {
                 # Intelligent GC scheduling based on memory usage patterns
                 memInfo <- private$.getMemoryUsage()
-                
+
                 if (!is.null(memInfo$used) && memInfo$used > 100) {  # >100MB used
                     gc(full = TRUE, verbose = FALSE)
                 } else {
                     gc(verbose = FALSE)
                 }
             },
-            
+
             # Aggressive Memory Cleanup
             .aggressiveMemoryCleanup = function() {
                 # Clear all private variables immediately
@@ -3468,13 +3469,13 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 private$.nmbSensitivity <- NULL
                 private$.nmbAnalysis <- NULL
             },
-            
+
             # Selective Memory Cleanup
             .selectiveMemoryCleanup = function() {
                 # Keep some cacheable results, clear heavy objects
                 private$.psaResults <- NULL      # Large simulation results
                 private$.cohortTrace <- NULL     # Markov trace matrices
-                
+
                 # Preserve smaller, cacheable objects
                 # private$.results - keep for performance
                 # private$.treeData - keep if not too large
@@ -3482,7 +3483,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     private$.treeData <- NULL
                 }
             },
-            
+
             # Standard Memory Cleanup
             .standardMemoryCleanup = function() {
                 # Balanced cleanup for standard operations
@@ -3494,7 +3495,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 private$.nmbSensitivity <- NULL
                 private$.nmbAnalysis <- NULL
             },
-            
+
             # Log Memory Optimization Results
             .logMemoryOptimization = function(memBefore, memAfter) {
                 # Optional memory usage logging for debugging
@@ -3507,29 +3508,29 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
                 }
             },
-            
+
             .retrieveState = function() {
                 # Retrieve state from results elements at the start of analysis
                 # TEMPORARILY populate private variables for calculations only
-                
+
                 tryCatch({
                     # Initialize temporary private variables as NULL
                     private$.results <- NULL
                     private$.treeData <- NULL
-                    private$.nodeData <- NULL 
+                    private$.nodeData <- NULL
                     private$.markovData <- NULL
                     private$.psaResults <- NULL
-                    
+
                     # Try to retrieve previous results
                     if (!is.null(self$results$summaryTable$state)) {
                         private$.results <- self$results$summaryTable$state
                     }
-                    
-                    # Try to retrieve previous tree data  
+
+                    # Try to retrieve previous tree data
                     if (!is.null(self$results$treeplot$state)) {
                         private$.treeData <- self$results$treeplot$state
                     }
-                    
+
                     return(TRUE)
                 }, error = function(e) {
                     # If state retrieval fails, start fresh
@@ -3541,7 +3542,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     return(FALSE)
                 })
             },
-            
+
             # Render functions for jamovi outputs
             .treeplot = function(image, ...) {
                 # Main tree plot rendering function
@@ -3551,21 +3552,21 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     if (is.null(treeData) && !is.null(private$.treeData)) {
                         treeData <- private$.treeData
                     }
-                    
+
                     if (is.null(treeData)) {
                         # Create empty plot with instruction message
                         plot <- ggplot2::ggplot() +
-                            ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                            label = "Please specify decision variables, probabilities, costs, or utilities\nto create a decision tree.", 
+                            ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                            label = "Please specify decision variables, probabilities, costs, or utilities\nto create a decision tree.",
                                             hjust = 0.5, vjust = 0.5, size = 4, color = "gray60") +
                             ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                             ggplot2::theme_void() +
                             ggplot2::theme(plot.margin = ggplot2::margin(20, 20, 20, 20))
-                        
+
                         print(plot)
                         return(TRUE)
                     }
-                    
+
                     # Use utility function to create the plot
                     plot <- createDecisionTreePlot(
                         treeData = treeData,
@@ -3576,105 +3577,105 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         showCosts = self$options$showCosts,
                         showUtilities = self$options$showUtilities
                     )
-                    
+
                     print(plot)
                     return(TRUE)
-                    
+
                 }, error = function(e) {
                     # Error plot
                     plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                        label = paste("Error creating decision tree plot:\n", e$message), 
+                        ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                        label = paste("Error creating decision tree plot:\n", e$message),
                                         hjust = 0.5, vjust = 0.5, size = 4, color = "red") +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                         ggplot2::theme_void()
-                    
+
                     print(plot)
                     return(FALSE)
                 })
             },
-            
+
             .tornadoplot = function(image, ...) {
                 # Tornado diagram rendering function
                 tryCatch({
                     if (!self$options$sensitivityAnalysis || !self$options$tornado) {
                         return(FALSE)
                     }
-                    
+
                     # Get sensitivity data
                     sensData <- self$results$sensitivityTable$state
                     if (is.null(sensData)) {
                         return(FALSE)
                     }
-                    
+
                     # Create tornado plot
                     plot <- ggplot2::ggplot() +
-                        ggplot2::geom_col(data = data.frame(param = c("Cost", "Utility", "Probability"), 
-                                                           value = c(1000, -800, 600)), 
+                        ggplot2::geom_col(data = data.frame(param = c("Cost", "Utility", "Probability"),
+                                                           value = c(1000, -800, 600)),
                                          ggplot2::aes(x = param, y = value), fill = "steelblue") +
                         ggplot2::coord_flip() +
                         ggplot2::labs(title = "Tornado Diagram - One-Way Sensitivity Analysis",
                                      x = "Parameter", y = "Change in Net Monetary Benefit ($)") +
                         ggplot2::theme_minimal()
-                    
+
                     print(plot)
                     return(TRUE)
-                    
+
                 }, error = function(e) {
                     return(FALSE)
                 })
             },
-            
+
             .markovPlot = function(image, ...) {
                 # Markov state transition diagram rendering function
                 tryCatch({
                     if (self$options$treeType != "markov") {
                         return(FALSE)
                     }
-                    
+
                     # Create Markov state diagram
                     plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("rect", xmin = 0.1, xmax = 0.3, ymin = 0.7, ymax = 0.9, 
+                        ggplot2::annotate("rect", xmin = 0.1, xmax = 0.3, ymin = 0.7, ymax = 0.9,
                                         fill = "lightgreen", alpha = 0.7) +
                         ggplot2::annotate("text", x = 0.2, y = 0.8, label = "Healthy", size = 4) +
-                        ggplot2::annotate("rect", xmin = 0.4, xmax = 0.6, ymin = 0.7, ymax = 0.9, 
+                        ggplot2::annotate("rect", xmin = 0.4, xmax = 0.6, ymin = 0.7, ymax = 0.9,
                                         fill = "orange", alpha = 0.7) +
                         ggplot2::annotate("text", x = 0.5, y = 0.8, label = "Sick", size = 4) +
-                        ggplot2::annotate("rect", xmin = 0.7, xmax = 0.9, ymin = 0.7, ymax = 0.9, 
+                        ggplot2::annotate("rect", xmin = 0.7, xmax = 0.9, ymin = 0.7, ymax = 0.9,
                                         fill = "red", alpha = 0.7) +
                         ggplot2::annotate("text", x = 0.8, y = 0.8, label = "Dead", size = 4) +
-                        ggplot2::annotate("segment", x = 0.3, y = 0.8, xend = 0.4, yend = 0.8, 
+                        ggplot2::annotate("segment", x = 0.3, y = 0.8, xend = 0.4, yend = 0.8,
                                         arrow = ggplot2::arrow(length = ggplot2::unit(0.3, "cm"))) +
-                        ggplot2::annotate("segment", x = 0.6, y = 0.8, xend = 0.7, yend = 0.8, 
+                        ggplot2::annotate("segment", x = 0.6, y = 0.8, xend = 0.7, yend = 0.8,
                                         arrow = ggplot2::arrow(length = ggplot2::unit(0.3, "cm"))) +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0.5, 1) +
                         ggplot2::labs(title = "Markov State Transition Diagram") +
                         ggplot2::theme_void() +
                         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-                    
+
                     print(plot)
                     return(TRUE)
-                    
+
                 }, error = function(e) {
                     return(FALSE)
                 })
             },
-            
+
             .ceacPlot = function(image, ...) {
                 # Cost-effectiveness acceptability curve rendering function
                 tryCatch({
                     if (!self$options$probabilisticAnalysis) {
                         return(FALSE)
                     }
-                    
+
                     # Read CEAC data from the image state
                     psaData <- image$state
                     if (is.null(psaData) || is.null(psaData$ceac_data)) {
                         return(FALSE)
                     }
-                    
+
                     # Create CEAC plot
-                    plot <- ggplot2::ggplot(psaData$ceac_data, 
+                    plot <- ggplot2::ggplot(psaData$ceac_data,
                                            ggplot2::aes(x = threshold, y = probability, color = strategy)) +
                         ggplot2::geom_line(size = 1.2) +
                         ggplot2::scale_x_continuous(labels = scales::dollar_format()) +
@@ -3685,30 +3686,30 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                      color = "Strategy") +
                         ggplot2::theme_minimal() +
                         ggplot2::theme(legend.position = "bottom")
-                    
+
                     print(plot)
                     return(TRUE)
-                    
+
                 }, error = function(e) {
                     return(FALSE)
                 })
             },
-            
+
             .scatterPlot = function(image, ...) {
                 # Cost-effectiveness scatter plot rendering function
                 tryCatch({
                     if (!self$options$probabilisticAnalysis) {
                         return(FALSE)
                     }
-                    
+
                     # Read scatter data from the image state
                     psaData <- image$state
                     if (is.null(psaData)) {
                         return(FALSE)
                     }
-                    
+
                     # Create scatter plot
-                    plot <- ggplot2::ggplot(psaData, 
+                    plot <- ggplot2::ggplot(psaData,
                                            ggplot2::aes(x = utility, y = cost, color = strategy)) +
                         ggplot2::geom_point(alpha = 0.6, size = 1) +
                         ggplot2::scale_y_continuous(labels = scales::dollar_format()) +
@@ -3718,10 +3719,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                      color = "Strategy") +
                         ggplot2::theme_minimal() +
                         ggplot2::theme(legend.position = "bottom")
-                    
+
                     print(plot)
                     return(TRUE)
-                    
+
                 }, error = function(e) {
                     return(FALSE)
                 })

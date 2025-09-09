@@ -71,6 +71,13 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             treatmentThreshold = "0.05,0.5,0.05",
             harmBenefitRatio = 0.25,
             interventionCost = FALSE,
+            fixedSensSpecAnalysis = FALSE,
+            fixedAnalysisType = "sensitivity",
+            fixedSensitivityValue = 0.9,
+            fixedSpecificityValue = 0.9,
+            showFixedROC = TRUE,
+            fixedInterpolation = "linear",
+            showFixedExplanation = TRUE,
             metaAnalysis = FALSE,
             metaAnalysisMethod = "both",
             heterogeneityTest = TRUE,
@@ -452,6 +459,45 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "interventionCost",
                 interventionCost,
                 default=FALSE)
+            private$..fixedSensSpecAnalysis <- jmvcore::OptionBool$new(
+                "fixedSensSpecAnalysis",
+                fixedSensSpecAnalysis,
+                default=FALSE)
+            private$..fixedAnalysisType <- jmvcore::OptionList$new(
+                "fixedAnalysisType",
+                fixedAnalysisType,
+                options=list(
+                    "sensitivity",
+                    "specificity"),
+                default="sensitivity")
+            private$..fixedSensitivityValue <- jmvcore::OptionNumber$new(
+                "fixedSensitivityValue",
+                fixedSensitivityValue,
+                default=0.9,
+                min=0.01,
+                max=0.99)
+            private$..fixedSpecificityValue <- jmvcore::OptionNumber$new(
+                "fixedSpecificityValue",
+                fixedSpecificityValue,
+                default=0.9,
+                min=0.01,
+                max=0.99)
+            private$..showFixedROC <- jmvcore::OptionBool$new(
+                "showFixedROC",
+                showFixedROC,
+                default=TRUE)
+            private$..fixedInterpolation <- jmvcore::OptionList$new(
+                "fixedInterpolation",
+                fixedInterpolation,
+                options=list(
+                    "linear",
+                    "nearest",
+                    "stepwise"),
+                default="linear")
+            private$..showFixedExplanation <- jmvcore::OptionBool$new(
+                "showFixedExplanation",
+                showFixedExplanation,
+                default=TRUE)
             private$..metaAnalysis <- jmvcore::OptionBool$new(
                 "metaAnalysis",
                 metaAnalysis,
@@ -538,6 +584,13 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..treatmentThreshold)
             self$.addOption(private$..harmBenefitRatio)
             self$.addOption(private$..interventionCost)
+            self$.addOption(private$..fixedSensSpecAnalysis)
+            self$.addOption(private$..fixedAnalysisType)
+            self$.addOption(private$..fixedSensitivityValue)
+            self$.addOption(private$..fixedSpecificityValue)
+            self$.addOption(private$..showFixedROC)
+            self$.addOption(private$..fixedInterpolation)
+            self$.addOption(private$..showFixedExplanation)
             self$.addOption(private$..metaAnalysis)
             self$.addOption(private$..metaAnalysisMethod)
             self$.addOption(private$..heterogeneityTest)
@@ -609,6 +662,13 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         treatmentThreshold = function() private$..treatmentThreshold$value,
         harmBenefitRatio = function() private$..harmBenefitRatio$value,
         interventionCost = function() private$..interventionCost$value,
+        fixedSensSpecAnalysis = function() private$..fixedSensSpecAnalysis$value,
+        fixedAnalysisType = function() private$..fixedAnalysisType$value,
+        fixedSensitivityValue = function() private$..fixedSensitivityValue$value,
+        fixedSpecificityValue = function() private$..fixedSpecificityValue$value,
+        showFixedROC = function() private$..showFixedROC$value,
+        fixedInterpolation = function() private$..fixedInterpolation$value,
+        showFixedExplanation = function() private$..showFixedExplanation$value,
         metaAnalysis = function() private$..metaAnalysis$value,
         metaAnalysisMethod = function() private$..metaAnalysisMethod$value,
         heterogeneityTest = function() private$..heterogeneityTest$value,
@@ -679,6 +739,13 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..treatmentThreshold = NA,
         ..harmBenefitRatio = NA,
         ..interventionCost = NA,
+        ..fixedSensSpecAnalysis = NA,
+        ..fixedAnalysisType = NA,
+        ..fixedSensitivityValue = NA,
+        ..fixedSpecificityValue = NA,
+        ..showFixedROC = NA,
+        ..fixedInterpolation = NA,
+        ..showFixedExplanation = NA,
         ..metaAnalysis = NA,
         ..metaAnalysisMethod = NA,
         ..heterogeneityTest = NA,
@@ -696,11 +763,14 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         resultsTable = function() private$.items[["resultsTable"]],
         sensSpecTable = function() private$.items[["sensSpecTable"]],
         thresholdTable = function() private$.items[["thresholdTable"]],
+        fixedSensSpecTable = function() private$.items[["fixedSensSpecTable"]],
+        fixedSensSpecExplanation = function() private$.items[["fixedSensSpecExplanation"]],
         aucSummaryTable = function() private$.items[["aucSummaryTable"]],
         delongComparisonTable = function() private$.items[["delongComparisonTable"]],
         delongTest = function() private$.items[["delongTest"]],
         plotROC = function() private$.items[["plotROC"]],
         interactivePlot = function() private$.items[["interactivePlot"]],
+        fixedSensSpecROC = function() private$.items[["fixedSensSpecROC"]],
         criterionPlot = function() private$.items[["criterionPlot"]],
         prevalencePlot = function() private$.items[["prevalencePlot"]],
         dotPlot = function() private$.items[["dotPlot"]],
@@ -944,6 +1014,77 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="fixedSensSpecTable",
+                title="Fixed Sensitivity/Specificity Results",
+                visible="(fixedSensSpecAnalysis)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "positiveClass",
+                    "fixedAnalysisType",
+                    "fixedSensitivityValue",
+                    "fixedSpecificityValue",
+                    "fixedInterpolation"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="analysis_type", 
+                        `title`="Analysis Type", 
+                        `type`="text"),
+                    list(
+                        `name`="target_value", 
+                        `title`="Target Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="cutpoint", 
+                        `title`="Determined Cutpoint", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="achieved_sensitivity", 
+                        `title`="Achieved Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="achieved_specificity", 
+                        `title`="Achieved Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden's J", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpolation_used", 
+                        `title`="Interpolation Method", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="fixedSensSpecExplanation",
+                title="Fixed Sensitivity/Specificity Analysis Guide",
+                visible="(fixedSensSpecAnalysis && showFixedExplanation)"))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="aucSummaryTable",
                 title="Area Under the ROC Curve",
                 visible=TRUE,
@@ -1058,6 +1199,25 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "subGroup"),
                 refs=list(
                     "plotROC")))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="fixedSensSpecROC",
+                title="Fixed Sensitivity/Specificity ROC Curves",
+                visible="(fixedSensSpecAnalysis && showFixedROC)",
+                template=jmvcore::Image$new(
+                    options=options,
+                    width=550,
+                    height=450,
+                    renderFun=".plotFixedSensSpecROC",
+                    clearWith=list(
+                        "dependentVars",
+                        "classVar",
+                        "positiveClass",
+                        "subGroup",
+                        "fixedAnalysisType",
+                        "fixedSensitivityValue",
+                        "fixedSpecificityValue",
+                        "fixedInterpolation"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="criterionPlot",
@@ -1909,6 +2069,21 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   policies.
 #' @param interventionCost Include cost-effectiveness considerations in
 #'   clinical utility analysis.
+#' @param fixedSensSpecAnalysis Determine cutoffs based on fixed sensitivity
+#'   or specificity values and display corresponding performance metrics.
+#' @param fixedAnalysisType Choose whether to fix sensitivity or specificity
+#'   value for cutoff determination.
+#' @param fixedSensitivityValue Target sensitivity value (0-1) for determining
+#'   the corresponding cutoff and specificity.
+#' @param fixedSpecificityValue Target specificity value (0-1) for determining
+#'   the corresponding cutoff and sensitivity.
+#' @param showFixedROC Display separate ROC curve highlighting the fixed
+#'   sensitivity/specificity point.
+#' @param fixedInterpolation Method for interpolating between observed points
+#'   to achieve target sensitivity/specificity.
+#' @param showFixedExplanation Display explanatory guide for fixed
+#'   sensitivity/specificity analysis including  clinical interpretation,
+#'   interpolation methods, and usage recommendations.
 #' @param metaAnalysis Perform meta-analysis of AUC values across multiple
 #'   test variables. Requires at least 3 test variables to enable pooled effect
 #'   estimation.
@@ -1927,11 +2102,14 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 #'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
 #'   \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$fixedSensSpecTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$fixedSensSpecExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$delongTest} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plotROC} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$fixedSensSpecROC} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$criterionPlot} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
@@ -2031,6 +2209,13 @@ psychopdaROC <- function(
     treatmentThreshold = "0.05,0.5,0.05",
     harmBenefitRatio = 0.25,
     interventionCost = FALSE,
+    fixedSensSpecAnalysis = FALSE,
+    fixedAnalysisType = "sensitivity",
+    fixedSensitivityValue = 0.9,
+    fixedSpecificityValue = 0.9,
+    showFixedROC = TRUE,
+    fixedInterpolation = "linear",
+    showFixedExplanation = TRUE,
     metaAnalysis = FALSE,
     metaAnalysisMethod = "both",
     heterogeneityTest = TRUE,
@@ -2118,6 +2303,13 @@ psychopdaROC <- function(
         treatmentThreshold = treatmentThreshold,
         harmBenefitRatio = harmBenefitRatio,
         interventionCost = interventionCost,
+        fixedSensSpecAnalysis = fixedSensSpecAnalysis,
+        fixedAnalysisType = fixedAnalysisType,
+        fixedSensitivityValue = fixedSensitivityValue,
+        fixedSpecificityValue = fixedSpecificityValue,
+        showFixedROC = showFixedROC,
+        fixedInterpolation = fixedInterpolation,
+        showFixedExplanation = showFixedExplanation,
         metaAnalysis = metaAnalysis,
         metaAnalysisMethod = metaAnalysisMethod,
         heterogeneityTest = heterogeneityTest,

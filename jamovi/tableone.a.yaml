@@ -1,7 +1,7 @@
 ---
 name: tableone
 title: "Table One"
-menuGroup: ExplorationT2
+menuGroup: Exploration
 menuSubgroup: "ClinicoPath Descriptives"
 version: '0.0.31'
 jas: '1.2'
@@ -44,20 +44,20 @@ options:
     title: "Table Style"
     type: List
     options:
-      - title: "tableone"
+      - title: "tableone (Standard medical format)"
         name: t1
-      - title: "gtsummary"
+      - title: "gtsummary (Publication-ready descriptives)"
         name: t2
-      - title: "arsenal"
+      - title: "arsenal (Comprehensive descriptive table)"
         name: t3
-      - title: "janitor"
+      - title: "janitor (Simple frequency tables)"
         name: t4
     default: t1
     description:
       R: >
-        Specify the output style for the table. Each option uses a different package for formatting.
+        Specify the output style for the descriptive table. 'tableone' provides standard medical format with means/medians and frequencies, 'gtsummary' creates publication-ready descriptive tables, 'arsenal' generates comprehensive descriptive summaries, and 'janitor' produces simple frequency tables for categorical variables.
       jamovi: >
-        Choose the table style.
+        Choose the descriptive table format. 'tableone' style shows standard medical descriptives (mean ± SD, median [IQR], N (%)), 'gtsummary' provides polished formatting, 'arsenal' gives detailed summaries, and 'janitor' focuses on frequency counts.
         
   - name: excl
     title: "Exclude Missing (NA)"

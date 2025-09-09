@@ -71,6 +71,13 @@ psychopdaROC(
   treatmentThreshold = "0.05,0.5,0.05",
   harmBenefitRatio = 0.25,
   interventionCost = FALSE,
+  fixedSensSpecAnalysis = FALSE,
+  fixedAnalysisType = "sensitivity",
+  fixedSensitivityValue = 0.9,
+  fixedSpecificityValue = 0.9,
+  showFixedROC = TRUE,
+  fixedInterpolation = "linear",
+  showFixedExplanation = TRUE,
   metaAnalysis = FALSE,
   metaAnalysisMethod = "both",
   heterogeneityTest = TRUE,
@@ -286,6 +293,28 @@ policies.}
 \item{interventionCost}{Include cost-effectiveness considerations in
 clinical utility analysis.}
 
+\item{fixedSensSpecAnalysis}{Determine cutoffs based on fixed sensitivity
+or specificity values and display corresponding performance metrics.}
+
+\item{fixedAnalysisType}{Choose whether to fix sensitivity or specificity
+value for cutoff determination.}
+
+\item{fixedSensitivityValue}{Target sensitivity value (0-1) for determining
+the corresponding cutoff and specificity.}
+
+\item{fixedSpecificityValue}{Target specificity value (0-1) for determining
+the corresponding cutoff and sensitivity.}
+
+\item{showFixedROC}{Display separate ROC curve highlighting the fixed
+sensitivity/specificity point.}
+
+\item{fixedInterpolation}{Method for interpolating between observed points
+to achieve target sensitivity/specificity.}
+
+\item{showFixedExplanation}{Display explanatory guide for fixed
+sensitivity/specificity analysis including  clinical interpretation,
+interpolation methods, and usage recommendations.}
+
 \item{metaAnalysis}{Perform meta-analysis of AUC values across multiple
 test variables. Requires at least 3 test variables to enable pooled effect
 estimation.}
@@ -309,11 +338,14 @@ A results object containing:
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
 \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$fixedSensSpecTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$fixedSensSpecExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$delongTest} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plotROC} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$fixedSensSpecROC} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$criterionPlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
