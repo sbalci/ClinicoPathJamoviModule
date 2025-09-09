@@ -4,119 +4,387 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  # === DATA INPUT SECTION ===
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Raters
+        label: Rater Variables
         children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-  - type: Label
-    label: Table
+            itemDropBehaviour: emptyspace
+
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Case ID Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: caseID
+            maxItemCount: 1
+            isTarget: true
+
+  # === CORE ANALYSIS SETTINGS ===
+  - type: CollapseBox
+    label: Primary Agreement Analysis
+    collapsed: false
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: sft
-            label: Show Frequency Tables
-  - type: Label
-    label: Plots
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: heatmap
-            label: Agreement Heatmap
-          - type: CheckBox
-            name: heatmapDetails
-            label: Show Detailed Statistics
-            enable: (heatmap)
-  - type: Label
-    label: Tests
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: exct
-            label: Exact Kappa (>=3 Variables)
+          - type: Label
+            label: Agreement Method Selection
+          - type: ComboBox
+            name: multiraterMethod
+            label: Analysis Method
+            options:
+              - title: Automatic (recommended)
+                name: auto
+              - title: Cohen's Kappa (2 raters only)
+                name: cohen
+              - title: Fleiss' Kappa (3+ raters)
+                name: fleiss
+              - title: Krippendorff's Alpha (universal)
+                name: krippendorff
           - type: ComboBox
             name: wght
-            label: Weighted Kappa
+            label: Weighting for Ordinal Data
             options:
-              - title: Unweighted
+              - title: Unweighted (for nominal data)
                 name: unweighted
-              - title: Squared
-                name: squared
-              - title: Equal/Linear
+              - title: Linear Weighted (for ordinal)
                 name: equal
-  - type: Label
-    label: Krippendorff's Alpha
+              - title: Quadratic Weighted (for ordinal)
+                name: squared
+          - type: CheckBox
+            name: fleissCI
+            label: Show Confidence Intervals
+          - type: CheckBox
+            name: exct
+            label: Use Exact Method (computationally intensive)
+
+  # === ADVANCED RELIABILITY MEASURES ===
+  - type: CollapseBox
+    label: Advanced Reliability Measures
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
+          - type: Label
+            label: Alternative Agreement Coefficients
           - type: CheckBox
             name: kripp
+            label: Krippendorff's Alpha
           - type: ComboBox
             name: krippMethod
+            label: Data Level of Measurement
             enable: (kripp)
             options:
-              - title: Nominal
+              - title: Nominal (unordered categories)
                 name: nominal
-              - title: Ordinal
+              - title: Ordinal (ranked categories)
                 name: ordinal
-              - title: Interval
+              - title: Interval (equal intervals)
                 name: interval
-              - title: Ratio
+              - title: Ratio (true zero point)
                 name: ratio
-  - type: Label
+          - type: CheckBox
+            name: icc
+            label: Intraclass Correlation Coefficient (ICC)
+          - type: CheckBox
+            name: gwetAC
+            label: Gwet's AC1 and AC2 Coefficients
+          - type: CheckBox
+            name: pabak
+            label: PABAK (Prevalence-Adjusted Bias-Adjusted Kappa)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Bootstrap Analysis
+          - type: CheckBox
+            name: bootstrap
+            label: Bootstrap Confidence Intervals
+          - type: TextBox
+            name: bootstrapSamples
+            label: Bootstrap Samples
+            enable: (bootstrap)
+            format: number
+
+  # === CONSENSUS ANALYSIS ===
+  - type: CollapseBox
     label: Consensus Scoring
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: consensus
-            label: Perform Consensus Analysis
+            label: Enable Consensus Analysis
           - type: ComboBox
             name: consensus_method
-            label: Consensus Method
+            label: Consensus Threshold
             enable: (consensus)
             options:
-              - title: Majority Rule (≥50%)
+              - title: Simple Majority (>50%)
                 name: majority
-              - title: Super Majority (≥2/3)
+              - title: Supermajority (≥67%)
                 name: super_majority
-              - title: Unanimous Only
+              - title: Unanimous Agreement (100%)
                 name: unanimous
           - type: ComboBox
             name: tie_breaking
-            label: Tie Breaking
+            label: Handle Ties By
             enable: (consensus)
             options:
-              - title: Exclude ties from analysis
+              - title: Excluding tied cases
                 name: exclude
-              - title: Flag for expert arbitration
+              - title: Flagging for arbitration
                 name: arbitration
-              - title: Use most frequent category overall
+              - title: Using global most frequent
                 name: global_mode
           - type: CheckBox
             name: show_consensus_table
-            label: Show Consensus Details
+            label: Show Case-by-Case Results
             enable: (consensus)
-  - type: LayoutBox
-    margin: large
+
+  # === DIAGNOSTIC STYLE ANALYSIS (USUBUTUN METHOD) ===
+  - type: CollapseBox
+    label: Diagnostic Style Analysis (Usubutun Method)
+    collapsed: true
     children:
-      - type: ComboBox
-        name: multiraterMethod
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: diagnosticStyleAnalysis
+            label: Enable Diagnostic Style Clustering
+          - type: ComboBox
+            name: styleClusterMethod
+            label: Clustering Method
+            enable: (diagnosticStyleAnalysis)
+            options:
+              - title: Ward's Linkage (Usubutun standard)
+                name: ward
+              - title: Complete Linkage
+                name: complete
+              - title: Average Linkage
+                name: average
+          - type: ComboBox
+            name: styleDistanceMetric
+            label: Distance Metric
+            enable: (diagnosticStyleAnalysis)
+            options:
+              - title: Percentage Agreement (recommended)
+                name: agreement
+              - title: Correlation
+                name: correlation
+              - title: Euclidean
+                name: euclidean
+          - type: TextBox
+            name: styleGroups
+            label: Number of Style Groups
+            enable: (diagnosticStyleAnalysis)
+            format: number
+          - type: CheckBox
+            name: identifyDiscordantCases
+            label: Identify Cases Distinguishing Styles
+            enable: (diagnosticStyleAnalysis)
+
+  # === RATER CHARACTERISTICS (Optional) ===
+  - type: CollapseBox
+    label: Rater Characteristics (Optional)
+    collapsed: true
     children:
-      - type: CheckBox
-        name: fleissCI
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: raterCharacteristics
+            label: Include Rater Background Information
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Experience Variable
+            children:
+              - type: VariablesListBox
+                name: experienceVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+          - type: TargetLayoutBox
+            label: Training Institution Variable
+            children:
+              - type: VariablesListBox
+                name: trainingVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+          - type: TargetLayoutBox
+            label: Current Institution Variable
+            children:
+              - type: VariablesListBox
+                name: institutionVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+          - type: TargetLayoutBox
+            label: Specialty Variable
+            children:
+              - type: VariablesListBox
+                name: specialtyVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+
+  # === DETAILED ANALYSIS OPTIONS ===
+  - type: CollapseBox
+    label: Detailed Analysis Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Rater-Level Analysis
+          - type: CheckBox
+            name: pairwiseAnalysis
+            label: Pairwise Rater Analysis
+          - type: CheckBox
+            name: raterBiasAnalysis
+            label: Rater Bias Detection
+          - type: CheckBox
+            name: agreementTrendAnalysis
+            label: Agreement Trend Over Cases
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Case-Level Analysis
+          - type: CheckBox
+            name: categoryAnalysis
+            label: Category-Specific Agreement
+          - type: CheckBox
+            name: outlierAnalysis
+            label: Identify Problematic Cases
+          - type: CheckBox
+            name: caseDifficultyScoring
+            label: Case Difficulty Scoring
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Pathology-Specific Features
+          - type: CheckBox
+            name: pathologyContext
+            label: Diagnostic Accuracy Metrics
+          - type: CheckBox
+            name: agreementStabilityAnalysis
+            label: Agreement Stability Analysis
+
+  # === VISUALIZATION & OUTPUT ===
+  - type: CollapseBox
+    label: Visualization & Output
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Descriptive Tables
+          - type: CheckBox
+            name: sft
+            label: Individual Rater Frequency Tables
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Agreement Visualization
+          - type: CheckBox
+            name: heatmap
+            label: Rater Agreement Heatmap
+          - type: CheckBox
+            name: heatmapDetails
+            label: Include Statistical Details in Heatmap
+            enable: (heatmap)
+          - type: ComboBox
+            name: heatmapTheme
+            label: Heatmap Color Theme
+            enable: (heatmap)
+            options:
+              - title: Red-Yellow-Green (traditional)
+                name: ryg
+              - title: Blue-White-Red
+                name: bwr
+              - title: Viridis (colorblind-friendly)
+                name: viridis
+              - title: Plasma (colorblind-friendly)
+                name: plasma
+
+  # === STUDY DESIGN & PLANNING ===
+  - type: CollapseBox
+    label: Study Design & Sample Size Planning
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sampleSizePlanning
+            label: Perform Sample Size Planning
+          - type: TextBox
+            name: targetKappa
+            label: Target Kappa Value (0-1)
+            format: number
+            enable: (sampleSizePlanning)
+          - type: TextBox
+            name: targetPrecision
+            label: Target Precision (CI Width)
+            format: number
+            enable: (sampleSizePlanning)
+
+  # === REPORTING & INTERPRETATION ===
+  - type: CollapseBox
+    label: Reporting & Interpretation
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clinical Interpretation Guides
+          - type: CheckBox
+            name: showClinicalSummary
+            label: Clinical Summary (recommended)
+          - type: CheckBox
+            name: showAboutAnalysis
+            label: About This Analysis (educational)
+          - type: CheckBox
+            name: showAssumptions
+            label: Assumptions & Caveats
+          - type: CheckBox
+            name: showWeightedKappaGuide
+            label: Weighted Kappa Guide
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Advanced User Features
+          - type: CheckBox
+            name: showInlineComments
+            label: Show Inline Statistical Comments
+          - type: CheckBox
+            name: enhancedErrorGuidance
+            label: Enhanced Error Guidance
+          - type: CheckBox
+            name: showProgressIndicators
+            label: Show Progress for Long Operations

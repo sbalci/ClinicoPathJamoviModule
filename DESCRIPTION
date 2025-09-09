@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.31.59
-Date: 2025-09-06
+Version: 0.0.31.62
+Date: 2025-09-09
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -113,7 +113,6 @@ Imports:
     DiagrammeR,
     rsvg,
     shiny,
-    gtExtras,
     stats,
     ggstatsplot,
     ggside,
@@ -280,6 +279,7 @@ VignetteBuilder:
     tiff, 
     quarto
 Remotes:
+    jthomasmock/gtExtras,
     gastonstat/arcdiagram,
     hrbrmstr/ggeconodist,
     jbengler/tidyplots,

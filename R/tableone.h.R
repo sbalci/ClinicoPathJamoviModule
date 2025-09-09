@@ -52,6 +52,9 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
+        about = function() private$.items[["about"]],
+        assumptions = function() private$.items[["assumptions"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
@@ -65,11 +68,35 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Table One",
                 refs=list(
                     "ClinicoPathJamoviModule",
+                    "tableone",
+                    "gtsummary",
+                    "arsenal",
+                    "janitor",
                     "whoisinthisstudy"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="Instructions"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Summary",
+                clearWith=list(
+                    "vars",
+                    "excl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About This Analysis",
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Data Quality & Assumptions",
+                clearWith=list(
+                    "vars",
+                    "excl")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="tablestyle1",
@@ -149,13 +176,18 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The input data as a data frame.
 #' @param vars A set of variable names from \code{data} to include in the
 #'   Table One. Supports numeric, ordinal, and categorical variables.
-#' @param sty Specify the output style for the table. Each option uses a
-#'   different package for formatting.
+#' @param sty Specify the output style for the table. tableone provides
+#'   standard medical format, gtsummary adds publication-ready styling, arsenal
+#'   includes comprehensive comparisons, and janitor creates simple frequency
+#'   tables.
 #' @param excl Boolean option to exclude missing values (NA) from the
 #'   analysis. Note: Exclusion may remove entire cases.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr

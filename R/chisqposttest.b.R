@@ -24,6 +24,13 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = chisqposttestBase,
     private = list(
         
+        .init = function() {
+            # Prevent analysis from running without variables selected
+            if (is.null(self$options$rows) || is.null(self$options$cols)) {
+                return()
+            }
+        },
+        
         # Enhanced helper functions for comprehensive analysis ----
         
         # Analyze residuals with proper statistical corrections and explicit methodology
@@ -144,47 +151,30 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(interpretation_matrix)
         },
         
-        # Robust pairwise chi-square testing with progress indicators and memory optimization
+        # Robust pairwise chi-square testing with optimized resource management
         .robustPairwiseTests = function(contingency_table, method = "bonferroni", test_selection = "auto") {
             # Check if we need memory optimization for large tables
             row_names <- rownames(contingency_table)
             total_comparisons <- choose(length(row_names), 2)
             
-            # Use chunked processing for very large numbers of comparisons
-            if (total_comparisons > 100) {
+            # Use chunked processing for moderate-sized tables to prevent resource limits
+            if (total_comparisons > 25) {
                 return(private$.robustPairwiseTestsChunked(contingency_table, method, test_selection))
             }
             
             # Standard processing for smaller datasets
-            # Convert table to vector format for chisq.multcomp
             row_names <- rownames(contingency_table)
             col_names <- colnames(contingency_table)
-            
-            # Calculate total number of possible comparisons for progress tracking
-            total_comparisons <- choose(length(row_names), 2)
             
             # Create all pairwise combinations for rows
             pairwise_results <- list()
             comparison_index <- 1
-            completed_comparisons <- 0
             
             if (length(row_names) >= 2) {
-                # Initialize progress for long-running analyses
-                if (total_comparisons > 10) {
-                    private$.checkpoint(paste("Starting", total_comparisons, "pairwise comparisons..."))
-                }
                 
                 # Row-wise pairwise comparisons
                 for (i in 1:(length(row_names) - 1)) {
                     for (j in (i + 1):length(row_names)) {
-                        completed_comparisons <- completed_comparisons + 1
-                        
-                        # Update progress for long analyses
-                        if (total_comparisons > 10 && completed_comparisons %% 5 == 0) {
-                            progress_pct <- round((completed_comparisons / total_comparisons) * 100)
-                            private$.checkpoint(paste("Progress:", progress_pct, "% -", completed_comparisons, "of", total_comparisons, "comparisons completed"))
-                        }
-                        
                         # Extract 2x2 subtable
                         subtable <- contingency_table[c(i, j), , drop = FALSE]
                         
@@ -230,12 +220,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             pairwise_results[[comparison_index]] <- test_result
                             comparison_index <- comparison_index + 1
                         }
+                        
                     }
-                }
-                
-                # Final progress update for long analyses
-                if (total_comparisons > 10) {
-                    private$.checkpoint(paste("Completed all", total_comparisons, "pairwise comparisons. Applying", method, "correction..."))
                 }
             }
             
@@ -266,7 +252,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Memory-optimized chunked processing for large contingency tables
-        .robustPairwiseTestsChunked = function(contingency_table, method = "bonferroni", test_selection = "auto", chunk_size = 25) {
+        .robustPairwiseTestsChunked = function(contingency_table, method = "bonferroni", test_selection = "auto", chunk_size = 50) {
             row_names <- rownames(contingency_table)
             col_names <- colnames(contingency_table)
             total_comparisons <- choose(length(row_names), 2)
@@ -276,7 +262,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             completed_comparisons <- 0
             overall_index <- 1
             
-            private$.checkpoint(paste("Processing", total_comparisons, "comparisons in chunks of", chunk_size, "for memory efficiency..."))
+            # Processing comparisons in chunks for memory efficiency
             
             # Create comparison pairs
             comparison_pairs <- list()
@@ -295,8 +281,6 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 start_idx <- (chunk_idx - 1) * chunk_size + 1
                 end_idx <- min(chunk_idx * chunk_size, length(comparison_pairs))
                 chunk_pairs <- comparison_pairs[start_idx:end_idx]
-                
-                private$.checkpoint(paste("Processing chunk", chunk_idx, "of", num_chunks, "- comparisons", start_idx, "to", end_idx))
                 
                 # Process current chunk
                 chunk_results <- list()
@@ -353,15 +337,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         chunk_result_idx <- chunk_result_idx + 1
                     }
                     
-                    # Periodic checkpoint within chunk
-                    if (completed_comparisons %% 10 == 0) {
-                        progress_pct <- round((completed_comparisons / total_comparisons) * 100)
-                        private$.checkpoint(paste("Progress:", progress_pct, "% - processed", completed_comparisons, "comparisons"))
-                        
-                        # Force garbage collection for memory management
-                        if (completed_comparisons %% 50 == 0) {
-                            gc(verbose = FALSE)
-                        }
+                    # Minimal garbage collection - only for very large chunks
+                    if (completed_comparisons %% 100 == 0) {
+                        gc(verbose = FALSE)
                     }
                 }
                 
@@ -377,14 +355,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 chunk_results <- NULL
                 chunk_pairs <- NULL
                 gc(verbose = FALSE)
-                
-                private$.checkpoint(paste("Completed chunk", chunk_idx, "- total valid comparisons so far:", length(all_pairwise_results)))
             }
             
             # Apply p-value adjustments to all results
             if (length(all_pairwise_results) > 0) {
-                private$.checkpoint(paste("Applying", method, "correction to", length(all_pairwise_results), "valid comparisons..."))
-                
                 chi_pvalues <- sapply(all_pairwise_results, function(x) x$chi_pvalue)
                 fisher_pvalues <- sapply(all_pairwise_results, function(x) x$fisher_pvalue)
                 
@@ -404,8 +378,6 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     all_pairwise_results[[i]]$fisher_pvalue_adjusted <- fisher_adjusted[i]
                     all_pairwise_results[[i]]$adjustment_method <- method
                 }
-                
-                private$.checkpoint(paste("Completed chunked processing:", length(all_pairwise_results), "comparisons with", method, "correction applied"))
             }
             
             return(all_pairwise_results)
@@ -980,9 +952,6 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             adjustMethod <- self$options$posthoc
             
-            # Add checkpoint before potentially long operation
-            private$.checkpoint()
-            
             # Use robust pairwise testing approach with user-selected test method
             pairwise_results <- private$.robustPairwiseTests(contTable, adjustMethod, self$options$testSelection)
             
@@ -1028,9 +997,6 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             sig = ifelse(final_p_adj < self$options$sig, "Yes", "No")
                         )
                     )
-                    
-                    # Add checkpoint for each comparison
-                    private$.checkpoint(flush = FALSE)
                 }
                 
                 # Create detailed comparison tables (conditional)
@@ -1046,35 +1012,157 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .run = function() {
-            # Handle initial setup and validation
-            if (!private$.handleInitialSetup()) {
-                return() # Exit early if setup incomplete
+            # Simple early return pattern like working summarydata.b.R
+            if (is.null(self$options$rows) || is.null(self$options$cols)) {
+                todo <- "
+                <br>Welcome to ClinicoPath Chi-Square Post-Hoc Tests
+                <br><br>
+                This tool performs a Chi-Square test followed by pairwise post-hoc tests for all combinations of category levels when the overall Chi-Square test is significant.
+                <br><br>
+                <strong>Data Input Options:</strong>
+                <br>• <strong>Individual observations:</strong> Select row and column variables from raw data
+                <br>• <strong>Frequency counts:</strong> Select row and column variables plus a counts variable for aggregated data
+                <br><br>
+                The post-hoc tests help identify which specific group combinations contribute to the significant overall effect.
+                <hr><br>
+                "
+                self$results$todo$setContent(todo)
+                return()
+            } else {
+                self$results$todo$setContent("")
             }
             
-            # Prepare and validate data
-            data_info <- private$.prepareAndValidateData()
+            # Basic validation
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
             
-            # Create contingency table
-            contTable <- private$.createContingencyTable(data_info$data, data_info$rows, data_info$cols, data_info$counts)
+            # Prepare data
+            data <- self$data
+            rows <- self$options$rows
+            cols <- self$options$cols
+            counts <- self$options$counts
             
-            # Perform chi-square test and populate results
-            chiSqTest <- private$.performChiSquareTest(contTable, data_info$rows, data_info$cols)
-            
-            # Handle residuals analysis
-            private$.handleResidualsAnalysis(chiSqTest, contTable, data_info$rows, data_info$cols)
-            
-            # Create educational overview panel (conditional)
-            if (self$options$showEducational) {
-                overview_panel <- private$.createEducationalPanel("overview")
-                self$results$educationalOverview$setContent(as.character(overview_panel))
+            # Exclude NA
+            if (self$options$excl) {
+                data <- jmvcore::naOmit(data)
             }
             
-            # Handle post-hoc testing
-            private$.handlePostHocTesting(chiSqTest, contTable, data_info$rows, data_info$cols)
+            # Create contingency table (simplified)
+            contTable <- try({
+                if (!is.null(counts)) {
+                    data[[counts]] <- as.numeric(as.character(data[[counts]]))
+                    formula_str <- paste0("`", counts, "` ~ `", rows, "` + `", cols, "`")
+                    xtabs(as.formula(formula_str), data = data)
+                } else {
+                    table(data[[rows]], data[[cols]], useNA = if(self$options$excl) "no" else "ifany")
+                }
+            }, silent = TRUE)
             
-            # Handle export functionality
-            if (self$options$exportResults) {
-                private$.generateExportTable(chiSqTest, contTable)
+            if (inherits(contTable, "try-error") || any(dim(contTable) < 2)) {
+                stop("Error creating contingency table. Please check your data and variable selections.")
+            }
+            
+            # Perform basic Chi-Square Test
+            chiSqTest <- stats::chisq.test(contTable, correct = FALSE)
+            
+            # Populate chi-square results
+            self$results$chisqTable$setRow(
+                rowNo = 1,
+                values = list(
+                    stat = "Chi-Square",
+                    value = chiSqTest$statistic,
+                    df = chiSqTest$parameter,
+                    p = chiSqTest$p.value
+                )
+            )
+            
+            # Simple contingency table HTML
+            tableHtml <- private$.createSimpleTableHTML(contTable, chiSqTest$expected)
+            self$results$contingencyTable$setContent(tableHtml)
+            
+            # Simple pairwise tests only if significant
+            if (chiSqTest$p.value < self$options$sig) {
+                private$.simplePostHocTests(contTable)
+            }
+        },
+        
+        # Simple table HTML generation
+        .createSimpleTableHTML = function(contTable, expected = NULL) {
+            html <- "<table style='border-collapse: collapse; margin: 10px 0;'>"
+            html <- paste0(html, "<tr><th style='border: 1px solid #ccc; padding: 5px;'></th>")
+            
+            # Column headers
+            for (col in colnames(contTable)) {
+                html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 5px;'>", col, "</th>")
+            }
+            html <- paste0(html, "</tr>")
+            
+            # Data rows
+            for (i in 1:nrow(contTable)) {
+                html <- paste0(html, "<tr><td style='border: 1px solid #ccc; padding: 5px; font-weight: bold;'>", rownames(contTable)[i], "</td>")
+                for (j in 1:ncol(contTable)) {
+                    obs <- contTable[i, j]
+                    cell_content <- if (!is.null(expected)) {
+                        paste0(obs, "<br><small>(", round(expected[i, j], 1), ")</small>")
+                    } else {
+                        obs
+                    }
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 5px; text-align: center;'>", cell_content, "</td>")
+                }
+                html <- paste0(html, "</tr>")
+            }
+            html <- paste0(html, "</table>")
+            return(html)
+        },
+        
+        # Simple post-hoc tests
+        .simplePostHocTests = function(contTable) {
+            row_names <- rownames(contTable)
+            if (length(row_names) < 2) return()
+            
+            # Limit to reasonable number of comparisons to avoid resource limits
+            max_comparisons <- 20
+            comparison_count <- 0
+            
+            for (i in 1:(length(row_names) - 1)) {
+                for (j in (i + 1):length(row_names)) {
+                    comparison_count <- comparison_count + 1
+                    if (comparison_count > max_comparisons) return()
+                    
+                    # Extract 2x2 subtable
+                    subtable <- contTable[c(i, j), , drop = FALSE]
+                    
+                    # Skip if insufficient data
+                    if (any(dim(subtable) < 2) || sum(subtable) < 5) next
+                    
+                    # Simple chi-square test
+                    test_result <- try({
+                        chi_test <- stats::chisq.test(subtable, correct = FALSE)
+                        list(
+                            comparison = paste(row_names[i], "vs", row_names[j]),
+                            chi_statistic = chi_test$statistic,
+                            chi_pvalue = chi_test$p.value,
+                            effect_size = sqrt(chi_test$statistic / sum(subtable))
+                        )
+                    }, silent = TRUE)
+                    
+                    if (!inherits(test_result, "try-error")) {
+                        # Add to results table
+                        adjusted_p <- stats::p.adjust(test_result$chi_pvalue, method = self$options$posthoc, n = comparison_count)
+                        
+                        self$results$posthocTable$addRow(
+                            rowKey = comparison_count,
+                            values = list(
+                                comparison = test_result$comparison,
+                                test_method = "Chi-square",
+                                chi = test_result$chi_statistic,
+                                p = test_result$chi_pvalue,
+                                padj = adjusted_p,
+                                effect_size = round(test_result$effect_size, 3),
+                                sig = ifelse(adjusted_p < self$options$sig, "Yes", "No")
+                            )
+                        )
+                    }
+                }
             }
         },
         

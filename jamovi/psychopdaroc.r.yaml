@@ -187,6 +187,69 @@ items:
           format: zto
 
     # ==========================================
+    # FIXED SENSITIVITY/SPECIFICITY ANALYSIS
+    # ==========================================
+    - name: fixedSensSpecTable
+      title: Fixed Sensitivity/Specificity Results
+      type: Table
+      visible: (fixedSensSpecAnalysis)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - fixedAnalysisType
+        - fixedSensitivityValue
+        - fixedSpecificityValue
+        - fixedInterpolation
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: analysis_type
+          title: Analysis Type
+          type: text
+        - name: target_value
+          title: Target Value
+          type: number
+          format: pc
+        - name: cutpoint
+          title: Determined Cutpoint
+          type: number
+          format: zto
+        - name: achieved_sensitivity
+          title: Achieved Sensitivity
+          type: number
+          format: pc
+        - name: achieved_specificity
+          title: Achieved Specificity
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: youden
+          title: "Youden's J"
+          type: number
+          format: zto
+        - name: interpolation_used
+          title: Interpolation Method
+          type: text
+
+    - name: fixedSensSpecExplanation
+      title: Fixed Sensitivity/Specificity Analysis Guide
+      type: Html
+      visible: (fixedSensSpecAnalysis && showFixedExplanation)
+
+    # ==========================================
     # AUC COMPARISON AND ANALYSIS
     # ==========================================
     - name: aucSummaryTable
@@ -296,6 +359,25 @@ items:
         - subGroup
       refs: 
         - plotROC
+
+    - name: fixedSensSpecROC
+      title: Fixed Sensitivity/Specificity ROC Curves
+      type: Array
+      visible: (fixedSensSpecAnalysis && showFixedROC)
+      template:
+        type: Image
+        width: 550
+        height: 450
+        renderFun: .plotFixedSensSpecROC
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - fixedAnalysisType
+          - fixedSensitivityValue
+          - fixedSpecificityValue
+          - fixedInterpolation
 
     # ==========================================
     # ADDITIONAL PLOTS

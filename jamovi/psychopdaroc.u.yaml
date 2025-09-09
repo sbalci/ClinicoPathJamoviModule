@@ -69,6 +69,43 @@ children:
             label: Show forest plot
             enable: (metaAnalysis)
   - type: CollapseBox
+    label: Fixed Sensitivity/Specificity Analysis
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: fixedSensSpecAnalysis
+            label: Enable Fixed Sensitivity/Specificity Analysis
+          - type: ComboBox
+            name: fixedAnalysisType
+            label: Analysis Type
+            enable: (fixedSensSpecAnalysis)
+          - type: TextBox
+            name: fixedSensitivityValue
+            format: number
+            label: Target Sensitivity
+            enable: (fixedSensSpecAnalysis && fixedAnalysisType:sensitivity)
+          - type: TextBox
+            name: fixedSpecificityValue
+            format: number
+            label: Target Specificity
+            enable: (fixedSensSpecAnalysis && fixedAnalysisType:specificity)
+          - type: ComboBox
+            name: fixedInterpolation
+            label: Interpolation Method
+            enable: (fixedSensSpecAnalysis)
+          - type: CheckBox
+            name: showFixedROC
+            label: Show Fixed Point ROC Curve
+            enable: (fixedSensSpecAnalysis)
+          - type: CheckBox
+            name: showFixedExplanation
+            label: Show Analysis Guide
+            enable: (fixedSensSpecAnalysis)
+  - type: CollapseBox
     label: Cutpoint Optimization
     margin: normal
     collapsed: false

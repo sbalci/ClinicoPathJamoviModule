@@ -58,6 +58,9 @@
 | Output ID | Type | Title | Visibility | Schema/Notes |
 |-----------|------|-------|------------|--------------|
 | `todo` | Html | "Instructions" | Always visible | Welcome message when no variables selected |
+| `summary` | Html | "Summary" | Always visible | Dataset overview, sample size, variable types, missing data |
+| `about` | Html | "About This Analysis" | Always visible | Educational content about Table One usage in clinical research |
+| `assumptions` | Html | "Data Quality & Assumptions" | Always visible | Data quality warnings and recommendations |
 | `tablestyle1` | Preformatted | "Table One Output (tableone)" | `(sty:t1)` | Plain text output from tableone package |
 | `tablestyle2` | Html | "Summary Table (gtsummary)" | `(sty:t2)` | HTML table from gtsummary package |
 | `tablestyle3` | Html | "Descriptive Table (arsenal)" | `(sty:t3)` | HTML table from arsenal package with kable formatting |
@@ -265,3 +268,79 @@ if (table_style == "t1") {
     self$results$tablestyle1$setContent(mytable)
 }
 ```
+
+## 11. Clinical Context and Educational Content
+
+### About Table One (Educational Content)
+
+The function provides comprehensive educational content explaining that Table One is a standardized descriptive table used in medical research to **summarize baseline characteristics and demographic information** of study participants (not for group comparisons).
+
+**When to use**:
+- Describing patient demographics and clinical characteristics
+- **Summarizing baseline features of your study population** (updated from comparison language)
+- Presenting lab values, vital signs, or biomarker data
+- Creating manuscript-ready descriptive summary tables
+
+**Variable types**:
+- *Continuous*: Age, weight, lab values (shown as mean ± SD or median [IQR])
+- *Categorical*: Sex, diagnosis, treatment groups (shown as N (%))
+- *Ordinal*: Tumor grade, ECOG status (shown as N (%) by level)
+
+**Output styles** (updated descriptions):
+- **tableone**: Standard medical format, suitable for most clinical papers
+- **gtsummary**: Publication-ready formatting with **professional styling** (removed "statistical testing")
+- **arsenal**: Comprehensive descriptive tables with **detailed summaries** (removed "statistical comparisons")
+- **janitor**: Simple frequency tables, good for data exploration
+
+### Data Quality Monitoring
+
+#### Summary Generation (.generateSummary)
+The function automatically generates clinical insights:
+- **Total cases**: Count of observations with percentage completeness
+- **Variable types**: Automatic classification (Numeric, Categorical, Logical, Other)
+- **Complete cases**: Cases without missing values
+- **Missing data**: Percentage with clinical interpretation
+
+#### Quality Checks (.checkDataQuality)
+Comprehensive data validation with clinical recommendations:
+
+**Sample size warnings**:
+- N < 10: "Very small sample size. Results may be unreliable."
+- N < 30: "Consider reporting exact values rather than summary statistics."
+
+**Missing data alerts**:
+- \> 50%: High missing data rate warning with imputation recommendations
+- \> 20%: Moderate missing data with pattern reporting suggestions
+
+**Variable pattern detection**:
+- Numeric variables with few unique values: Suggest categorical treatment
+- Text variables with many unique values: Suggest category grouping
+
+### Performance Optimization Features
+
+#### Checkpoint Integration
+Strategic checkpoint calls for incremental results in jamovi:
+```r
+private$.checkpoint()  # Before data preparation
+private$.checkpoint()  # Before statistical computation  
+private$.checkpoint(flush = FALSE)  # During variable loops
+```
+
+#### Error Handling with Clinical Context
+Enhanced error messages that provide clinical guidance:
+- Insufficient data errors with sample size recommendations
+- Package-specific errors with variable type guidance
+- Missing data handling with clinical interpretation
+
+### Recent Improvements (2024-2025)
+
+1. **Removed Group Comparison Language**: Updated all content to focus on descriptive summaries rather than group comparisons
+2. **Added Clinical Context**: Enhanced educational content with medical research focus
+3. **Data Quality Monitoring**: Comprehensive data validation with clinical recommendations
+4. **Enhanced Error Messages**: Context-aware error handling with clinical guidance
+5. **Performance Optimization**: Strategic checkpointing for large datasets
+6. **Missing Data Intelligence**: Smart handling of missing values with clinical interpretation
+
+### Integration with ClinicoPath Module
+
+The `tableone` function is part of the **ClinicoPath Descriptives** module group, designed specifically for clinicopathological research. It integrates with other ClinicoPath functions for comprehensive medical data analysis workflows.

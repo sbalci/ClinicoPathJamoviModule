@@ -1,7 +1,7 @@
 ---
 name: psychopdaROC
 title: Advanced ROC Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
 version: '0.0.31'
@@ -788,6 +788,84 @@ options:
       description:
           R: >
             Include cost-effectiveness considerations in clinical utility analysis.
+
+    # ==========================================
+    # FIXED SENSITIVITY/SPECIFICITY ANALYSIS
+    # ==========================================
+
+    - name: fixedSensSpecAnalysis
+      title: Fixed Sensitivity/Specificity Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Determine cutoffs based on fixed sensitivity or specificity values and
+            display corresponding performance metrics.
+
+    - name: fixedAnalysisType
+      title: Fixed Analysis Type
+      type: List
+      options:
+        - name: sensitivity
+          title: Fixed Sensitivity
+        - name: specificity
+          title: Fixed Specificity
+      default: sensitivity
+      description:
+          R: >
+            Choose whether to fix sensitivity or specificity value for cutoff determination.
+
+    - name: fixedSensitivityValue
+      title: Target Sensitivity
+      type: Number
+      default: 0.90
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Target sensitivity value (0-1) for determining the corresponding cutoff and specificity.
+
+    - name: fixedSpecificityValue
+      title: Target Specificity
+      type: Number
+      default: 0.90
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Target specificity value (0-1) for determining the corresponding cutoff and sensitivity.
+
+    - name: showFixedROC
+      title: Show Fixed Point ROC Curve
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display separate ROC curve highlighting the fixed sensitivity/specificity point.
+
+    - name: fixedInterpolation
+      title: Interpolation Method
+      type: List
+      options:
+        - name: linear
+          title: Linear Interpolation
+        - name: nearest
+          title: Nearest Point
+        - name: stepwise
+          title: Stepwise (Conservative)
+      default: linear
+      description:
+          R: >
+            Method for interpolating between observed points to achieve target sensitivity/specificity.
+
+    - name: showFixedExplanation
+      title: Show Analysis Guide
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display explanatory guide for fixed sensitivity/specificity analysis including 
+            clinical interpretation, interpolation methods, and usage recommendations.
 
     # ==========================================
     # META-ANALYSIS OPTIONS

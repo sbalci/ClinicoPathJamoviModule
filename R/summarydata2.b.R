@@ -552,45 +552,103 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 }
             }
 
-            # Generate summarytools output if selected - NEW FUNCTIONALITY
+            # DISABLED: summarytools functionality to prevent resource limits
+            # summarytools operations are resource-intensive and may cause jamovi to terminate
             if (self$options$summary_format %in% c("summarytools_df", "summarytools_desc", "summarytools_freq")) {
-                tryCatch({
-                    summarytools_html <- private$.generate_comprehensive_summarytools(dataset, all_vars)
-                    self$results$text$setContent(summarytools_html)
-                }, error = function(e) {
-                    error_html <- paste0(
-                        "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                        "<h4>summarytools Error</h4>",
-                        "<p>Error generating summarytools output: ", e$message, "</p>",
-                        "<p><em>Falling back to standard summary format.</em></p>",
-                        "</div><br>", results
-                    )
-                    self$results$text$setContent(error_html)
-                })
+                warning_html <- paste0(
+                    "<div style='color: orange; padding: 20px; background-color: #fff3cd; border-radius: 5px; margin: 10px 0;'>",
+                    "<h4>⚠️ Feature Temporarily Disabled</h4>",
+                    "<p>summarytools functionality has been temporarily disabled to prevent resource limit issues in jamovi.</p>",
+                    "<p>Please use 'standard' or 'sumvar' format instead for reliable analysis.</p>",
+                    "</div><br>", results
+                )
+                self$results$text$setContent(warning_html)
             }
+            # COMMENTED OUT: Resource-intensive summarytools operations
+            # if (self$options$summary_format %in% c("summarytools_df", "summarytools_desc", "summarytools_freq")) {
+            #     tryCatch({
+            #         summarytools_html <- private$.generate_comprehensive_summarytools(dataset, all_vars)
+            #         self$results$text$setContent(summarytools_html)
+            #     }, error = function(e) {
+            #         error_html <- paste0(
+            #             "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
+            #             "<h4>summarytools Error</h4>",
+            #             "<p>Error generating summarytools output: ", e$message, "</p>",
+            #             "<p><em>Falling back to standard summary format.</em></p>",
+            #             "</div><br>", results
+            #         )
+            #         self$results$text$setContent(error_html)
+            #     })
+            # }
 
-            # Generate plots with error handling
-            tryCatch({
-                if (ncol(dataset) > 0 && nrow(dataset) > 0) {
-                    plot_dataset <- dataset %>%
-                        gtExtras::gt_plt_summary()
-                    print_plot_dataset <- print(plot_dataset)
-                    plot_dataset <- htmltools::HTML(print_plot_dataset[["children"]][[2]])
+            # CORRECT IMPLEMENTATION: Use gtExtras as intended by the package
+            if (ncol(dataset) > 0 && nrow(dataset) > 0) {
+                numeric_vars <- names(dataset)[sapply(dataset, is.numeric)]
+                if (length(numeric_vars) > 0) {
+                    plot_dataset <- tryCatch({
+                        clean_data <- dataset[numeric_vars]
+                        
+                        # Ensure proper data types
+                        clean_data <- as.data.frame(lapply(clean_data, function(x) {
+                            if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
+                        }))
+                        
+                        # Use gtExtras with default styling as intended
+                        summary_table <- clean_data %>% 
+                            gtExtras::gt_plt_summary()
+                        
+                        # Convert to HTML properly
+                        print_table <- print(summary_table)
+                        return(htmltools::HTML(print_table[["children"]][[2]]))
+                    }, error = function(e) {
+                        # Fallback to simple table if gtExtras fails
+                        return(private$.create_simple_summary_table(dataset, numeric_vars))
+                    })
+                    
                     self$results$text1$setContent(plot_dataset)
                 } else {
-                    self$results$text1$setContent("<p><em>No data available for visualization.</em></p>")
+                    self$results$text1$setContent("<p><em>No numeric variables available for summary table.</em></p>")
                 }
-            }, error = function(e) {
-                warning(paste("Error generating plots:", e$message))
-                self$results$text1$setContent(paste0(
-                    "<div style='color: orange; padding: 15px; background-color: #fff3cd;'>",
-                    "<strong>Note:</strong> Plot generation encountered an issue. ",
-                    "Statistical summaries are still available above.",
-                    "</div>"
-                ))
-            })
+            } else {
+                self$results$text1$setContent("<p><em>No data available for summary.</em></p>")
+            }
 
         }
+        },
+
+        # Simple summary table without resource-intensive operations
+        .create_simple_summary_table = function(dataset, numeric_vars) {
+            # Create simple HTML table
+            html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
+            html <- paste0(html, "<tr style='background-color: #f8f9fa;'>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Variable</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>N</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Mean</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>SD</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Median</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Min</th>")
+            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Max</th>")
+            html <- paste0(html, "</tr>")
+            
+            for (var in numeric_vars) {
+                data_col <- dataset[[var]]
+                data_col <- as.numeric(data_col[!is.na(data_col)])
+                
+                if (length(data_col) > 0) {
+                    html <- paste0(html, "<tr>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", var, "</td>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", length(data_col), "</td>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(mean(data_col, na.rm = TRUE), 2), "</td>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(sd(data_col, na.rm = TRUE), 2), "</td>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(median(data_col, na.rm = TRUE), 2), "</td>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(min(data_col, na.rm = TRUE), 2), "</td>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(max(data_col, na.rm = TRUE), 2), "</td>")
+                    html <- paste0(html, "</tr>")
+                }
+            }
+            
+            html <- paste0(html, "</table>")
+            return(htmltools::HTML(html))
         },
 
         .generate_pivot_summary = function(pivot_data) {
