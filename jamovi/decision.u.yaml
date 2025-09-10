@@ -4,12 +4,26 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  # About This Analysis Panel
+  - type: CollapseBox
+    label: "📚 About This Analysis"
+    collapsed: true
+    children:
+      - type: Label
+        label: "DIAGNOSTIC TEST EVALUATION: Compare test accuracy to gold standard reference"
+      - type: Label
+        label: "When to use: Validating new tests, clinical validation studies, test comparisons"
+      - type: Label
+        label: "Required data: Cases with both test results and true disease status (gold standard)"
+      - type: Label  
+        label: "Key outputs: Sensitivity, specificity, predictive values, likelihood ratios"
+
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Gold Standard (Reference Test)
+        label: "🏆 Gold Standard (Reference Test) - Most reliable diagnostic method"
         children:
           - type: VariablesListBox
             name: gold
@@ -18,8 +32,9 @@ children:
           - type: LevelSelector
             name: goldPositive
             enable: (gold)
+            
       - type: TargetLayoutBox
-        label: Test Under Evaluation
+        label: "🧪 Test Under Evaluation - Diagnostic test to validate"
         children:
           - type: VariablesListBox
             name: newtest
@@ -28,54 +43,57 @@ children:
           - type: LevelSelector
             name: testPositive
             enable: (newtest)
-  - type: Label
-    label: Analysis Options
+  - type: CollapseBox
+    label: "📊 Analysis Options"
+    collapsed: false
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: ci
+            label: "📈 95% Confidence Intervals (Recommended)"
             enable: (!pp)
           - type: CheckBox
             name: fnote
+            label: "📝 Show Explanatory Footnotes"
           - type: CheckBox
             name: od
-  - type: Label
-    label: Population Prevalence Settings
+            label: "🔍 Show Raw Data Tables"
+            
+  - type: CollapseBox
+    label: "🌍 Population Prevalence Settings"
+    collapsed: true
     children:
+      - type: Label
+        label: "Use when sample doesn't represent target population disease prevalence"
       - type: CheckBox
         name: pp
+        label: "📊 Use Known Population Prevalence"
         enable: (!ci)
       - type: TextBox
         name: pprob
-        label: 'Prevalence (0.0-1.0)'
+        label: "Disease Prevalence in Target Population (0.0-1.0)"
         format: number
         enable: (!ci && pp)
-  - type: Label
-    label: Visualization
+        
+  - type: CollapseBox
+    label: "📈 Visualization"
+    collapsed: true
     children:
       - type: CheckBox
         name: fagan
-      # - type: CheckBox
-      #   name: roc
-  # - type: Label
-  #   label: Test Comparison
-  #   children:
-  #     - type: CheckBox
-  #       name: compare_tests
-  #       label: Compare Multiple Tests
-  # - type: VariableSupplier
-  #   persistentItems: false
-  #   stretchFactor: 1
-  #   children:
-  #     - type: TargetLayoutBox
-  #       label: Additional Test
-  #       children:
-  #         - type: VariablesListBox
-  #           name: additional_test
-  #           maxItemCount: 1
-  #           isTarget: true
-  #         - type: LevelSelector
-  #           name: additionaltestPositive
-  #           enable: (additional_test)
+        label: "📊 Fagan Nomogram"
+        
+  - type: CollapseBox
+    label: "⚠️ Important Notes"
+    collapsed: true
+    children:
+      - type: Label
+        label: "Data Requirements: Both variables must be categorical (factor), each with exactly 2 levels, minimum 4 cases (preferably 30+)"
+      - type: Label
+        label: "Clinical Guidelines: Sensitivity >90% excellent for ruling OUT disease, Specificity >90% excellent for ruling IN disease"
+      - type: Label
+        label: "Likelihood Ratios: LR+ >10 strong evidence FOR disease, LR- <0.1 strong evidence AGAINST disease"
+      - type: Label
+        label: "Common Issues: Small cell counts (<5) may cause unstable results, extreme prevalence affects predictive values"

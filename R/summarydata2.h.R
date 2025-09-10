@@ -202,7 +202,7 @@ summarydata2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Summary of Continuous Variables
+#' Enhanced Descriptives
 #'
 #' This module generates descriptive statistics for continuous variables.
 #' It provides both a textual summary and a visually appealing summary table.

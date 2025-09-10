@@ -1,7 +1,7 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Combine tests and evaluate performance
 version: '0.0.31'
@@ -9,21 +9,21 @@ jas: '1.2'
 
 description:
     main: |
-        Advanced medical diagnostic test combination analysis with automated 
-        optimal cut-point identification and comprehensive clinical interpretation. 
-        This function systematically evaluates all possible test result combinations 
-        (2-test: 4 patterns, 3-test: 8 patterns) against a gold standard using 
-        state-of-the-art statistical methods. Features include Wilson score 
-        confidence intervals for enhanced accuracy, ROC-based optimal cut-point 
-        selection using Youden Index maximization, and publication-quality 
-        visualizations with clinical decision thresholds. Provides actionable 
-        recommendations for screening vs. confirmatory testing strategies with 
-        detailed clinical interpretation guidelines. Essential for evidence-based 
-        diagnostic protocol development and test validation studies.
+        Advanced medical diagnostic test combination analysis for categorical tests 
+        with comprehensive clinical interpretation. This function systematically 
+        evaluates all possible test result combinations (2-test: 4 patterns, 
+        3-test: 8 patterns) against a gold standard using state-of-the-art 
+        statistical methods. Features include Wilson score confidence intervals 
+        for enhanced accuracy, performance heatmaps, decision trees, and 
+        publication-quality visualizations with clinical decision thresholds. 
+        Provides actionable recommendations for screening vs. confirmatory testing 
+        strategies with detailed clinical interpretation guidelines. Essential for 
+        evidence-based diagnostic protocol development and categorical test 
+        validation studies.
     R:
         dontrun: false
         usage: |
-            # Basic two-test combination analysis with optimal cut-point identification
+            # Basic two-test combination analysis
             result1 <- decisioncombine(
               data = histopathology,
               gold = "Golden Standart",
@@ -33,7 +33,7 @@ description:
               test2 = "Rater 1",
               test2Positive = "1",
               showVisualization = TRUE,
-              plotType = "all"  # Shows all visualization types including ROC with optimal cut-point
+              plotType = "all"  # Shows all visualization types
             )
             
             # Comprehensive three-test analysis with clinical recommendations
@@ -49,11 +49,11 @@ description:
               test3Positive = "1",
               showIndividual = TRUE,
               showVisualization = TRUE,
-              plotType = "roc",  # Focus on ROC analysis with optimal cut-point
+              plotType = "heatmap",  # Focus on performance heatmap
               addCombinationPattern = TRUE  # Export patterns for further analysis
             )
             
-            # Access optimal cut-point recommendations from HTML output
+            # Access clinical recommendations from HTML output
             # result2$combinationsAnalysis contains clinical recommendations
 
 options:
@@ -63,35 +63,65 @@ options:
           R: The data as a data frame.
 
     - name: gold
-      title: Golden Standard
+      title: Golden Standard (Reference Test)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Select the most reliable diagnostic method available (e.g., biopsy, final pathology report, expert consensus). 
+            This is the "truth" against which we compare other tests. Must be categorical with exactly 2 levels.
+          R: >
+            The gold standard reference variable representing true disease status.
 
     - name: goldPositive
-      title: Positive Level
+      title: Disease Present Level
       type: Level
       variable: (gold)
+      description:
+          ui: >
+            Select the level that indicates disease is PRESENT in your gold standard variable 
+            (e.g., "1", "positive", "malignant"). This represents the condition you want to detect.
+          R: >
+            The level indicating presence of disease in the gold standard variable.
 
     # For the first test
     - name: test1
-      title: Test 1
+      title: Test 1 (Required)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Select the first diagnostic test to evaluate. This should be a test you want to validate 
+            (e.g., imaging result, biomarker, clinical assessment). Must be categorical with 2+ levels.
+          R: >
+            The first diagnostic test variable being evaluated for performance.
 
     - name: test1Positive
-      title: Positive Level
+      title: Test 1 Positive Level
       type: Level
       variable: (test1)
+      description:
+          ui: >
+            Select the level that represents a POSITIVE result for Test 1 
+            (e.g., "abnormal", "high", "positive"). This should indicate suspected disease presence.
+          R: >
+            The level representing a positive result for Test 1.
 
     # For the second test
     - name: test2
-      title: Test 2
+      title: Test 2 (Optional - Required for Combinations)
       type: Variable
       default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Select a second diagnostic test to combine with Test 1. This enables combination analysis 
+            (e.g., combine imaging + biomarker, or two different biomarkers). Leave empty for single test analysis.
+          R: >
+            The second diagnostic test variable for combination analysis.
 
     - name: test2Positive
       title: Positive Level
@@ -143,11 +173,13 @@ options:
       default: false
       description:
           ui: >
-            Generate publication-quality visualizations including performance heatmaps, 
-            ROC analysis with optimal cut-point identification, decision trees, Venn diagrams, 
-            and forest plots with Wilson confidence intervals.
+            Generate publication-quality visualizations to help interpret results:
+            • Performance Heatmap: Color-coded overview of all test combinations
+            • Decision Tree: Clinical decision-making flowchart
+            • Venn Diagram: Test agreement visualization
+            • Forest Plot: Confidence intervals for all metrics
           R: >
-            Display comprehensive visualizations for test combination analysis with automated optimal cut-point identification.
+            Display comprehensive visualizations for categorical test combination analysis.
 
     - name: plotType
       title: Visualization Type
@@ -155,8 +187,6 @@ options:
       options:
         - title: Performance Heatmap
           name: heatmap
-        - title: ROC Analysis with Optimal Cut-point
-          name: roc
         - title: Clinical Decision Tree
           name: tree
         - title: Test Agreement Venn Diagram
@@ -168,12 +198,12 @@ options:
       default: heatmap
       description:
           ui: >
-            Select visualization type. ROC analysis automatically identifies optimal cut-points 
-            using Youden Index. Forest plots use Wilson score confidence intervals for enhanced 
-            accuracy. 'All Visualizations' provides comprehensive publication-ready output.
+            Select visualization type for categorical test analysis. Forest plots use Wilson score 
+            confidence intervals for enhanced accuracy. 'All Visualizations' provides comprehensive 
+            publication-ready output.
           R: >
-            Visualization selection: heatmap (performance matrix), roc (ROC space with optimal cut-point), 
-            tree (clinical decision hierarchy), venn (test agreement), forest (Wilson CIs), all (comprehensive output).
+            Visualization selection: heatmap (performance matrix), tree (clinical decision hierarchy), 
+            venn (test agreement), forest (Wilson CIs), all (comprehensive output).
 
     - name: plotHeight
       title: Plot Height (pixels)

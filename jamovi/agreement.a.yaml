@@ -1,7 +1,7 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Agreement
 version: '0.0.31'
 jas: '1.2'
@@ -64,15 +64,6 @@ options:
             Variables representing different raters/observers. Each variable should contain the ratings/diagnoses 
             given by each observer for the same set of cases.
 
-    # - name: caseID
-    #   title: Case ID (Optional)
-    #   type: Variable
-    #   suggested: [ nominal, id ]
-    #   permitted: [ factor, string, integer ]
-    #   default: NULL
-    #   description:
-    #       R: >
-    #         Optional case identifier variable for tracking individual cases across raters.
 
     - name: sft
       title: Frequency Tables
@@ -102,15 +93,17 @@ options:
       title: Heatmap Color Theme
       type: List
       options:
-        - title: Red-Yellow-Green
-          name: ryg
+        - title: Viridis (colorblind-safe)
+          name: viridis
+        - title: Plasma (colorblind-safe)
+          name: plasma
+        - title: Cividis (colorblind-safe)
+          name: cividis
         - title: Blue-White-Red
           name: bwr
-        - title: Viridis
-          name: viridis
-        - title: Plasma
-          name: plasma
-      default: ryg
+        - title: Red-Yellow-Green (classic)
+          name: ryg
+      default: viridis
       description:
           R: >
             Choose color scheme for the agreement heatmap visualization.
@@ -266,6 +259,14 @@ options:
       description:
           R: >
             Show explanatory guide for weighted kappa options, including when to use linear vs quadratic weighting schemes.
+
+    - name: showStatisticalGlossary
+      title: Statistical Terms Glossary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show glossary of statistical terms (kappa, ICC, alpha, etc.) with clinical interpretations and usage guidelines.
 
     # Diagnostic Style Analysis (Usubutun Method)
     - name: diagnosticStyleAnalysis

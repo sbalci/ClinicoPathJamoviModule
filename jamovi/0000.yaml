@@ -16,7 +16,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -780,7 +780,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
@@ -1207,7 +1207,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1251,7 +1251,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1311,34 +1311,35 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
     description: >
-      Advanced medical diagnostic test combination analysis with automated 
+      Advanced medical diagnostic test combination analysis for categorical
+      tests 
 
-      optimal cut-point identification and comprehensive clinical
-      interpretation. 
+      with comprehensive clinical interpretation. This function systematically 
 
-      This function systematically evaluates all possible test result
-      combinations 
+      evaluates all possible test result combinations (2-test: 4 patterns, 
 
-      (2-test: 4 patterns, 3-test: 8 patterns) against a gold standard using 
+      3-test: 8 patterns) against a gold standard using state-of-the-art 
 
-      state-of-the-art statistical methods. Features include Wilson score 
+      statistical methods. Features include Wilson score confidence intervals 
 
-      confidence intervals for enhanced accuracy, ROC-based optimal cut-point 
+      for enhanced accuracy, performance heatmaps, decision trees, and 
 
-      selection using Youden Index maximization, and publication-quality 
+      publication-quality visualizations with clinical decision thresholds. 
 
-      visualizations with clinical decision thresholds. Provides actionable 
+      Provides actionable recommendations for screening vs. confirmatory
+      testing 
 
-      recommendations for screening vs. confirmatory testing strategies with 
+      strategies with detailed clinical interpretation guidelines. Essential
+      for 
 
-      detailed clinical interpretation guidelines. Essential for evidence-based 
+      evidence-based diagnostic protocol development and categorical test 
 
-      diagnostic protocol development and test validation studies.
+      validation studies.
     ribbon: analyses
     category: analyses
   - title: Screening Test Calculator
@@ -2104,26 +2105,27 @@ analyses:
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
-  - title: Summary of Categorical Variables
+  - title: Enhanced Frequencies
     name: reportcat2
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Descriptives
-    menuTitle: Summary of Categorical Variables
+    menuTitle: Enhanced Frequencies
     description: >
       Generates a comprehensive summary of categorical variables including
       frequency counts,  percentages, missing value information, and optional
       visual summaries. Supports multiple  output formats and sorting options
       for enhanced data exploration. Automatically handles  edge cases like
       missing values, single categories, and variable conversion.
-  - title: Summary of Continuous Variables
+    menuSubtitle: Advanced Categorical Variables
+  - title: Enhanced Descriptives
     name: summarydata2
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Descriptives
-    menuTitle: Summary of Continuous Variables
+    menuTitle: Enhanced Descriptives
     description: >
       This module generates descriptive statistics for continuous variables.
 
@@ -2131,6 +2133,7 @@ analyses:
 
       Optionally, you can enable distribution diagnostics to examine normality,
       skewness, and kurtosis.
+    menuSubtitle: Advanced Continuous Variables
   - title: Simon-Makuch Time-Dependent Survival Analysis
     name: simonmakuch
     ns: ClinicoPath
@@ -4402,7 +4405,7 @@ analyses:
     name: modalitycomparison
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideD
     menuSubgroup: Agreement
     menuTitle: Modality Comparison Analysis
     description: >

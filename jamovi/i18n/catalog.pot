@@ -8,6 +8,61 @@ msgstr ""
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
+#: R/psychopdaROC.b.R
+msgid "\n"
+"        <h3>Advanced ROC Analysis</h3> \n"
+"        <p>Advanced interface with statistical comparisons, effect sizes, and additional metrics for research applications.</p>\n"
+"        "
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "\n"
+"        <h3>Basic ROC Analysis</h3>\n"
+"        <p>This simplified interface shows essential diagnostic performance metrics. \n"
+"        Results include Area Under the Curve (AUC), optimal cutpoints, and performance statistics.</p>\n"
+"        <p><strong>AUC Interpretation:</strong> 0.9+ = Excellent, 0.8-0.9 = Good, 0.7-0.8 = Fair, &lt;0.7 = Poor</p>\n"
+"        "
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "\n"
+"        <h3>Comprehensive Statistical Analysis</h3>\n"
+"        <p>Full research-grade analysis with all available statistical methods, Bayesian analysis, and publication-quality outputs.</p>\n"
+"        "
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "\n"
+"        <h4>Balanced Diagnostic Test</h4>\n"
+"        <p>Optimized for balanced sensitivity and specificity using Youden's J index.\n"
+"        Suitable for general diagnostic applications.</p>\n"
+"        "
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "\n"
+"        <h4>Confirmation Test Configuration</h4>\n"
+"        <p>Optimized for high specificity to minimize false positives.\n"
+"        Recommended for confirmatory testing where false alarms are costly.</p>\n"
+"        "
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "\n"
+"        <h4>Research Analysis Configuration</h4>\n"
+"        <p>Comprehensive statistical analysis suitable for research publications with \n"
+"        advanced metrics and comparisons.</p>\n"
+"        "
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "\n"
+"        <h4>Screening Test Configuration</h4>\n"
+"        <p>Optimized for high sensitivity to minimize false negatives. \n"
+"        Recommended for initial disease screening where missing cases is costly.</p>\n"
+"        "
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "  %d/%d (%.1f%%) - %d successful, %d errors - %.1f sec elapsed, ~%.1f sec remaining"
 msgstr ""
@@ -178,6 +233,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "(%s)"
+msgstr ""
+
+#: R/decision.b.R
+msgid "(95%% CI: sensitivity %.1f-%.1f%%, specificity %.1f-%.1f%%)"
 msgstr ""
 
 #: comparingSurvival/results/compsurvTable1.columns.title
@@ -951,6 +1010,22 @@ msgstr ""
 msgid "<div class='clinical-summary'><h4>Results Summary</h4><p>{test} comparing {vars} between groups.</p><p class='subtitle-stats'>{subtitle}</p></div>"
 msgstr ""
 
+#: R/decision.b.R
+msgid "<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background: #f1f8e9;'>"
+msgstr ""
+
+#: R/decision.b.R
+msgid "<div style='margin: 15px; padding: 15px; border-left: 5px solid #FF9800; background: #fff3e0;'>"
+msgstr ""
+
+#: R/decision.b.R
+msgid "<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'>"
+msgstr ""
+
+#: R/decision.b.R
+msgid "<div style='margin: 15px; padding: 15px; border: 2px dashed #FF9800;'>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid "<h3>🌐 Arc Diagram Network Visualization</h3>"
 msgstr ""
@@ -1349,8 +1424,24 @@ msgstr ""
 msgid "≥ (higher values indicate positive class)"
 msgstr ""
 
+#: agreement/ui[11][0]/showProgressIndicators.label
+msgid "⏱️ Show Progress for Long Operations"
+msgstr ""
+
 #: decisionpanel/ui[7][1][2].label
 msgid "⚖️ Balanced Testing: Consider both sensitivity and specificity equally"
+msgstr ""
+
+#: agreement/ui[7][1]/caseDifficultyScoring.label
+msgid "⚖️ Case Difficulty Assessment"
+msgstr ""
+
+#: agreement/ui[5][0]/gwetAC.label
+msgid "⚖️ Gwet's AC1/AC2 Coefficients (prevalence-robust)"
+msgstr ""
+
+#: agreement/ui[6][0]/tie_breaking.label
+msgid "⚖️ Handle Ties By"
 msgstr ""
 
 #: modelbuilder/ui[7].label
@@ -1361,12 +1452,28 @@ msgstr ""
 msgid "⚙️ Feature Engineering"
 msgstr ""
 
+#: agreement/ui[11].label
+msgid "⚙️ System & Technical Options"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid "⚠️ {var}: Data may not be normally distributed in group '{level}' (consider non-parametric)"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
 msgid "⚠️ {var}: Minimum group size is {size} (recommend ≥3)"
+msgstr ""
+
+#: agreement/ui[3][1]/showAssumptions.label
+msgid "⚠️ Assumptions & Caveats"
+msgstr ""
+
+#: R/decision.b.R
+msgid "⚠️ Highly unbalanced test results. Consider the appropriateness of the selected positive level."
+msgstr ""
+
+#: decision/ui[5].label
+msgid "⚠️ Important Notes"
 msgstr ""
 
 #: R/linechart.b.R
@@ -1377,8 +1484,32 @@ msgstr ""
 msgid "⚠️ Residuals may not be normally distributed (Shapiro-Wilk p ≤ 0.05). Consider robust methods."
 msgstr ""
 
+#: R/decision.b.R
+msgid "⚠️ Small cell counts detected (< 5). Results may be unstable. Consider collecting more data or using exact methods."
+msgstr ""
+
+#: R/decision.b.R
+msgid "⚠️ Small sample size (< 30). Confidence intervals may be wide. Interpret results cautiously."
+msgstr ""
+
+#: R/decision.b.R
+msgid "⚠️ Very high disease prevalence (> 95%). Negative predictive value may be unreliable. Verify your data coding."
+msgstr ""
+
+#: R/decision.b.R
+msgid "⚠️ Very low disease prevalence (< 5%). Positive predictive value may be unreliable. Consider the clinical context carefully."
+msgstr ""
+
 #: decisionpanel/ui[1][0][1].label
 msgid "⚡ Parallel: Tests performed simultaneously (any/all positive)"
+msgstr ""
+
+#: agreement/ui[2][1]/wght/unweighted.title
+msgid "⚪ Unweighted (nominal/categorical data)"
+msgstr ""
+
+#: agreement/ui[6][0]/consensus.label
+msgid "✅ Enable Consensus Scoring"
 msgstr ""
 
 #: R/linechart.b.R
@@ -1409,6 +1540,38 @@ msgstr ""
 msgid "✓ Pairwise comparisons enabled"
 msgstr ""
 
+#: agreement/ui[6][0]/tie_breaking/exclude.title
+msgid "❌ Excluding tied cases from analysis"
+msgstr ""
+
+#: agreement/ui[4][0]/heatmapTheme/viridis.title
+msgid "🌈 Viridis (colorblind-safe, recommended)"
+msgstr ""
+
+#: agreement/ui[4][0]/heatmapTheme/cividis.title
+msgid "🌊 Cividis (colorblind-safe)"
+msgstr ""
+
+#: decision/ui[3].label
+msgid "🌍 Population Prevalence Settings"
+msgstr ""
+
+#: agreement/ui[5][0]/kripp.label
+msgid "🌐 Krippendorff's Alpha (handles missing data)"
+msgstr ""
+
+#: agreement/ui[2][0]/multiraterMethod/krippendorff.title
+msgid "🌐 Krippendorff's Alpha (universal method)"
+msgstr ""
+
+#: agreement/ui[8][0]/styleClusterMethod.label
+msgid "🌳 Clustering Algorithm"
+msgstr ""
+
+#: agreement/ui[9][1][0].label
+msgid "🎓 Experience Variable"
+msgstr ""
+
 #: modelbuilder/options/clinicalPreset/cancer_prognosis.title
 msgid "🎗️ Cancer Prognosis Model"
 msgstr ""
@@ -1425,6 +1588,10 @@ msgstr ""
 msgid "🎛️ Custom Variables"
 msgstr ""
 
+#: agreement/ui[4][0]/heatmapTheme.label
+msgid "🎨 Color Theme"
+msgstr ""
+
 #: modelbuilder/ui[1][0][0].label
 msgid "🎨 Predefined Clinical Scenarios"
 msgstr ""
@@ -1437,8 +1604,28 @@ msgstr ""
 msgid "🎯 Clinical Presets (Quick Setup)"
 msgstr ""
 
+#: agreement/ui[8][0]/identifyDiscordantCases.label
+msgid "🎯 Identify Cases Distinguishing Styles"
+msgstr ""
+
 #: modelbuilder/ui[0][0].label
 msgid "🎯 Outcome Variable"
+msgstr ""
+
+#: agreement/ui[5][0]/pabak.label
+msgid "🎯 PABAK (Prevalence-Adjusted Kappa)"
+msgstr ""
+
+#: agreement/ui[10][0]/targetKappa.label
+msgid "🎯 Target Kappa Value (0.0-1.0)"
+msgstr ""
+
+#: agreement/ui[6][0]/consensus_method/unanimous.title
+msgid "🎯 Unanimous Agreement (100%)"
+msgstr ""
+
+#: decision/ui[1][0].label
+msgid "🏆 Gold Standard (Reference Test) - Most reliable diagnostic method"
 msgstr ""
 
 #: nogoldstandard/ui[2][0]/method/latent_class.title
@@ -1449,8 +1636,20 @@ msgstr ""
 msgid "🏗️ Model Types to Build"
 msgstr ""
 
+#: agreement/ui[3].label
+msgid "🏥 Clinical Output & Interpretation"
+msgstr ""
+
 #: modelbuilder/ui[9].label
 msgid "🏥 Clinical Risk Score"
+msgstr ""
+
+#: agreement/ui[9][1][2].label
+msgid "🏥 Current Institution Variable"
+msgstr ""
+
+#: agreement/ui[7][2]/pathologyContext.label
+msgid "🏥 Diagnostic Accuracy Metrics"
 msgstr ""
 
 #: decisiongraph/ui[2][0][0].label
@@ -1461,8 +1660,52 @@ msgstr ""
 msgid "🏥 Screening Tests: Prioritize high sensitivity (minimize missed cases)"
 msgstr ""
 
+#: agreement/ui[9][1][1].label
+msgid "🏫 Training Institution Variable"
+msgstr ""
+
+#: agreement/ui[7][1]/categoryAnalysis.label
+msgid "🏷️ Category-Specific Agreement"
+msgstr ""
+
+#: agreement/ui[5][0]/krippMethod/nominal.title
+msgid "🏷️ Nominal (unordered categories)"
+msgstr ""
+
+#: agreement/ui[2][0]/multiraterMethod/cohen.title
+msgid "👥 Cohen's Kappa (exactly 2 raters)"
+msgstr ""
+
+#: agreement/ui[8][0]/styleGroups.label
+msgid "👥 Number of Style Groups (2-10)"
+msgstr ""
+
+#: agreement/ui[7][0]/pairwiseAnalysis.label
+msgid "👥 Pairwise Rater Comparisons"
+msgstr ""
+
 #: nogoldstandard/options/clinicalPreset/pathology_agreement.title
 msgid "👥 Pathologist Agreement"
+msgstr ""
+
+#: agreement/ui[6][0]/consensus_method/majority.title
+msgid "👥 Simple Majority (>50% agreement)"
+msgstr ""
+
+#: agreement/ui[2][0]/multiraterMethod/fleiss.title
+msgid "👥👥 Fleiss' Kappa (3 or more raters)"
+msgstr ""
+
+#: agreement/ui[6][0]/consensus_method/super_majority.title
+msgid "👥👥 Supermajority (≥67% agreement)"
+msgstr ""
+
+#: agreement/ui[6][0]/tie_breaking/arbitration.title
+msgid "👨‍⚕️ Flagging for expert arbitration"
+msgstr ""
+
+#: agreement/ui[9].label
+msgid "👨‍⚕️ Rater Background Information (Optional)"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -1497,6 +1740,10 @@ msgstr ""
 msgid "💡 Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"
 msgstr ""
 
+#: agreement/ui[11][0]/showInlineComments.label
+msgid "💬 Show Inline Statistical Comments"
+msgstr ""
+
 #: decisiongraph/ui[0][0][2].label
 msgid "💰 Cost-Effectiveness: Economic evaluation with ICER analysis"
 msgstr ""
@@ -1517,6 +1764,26 @@ msgstr ""
 msgid "💾 Export Options"
 msgstr ""
 
+#: decision/results/reportTemplate.title
+msgid "📄 Copy-Ready Report"
+msgstr ""
+
+#: decision/ui[2][0]/ci.label
+msgid "📈 95% Confidence Intervals (Recommended)"
+msgstr ""
+
+#: agreement/ui[7][0]/agreementTrendAnalysis.label
+msgid "📈 Agreement Trend Over Cases (training effect)"
+msgstr ""
+
+#: agreement/ui[8][0]/styleDistanceMetric/correlation.title
+msgid "📈 Correlation"
+msgstr ""
+
+#: agreement/ui[5][0]/icc.label
+msgid "📈 Intraclass Correlation Coefficient (ICC)"
+msgstr ""
+
 #: modelbuilder/ui[8][1][0].label
 msgid "📈 Plots & Visualizations"
 msgstr ""
@@ -1525,16 +1792,37 @@ msgstr ""
 msgid "📈 Regression Type"
 msgstr ""
 
+#: agreement/ui[2][2]/fleissCI.label
+msgid "📈 Show Confidence Intervals (recommended)"
+msgstr ""
+
+#: agreement/ui[4].label
+#: decision/ui[4].label
+msgid "📈 Visualization"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "📊 Advanced Raincloud Statistics"
+msgstr ""
+
+#: decision/ui[2].label
+msgid "📊 Analysis Options"
 msgstr ""
 
 #: nogoldstandard/ui[2][0]/method/bayesian.title
 msgid "📊 Bayesian Analysis"
 msgstr ""
 
+#: agreement/ui[2].label
+msgid "📊 Core Agreement Analysis"
+msgstr ""
+
 #: modelbuilder/ui[2].label
 msgid "📊 Data Preparation"
+msgstr ""
+
+#: decision/ui[4]/fagan.label
+msgid "📊 Fagan Nomogram"
 msgstr ""
 
 #: decisiongraph/ui[3][0][1].label
@@ -1545,8 +1833,36 @@ msgstr ""
 msgid "📊 Improvement Metrics"
 msgstr ""
 
+#: agreement/ui[3][0]/sft.label
+msgid "📊 Individual Rater Frequency Tables"
+msgstr ""
+
+#: agreement/ui[5][0]/krippMethod/ordinal.title
+msgid "📊 Ordinal (ranked categories)"
+msgstr ""
+
+#: agreement/ui[8][0]/styleDistanceMetric/agreement.title
+msgid "📊 Percentage Agreement (recommended)"
+msgstr ""
+
+#: agreement/ui[10][0]/sampleSizePlanning.label
+msgid "📊 Perform Sample Size Planning"
+msgstr ""
+
+#: agreement/ui[7][0]/raterBiasAnalysis.label
+msgid "📊 Rater Bias Detection"
+msgstr ""
+
 #: modelbuilder/ui[8][0][0].label
 msgid "📊 Tables & Performance"
+msgstr ""
+
+#: decision/ui[3]/pp.label
+msgid "📊 Use Known Population Prevalence"
+msgstr ""
+
+#: agreement/ui[6][0]/tie_breaking/global_mode.title
+msgid "📊 Using global most frequent category"
 msgstr ""
 
 #: modelbuilder/ui[5][2][0].label
@@ -1555,6 +1871,14 @@ msgstr ""
 
 #: modelbuilder/results/clinicalSummary.title
 msgid "📋 Clinical Interpretation Summary"
+msgstr ""
+
+#: decision/results/naturalLanguageSummary.title
+msgid "📋 Clinical Summary"
+msgstr ""
+
+#: agreement/ui[3][0]/showClinicalSummary.label
+msgid "📋 Clinical Summary (recommended)"
 msgstr ""
 
 #: modelbuilder/ui[8].label
@@ -1569,6 +1893,51 @@ msgstr ""
 msgid "📋 Sequential: Tests performed in order (stop when criteria met)"
 msgstr ""
 
+#: agreement/ui[6][0]/show_consensus_table.label
+msgid "📋 Show Detailed Case-by-Case Results"
+msgstr ""
+
+#: agreement/ui[10].label
+msgid "📋 Study Design & Sample Size Planning"
+msgstr ""
+
+#: agreement/ui[5][0]/krippMethod.label
+msgid "📏 Data Measurement Level"
+msgstr ""
+
+#: agreement/ui[8][0]/styleDistanceMetric.label
+msgid "📏 Distance Metric"
+msgstr ""
+
+#: agreement/ui[5][0]/krippMethod/interval.title
+msgid "📏 Interval (equal intervals)"
+msgstr ""
+
+#: agreement/ui[2][1]/wght/equal.title
+msgid "📏 Linear Weighted (ordinal data, equal steps)"
+msgstr ""
+
+#: agreement/ui[10][0]/targetPrecision.label
+msgid "📏 Target Precision (CI Width, e.g., 0.1)"
+msgstr ""
+
+#: agreement/ui[8][0]/styleDistanceMetric/euclidean.title
+msgid "📐 Euclidean Distance"
+msgstr ""
+
+#: agreement/ui[2][1]/wght/squared.title
+msgid "📐 Quadratic Weighted (ordinal data, severe distant errors)"
+msgstr ""
+
+#: agreement/ui[3][1]/showWeightedKappaGuide.label
+msgid "📐 Weighted Kappa Guide"
+msgstr ""
+
+#: decision/ui[0].label
+#: decision/results/aboutAnalysis.title
+msgid "📚 About This Analysis"
+msgstr ""
+
 #: decisionpanel/ui[7].label
 msgid "📚 Clinical Guidance & Terminology"
 msgstr ""
@@ -1577,8 +1946,20 @@ msgstr ""
 msgid "📚 Statistical Glossary"
 msgstr ""
 
+#: agreement/ui[3][1]/showStatisticalGlossary.label
+msgid "📚 Statistical Terms Glossary"
+msgstr ""
+
 #: modelbuilder/results/reportSentences.title
 msgid "📝 Copy-Ready Report Sentences"
+msgstr ""
+
+#: agreement/ui[9][0]/raterCharacteristics.label
+msgid "📝 Include Rater Background Variables"
+msgstr ""
+
+#: decision/ui[2][0]/fnote.label
+msgid "📝 Show Explanatory Footnotes"
 msgstr ""
 
 #: decisiongraph/ui[2][0][1].label
@@ -1587,6 +1968,14 @@ msgstr ""
 
 #: modelbuilder/ui[6][1][0].label
 msgid "🔁 Bootstrap Validation"
+msgstr ""
+
+#: agreement/ui[2][0]/multiraterMethod/auto.title
+msgid "🔄 Automatic (recommended for most users)"
+msgstr ""
+
+#: agreement/ui[5][1]/bootstrap.label
+msgid "🔄 Bootstrap Confidence Intervals"
 msgstr ""
 
 #: modelbuilder/ui[6][0][0].label
@@ -1605,12 +1994,24 @@ msgstr ""
 msgid "🔍 <strong>What to look for:</strong><br>• Statistical significance (p < 0.05) indicates real changes over time<br>• Effect sizes show practical importance<br>• Individual trajectories reveal response patterns<br>• Outliers may indicate treatment non-responders or measurement errors"
 msgstr ""
 
+#: agreement/ui[7].label
+msgid "🔍 Detailed Analysis Options"
+msgstr ""
+
 #: modelbuilder/options/clinicalPreset/diagnostic_test.title
 msgid "🔍 Diagnostic Test Evaluation"
 msgstr ""
 
 #: decisionpanel/ui[2][0][1].label
 msgid "🔍 Sensitivity: Prioritize catching positive cases (screening)"
+msgstr ""
+
+#: decision/ui[2][0]/od.label
+msgid "🔍 Show Raw Data Tables"
+msgstr ""
+
+#: agreement/ui[4][0]/heatmapDetails.label
+msgid "🔍 Show Statistical Details in Heatmap"
 msgstr ""
 
 #: decisionpanel/ui[1][0][0].label
@@ -1625,8 +2026,32 @@ msgstr ""
 msgid "🔓 Any Test Positive"
 msgstr ""
 
+#: agreement/ui[8][0]/styleClusterMethod/average.title
+msgid "🔗 Average Linkage"
+msgstr ""
+
+#: agreement/ui[8][0]/styleClusterMethod/complete.title
+msgid "🔗 Complete Linkage"
+msgstr ""
+
 #: modelbuilder/ui[5][1][0].label
 msgid "🔗 Variable Interactions"
+msgstr ""
+
+#: agreement/ui[8][0]/styleClusterMethod/ward.title
+msgid "🔗 Ward's Linkage (Usubutun standard, recommended)"
+msgstr ""
+
+#: agreement/ui[5][0]/krippMethod/ratio.title
+msgid "🔢 Ratio (true zero point)"
+msgstr ""
+
+#: agreement/ui[4][0]/heatmap.label
+msgid "🔥 Agreement Heatmap"
+msgstr ""
+
+#: agreement/ui[4][0]/heatmapTheme/plasma.title
+msgid "🔥 Plasma (colorblind-safe)"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -1637,6 +2062,14 @@ msgstr ""
 msgid "🔬 <strong>Laboratory Values:</strong> Optimized for clinical lab value monitoring<br>"
 msgstr ""
 
+#: agreement/ui[5].label
+msgid "🔬 Advanced Statistical Methods"
+msgstr ""
+
+#: agreement/ui[7][2]/agreementStabilityAnalysis.label
+msgid "🔬 Agreement Stability Analysis"
+msgstr ""
+
 #: decisionpanel/ui[7][1][1].label
 msgid "🔬 Confirmatory Tests: Prioritize high specificity (minimize false alarms)"
 msgstr ""
@@ -1645,12 +2078,40 @@ msgstr ""
 msgid "🔬 Diagnostic Test Validation"
 msgstr ""
 
+#: agreement/ui[8][0]/diagnosticStyleAnalysis.label
+msgid "🔬 Enable Diagnostic Style Clustering"
+msgstr ""
+
 #: modelbuilder/ui[4].label
 msgid "🔬 Modeling Method"
 msgstr ""
 
+#: agreement/ui[2][2]/exct.label
+msgid "🔬 Use Exact Method (more accurate, slower)"
+msgstr ""
+
+#: agreement/ui[4][0]/heatmapTheme/bwr.title
+msgid "🔵 Blue-White-Red"
+msgstr ""
+
+#: agreement/ui[0][0].label
+msgid "🔹 Rater Variables (Required)"
+msgstr ""
+
 #: nogoldstandard/ui[2][0]/method/composite.title
 msgid "🗳️ Composite Reference"
+msgstr ""
+
+#: agreement/ui[6][0]/consensus_method.label
+msgid "🗳️ Consensus Threshold"
+msgstr ""
+
+#: agreement/ui[6].label
+msgid "🤝 Consensus Analysis"
+msgstr ""
+
+#: decision/ui[1][1].label
+msgid "🧪 Test Under Evaluation - Diagnostic test to validate"
 msgstr ""
 
 #: modelbuilder/ui[3][2][0].label
@@ -1665,6 +2126,10 @@ msgstr ""
 msgid "🧬 Biomarker Variables"
 msgstr ""
 
+#: agreement/ui[8].label
+msgid "🧬 Diagnostic Style Analysis (Usubutun Method)"
+msgstr ""
+
 #: modelbuilder/ui[3][0][0].label
 msgid "🩺 Basic Clinical Model"
 msgstr ""
@@ -1677,6 +2142,14 @@ msgstr ""
 msgid "🩺 Clinical Guidance"
 msgstr ""
 
+#: decision/results/clinicalInterpretation.title
+msgid "🩺 Clinical Interpretation Guide"
+msgstr ""
+
+#: agreement/ui[9][1][3].label
+msgid "🩺 Medical Specialty Variable"
+msgstr ""
+
 #: nogoldstandard/options/clinicalPreset/screening_evaluation.title
 msgid "🩺 Screening Test Assessment"
 msgstr ""
@@ -1687,6 +2160,18 @@ msgstr ""
 
 #: modelbuilder/ui[0][2].label
 msgid "🩺+ Enhanced Clinical Variables"
+msgstr ""
+
+#: agreement/ui[11][0]/enhancedErrorGuidance.label
+msgid "🚨 Enhanced Error Guidance"
+msgstr ""
+
+#: agreement/ui[7][1]/outlierAnalysis.label
+msgid "🚨 Identify Problematic Cases"
+msgstr ""
+
+#: agreement/ui[4][0]/heatmapTheme/ryg.title
+msgid "🟢 Red-Yellow-Green (classic)"
 msgstr ""
 
 #: advancedimputation/options/delta_values.default
@@ -2951,8 +3436,19 @@ msgstr ""
 msgid "Aalen's Additive Hazard Models"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Ability to correctly identify disease (true positive rate)"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Ability to correctly identify healthy individuals (true negative rate)"
+msgstr ""
+
+#: agreement/options/showAboutAnalysis.title
+#: agreement/results/aboutAnalysis.title
 #: jjbarstats/results/about.title
 #: jjpiestats/results/about.title
+#: tableone/results/about.title
 msgid "About This Analysis"
 msgstr ""
 
@@ -3181,6 +3677,7 @@ msgstr ""
 #: enhancedROC/results/results/diagnosticPerformance.columns.title
 #: imagingcorrelation/results/diagnosticPerformanceTable.columns.title
 #: psychopdaROC/results/thresholdTable.columns.title
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: psychopdaROC/results/rocComparisonTable.columns.title
 #: treecompare/options/primary_metric/accuracy.title
 #: treecompare/results/comparison_table.columns.title
@@ -3189,6 +3686,10 @@ msgstr ""
 
 #: qualitycontrol/options/validation_components/accuracy.title
 msgid "Accuracy (Bias Analysis)"
+msgstr ""
+
+#: agreement/results/diagnosticAccuracyTable.columns.title
+msgid "Accuracy %"
 msgstr ""
 
 #: methodvalidation/options/accuracy_analysis.title
@@ -3211,8 +3712,20 @@ msgstr ""
 msgid "Accuracy Study Only"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Accuracy: Overall proportion of correct test results. Consider prevalence dependency."
+msgstr ""
+
 #: nonparametric/results/powerAnalysis.columns.title
 msgid "Achieved Power"
+msgstr ""
+
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
+msgid "Achieved Sensitivity"
+msgstr ""
+
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
+msgid "Achieved Specificity"
 msgstr ""
 
 #: patientreported/options/acquiescence_analysis.title
@@ -3858,7 +4371,7 @@ msgstr ""
 msgid "Additional Partitioning Factors"
 msgstr ""
 
-#: psychopdaROC/ui[6].label
+#: psychopdaROC/ui[8].label
 #: robustcorrelation/ui[5][4].label
 msgid "Additional Plots"
 msgstr ""
@@ -4208,7 +4721,7 @@ msgstr ""
 #: enhancedtwowayfrequency/ui[3][0].label
 #: labinterpret/ui[1][4].label
 #: patientreported/ui[8][0].label
-#: psychopdaROC/ui[9].label
+#: psychopdaROC/ui[11].label
 #: qualityoflife/ui[7][0].label
 #: sigmametrics/ui[1][2].label
 msgid "Advanced Analysis"
@@ -4304,6 +4817,11 @@ msgstr ""
 msgid "Advanced Categorical Tests"
 msgstr ""
 
+#: package/analyses/reportcat2.menuSubtitle
+#: reportcat2/options.menuSubtitle
+msgid "Advanced Categorical Variables"
+msgstr ""
+
 #: package/analyses/treeadvanced.title
 #: package/analyses/treeadvanced.menuTitle
 #: treeadvanced/options.title
@@ -4344,6 +4862,11 @@ msgstr ""
 
 #: stagemigration/options/performCompetingRisksAdvanced.title
 msgid "Advanced Competing Risks Analysis"
+msgstr ""
+
+#: package/analyses/summarydata2.menuSubtitle
+#: summarydata2/options.menuSubtitle
+msgid "Advanced Continuous Variables"
 msgstr ""
 
 #: package/analyses/enhancedcorrelation.menuSubtitle
@@ -4475,17 +4998,17 @@ msgstr ""
 
 #: package/analyses/decisioncombine.description
 #: decisioncombine/options.description.main
-msgid "Advanced medical diagnostic test combination analysis with automated \n"
-"optimal cut-point identification and comprehensive clinical interpretation. \n"
-"This function systematically evaluates all possible test result combinations \n"
-"(2-test: 4 patterns, 3-test: 8 patterns) against a gold standard using \n"
-"state-of-the-art statistical methods. Features include Wilson score \n"
-"confidence intervals for enhanced accuracy, ROC-based optimal cut-point \n"
-"selection using Youden Index maximization, and publication-quality \n"
-"visualizations with clinical decision thresholds. Provides actionable \n"
-"recommendations for screening vs. confirmatory testing strategies with \n"
-"detailed clinical interpretation guidelines. Essential for evidence-based \n"
-"diagnostic protocol development and test validation studies."
+msgid "Advanced medical diagnostic test combination analysis for categorical tests \n"
+"with comprehensive clinical interpretation. This function systematically \n"
+"evaluates all possible test result combinations (2-test: 4 patterns, \n"
+"3-test: 8 patterns) against a gold standard using state-of-the-art \n"
+"statistical methods. Features include Wilson score confidence intervals \n"
+"for enhanced accuracy, performance heatmaps, decision trees, and \n"
+"publication-quality visualizations with clinical decision thresholds. \n"
+"Provides actionable recommendations for screening vs. confirmatory testing \n"
+"strategies with detailed clinical interpretation guidelines. Essential for \n"
+"evidence-based diagnostic protocol development and categorical test \n"
+"validation studies."
 msgstr ""
 
 #: package/analyses/flexparametricadvanced.menuSubgroup
@@ -4494,7 +5017,7 @@ msgid "Advanced Methods"
 msgstr ""
 
 #: aivalidation/ui/advancedMetrics.label
-#: psychopdaROC/ui[9][0][0].label
+#: psychopdaROC/ui[11][0][0].label
 msgid "Advanced Metrics"
 msgstr ""
 
@@ -4618,7 +5141,7 @@ msgid "Advanced penalized regression with adaptive variable selection"
 msgstr ""
 
 #: psychopdaROC/options/advancedMetrics.title
-#: psychopdaROC/ui[9][0]/advancedMetrics.label
+#: psychopdaROC/ui[11][0]/advancedMetrics.label
 msgid "Advanced Performance Metrics"
 msgstr ""
 
@@ -4670,6 +5193,10 @@ msgstr ""
 msgid "Advanced regularization for high-dimensional survival data"
 msgstr ""
 
+#: psychopdaROC/options/clinicalMode/advanced.title
+msgid "Advanced Research Analysis"
+msgstr ""
+
 #: package/analyses/jjridges.title
 #: package/analyses/jjridges.menuTitle
 #: jjridges/ui.title
@@ -4681,7 +5208,7 @@ msgstr ""
 #: package/analyses/psychopdaROC.menuTitle
 #: psychopdaROC/options.title
 #: psychopdaROC/ui.title
-#: psychopdaROC/ui[7].label
+#: psychopdaROC/ui[9].label
 #: psychopdaROC/results.title
 msgid "Advanced ROC Analysis"
 msgstr ""
@@ -4693,7 +5220,7 @@ msgstr ""
 
 #: decisionpanel/ui[8].label
 #: ihcscoring/ui[1][5].label
-#: psychopdaROC/ui[2][1][0].label
+#: psychopdaROC/ui[4][1][0].label
 msgid "Advanced Settings"
 msgstr ""
 
@@ -5066,6 +5593,12 @@ msgstr ""
 msgid "Agreement"
 msgstr ""
 
+#: agreement/results/pairwiseTable.columns.title
+#: agreement/results/categoryTable.columns.title
+#: agreement/results/agreementTrendTable.columns.title
+msgid "Agreement %"
+msgstr ""
+
 #: agreement/results/overviewTable.title
 msgid "Agreement Analysis Summary"
 msgstr ""
@@ -5074,13 +5607,41 @@ msgstr ""
 msgid "Agreement analysis with limits of agreement"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Agreement could not be assessed - review data quality and sample size requirements."
+msgstr ""
+
 #: agreement/options/heatmap.title
-#: agreement/ui[2][0]/heatmap.label
 #: agreement/results/heatmapPlot.title
 #: cohenskappa/results/confusionHeatmap.title
 msgid "Agreement Heatmap"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Agreement is <strong>excellent</strong> - raters show high consistency, suitable for all clinical applications including critical diagnoses and research studies."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Agreement is <strong>fair</strong> - some consistency between raters but significant disagreement remains. Review cases with disagreement and consider standardizing evaluation procedures."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Agreement is <strong>good</strong> - suitable for most clinical and research applications. This level indicates reliable inter-rater consistency."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Agreement is <strong>moderate</strong> - acceptable for many clinical applications but may need improvement for critical diagnoses. Consider additional training or clearer diagnostic guidelines."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Agreement is <strong>poor</strong> - raters are essentially making independent judgments. Consider revising diagnostic criteria, providing additional training, or using consensus panels for critical diagnoses."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Agreement is worse than chance - raters systematically disagree. Review rating criteria and consider additional training."
+msgstr ""
+
+#: agreement/results/pairwiseTable.columns.title
 #: agreement/results/consensusTable.columns.title
 #: ihcscoring/results/agreementtable.columns.title
 #: imagingcorrelation/results/concordanceTable.columns.title
@@ -5095,6 +5656,15 @@ msgstr ""
 msgid "Agreement Rate"
 msgstr ""
 
+#: agreement/results/outlierTable.columns.title
+msgid "Agreement Score"
+msgstr ""
+
+#: agreement/options/agreementStabilityAnalysis.title
+#: agreement/results/stabilityTable.title
+msgid "Agreement Stability Analysis"
+msgstr ""
+
 #: cohenskappa/results/agreementStats.title
 #: digitalvalidation/results/agreementtable.title
 #: modalitycomparison/results/agreementTable.title
@@ -5102,14 +5672,28 @@ msgstr ""
 msgid "Agreement Statistics"
 msgstr ""
 
+#: agreement/options/agreementTrendAnalysis.title
+#: agreement/results/agreementTrendTable.title
+msgid "Agreement Trend Analysis"
+msgstr ""
+
+#: agreement/results/trendPlot.title
+msgid "Agreement Trend Plot"
+msgstr ""
+
 #: icccoeff/options/agreement_type.title
 msgid "Agreement Type"
 msgstr ""
 
+#: agreement/ui[4][0][0].label
 #: cohenskappa/options/agreement_plot.title
 #: cohenskappa/results/agreementPlot.title
 #: modalitycomparison/results/agreementPlot.title
 msgid "Agreement Visualization"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Agreement was assessed using %s."
 msgstr ""
 
 #: cohenskappa/results/categoryStats.columns.title
@@ -5425,6 +6009,10 @@ msgstr ""
 msgid "All methods"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "All metrics scaled 0-100% (LR Quality: clinical performance scale)"
+msgstr ""
+
 #: vartree/options/summarylocation/allnodes.title
 msgid "All Nodes"
 msgstr ""
@@ -5645,6 +6233,10 @@ msgstr ""
 msgid "Alluvial Plot Style"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Almost Perfect"
+msgstr ""
+
 #: decisionpanel/results/incrementalValue.columns.title
 msgid "Alone"
 msgstr ""
@@ -5726,6 +6318,10 @@ msgstr ""
 
 #: tinytable/options/style_alternating.title
 msgid "Alternating Row Colors"
+msgstr ""
+
+#: agreement/ui[5][0][0].label
+msgid "Alternative Agreement Coefficients"
 msgstr ""
 
 #: exacttests/options/alternative.title
@@ -5884,6 +6480,7 @@ msgstr ""
 #: haralicktexture/ui[1][0][0].label
 #: multiplexanalysis/ui[1][0][0].label
 #: poweranalysis/ui[0].label
+#: psychopdaROC/ui[1][0].label
 #: simonmakuch/ui[2].label
 #: stagemigration/ui[2].label
 #: treatmentmeta/ui[1][0].label
@@ -5896,6 +6493,10 @@ msgstr ""
 
 #: effectsize/options/analysis_context.title
 msgid "Analysis Context"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Analysis could not be completed"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -5913,6 +6514,10 @@ msgstr ""
 
 #: survival/ui[8].label
 msgid "Analysis Explanations"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Analysis failed: {error}. Please check your data and variable selections."
 msgstr ""
 
 #: decisioncurve/ui[1][1][0].label
@@ -5978,6 +6583,11 @@ msgstr ""
 msgid "Analysis Interpretation"
 msgstr ""
 
+#: psychopdaROC/options/clinicalMode.title
+#: psychopdaROC/ui[1]/clinicalMode.label
+msgid "Analysis Level"
+msgstr ""
+
 #: condsurvival/ui[1][1].label
 #: nogoldstandard/options/method.title
 #: nogoldstandard/ui[2][0]/method.label
@@ -6035,7 +6645,6 @@ msgstr ""
 #: clinicaltrialdesign/ui[6][0].label
 #: competingsurvival/ui[2][0].label
 #: conditionalsurvival/ui[1][0].label
-#: decision/ui[1].label
 #: decisioncalculator/ui[1].label
 #: decisioncombine/ui[1].label
 #: decisioncurve/ui[1].label
@@ -6067,7 +6676,7 @@ msgstr ""
 #: pathologycomposition/ui[1][0].label
 #: pheval/ui[6][0].label
 #: powercomprisk/ui[6].label
-#: psychopdaROC/ui[3].label
+#: psychopdaROC/ui[5].label
 #: qualitycontrol/ui[1][8].label
 #: rmst/ui[1].label
 #: sigmametrics/ui[1][1].label
@@ -6368,6 +6977,8 @@ msgstr ""
 #: progressionsurvival/options/analysis_type.title
 #: progressionsurvival/results/pfs_summary.columns.title
 #: pseudosurvival/options/analysis_type.title
+#: psychopdaROC/ui[3][0]/fixedAnalysisType.label
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: qualitycontrol/ui[1][0].label
 #: rmstregression/options/analysis_type.title
 #: simonmakuch/options/analysisType.title
@@ -6701,6 +7312,11 @@ msgstr ""
 msgid "Apparent Performance"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Apparent prevalence"
+msgstr ""
+
 #: jjarcdiagram/ui[4].label
 #: jwaffle/ui[1][1].label
 msgid "Appearance"
@@ -6766,7 +7382,7 @@ msgstr ""
 msgid "Apply LOESS Smoothing"
 msgstr ""
 
-#: psychopdaROC/ui[5][1]/smoothing.label
+#: psychopdaROC/ui[7][1]/smoothing.label
 msgid "Apply LOESS smoothing"
 msgstr ""
 
@@ -7002,9 +7618,12 @@ msgstr ""
 
 #: crosstable/options/sty/arsenal.title
 #: crosstable2/options/sty/arsenal.title
-#: tableone/options/sty/t3.title
 #: tableone2/options/sty/t3.title
 msgid "arsenal"
+msgstr ""
+
+#: tableone/options/sty/t3.title
+msgid "arsenal (Comprehensive descriptive table)"
 msgstr ""
 
 #: clinmon/options/abp.title
@@ -7245,6 +7864,11 @@ msgstr ""
 #: ciSingle/results/diagnostics.columns.title
 #: screeningcalculator/results/sampleSizeTable.columns.title
 msgid "Assumptions"
+msgstr ""
+
+#: agreement/options/showAssumptions.title
+#: agreement/results/assumptions.title
+msgid "Assumptions & Caveats"
 msgstr ""
 
 #: stagemigration/options/winRatioConfidenceMethod/asymptotic.title
@@ -7802,6 +8426,7 @@ msgstr ""
 msgid "Average Cluster Size"
 msgstr ""
 
+#: agreement/options/styleClusterMethod/average.title
 #: dendrogram/options/clusterMethod/average.title
 msgid "Average Linkage"
 msgstr ""
@@ -7848,6 +8473,10 @@ msgstr ""
 
 #: decisionpanel/results/strategyComparison.columns.title
 msgid "Avg Specificity"
+msgstr ""
+
+#: agreement/results/styleSummaryTable.columns.title
+msgid "Avg Within-Group Agreement %"
 msgstr ""
 
 #: jjradarplot/options/axisLabelSize.title
@@ -7964,6 +8593,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Balanced approach for diagnostic test validation"
+msgstr ""
+
+#: psychopdaROC/options/clinicalPreset/balanced.title
+msgid "Balanced Diagnostic Test"
 msgstr ""
 
 #: smoothhazard/options/bandwidth.title
@@ -8405,7 +9038,7 @@ msgstr ""
 msgid "Basic Parameters"
 msgstr ""
 
-#: psychopdaROC/ui[5][0][0].label
+#: psychopdaROC/ui[7][0][0].label
 msgid "Basic Plot Settings"
 msgstr ""
 
@@ -8427,6 +9060,10 @@ msgstr ""
 
 #: jjridges/options/plot_type/ridgeline.title
 msgid "Basic Ridgeline"
+msgstr ""
+
+#: psychopdaROC/options/clinicalMode/basic.title
+msgid "Basic ROC Analysis (Recommended for Clinical Use)"
 msgstr ""
 
 #: simonmakuch/options/analysisType/basic.title
@@ -8632,7 +9269,7 @@ msgstr ""
 #: bayesdca/options/bayesianAnalysis.title
 #: bayesdca/ui[2][0]/bayesianAnalysis.label
 #: nogoldstandard/options/method/bayesian.title
-#: psychopdaROC/ui[9][0][2].label
+#: psychopdaROC/ui[11][0][2].label
 msgid "Bayesian Analysis"
 msgstr ""
 
@@ -8887,8 +9524,7 @@ msgstr ""
 msgid "Bayesian repeated measures analysis"
 msgstr ""
 
-#: psychopdaROC/options/bayesianAnalysis.title
-#: psychopdaROC/ui[9][0]/bayesianAnalysis.label
+#: psychopdaROC/ui[11][0]/bayesianAnalysis.label
 #: psychopdaROC/results/bayesianROCTable.title
 msgid "Bayesian ROC Analysis"
 msgstr ""
@@ -9365,6 +10001,14 @@ msgstr ""
 
 #: sigmametrics/results/qualityGoalIndex.columns.title
 msgid "Bias QGI"
+msgstr ""
+
+#: agreement/results/raterBiasTable.columns.title
+msgid "Bias Score"
+msgstr ""
+
+#: agreement/results/raterBiasTable.columns.title
+msgid "Bias Severity"
 msgstr ""
 
 #: methodcomparison/results/biasAnalysis.columns.title
@@ -10085,6 +10729,7 @@ msgstr ""
 msgid "Blue-Red"
 msgstr ""
 
+#: agreement/options/heatmapTheme/bwr.title
 #: robustcorrelation/options/heatmap_colors/blue_white_red.title
 msgid "Blue-White-Red"
 msgstr ""
@@ -10232,6 +10877,10 @@ msgstr ""
 msgid "Bootstrap 95% CI Upper"
 msgstr ""
 
+#: agreement/ui[5][1][0].label
+msgid "Bootstrap Analysis"
+msgstr ""
+
 #: nonparametric/ui[5].label
 msgid "Bootstrap and Resampling Methods"
 msgstr ""
@@ -10252,6 +10901,7 @@ msgstr ""
 msgid "Bootstrap confidence interval results"
 msgstr ""
 
+#: agreement/options/bootstrap.title
 #: aivalidation/options/bootstrapCI.title
 #: bayesdca/options/bootstrapCI.title
 #: bayesdca/ui[2][0]/bootstrapCI.label
@@ -10297,7 +10947,7 @@ msgstr ""
 msgid "Bootstrap Confidence Intervals"
 msgstr ""
 
-#: psychopdaROC/ui[7][1]/bootstrapCI.label
+#: psychopdaROC/ui[9][1]/bootstrapCI.label
 msgid "Bootstrap confidence intervals"
 msgstr ""
 
@@ -10343,14 +10993,14 @@ msgstr ""
 #: highdimcox/options/bootstrap_iterations.title
 #: ihccluster/options/nBootstrap.title
 #: psychopdaROC/options/boot_runs.title
-#: psychopdaROC/ui[2][1]/boot_runs.label
+#: psychopdaROC/ui[4][1]/boot_runs.label
 #: rmst/options/bootstrap_n.title
 #: robustcorrelation/options/n_bootstrap.title
 msgid "Bootstrap Iterations"
 msgstr ""
 
 #: ihccluster/ui[3][1][0].label
-#: psychopdaROC/ui[8][1]/idiNriBootRuns.label
+#: psychopdaROC/ui[10][1]/idiNriBootRuns.label
 msgid "Bootstrap iterations"
 msgstr ""
 
@@ -10358,6 +11008,7 @@ msgstr ""
 msgid "Bootstrap Lower"
 msgstr ""
 
+#: agreement/results/stabilityTable.columns.title
 #: biomarkerdiscovery/results/discovery_performance.columns.title
 #: flexparametricadv/results/bootstrapValidation.columns.title
 #: rmstregression/results/bootstrapResults.columns.title
@@ -10420,7 +11071,7 @@ msgstr ""
 
 #: decisioncurve/ui[5][0][0]/bootReps.label
 #: modelbuilder/ui[6][1][0]/bootstrapReps.label
-#: psychopdaROC/ui[7][1]/bootstrapReps.label
+#: psychopdaROC/ui[9][1]/bootstrapReps.label
 msgid "Bootstrap replications"
 msgstr ""
 
@@ -10435,6 +11086,7 @@ msgid "Bootstrap Runs"
 msgstr ""
 
 #: adaptivelasso/options/bootstrap_samples.title
+#: agreement/options/bootstrapSamples.title
 #: biomarkerdiscovery/options/n_bootstrap_samples.title
 #: ciSingle/options/bootstrapSamples.title
 #: classification/options/bootstrapSamples.title
@@ -10507,6 +11159,10 @@ msgstr ""
 msgid "Bootstrap Samples"
 msgstr ""
 
+#: agreement/ui[5][1]/bootstrapSamples.label
+msgid "Bootstrap Samples (100-5000)"
+msgstr ""
+
 #: treeadvanced/options/n_bootstrap.title
 msgid "Bootstrap Samples for CI"
 msgstr ""
@@ -10524,6 +11180,7 @@ msgstr ""
 msgid "Bootstrap SD"
 msgstr ""
 
+#: agreement/results/stabilityTable.columns.title
 #: effectsize/results/results/bootstrapResults.columns.title
 #: flexparametricadv/results/bootstrapValidation.columns.title
 #: mixedcox/results/bootstrapTable.columns.title
@@ -11383,6 +12040,10 @@ msgstr ""
 msgid "Calculate diagnostic odds ratio and confidence interval"
 msgstr ""
 
+#: psychopdaROC/options/calculateIDI.title
+msgid "Calculate Discrimination Improvement"
+msgstr ""
+
 #: stagemigration/options/forestDiscriminationMetrics.description
 msgid "Calculate discrimination metrics specifically for random forest models  including C-index, Integrated Brier Score, and time-dependent AUC.  Compares forest performance with traditional Cox models."
 msgstr ""
@@ -11470,8 +12131,7 @@ msgstr ""
 msgid "Calculate Hedges' g effect size (bias-corrected)"
 msgstr ""
 
-#: psychopdaROC/options/calculateIDI.title
-#: psychopdaROC/ui[8][1]/calculateIDI.label
+#: psychopdaROC/ui[10][1]/calculateIDI.label
 msgid "Calculate IDI"
 msgstr ""
 
@@ -11547,8 +12207,7 @@ msgstr ""
 msgid "Calculate Net Reclassification Index"
 msgstr ""
 
-#: psychopdaROC/options/calculateNRI.title
-#: psychopdaROC/ui[8][1]/calculateNRI.label
+#: psychopdaROC/ui[10][1]/calculateNRI.label
 msgid "Calculate NRI"
 msgstr ""
 
@@ -11572,7 +12231,7 @@ msgstr ""
 msgid "Calculate Partial AUC"
 msgstr ""
 
-#: psychopdaROC/ui[7][0]/partialAUC.label
+#: psychopdaROC/ui[9][0]/partialAUC.label
 msgid "Calculate partial AUC"
 msgstr ""
 
@@ -11665,6 +12324,10 @@ msgstr ""
 
 #: effectsize/options/measures_rank_biserial.description
 msgid "Calculate rank-biserial correlation for Mann-Whitney U"
+msgstr ""
+
+#: psychopdaROC/options/calculateNRI.title
+msgid "Calculate Reclassification Improvement"
 msgstr ""
 
 #: idi/options/relative_improvement.title
@@ -12110,6 +12773,14 @@ msgstr ""
 msgid "Cannot be tested statistically"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Cannot calculate"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Cannot use both population prevalence and confidence intervals simultaneously. Please choose one option."
+msgstr ""
+
 #: qualitycontrol/results/capabilityAnalysis.columns.title
 msgid "Capability Index"
 msgstr ""
@@ -12186,7 +12857,19 @@ msgstr ""
 msgid "Case Definition Performance"
 msgstr ""
 
+#: agreement/options/caseDifficultyScoring.title
+#: agreement/results/caseDifficultyTable.title
+msgid "Case Difficulty Analysis"
+msgstr ""
+
+#: agreement/results/difficultyPlot.title
+msgid "Case Difficulty Distribution"
+msgstr ""
+
+#: agreement/results/outlierTable.columns.title
+#: agreement/results/discordantCasesTable.columns.title
 #: agreement/results/consensusTable.columns.title
+#: agreement/results/caseDifficultyTable.columns.title
 #: extratrees/results/oobPredictions.columns.title
 #: gradientboosting/results/predictions.columns.title
 #: modalitycomparison/results/caseDetailTable.columns.title
@@ -12195,6 +12878,10 @@ msgstr ""
 
 #: ihccluster/options/caseId.title
 msgid "Case ID (optional)"
+msgstr ""
+
+#: agreement/options/caseID.title
+msgid "Case ID Variable"
 msgstr ""
 
 #: ihcstats/options/id.title
@@ -12247,6 +12934,10 @@ msgstr ""
 msgid "Case-Control Analysis"
 msgstr ""
 
+#: agreement/ui[7][1][0].label
+msgid "Case-Level Analysis"
+msgstr ""
+
 #: agreement/results/overviewTable.columns.title
 #: aivalidation/results/cvFoldResults.columns.title
 #: biopsysimulation/results/spatialanalysistable.columns.title
@@ -12270,12 +12961,20 @@ msgstr ""
 msgid "Cases Detected"
 msgstr ""
 
+#: agreement/results/discordantCasesTable.title
+msgid "Cases Distinguishing Diagnostic Styles"
+msgstr ""
+
 #: outbreakanalysis/results/case_definition_analysis.columns.title
 msgid "Cases Identified"
 msgstr ""
 
 #: epidemiosurvival/results/case_cohort_results.columns.title
 msgid "Cases in Subcohort"
+msgstr ""
+
+#: agreement/results/outlierTable.title
+msgid "Cases with Poor Agreement"
 msgstr ""
 
 #: package/analyses/jjtreemap.menuSubgroup
@@ -12442,6 +13141,9 @@ msgstr ""
 msgid "Categorized (NOT recommended - educational only)"
 msgstr ""
 
+#: agreement/results/categoryTable.columns.title
+#: agreement/results/raterFrequencyTables/frequencyTable.columns.title
+#: agreement/results/crosstabTable.columns.title
 #: chisqposttest/results/exportTable.columns.title
 #: clinicalalerts/results/clinicalRecommendations.columns.title
 #: clinicalvalidationinteractive/results/performanceWarnings.columns.title
@@ -12458,6 +13160,10 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
+#: agreement/results/categoryPlot.title
+msgid "Category Agreement Plot"
+msgstr ""
+
 #: enhancedfrequency/results/results/dataQualityReport.columns.title
 msgid "Category Balance"
 msgstr ""
@@ -12472,6 +13178,10 @@ msgstr ""
 
 #: enhancedfrequency/ui[2][0][1][0].label
 msgid "Category Filtering"
+msgstr ""
+
+#: agreement/results/categoryTable.columns.title
+msgid "Category Kappa"
 msgstr ""
 
 #: netreclassification/options/category_labels.title
@@ -12492,6 +13202,8 @@ msgstr ""
 msgid "Category Variable (X-axis)"
 msgstr ""
 
+#: agreement/options/categoryAnalysis.title
+#: agreement/results/categoryTable.title
 #: cohenskappa/results/categoryStats.title
 msgid "Category-Specific Agreement"
 msgstr ""
@@ -13511,6 +14223,10 @@ msgstr ""
 msgid "Choose the color scheme for the age pyramid."
 msgstr ""
 
+#: tableone/options/sty.description.jamovi
+msgid "Choose the descriptive table format. 'tableone' style shows standard medical descriptives (mean ± SD, median [IQR], N (%)), 'gtsummary' provides polished formatting, 'arsenal' gives detailed summaries, and 'janitor' focuses on frequency counts."
+msgstr ""
+
 #: advancedbarplot/options/theme_style.description.jamovi
 msgid "Choose the overall visual style including authentic Prism styling."
 msgstr ""
@@ -13547,7 +14263,6 @@ msgstr ""
 msgid "Choose the smoothing method for trend line."
 msgstr ""
 
-#: tableone/options/sty.description.jamovi
 #: tableone2/options/sty.description.jamovi
 msgid "Choose the table style."
 msgstr ""
@@ -13651,7 +14366,10 @@ msgstr ""
 #: advancedimputation/results/sensitivity_results.columns.title
 #: advancedimputation/results/pooled_estimates.columns.title
 #: agreement/results/kappaTable.columns.title
+#: agreement/results/iccTable.columns.title
+#: agreement/results/pairwiseTable.columns.title
 #: agreement/results/krippTable.columns.title
+#: agreement/results/gwetACTable.columns.title
 #: bayesiandiagnostic/results/summaryStatistics.columns.title
 #: bayesiandiagnostic/results/diagnosticPerformance.columns.title
 #: bayesiandiagnostic/results/sensitivitySpecificity.columns.title
@@ -13733,7 +14451,10 @@ msgstr ""
 #: advancedimputation/results/sensitivity_results.columns.title
 #: advancedimputation/results/pooled_estimates.columns.title
 #: agreement/results/kappaTable.columns.title
+#: agreement/results/iccTable.columns.title
+#: agreement/results/pairwiseTable.columns.title
 #: agreement/results/krippTable.columns.title
+#: agreement/results/gwetACTable.columns.title
 #: bayesiandiagnostic/results/summaryStatistics.columns.title
 #: bayesiandiagnostic/results/diagnosticPerformance.columns.title
 #: bayesiandiagnostic/results/sensitivitySpecificity.columns.title
@@ -13860,6 +14581,10 @@ msgstr ""
 msgid "Cividis"
 msgstr ""
 
+#: agreement/options/heatmapTheme/cividis.title
+msgid "Cividis (colorblind-safe)"
+msgstr ""
+
 #: ppv/results/confusion.columns.title
 msgid "Claimed Finding"
 msgstr ""
@@ -13945,7 +14670,7 @@ msgstr ""
 
 #: bayesdca/ui[2][0][0].label
 #: psychopdaROC/options/direction.title
-#: psychopdaROC/ui[2][0]/direction.label
+#: psychopdaROC/ui[4][0]/direction.label
 msgid "Classification Direction"
 msgstr ""
 
@@ -14276,6 +15001,7 @@ msgstr ""
 msgid "Clinical Context"
 msgstr ""
 
+#: agreement/ui[7][2][0].label
 #: featurequality/options/clinical_context.title
 msgid "Clinical Context Analysis"
 msgstr ""
@@ -14500,6 +15226,10 @@ msgstr ""
 msgid "Clinical Guidelines Integration"
 msgstr ""
 
+#: decision/ui[5][1].label
+msgid "Clinical Guidelines: Sensitivity >90% excellent for ruling OUT disease, Specificity >90% excellent for ruling IN disease"
+msgstr ""
+
 #: package/analyses/clinmon.title
 #: package/analyses/clinmon.menuTitle
 #: clinmon/options.title
@@ -14648,6 +15378,7 @@ msgstr ""
 #: poweranalysis/results/non_inferiority_table.columns.title
 #: progressionsurvival/results/treatment_effects.columns.title
 #: progressionsurvival/results/clinical_significance_table.columns.title
+#: psychopdaROC/results/clinicalInterpretationTable.title
 #: qualityoflife/options/clinical_interpretation.title
 #: qualityoflife/ui[3][0].label
 #: qualityoflife/results/summary_scores.columns.title
@@ -14777,7 +15508,6 @@ msgstr ""
 #: cochranq/results/clinicalInterpretation.title
 #: cohenskappa/options/interpretation_guide.title
 #: condsurvival/options/clinical_interpretation.title
-#: decision/results/clinicalInterpretation.title
 #: friedmantest/results/clinicalInterpretation.title
 #: likelihoodratio/options/showClinicalInterpretation.title
 #: markovmultistate/results/interpretationGuide.title
@@ -14794,6 +15524,7 @@ msgstr ""
 msgid "Clinical interpretation guide"
 msgstr ""
 
+#: R/decision.b.R
 #: R/linechart.b.R
 #: clinicalalerts/results/interpretationGuide.title
 #: cohenskappa/results/interpretationGuide.title
@@ -15000,6 +15731,7 @@ msgstr ""
 #: enhancedROC/results/results/optimalCutoffSummary.columns.title
 #: friedmantest/results/clinicalInterpretation.columns.title
 #: pagetrendtest/results/clinicalInterpretation.columns.title
+#: psychopdaROC/results/clinicalInterpretationTable.columns.title
 #: qualityoflife/results/clinical_interpretation_summary.columns.title
 #: stagemigration/results/multiStateSummary.columns.title
 #: stagemigration/results/forestStagingComparison.columns.title
@@ -15065,6 +15797,10 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: enhancedROC/results/results/clinicalReport.title
 msgid "Clinical Report Sentences"
+msgstr ""
+
+#: agreement/ui[3][0][0].label
+msgid "Clinical Reports"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/clinical.title
@@ -15250,6 +15986,8 @@ msgstr ""
 #: R/jjsegmentedtotalbar.b.R
 #: R/lollipop.b.R
 #: R/nogoldstandard.b.R
+#: agreement/options/showClinicalSummary.title
+#: agreement/results/clinicalSummary.title
 #: decisionpanel/results/clinicalSummary.title
 #: jjridges/results/clinicalSummary.title
 #: jjsegmentedtotalbar/results/clinical_summary.title
@@ -15308,10 +16046,15 @@ msgstr ""
 msgid "Clinical Trial Settings"
 msgstr ""
 
+#: psychopdaROC/options/clinicalPreset.title
+#: psychopdaROC/ui[1]/clinicalPreset.label
+msgid "Clinical Use Case"
+msgstr ""
+
 #: clinicalvalidationinteractive/results/thresholdOptimization.columns.title
 #: enhancedROC/results/results/aucSummary.columns.title
 #: likelihoodratio/results/postTestProbabilities.columns.title
-#: psychopdaROC/ui[9][0][6].label
+#: psychopdaROC/ui[11][0][6].label
 #: psychopdaROC/results/clinicalUtilityTable.columns.title
 #: stagemigration/results/stageSpecificCureAnalysis.columns.title
 msgid "Clinical Utility"
@@ -15326,7 +16069,7 @@ msgid "Clinical Utility (Cost-Weighted)"
 msgstr ""
 
 #: psychopdaROC/options/clinicalUtilityAnalysis.title
-#: psychopdaROC/ui[9][0]/clinicalUtilityAnalysis.label
+#: psychopdaROC/ui[11][0]/clinicalUtilityAnalysis.label
 #: psychopdaROC/results/clinicalUtilityTable.title
 msgid "Clinical Utility Analysis"
 msgstr ""
@@ -15396,6 +16139,10 @@ msgstr ""
 
 #: digitalvalidation/options/validation_type/clinical.title
 msgid "Clinical Validation"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Clinical validation studies"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -16294,6 +17041,7 @@ msgid "Cochran's Q Test Results"
 msgstr ""
 
 #: adaptivelasso/results/coefficients.columns.title
+#: agreement/results/gwetACTable.columns.title
 #: bayesiandiagnostic/results/covariateEffects.columns.title
 #: bayesiannetworkma/results/metaRegressionResults.columns.title
 #: clinicalnomograms/results/variableSelection.columns.title
@@ -16430,6 +17178,7 @@ msgstr ""
 msgid "Cohen's d for AUC differences"
 msgstr ""
 
+#: R/agreement.b.R
 #: psychopdaROC/options/metric/cohens_kappa.title
 msgid "Cohen's Kappa"
 msgstr ""
@@ -16877,7 +17626,7 @@ msgstr ""
 msgid "Combination Diagnostic Statistics with 95% Confidence Intervals"
 msgstr ""
 
-#: psychopdaROC/ui[5][0]/combinePlots.label
+#: psychopdaROC/ui[7][0]/combinePlots.label
 msgid "Combine all curves in one plot"
 msgstr ""
 
@@ -16920,6 +17669,10 @@ msgstr ""
 
 #: labcontrolcharts/options/chart_type/combined.title
 msgid "Combined Charts"
+msgstr ""
+
+#: agreement/results/diagnosticStyleCombined.title
+msgid "Combined Dendrogram + Heatmap (Usubutun Style)"
 msgstr ""
 
 #: enhancedfactorvariable/options/showCombinedAnalysis.title
@@ -17121,6 +17874,10 @@ msgstr ""
 msgid "Common Heterogeneity"
 msgstr ""
 
+#: decision/ui[5][3].label
+msgid "Common Issues: Small cell counts (<5) may cause unstable results, extreme prevalence affects predictive values"
+msgstr ""
+
 #: effectsize/options/measures_common_language.title
 msgid "Common Language Effect Size"
 msgstr ""
@@ -17211,11 +17968,7 @@ msgstr ""
 msgid "Compare Across Cut-offs"
 msgstr ""
 
-#: psychopdaROC/options/delongTest.title
-msgid "Compare AUCs (DeLong's Test)"
-msgstr ""
-
-#: psychopdaROC/ui[4][0]/delongTest.label
+#: psychopdaROC/ui[6][0]/delongTest.label
 msgid "Compare AUCs (DeLong's test)"
 msgstr ""
 
@@ -17235,7 +17988,7 @@ msgstr ""
 msgid "Compare Classifier Performance"
 msgstr ""
 
-#: psychopdaROC/ui[8][0]/compareClassifiers.label
+#: psychopdaROC/ui[10][0]/compareClassifiers.label
 msgid "Compare classifier performance"
 msgstr ""
 
@@ -17361,6 +18114,10 @@ msgstr ""
 msgid "Compare Staging Systems"
 msgstr ""
 
+#: psychopdaROC/options/delongTest.title
+msgid "Compare Test Performance Statistically"
+msgstr ""
+
 #: decisionpanel/options/compareStrategies.title
 #: decisionpanel/ui[6][0]/compareStrategies.label
 msgid "Compare Testing Strategies"
@@ -17388,6 +18145,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Comparing across groups:"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Comparing performance of different diagnostic methods"
 msgstr ""
 
 #: package/analyses/comparingSurvival.title
@@ -17524,6 +18285,10 @@ msgstr ""
 
 #: stagemigration/results/frailtyModelsComparison.description
 msgid "Comparison of staging systems using frailty models with clustering adjustments"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Comparison of Tests"
 msgstr ""
 
 #: decisioncompare/options/plot.title
@@ -17789,6 +18554,7 @@ msgstr ""
 msgid "Complete effect size toolkit with BlueSky integration"
 msgstr ""
 
+#: agreement/options/styleClusterMethod/complete.title
 #: dendrogram/options/clusterMethod/complete.title
 msgid "Complete Linkage"
 msgstr ""
@@ -18356,6 +19122,11 @@ msgstr ""
 msgid "Comprehensive Guide"
 msgstr ""
 
+#: package/analyses/agreement.description
+#: agreement/options.description.main
+msgid "Comprehensive interrater reliability analysis including Cohen's kappa (2 raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis. Provides agreement statistics, visualization, and clinical interpretation for categorical rating data."
+msgstr ""
+
 #: package/analyses/qualitycontrol.description
 #: qualitycontrol/options.description.main
 msgid "Comprehensive laboratory quality control statistics including control charts (Shewhart, CUSUM, EWMA),  sigma metrics, method validation protocols, and reference interval establishment for clinical laboratory management."
@@ -18639,6 +19410,10 @@ msgstr ""
 #: package/analyses/spatialautocorrelation.description
 #: spatialautocorrelation/options.description.main
 msgid "Comprehensive spatial autocorrelation analysis for tissue pattern analysis and digital pathology. Implements Moran's I, Geary's C, and local indicators of spatial association (LISA) for detecting spatial clustering and patterns in histopathological data. Essential for analyzing spatial dependencies in tissue architecture and cellular distributions."
+msgstr ""
+
+#: psychopdaROC/options/clinicalMode/comprehensive.title
+msgid "Comprehensive Statistical Analysis"
 msgstr ""
 
 #: effectsize/options/comprehensive_output.title
@@ -19225,7 +20000,7 @@ msgstr ""
 #: exacttests/ui[1][1].label
 #: mixedcox/options/confidence_intervals.title
 #: plscox/options/confidence_intervals.title
-#: psychopdaROC/ui[5][2][0].label
+#: psychopdaROC/ui[7][2][0].label
 msgid "Confidence Intervals"
 msgstr ""
 
@@ -19582,6 +20357,10 @@ msgstr ""
 msgid "Confirm variables have adequate variation (≥2 categories)"
 msgstr ""
 
+#: psychopdaROC/options/clinicalPreset/confirmation.title
+msgid "Confirmation Test (Prioritize Specificity)"
+msgstr ""
+
 #: decisionpanel/options/sequentialStop/confirmatory.title
 msgid "Confirmatory (require 2 positives)"
 msgstr ""
@@ -19610,6 +20389,7 @@ msgstr ""
 msgid "Confusion Matrices"
 msgstr ""
 
+#: agreement/results/confusionMatrixPlot.title
 #: classification/options/reporting/confusionMatrix.title
 #: cohenskappa/options/confusion_matrix.title
 #: cohenskappa/results/confusionMatrix.title
@@ -19660,6 +20440,14 @@ msgstr ""
 msgid "Conover-Iman test"
 msgstr ""
 
+#: agreement/results/outlierTable.columns.title
+msgid "Consensus"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Consensus Achieved"
+msgstr ""
+
 #: agreement/options/consensus.title
 msgid "Consensus Analysis"
 msgstr ""
@@ -19673,16 +20461,11 @@ msgid "Consensus Clustering Stability"
 msgstr ""
 
 #: agreement/options/consensus_method.title
-#: agreement/ui[5][0]/consensus_method.label
 msgid "Consensus Method"
 msgstr ""
 
 #: agreement/results/consensusTable.columns.title
 msgid "Consensus Score"
-msgstr ""
-
-#: agreement/ui[5].label
-msgid "Consensus Scoring"
 msgstr ""
 
 #: agreement/results/consensusTable.title
@@ -19734,6 +20517,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Consider checking for missing values or selecting different variables."
+msgstr ""
+
+#: R/decision.b.R
+msgid "Consider clinical consequences of false positives vs false negatives"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -20430,6 +21217,7 @@ msgstr ""
 msgid "Copy-ready clinical report sentences for publications and reports"
 msgstr ""
 
+#: agreement/results/reportTemplate.title
 #: decisionpanel/results/clinicalReport.title
 #: jjbarstats/results/report.title
 #: jjpiestats/results/report.title
@@ -20516,6 +21304,7 @@ msgstr ""
 
 #: package/analyses/jcorrelation.menuSubgroup
 #: advancedimputation/results/cross_validation_results.columns.title
+#: agreement/options/styleDistanceMetric/correlation.title
 #: batcheffect/results/redundancy.columns.title
 #: betabinomialdiagnostic/results/correlationResults.columns.title
 #: biomarkerresponse/results/correlation.columns.title
@@ -20890,7 +21679,7 @@ msgid "Cost Ratio (False Positive : False Negative)"
 msgstr ""
 
 #: psychopdaROC/options/costratioFP.title
-#: psychopdaROC/ui[2][0]/costratioFP.label
+#: psychopdaROC/ui[4][0]/costratioFP.label
 msgid "Cost Ratio (FP:FN)"
 msgstr ""
 
@@ -20994,6 +21783,22 @@ msgstr ""
 
 #: decisionpanel/options/treeMethod/costSensitive.title
 msgid "Cost-sensitive trees"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Could not calculate {metric} difference for {comparison} (n1={n1}, n2={n2}). Check for extreme values or zero denominators. Error: {error}"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Could not calculate reliable agreement measure. Check your data for sufficient cases and category distribution."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}"
 msgstr ""
 
 #: advancedbarplot/options/stat_type/count.title
@@ -21593,7 +22398,7 @@ msgstr ""
 msgid "Create Interactive Plot"
 msgstr ""
 
-#: psychopdaROC/ui[5][1]/interactiveROC.label
+#: psychopdaROC/ui[7][1]/interactiveROC.label
 msgid "Create interactive plot"
 msgstr ""
 
@@ -22039,6 +22844,10 @@ msgstr ""
 
 #: enhancedtwowayfrequency/results/crossTabMatrix.title
 msgid "Cross-Tabulation Matrix"
+msgstr ""
+
+#: agreement/results/crosstabTable.title
+msgid "Cross-tabulation Matrix"
 msgstr ""
 
 #: modalitycomparison/results/contingencyTable.title
@@ -22720,6 +23529,10 @@ msgstr ""
 msgid "Current Hazard Ratio"
 msgstr ""
 
+#: agreement/results/diagnosticStyleTable.columns.title
+msgid "Current Institution"
+msgstr ""
+
 #: featurequality/results/transformation_recommendations.columns.title
 msgid "Current Issue"
 msgstr ""
@@ -22856,6 +23669,7 @@ msgid "Custom Alpha Spending"
 msgstr ""
 
 #: jjcorrmat/options/clinicalpreset/custom.title
+#: psychopdaROC/options/clinicalPreset/none.title
 msgid "Custom Analysis"
 msgstr ""
 
@@ -23594,12 +24408,12 @@ msgstr ""
 
 #: optimalcutpoint/options/cutpoint_method.title
 #: psychopdaROC/options/method.title
-#: psychopdaROC/ui[2][0]/method.label
+#: psychopdaROC/ui[4][0]/method.label
 #: timedependent/options/cutpoint_method.title
 msgid "Cutpoint Method"
 msgstr ""
 
-#: psychopdaROC/ui[2].label
+#: psychopdaROC/ui[4].label
 msgid "Cutpoint Optimization"
 msgstr ""
 
@@ -23918,6 +24732,10 @@ msgstr ""
 msgid "Data contains no (complete) rows"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "Data contains no complete rows after removing missing values"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Data contains no rows"
 msgstr ""
@@ -24051,6 +24869,10 @@ msgstr ""
 msgid "Data Processing Diagnostics"
 msgstr ""
 
+#: tableone/results/assumptions.title
+msgid "Data Quality & Assumptions"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Data Quality Alerts:"
 msgstr ""
@@ -24117,6 +24939,10 @@ msgstr ""
 
 #: jjridges/results/warnings.title
 msgid "Data Quality Warnings"
+msgstr ""
+
+#: decision/ui[5][0].label
+msgid "Data Requirements: Both variables must be categorical (factor), each with exactly 2 levels, minimum 4 cases (preferably 30+)"
 msgstr ""
 
 #: jggheatmap/options/scaling.title
@@ -24193,6 +25019,10 @@ msgstr ""
 #: agreement/results/krippTable.columns.title
 #: biomarkerdiscovery/options/data_type.title
 msgid "Data Type"
+msgstr ""
+
+#: agreement/ui[2][1][0].label
+msgid "Data Type & Weighting"
 msgstr ""
 
 #: agreement/options/krippMethod.title
@@ -25555,6 +26385,10 @@ msgstr ""
 msgid "Detailed hazard function estimates for export"
 msgstr ""
 
+#: psychopdaROC/results/clinicalInterpretationTable.columns.title
+msgid "Detailed Interpretation"
+msgstr ""
+
 #: survivalmodelvalidation/results/methodologicalNotes.description
 msgid "Detailed methodology and interpretation guidance"
 msgstr ""
@@ -25701,6 +26535,10 @@ msgstr ""
 
 #: stagemigration/options/performOptimalCutpoint.description
 msgid "Determine optimal cut-points for continuous variables that create the most  statistically significant separation in survival outcomes. Uses maximal  selected rank statistics with appropriate multiple testing corrections.  Essential for developing new staging criteria from continuous biomarkers  or measurements."
+msgstr ""
+
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
+msgid "Determined Cutpoint"
 msgstr ""
 
 #: package/analyses/optimalcutpoint.description
@@ -25884,8 +26722,17 @@ msgstr ""
 msgid "Diagnostic"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Diagnostic accuracy"
+msgstr ""
+
 #: screeningevaluation/options/diagnostic_accuracy.title
 msgid "Diagnostic Accuracy Analysis"
+msgstr ""
+
+#: agreement/results/diagnosticAccuracyTable.title
+msgid "Diagnostic Accuracy by Rater"
 msgstr ""
 
 #: screeningevaluation/results/diagnostic_accuracy_summary.title
@@ -25985,6 +26832,8 @@ msgstr ""
 msgid "Diagnostic Odds Ratio"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
 #: likelihoodratio/ui[6]/showDiagnosticOdds.label
 #: psychopdaROC/options/metric/odds_ratio.title
 msgid "Diagnostic odds ratio"
@@ -26107,6 +26956,26 @@ msgstr ""
 msgid "Diagnostic Statistics"
 msgstr ""
 
+#: agreement/options/diagnosticStyleAnalysis.title
+msgid "Diagnostic Style Clustering"
+msgstr ""
+
+#: agreement/results/diagnosticStyleTable.title
+msgid "Diagnostic Style Clustering Results"
+msgstr ""
+
+#: agreement/results/diagnosticStyleDendrogram.title
+msgid "Diagnostic Style Dendrogram"
+msgstr ""
+
+#: agreement/results/styleSummaryTable.title
+msgid "Diagnostic Style Group Summary"
+msgstr ""
+
+#: agreement/results/diagnosticStyleHeatmap.title
+msgid "Diagnostic Style Heatmap"
+msgstr ""
+
 #: conditionalgee/results/modelDiagnostics.columns.title
 #: nonparametricregression/results/residualDiagnostics.columns.title
 #: semimarkov/results/modelDiagnostics.columns.title
@@ -26143,6 +27012,10 @@ msgstr ""
 #: bayesiandiagnostic/options.menuSubgroup
 #: decisiongraph/options/clinicalPreset/diagnostic_test.title
 msgid "Diagnostic Test Evaluation"
+msgstr ""
+
+#: decision/ui[0][0].label
+msgid "DIAGNOSTIC TEST EVALUATION: Compare test accuracy to gold standard reference"
 msgstr ""
 
 #: package/analyses/diagnosticmeta.title
@@ -26309,6 +27182,14 @@ msgstr ""
 msgid "Differential Diagnosis Results (Olsen Method)"
 msgstr ""
 
+#: agreement/results/caseDifficultyTable.columns.title
+msgid "Difficulty Level"
+msgstr ""
+
+#: agreement/results/caseDifficultyTable.columns.title
+msgid "Difficulty Score"
+msgstr ""
+
 #: imagingcorrelation/results/lesionCharacterizationTable.columns.title
 msgid "Diffusion/Signal"
 msgstr ""
@@ -26464,12 +27345,24 @@ msgstr ""
 msgid "Dirichlet-Multinomial (>2 categories)"
 msgstr ""
 
+#: agreement/results/caseDifficultyTable.columns.title
+msgid "Disagreement Pattern"
+msgstr ""
+
+#: agreement/results/outlierTable.columns.title
+msgid "Disagreements"
+msgstr ""
+
 #: modelbuilder/results/idiTable.columns.title
 msgid "Disc. Slope (New)"
 msgstr ""
 
 #: modelbuilder/results/idiTable.columns.title
 msgid "Disc. Slope (Reference)"
+msgstr ""
+
+#: agreement/results/discordantCasesTable.columns.title
+msgid "Discord Score"
 msgstr ""
 
 #: modalitycomparison/results/lowEndAnalysisTable.columns.title
@@ -26646,6 +27539,8 @@ msgid "Disease Positive Level"
 msgstr ""
 
 #: decision/options/goldPositive.title
+#: decisioncombine/options/goldPositive.title
+#: decisioncompare/options/goldPositive.title
 msgid "Disease Present Level"
 msgstr ""
 
@@ -26674,8 +27569,16 @@ msgstr ""
 msgid "Disease prevalence for calculating predictive values"
 msgstr ""
 
+#: decision/ui[3]/pprob.label
+msgid "Disease Prevalence in Target Population (0.0-1.0)"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Disease prevalence:"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Disease Prevalence: Proportion with disease in this population. Affects predictive values."
 msgstr ""
 
 #: R/linechart.b.R
@@ -28882,6 +29785,7 @@ msgstr ""
 msgid "Educational"
 msgstr ""
 
+#: agreement/ui[3][1][0].label
 #: mixedcox/ui[7][2].label
 #: multisurvival/ui[18][0].label
 #: penalizedcox/ui[8][1].label
@@ -29052,7 +29956,7 @@ msgstr ""
 #: effectsize/ui.title
 #: patientreported/options/effect_size_analysis.title
 #: psychopdaROC/options/effectSizeAnalysis.title
-#: psychopdaROC/ui[8][1][6]/effectSizeAnalysis.label
+#: psychopdaROC/ui[10][1][6]/effectSizeAnalysis.label
 #: psychopdaROC/results/effectSizeTable.title
 #: qualityoflife/options/change_analysis/effect_size.title
 msgid "Effect Size Analysis"
@@ -29157,7 +30061,7 @@ msgstr ""
 
 #: nonparametric/options/effect_size_method.title
 #: psychopdaROC/options/effectSizeMethod.title
-#: psychopdaROC/ui[8][1][6]/effectSizeMethod.label
+#: psychopdaROC/ui[10][1][6]/effectSizeMethod.label
 msgid "Effect Size Method"
 msgstr ""
 
@@ -29517,6 +30421,10 @@ msgstr ""
 msgid "Enable custom coloring for different distribution percentiles."
 msgstr ""
 
+#: decisioncompare/options/pp.description.ui
+msgid "Enable custom disease prevalence for calculating PPV and NPV.  Use when your study population differs from the dataset prevalence  (e.g., screening vs high-risk populations)."
+msgstr ""
+
 #: deeplearningprediction/options/data_augmentation.title
 msgid "Enable Data Augmentation"
 msgstr ""
@@ -29539,6 +30447,10 @@ msgstr ""
 
 #: clinmon/options/fast_processing.description
 msgid "Enable fast processing by aggregating data before analysis. This speeds up computation but may reduce precision."
+msgstr ""
+
+#: psychopdaROC/ui[3][0]/fixedSensSpecAnalysis.label
+msgid "Enable Fixed Sensitivity/Specificity Analysis"
 msgstr ""
 
 #: tableone2/options/group_comparisons.description.jamovi
@@ -29876,6 +30788,17 @@ msgstr ""
 msgid "Enhanced Data Summary"
 msgstr ""
 
+#: package/analyses/summarydata2.title
+#: package/analyses/summarydata2.menuTitle
+#: summarydata2/options.title
+#: summarydata2/ui.title
+msgid "Enhanced Descriptives"
+msgstr ""
+
+#: agreement/options/enhancedErrorGuidance.title
+msgid "Enhanced Error Guidance"
+msgstr ""
+
 #: enhancedfactorvariable/ui.title
 msgid "Enhanced Factor Variable Analysis"
 msgstr ""
@@ -29897,6 +30820,13 @@ msgstr ""
 #: package/analyses/enhancedfactorvariable.menuTitle
 #: enhancedfactorvariable/options.title
 msgid "Enhanced Factor Variable Analysis with BlueSky Integration"
+msgstr ""
+
+#: package/analyses/reportcat2.title
+#: package/analyses/reportcat2.menuTitle
+#: reportcat2/options.title
+#: reportcat2/ui.title
+msgid "Enhanced Frequencies"
 msgstr ""
 
 #: enhancedfrequency/ui.title
@@ -30506,7 +31436,6 @@ msgid "Equal-Tailed Interval"
 msgstr ""
 
 #: agreement/options/wght/equal.title
-#: agreement/ui[3][0]/wght/equal.title
 msgid "Equal/Linear"
 msgstr ""
 
@@ -30561,13 +31490,41 @@ msgstr ""
 msgid "Error Bound"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Error calculating confidence intervals: {message}. This may be due to insufficient data or extreme values."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error calculating Gwet's coefficients:"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error calculating Krippendorff's alpha:"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error calculating PABAK:"
+msgstr ""
+
 #: survivalbart/options/prior_distribution.title
 #: transformationmodels/options/distribution.title
 msgid "Error Distribution"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Error extracting confusion matrix values: {message}. Please check your data formatting."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "Error generating summary:"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error in bias analysis:"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error in difficulty analysis:"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -30580,6 +31537,18 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Error in plot: "
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error in sample size planning:"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error in stability analysis:"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Error in trend analysis:"
 msgstr ""
 
 #: jointmodeling/results/errors.title
@@ -30904,6 +31873,7 @@ msgstr ""
 msgid "Ethnicity-Adjusted Reference Ranges"
 msgstr ""
 
+#: agreement/options/styleDistanceMetric/euclidean.title
 #: classification/options/knnDistance/euclidean.title
 #: dendrogram/options/distanceMethod/euclidean.title
 #: jggheatmap/options/distance_method/euclidean.title
@@ -31639,7 +32609,6 @@ msgid "Exact binomial test"
 msgstr ""
 
 #: agreement/options/exct.title
-#: agreement/ui[3][0]/exct.label
 msgid "Exact Kappa (>=3 Variables)"
 msgstr ""
 
@@ -31722,7 +32691,12 @@ msgid "Excel Calculator"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
 msgid "Excellent"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Excellent Tests"
 msgstr ""
 
 #: epidemiosurvival/results/excess_mortality_table.columns.title
@@ -31867,7 +32841,6 @@ msgid "Exclude Specific"
 msgstr ""
 
 #: agreement/options/tie_breaking/exclude.title
-#: agreement/ui[5][0]/tie_breaking/exclude.title
 msgid "Exclude ties from analysis"
 msgstr ""
 
@@ -31958,7 +32931,7 @@ msgid "Expected Annual Errors"
 msgstr ""
 
 #: psychopdaROC/options/expectedAUCDifference.title
-#: psychopdaROC/ui[8][1][6]/expectedAUCDifference.label
+#: psychopdaROC/ui[10][1][6]/expectedAUCDifference.label
 msgid "Expected AUC Difference"
 msgstr ""
 
@@ -32222,6 +33195,14 @@ msgstr ""
 msgid "Expected Values Summary Table"
 msgstr ""
 
+#: agreement/results/diagnosticStyleTable.columns.title
+msgid "Experience"
+msgstr ""
+
+#: agreement/options/experienceVar.title
+msgid "Experience Variable"
+msgstr ""
+
 #: package/analyses/assayoptimization.menuSubgroup
 #: assayoptimization/options.menuSubgroup
 #: grafify/options/experimental_design.title
@@ -32371,10 +33352,12 @@ msgstr ""
 msgid "Explanatory Variables:"
 msgstr ""
 
+#: package/analyses/tableone.menuGroup
 #: package/analyses/agepyramid.menuGroup
 #: package/analyses/nonparametric.menuGroup
 #: agepyramid/options.menuGroup
 #: nonparametric/options.menuGroup
+#: tableone/options.menuGroup
 msgid "Exploration"
 msgstr ""
 
@@ -32411,8 +33394,6 @@ msgstr ""
 #: package/analyses/benford2.menuGroup
 #: package/analyses/alluvial2.menuGroup
 #: package/analyses/crosstable2.menuGroup
-#: package/analyses/reportcat2.menuGroup
-#: package/analyses/summarydata2.menuGroup
 #: package/analyses/continuousrelationship.menuGroup
 #: package/analyses/bayesianclinical.menuGroup
 #: package/analyses/featurequality.menuGroup
@@ -32448,10 +33429,8 @@ msgstr ""
 #: outbreakanalysis/options.menuGroup
 #: patientreported/options.menuGroup
 #: qualityoflife/options.menuGroup
-#: reportcat2/options.menuGroup
 #: retracted/options.menuGroup
 #: screeningevaluation/options.menuGroup
-#: summarydata2/options.menuGroup
 #: tableone2/options.menuGroup
 #: tidydensity/options.menuGroup
 #: tinytable/options.menuGroup
@@ -32461,8 +33440,13 @@ msgstr ""
 msgid "ExplorationD"
 msgstr ""
 
-#: package/analyses/tableone.menuGroup
 #: package/analyses/summarydata.menuGroup
+#: package/analyses/chisqposttest.menuGroup
+#: chisqposttest/options.menuGroup
+#: summarydata/options.menuGroup
+msgid "ExplorationT"
+msgstr ""
+
 #: package/analyses/reportcat.menuGroup
 #: package/analyses/benford.menuGroup
 #: package/analyses/alluvial.menuGroup
@@ -32476,17 +33460,17 @@ msgstr ""
 #: package/analyses/contTables.menuGroup
 #: package/analyses/contTablesPaired.menuGroup
 #: package/analyses/ggflowchart.menuGroup
-#: package/analyses/chisqposttest.menuGroup
 #: package/analyses/groupsummary.menuGroup
 #: package/analyses/ggprism.menuGroup
 #: package/analyses/riverplot.menuGroup
 #: package/analyses/jjsankeyfier.menuGroup
+#: package/analyses/reportcat2.menuGroup
+#: package/analyses/summarydata2.menuGroup
 #: package/analyses/deeplearningprediction.menuGroup
 #: package/analyses/explainableai.menuGroup
 #: alluvial/options.menuGroup
 #: benford/options.menuGroup
 #: checkdata/options.menuGroup
-#: chisqposttest/options.menuGroup
 #: classification/options.menuGroup
 #: contTables/options.menuGroup
 #: contTablesPaired/options.menuGroup
@@ -32500,9 +33484,9 @@ msgstr ""
 #: jjsankeyfier/options.menuGroup
 #: outlierdetection/options.menuGroup
 #: reportcat/options.menuGroup
+#: reportcat2/options.menuGroup
 #: riverplot/options.menuGroup
-#: summarydata/options.menuGroup
-#: tableone/options.menuGroup
+#: summarydata2/options.menuGroup
 #: vartree/options.menuGroup
 #: venn/options.menuGroup
 msgid "ExplorationT2"
@@ -32785,6 +33769,10 @@ msgstr ""
 
 #: gtsummary/options/exportTable.title
 msgid "Export Table Data"
+msgstr ""
+
+#: decisioncombine/ui[3][0]/addCombinationPattern.label
+msgid "Export Test Combination Pattern to Dataset"
 msgstr ""
 
 #: assayoptimization/options/export_design.description.ui
@@ -33090,6 +34078,10 @@ msgstr ""
 msgid "F-score"
 msgstr ""
 
+#: agreement/results/iccTable.columns.title
+msgid "F-value"
+msgstr ""
+
 #: clinicalprediction/results/classification_metrics.columns.title
 #: clinicalprediction/results/model_comparison.columns.title
 #: clinicalvalidationinteractive/options/optimization_metric/f1.title
@@ -33369,7 +34361,9 @@ msgstr ""
 msgid "Failure Rate"
 msgstr ""
 
+#: R/agreement.b.R
 #: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
 msgid "Fair"
 msgstr ""
 
@@ -33385,6 +34379,8 @@ msgstr ""
 msgid "False Count"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
 #: categoricaladvanced/options/correction_method/fdr.title
 #: outbreakanalysis/options/multiple_testing_correction/fdr.title
 #: patientreported/options/multiple_comparisons/fdr.title
@@ -33402,6 +34398,7 @@ msgstr ""
 msgid "False Negative"
 msgstr ""
 
+#: R/decisioncompare.b.R
 #: decisioncalculator/options/FN.title
 msgid "False Negative (FN)"
 msgstr ""
@@ -33425,10 +34422,16 @@ msgstr ""
 msgid "False Negatives (FN)"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "False Omission Rate"
+msgstr ""
+
 #: enhancedROC/results/results/cutoffAnalysis.columns.title
 msgid "False Positive"
 msgstr ""
 
+#: R/decisioncompare.b.R
 #: decisioncalculator/options/FP.title
 msgid "False Positive (FP)"
 msgstr ""
@@ -34192,6 +35195,10 @@ msgstr ""
 msgid "Fixed"
 msgstr ""
 
+#: psychopdaROC/options/fixedAnalysisType.title
+msgid "Fixed Analysis Type"
+msgstr ""
+
 #: jjarcdiagram/options/arcWidthValue.title
 msgid "Fixed Arc Width"
 msgstr ""
@@ -34274,6 +35281,31 @@ msgstr ""
 msgid "Fixed Positive Correlation"
 msgstr ""
 
+#: psychopdaROC/options/fixedAnalysisType/sensitivity.title
+msgid "Fixed Sensitivity"
+msgstr ""
+
+#: psychopdaROC/options/fixedSensSpecAnalysis.title
+#: psychopdaROC/ui[3].label
+msgid "Fixed Sensitivity/Specificity Analysis"
+msgstr ""
+
+#: psychopdaROC/results/fixedSensSpecExplanation.title
+msgid "Fixed Sensitivity/Specificity Analysis Guide"
+msgstr ""
+
+#: psychopdaROC/results/fixedSensSpecTable.title
+msgid "Fixed Sensitivity/Specificity Results"
+msgstr ""
+
+#: psychopdaROC/results/fixedSensSpecROC.title
+msgid "Fixed Sensitivity/Specificity ROC Curves"
+msgstr ""
+
+#: psychopdaROC/options/fixedAnalysisType/specificity.title
+msgid "Fixed Specificity"
+msgstr ""
+
 #: treatmentmeta/options/model_type/fixed.title
 msgid "Fixed-Effect Model"
 msgstr ""
@@ -34287,7 +35319,6 @@ msgid "Flag Extreme Values"
 msgstr ""
 
 #: agreement/options/tie_breaking/arbitration.title
-#: agreement/ui[5][0]/tie_breaking/arbitration.title
 msgid "Flag for expert arbitration"
 msgstr ""
 
@@ -34322,8 +35353,16 @@ msgstr ""
 msgid "Fleiss Kappa Confidence Intervals"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Fleiss' Kappa"
+msgstr ""
+
 #: agreement/options/multiraterMethod/fleiss.title
 msgid "Fleiss' Kappa (3+ raters)"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Fleiss' Kappa (Exact)"
 msgstr ""
 
 #: condsurvival/options/survival_method/fleming_harrington.title
@@ -35211,6 +36250,10 @@ msgstr ""
 msgid "Frequencies"
 msgstr ""
 
+#: agreement/results/crosstabTable.columns.title
+msgid "Frequencies by Rater 2"
+msgstr ""
+
 #: package/analyses/contTables.menuSubgroup
 #: package/analyses/contTablesPaired.menuSubgroup
 #: contTables/options.menuSubgroup
@@ -35223,6 +36266,8 @@ msgstr ""
 msgid "FrequenciesD"
 msgstr ""
 
+#: agreement/results/categoryTable.columns.title
+#: agreement/results/raterFrequencyTables/frequencyTable.columns.title
 #: cochranq/results/responsePatterns.columns.title
 #: decisioncombine/results/goldStandardFreqTable.columns.title
 #: decisionpanel/results/resultImportance.columns.title
@@ -35269,6 +36314,10 @@ msgstr ""
 msgid "Frequency Decimals"
 msgstr ""
 
+#: agreement/results/raterFrequencyTables/frequencyTable.title
+msgid "Frequency Distribution"
+msgstr ""
+
 #: enhancedfrequency/results/results/frequencyDistributionPlot.title
 msgid "Frequency Distribution Overview"
 msgstr ""
@@ -35288,7 +36337,6 @@ msgid "Frequency Table"
 msgstr ""
 
 #: agreement/options/sft.title
-#: agreement/results/frequencyTables.title
 #: polychoriccorr/results/frequencies.title
 #: toolssummary/results/frequencies.title
 msgid "Frequency Tables"
@@ -35379,7 +36427,7 @@ msgstr ""
 msgid "From Node"
 msgstr ""
 
-#: psychopdaROC/ui[7][0]/partialAUCfrom.label
+#: psychopdaROC/ui[9][0]/partialAUCfrom.label
 msgid "From specificity"
 msgstr ""
 
@@ -35468,11 +36516,6 @@ msgstr ""
 
 #: package/analyses/statsplot2.description
 msgid "Function for Generating Plots and Graphs Based on Variable Types."
-msgstr ""
-
-#: package/analyses/agreement.description
-#: agreement/options.description.main
-msgid "Function for Interrater Reliability."
 msgstr ""
 
 #: package/analyses/crosstable.description
@@ -36037,6 +37080,10 @@ msgstr ""
 msgid "Generate Attention Maps"
 msgstr ""
 
+#: decisioncompare/options/plot.description.ui
+msgid "Generate bar chart comparing test performance metrics side-by-side.  Useful for visualizing differences in sensitivity, specificity, PPV, NPV, and accuracy."
+msgstr ""
+
 #: methodcomparison/options/bland_altman_plot.description
 msgid "Generate Bland-Altman plot with limits of agreement"
 msgstr ""
@@ -36247,7 +37294,7 @@ msgid "Generate prognostic risk score"
 msgstr ""
 
 #: decisioncombine/options/showVisualization.description.ui
-msgid "Generate publication-quality visualizations including performance heatmaps,  ROC analysis with optimal cut-point identification, decision trees, Venn diagrams,  and forest plots with Wilson confidence intervals."
+msgid "Generate publication-quality visualizations to help interpret results: • Performance Heatmap: Color-coded overview of all test combinations • Decision Tree: Clinical decision-making flowchart • Venn Diagram: Test agreement visualization • Forest Plot: Confidence intervals for all metrics"
 msgstr ""
 
 #: qualitycontrol/options/generate_plots.title
@@ -36261,6 +37308,10 @@ msgstr ""
 
 #: economistplots/options/export_economist_code.description.jamovi
 msgid "Generate R code example for reproducing the visualization."
+msgstr ""
+
+#: decisioncompare/options/radarplot.description.ui
+msgid "Generate radar (spider) plot showing all performance metrics on a circular scale.  Excellent for comprehensive visual comparison and identifying test strengths/weaknesses."
 msgstr ""
 
 #: recurrentsurvival/options/recurrence_plots.description.ui
@@ -36757,10 +37808,6 @@ msgstr ""
 msgid "Gold Standard"
 msgstr ""
 
-#: decision/ui[0][0].label
-msgid "Gold Standard (Reference Test)"
-msgstr ""
-
 #: decision/options/gold.title
 msgid "Gold Standard (Reference)"
 msgstr ""
@@ -36781,6 +37828,10 @@ msgstr ""
 msgid "Gold Standard Reference"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "Gold standard variable is required. Please select a gold standard variable from your dataset."
+msgstr ""
+
 #: bayesiandiagnostic/options/gold_standard.title
 #: bayesiandiagnostic/ui[0][1].label
 msgid "Gold Standard/Reference Variable"
@@ -36790,11 +37841,14 @@ msgstr ""
 msgid "Golden (1.618:1)"
 msgstr ""
 
-#: decisioncombine/options/gold.title
 #: decisioncombine/ui[0][0].label
-#: decisioncompare/options/gold.title
 #: decisioncompare/ui[0][0].label
 msgid "Golden Standard"
+msgstr ""
+
+#: decisioncombine/options/gold.title
+#: decisioncompare/options/gold.title
+msgid "Golden Standard (Reference Test)"
 msgstr ""
 
 #: flexparametricadvanced/options/distribution/gompertz.title
@@ -36810,11 +37864,16 @@ msgid "Gompertz Model"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
 msgid "Good"
 msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Good diagnostic performance - balanced sensitivity and specificity"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Good Tests"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -37803,9 +38862,12 @@ msgstr ""
 
 #: crosstable/options/sty/gtsummary.title
 #: crosstable2/options/sty/gtsummary.title
-#: tableone/options/sty/t2.title
 #: tableone2/options/sty/t2.title
 msgid "gtsummary"
+msgstr ""
+
+#: tableone/options/sty/t2.title
+msgid "gtsummary (Publication-ready descriptives)"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -37822,6 +38884,11 @@ msgstr ""
 
 #: measurementuncertainty/options/uncertainty_method/gum_approach.title
 msgid "GUM Approach (ISO Guide)"
+msgstr ""
+
+#: agreement/options/gwetAC.title
+#: agreement/results/gwetACTable.title
+msgid "Gwet's Agreement Coefficients"
 msgstr ""
 
 #: stagemigration/results/calibrationAnalysis.columns.title
@@ -37943,7 +39010,7 @@ msgstr ""
 msgid "Haralick Texture Analysis"
 msgstr ""
 
-#: psychopdaROC/ui[9][0]/harmBenefitRatio.label
+#: psychopdaROC/ui[11][0]/harmBenefitRatio.label
 msgid "Harm-Benefit Ratio"
 msgstr ""
 
@@ -38375,6 +39442,10 @@ msgstr ""
 
 #: robustcorrelation/options/heatmap_colors.title
 msgid "Heatmap Color Scheme"
+msgstr ""
+
+#: agreement/options/heatmapTheme.title
+msgid "Heatmap Color Theme"
 msgstr ""
 
 #: jggheatmap/results/interpretation.title
@@ -38811,8 +39882,16 @@ msgstr ""
 msgid "High Risk Threshold"
 msgstr ""
 
+#: R/decision.b.R
+msgid "High sensitivity is crucial for screening tests (rule out disease)"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "High sensitivity reference, minimizes false negatives"
+msgstr ""
+
+#: R/decision.b.R
+msgid "High specificity is crucial for confirmatory tests (rule in disease)"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -39372,6 +40451,18 @@ msgstr ""
 msgid "How biomarker trajectory links to survival risk"
 msgstr ""
 
+#: R/decision.b.R
+msgid "How much a negative test decreases disease odds"
+msgstr ""
+
+#: R/decision.b.R
+msgid "How much a positive test increases disease odds"
+msgstr ""
+
+#: R/decision.b.R
+msgid "How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."
+msgstr ""
+
 #: survivalpower/options/entry_type.description.jamovi
 msgid "How patients enter the study over time."
 msgstr ""
@@ -39697,6 +40788,10 @@ msgstr ""
 msgid "Hypothesis Tests"
 msgstr ""
 
+#: agreement/ui[3][1]/showAboutAnalysis.label
+msgid "ℹ️ About This Analysis"
+msgstr ""
+
 #: bayesiandiagnostic/results/heterogeneityAssessment.columns.title
 #: betabinomialdiagnostic/results/heterogeneityTests.columns.title
 #: hierarchicalbayes/results/heterogeneityAssessment.columns.title
@@ -39719,6 +40814,7 @@ msgstr ""
 msgid "IBS"
 msgstr ""
 
+#: agreement/results/iccTable.columns.title
 #: icccoeff/results/icc_results.columns.title
 #: ihcscoring/results/agreementtable.columns.title
 #: mixedcox/results/iccTable.columns.title
@@ -39747,6 +40843,14 @@ msgstr ""
 msgid "ICC Analysis"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "ICC calculation failed:"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "ICC Error"
+msgstr ""
+
 #: mixedeffectscox/results/iccAnalysis.columns.title
 msgid "ICC Lower"
 msgstr ""
@@ -39759,6 +40863,7 @@ msgstr ""
 msgid "ICC threshold"
 msgstr ""
 
+#: agreement/results/iccTable.columns.title
 #: hierarchicalpathology/results/icc.columns.title
 #: icccoeff/options/icc_type.title
 #: icccoeff/results/icc_results.columns.title
@@ -39854,6 +40959,10 @@ msgstr ""
 msgid "ICU Critical Thresholds"
 msgstr ""
 
+#: agreement/ui[1][0].label
+msgid "🆔 Case ID Variable (Optional)"
+msgstr ""
+
 #: alluvial/ui[0][2]/id.label
 msgid "ID Variable"
 msgstr ""
@@ -39903,6 +41012,10 @@ msgstr ""
 msgid "Identify and tag outliers"
 msgstr ""
 
+#: agreement/options/identifyDiscordantCases.title
+msgid "Identify Discordant Cases"
+msgstr ""
+
 #: decisiongraph/options/dominanceAnalysis.description.ui
 msgid "Identify dominated and extendedly dominated strategies in ICER analysis."
 msgstr ""
@@ -39917,6 +41030,10 @@ msgstr ""
 
 #: decisioncurve/ui[1][1][0]/showOptimalThreshold.label
 msgid "Identify optimal thresholds"
+msgstr ""
+
+#: agreement/options/outlierAnalysis.title
+msgid "Identify Outlier Cases"
 msgstr ""
 
 #: hierarchicalbayes/options/outlier_detection.description.ui
@@ -39964,7 +41081,7 @@ msgstr ""
 msgid "IDI (without outliers)"
 msgstr ""
 
-#: psychopdaROC/ui[8][1][0].label
+#: psychopdaROC/ui[10][1][0].label
 msgid "IDI and NRI Analysis"
 msgstr ""
 
@@ -40420,6 +41537,10 @@ msgstr ""
 
 #: stagemigration/results/forestVariableImportance.columns.title
 msgid "Importance Type"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Important Considerations"
 msgstr ""
 
 #: continuousrelationship/results/warningMessage.title
@@ -41100,6 +42221,10 @@ msgstr ""
 msgid "Include Range"
 msgstr ""
 
+#: agreement/options/raterCharacteristics.title
+msgid "Include Rater Characteristics"
+msgstr ""
+
 #: jointfrailty/options/include_residuals.title
 #: timeupdatesurvival/options/include_residuals.title
 msgid "Include Residual Analysis"
@@ -41395,6 +42520,22 @@ msgstr ""
 msgid "Indicate the concentration and variability of values"
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid "indicating excellent discriminatory ability. This test can reliably distinguish between diseased and healthy patients."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "indicating fair discriminatory ability. Consider combining with other clinical information."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "indicating good discriminatory ability. This test performs well for clinical decision making."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "indicating poor discriminatory ability. Alternative diagnostic approaches should be considered."
+msgstr ""
+
 #: eurostatmap/options/indicator.title
 msgid "Indicator Variable"
 msgstr ""
@@ -41521,6 +42662,10 @@ msgstr ""
 
 #: pagetrendtest/results/profilePlot.title
 msgid "Individual Profile Plot with Trend"
+msgstr ""
+
+#: agreement/results/raterFrequencyTables.title
+msgid "Individual Rater Frequencies"
 msgstr ""
 
 #: jointfrailty/results/individualPredictions.title
@@ -41801,6 +42946,7 @@ msgstr ""
 msgid "Install required packages using the provided commands."
 msgstr ""
 
+#: agreement/options/institutionVar.title
 #: stagemigration/options/institutionVariable.title
 #: stagemigration/ui[10][0].label
 msgid "Institution Variable"
@@ -41970,6 +43116,10 @@ msgstr ""
 msgid "Instrumental Variables"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Insufficient"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Insufficient data"
 msgstr ""
@@ -41984,6 +43134,10 @@ msgstr ""
 
 #: R/nonparametric.b.R
 msgid "Insufficient data: At least {} complete observations required."
+msgstr ""
+
+#: R/decision.b.R
+msgid "Insufficient data: At least 4 cases are required for diagnostic test analysis"
 msgstr ""
 
 #: advancedbarplot/options/value_format/integer.title
@@ -42085,8 +43239,16 @@ msgstr ""
 msgid "Inter-Item Correlations"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Inter-rater agreement could not be reliably calculated for the %d raters evaluating %d cases. Data quality or sample size may be insufficient."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Inter-rater agreement studies with 3+ tests, exploratory analysis"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Inter-rater agreement was %s (κ = %.3f%s%s), indicating %s reliability for the %d raters evaluating %d cases."
 msgstr ""
 
 #: spatialanalysis/results/interaction.columns.title
@@ -42375,6 +43537,12 @@ msgstr ""
 msgid "Interpolate Raster"
 msgstr ""
 
+#: psychopdaROC/options/fixedInterpolation.title
+#: psychopdaROC/ui[3][0]/fixedInterpolation.label
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
+msgid "Interpolation Method"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Interpret results in the context of your specific research question and clinical setting."
 msgstr ""
@@ -42393,7 +43561,11 @@ msgstr ""
 #: advancedanova/results/anova.columns.title
 #: advancedimputation/results/mnar_analysis.columns.title
 #: agreement/results/kappaTable.columns.title
+#: agreement/results/iccTable.columns.title
+#: agreement/results/discordantCasesTable.columns.title
 #: agreement/results/krippTable.columns.title
+#: agreement/results/gwetACTable.columns.title
+#: agreement/results/pabakTable.columns.title
 #: batcheffect/results/batch_detection.columns.title
 #: batcheffect/results/combat_results.columns.title
 #: bayesianci/results/credibleIntervals.columns.title
@@ -42638,7 +43810,6 @@ msgid "Intersections Height"
 msgstr ""
 
 #: agreement/options/krippMethod/interval.title
-#: agreement/ui[4][0]/krippMethod/interval.title
 #: contTables/options/ciWidth.title
 #: enhancedcorrelation/ui[1][1]/ciWidth.label
 #: partialcorrelation/ui[1][1]/ciWidth.label
@@ -42728,7 +43899,7 @@ msgid "Intervention Assessment"
 msgstr ""
 
 #: psychopdaROC/options/interventionCost.title
-#: psychopdaROC/ui[9][0]/interventionCost.label
+#: psychopdaROC/ui[11][0]/interventionCost.label
 msgid "Intervention Cost Analysis"
 msgstr ""
 
@@ -42768,12 +43939,14 @@ msgstr ""
 
 #: package/analyses/icccoeff.title
 #: package/analyses/icccoeff.menuTitle
+#: agreement/options/icc.title
 #: icccoeff/options.title
 #: icccoeff/ui.title
 #: icccoeff/results.title
 msgid "Intraclass Correlation Coefficient"
 msgstr ""
 
+#: agreement/results/iccTable.title
 #: hierarchicalpathology/results/icc.title
 msgid "Intraclass Correlation Coefficients"
 msgstr ""
@@ -42815,6 +43988,14 @@ msgstr ""
 #: package/analyses/jiwillsurvive.description
 #: jiwillsurvive/options.description.main
 msgid "Intuitive survival analysis using the iwillsurvive package with user-friendly interface, automatic data preparation, and comprehensive visualization options."
+msgstr ""
+
+#: R/decision.b.R
+msgid "Invalid contingency table values detected"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Invalid data structure: Both test and gold standard variables must have exactly 2 levels each"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -43128,9 +44309,12 @@ msgstr ""
 msgid "jamovi Theme"
 msgstr ""
 
-#: tableone/options/sty/t4.title
 #: tableone2/options/sty/t4.title
 msgid "janitor"
+msgstr ""
+
+#: tableone/options/sty/t4.title
+msgid "janitor (Simple frequency tables)"
 msgstr ""
 
 #: bayesianci/options/prior_type/jeffreys.title
@@ -43488,6 +44672,8 @@ msgid "Kaplan-Meier Weights"
 msgstr ""
 
 #: agreement/results/kappaTable.columns.title
+#: agreement/results/pairwiseTable.columns.title
+#: agreement/results/agreementTrendTable.columns.title
 #: cohenskappa/results/kappaTable.columns.title
 #: cohenskappa/results/bootstrapResults.columns.title
 #: modalitycomparison/results/lowEndAnalysisTable.columns.title
@@ -43518,6 +44704,10 @@ msgstr ""
 #: agreement/results/kappaTable.title
 #: cohenskappa/results/kappaTable.title
 msgid "Kappa Statistics"
+msgstr ""
+
+#: agreement/results/diagnosticAccuracyTable.columns.title
+msgid "Kappa vs Gold Standard"
 msgstr ""
 
 #: kappaSizeCI/options/kappa0.title
@@ -43701,6 +44891,14 @@ msgstr ""
 msgid "Key Findings:"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Key Output Measures"
+msgstr ""
+
+#: decision/ui[0][3].label
+msgid "Key outputs: Sensitivity, specificity, predictive values, likelihood ratios"
+msgstr ""
+
 #: ihcscoring/options/biomarker_type/ki67.title
 msgid "Ki-67"
 msgstr ""
@@ -43806,12 +45004,19 @@ msgid "Kolmogorov-Smirnov Test"
 msgstr ""
 
 #: agreement/options/kripp.title
-#: agreement/ui[4].label
 msgid "Krippendorff's Alpha"
 msgstr ""
 
 #: agreement/options/multiraterMethod/krippendorff.title
 msgid "Krippendorff's Alpha (any number)"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Krippendorff's alpha calculation failed"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Krippendorff's alpha for non-nominal data requires full irr package implementation"
 msgstr ""
 
 #: agreement/results/krippTable.title
@@ -43903,7 +45108,7 @@ msgstr ""
 msgid "Label Background"
 msgstr ""
 
-#: psychopdaROC/ui[5][0]/directLabel.label
+#: psychopdaROC/ui[7][0]/directLabel.label
 msgid "Label curves directly"
 msgstr ""
 
@@ -44701,7 +45906,7 @@ msgstr ""
 msgid "Legend Position"
 msgstr ""
 
-#: psychopdaROC/ui[5][1]/legendPosition.label
+#: psychopdaROC/ui[7][1]/legendPosition.label
 msgid "Legend position"
 msgstr ""
 
@@ -44972,6 +46177,16 @@ msgstr ""
 msgid "Likelihood ratio nomogram"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Likelihood ratio of a negative test"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Likelihood ratio of a positive test"
+msgstr ""
+
 #: mixedcox/options/likelihood_ratio_test.title
 msgid "Likelihood Ratio Test"
 msgstr ""
@@ -45007,6 +46222,10 @@ msgstr ""
 
 #: likelihoodratio/ui[6]/showLikelihoodRatios.label
 msgid "Likelihood ratios table"
+msgstr ""
+
+#: decision/ui[5][2].label
+msgid "Likelihood Ratios: LR+ >10 strong evidence FOR disease, LR- <0.1 strong evidence AGAINST disease"
 msgstr ""
 
 #: treatmentswitching/results/methodComparisonTable.columns.title
@@ -45218,6 +46437,7 @@ msgid "Linear Increasing"
 msgstr ""
 
 #: nonparametricregression/options/missing_data_handling/linear_interpolation.title
+#: psychopdaROC/options/fixedInterpolation/linear.title
 msgid "Linear Interpolation"
 msgstr ""
 
@@ -46399,10 +47619,26 @@ msgstr ""
 msgid "LR-"
 msgstr ""
 
+#: R/decision.b.R
+msgid "LR- (Negative Likelihood Ratio)"
+msgstr ""
+
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
 #: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: likelihoodratio/results/stratifiedAnalysis.columns.title
 msgid "LR+"
+msgstr ""
+
+#: R/decision.b.R
+msgid "LR+ (Positive Likelihood Ratio)"
+msgstr ""
+
+#: R/decision.b.R
+msgid "LR+ ≥ 10, LR- ≤ 0.1"
+msgstr ""
+
+#: R/decision.b.R
+msgid "LR+ 5-9.9, LR- 0.1-0.2"
 msgstr ""
 
 #: mixedeffectscox/results/modelComparison.columns.title
@@ -46541,12 +47777,19 @@ msgstr ""
 msgid "Major Regions (NUTS 1)"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Majority"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Majority (≥50%)"
+msgstr ""
+
 #: decisionpanel/options/parallelRules/majority.title
 msgid "Majority positive"
 msgstr ""
 
 #: agreement/options/consensus_method/majority.title
-#: agreement/ui[5][0]/consensus_method/majority.title
 msgid "Majority Rule (≥50%)"
 msgstr ""
 
@@ -46617,7 +47860,7 @@ msgstr ""
 msgid "Manual Colors"
 msgstr ""
 
-#: psychopdaROC/ui[2][0]/specifyCutScore.label
+#: psychopdaROC/ui[4][0]/specifyCutScore.label
 msgid "Manual Cut Score"
 msgstr ""
 
@@ -47439,7 +48682,7 @@ msgstr ""
 msgid "Maximum Thresholds to Display"
 msgstr ""
 
-#: psychopdaROC/ui[4][0]/maxThresholds.label
+#: psychopdaROC/ui[6][0]/maxThresholds.label
 msgid "Maximum thresholds to display"
 msgstr ""
 
@@ -47495,6 +48738,10 @@ msgstr ""
 
 #: vartree/options/maxwidth.title
 msgid "Maximum Width"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "May be useful in combination with other markers"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -48041,6 +49288,7 @@ msgstr ""
 msgid "Meaning"
 msgstr ""
 
+#: agreement/results/pabakTable.columns.title
 #: betabinomialdiagnostic/results/pooledEstimates.columns.title
 #: chisqposttest/results/exportTable.columns.title
 #: coxphw/results/diagnostics.columns.title
@@ -48145,8 +49393,10 @@ msgstr ""
 #: package/analyses/decisionpanel.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
+#: package/analyses/enhancedROC.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
 #: decisionpanel/options.menuGroup
+#: enhancedROC/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
 #: nogoldstandard/options.menuGroup
 msgid "meddecide"
@@ -48171,6 +49421,7 @@ msgstr ""
 #: package/analyses/adaptivetrialdesign.menuGroup
 #: package/analyses/bayesiannetworkma.menuGroup
 #: package/analyses/spikeslabpriors.menuGroup
+#: package/analyses/modalitycomparison.menuGroup
 #: adaptivetrialdesign/options.menuGroup
 #: bayesdca/options.menuGroup
 #: bayesiandiagnostic/options.menuGroup
@@ -48182,6 +49433,7 @@ msgstr ""
 #: kappaSizeFixedN/options.menuGroup
 #: kappaSizePower/options.menuGroup
 #: likelihoodratio/options.menuGroup
+#: modalitycomparison/options.menuGroup
 #: modelbuilder/options.menuGroup
 #: nonparametricregression/options.menuGroup
 #: ppv/options.menuGroup
@@ -48193,19 +49445,22 @@ msgstr ""
 msgid "meddecideD"
 msgstr ""
 
+#: package/analyses/agreement.menuGroup
+#: package/analyses/decision.menuGroup
+#: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
+#: package/analyses/decisioncombine.menuGroup
 #: package/analyses/classification.menuGroup
 #: package/analyses/enhancedROC.menuGroup
-#: enhancedROC/options.menuGroup
+#: agreement/options.menuGroup
+#: decision/options.menuGroup
+#: decisioncombine/options.menuGroup
+#: decisioncompare/options.menuGroup
 #: psychopdaROC/options.menuGroup
 msgid "meddecideT"
 msgstr ""
 
-#: package/analyses/agreement.menuGroup
-#: package/analyses/decision.menuGroup
 #: package/analyses/decisioncalculator.menuGroup
-#: package/analyses/decisioncompare.menuGroup
-#: package/analyses/decisioncombine.menuGroup
 #: package/analyses/cotest.menuGroup
 #: package/analyses/decisioncurve.menuGroup
 #: package/analyses/dendrogram.menuGroup
@@ -48218,23 +49473,17 @@ msgstr ""
 #: package/analyses/methodvalidation.menuGroup
 #: package/analyses/aivalidation.menuGroup
 #: package/analyses/clinicalvalidation.menuGroup
-#: package/analyses/modalitycomparison.menuGroup
 #: package/analyses/multiclassdiagnostics.menuGroup
-#: agreement/options.menuGroup
 #: aivalidation/options.menuGroup
 #: clinicalvalidation/options.menuGroup
 #: cotest/options.menuGroup
-#: decision/options.menuGroup
 #: decisioncalculator/options.menuGroup
-#: decisioncombine/options.menuGroup
-#: decisioncompare/options.menuGroup
 #: decisioncurve/options.menuGroup
 #: dendrogram/options.menuGroup
 #: icccoeff/options.menuGroup
 #: idi/options.menuGroup
 #: methodcomparison/options.menuGroup
 #: methodvalidation/options.menuGroup
-#: modalitycomparison/options.menuGroup
 #: multiclassdiagnostics/options.menuGroup
 #: netreclassification/options.menuGroup
 #: treeadvanced/options.menuGroup
@@ -48586,6 +49835,10 @@ msgstr ""
 msgid "Medical Decision Trees"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Medical device evaluation"
+msgstr ""
+
 #: jforester/options/color_scheme/medical.title
 msgid "Medical Red"
 msgstr ""
@@ -48678,6 +49931,14 @@ msgstr ""
 msgid "melanoma dataset obtained from {boot}."
 msgstr ""
 
+#: agreement/results/styleSummaryTable.columns.title
+msgid "Member Names"
+msgstr ""
+
+#: agreement/results/styleSummaryTable.columns.title
+msgid "Members"
+msgstr ""
+
 #: decisiongraph/options/memoryOptimization.title
 #: decisiongraph/ui[8][1]/memoryOptimization.label
 #: survivalbart/options/memory_optimization.title
@@ -48701,7 +49962,7 @@ msgstr ""
 msgid "Meta-analysis"
 msgstr ""
 
-#: psychopdaROC/ui[1][0].label
+#: psychopdaROC/ui[2].label
 msgid "Meta-Analysis (3+ Variables Required)"
 msgstr ""
 
@@ -48727,7 +49988,7 @@ msgstr ""
 msgid "Meta-Analysis Method"
 msgstr ""
 
-#: psychopdaROC/ui[1]/metaAnalysisMethod.label
+#: psychopdaROC/ui[2][0]/metaAnalysisMethod.label
 msgid "Meta-analysis method"
 msgstr ""
 
@@ -49405,7 +50666,7 @@ msgid "Metric Stability"
 msgstr ""
 
 #: psychopdaROC/options/tol_metric.title
-#: psychopdaROC/ui[2][1]/tol_metric.label
+#: psychopdaROC/ui[4][1]/tol_metric.label
 msgid "Metric Tolerance"
 msgstr ""
 
@@ -49702,6 +50963,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Minimal effect"
+msgstr ""
+
+#: R/decision.b.R
+msgid "minimal evidence for disease when positive"
 msgstr ""
 
 #: patientreported/options/minimal_important_difference.title
@@ -50260,6 +51525,10 @@ msgstr ""
 msgid "Missing Data Summary"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Missing data summary: {count} cases ({percent}%) with missing values removed. Complete case analysis performed."
+msgstr ""
+
 #: patientreported/options/missing_threshold.title
 msgid "Missing Data Threshold"
 msgstr ""
@@ -50383,6 +51652,7 @@ msgstr ""
 msgid "Mitigation Strategy"
 msgstr ""
 
+#: R/agreement.b.R
 #: hiddenmarkov/options/obstype/mixed.title
 msgid "Mixed"
 msgstr ""
@@ -50781,7 +52051,7 @@ msgstr ""
 #: ncvregcox/results/model_comparison.title
 #: nonparametricregression/results/modelComparison.title
 #: principalcox/results/modelComparison.title
-#: psychopdaROC/ui[8].label
+#: psychopdaROC/ui[10].label
 #: raftgee/results/modelComparison.title
 #: recurrentsurvival/results/model_comparison_plot.title
 #: robustaft/results/modelComparison.title
@@ -51550,6 +52820,7 @@ msgstr ""
 msgid "moderate"
 msgstr ""
 
+#: R/agreement.b.R
 #: R/enhancedROC.b.R
 msgid "Moderate"
 msgstr ""
@@ -51560,6 +52831,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Moderate discriminatory performance"
+msgstr ""
+
+#: R/decision.b.R
+msgid "moderate evidence for disease when positive"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -52356,6 +53631,10 @@ msgstr ""
 msgid "Multiple Tests"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Multiple ties"
+msgstr ""
+
 #: simonmakuch/options/enableMultipleTimeDep.title
 msgid "Multiple Time-Dependent Variables"
 msgstr ""
@@ -52934,6 +54213,10 @@ msgstr ""
 msgid "Nearest Neighbor Matching"
 msgstr ""
 
+#: psychopdaROC/options/fixedInterpolation/nearest.title
+msgid "Nearest Point"
+msgstr ""
+
 #: ppv/results/confusion.columns.content
 msgid "Negative"
 msgstr ""
@@ -52959,6 +54242,10 @@ msgstr ""
 msgid "Negative Likelihood Ratio"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. <0.1 = strong evidence against disease, <0.2 = moderate, <0.5 = weak."
+msgstr ""
+
 #: cotest/results/testParamsTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 msgid "Negative LR"
@@ -52970,6 +54257,15 @@ msgstr ""
 #: screeningcalculator/results/singleTestTable.columns.title
 #: stagemigration/results/clinicalUtilityComparison.columns.title
 msgid "Negative Predictive Value"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Negative predictive value"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Negative Predictive Value: Probability of being healthy given negative test. Depends on prevalence and sensitivity."
 msgstr ""
 
 #: cochranq/results/marginalFrequencies.columns.title
@@ -53520,6 +54816,14 @@ msgstr ""
 msgid "No complete data rows available after handling missing values. Please check your data."
 msgstr ""
 
+#: R/agreement.b.R
+msgid "No Consensus"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "No consensus"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "No control observations found for predictor"
 msgstr ""
@@ -53547,8 +54851,16 @@ msgstr ""
 msgid "No data available for analysis."
 msgstr ""
 
+#: R/decision.b.R
+msgid "No data available for analysis. Please ensure your data is loaded."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "No data available for plotting"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "No data provided for analysis. Please ensure your dataset contains data."
 msgstr ""
 
 #: jjsegmentedtotalbar/options/percentage_format/integer.title
@@ -53585,6 +54897,10 @@ msgstr ""
 
 #: psychopdaROC/options/legendPosition/none.title
 msgid "No legend"
+msgstr ""
+
+#: R/decision.b.R
+msgid "No missing data detected."
 msgstr ""
 
 #: aivalidation/options/modelSelection/none.title
@@ -53661,6 +54977,10 @@ msgstr ""
 
 #: poweranalysis/options/alpha_spending/none.title
 msgid "No Spending Function"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "No test variables selected. Please select at least Test 1 and Test 2 for comparison analysis."
 msgstr ""
 
 #: grafify/options/log_transform/none.title
@@ -53798,7 +55118,6 @@ msgid "Nodes"
 msgstr ""
 
 #: agreement/options/krippMethod/nominal.title
-#: agreement/ui[4][0]/krippMethod/nominal.title
 #: contTables/ui[1][0][1][0][0].label
 #: contTables/results/nom.title
 msgid "Nominal"
@@ -54404,6 +55723,10 @@ msgstr ""
 msgid "not found in grouping variable. Highlight will be ignored."
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid "Not recommended as standalone diagnostic marker"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Not recommended for screening - insufficient sensitivity"
 msgstr ""
@@ -54418,6 +55741,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Not significantly different"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Not specified"
 msgstr ""
 
 #: R/linechart.b.R
@@ -54462,6 +55789,10 @@ msgstr ""
 msgid "Note: Unequal time intervals detected. Trend interpretation should account for irregular spacing."
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Note: Weighted kappa requires ordinal variables. Analysis performed with unweighted kappa instead."
+msgstr ""
+
 #: clinicalprediction/results/regulatory_summary.columns.title
 #: partialcorrelation/results/partialCorr.columns.title
 #: powercomprisk/results/studyDesignTable.columns.title
@@ -54481,6 +55812,7 @@ msgstr ""
 #: nogoldstandard/results/test_metrics.columns.title
 #: psychopdaROC/results/resultsTable.template.columns.title
 #: psychopdaROC/results/thresholdTable.columns.title
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 msgid "NPV"
 msgstr ""
@@ -54490,6 +55822,11 @@ msgstr ""
 msgid "NPV (%)"
 msgstr ""
 
+#: R/decision.b.R
+msgid "NPV (Negative Predictive Value)"
+msgstr ""
+
+#: agreement/results/diagnosticAccuracyTable.columns.title
 #: ihcstats/results/diagnosticTable.columns.title
 #: ihcstats/results/antibodyPerformanceTable.columns.title
 msgid "NPV %"
@@ -54559,7 +55896,7 @@ msgstr ""
 msgid "NRI Summary"
 msgstr ""
 
-#: psychopdaROC/ui[8][1]/nriThresholds.label
+#: psychopdaROC/ui[10][1]/nriThresholds.label
 msgid "NRI thresholds (comma-separated)"
 msgstr ""
 
@@ -54616,6 +55953,11 @@ msgstr ""
 
 #: survivalcont/ui[4][1][0]/risktable.label
 msgid "Number at Risk Table"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Number needed to diagnose"
 msgstr ""
 
 #: stagemigration/results/clinicalUtilityNNT.columns.title
@@ -55138,6 +56480,10 @@ msgstr ""
 msgid "Number of Patients"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Number of patients that need to be tested to give one correct positive test."
+msgstr ""
+
 #: stagemigration/options/shapSampleSize.description
 msgid "Number of patients to use for SHAP analysis. Larger samples provide  more comprehensive explanations but require more computation time.  Recommended: 100-200 for routine analysis, 500+ for detailed research."
 msgstr ""
@@ -55281,6 +56627,10 @@ msgstr ""
 #: bayesiannetworkma/options/edge_weights/n_studies.title
 #: bayesiannetworkma/results/networkCharacteristics.columns.title
 msgid "Number of Studies"
+msgstr ""
+
+#: agreement/options/styleGroups.title
+msgid "Number of Style Groups"
 msgstr ""
 
 #: causespecifichazards/results/overview.columns.title
@@ -55910,6 +57260,10 @@ msgstr ""
 msgid "One-Way Sensitivity Analysis"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "Only {available} is selected. Please also select {needed} to perform comparison analysis."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Only one time point detected: Temporal flow analysis requires multiple time points."
 msgstr ""
@@ -56203,7 +57557,7 @@ msgstr ""
 
 #: clinicalvalidationinteractive/options/optimization_metric.title
 #: psychopdaROC/options/metric.title
-#: psychopdaROC/ui[2][0]/metric.label
+#: psychopdaROC/ui[4][0]/metric.label
 #: treeadvanced/options/tuning_metric.title
 msgid "Optimization Metric"
 msgstr ""
@@ -56416,6 +57770,10 @@ msgstr ""
 msgid "Optionally add a grouping variable (treatment arms, patient groups)"
 msgstr ""
 
+#: decisioncompare/options/test3.description.ui
+msgid "Optionally select a third diagnostic test for three-way comparison.  This allows comprehensive evaluation of multiple testing strategies simultaneously."
+msgstr ""
+
 #: alluvial/ui[1].label
 #: alluvial2/ui[1].label
 #: crosstable/ui[1].label
@@ -56481,7 +57839,6 @@ msgid "Ordering Options"
 msgstr ""
 
 #: agreement/options/krippMethod/ordinal.title
-#: agreement/ui[4][0]/krippMethod/ordinal.title
 #: bayesianci/options/outcome_type/ordinal.title
 #: contTables/ui[1][0][1][1][0].label
 msgid "Ordinal"
@@ -56653,6 +58010,10 @@ msgstr ""
 #: stagemigration/results/competingRisksCIndex.columns.title
 #: stagemigration/results/transitionProbabilities.columns.title
 msgid "Original Upper CI"
+msgstr ""
+
+#: agreement/results/stabilityTable.columns.title
+msgid "Original Value"
 msgstr ""
 
 #: sparsegrouplasso/options/orthogonalize_groups.title
@@ -57203,7 +58564,7 @@ msgstr ""
 #: patientreported/ui[10][0].label
 #: penalizedcox/ui[8].label
 #: permutationsurvival/ui[4].label
-#: psychopdaROC/ui[4].label
+#: psychopdaROC/ui[6].label
 #: qualityoflife/ui[9][0].label
 #: rmst/ui[5].label
 #: stratifiedparametric/ui[5][0].label
@@ -57340,6 +58701,10 @@ msgstr ""
 
 #: deeplearningprediction/results/trainingMetrics/finalMetrics.description
 msgid "Overall model performance assessment"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Overall percentage agreement was %.1f%%."
 msgstr ""
 
 #: multiclassdiagnostics/results/overallMetrics.title
@@ -57637,6 +59002,8 @@ msgstr ""
 #: advancedanova/results/assumptions.columns.title
 #: advancedanova/results/anova.columns.title
 #: agreement/results/kappaTable.columns.title
+#: agreement/results/iccTable.columns.title
+#: agreement/results/pairwiseTable.columns.title
 #: aivalidation/results/modelComparisonTable.columns.title
 #: aivalidation/results/nriIdiTable.columns.title
 #: aivalidation/results/calibrationTable.columns.title
@@ -58108,6 +59475,18 @@ msgstr ""
 msgid "P(ρ > 0)"
 msgstr ""
 
+#: agreement/results/pabakTable.columns.title
+msgid "PABAK"
+msgstr ""
+
+#: agreement/options/pabak.title
+msgid "PABAK Analysis"
+msgstr ""
+
+#: agreement/results/pabakTable.title
+msgid "PABAK Analysis Results"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Package 'poLCA' is required for latent class analysis"
 msgstr ""
@@ -58226,6 +59605,10 @@ msgstr ""
 msgid "Pairs Plots"
 msgstr ""
 
+#: agreement/results/pairwisePlot.title
+msgid "Pairwise Agreement Plot"
+msgstr ""
+
 #: agreement/options/multiraterMethod/cohen.title
 msgid "Pairwise Cohen's Kappa (2 raters)"
 msgstr ""
@@ -58317,6 +59700,14 @@ msgstr ""
 
 #: comparingSurvival/results/pairwiseTable.title
 msgid "Pairwise Log-rank Comparisons"
+msgstr ""
+
+#: agreement/results/pairwiseTable.title
+msgid "Pairwise Rater Agreements"
+msgstr ""
+
+#: agreement/options/pairwiseAnalysis.title
+msgid "Pairwise Rater Analysis"
 msgstr ""
 
 #: nonparametric/options/post_hoc_method/pairwise_wilcoxon.title
@@ -58443,6 +59834,7 @@ msgid "Parallel Testing Rules"
 msgstr ""
 
 #: advancedimputation/results/pooled_estimates.columns.title
+#: agreement/results/sampleSizeTable.columns.title
 #: bayesianci/results/priorSpecification.columns.title
 #: bayesianci/results/posteriorSummary.columns.title
 #: bayesianci/results/credibleIntervals.columns.title
@@ -58799,7 +60191,7 @@ msgid "Partial area under curve analysis"
 msgstr ""
 
 #: enhancedROC/results/results/partialAucAnalysis.columns.title
-#: psychopdaROC/ui[7][0][0].label
+#: psychopdaROC/ui[9][0][0].label
 #: psychopdaROC/results/partialAUCTable.columns.title
 msgid "Partial AUC"
 msgstr ""
@@ -59062,6 +60454,10 @@ msgstr ""
 
 #: imagingcorrelation/results/stagingCorrelationTable.columns.title
 msgid "Pathology Stage"
+msgstr ""
+
+#: agreement/options/pathologyContext.title
+msgid "Pathology-Specific Metrics"
 msgstr ""
 
 #: biomarkerdiscovery/results/pathway_enrichment.columns.title
@@ -59764,6 +61160,7 @@ msgstr ""
 #: R/jjsegmentedtotalbar.b.R
 #: advancedbarplot/options/value_format/percentage.title
 #: agreement/results/consensusSummary.columns.title
+#: agreement/results/raterFrequencyTables/frequencyTable.columns.title
 #: clinicalalerts/results/alertSummary.columns.title
 #: cochranq/results/responsePatterns.columns.title
 #: cohenskappa/results/agreementStats.columns.title
@@ -59812,6 +61209,10 @@ msgstr ""
 #: ihcstats/results/prognosticTable.columns.title
 #: ihcstats/results/supervisedResultsTable.columns.title
 msgid "Percentage %"
+msgstr ""
+
+#: agreement/options/styleDistanceMetric/agreement.title
+msgid "Percentage Agreement"
 msgstr ""
 
 #: robustcorrelation/options/method/percentage_bend.title
@@ -60018,10 +61419,6 @@ msgstr ""
 msgid "Perform comprehensive statistical comparison between models"
 msgstr ""
 
-#: agreement/ui[5][0]/consensus.label
-msgid "Perform Consensus Analysis"
-msgstr ""
-
 #: ihccluster/ui[3]/consensusClustering.label
 msgid "Perform consensus clustering"
 msgstr ""
@@ -60178,7 +61575,11 @@ msgstr ""
 msgid "Perform McNemar test for paired model comparison"
 msgstr ""
 
-#: psychopdaROC/ui[1]/metaAnalysis.label
+#: decisioncompare/options/statComp.description.ui
+msgid "Perform McNemar's test to statistically compare test performance.  Use when you need to determine if differences between tests are  statistically significant (p<0.05 indicates significant difference).  Also provides confidence intervals for metric differences."
+msgstr ""
+
+#: psychopdaROC/ui[2][0]/metaAnalysis.label
 msgid "Perform meta-analysis of AUC values"
 msgstr ""
 
@@ -60422,6 +61823,10 @@ msgstr ""
 msgid "Performance"
 msgstr ""
 
+#: agreement/ui[11][0][0].label
+msgid "Performance & Debugging"
+msgstr ""
+
 #: deeplearningprediction/results/crossValidationResults/cvMetrics.description
 msgid "Performance across CV folds"
 msgstr ""
@@ -60464,6 +61869,7 @@ msgstr ""
 msgid "Performance Heatmap"
 msgstr ""
 
+#: psychopdaROC/results/clinicalInterpretationTable.columns.title
 #: screeningevaluation/results/quality_indicators.columns.title
 msgid "Performance Level"
 msgstr ""
@@ -61068,6 +62474,10 @@ msgstr ""
 msgid "Plasma"
 msgstr ""
 
+#: agreement/options/heatmapTheme/plasma.title
+msgid "Plasma (colorblind-safe)"
+msgstr ""
+
 #: stagemigration/options/curePlateauThreshold.title
 msgid "Plateau Detection Threshold"
 msgstr ""
@@ -61120,12 +62530,28 @@ msgstr ""
 msgid "Please select a different variable with varying values."
 msgstr ""
 
+#: R/decision.b.R
+msgid "Please select a gold standard (reference) variable"
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "Please select a grouping variable for Y (Groups)"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Please select a test variable to evaluate"
+msgstr ""
+
 #: R/nonparametric.b.R
 msgid "Please select dependent variable(s) and grouping variable to begin analysis."
+msgstr ""
+
+#: R/decision.b.R
+msgid "Please select the positive level for the gold standard variable"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Please select the positive level for the test variable"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -61723,7 +63149,7 @@ msgstr ""
 #: jiwillsurvive/options/plot_style.title
 #: jjridges/ui[1].label
 #: multisurvival/options/sty.title
-#: psychopdaROC/ui[5][1][0].label
+#: psychopdaROC/ui[7][1][0].label
 msgid "Plot Style"
 msgstr ""
 
@@ -61948,7 +63374,6 @@ msgstr ""
 msgid "Plot width must be between 300 and 1200 pixels. Current value will be ignored."
 msgstr ""
 
-#: agreement/ui[2].label
 #: alluvial/ui[1][0][1][0].label
 #: alluvial2/ui[1][0][1][0].label
 #: bayesianci/ui[1][5].label
@@ -62280,7 +63705,9 @@ msgstr ""
 msgid "Pooled Standard Deviation"
 msgstr ""
 
+#: R/agreement.b.R
 #: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
 msgid "Poor"
 msgstr ""
 
@@ -62410,7 +63837,10 @@ msgstr ""
 msgid "Population Prevalence (%)"
 msgstr ""
 
-#: decision/ui[2].label
+#: R/decision.b.R
+msgid "Population prevalence must be between 0 and 1 (exclusive). Current value: {value}. Please enter a value like 0.05 for 5% prevalence."
+msgstr ""
+
 #: decisioncalculator/ui[2].label
 msgid "Population Prevalence Settings"
 msgstr ""
@@ -62565,14 +63995,8 @@ msgstr ""
 
 #: aivalidation/options/positiveLevel.title
 #: aivalidation/ui[0][1]/positiveLevel.label
-#: decisioncombine/options/goldPositive.title
-#: decisioncombine/options/test1Positive.title
 #: decisioncombine/options/test2Positive.title
 #: decisioncombine/options/test3Positive.title
-#: decisioncompare/options/goldPositive.title
-#: decisioncompare/options/test1Positive.title
-#: decisioncompare/options/test2Positive.title
-#: decisioncompare/options/test3Positive.title
 #: decisionpanel/options/test1Positive.title
 #: decisionpanel/options/test2Positive.title
 #: decisionpanel/options/test3Positive.title
@@ -62591,11 +64015,19 @@ msgstr ""
 msgid "Positive Level (Disease Present)"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "Positive level not specified for: {tests}. Please select the positive result level for each test variable."
+msgstr ""
+
 #: decision/results/ratioTable.columns.title
 #: decisioncalculator/results/ratioTable.columns.title
 #: decisioncompare/results/comparisonTable.columns.title
 #: screeningcalculator/results/singleTestTable.columns.title
 msgid "Positive Likelihood Ratio"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. >10 = strong evidence, >5 = moderate, >2 = weak but potentially useful."
 msgstr ""
 
 #: cotest/results/testParamsTable.columns.title
@@ -62636,6 +64068,15 @@ msgstr ""
 #: screeningcalculator/results/singleTestTable.columns.title
 #: stagemigration/results/clinicalUtilityComparison.columns.title
 msgid "Positive Predictive Value"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Positive predictive value"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Positive Predictive Value: Probability of disease given positive test. Depends on prevalence and specificity."
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
@@ -62819,6 +64260,14 @@ msgstr ""
 
 #: cotest/results/cotestResultsTable.columns.title
 msgid "Post-test Probability"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Post-test Probability (Disease-): Probability of being healthy after negative test using population prevalence."
+msgstr ""
+
+#: R/decision.b.R
+msgid "Post-test Probability (Disease+): Probability of disease after positive test using population prevalence."
 msgstr ""
 
 #: likelihoodratio/ui[3].label
@@ -63167,7 +64616,7 @@ msgid "Power Analysis Summary"
 msgstr ""
 
 #: psychopdaROC/options/powerAnalysisType.title
-#: psychopdaROC/ui[8][1][6]/powerAnalysisType.label
+#: psychopdaROC/ui[10][1][6]/powerAnalysisType.label
 msgid "Power Analysis Type"
 msgstr ""
 
@@ -63304,6 +64753,7 @@ msgstr ""
 #: nogoldstandard/results/test_metrics.columns.title
 #: psychopdaROC/results/resultsTable.template.columns.title
 #: psychopdaROC/results/thresholdTable.columns.title
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 msgid "PPV"
 msgstr ""
@@ -63314,6 +64764,11 @@ msgstr ""
 msgid "PPV (%)"
 msgstr ""
 
+#: R/decision.b.R
+msgid "PPV (Positive Predictive Value)"
+msgstr ""
+
+#: agreement/results/diagnosticAccuracyTable.columns.title
 #: ihcstats/results/diagnosticTable.columns.title
 #: ihcstats/results/antibodyPerformanceTable.columns.title
 msgid "PPV %"
@@ -63421,7 +64876,7 @@ msgid "Precision Study Visualization"
 msgstr ""
 
 #: psychopdaROC/options/precisionRecallCurve.title
-#: psychopdaROC/ui[6][0]/precisionRecallCurve.label
+#: psychopdaROC/ui[8][0]/precisionRecallCurve.label
 msgid "Precision-Recall Curve"
 msgstr ""
 
@@ -63894,12 +65349,16 @@ msgstr ""
 msgid "Predictive Values Analysis"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Predictive values depend on disease prevalence in your population"
+msgstr ""
+
 #: psychopdaROC/options/showPrevalencePlot.title
 msgid "Predictive Values vs Prevalence"
 msgstr ""
 
 #: bayesiandiagnostic/results/predictiveValuesPlot.title
-#: psychopdaROC/ui[6][0]/showPrevalencePlot.label
+#: psychopdaROC/ui[8][0]/showPrevalencePlot.label
 #: psychopdaROC/results/prevalencePlot.title
 msgid "Predictive Values vs. Prevalence"
 msgstr ""
@@ -64022,6 +65481,18 @@ msgstr ""
 msgid "Predictors"
 msgstr ""
 
+#: agreement/results/styleSummaryTable.columns.title
+msgid "Predominant Experience"
+msgstr ""
+
+#: agreement/results/styleSummaryTable.columns.title
+msgid "Predominant Institution"
+msgstr ""
+
+#: agreement/results/styleSummaryTable.columns.title
+msgid "Predominant Training"
+msgstr ""
+
 #: qualityoflife/options/scoring_algorithm/preference_based.title
 msgid "Preference-Based Utilities"
 msgstr ""
@@ -64101,7 +65572,6 @@ msgstr ""
 msgid "Prevalence (%)"
 msgstr ""
 
-#: decision/ui[2]/pprob.label
 #: decisioncalculator/ui[2]/pprob.label
 msgid "Prevalence (0.0-1.0)"
 msgstr ""
@@ -64153,6 +65623,10 @@ msgstr ""
 
 #: labinterpret/results/deltaChecksTable.columns.title
 msgid "Previous Value"
+msgstr ""
+
+#: agreement/ui[2][0]/multiraterMethod.label
+msgid "Primary Analysis Method"
 msgstr ""
 
 #: qualitycontrol/options/analysis_type.title
@@ -64375,7 +65849,7 @@ msgstr ""
 msgid "Print model"
 msgstr ""
 
-#: psychopdaROC/ui[9][0]/priorAUC.label
+#: psychopdaROC/ui[11][0]/priorAUC.label
 msgid "Prior AUC"
 msgstr ""
 
@@ -64456,7 +65930,7 @@ msgid "Prior PIP"
 msgstr ""
 
 #: psychopdaROC/options/priorPrecision.title
-#: psychopdaROC/ui[9][0]/priorPrecision.label
+#: psychopdaROC/ui[11][0]/priorPrecision.label
 msgid "Prior Precision"
 msgstr ""
 
@@ -64464,7 +65938,7 @@ msgstr ""
 msgid "Prior Prevalence Value"
 msgstr ""
 
-#: psychopdaROC/ui[3][0]/priorPrev.label
+#: psychopdaROC/ui[5][0]/priorPrev.label
 msgid "Prior prevalence value"
 msgstr ""
 
@@ -64487,6 +65961,14 @@ msgstr ""
 #: decisioncompare/options/pp.title
 #: decisioncompare/options/pprob.title
 msgid "Prior Probability (prevalence)"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Prior probability and confidence intervals cannot both be enabled. Please choose one option."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Prior probability must be between 0 and 1. Current value: {value}"
 msgstr ""
 
 #: spikeslabpriors/options/prior_inclusion_prob.description
@@ -64736,6 +66218,10 @@ msgstr ""
 msgid "Pro-Rata Scoring"
 msgstr ""
 
+#: psychopdaROC/options/bayesianAnalysis.title
+msgid "Probabilistic ROC Analysis"
+msgstr ""
+
 #: decisiongraph/options/probabilisticAnalysis.title
 #: decisiongraph/results/psaResults.title
 msgid "Probabilistic Sensitivity Analysis"
@@ -64790,9 +66276,17 @@ msgstr ""
 msgid "Probability Influence"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Probability of being healthy given negative test"
+msgstr ""
+
 #: screeningcalculator/results/repeatTest2Table.columns.title
 #: screeningcalculator/results/repeatTest3Table.columns.title
 msgid "Probability of Disease"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Probability of disease given positive test"
 msgstr ""
 
 #: survivalpower/options/beta.description.jamovi
@@ -65198,8 +66692,32 @@ msgstr ""
 msgid "Proportion Group 2"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Proportion of all tests that give a correct result."
+msgstr ""
+
 #: treemedical/options/holdout_split.description
 msgid "Proportion of data for training in holdout validation (rest for testing)."
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Proportion of false negative"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Proportion of false positives"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Proportion of subjects with the outcome ruled in"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Proportion of subjects with the outcome ruled out"
 msgstr ""
 
 #: mixedeffectscox/results/randomEffects.columns.title
@@ -65608,7 +67126,7 @@ msgstr ""
 msgid "Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding."
 msgstr ""
 
-#: psychopdaROC/ui[5][1]/cleanPlot.label
+#: psychopdaROC/ui[7][1]/cleanPlot.label
 msgid "Publication-quality plot"
 msgstr ""
 
@@ -65896,6 +67414,10 @@ msgstr ""
 msgid "Quality Assurance & Improvement Report"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Quality assurance for laboratory tests"
+msgstr ""
+
 #: clinicalalerts/options/quality_metrics.title
 #: clinicalalerts/results/qualityMetrics.title
 msgid "Quality Assurance Metrics"
@@ -66088,7 +67610,7 @@ msgstr ""
 msgid "Quantile Positions"
 msgstr ""
 
-#: psychopdaROC/ui[5][2]/quantiles.label
+#: psychopdaROC/ui[7][2]/quantiles.label
 msgid "Quantile positions"
 msgstr ""
 
@@ -66256,6 +67778,10 @@ msgstr ""
 
 #: decisioncompare/results/plotRadar.title
 msgid "Radar Plot Comparison"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Radar Plot: Decision Test Statistics Comparison"
 msgstr ""
 
 #: decisiongraph/options/layout/radial.title
@@ -66937,6 +68463,10 @@ msgstr ""
 msgid "Rate Ratio"
 msgstr ""
 
+#: agreement/results/diagnosticAccuracyTable.columns.title
+#: agreement/results/diagnosticStyleTable.columns.title
+#: agreement/results/raterFrequencyTables/frequencyTable.columns.title
+#: agreement/results/raterBiasTable.columns.title
 #: icccoeff/results/descriptive_stats.columns.title
 msgid "Rater"
 msgstr ""
@@ -66949,12 +68479,39 @@ msgstr ""
 msgid "Rater 2 Categories"
 msgstr ""
 
+#: agreement/results/outlierTable.columns.title
+msgid "Rater Assignments"
+msgstr ""
+
+#: agreement/results/raterBiasTable.title
+msgid "Rater Bias Analysis"
+msgstr ""
+
+#: agreement/options/raterBiasAnalysis.title
+msgid "Rater Bias Detection"
+msgstr ""
+
+#: agreement/results/biasPlot.title
+msgid "Rater Bias Visualization"
+msgstr ""
+
+#: agreement/results/pairwiseTable.columns.title
+msgid "Rater Pair"
+msgstr ""
+
+#: agreement/results/caseDifficultyTable.columns.title
+msgid "Rater Variability"
+msgstr ""
+
 #: icccoeff/options/vars.title
 #: icccoeff/ui[0][0].label
 msgid "Rater Variables"
 msgstr ""
 
-#: agreement/ui[0][0].label
+#: agreement/ui[7][0][0].label
+msgid "Rater-Level Analysis"
+msgstr ""
+
 #: agreement/results/overviewTable.columns.title
 #: kappaSizeCI/ui[0][1][0][0]/raters.label
 #: kappaSizeFixedN/ui[0][1][0][0]/raters.label
@@ -66977,7 +68534,6 @@ msgid "Raters/Observers"
 msgstr ""
 
 #: agreement/options/krippMethod/ratio.title
-#: agreement/ui[4][0]/krippMethod/ratio.title
 msgid "Ratio"
 msgstr ""
 
@@ -67188,6 +68744,8 @@ msgstr ""
 #: adaptivetrialdesign/results/interimResults.columns.title
 #: advancedimputation/results/missing_summary.columns.title
 #: advancedtrials/results/futility_analysis_results.columns.title
+#: agreement/results/sampleSizeTable.columns.title
+#: agreement/results/raterBiasTable.columns.title
 #: batcheffect/results/summary.columns.title
 #: batcheffect/results/feature_quality.columns.title
 #: batcheffect/results/redundancy.columns.title
@@ -67423,6 +68981,10 @@ msgstr ""
 
 #: robustcorrelation/options/heatmap_colors/red_yellow_blue.title
 msgid "Red-Yellow-Blue"
+msgstr ""
+
+#: agreement/options/heatmapTheme/ryg.title
+msgid "Red-Yellow-Green (classic)"
 msgstr ""
 
 #: survivalcont/ui[3][0][0]/outcomeredefined.label
@@ -67677,7 +69239,7 @@ msgid "Reference Value for Testing"
 msgstr ""
 
 #: psychopdaROC/options/refVar.title
-#: psychopdaROC/ui[8][1]/refVar.label
+#: psychopdaROC/ui[10][1]/refVar.label
 msgid "Reference Variable"
 msgstr ""
 
@@ -68265,6 +69827,11 @@ msgstr ""
 msgid "Remove Y Axis Title"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Removed {count} rows with missing values"
+msgstr ""
+
 #: riverplot/options/reorderEdges.title
 msgid "Reorder Edges"
 msgstr ""
@@ -68422,6 +69989,10 @@ msgstr ""
 msgid "Required Data Setup:"
 msgstr ""
 
+#: decision/ui[0][2].label
+msgid "Required data: Cases with both test results and true disease status (gold standard)"
+msgstr ""
+
 #: poweranalysis/results/competing_risks_table.columns.title
 msgid "Required Events"
 msgstr ""
@@ -68497,6 +70068,10 @@ msgstr ""
 
 #: haralicktexture/options/texture_interpretation/research.title
 msgid "Research Applications"
+msgstr ""
+
+#: psychopdaROC/options/clinicalPreset/research.title
+msgid "Research Comparison"
 msgstr ""
 
 #: package/analyses/ppv.menuSubgroup
@@ -68905,6 +70480,10 @@ msgstr ""
 
 #: batcheffect/results/combat_results.description
 msgid "Results and effectiveness of ComBat batch correction"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Results are only as good as your gold standard"
 msgstr ""
 
 #: jjhistostats/ui[2][1].label
@@ -69998,11 +71577,6 @@ msgstr ""
 msgid "ROC analysis was performed to evaluate the diagnostic performance of %s in predicting [outcome] using %d observations. The analysis was conducted using the pROC package in R, with AUC calculation and %d%% confidence intervals determined using %s methodology."
 msgstr ""
 
-#: decisioncombine/options/plotType/roc.title
-#: decisioncombine/results/rocCurves.title
-msgid "ROC Analysis with Optimal Cut-point"
-msgstr ""
-
 #: stagemigration/ui[4][1].label
 msgid "ROC and Discrimination Analysis"
 msgstr ""
@@ -70020,7 +71594,7 @@ msgid "ROC Comparison Method"
 msgstr ""
 
 #: psychopdaROC/options/correlationROCs.title
-#: psychopdaROC/ui[8][1][6]/correlationROCs.label
+#: psychopdaROC/ui[10][1][6]/correlationROCs.label
 msgid "ROC Correlation"
 msgstr ""
 
@@ -70160,16 +71734,12 @@ msgstr ""
 msgid "ROC Plot"
 msgstr ""
 
-#: psychopdaROC/ui[7][1][0].label
+#: psychopdaROC/ui[9][1][0].label
 msgid "ROC Smoothing"
 msgstr ""
 
 #: psychopdaROC/options/rocSmoothingMethod.title
 msgid "ROC Smoothing Method"
-msgstr ""
-
-#: decisioncombine/results/rocCurves.description
-msgid "ROC space analysis comparing all test combinations with automatic identification of optimal cut-point using Youden Index maximization for balanced sensitivity and specificity."
 msgstr ""
 
 #: stagemigration/options/rocTimePoints.title
@@ -70575,6 +72145,14 @@ msgstr ""
 
 #: poweranalysis/results/multi_arm_table.columns.title
 msgid "Sample Size per Arm"
+msgstr ""
+
+#: agreement/options/sampleSizePlanning.title
+msgid "Sample Size Planning"
+msgstr ""
+
+#: agreement/results/sampleSizeTable.title
+msgid "Sample Size Planning Results"
 msgstr ""
 
 #: adaptivetrialdesign/options/adaptation_type/sample_size.title
@@ -71252,6 +72830,10 @@ msgstr ""
 msgid "Screening Test"
 msgstr ""
 
+#: psychopdaROC/options/clinicalPreset/screening.title
+msgid "Screening Test (Prioritize Sensitivity)"
+msgstr ""
+
 #: package/analyses/screeningcalculator.title
 #: package/analyses/screeningcalculator.menuTitle
 #: screeningcalculator/options.title
@@ -71656,6 +73238,14 @@ msgstr ""
 msgid "Select 'Raw Measurements' if providing actual tumor measurements, or 'Percentage Changes' if changes from baseline are pre-calculated"
 msgstr ""
 
+#: decisioncombine/options/test2.description.ui
+msgid "Select a second diagnostic test to combine with Test 1. This enables combination analysis  (e.g., combine imaging + biomarker, or two different biomarkers). Leave empty for single test analysis."
+msgstr ""
+
+#: decisioncompare/options/test2.description.ui
+msgid "Select a second diagnostic test to compare with Test 1. This enables head-to-head  comparison analysis (e.g., new method vs standard method, or two different biomarkers)."
+msgstr ""
+
 #: bbcplots/options/group_var.description.ui
 msgid "Select a variable to create multiple series or grouped comparisons."
 msgstr ""
@@ -71776,6 +73366,14 @@ msgstr ""
 msgid "Select the EDA analysis engine."
 msgstr ""
 
+#: decisioncompare/options/test1.description.ui
+msgid "Select the first diagnostic test to evaluate (e.g., imaging result, biomarker,  clinical assessment). This should be a test you want to validate against the gold standard."
+msgstr ""
+
+#: decisioncombine/options/test1.description.ui
+msgid "Select the first diagnostic test to evaluate. This should be a test you want to validate  (e.g., imaging result, biomarker, clinical assessment). Must be categorical with 2+ levels."
+msgstr ""
+
 #: statsplot2/options/group.description.ui
 msgid "Select the groups to compare (e.g., treatment vs control, tumor grade G1/G2/G3, positive vs negative)"
 msgstr ""
@@ -71800,8 +73398,29 @@ msgstr ""
 msgid "Select the level of the outcome variable that represents the event of interest. For example, if the outcome variable is \"death_status\" with levels \"Alive\" and \"Dead\", select \"Dead\" as the event level."
 msgstr ""
 
+#: decisioncombine/options/goldPositive.description.ui
+msgid "Select the level that indicates disease is PRESENT in your gold standard variable  (e.g., \"1\", \"positive\", \"malignant\"). This represents the condition you want to detect."
+msgstr ""
+
+#: decisioncompare/options/goldPositive.description.ui
+msgid "Select the level that indicates disease IS PRESENT in your gold standard variable  (e.g., \"positive\", \"malignant\", \"1\"). This represents the condition you want to detect."
+msgstr ""
+
 #: decision/options/goldPositive.description.ui
 msgid "Select the level that indicates disease is present in your gold standard variable. This represents the condition you want to detect or diagnose."
+msgstr ""
+
+#: decisioncombine/options/test1Positive.description.ui
+#: decisioncompare/options/test1Positive.description.ui
+msgid "Select the level that represents a POSITIVE result for Test 1  (e.g., \"abnormal\", \"high\", \"positive\"). This should indicate suspected disease presence."
+msgstr ""
+
+#: decisioncompare/options/test2Positive.description.ui
+msgid "Select the level that represents a POSITIVE result for Test 2."
+msgstr ""
+
+#: decisioncompare/options/test3Positive.description.ui
+msgid "Select the level that represents a POSITIVE result for Test 3."
 msgstr ""
 
 #: decision/options/testPositive.description.ui
@@ -71814,6 +73433,14 @@ msgstr ""
 
 #: statsplot2/options/dep.description.ui
 msgid "Select the main outcome you want to analyze (e.g., tumor size, survival time, biomarker level, treatment response)"
+msgstr ""
+
+#: decisioncombine/options/gold.description.ui
+msgid "Select the most reliable diagnostic method available (e.g., biopsy, final pathology report, expert consensus).  This is the \"truth\" against which we compare other tests. Must be categorical with exactly 2 levels."
+msgstr ""
+
+#: decisioncompare/options/gold.description.ui
+msgid "Select the most reliable diagnostic method available (e.g., biopsy, final pathology,  expert consensus). This is the \"truth\" against which we compare other tests.  Must be categorical with exactly 2 levels (positive/negative)."
 msgstr ""
 
 #: survivalcont/options/num_cutoffs.description
@@ -71898,7 +73525,7 @@ msgid "Select variables to include as predictors in the Cox regression model."
 msgstr ""
 
 #: decisioncombine/options/plotType.description.ui
-msgid "Select visualization type. ROC analysis automatically identifies optimal cut-points  using Youden Index. Forest plots use Wilson score confidence intervals for enhanced  accuracy. 'All Visualizations' provides comprehensive publication-ready output."
+msgid "Select visualization type for categorical test analysis. Forest plots use Wilson score  confidence intervals for enhanced accuracy. 'All Visualizations' provides comprehensive  publication-ready output."
 msgstr ""
 
 #: clinmon/options/output_level.description
@@ -72167,7 +73794,9 @@ msgstr ""
 msgid "Sens Upper"
 msgstr ""
 
+#: R/decision.b.R
 #: advancedimputation/results/sensitivity_results.columns.title
+#: agreement/results/categoryTable.columns.title
 #: aivalidation/results/cvPerformanceTable.columns.title
 #: aivalidation/results/cvFoldResults.columns.title
 #: bayesdca/results/modelResults.template.columns.title
@@ -72228,6 +73857,7 @@ msgstr ""
 msgid "Sensitivity (%)"
 msgstr ""
 
+#: agreement/results/diagnosticAccuracyTable.columns.title
 #: ihcstats/results/diagnosticTable.columns.title
 #: ihcstats/results/antibodyPerformanceTable.columns.title
 msgid "Sensitivity %"
@@ -72387,11 +74017,23 @@ msgstr ""
 msgid "Sensitivity, Specificity, PPV, NPV, ..."
 msgstr ""
 
+#: R/decision.b.R
+msgid "Sensitivity: Proportion of diseased patients correctly identified (TP rate). Higher is better for ruling OUT disease when negative."
+msgstr ""
+
+#: R/decision.b.R
+msgid "Sensitivity/Specificity ≥ 90%"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Sensitivity/Specificity 80-89%"
+msgstr ""
+
 #: psychopdaROC/options/showCriterionPlot.title
 msgid "Sensitivity/Specificity vs Threshold"
 msgstr ""
 
-#: psychopdaROC/ui[6][0]/showCriterionPlot.label
+#: psychopdaROC/ui[8][0]/showCriterionPlot.label
 #: psychopdaROC/results/criterionPlot.title
 msgid "Sensitivity/Specificity vs. Threshold"
 msgstr ""
@@ -72410,6 +74052,10 @@ msgstr ""
 
 #: ihcstats/results/optimalMarkersTable.columns.title
 msgid "Separation Score"
+msgstr ""
+
+#: agreement/results/agreementTrendTable.columns.title
+msgid "Sequence Group"
 msgstr ""
 
 #: vartree/options/sequence.title
@@ -72948,6 +74594,7 @@ msgid "Show Adjusted C-index Comparison"
 msgstr ""
 
 #: decisioncombine/options/showVisualization.title
+#: decisioncombine/ui[2][0]/showVisualization.label
 msgid "Show Advanced Visualizations"
 msgstr ""
 
@@ -72974,7 +74621,7 @@ msgstr ""
 msgid "Show All Observed Cutpoints"
 msgstr ""
 
-#: psychopdaROC/ui[3][0]/allObserved.label
+#: psychopdaROC/ui[5][0]/allObserved.label
 msgid "Show all observed cutpoints"
 msgstr ""
 
@@ -72998,6 +74645,11 @@ msgstr ""
 
 #: continuousrelationship/options/showGuidance.title
 msgid "Show Analysis Guidance"
+msgstr ""
+
+#: psychopdaROC/options/showFixedExplanation.title
+#: psychopdaROC/ui[3][0]/showFixedExplanation.label
+msgid "Show Analysis Guide"
 msgstr ""
 
 #: outlierdetection/options/show_interpretation.title
@@ -73132,7 +74784,7 @@ msgstr ""
 msgid "Show CIs at Quantiles"
 msgstr ""
 
-#: psychopdaROC/ui[5][2]/quantileCIs.label
+#: psychopdaROC/ui[7][2]/quantileCIs.label
 msgid "Show CIs at quantiles"
 msgstr ""
 
@@ -73312,7 +74964,7 @@ msgstr ""
 msgid "Show Confidence Bands"
 msgstr ""
 
-#: psychopdaROC/ui[5][2]/showConfidenceBands.label
+#: psychopdaROC/ui[7][2]/showConfidenceBands.label
 msgid "Show confidence bands"
 msgstr ""
 
@@ -73349,7 +75001,7 @@ msgstr ""
 msgid "Show Confusion Matrices"
 msgstr ""
 
-#: psychopdaROC/ui[4][0]/sensSpecTable.label
+#: psychopdaROC/ui[6][0]/sensSpecTable.label
 msgid "Show confusion matrices"
 msgstr ""
 
@@ -73362,10 +75014,6 @@ msgstr ""
 
 #: groupedbar/options/showconnectors.title
 msgid "Show Connecting Lines"
-msgstr ""
-
-#: agreement/ui[5][0]/show_consensus_table.label
-msgid "Show Consensus Details"
 msgstr ""
 
 #: agreement/options/show_consensus_table.title
@@ -73623,10 +75271,6 @@ msgstr ""
 
 #: clinmon/options/show_detailed.title
 msgid "Show Detailed Results"
-msgstr ""
-
-#: agreement/ui[2][0]/heatmapDetails.label
-msgid "Show Detailed Statistics"
 msgstr ""
 
 #: coxdiagnostics/options/show_deviance.title
@@ -73899,6 +75543,11 @@ msgstr ""
 msgid "Show Fixed Effects Table"
 msgstr ""
 
+#: psychopdaROC/options/showFixedROC.title
+#: psychopdaROC/ui[3][0]/showFixedROC.label
+msgid "Show Fixed Point ROC Curve"
+msgstr ""
+
 #: jjsankeyfier/options/show_statistics.title
 msgid "Show Flow Statistics"
 msgstr ""
@@ -73921,7 +75570,7 @@ msgstr ""
 msgid "Show Forest Plot"
 msgstr ""
 
-#: psychopdaROC/ui[1]/forestPlot.label
+#: psychopdaROC/ui[2][0]/forestPlot.label
 msgid "Show forest plot"
 msgstr ""
 
@@ -73947,10 +75596,6 @@ msgstr ""
 
 #: toolssummary/options/showFreq.title
 msgid "Show Frequencies"
-msgstr ""
-
-#: agreement/ui[1][0]/sft.label
-msgid "Show Frequency Tables"
 msgstr ""
 
 #: polychoriccorr/options/showFreq.title
@@ -74106,6 +75751,7 @@ msgid "Show Individual Study Results"
 msgstr ""
 
 #: decisioncombine/options/showIndividual.title
+#: decisioncombine/ui[1][0]/showIndividual.label
 msgid "Show Individual Test Results"
 msgstr ""
 
@@ -74127,6 +75773,10 @@ msgstr ""
 
 #: factoranalysis/options/communalities.description
 msgid "Show initial and extracted communalities"
+msgstr ""
+
+#: agreement/options/showInlineComments.title
+msgid "Show Inline Statistical Comments"
 msgstr ""
 
 #: survivalpower/options/show_power_plot.description.jamovi
@@ -74567,7 +76217,7 @@ msgstr ""
 msgid "Show Optimal Cutoff Values"
 msgstr ""
 
-#: psychopdaROC/ui[5][0]/showOptimalPoint.label
+#: psychopdaROC/ui[7][0]/showOptimalPoint.label
 msgid "Show optimal cutpoint"
 msgstr ""
 
@@ -74577,6 +76227,10 @@ msgstr ""
 
 #: decisioncurve/options/showOptimalThreshold.title
 msgid "Show Optimal Thresholds"
+msgstr ""
+
+#: decisioncombine/ui[1][0]/od.label
+msgid "Show Original Data Tables"
 msgstr ""
 
 #: outcomeorganizer/options/visualization.title
@@ -74812,6 +76466,10 @@ msgstr ""
 
 #: decisiongraph/options/showProbabilities.title
 msgid "Show Probabilities"
+msgstr ""
+
+#: agreement/options/showProgressIndicators.title
+msgid "Show Progress for Long Operations"
 msgstr ""
 
 #: decisionpanel/options/showProgress.title
@@ -75061,7 +76719,7 @@ msgstr ""
 msgid "Show ROC Curves"
 msgstr ""
 
-#: psychopdaROC/ui[5][0]/plotROC.label
+#: psychopdaROC/ui[7][0]/plotROC.label
 msgid "Show ROC curves"
 msgstr ""
 
@@ -75201,7 +76859,7 @@ msgstr ""
 msgid "Show Standard Error Bands"
 msgstr ""
 
-#: psychopdaROC/ui[5][1]/displaySE.label
+#: psychopdaROC/ui[7][1]/displaySE.label
 msgid "Show standard error bands"
 msgstr ""
 
@@ -75450,7 +77108,7 @@ msgstr ""
 msgid "Show Threshold Table"
 msgstr ""
 
-#: psychopdaROC/ui[4][0]/showThresholdTable.label
+#: psychopdaROC/ui[6][0]/showThresholdTable.label
 msgid "Show threshold table"
 msgstr ""
 
@@ -75779,6 +77437,7 @@ msgstr ""
 #: advancedanova/results/gameshowell.columns.title
 #: advancedanova/results/dunnett.columns.title
 #: advancedanova/results/bonferroni.columns.title
+#: agreement/results/agreementTrendTable.columns.title
 #: cochranq/results/cochranQTest.columns.title
 #: cochranq/results/pairwiseComparisons.columns.title
 #: condsurvival/results/groupComparisonTable.columns.title
@@ -75818,7 +77477,7 @@ msgstr ""
 #: jjcorrmat/options/siglevel.title
 #: netreclassification/options/alpha_level.title
 #: pagetrendtest/options/alpha.title
-#: psychopdaROC/ui[8][1][6]/significanceLevel.label
+#: psychopdaROC/ui[10][1][6]/significanceLevel.label
 #: robustcorrelation/options/sig_level.title
 #: spatialanalysis/options/significance_level.title
 #: spatialautocorrelation/results/spatialClusters.columns.title
@@ -76280,6 +77939,10 @@ msgstr ""
 msgid "Slice Label Type"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Slight"
+msgstr ""
+
 #: dynamicprediction/results/trajectoryParameters.columns.title
 #: labcontrolcharts/results/trendAnalysis.columns.title
 #: methodcomparison/results/regressionComparison.columns.title
@@ -76438,7 +78101,7 @@ msgstr ""
 
 #: flexiblerelativesurvival/options/smoothingMethod.title
 #: flexiblerelativesurvival/ui[1][0]/smoothingMethod.label
-#: psychopdaROC/ui[7][1]/rocSmoothingMethod.label
+#: psychopdaROC/ui[9][1]/rocSmoothingMethod.label
 msgid "Smoothing method"
 msgstr ""
 
@@ -77114,6 +78777,14 @@ msgstr ""
 msgid "Specialized Survival Methods"
 msgstr ""
 
+#: agreement/results/diagnosticStyleTable.columns.title
+msgid "Specialty"
+msgstr ""
+
+#: agreement/options/specialtyVar.title
+msgid "Specialty Variable"
+msgstr ""
+
 #: coefplot/options/coef_selection/specific.title
 #: coefplot/options/specific_coefs.title
 msgid "Specific Coefficients"
@@ -77167,7 +78838,9 @@ msgstr ""
 msgid "Specification for baseline hazard function"
 msgstr ""
 
+#: R/decision.b.R
 #: R/enhancedROC.b.R
+#: agreement/results/categoryTable.columns.title
 #: aivalidation/results/cvPerformanceTable.columns.title
 #: aivalidation/results/cvFoldResults.columns.title
 #: bayesdca/results/modelResults.template.columns.title
@@ -77228,6 +78901,7 @@ msgstr ""
 msgid "Specificity (%)"
 msgstr ""
 
+#: agreement/results/diagnosticAccuracyTable.columns.title
 #: ihcstats/results/diagnosticTable.columns.title
 #: ihcstats/results/antibodyPerformanceTable.columns.title
 msgid "Specificity %"
@@ -77255,6 +78929,10 @@ msgstr ""
 
 #: enhancedROC/options/specificityThreshold.title
 msgid "Specificity Threshold"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Specificity: Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -77667,10 +79345,10 @@ msgid "Square Root Time"
 msgstr ""
 
 #: agreement/options/wght/squared.title
-#: agreement/ui[3][0]/wght/squared.title
 msgid "Squared"
 msgstr ""
 
+#: agreement/results/stabilityTable.columns.title
 #: idi/results/sensitivityTable.columns.title
 #: ihccluster/results/consensusStats.columns.title
 #: stagemigration/results/shapGlobalImportance.columns.title
@@ -77685,6 +79363,7 @@ msgstr ""
 msgid "Stability Class"
 msgstr ""
 
+#: agreement/results/stabilityTable.columns.title
 #: biomarkerdiscovery/results/selected_biomarkers.columns.title
 #: clinicalprediction/results/stability_analysis.columns.title
 msgid "Stability Index"
@@ -77992,6 +79671,7 @@ msgstr ""
 
 #: advancedbarplot/options/error_bars/se.title
 #: agreement/results/kappaTable.columns.title
+#: agreement/results/gwetACTable.columns.title
 #: aivalidation/results/nriIdiTable.columns.title
 #: bayesiandiagnostic/results/covariateEffects.columns.title
 #: bayesianmetaanalysis/options/standardError.title
@@ -78056,6 +79736,10 @@ msgstr ""
 
 #: highdimcox/options/cv_method/cv_glmnet.title
 msgid "Standard K-Fold CV"
+msgstr ""
+
+#: agreement/results/pabakTable.columns.title
+msgid "Standard Kappa"
 msgstr ""
 
 #: weightedlogrank/options/standard_logrank.title
@@ -78440,6 +80124,7 @@ msgstr ""
 #: aalenhazard/results/goodnessOfFit.columns.title
 #: adaptivelasso/results/modelDiagnostics.columns.title
 #: advancedanova/results/assumptions.columns.title
+#: agreement/results/stabilityTable.columns.title
 #: batcheffect/results/batch_detection.columns.title
 #: bayesiandiagnostic/results/summaryStatistics.columns.title
 #: bayesianmetaanalysis/results/publicationBiasResults.columns.title
@@ -78538,7 +80223,7 @@ msgstr ""
 #: jjridges/ui[3].label
 #: jjscatterstats/ui[1].label
 #: jjwithinstats/ui[1].label
-#: psychopdaROC/ui[8][1][6][0].label
+#: psychopdaROC/ui[10][1][6][0].label
 #: raincloud/ui[5].label
 #: summarydata2/options/pivot_layout/statistical.title
 #: survival/ui[3].label
@@ -78580,6 +80265,14 @@ msgstr ""
 
 #: adaptivetrialdesign/results/dmbRecommendations.columns.title
 msgid "Statistical Basis"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Statistical calculation failed for {context}: {error}. Check data quality, sample sizes, and ensure no extreme values or division by zero."
+msgstr ""
+
+#: agreement/results/inlineComments.title
+msgid "Statistical Commentary"
 msgstr ""
 
 #: decisioncompare/options/statComp.title
@@ -78725,6 +80418,10 @@ msgstr ""
 msgid "Statistical method for parameter estimation"
 msgstr ""
 
+#: agreement/ui[2][0][0].label
+msgid "Statistical Method Selection"
+msgstr ""
+
 #: grafify/options/stat_method.description
 msgid "Statistical method to apply. Results will be displayed as text annotations or in separate output sections."
 msgstr ""
@@ -78801,6 +80498,7 @@ msgstr ""
 msgid "Statistical Notes:"
 msgstr ""
 
+#: agreement/ui[2][2][0].label
 #: chisqposttest/ui[1].label
 #: enhancedROC/ui[3].label
 #: enhancedfactorvariable/ui[1][2][0].label
@@ -78846,7 +80544,7 @@ msgstr ""
 
 #: outbreakanalysis/results/power_analysis_results.title
 #: psychopdaROC/options/powerAnalysis.title
-#: psychopdaROC/ui[8][1][6]/powerAnalysis.label
+#: psychopdaROC/ui[10][1][6]/powerAnalysis.label
 msgid "Statistical Power Analysis"
 msgstr ""
 
@@ -78948,6 +80646,11 @@ msgstr ""
 #: stagemigration/options/showStatisticalSummary.title
 #: stagemigration/ui[16][1][0]/showStatisticalSummary.label
 msgid "Statistical Summary Table"
+msgstr ""
+
+#: agreement/options/showStatisticalGlossary.title
+#: agreement/results/statisticalGlossary.title
+msgid "Statistical Terms Glossary"
 msgstr ""
 
 #: advancedbarplot/options/stat_method.title
@@ -79259,6 +80962,10 @@ msgstr ""
 
 #: decisioncurve/ui[1][0][0]/thresholdStep.label
 msgid "Step Size"
+msgstr ""
+
+#: psychopdaROC/options/fixedInterpolation/stepwise.title
+msgid "Stepwise (Conservative)"
 msgstr ""
 
 #: modelbuilder/options/stepwiseDirection.title
@@ -79658,6 +81365,10 @@ msgstr ""
 msgid "Strong discriminatory performance"
 msgstr ""
 
+#: R/decision.b.R
+msgid "strong evidence for disease when positive"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Strong evidence for positive diagnosis"
 msgstr ""
@@ -79908,8 +81619,29 @@ msgstr ""
 msgid "Study/Group Labels"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Style"
+msgstr ""
+
+#: agreement/options/styleClusterMethod.title
+msgid "Style Clustering Method"
+msgstr ""
+
+#: agreement/options/styleDistanceMetric.title
+msgid "Style Distance Metric"
+msgstr ""
+
 #: statsplot2/options/alluvsty.description.ui
 msgid "Style for alluvial diagrams when comparing two categorical variables in repeated measures"
+msgstr ""
+
+#: agreement/results/diagnosticStyleTable.columns.title
+#: agreement/results/styleSummaryTable.columns.title
+msgid "Style Group"
+msgstr ""
+
+#: agreement/results/discordantCasesTable.columns.title
+msgid "Style Group Diagnoses"
 msgstr ""
 
 #: epidemiosurvival/options/subcohort_indicator.title
@@ -80137,6 +81869,10 @@ msgstr ""
 msgid "Subset Sampling"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Substantial"
+msgstr ""
+
 #: jjtreemap/ui[2][0][0]/subtitle.label
 msgid "Subtitle"
 msgstr ""
@@ -80193,6 +81929,10 @@ msgstr ""
 msgid "suitable for analyzing treatment decision pathways and resource flows"
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid "Suitable for clinical use with appropriate cutpoint"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Suitable for confirmatory testing - high specificity"
 msgstr ""
@@ -80237,6 +81977,7 @@ msgstr ""
 #: ihccluster/results/clusterProfiles.columns.title
 #: ihccluster/results/clinicalComparison.columns.title
 #: jiwillsurvive/options/followup_plot_type/summary.title
+#: tableone/results/summary.title
 msgid "Summary"
 msgstr ""
 
@@ -80275,13 +82016,9 @@ msgstr ""
 
 #: package/analyses/reportcat.title
 #: package/analyses/reportcat.menuTitle
-#: package/analyses/reportcat2.title
-#: package/analyses/reportcat2.menuTitle
 #: reportcat/options.title
 #: reportcat/ui.title
 #: reportcat/results.title
-#: reportcat2/options.title
-#: reportcat2/ui.title
 #: reportcat2/results.title
 msgid "Summary of Categorical Variables"
 msgstr ""
@@ -80300,13 +82037,9 @@ msgstr ""
 
 #: package/analyses/summarydata.title
 #: package/analyses/summarydata.menuTitle
-#: package/analyses/summarydata2.title
-#: package/analyses/summarydata2.menuTitle
 #: summarydata/options.title
 #: summarydata/ui.title
 #: summarydata/results.title
-#: summarydata2/options.title
-#: summarydata2/ui.title
 #: summarydata2/results.title
 msgid "Summary of Continuous Variables"
 msgstr ""
@@ -80574,8 +82307,12 @@ msgstr ""
 msgid "Super Learner Ensemble"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Super Majority"
+msgstr ""
+
+#: R/agreement.b.R
 #: agreement/options/consensus_method/super_majority.title
-#: agreement/ui[5][0]/consensus_method/super_majority.title
 msgid "Super Majority (≥2/3)"
 msgstr ""
 
@@ -81686,6 +83423,10 @@ msgstr ""
 msgid "Systematic Sampling"
 msgstr ""
 
+#: agreement/results/raterBiasTable.columns.title
+msgid "Systematic Tendency"
+msgstr ""
+
 #: contTables/results/taub.columns.title
 #: dynamicprediction/results/jointModelResults.columns.title
 #: effectsize/results/results/testDetails.columns.title
@@ -81752,10 +83493,6 @@ msgstr ""
 #: generalpseudo/results/regressionResults.columns.title
 #: rmstregression/results/regressionResults.columns.title
 msgid "t/z"
-msgstr ""
-
-#: agreement/ui[1].label
-msgid "Table"
 msgstr ""
 
 #: tinytable/options/style_borders.title
@@ -81858,9 +83595,12 @@ msgstr ""
 msgid "Table Width (proportion)"
 msgstr ""
 
-#: tableone/options/sty/t1.title
 #: tableone2/options/sty/t1.title
 msgid "tableone"
+msgstr ""
+
+#: tableone/options/sty/t1.title
+msgid "tableone (Standard medical format)"
 msgstr ""
 
 #: decisioncurve/ui[2][0][0].label
@@ -81916,6 +83656,10 @@ msgstr ""
 msgid "Target Estimand"
 msgstr ""
 
+#: agreement/options/targetKappa.title
+msgid "Target Kappa Value"
+msgstr ""
+
 #: labcontrolcharts/options/target_mean.title
 msgid "Target Mean Value"
 msgstr ""
@@ -81952,8 +83696,12 @@ msgstr ""
 msgid "Target Population Size"
 msgstr ""
 
-#: psychopdaROC/ui[8][1][6]/targetPower.label
+#: psychopdaROC/ui[10][1][6]/targetPower.label
 msgid "Target Power"
+msgstr ""
+
+#: agreement/options/targetPrecision.title
+msgid "Target Precision (CI Width)"
 msgstr ""
 
 #: sigmametrics/results/defectRateAnalysis.columns.title
@@ -81964,8 +83712,18 @@ msgstr ""
 msgid "Target Response Value"
 msgstr ""
 
+#: psychopdaROC/options/fixedSensitivityValue.title
+#: psychopdaROC/ui[3][0]/fixedSensitivityValue.label
+msgid "Target Sensitivity"
+msgstr ""
+
 #: assayoptimization/options/optimization_goal/target_value.title
 msgid "Target Specific Value"
+msgstr ""
+
+#: psychopdaROC/options/fixedSpecificityValue.title
+#: psychopdaROC/ui[3][0]/fixedSpecificityValue.label
+msgid "Target Specificity"
 msgstr ""
 
 #: labcontrolcharts/options/target_sd.title
@@ -81984,6 +83742,7 @@ msgstr ""
 
 #: methodvalidation/results/accuracyResults.columns.title
 #: populationhealth/results/qualityMetricsTable.columns.title
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: qualitycontrol/options/target_value.title
 #: screeningevaluation/results/quality_indicators.columns.title
 msgid "Target Value"
@@ -82307,6 +84066,7 @@ msgstr ""
 msgid "Tertile Split"
 msgstr ""
 
+#: R/decisioncompare.b.R
 #: R/nonparametric.b.R
 #: aalenhazard/results/goodnessOfFit.columns.title
 #: advancedanova/results/assumptions.columns.title
@@ -82353,6 +84113,7 @@ msgstr ""
 #: pagetrendtest/results/friedmanComparison.columns.title
 #: parametricfrailty/results/gof_table.columns.title
 #: pheval/results/globalTests.columns.title
+#: psychopdaROC/results/clinicalInterpretationTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 #: simonmakuch/results/statisticalTests.columns.title
 #: stagemigration/results/likelihoodTests.columns.title
@@ -82375,8 +84136,6 @@ msgstr ""
 msgid "Test '%s' shows extreme imbalance (minority category %.1f%%). This may affect parameter estimation."
 msgstr ""
 
-#: decisioncombine/options/test1.title
-#: decisioncompare/options/test1.title
 #: decisioncompare/ui[0][1].label
 #: decisionpanel/options/test1.title
 #: nogoldstandard/options/test1.title
@@ -82392,12 +84151,19 @@ msgstr ""
 msgid "Test 1 - Recoded Data"
 msgstr ""
 
+#: decisioncombine/options/test1.title
 #: decisioncombine/ui[0][1].label
+#: decisioncompare/options/test1.title
 msgid "Test 1 (Required)"
 msgstr ""
 
 #: cotest/ui[0].label
 msgid "Test 1 Parameters"
+msgstr ""
+
+#: decisioncombine/options/test1Positive.title
+#: decisioncompare/options/test1Positive.title
+msgid "Test 1 Positive Level"
 msgstr ""
 
 #: decisioncombine/results/indTable1.title
@@ -82412,8 +84178,6 @@ msgstr ""
 msgid "Test 1 Specificity"
 msgstr ""
 
-#: decisioncombine/options/test2.title
-#: decisioncompare/options/test2.title
 #: decisioncompare/ui[0][2].label
 #: decisionpanel/options/test2.title
 #: nogoldstandard/options/test2.title
@@ -82429,12 +84193,24 @@ msgstr ""
 msgid "Test 2 - Recoded Data"
 msgstr ""
 
+#: decisioncombine/options/test2.title
+msgid "Test 2 (Optional - Required for Combinations)"
+msgstr ""
+
 #: decisioncombine/ui[0][2].label
 msgid "Test 2 (Required for Combination Analysis)"
 msgstr ""
 
+#: decisioncompare/options/test2.title
+msgid "Test 2 (Required for Comparison)"
+msgstr ""
+
 #: cotest/ui[1].label
 msgid "Test 2 Parameters"
+msgstr ""
+
+#: decisioncompare/options/test2Positive.title
+msgid "Test 2 Positive Level"
 msgstr ""
 
 #: decisioncombine/results/indTable2.title
@@ -82450,7 +84226,6 @@ msgid "Test 2 Specificity"
 msgstr ""
 
 #: decisioncombine/options/test3.title
-#: decisioncompare/options/test3.title
 #: decisioncompare/ui[0][3].label
 #: nogoldstandard/options/test3.title
 msgid "Test 3"
@@ -82465,9 +84240,14 @@ msgid "Test 3 - Recoded Data"
 msgstr ""
 
 #: decisioncombine/ui[0][3].label
+#: decisioncompare/options/test3.title
 #: decisionpanel/options/test3.title
 #: nogoldstandard/ui[1][2].label
 msgid "Test 3 (Optional)"
+msgstr ""
+
+#: decisioncompare/options/test3Positive.title
+msgid "Test 3 Positive Level"
 msgstr ""
 
 #: decisioncombine/results/indTable3.title
@@ -82624,7 +84404,7 @@ msgstr ""
 msgid "Test for Heterogeneity"
 msgstr ""
 
-#: psychopdaROC/ui[1]/heterogeneityTest.label
+#: psychopdaROC/ui[2][0]/heterogeneityTest.label
 msgid "Test for heterogeneity (Q-test, I²)"
 msgstr ""
 
@@ -82794,6 +84574,8 @@ msgstr ""
 msgid "Test Method for Informative Censoring"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
 #: sequentialtests/results/population_flow_table.columns.title
 msgid "Test Negative"
 msgstr ""
@@ -82833,6 +84615,8 @@ msgstr ""
 msgid "Test Performance Metrics"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
 #: sequentialtests/results/population_flow_table.columns.title
 msgid "Test Positive"
 msgstr ""
@@ -82926,6 +84710,11 @@ msgstr ""
 msgid "Test sensitivities:"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Test sensitivity"
+msgstr ""
+
 #: methodvalidation/results/carryoverResults.columns.title
 msgid "Test Sequence"
 msgstr ""
@@ -82939,6 +84728,11 @@ msgstr ""
 #: polychoriccorr/options/sig.title
 #: polychoriccorr/ui[1][1]/sig.label
 msgid "Test significance"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Test specificity"
 msgstr ""
 
 #: stagemigration/options/performInteractionTests.title
@@ -83039,7 +84833,6 @@ msgid "Test type"
 msgstr ""
 
 #: decision/options/newtest.title
-#: decision/ui[0][1].label
 msgid "Test Under Evaluation"
 msgstr ""
 
@@ -83061,7 +84854,7 @@ msgstr ""
 msgid "Test Value Distribution"
 msgstr ""
 
-#: psychopdaROC/ui[6][0]/showDotPlot.label
+#: psychopdaROC/ui[8][0]/showDotPlot.label
 #: psychopdaROC/results/dotPlot.title
 msgid "Test Values Distribution"
 msgstr ""
@@ -83136,7 +84929,6 @@ msgstr ""
 msgid "Testing Strategy Configuration"
 msgstr ""
 
-#: agreement/ui[3].label
 #: contTables/ui[1][0][0][0][0].label
 #: decisionpanel/results/allCombinations.columns.title
 msgid "Tests"
@@ -83538,6 +85330,10 @@ msgstr ""
 msgid "The smaller outcome group has only %.1f%% of observations (%d cases). This may affect ROC reliability."
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid "The test '%s' has an AUC of %.3f"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The time period for each cycle in a Markov model, commonly one year."
 msgstr ""
@@ -83745,6 +85541,10 @@ msgstr ""
 msgid "This function creates lollipop charts for categorical data visualization with clinical applications."
 msgstr ""
 
+#: R/decision.b.R
+msgid "This function evaluates diagnostic test performance by comparing test results to a gold standard (reference). It calculates key diagnostic accuracy measures including sensitivity, specificity, predictive values, and likelihood ratios."
+msgstr ""
+
 #: package/analyses/tableone.description
 #: package/analyses/tableone2.description
 #: tableone/options.description.main
@@ -83754,6 +85554,22 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "This function uses ggplot2 and ggstatsplot packages. See documentations <a href = \'https://indrajeetpatil.github.io/ggstatsplot/reference/ggpiestats.html\' target=\'_blank\'>ggpiestats</a> and <a href = \'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggpiestats.html\' target=\'_blank\'>grouped_ggpiestats</a>."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "This level of agreement is excellent and suitable for all clinical applications including critical diagnoses."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "This level of agreement is good and suitable for most clinical and research applications."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "This level of agreement is moderate and may be acceptable for some clinical applications but consider additional training for critical diagnoses."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "This level of agreement is poor to fair and requires improvement through additional training or revised criteria before clinical use."
 msgstr ""
 
 #: package/analyses/summarydata.description
@@ -83971,13 +85787,13 @@ msgstr ""
 msgid "TidyQuant"
 msgstr ""
 
-#: agreement/ui[5][0]/tie_breaking.label
-msgid "Tie Breaking"
+#: R/agreement.b.R
+msgid "Tie"
 msgstr ""
 
 #: agreement/options/tie_breaking.title
 #: psychopdaROC/options/break_ties.title
-#: psychopdaROC/ui[2][1]/break_ties.label
+#: psychopdaROC/ui[4][1]/break_ties.label
 msgid "Tie Breaking Method"
 msgstr ""
 
@@ -83993,6 +85809,10 @@ msgstr ""
 #: simonmakuch/options/handleTieBreaking.title
 #: simonmakuch/ui[5][0][1]/handleTieBreaking.label
 msgid "Tie-Breaking Method"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Tied Cases"
 msgstr ""
 
 #: mixedeffectscox/options/ties_method.title
@@ -85383,7 +87203,7 @@ msgstr ""
 msgid "To Node"
 msgstr ""
 
-#: psychopdaROC/ui[7][0]/partialAUCto.label
+#: psychopdaROC/ui[9][0]/partialAUCto.label
 msgid "To specificity"
 msgstr ""
 
@@ -85529,6 +87349,8 @@ msgstr ""
 msgid "Tornado Diagram"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
 #: clinicaltrialdesign/results/sample_size_breakdown.columns.title
 #: contTables/options/pcTot.title
 #: decision/results/cTable.columns.title
@@ -85570,6 +87392,7 @@ msgstr ""
 msgid "Total Allowable Error (%)"
 msgstr ""
 
+#: R/agreement.b.R
 #: epidemiosurvival/results/case_cohort_results.columns.title
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
 #: ihcscoring/results/cpsanalysis/cpsresults.columns.title
@@ -85630,8 +87453,36 @@ msgstr ""
 msgid "Total Nuclei"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Total Number of Healthy Subjects (Gold Standard Negative)"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Total Number of Negative Test Results"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Total number of observations in analysis"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Total Number of Positive Test Results"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Total Number of Subjects in complete case analysis"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Total Number of Subjects with Disease (Gold Standard Positive)"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Total Number of True Test Results (TP + TN)"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Total Number of Wrong Test Results (FP + FN)"
 msgstr ""
 
 #: jjsegmentedtotalbar/results/summary.columns.title
@@ -85837,6 +87688,10 @@ msgstr ""
 msgid "Training History"
 msgstr ""
 
+#: agreement/results/diagnosticStyleTable.columns.title
+msgid "Training Institution"
+msgstr ""
+
 #: deeplearningprediction/results/trainingMetrics/trainingHistory.columns.title
 msgid "Training Loss"
 msgstr ""
@@ -85860,6 +87715,10 @@ msgstr ""
 
 #: clinicalprediction/results/model_comparison.columns.title
 msgid "Training Time (s)"
+msgstr ""
+
+#: agreement/options/trainingVar.title
+msgid "Training Variable"
 msgstr ""
 
 #: treeadvanced/options/train.title
@@ -86553,7 +88412,7 @@ msgid "Treatment Switching Timeline"
 msgstr ""
 
 #: netreclassification/options/treatment_threshold.title
-#: psychopdaROC/ui[9][0]/treatmentThreshold.label
+#: psychopdaROC/ui[11][0]/treatmentThreshold.label
 msgid "Treatment Threshold"
 msgstr ""
 
@@ -86659,6 +88518,7 @@ msgstr ""
 msgid "TreeSHAP (for tree-based models)"
 msgstr ""
 
+#: agreement/results/agreementTrendTable.columns.title
 #: clinicaldashboard/results/summaryMetrics.columns.title
 #: flexcomprisk/results/timeVaryingEffects.columns.title
 #: patientdashboard/results/vitalsTable.columns.title
@@ -86907,6 +88767,7 @@ msgstr ""
 msgid "True Negative"
 msgstr ""
 
+#: R/decisioncompare.b.R
 #: decisioncalculator/options/TN.title
 msgid "True Negative (TN)"
 msgstr ""
@@ -86929,6 +88790,7 @@ msgstr ""
 msgid "True Positive"
 msgstr ""
 
+#: R/decisioncompare.b.R
 #: decisioncalculator/options/TP.title
 msgid "True Positive (TP)"
 msgstr ""
@@ -86949,6 +88811,11 @@ msgstr ""
 
 #: decisioncurve/results/clinicalImpactTable.columns.title
 msgid "True Positives per 100"
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "True prevalence"
 msgstr ""
 
 #: hiddenmarkov/results/misclassification.columns.title
@@ -87454,6 +89321,10 @@ msgstr ""
 msgid "Umbrella Trial"
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid "Unable to assess"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Unable to assess linearity automatically."
 msgstr ""
@@ -87474,8 +89345,15 @@ msgstr ""
 msgid "Unadjusted Survival"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Unanimous"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Unanimous Agreement"
+msgstr ""
+
 #: agreement/options/consensus_method/unanimous.title
-#: agreement/ui[5][0]/consensus_method/unanimous.title
 msgid "Unanimous Only"
 msgstr ""
 
@@ -88148,7 +90026,6 @@ msgid "Unstructured Correlation"
 msgstr ""
 
 #: agreement/options/wght/unweighted.title
-#: agreement/ui[3][0]/wght/unweighted.title
 msgid "Unweighted"
 msgstr ""
 
@@ -88726,7 +90603,6 @@ msgid "Use Monte Carlo simulation for p-values when exact computation is not fea
 msgstr ""
 
 #: agreement/options/tie_breaking/global_mode.title
-#: agreement/ui[5][0]/tie_breaking/global_mode.title
 msgid "Use most frequent category overall"
 msgstr ""
 
@@ -88795,7 +90671,7 @@ msgstr ""
 msgid "Use Prior Prevalence"
 msgstr ""
 
-#: psychopdaROC/ui[3][0]/usePriorPrev.label
+#: psychopdaROC/ui[5][0]/usePriorPrev.label
 msgid "Use prior prevalence"
 msgstr ""
 
@@ -88896,6 +90772,10 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Use when evaluating new biomarkers or diagnostic technologies"
+msgstr ""
+
+#: decision/ui[3][0].label
+msgid "Use when sample doesn't represent target population disease prevalence"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -89047,6 +90927,10 @@ msgstr ""
 
 #: survivalmodelvalidation/results/validationResults.columns.title
 msgid "Validated Performance"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Validating new diagnostic tests or biomarkers"
 msgstr ""
 
 #: clinicalprediction/results/performance_summary.columns.title
@@ -89237,10 +91121,14 @@ msgstr ""
 msgid "Validity Type"
 msgstr ""
 
+#: R/decisioncompare.b.R
 #: R/nonparametric.b.R
 #: adaptivelasso/results/performanceMetrics.columns.title
 #: adaptivetrialdesign/results/designSummary.columns.title
 #: agreement/results/consensusSummary.columns.title
+#: agreement/results/gwetACTable.columns.title
+#: agreement/results/pabakTable.columns.title
+#: agreement/results/sampleSizeTable.columns.title
 #: batcheffect/results/summary.columns.title
 #: bayesianci/results/dataInfo.columns.title
 #: bayesianclinical/results/bayesian_overview.columns.title
@@ -89667,6 +91555,7 @@ msgstr ""
 #: principalcox/results/variableImportance.columns.title
 #: principalcox/results/scalingSummary.columns.title
 #: psychopdaROC/results/simpleResultsTable.columns.title
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: psychopdaROC/results/aucSummaryTable.columns.title
 #: psychopdaROC/results/idiTable.columns.title
 #: psychopdaROC/results/nriTable.columns.title
@@ -90988,6 +92877,10 @@ msgstr ""
 msgid "Viridis (6 colors)"
 msgstr ""
 
+#: agreement/options/heatmapTheme/viridis.title
+msgid "Viridis (colorblind-safe)"
+msgstr ""
+
 #: deeplearningprediction/options/model_type/vision_transformer.title
 msgid "Vision Transformer (ViT)"
 msgstr ""
@@ -91052,12 +92945,11 @@ msgid "Visual theme for ROC plots"
 msgstr ""
 
 #: advancedanova/ui[1][3][0].label
-#: decision/ui[3].label
 #: decisioncalculator/ui[3].label
 #: enhancedfactorvariable/ui[4].label
 #: enhancedtwowayfrequency/ui[5][0].label
 #: pathologycomposition/ui[1][3].label
-#: psychopdaROC/ui[5].label
+#: psychopdaROC/ui[7].label
 #: waterfall/ui[1][1][0].label
 msgid "Visualization"
 msgstr ""
@@ -91247,6 +93139,10 @@ msgstr ""
 msgid "Ward Monitoring"
 msgstr ""
 
+#: agreement/options/styleClusterMethod/ward.title
+msgid "Ward's Linkage"
+msgstr ""
+
 #: ggprism/options/prism_palette/warm_pastels.title
 msgid "Warm Pastels (9 colors)"
 msgstr ""
@@ -91344,6 +93240,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "weak"
+msgstr ""
+
+#: R/decision.b.R
+msgid "weak evidence for disease when positive"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -91619,10 +93519,6 @@ msgstr ""
 msgid "Weighted Kaplan-Meier"
 msgstr ""
 
-#: agreement/ui[3][0]/wght.label
-msgid "Weighted Kappa"
-msgstr ""
-
 #: cohenskappa/options/kappa_type/linear.title
 msgid "Weighted Kappa (Linear)"
 msgstr ""
@@ -91633,6 +93529,11 @@ msgstr ""
 
 #: cohenskappa/options/kappa_type/quadratic.title
 msgid "Weighted Kappa (Quadratic)"
+msgstr ""
+
+#: agreement/options/showWeightedKappaGuide.title
+#: agreement/results/weightedKappaGuide.title
+msgid "Weighted Kappa Guide"
 msgstr ""
 
 #: coxrobust/options/robust_method/weighted.title
@@ -91674,6 +93575,10 @@ msgstr ""
 
 #: riverplot/results/flowTable.columns.title
 msgid "Weighted Value"
+msgstr ""
+
+#: agreement/ui[2][1]/wght.label
+msgid "Weighting Scheme"
 msgstr ""
 
 #: stagemigration/options/concordanceProbabilityWeighting.title
@@ -91776,6 +93681,10 @@ msgstr ""
 msgid "What this analysis does"
 msgstr ""
 
+#: R/decision.b.R
+msgid "What This Analysis Does"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "What you\'ll get"
 msgstr ""
@@ -91798,6 +93707,14 @@ msgstr ""
 
 #: R/jjridges.b.R
 msgid "When to Use Ridge Plots:"
+msgstr ""
+
+#: R/decision.b.R
+msgid "When to Use This Analysis"
+msgstr ""
+
+#: decision/ui[0][1].label
+msgid "When to use: Validating new tests, clinical validation studies, test comparisons"
 msgstr ""
 
 #: advancedbarplot/options/legend_position.description.jamovi
@@ -92125,6 +94042,10 @@ msgstr ""
 
 #: explainableai/results/globalexplanations/featureclusteringtable.columns.title
 msgid "Within-Cluster Similarity"
+msgstr ""
+
+#: agreement/results/diagnosticStyleTable.columns.title
+msgid "Within-Group Agreement %"
 msgstr ""
 
 #: sparsegrouplasso/results/groupStructure.columns.title
@@ -92715,12 +94636,22 @@ msgstr ""
 msgid "Youden's Index"
 msgstr ""
 
+#: R/decision.b.R
+#: R/decisioncompare.b.R
+msgid "Youden's index"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."
+msgstr ""
+
 #: aivalidation/results/cvPerformanceTable.columns.title
 #: decisionpanel/results/optimalPanel.columns.title
 #: decisionpanel/results/individualTests.columns.title
 #: decisionpanel/results/optimalPanelsBySize.columns.title
 #: psychopdaROC/results/resultsTable.template.columns.title
 #: psychopdaROC/results/thresholdTable.columns.title
+#: psychopdaROC/results/fixedSensSpecTable.columns.title
 msgid "Youden's J"
 msgstr ""
 
@@ -92860,6 +94791,10 @@ msgstr ""
 #: treatmentmeta/results/pooled_effects.columns.title
 #: treatmentmeta/results/meta_regression.columns.title
 msgid "Z-value"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Zero counts detected in contingency table. Results may be unstable. Consider collecting more data."
 msgstr ""
 
 #: bayesiannetworkma/options/zero_events_correction.title

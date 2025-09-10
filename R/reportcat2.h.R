@@ -109,7 +109,7 @@ reportcat2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Summary of Categorical Variables
+#' Enhanced Frequencies
 #'
 #' Generates a comprehensive summary of categorical variables including 
 #' frequency counts,  percentages, missing value information, and optional 

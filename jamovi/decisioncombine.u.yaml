@@ -56,8 +56,10 @@ children:
         children:
           - type: CheckBox
             name: od
+            label: "Show Original Data Tables"
           - type: CheckBox
             name: showIndividual
+            label: "Show Individual Test Results"
   - type: Label
     label: Advanced Visualizations
     children:
@@ -66,6 +68,7 @@ children:
         children:
           - type: CheckBox
             name: showVisualization
+            label: "Show Advanced Visualizations"
           - type: ComboBox
             name: plotType
             enable: (showVisualization)
@@ -90,3 +93,4 @@ children:
         children:
           - type: CheckBox
             name: addCombinationPattern
+            label: "Export Test Combination Pattern to Dataset"

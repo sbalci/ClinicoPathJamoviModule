@@ -1,0 +1,197 @@
+# Turkish Translation for ClinicoPath Agreement Function
+# Copyright (C) 2024 ClinicoPath
+# This file is distributed under the same license as the ClinicoPath package.
+# Translator: <translator@example.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ClinicoPath 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: <translator@example.com>\n"
+"Language-Team: Turkish\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Statistical Method Names
+msgid "Cohen's Kappa"
+msgstr "Cohen Kappa"
+
+msgid "Fleiss' Kappa"
+msgstr "Fleiss Kappa"
+
+msgid "Fleiss' Kappa (Exact)"
+msgstr "Fleiss Kappa (Kesin)"
+
+msgid "Krippendorff's Alpha"
+msgstr "Krippendorff Alfa"
+
+msgid "ICC Error"
+msgstr "İKK Hatası"
+
+# Error Messages
+msgid "ICC calculation failed:"
+msgstr "İKK hesaplama hatası:"
+
+msgid "Krippendorff's alpha calculation failed"
+msgstr "Krippendorff alfa hesaplaması başarısız"
+
+msgid "Krippendorff's alpha for non-nominal data requires full irr package implementation"
+msgstr "Nominal olmayan veriler için Krippendorff alfa tam irr paketi gerektirir"
+
+msgid "Error calculating Krippendorff's alpha:"
+msgstr "Krippendorff alfa hesaplama hatası:"
+
+msgid "Error calculating Gwet's coefficients:"
+msgstr "Gwet katsayıları hesaplama hatası:"
+
+msgid "Error calculating PABAK:"
+msgstr "PABAK hesaplama hatası:"
+
+msgid "Error in sample size planning:"
+msgstr "Örneklem büyüklüğü planlaması hatası:"
+
+msgid "Error in bias analysis:"
+msgstr "Yanlılık analizi hatası:"
+
+msgid "Error in trend analysis:"
+msgstr "Trend analizi hatası:"
+
+msgid "Error in difficulty analysis:"
+msgstr "Zorluk analizi hatası:"
+
+msgid "Error in stability analysis:"
+msgstr "Kararlılık analizi hatası:"
+
+# Agreement Levels
+msgid "Cannot calculate"
+msgstr "Hesaplanamıyor"
+
+msgid "Poor"
+msgstr "Zayıf"
+
+msgid "Slight"
+msgstr "Hafif"
+
+msgid "Fair"
+msgstr "Orta"
+
+msgid "Moderate"
+msgstr "İyi"
+
+msgid "Substantial"
+msgstr "Önemli"
+
+msgid "Almost Perfect"
+msgstr "Mükemmele Yakın"
+
+# Consensus Analysis
+msgid "Unanimous"
+msgstr "Oybirliği"
+
+msgid "Majority"
+msgstr "Çoğunluk"
+
+msgid "Super Majority"
+msgstr "Üstün Çoğunluk"
+
+msgid "Tie"
+msgstr "Beraberlik"
+
+msgid "No Consensus"
+msgstr "Uzlaşma Yok"
+
+msgid "No consensus"
+msgstr "Uzlaşma yok"
+
+msgid "Total Cases"
+msgstr "Toplam Olgu"
+
+msgid "Consensus Achieved"
+msgstr "Uzlaşma Sağlandı"
+
+msgid "Unanimous Agreement"
+msgstr "Oybirliği Uyumu"
+
+msgid "Super Majority (≥2/3)"
+msgstr "Üstün Çoğunluk (≥2/3)"
+
+msgid "Majority (≥50%)"
+msgstr "Çoğunluk (≥%50)"
+
+msgid "Tied Cases"
+msgstr "Berabere Olgular"
+
+msgid "Insufficient"
+msgstr "Yetersiz"
+
+msgid "Multiple ties"
+msgstr "Çoklu beraberlik"
+
+# Diagnostic Style Analysis
+msgid "Not specified"
+msgstr "Belirtilmemiş"
+
+msgid "Style"
+msgstr "Stil"
+
+msgid "Mixed"
+msgstr "Karışık"
+
+# Notes and Warnings
+msgid "Note: Weighted kappa requires ordinal variables. Analysis performed with unweighted kappa instead."
+msgstr "Not: Ağırlıklı kappa sıralı değişkenler gerektirir. Analiz ağırlıksız kappa ile gerçekleştirildi."
+
+# Clinical Interpretations
+msgid "Could not calculate reliable agreement measure. Check your data for sufficient cases and category distribution."
+msgstr "Güvenilir uyum ölçütü hesaplanamadı. Yeterli olgu sayısı ve kategori dağılımı için verilerinizi kontrol edin."
+
+msgid "Agreement is worse than chance - raters systematically disagree. Review rating criteria and consider additional training."
+msgstr "Uyum şanstan kötü - değerlendiriciler sistematik olarak anlaşmıyor. Derecelendirme kriterlerini gözden geçirin ve ek eğitim düşünün."
+
+msgid "Agreement is <strong>poor</strong> - raters are essentially making independent judgments. Consider revising diagnostic criteria, providing additional training, or using consensus panels for critical diagnoses."
+msgstr "Uyum <strong>zayıf</strong> - değerlendiriciler temelde bağımsız kararlar veriyor. Tanı kriterlerini revize etmeyi, ek eğitim sağlamayı veya kritik tanılar için uzlaşma panelleri kullanmayı düşünün."
+
+msgid "Agreement is <strong>fair</strong> - some consistency between raters but significant disagreement remains. Review cases with disagreement and consider standardizing evaluation procedures."
+msgstr "Uyum <strong>orta</strong> - değerlendiriciler arasında bir miktar tutarlılık var ancak önemli anlaşmazlık sürüyor. Anlaşmazlık olan olguları inceleyin ve değerlendirme prosedürlerini standartlaştırmayı düşünün."
+
+msgid "Agreement is <strong>moderate</strong> - acceptable for many clinical applications but may need improvement for critical diagnoses. Consider additional training or clearer diagnostic guidelines."
+msgstr "Uyum <strong>iyi</strong> - birçok klinik uygulama için kabul edilebilir ancak kritik tanılar için iyileştirme gerekebilir. Ek eğitim veya daha net tanı kılavuzları düşünün."
+
+msgid "Agreement is <strong>good</strong> - suitable for most clinical and research applications. This level indicates reliable inter-rater consistency."
+msgstr "Uyum <strong>önemli</strong> - çoğu klinik ve araştırma uygulaması için uygun. Bu düzey güvenilir değerlendiriciler arası tutarlılığı gösterir."
+
+msgid "Agreement is <strong>excellent</strong> - raters show high consistency, suitable for all clinical applications including critical diagnoses and research studies."
+msgstr "Uyum <strong>mükemmel</strong> - değerlendiriciler yüksek tutarlılık gösteriyor, kritik tanılar ve araştırma çalışmaları dahil tüm klinik uygulamalar için uygun."
+
+# Copy-Ready Report Template Strings
+msgid "Inter-rater agreement was %s (κ = %.3f%s%s), indicating %s reliability for the %d raters evaluating %d cases."
+msgstr "%d rater tarafından değerlendirilen %d olgu için rater arası uyum %s idi (κ = %.3f%s%s), bu %s güvenilirliği göstermektedir."
+
+msgid "Inter-rater agreement could not be reliably calculated for the %d raters evaluating %d cases. Data quality or sample size may be insufficient."
+msgstr "%d rater tarafından değerlendirilen %d olgu için rater arası uyum güvenilir bir şekilde hesaplanamadı. Veri kalitesi veya örneklem büyüklüğü yetersiz olabilir."
+
+msgid "Overall percentage agreement was %.1f%%."
+msgstr "Genel yüzdelik uyum %.1f%% idi."
+
+msgid "Agreement was assessed using %s."
+msgstr "Uyum %s kullanılarak değerlendirildi."
+
+msgid "This level of agreement is excellent and suitable for all clinical applications including critical diagnoses."
+msgstr "Bu uyum düzeyi mükemmeldir ve kritik tanılar dahil tüm klinik uygulamalar için uygundur."
+
+msgid "This level of agreement is good and suitable for most clinical and research applications."
+msgstr "Bu uyum düzeyi iyidir ve çoğu klinik ve araştırma uygulaması için uygundur."
+
+msgid "This level of agreement is moderate and may be acceptable for some clinical applications but consider additional training for critical diagnoses."
+msgstr "Bu uyum düzeyi orta düzeydedir ve bazı klinik uygulamalar için kabul edilebilir olabilir ancak kritik tanılar için ek eğitim düşünün."
+
+msgid "This level of agreement is poor to fair and requires improvement through additional training or revised criteria before clinical use."
+msgstr "Bu uyum düzeyi zayıftan orta düzeye kadar olup, klinik kullanımdan önce ek eğitim veya revize edilmiş kriterler yoluyla iyileştirme gerektirir."
+
+msgid "Agreement could not be assessed - review data quality and sample size requirements."
+msgstr "Uyum değerlendirilemedi - veri kalitesi ve örneklem büyüklüğü gereksinimlerini gözden geçirin."

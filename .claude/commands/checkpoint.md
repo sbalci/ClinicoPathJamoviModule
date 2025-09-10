@@ -3,7 +3,7 @@ description: Add checkpoint calls to functions before expensive operations in Ja
 allowed-tools: ["Read", "Edit", "MultiEdit", "Grep"]
 ---
 
-Add `private$.checkpoint()` calls to the specified function before expensive operations. This enables:
+Add `private$.checkpoint()` calls to the specified function before computationally expensive operations. This enables:
 
 1. **Incremental Results**: Pushes computed results to Jamovi so users see tables fill gradually
 2. **Change Detection**: Aborts current run if user modifies settings, avoiding wasted computation
@@ -12,7 +12,8 @@ Add `private$.checkpoint()` calls to the specified function before expensive ope
 
 **Best Practices**:
 - Place checkpoints immediately before expensive operations (loops, statistical computations, data processing)
-- Don't add checkpoints before fast operations that return instantly
+- Don't add checkpoints before fast operations that return instantly. 
+- Don't add checkpoints more than necessary, it will cause resource limit error. 
 - Use `private$.checkpoint(flush = FALSE)` to only poll for changes without re-pushing results
 
 **Example Pattern**:

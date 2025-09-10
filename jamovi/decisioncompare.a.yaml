@@ -1,7 +1,7 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
 version: '0.0.31'
@@ -13,9 +13,53 @@ description:
         negative predictive value, and other metrics between different tests against the same golden standard.
         Includes statistical comparison using McNemar's test and confidence intervals for differences.
     R:
-        dontrun: true
+        dontrun: false
         usage: |
-            # example will be added
+            # Basic comparison of two diagnostic tests
+            library(ClinicoPath)
+            data('histopathology')
+            
+            # Example 1: Compare imaging vs blood test performance
+            result1 <- decisioncompare(
+                data = histopathology,
+                gold = "Golden Standart",
+                goldPositive = "1",
+                test1 = "New Test", 
+                test1Positive = "1",
+                test2 = "Rater 1",
+                test2Positive = "1",
+                ci = TRUE,
+                plot = TRUE
+            )
+            
+            # Example 2: Three-test comparison with statistical analysis
+            result2 <- decisioncompare(
+                data = histopathology,
+                gold = "Golden Standart",
+                goldPositive = "1", 
+                test1 = "New Test",
+                test1Positive = "1",
+                test2 = "Rater 1", 
+                test2Positive = "1",
+                test3 = "Rater 2",
+                test3Positive = "1",
+                statComp = TRUE,
+                radarplot = TRUE
+            )
+            
+            # Example 3: Using custom prevalence for clinical setting
+            result3 <- decisioncompare(
+                data = histopathology,
+                gold = "Golden Standart",
+                goldPositive = "1",
+                test1 = "New Test",
+                test1Positive = "1", 
+                test2 = "Rater 1",
+                test2Positive = "1",
+                pp = TRUE,
+                pprob = 0.15,  # 15% prevalence in screening population
+                od = TRUE      # Show original frequency tables
+            )
 
 options:
     - name: data
@@ -24,58 +68,112 @@ options:
           R: The data as a data frame.
 
     - name: gold
-      title: Golden Standard
+      title: Golden Standard (Reference Test)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Select the most reliable diagnostic method available (e.g., biopsy, final pathology, 
+            expert consensus). This is the "truth" against which we compare other tests. 
+            Must be categorical with exactly 2 levels (positive/negative).
+          R: >
+            The gold standard reference variable representing true disease status.
 
     - name: goldPositive
-      title: Positive Level
+      title: Disease Present Level
       type: Level
       variable: (gold)
+      description:
+          ui: >
+            Select the level that indicates disease IS PRESENT in your gold standard variable 
+            (e.g., "positive", "malignant", "1"). This represents the condition you want to detect.
+          R: >
+            The level indicating presence of disease in the gold standard variable.
 
     # For the first test
     - name: test1
-      title: Test 1
+      title: Test 1 (Required)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Select the first diagnostic test to evaluate (e.g., imaging result, biomarker, 
+            clinical assessment). This should be a test you want to validate against the gold standard.
+          R: >
+            The first diagnostic test variable being evaluated for performance.
 
     - name: test1Positive
-      title: Positive Level
+      title: Test 1 Positive Level
       type: Level
       variable: (test1)
+      description:
+          ui: >
+            Select the level that represents a POSITIVE result for Test 1 
+            (e.g., "abnormal", "high", "positive"). This should indicate suspected disease presence.
+          R: >
+            The level representing a positive result for Test 1.
 
     # For the second test
     - name: test2
-      title: Test 2
+      title: Test 2 (Required for Comparison)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Select a second diagnostic test to compare with Test 1. This enables head-to-head 
+            comparison analysis (e.g., new method vs standard method, or two different biomarkers).
+          R: >
+            The second diagnostic test variable for comparison analysis.
 
     - name: test2Positive
-      title: Positive Level
+      title: Test 2 Positive Level
       type: Level
       variable: (test2)
+      description:
+          ui: >
+            Select the level that represents a POSITIVE result for Test 2.
+          R: >
+            The level representing a positive result for Test 2.
 
     # For the third test
     - name: test3
-      title: Test 3
+      title: Test 3 (Optional)
       type: Variable
       default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Optionally select a third diagnostic test for three-way comparison. 
+            This allows comprehensive evaluation of multiple testing strategies simultaneously.
+          R: >
+            Optional third diagnostic test variable for extended comparison analysis.
 
     - name: test3Positive
-      title: Positive Level
+      title: Test 3 Positive Level
       type: Level
       variable: (test3)
+      description:
+          ui: >
+            Select the level that represents a POSITIVE result for Test 3.
+          R: >
+            The level representing a positive result for Test 3.
 
     # Options
     - name: pp
       title: Prior Probability (prevalence)
       type: Bool
       default: false
+      description:
+          ui: >
+            Enable custom disease prevalence for calculating PPV and NPV. 
+            Use when your study population differs from the dataset prevalence 
+            (e.g., screening vs high-risk populations).
+          R: >
+            Enable custom prior probability (prevalence) for predictive value calculations.
 
     - name: pprob
       title: Prior Probability (prevalence)
@@ -113,17 +211,34 @@ options:
       title: 'Comparison Plot'
       type: Bool
       default: false
+      description:
+          ui: >
+            Generate bar chart comparing test performance metrics side-by-side. 
+            Useful for visualizing differences in sensitivity, specificity, PPV, NPV, and accuracy.
+          R: >
+            Generate comparison plot showing test performance metrics.
 
     - name: radarplot
       title: 'Radar Plot'
       type: Bool
       default: false
+      description:
+          ui: >
+            Generate radar (spider) plot showing all performance metrics on a circular scale. 
+            Excellent for comprehensive visual comparison and identifying test strengths/weaknesses.
+          R: >
+            Generate radar plot for comprehensive test comparison visualization.
 
     - name: statComp
       title: 'Statistical Comparison'
       type: Bool
       default: false
       description:
+          ui: >
+            Perform McNemar's test to statistically compare test performance. 
+            Use when you need to determine if differences between tests are 
+            statistically significant (p<0.05 indicates significant difference). 
+            Also provides confidence intervals for metric differences.
           R: >
             Perform statistical comparison between tests (McNemar's test and confidence intervals for differences).
 ...

@@ -4,13 +4,16 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # === DATA INPUT SECTION ===
+
+  # ========================================================================
+  # DATA INPUT - Essential Variables
+  # ========================================================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Rater Variables
+        label: "🔹 Rater Variables (Required)"
         children:
           - type: VariablesListBox
             name: vars
@@ -22,104 +25,198 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Case ID Variable (Optional)
+        label: "🆔 Case ID Variable (Optional)"
         children:
           - type: VariablesListBox
             name: caseID
             maxItemCount: 1
             isTarget: true
 
-  # === CORE ANALYSIS SETTINGS ===
+  # ========================================================================
+  # CORE ANALYSIS - Main Statistical Settings
+  # ========================================================================
   - type: CollapseBox
-    label: Primary Agreement Analysis
+    label: "📊 Core Agreement Analysis"
     collapsed: false
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Agreement Method Selection
+            label: "Statistical Method Selection"
           - type: ComboBox
             name: multiraterMethod
-            label: Analysis Method
+            label: "Primary Analysis Method"
             options:
-              - title: Automatic (recommended)
+              - title: "🔄 Automatic (recommended for most users)"
                 name: auto
-              - title: Cohen's Kappa (2 raters only)
+              - title: "👥 Cohen's Kappa (exactly 2 raters)"
                 name: cohen
-              - title: Fleiss' Kappa (3+ raters)
+              - title: "👥👥 Fleiss' Kappa (3 or more raters)"
                 name: fleiss
-              - title: Krippendorff's Alpha (universal)
+              - title: "🌐 Krippendorff's Alpha (universal method)"
                 name: krippendorff
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Data Type & Weighting"
           - type: ComboBox
             name: wght
-            label: Weighting for Ordinal Data
+            label: "Weighting Scheme"
             options:
-              - title: Unweighted (for nominal data)
+              - title: "⚪ Unweighted (nominal/categorical data)"
                 name: unweighted
-              - title: Linear Weighted (for ordinal)
+              - title: "📏 Linear Weighted (ordinal data, equal steps)"
                 name: equal
-              - title: Quadratic Weighted (for ordinal)
+              - title: "📐 Quadratic Weighted (ordinal data, severe distant errors)"
                 name: squared
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Statistical Options"
           - type: CheckBox
             name: fleissCI
-            label: Show Confidence Intervals
+            label: "📈 Show Confidence Intervals (recommended)"
           - type: CheckBox
             name: exct
-            label: Use Exact Method (computationally intensive)
+            label: "🔬 Use Exact Method (more accurate, slower)"
 
-  # === ADVANCED RELIABILITY MEASURES ===
+  # ========================================================================
+  # CLINICAL OUTPUT - Results & Interpretation
+  # ========================================================================
   - type: CollapseBox
-    label: Advanced Reliability Measures
+    label: "🏥 Clinical Output & Interpretation"
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Clinical Reports"
+          - type: CheckBox
+            name: showClinicalSummary
+            label: "📋 Clinical Summary (recommended)"
+          - type: CheckBox
+            name: sft
+            label: "📊 Individual Rater Frequency Tables"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Educational Content"
+          - type: CheckBox
+            name: showAboutAnalysis
+            label: "ℹ️ About This Analysis"
+          - type: CheckBox
+            name: showAssumptions
+            label: "⚠️ Assumptions & Caveats"
+          - type: CheckBox
+            name: showStatisticalGlossary
+            label: "📚 Statistical Terms Glossary"
+          - type: CheckBox
+            name: showWeightedKappaGuide
+            label: "📐 Weighted Kappa Guide"
+            enable: (wght != 'unweighted')
+
+  # ========================================================================
+  # VISUALIZATION - Charts and Graphics
+  # ========================================================================
+  - type: CollapseBox
+    label: "📈 Visualization"
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Alternative Agreement Coefficients
+            label: "Agreement Visualization"
           - type: CheckBox
-            name: kripp
-            label: Krippendorff's Alpha
+            name: heatmap
+            label: "🔥 Agreement Heatmap"
+          - type: CheckBox
+            name: heatmapDetails
+            label: "🔍 Show Statistical Details in Heatmap"
+            enable: (heatmap)
+          
           - type: ComboBox
-            name: krippMethod
-            label: Data Level of Measurement
-            enable: (kripp)
+            name: heatmapTheme
+            label: "🎨 Color Theme"
+            enable: (heatmap)
             options:
-              - title: Nominal (unordered categories)
-                name: nominal
-              - title: Ordinal (ranked categories)
-                name: ordinal
-              - title: Interval (equal intervals)
-                name: interval
-              - title: Ratio (true zero point)
-                name: ratio
-          - type: CheckBox
-            name: icc
-            label: Intraclass Correlation Coefficient (ICC)
-          - type: CheckBox
-            name: gwetAC
-            label: Gwet's AC1 and AC2 Coefficients
-          - type: CheckBox
-            name: pabak
-            label: PABAK (Prevalence-Adjusted Bias-Adjusted Kappa)
+              - title: "🌈 Viridis (colorblind-safe, recommended)"
+                name: viridis
+              - title: "🔥 Plasma (colorblind-safe)"
+                name: plasma
+              - title: "🌊 Cividis (colorblind-safe)"
+                name: cividis
+              - title: "🔵 Blue-White-Red"
+                name: bwr
+              - title: "🟢 Red-Yellow-Green (classic)"
+                name: ryg
+
+  # ========================================================================
+  # ADVANCED STATISTICS - Extended Statistical Methods
+  # ========================================================================
+  - type: CollapseBox
+    label: "🔬 Advanced Statistical Methods"
+    collapsed: true
+    children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Bootstrap Analysis
+            label: "Alternative Agreement Coefficients"
+          - type: CheckBox
+            name: kripp
+            label: "🌐 Krippendorff's Alpha (handles missing data)"
+          - type: ComboBox
+            name: krippMethod
+            label: "📏 Data Measurement Level"
+            enable: (kripp)
+            options:
+              - title: "🏷️ Nominal (unordered categories)"
+                name: nominal
+              - title: "📊 Ordinal (ranked categories)"
+                name: ordinal
+              - title: "📏 Interval (equal intervals)"
+                name: interval
+              - title: "🔢 Ratio (true zero point)"
+                name: ratio
+          
+          - type: CheckBox
+            name: icc
+            label: "📈 Intraclass Correlation Coefficient (ICC)"
+          - type: CheckBox
+            name: gwetAC
+            label: "⚖️ Gwet's AC1/AC2 Coefficients (prevalence-robust)"
+          - type: CheckBox
+            name: pabak
+            label: "🎯 PABAK (Prevalence-Adjusted Kappa)"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Bootstrap Analysis"
           - type: CheckBox
             name: bootstrap
-            label: Bootstrap Confidence Intervals
+            label: "🔄 Bootstrap Confidence Intervals"
           - type: TextBox
             name: bootstrapSamples
-            label: Bootstrap Samples
+            label: "Bootstrap Samples (100-5000)"
             enable: (bootstrap)
             format: number
 
-  # === CONSENSUS ANALYSIS ===
+  # ========================================================================
+  # CONSENSUS ANALYSIS - Agreement Scoring
+  # ========================================================================
   - type: CollapseBox
-    label: Consensus Scoring
+    label: "🤝 Consensus Analysis"
     collapsed: true
     children:
       - type: LayoutBox
@@ -127,37 +224,91 @@ children:
         children:
           - type: CheckBox
             name: consensus
-            label: Enable Consensus Analysis
+            label: "✅ Enable Consensus Scoring"
+          
           - type: ComboBox
             name: consensus_method
-            label: Consensus Threshold
+            label: "🗳️ Consensus Threshold"
             enable: (consensus)
             options:
-              - title: Simple Majority (>50%)
+              - title: "👥 Simple Majority (>50% agreement)"
                 name: majority
-              - title: Supermajority (≥67%)
+              - title: "👥👥 Supermajority (≥67% agreement)"
                 name: super_majority
-              - title: Unanimous Agreement (100%)
+              - title: "🎯 Unanimous Agreement (100%)"
                 name: unanimous
+          
           - type: ComboBox
             name: tie_breaking
-            label: Handle Ties By
+            label: "⚖️ Handle Ties By"
             enable: (consensus)
             options:
-              - title: Excluding tied cases
+              - title: "❌ Excluding tied cases from analysis"
                 name: exclude
-              - title: Flagging for arbitration
+              - title: "👨‍⚕️ Flagging for expert arbitration"
                 name: arbitration
-              - title: Using global most frequent
+              - title: "📊 Using global most frequent category"
                 name: global_mode
+          
           - type: CheckBox
             name: show_consensus_table
-            label: Show Case-by-Case Results
+            label: "📋 Show Detailed Case-by-Case Results"
             enable: (consensus)
 
-  # === DIAGNOSTIC STYLE ANALYSIS (USUBUTUN METHOD) ===
+  # ========================================================================
+  # DETAILED ANALYSIS - Case and Rater Level Analysis
+  # ========================================================================
   - type: CollapseBox
-    label: Diagnostic Style Analysis (Usubutun Method)
+    label: "🔍 Detailed Analysis Options"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Rater-Level Analysis"
+          - type: CheckBox
+            name: pairwiseAnalysis
+            label: "👥 Pairwise Rater Comparisons"
+          - type: CheckBox
+            name: raterBiasAnalysis
+            label: "📊 Rater Bias Detection"
+          - type: CheckBox
+            name: agreementTrendAnalysis
+            label: "📈 Agreement Trend Over Cases (training effect)"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Case-Level Analysis"
+          - type: CheckBox
+            name: categoryAnalysis
+            label: "🏷️ Category-Specific Agreement"
+          - type: CheckBox
+            name: outlierAnalysis
+            label: "🚨 Identify Problematic Cases"
+          - type: CheckBox
+            name: caseDifficultyScoring
+            label: "⚖️ Case Difficulty Assessment"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Clinical Context Analysis"
+          - type: CheckBox
+            name: pathologyContext
+            label: "🏥 Diagnostic Accuracy Metrics"
+          - type: CheckBox
+            name: agreementStabilityAnalysis
+            label: "🔬 Agreement Stability Analysis"
+
+  # ========================================================================
+  # DIAGNOSTIC STYLE ANALYSIS - Usubutun Method
+  # ========================================================================
+  - type: CollapseBox
+    label: "🧬 Diagnostic Style Analysis (Usubutun Method)"
     collapsed: true
     children:
       - type: LayoutBox
@@ -165,42 +316,48 @@ children:
         children:
           - type: CheckBox
             name: diagnosticStyleAnalysis
-            label: Enable Diagnostic Style Clustering
+            label: "🔬 Enable Diagnostic Style Clustering"
+          
           - type: ComboBox
             name: styleClusterMethod
-            label: Clustering Method
+            label: "🌳 Clustering Algorithm"
             enable: (diagnosticStyleAnalysis)
             options:
-              - title: Ward's Linkage (Usubutun standard)
+              - title: "🔗 Ward's Linkage (Usubutun standard, recommended)"
                 name: ward
-              - title: Complete Linkage
+              - title: "🔗 Complete Linkage"
                 name: complete
-              - title: Average Linkage
+              - title: "🔗 Average Linkage"
                 name: average
+          
           - type: ComboBox
             name: styleDistanceMetric
-            label: Distance Metric
+            label: "📏 Distance Metric"
             enable: (diagnosticStyleAnalysis)
             options:
-              - title: Percentage Agreement (recommended)
+              - title: "📊 Percentage Agreement (recommended)"
                 name: agreement
-              - title: Correlation
+              - title: "📈 Correlation"
                 name: correlation
-              - title: Euclidean
+              - title: "📐 Euclidean Distance"
                 name: euclidean
+          
           - type: TextBox
             name: styleGroups
-            label: Number of Style Groups
+            label: "👥 Number of Style Groups (2-10)"
             enable: (diagnosticStyleAnalysis)
             format: number
+          
           - type: CheckBox
             name: identifyDiscordantCases
-            label: Identify Cases Distinguishing Styles
+            label: "🎯 Identify Cases Distinguishing Styles"
             enable: (diagnosticStyleAnalysis)
 
-  # === RATER CHARACTERISTICS (Optional) ===
+  # ========================================================================
+  # RATER CHARACTERISTICS - Optional Background Information
+  # ========================================================================
   - type: CollapseBox
-    label: Rater Characteristics (Optional)
+    label: "👨‍⚕️ Rater Background Information (Optional)"
     collapsed: true
     children:
       - type: LayoutBox
@@ -208,37 +365,41 @@ children:
         children:
           - type: CheckBox
             name: raterCharacteristics
-            label: Include Rater Background Information
+            label: "📝 Include Rater Background Variables"
+      
       - type: VariableSupplier
         persistentItems: false
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: Experience Variable
+            label: "🎓 Experience Variable"
             children:
               - type: VariablesListBox
                 name: experienceVar
                 maxItemCount: 1
                 isTarget: true
                 enable: (raterCharacteristics)
+          
           - type: TargetLayoutBox
-            label: Training Institution Variable
+            label: "🏫 Training Institution Variable"
             children:
               - type: VariablesListBox
                 name: trainingVar
                 maxItemCount: 1
                 isTarget: true
                 enable: (raterCharacteristics)
+          
           - type: TargetLayoutBox
-            label: Current Institution Variable
+            label: "🏥 Current Institution Variable"
             children:
               - type: VariablesListBox
                 name: institutionVar
                 maxItemCount: 1
                 isTarget: true
                 enable: (raterCharacteristics)
+          
           - type: TargetLayoutBox
-            label: Specialty Variable
+            label: "🩺 Medical Specialty Variable"
             children:
               - type: VariablesListBox
                 name: specialtyVar
@@ -246,93 +407,11 @@ children:
                 isTarget: true
                 enable: (raterCharacteristics)
 
-  # === DETAILED ANALYSIS OPTIONS ===
+  # ========================================================================
+  # STUDY DESIGN - Sample Size Planning
+  # ========================================================================
   - type: CollapseBox
-    label: Detailed Analysis Options
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Rater-Level Analysis
-          - type: CheckBox
-            name: pairwiseAnalysis
-            label: Pairwise Rater Analysis
-          - type: CheckBox
-            name: raterBiasAnalysis
-            label: Rater Bias Detection
-          - type: CheckBox
-            name: agreementTrendAnalysis
-            label: Agreement Trend Over Cases
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Case-Level Analysis
-          - type: CheckBox
-            name: categoryAnalysis
-            label: Category-Specific Agreement
-          - type: CheckBox
-            name: outlierAnalysis
-            label: Identify Problematic Cases
-          - type: CheckBox
-            name: caseDifficultyScoring
-            label: Case Difficulty Scoring
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Pathology-Specific Features
-          - type: CheckBox
-            name: pathologyContext
-            label: Diagnostic Accuracy Metrics
-          - type: CheckBox
-            name: agreementStabilityAnalysis
-            label: Agreement Stability Analysis
-
-  # === VISUALIZATION & OUTPUT ===
-  - type: CollapseBox
-    label: Visualization & Output
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Descriptive Tables
-          - type: CheckBox
-            name: sft
-            label: Individual Rater Frequency Tables
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Agreement Visualization
-          - type: CheckBox
-            name: heatmap
-            label: Rater Agreement Heatmap
-          - type: CheckBox
-            name: heatmapDetails
-            label: Include Statistical Details in Heatmap
-            enable: (heatmap)
-          - type: ComboBox
-            name: heatmapTheme
-            label: Heatmap Color Theme
-            enable: (heatmap)
-            options:
-              - title: Red-Yellow-Green (traditional)
-                name: ryg
-              - title: Blue-White-Red
-                name: bwr
-              - title: Viridis (colorblind-friendly)
-                name: viridis
-              - title: Plasma (colorblind-friendly)
-                name: plasma
-
-  # === STUDY DESIGN & PLANNING ===
-  - type: CollapseBox
-    label: Study Design & Sample Size Planning
+    label: "📋 Study Design & Sample Size Planning"
     collapsed: true
     children:
       - type: LayoutBox
@@ -340,51 +419,38 @@ children:
         children:
           - type: CheckBox
             name: sampleSizePlanning
-            label: Perform Sample Size Planning
+            label: "📊 Perform Sample Size Planning"
+          
           - type: TextBox
             name: targetKappa
-            label: Target Kappa Value (0-1)
+            label: "🎯 Target Kappa Value (0.0-1.0)"
             format: number
             enable: (sampleSizePlanning)
+          
           - type: TextBox
             name: targetPrecision
-            label: Target Precision (CI Width)
+            label: "📏 Target Precision (CI Width, e.g., 0.1)"
             format: number
             enable: (sampleSizePlanning)
 
-  # === REPORTING & INTERPRETATION ===
+  # ========================================================================
+  # SYSTEM & TECHNICAL OPTIONS
+  # ========================================================================
   - type: CollapseBox
-    label: Reporting & Interpretation
-    collapsed: false
+    label: "⚙️ System & Technical Options"
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Clinical Interpretation Guides
-          - type: CheckBox
-            name: showClinicalSummary
-            label: Clinical Summary (recommended)
-          - type: CheckBox
-            name: showAboutAnalysis
-            label: About This Analysis (educational)
-          - type: CheckBox
-            name: showAssumptions
-            label: Assumptions & Caveats
-          - type: CheckBox
-            name: showWeightedKappaGuide
-            label: Weighted Kappa Guide
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Advanced User Features
+            label: "Performance & Debugging"
           - type: CheckBox
             name: showInlineComments
-            label: Show Inline Statistical Comments
+            label: "💬 Show Inline Statistical Comments"
           - type: CheckBox
             name: enhancedErrorGuidance
-            label: Enhanced Error Guidance
+            label: "🚨 Enhanced Error Guidance"
           - type: CheckBox
             name: showProgressIndicators
-            label: Show Progress for Long Operations
+            label: "⏱️ Show Progress for Long Operations"
