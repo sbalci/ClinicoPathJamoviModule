@@ -96,7 +96,6 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 plotType,
                 options=list(
                     "heatmap",
-                    "roc",
                     "tree",
                     "venn",
                     "forest",
@@ -191,7 +190,6 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         combStatsTableCI = function() private$.items[["combStatsTableCI"]],
         addCombinationPattern = function() private$.items[["addCombinationPattern"]],
         performanceHeatmap = function() private$.items[["performanceHeatmap"]],
-        rocCurves = function() private$.items[["rocCurves"]],
         decisionTree = function() private$.items[["decisionTree"]],
         vennDiagram = function() private$.items[["vennDiagram"]],
         forestPlot = function() private$.items[["forestPlot"]]),
@@ -481,20 +479,6 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "plotHeight")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="rocCurves",
-                title="ROC Analysis with Optimal Cut-point",
-                width=800,
-                height=600,
-                visible="(showVisualization && (plotType == 'roc' || plotType == 'all'))",
-                renderFun=".plotROCCurves",
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "plotWidth",
-                    "plotHeight")))
-            self$add(jmvcore::Image$new(
-                options=options,
                 name="decisionTree",
                 title="Decision Tree Visualization",
                 width=800,
@@ -559,22 +543,21 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 
 #' Combine Medical Decision Tests
 #'
-#' Advanced medical diagnostic test combination analysis with automated 
-#' optimal cut-point identification and comprehensive clinical interpretation. 
-#' This function systematically evaluates all possible test result 
-#' combinations 
-#' (2-test: 4 patterns, 3-test: 8 patterns) against a gold standard using 
-#' state-of-the-art statistical methods. Features include Wilson score 
-#' confidence intervals for enhanced accuracy, ROC-based optimal cut-point 
-#' selection using Youden Index maximization, and publication-quality 
-#' visualizations with clinical decision thresholds. Provides actionable 
-#' recommendations for screening vs. confirmatory testing strategies with 
-#' detailed clinical interpretation guidelines. Essential for evidence-based 
-#' diagnostic protocol development and test validation studies.
+#' Advanced medical diagnostic test combination analysis for categorical tests 
+#' with comprehensive clinical interpretation. This function systematically 
+#' evaluates all possible test result combinations (2-test: 4 patterns, 
+#' 3-test: 8 patterns) against a gold standard using state-of-the-art 
+#' statistical methods. Features include Wilson score confidence intervals 
+#' for enhanced accuracy, performance heatmaps, decision trees, and 
+#' publication-quality visualizations with clinical decision thresholds. 
+#' Provides actionable recommendations for screening vs. confirmatory testing 
+#' strategies with detailed clinical interpretation guidelines. Essential for 
+#' evidence-based diagnostic protocol development and categorical test 
+#' validation studies.
 #' 
 #'
 #' @examples
-#' # Basic two-test combination analysis with optimal cut-point identification
+#' # Basic two-test combination analysis
 #' result1 <- decisioncombine(
 #'   data = histopathology,
 #'   gold = "Golden Standart",
@@ -584,7 +567,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test2 = "Rater 1",
 #'   test2Positive = "1",
 #'   showVisualization = TRUE,
-#'   plotType = "all"  # Shows all visualization types including ROC with optimal cut-point
+#'   plotType = "all"  # Shows all visualization types
 #' )
 #'
 #' # Comprehensive three-test analysis with clinical recommendations
@@ -600,19 +583,22 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test3Positive = "1",
 #'   showIndividual = TRUE,
 #'   showVisualization = TRUE,
-#'   plotType = "roc",  # Focus on ROC analysis with optimal cut-point
+#'   plotType = "heatmap",  # Focus on performance heatmap
 #'   addCombinationPattern = TRUE  # Export patterns for further analysis
 #' )
 #'
-#' # Access optimal cut-point recommendations from HTML output
+#' # Access clinical recommendations from HTML output
 #' # result2$combinationsAnalysis contains clinical recommendations
 #'
 #' @param data The data as a data frame.
-#' @param gold .
-#' @param goldPositive .
-#' @param test1 .
-#' @param test1Positive .
-#' @param test2 .
+#' @param gold The gold standard reference variable representing true disease
+#'   status.
+#' @param goldPositive The level indicating presence of disease in the gold
+#'   standard variable.
+#' @param test1 The first diagnostic test variable being evaluated for
+#'   performance.
+#' @param test1Positive The level representing a positive result for Test 1.
+#' @param test2 The second diagnostic test variable for combination analysis.
 #' @param test2Positive .
 #' @param test3 .
 #' @param test3Positive .
@@ -621,11 +607,11 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param showIndividual .
 #' @param addCombinationPattern Export a new variable to the original data
 #'   frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
-#' @param showVisualization Display comprehensive visualizations for test
-#'   combination analysis with automated optimal cut-point identification.
-#' @param plotType Visualization selection: heatmap (performance matrix), roc
-#'   (ROC space with optimal cut-point),  tree (clinical decision hierarchy),
-#'   venn (test agreement), forest (Wilson CIs), all (comprehensive output).
+#' @param showVisualization Display comprehensive visualizations for
+#'   categorical test combination analysis.
+#' @param plotType Visualization selection: heatmap (performance matrix), tree
+#'   (clinical decision hierarchy),  venn (test agreement), forest (Wilson CIs),
+#'   all (comprehensive output).
 #' @param plotHeight Height of the plot in pixels.
 #' @param plotWidth Width of the plot in pixels.
 #' @param colorScheme Color scheme for visualizations. Clinical uses red for
@@ -642,7 +628,6 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$combStatsTableCI} \tab \tab \tab \tab \tab Detailed confidence intervals using Wilson score method, which provides more accurate bounds for diagnostic proportions than normal approximation, especially for small samples or extreme values. \cr
 #'   \code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$performanceHeatmap} \tab \tab \tab \tab \tab Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding. \cr
-#'   \code{results$rocCurves} \tab \tab \tab \tab \tab ROC space analysis comparing all test combinations with automatic identification of optimal cut-point using Youden Index maximization for balanced sensitivity and specificity. \cr
 #'   \code{results$decisionTree} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$vennDiagram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$forestPlot} \tab \tab \tab \tab \tab Comprehensive forest plot displaying all diagnostic metrics with Wilson score confidence intervals, providing more accurate uncertainty estimates than normal approximation methods. \cr

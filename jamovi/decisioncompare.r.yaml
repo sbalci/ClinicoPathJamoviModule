@@ -264,6 +264,18 @@ items:
       refs:
           - ggplot2
 
+    # Clinical Report
+    - name: clinicalReport
+      title: 'Clinical Summary & Report Templates'
+      type: Html
+      visible: true
+      
+    # About This Analysis
+    - name: aboutAnalysis
+      title: 'About This Analysis'
+      type: Html
+      visible: true
+
 refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule

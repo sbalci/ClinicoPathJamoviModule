@@ -24,6 +24,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             .init = function() {
                 # Initialize table rows for dynamic population
                 private$.initializeTables()
+                
+                # Generate about this analysis panel
+                private$.generateAboutPanel()
             }
 
             ,
@@ -58,8 +61,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                         private$.setupVisualizations(test_results)
                     }
                     
+                    # Step 8: Generate clinical report and summary
+                    private$.generateClinicalReport(test_results, processed_data)
+                    
                 }, error = function(e) {
-                    stop(paste("Analysis failed:", conditionMessage(e), "Please check your data and variable selections."))
+                    stop(jmvcore::.("Analysis failed: {error}. Please check your data and variable selections.", error = conditionMessage(e)))
                 })
             },
 
@@ -68,12 +74,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             .validateInputs = function() {
                 # Check for required gold standard
                 if (length(self$options$gold) == 0) {
-                    stop("Gold standard variable is required. Please select a gold standard variable from your dataset.")
+                    stop(jmvcore::.("Gold standard variable is required. Please select a gold standard variable from your dataset."))
                 }
                 
                 # Check for valid data
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    stop("No data provided for analysis. Please ensure your dataset contains data.")
+                    stop(jmvcore::.("No data provided for analysis. Please ensure your dataset contains data."))
                 }
                 
                 # Enhanced test validation with specific missing test identification
@@ -81,12 +87,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 
                 # Validate prevalence setting
                 if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
-                    stop(paste("Prior probability must be between 0 and 1. Current value:", self$options$pprob))
+                    stop(jmvcore::.("Prior probability must be between 0 and 1. Current value: {value}", value = self$options$pprob))
                 }
                 
                 # Check for conflicting options
                 if (self$options$pp && self$options$ci) {
-                    stop("Prior probability and confidence intervals cannot both be enabled. Please choose one option.")
+                    stop(jmvcore::.("Prior probability and confidence intervals cannot both be enabled. Please choose one option."))
                 }
             },
             
@@ -114,11 +120,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 # Require at least 2 tests for comparison
                 if (length(valid_tests) < 2) {
                     if (length(valid_tests) == 0) {
-                        stop("No test variables selected. Please select at least Test 1 and Test 2 for comparison analysis.")
+                        stop(jmvcore::.("No test variables selected. Please select at least Test 1 and Test 2 for comparison analysis."))
                     } else if (length(valid_tests) == 1) {
                         available <- paste(valid_tests, collapse = ", ")
                         needed <- paste(missing_tests[1:2], collapse = " or ")
-                        stop(sprintf("Only %s is selected. Please also select %s to perform comparison analysis.", available, needed))
+                        stop(jmvcore::.("Only {available} is selected. Please also select {needed} to perform comparison analysis.", available = available, needed = needed))
                     }
                 }
                 
@@ -139,8 +145,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 if (length(missing_positives) > 0) {
-                    stop(sprintf("Positive level not specified for: %s. Please select the positive result level for each test variable.", 
-                                paste(missing_positives, collapse = ", ")))
+                    stop(jmvcore::.("Positive level not specified for: {tests}. Please select the positive result level for each test variable.", 
+                                   tests = paste(missing_positives, collapse = ", ")))
                 }
             },
             
@@ -150,12 +156,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 mydata <- jmvcore::naOmit(self$data)
                 
                 if (nrow(mydata) < nrow(self$data)) {
-                    warning(sprintf("Removed %d rows with missing values", 
-                                   nrow(self$data) - nrow(mydata)))
+                    warning(jmvcore::.("Removed {count} rows with missing values", 
+                                      count = nrow(self$data) - nrow(mydata)))
                 }
                 
                 if (nrow(mydata) == 0) {
-                    stop("Data contains no complete rows after removing missing values")
+                    stop(jmvcore::.("Data contains no complete rows after removing missing values"))
                 }
                 
                 # Extract variable names
@@ -362,7 +368,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     cTable$setRow(
                         rowKey = "Test Positive",
                         values = list(
-                            newtest = "Test Positive",
+                            newtest = jmvcore::.("Test Positive"),
                             GP = TP, GN = FP, Total = TP + FP
                         )
                     )
@@ -370,7 +376,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     cTable$setRow(
                         rowKey = "Test Negative",
                         values = list(
-                            newtest = "Test Negative",
+                            newtest = jmvcore::.("Test Negative"),
                             GP = FN, GN = TN, Total = FN + TN
                         )
                     )
@@ -378,7 +384,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     cTable$setRow(
                         rowKey = "Total",
                         values = list(
-                            newtest = "Total",
+                            newtest = jmvcore::.("Total"),
                             GP = TP + FN, GN = FP + TN, Total = TP + FP + FN + TN
                         )
                     )
@@ -392,10 +398,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             
             # Add footnotes to contingency tables
             .addContingencyTableFootnotes = function(cTable) {
-                cTable$addFootnote(rowKey = "Test Positive", col = "GP", "True Positive (TP)")
-                cTable$addFootnote(rowKey = "Test Positive", col = "GN", "False Positive (FP)")
-                cTable$addFootnote(rowKey = "Test Negative", col = "GP", "False Negative (FN)")
-                cTable$addFootnote(rowKey = "Test Negative", col = "GN", "True Negative (TN)")
+                cTable$addFootnote(rowKey = "Test Positive", col = "GP", jmvcore::.("True Positive (TP)"))
+                cTable$addFootnote(rowKey = "Test Positive", col = "GN", jmvcore::.("False Positive (FP)"))
+                cTable$addFootnote(rowKey = "Test Negative", col = "GP", jmvcore::.("False Negative (FN)"))
+                cTable$addFootnote(rowKey = "Test Negative", col = "GN", jmvcore::.("True Negative (TN)"))
             },
 
             # Populate comparison table with all test results
@@ -420,10 +426,69 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                         )
                     )
                     
+                    # Add clinical interpretation
+                    clinical_interpretation <- private$.generateClinicalInterpretation(metrics)
+                    comparisonTable$addFormat(rowKey = test_name, col = "test", format = jmvcore::Cell.BEGIN_GROUP)
+                    comparisonTable$addRow(
+                        rowKey = paste0(test_name, "_interp"),
+                        values = list(
+                            test = paste0("  → ", clinical_interpretation),
+                            Sens = "", Spec = "", AccurT = "", PPV = "", NPV = "", LRP = "", LRN = ""
+                        )
+                    )
+                    comparisonTable$addFormat(rowKey = paste0(test_name, "_interp"), col = "test", format = jmvcore::Cell.END_GROUP)
+                    
                     # Add footnotes if requested
                     if (self$options$fnote) {
                         private$.addComparisonTableFootnotes(comparisonTable, test_name)
                     }
+                }
+            },
+            
+            # Generate clinical interpretation for test performance
+            .generateClinicalInterpretation = function(metrics) {
+                sens_pct <- metrics$Sens * 100
+                spec_pct <- metrics$Spec * 100
+                ppv_pct <- metrics$PPV * 100
+                npv_pct <- metrics$NPV * 100
+                lrp <- metrics$LRP
+                lrn <- metrics$LRN
+                
+                # Determine primary clinical strength
+                interpretations <- c()
+                
+                if (sens_pct >= 95 && spec_pct >= 95) {
+                    interpretations <- c(interpretations, "Excellent overall performance")
+                } else if (sens_pct >= 95) {
+                    interpretations <- c(interpretations, "Excellent for screening (rule-out)")
+                } else if (spec_pct >= 95) {
+                    interpretations <- c(interpretations, "Excellent for confirmation (rule-in)")
+                } else if (sens_pct >= 85 && spec_pct >= 85) {
+                    interpretations <- c(interpretations, "Good balanced performance")
+                } else if (sens_pct >= 85) {
+                    interpretations <- c(interpretations, "Good sensitivity for screening")
+                } else if (spec_pct >= 85) {
+                    interpretations <- c(interpretations, "Good specificity for confirmation")
+                }
+                
+                # Add likelihood ratio interpretation
+                if (!is.na(lrp) && lrp >= 10) {
+                    interpretations <- c(interpretations, "Strong positive evidence")
+                } else if (!is.na(lrp) && lrp >= 5) {
+                    interpretations <- c(interpretations, "Moderate positive evidence")
+                }
+                
+                if (!is.na(lrn) && lrn <= 0.1) {
+                    interpretations <- c(interpretations, "Strong negative evidence")
+                } else if (!is.na(lrn) && lrn <= 0.2) {
+                    interpretations <- c(interpretations, "Moderate negative evidence")
+                }
+                
+                # Combine interpretations or provide fallback
+                if (length(interpretations) > 0) {
+                    return(paste(interpretations, collapse = "; "))
+                } else {
+                    return("Limited diagnostic utility - consider combining with other tests")
                 }
             },
             
@@ -460,15 +525,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                             tibble::rownames_to_column(.data = ., var = 'statsabv')
                         
                         epirresult2$statsnames <- c(
-                            "Apparent prevalence", "True prevalence", "Test sensitivity",
-                            "Test specificity", "Diagnostic accuracy", "Diagnostic odds ratio",
-                            "Number needed to diagnose", "Youden's index",
-                            "Positive predictive value", "Negative predictive value",
-                            "Likelihood ratio of a positive test", "Likelihood ratio of a negative test",
-                            "Proportion of subjects with the outcome ruled out",
-                            "Proportion of subjects with the outcome ruled in",
-                            "Proportion of false positives", "Proportion of false negative",
-                            "False Discovery Rate", "False Omission Rate"
+                            jmvcore::.("Apparent prevalence"), jmvcore::.("True prevalence"), jmvcore::.("Test sensitivity"),
+                            jmvcore::.("Test specificity"), jmvcore::.("Diagnostic accuracy"), jmvcore::.("Diagnostic odds ratio"),
+                            jmvcore::.("Number needed to diagnose"), jmvcore::.("Youden's index"),
+                            jmvcore::.("Positive predictive value"), jmvcore::.("Negative predictive value"),
+                            jmvcore::.("Likelihood ratio of a positive test"), jmvcore::.("Likelihood ratio of a negative test"),
+                            jmvcore::.("Proportion of subjects with the outcome ruled out"),
+                            jmvcore::.("Proportion of subjects with the outcome ruled in"),
+                            jmvcore::.("Proportion of false positives"), jmvcore::.("Proportion of false negative"),
+                            jmvcore::.("False Discovery Rate"), jmvcore::.("False Omission Rate")
                         )
                         
                         ratiorows <- c("ap", "tp", "se", "sp", "diag.ac", "pv.pos", "pv.neg",
@@ -480,8 +545,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                         }
                     }, error = function(e) {
                         n_sample <- sum(conf_table)
-                        enhanced_msg <- sprintf("Could not calculate confidence intervals for %s (n=%d). This may be due to insufficient sample size or extreme values. Error: %s", 
-                                               testVariable, n_sample, conditionMessage(e))
+                        enhanced_msg <- jmvcore::.("Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}", 
+                                                  test = testVariable, n = n_sample, error = conditionMessage(e))
                         warning(enhanced_msg)
                     })
                 }
@@ -556,8 +621,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 }, error = function(e) {
                     n1 <- length(test1_results)
                     n2 <- length(test2_results)
-                    enhanced_msg <- sprintf("Could not perform McNemar's test for %s (n1=%d, n2=%d). This may be due to insufficient discordant pairs or identical test results. Error: %s", 
-                                           comparison_name, n1, n2, conditionMessage(e))
+                    enhanced_msg <- jmvcore::.("Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}", 
+                                              comparison = comparison_name, n1 = n1, n2 = n2, error = conditionMessage(e))
                     warning(enhanced_msg)
                 })
             },
@@ -595,8 +660,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                             )
                         )
                     }, error = function(e) {
-                        enhanced_msg <- sprintf("Could not calculate %s difference for %s (n1=%d, n2=%d). Check for extreme values or zero denominators. Error: %s", 
-                                               metric, comparison_name, n1, n2, conditionMessage(e))
+                        enhanced_msg <- jmvcore::.("Could not calculate {metric} difference for {comparison} (n1={n1}, n2={n2}). Check for extreme values or zero denominators. Error: {error}", 
+                                                  metric = metric, comparison = comparison_name, n1 = n1, n2 = n2, error = conditionMessage(e))
                         warning(enhanced_msg)
                     })
                 }
@@ -779,12 +844,248 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 tryCatch(
                     func(...),
                     error = function(e) {
-                        enhanced_msg <- sprintf("Statistical calculation failed for %s: %s. Check data quality, sample sizes, and ensure no extreme values or division by zero.", 
-                                               context_info, conditionMessage(e))
+                        enhanced_msg <- jmvcore::.("Statistical calculation failed for {context}: {error}. Check data quality, sample sizes, and ensure no extreme values or division by zero.", 
+                                                  context = context_info, error = conditionMessage(e))
                         warning(enhanced_msg)
                         return(default_return)
                     }
                 )
+            },
+            
+            # Generate comprehensive clinical report with copy-ready sentences
+            .generateClinicalReport = function(test_results, processed_data) {
+                if (length(test_results) == 0) return()
+                
+                # Find best performing test
+                best_test <- private$.findBestTest(test_results)
+                best_metrics <- test_results[[best_test]]$metrics
+                
+                # Generate report sections
+                methods_section <- private$.generateMethodsSection(test_results, processed_data)
+                results_section <- private$.generateResultsSection(test_results, best_test, best_metrics)
+                clinical_recommendations <- private$.generateClinicalRecommendations(test_results, best_test)
+                
+                # Create comprehensive HTML report
+                report_html <- paste0(
+                    '<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">',
+                    
+                    '<h2 style="color: #2c3e50; border-bottom: 2px solid #3498db;">📋 Clinical Summary</h2>',
+                    results_section,
+                    
+                    '<h3 style="color: #27ae60; margin-top: 30px;">📝 Copy-Ready Report Sentences</h3>',
+                    '<div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;">',
+                    '<h4 style="margin-top: 0;">Methods Section:</h4>',
+                    '<p style="font-style: italic; line-height: 1.6;">', methods_section, '</p>',
+                    '<button onclick="navigator.clipboard.writeText(this.parentNode.querySelector(\'p\').innerText)" ',
+                    'style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">',
+                    '📋 Copy Methods Text</button>',
+                    '</div>',
+                    
+                    '<div style="background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 15px 0;">',
+                    '<h4 style="margin-top: 0;">Results Section:</h4>',
+                    '<p style="font-style: italic; line-height: 1.6;">', results_section, '</p>',
+                    '<button onclick="navigator.clipboard.writeText(this.parentNode.querySelector(\'p\').innerText)" ',
+                    'style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">',
+                    '📋 Copy Results Text</button>',
+                    '</div>',
+                    
+                    '<h3 style="color: #8e44ad; margin-top: 30px;">💡 Clinical Recommendations</h3>',
+                    clinical_recommendations,
+                    
+                    '</div>'
+                )
+                
+                self$results$clinicalReport$setContent(report_html)
+            },
+            
+            # Find the best performing test based on overall metrics
+            .findBestTest = function(test_results) {
+                best_score <- -1
+                best_test <- names(test_results)[1]
+                
+                for (test_name in names(test_results)) {
+                    metrics <- test_results[[test_name]]$metrics
+                    # Balanced scoring: Youden index + accuracy
+                    score <- (metrics$Sens + metrics$Spec - 1) + metrics$AccurT
+                    if (score > best_score) {
+                        best_score <- score
+                        best_test <- test_name
+                    }
+                }
+                return(best_test)
+            },
+            
+            # Generate methods section for manuscripts
+            .generateMethodsSection = function(test_results, processed_data) {
+                n_tests <- length(test_results)
+                n_cases <- nrow(processed_data)
+                test_names <- names(test_results)
+                
+                methods <- sprintf(
+                    "We compared the diagnostic performance of %s tests (%s) against the gold standard reference using diagnostic accuracy analysis. The study included %d cases with complete data. Performance metrics calculated included sensitivity, specificity, positive and negative predictive values, likelihood ratios, and overall accuracy. %s",
+                    n_tests,
+                    paste(test_names, collapse = ", "),
+                    n_cases,
+                    if (n_tests >= 2 && self$options$statComp) "Statistical comparisons between tests were performed using McNemar's test for paired proportions." else ""
+                )
+                
+                return(methods)
+            },
+            
+            # Generate results section with key findings
+            .generateResultsSection = function(test_results, best_test, best_metrics) {
+                sens_pct <- round(best_metrics$Sens * 100, 1)
+                spec_pct <- round(best_metrics$Spec * 100, 1)
+                acc_pct <- round(best_metrics$AccurT * 100, 1)
+                ppv_pct <- round(best_metrics$PPV * 100, 1)
+                npv_pct <- round(best_metrics$NPV * 100, 1)
+                
+                # Determine statistical significance if McNemar was performed
+                significance_note <- if (self$options$statComp && length(test_results) >= 2) {
+                    " Statistical comparisons using McNemar's test revealed significant differences in test performance (detailed results in comparison tables)."
+                } else {
+                    ""
+                }
+                
+                results <- sprintf(
+                    "Among the tests evaluated, %s demonstrated optimal diagnostic performance with %s%% sensitivity (95%% CI: [see confidence interval table]), %s%% specificity (95%% CI: [see confidence interval table]), %s%% positive predictive value, %s%% negative predictive value, and %s%% overall accuracy.%s The likelihood ratio for positive results was %.2f and for negative results was %.2f.",
+                    best_test,
+                    sens_pct,
+                    spec_pct, 
+                    ppv_pct,
+                    npv_pct,
+                    acc_pct,
+                    significance_note,
+                    best_metrics$LRP,
+                    best_metrics$LRN
+                )
+                
+                return(results)
+            },
+            
+            # Generate clinical recommendations
+            .generateClinicalRecommendations = function(test_results, best_test) {
+                best_metrics <- test_results[[best_test]]$metrics
+                sens_pct <- best_metrics$Sens * 100
+                spec_pct <- best_metrics$Spec * 100
+                
+                recommendations <- '<div style="background-color: #fff3cd; padding: 15px; border-radius: 8px;">'
+                
+                if (sens_pct >= 95 && spec_pct >= 95) {
+                    recommendations <- paste0(recommendations, 
+                        '<p><strong>Clinical Use:</strong> ', best_test, ' shows excellent performance for both screening and confirmatory testing.</p>')
+                } else if (sens_pct >= 95) {
+                    recommendations <- paste0(recommendations, 
+                        '<p><strong>Screening Application:</strong> ', best_test, ' is excellent for initial screening due to high sensitivity (low false negative rate).</p>')
+                } else if (spec_pct >= 95) {
+                    recommendations <- paste0(recommendations, 
+                        '<p><strong>Confirmatory Application:</strong> ', best_test, ' is excellent for confirming diagnosis due to high specificity (low false positive rate).</p>')
+                } else {
+                    recommendations <- paste0(recommendations, 
+                        '<p><strong>Clinical Consideration:</strong> Consider using ', best_test, ' in combination with other tests for optimal diagnostic accuracy.</p>')
+                }
+                
+                recommendations <- paste0(recommendations, 
+                    '<p><strong>Implementation Note:</strong> Results should be interpreted in the context of disease prevalence in your clinical population. ',
+                    'Consider local validation studies before implementation.</p></div>')
+                
+                return(recommendations)
+            },
+            
+            # Generate comprehensive about this analysis panel
+            .generateAboutPanel = function() {
+                about_html <- paste0(
+                    '<div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px;">',
+                    
+                    '<h2 style="color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;">',
+                    '🔬 About Medical Decision Test Comparison</h2>',
+                    
+                    # What This Analysis Does
+                    '<div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 10px; margin: 20px 0;">',
+                    '<h3 style="color: #1565c0; margin-top: 0;">📊 What This Analysis Does</h3>',
+                    '<p style="line-height: 1.6; color: #333;">',
+                    'This tool compares the diagnostic performance of multiple medical tests against a gold standard reference. ',
+                    'It systematically evaluates sensitivity, specificity, predictive values, likelihood ratios, and overall accuracy ',
+                    'to help you determine which test performs best for your clinical scenario.',
+                    '</p>',
+                    '</div>',
+                    
+                    # When to Use
+                    '<div style="background-color: #f1f8e9; border: 1px solid #8bc34a; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #4a7c59; margin-top: 0;">🎯 When to Use This Analysis</h3>',
+                    '<ul style="line-height: 1.8; color: #4a7c59;">',
+                    '<li><strong>Test Validation:</strong> Comparing new diagnostic methods against established standards</li>',
+                    '<li><strong>Method Comparison:</strong> Evaluating which of several tests performs better</li>',
+                    '<li><strong>Clinical Research:</strong> Validating biomarkers, imaging techniques, or clinical assessments</li>',
+                    '<li><strong>Quality Assessment:</strong> Measuring agreement between different raters or methods</li>',
+                    '<li><strong>Protocol Development:</strong> Optimizing diagnostic workflows</li>',
+                    '</ul>',
+                    '</div>',
+                    
+                    # How to Use
+                    '<div style="background-color: #fff3e0; border: 1px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #e65100; margin-top: 0;">📝 How to Use This Analysis</h3>',
+                    '<ol style="line-height: 1.8; color: #e65100;">',
+                    '<li><strong>Select Gold Standard:</strong> Choose your most reliable reference test (e.g., biopsy, expert consensus)</li>',
+                    '<li><strong>Choose Tests to Compare:</strong> Select 2-3 diagnostic tests you want to evaluate</li>',
+                    '<li><strong>Define Positive Levels:</strong> Specify what constitutes a "positive" result for each test</li>',
+                    '<li><strong>Configure Options:</strong> Enable statistical comparisons, confidence intervals, or visualizations as needed</li>',
+                    '<li><strong>Run Analysis:</strong> Review results tables and clinical interpretations</li>',
+                    '<li><strong>Copy Report:</strong> Use the auto-generated sentences for your documentation</li>',
+                    '</ol>',
+                    '</div>',
+                    
+                    # Key Metrics Explained
+                    '<div style="background-color: #f3e5f5; border: 1px solid #9c27b0; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #6a1b9a; margin-top: 0;">📈 Key Metrics Explained</h3>',
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #6a1b9a;">',
+                    '<div>',
+                    '<p><strong>Sensitivity:</strong> Probability test is positive when disease present (rule-out ability)</p>',
+                    '<p><strong>Specificity:</strong> Probability test is negative when disease absent (rule-in ability)</p>',
+                    '<p><strong>PPV:</strong> Probability of disease when test positive</p>',
+                    '<p><strong>NPV:</strong> Probability of no disease when test negative</p>',
+                    '</div>',
+                    '<div>',
+                    '<p><strong>LR+:</strong> How much positive test increases odds of disease</p>',
+                    '<p><strong>LR-:</strong> How much negative test decreases odds of disease</p>',
+                    '<p><strong>Accuracy:</strong> Overall probability of correct classification</p>',
+                    '<p><strong>McNemar Test:</strong> Statistical comparison between paired tests</p>',
+                    '</div>',
+                    '</div>',
+                    '</div>',
+                    
+                    # Clinical Guidelines
+                    '<div style="background-color: #e8f5e8; border: 1px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #2e7d32; margin-top: 0;">⚕️ Clinical Interpretation Guidelines</h3>',
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #2e7d32;">',
+                    '<div>',
+                    '<h4 style="margin-bottom: 5px;">Screening Tests (Rule-Out):</h4>',
+                    '<p style="margin-top: 0;">• Sensitivity ≥95%: Excellent<br>• NPV ≥95%: High confidence<br>• Goal: Minimize false negatives</p>',
+                    '</div>',
+                    '<div>',
+                    '<h4 style="margin-bottom: 5px;">Confirmatory Tests (Rule-In):</h4>',
+                    '<p style="margin-top: 0;">• Specificity ≥95%: Excellent<br>• PPV ≥90%: High confidence<br>• Goal: Minimize false positives</p>',
+                    '</div>',
+                    '</div>',
+                    '</div>',
+                    
+                    # Assumptions and Limitations
+                    '<div style="background-color: #fff8e1; border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #f57f17; margin-top: 0;">⚠️ Important Assumptions & Limitations</h3>',
+                    '<ul style="line-height: 1.6; color: #f57f17;">',
+                    '<li><strong>Gold Standard:</strong> Assumes your reference test is truly accurate</li>',
+                    '<li><strong>Sample Size:</strong> Results more reliable with larger, representative samples</li>',
+                    '<li><strong>Prevalence Dependency:</strong> PPV and NPV vary with disease prevalence</li>',
+                    '<li><strong>McNemar Test:</strong> Requires paired/matched data for statistical comparisons</li>',
+                    '<li><strong>Missing Data:</strong> Cases with incomplete data are excluded from analysis</li>',
+                    '<li><strong>Confidence Intervals:</strong> Calculated using Wilson method for better accuracy</li>',
+                    '</ul>',
+                    '</div>',
+                    
+                    '</div>'
+                )
+                
+                self$results$aboutAnalysis$setContent(about_html)
             },
 
             .plot1 = function(image1, ggtheme, ...) {
@@ -799,10 +1100,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     ggplot2::coord_flip() +
                     ggplot2::scale_y_continuous(labels = scales::percent) +
                     ggplot2::labs(
-                        title = "Comparison of Tests",
+                        title = jmvcore::.("Comparison of Tests"),
                         x = "",
-                        y = "Value",
-                        fill = "Test"
+                        y = jmvcore::.("Value"),
+                        fill = jmvcore::.("Test")
                     ) +
                     ggtheme +
                     ggplot2::theme(legend.position = "bottom")
@@ -832,11 +1133,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                                                breaks = c(0, 25, 50, 75, 100),
                                                labels = c("0%", "25%", "50%", "75%", "100%")) +
                     ggplot2::labs(
-                        title = "Radar Plot: Decision Test Statistics Comparison",
-                        subtitle = "All metrics scaled 0-100% (LR Quality: clinical performance scale)",
+                        title = jmvcore::.("Radar Plot: Decision Test Statistics Comparison"),
+                        subtitle = jmvcore::.("All metrics scaled 0-100% (LR Quality: clinical performance scale)"),
                         x = "",
                         y = "",
-                        color = "Test"
+                        color = jmvcore::.("Test")
                     ) +
                     ggtheme +
                     ggplot2::theme(

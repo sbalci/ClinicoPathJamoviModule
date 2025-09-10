@@ -47,49 +47,6 @@ echo "/document-function FUNC_NAME" | claude
 
 ***
 
-## meddecideT
-
-- agreement - Interrater Reliability
-
-echo "/checkpoint agreement" | claude
-echo "/prepare-translation agreement" | claude
-echo "/review-function agreement" | claude
-echo "/fix-function agreement" | claude
-echo "/document-function agreement" | claude
-
-- decision - Medical Decision
-echo "/check-function decision" | claude
-echo "/checkpoint decision" | claude
-echo "/prepare-translation decision" | claude
-echo "/review-function decision" | claude
-echo "/fix-function decision" | claude
-echo "/document-function decision" | claude
-
-- decisioncombine - Combine Medical Decision Tests
-echo "/check-function decisioncombine" | claude
-echo "/checkpoint decisioncombine" | claude
-echo "/prepare-translation decisioncombine" | claude
-echo "/review-function decisioncombine" | claude
-echo "/fix-function decisioncombine" | claude
-echo "/document-function decisioncombine" | claude
-
-- modalitycomparison - Modality Comparison Analysis
-echo "/check-function modalitycomparison" | claude
-echo "/checkpoint modalitycomparison" | claude
-echo "/prepare-translation modalitycomparison" | claude
-echo "/review-function modalitycomparison" | claude
-echo "/fix-function modalitycomparison" | claude
-echo "/document-function modalitycomparison" | claude
-
-- decisioncompare - Compare Medical Decision Tests
-echo "/check-function decisioncompare" | claude
-echo "/checkpoint decisioncompare" | claude
-echo "/prepare-translation decisioncompare" | claude
-echo "/review-function decisioncompare" | claude
-echo "/fix-function decisioncompare" | claude
-echo "/document-function decisioncompare" | claude
-
-/check-module-meddecide
 
 ## SurvivalT (5 functions)
 

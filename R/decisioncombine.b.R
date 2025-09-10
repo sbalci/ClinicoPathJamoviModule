@@ -508,18 +508,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 npv <- if(total_test_neg > 0) tn / total_test_neg else NA  # Negative Precision
                 acc <- if(total > 0) (tp + tn) / total else NA  # Overall Accuracy
                 
-                # Calculate proper ROC AUC using trapezoidal rule approximation
-                # For single point, AUC is the area under ROC curve from (0,0) to (FPR,TPR) to (1,1)
+                # Calculate simplified performance score for categorical tests
+                # Using balanced accuracy: (Sensitivity + Specificity) / 2
                 auc <- if(!is.na(sens) && !is.na(spec)) {
-                    fpr <- 1 - spec  # False Positive Rate
-                    tpr <- sens      # True Positive Rate (Sensitivity)
-                    
-                    # Proper AUC calculation using trapezoidal approximation
-                    # AUC = Area from (0,0) to (FPR,TPR) + Area from (FPR,TPR) to (1,1)
-                    # Assuming linear interpolation between points
-                    area_left <- fpr * tpr / 2  # Triangle from (0,0) to (FPR,TPR)
-                    area_right <- (1 - fpr) * (tpr + 1) / 2  # Trapezoid from (FPR,TPR) to (1,1)
-                    area_left + area_right
+                    (sens + spec) / 2  # Balanced accuracy for categorical tests
                 } else NA
                 
                 # Calculate additional clinical metrics
@@ -711,9 +703,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 youden_optimal <- which.max(youden_scores)
                 accuracy_optimal <- which.max(plotData$accuracy)
                 
-                # Calculate distance from perfect classifier (0,1) in ROC space
-                roc_distances <- sqrt((1 - plotData$specificity)^2 + (1 - plotData$sensitivity)^2)
-                distance_optimal <- which.min(roc_distances)
+                # Calculate distance from perfect classifier (100% sensitivity, 100% specificity)
+                performance_distances <- sqrt((1 - plotData$specificity)^2 + (1 - plotData$sensitivity)^2)
+                distance_optimal <- which.min(performance_distances)
                 
                 # Determine best overall pattern with clinical reasoning
                 optimal_pattern <- youden_optimal
@@ -749,181 +741,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 ))
             },
             
-            .plotROCCurves = function(image, ...) {
-                # Validate plot data first
-                plotData <- image$state
-                
-                # Get plot dimensions if provided
-                plot_width <- self$options$plotWidth
-                plot_height <- self$options$plotHeight
-                
-                # Set image dimensions if provided
-                if (!is.null(plot_width) && !is.null(plot_height)) {
-                    image$setSize(width = plot_width, height = plot_height)
-                }
-                
-                # Find optimal cut-point before plotting
-                optimal_cutpoint <- private$.findOptimalCutpoint(plotData)
-                
-                tryCatch({
-                    private$.validatePlotData(plotData)
-                }, error = function(e) {
-                    plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                        label = paste("Data validation error:", e$message),
-                                        size = 6, color = "red", hjust = 0.5, vjust = 0.5) +
-                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                        ggplot2::theme_void() +
-                        ggplot2::labs(title = "ROC Analysis - Data Error")
-                    print(plot)
-                    return(TRUE)
-                })
-                
-                # Create publication-ready ROC space analysis
-                roc_data <- data.frame(
-                    Pattern = factor(plotData$patterns, levels = plotData$patterns),
-                    Description = plotData$descriptions,
-                    FPR = 1 - plotData$specificity,  # False Positive Rate
-                    TPR = plotData$sensitivity,      # True Positive Rate (Sensitivity)
-                    Specificity = plotData$specificity,
-                    Sensitivity = plotData$sensitivity,
-                    PPV = plotData$ppv,
-                    NPV = plotData$npv,
-                    Accuracy = plotData$accuracy,
-                    AUC = (plotData$sensitivity + plotData$specificity) / 2,  # Simplified AUC approximation
-                    n_total = plotData$tp + plotData$fp + plotData$fn + plotData$tn,
-                    stringsAsFactors = FALSE
-                )
-                
-                # Calculate Youden's J statistic (Sensitivity + Specificity - 1)
-                roc_data$Youden_J <- roc_data$Sensitivity + roc_data$Specificity - 1
-                
-                # Identify optimal pattern for highlighting
-                optimal_idx <- which(roc_data$Pattern == optimal_cutpoint$pattern)
-                
-                # Create high-quality ROC space plot with optimal cut-point highlighting
-                plot <- ggplot2::ggplot(roc_data, ggplot2::aes(x = FPR, y = TPR)) +
-                    
-                    # Add reference lines
-                    ggplot2::geom_abline(intercept = 0, slope = 1, 
-                                        linetype = "dashed", color = "gray60", size = 1,
-                                        alpha = 0.8) +
-                    ggplot2::annotate("text", x = 0.5, y = 0.45, 
-                                    label = "Random Classifier", 
-                                    angle = 45, color = "gray60", size = 3.5, alpha = 0.8) +
-                    
-                    # Perfect classifier reference point
-                    ggplot2::geom_point(x = 0, y = 1, color = "gold", size = 4, shape = 17) +
-                    ggplot2::annotate("text", x = 0.02, y = 1, 
-                                    label = "Perfect\nClassifier", 
-                                    hjust = 0, color = "gold", size = 3, fontface = "bold") +
-                    
-                    # Test combination points with size based on sample size
-                    ggplot2::geom_point(ggplot2::aes(color = Pattern, size = AUC), 
-                                       alpha = 0.8, stroke = 1.5) +
-                    
-                    # Highlight optimal cut-point
-                    ggplot2::geom_point(
-                        data = if(length(optimal_idx) > 0) roc_data[optimal_idx, ] else data.frame(),
-                        ggplot2::aes(x = FPR, y = TPR),
-                        color = "red", size = 6, shape = 1, stroke = 3, alpha = 1
-                    ) +
-                    
-                    # Add optimal cut-point annotation
-                    ggplot2::geom_text(
-                        data = if(length(optimal_idx) > 0) roc_data[optimal_idx, ] else data.frame(),
-                        ggplot2::aes(x = FPR, y = TPR, 
-                                   label = paste0("OPTIMAL\n", Pattern)),
-                        vjust = -2, hjust = 0.5, size = 4, 
-                        fontface = "bold", color = "red", show.legend = FALSE
-                    ) +
-                    
-                    # Add confidence ellipses or error bars would require CI data
-                    # For now, add performance labels
-                    ggplot2::geom_text(
-                        ggplot2::aes(label = paste0(Pattern, "\n(", 
-                                                   "AUC≈", round(AUC, 2), ")"),
-                                    color = Pattern),
-                        vjust = -1.2, hjust = 0.5, size = 3.5, 
-                        fontface = "bold", show.legend = FALSE
-                    ) +
-                    
-                    # Professional styling
-                    ggplot2::scale_x_continuous(
-                        name = "1 - Specificity (False Positive Rate)",
-                        limits = c(-0.05, 1.05), 
-                        breaks = seq(0, 1, 0.2),
-                        labels = scales::percent_format(accuracy = 1),
-                        expand = c(0, 0)
-                    ) +
-                    ggplot2::scale_y_continuous(
-                        name = "Sensitivity (True Positive Rate)", 
-                        limits = c(-0.05, 1.1), 
-                        breaks = seq(0, 1, 0.2),
-                        labels = scales::percent_format(accuracy = 1),
-                        expand = c(0, 0)
-                    ) +
-                    
-                    # Color and size scales
-                    ggplot2::scale_color_viridis_d(
-                        name = "Test\nCombination",
-                        option = "plasma",
-                        guide = ggplot2::guide_legend(
-                            override.aes = list(size = 4),
-                            keywidth = 1.2,
-                            keyheight = 1.2
-                        )
-                    ) +
-                    ggplot2::scale_size_continuous(
-                        name = "Approx.\nAUC",
-                        range = c(3, 8),
-                        limits = c(0.5, 1),
-                        breaks = c(0.5, 0.7, 0.9),
-                        guide = ggplot2::guide_legend(
-                            override.aes = list(alpha = 0.8),
-                            keywidth = 1.2,
-                            keyheight = 1.2
-                        )
-                    ) +
-                    
-                    ggplot2::labs(
-                        title = "ROC Space Analysis: Diagnostic Test Combinations",
-                        subtitle = paste0("Performance comparison across ", nrow(roc_data), 
-                                         " test combination patterns"),
-                        caption = paste0("Points closer to top-left corner indicate better performance. ",
-                                       "Red circle indicates optimal cut-point (", optimal_cutpoint$method, "). ",
-                                       "AUC approximated as (Sensitivity + Specificity)/2. ",
-                                       "Sample size: n = ", round(mean(roc_data$n_total)))
-                    ) +
-                    
-                    ggplot2::theme_classic(base_size = 12, base_family = "serif") +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 16, face = "bold", 
-                                                          margin = ggplot2::margin(b = 10)),
-                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, color = "gray30",
-                                                             margin = ggplot2::margin(b = 15)),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, size = 9, color = "gray40",
-                                                            margin = ggplot2::margin(t = 10)),
-                        axis.title.x = ggplot2::element_text(size = 13, face = "bold", 
-                                                            margin = ggplot2::margin(t = 15)),
-                        axis.title.y = ggplot2::element_text(size = 13, face = "bold", 
-                                                            margin = ggplot2::margin(r = 15)),
-                        axis.text = ggplot2::element_text(size = 11, color = "black"),
-                        axis.ticks = ggplot2::element_line(color = "black", size = 0.5),
-                        axis.line = ggplot2::element_line(color = "black", size = 0.8),
-                        legend.position = "right",
-                        legend.title = ggplot2::element_text(size = 11, face = "bold"),
-                        legend.text = ggplot2::element_text(size = 10),
-                        panel.border = ggplot2::element_rect(color = "black", fill = NA, size = 1.2),
-                        panel.grid.major = ggplot2::element_line(color = "gray90", size = 0.5),
-                        panel.grid.minor = ggplot2::element_line(color = "gray95", size = 0.3),
-                        plot.margin = ggplot2::margin(20, 20, 20, 20),
-                        aspect.ratio = 1
-                    )
-                
-                print(plot)
-                TRUE
-            },
             
             .plotDecisionTree = function(image, ...) {
                 # Validate plot data first
@@ -1544,6 +1361,110 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 TRUE
             },
             
+            .generateClinicalSummary = function(results, optimal_pattern = NULL) {
+                # Generate plain-language clinical summary for pathologists/clinicians
+                if (is.null(optimal_pattern) || is.null(results)) {
+                    return("<p><strong>Clinical Summary:</strong> Analysis in progress...</p>")
+                }
+                
+                # Extract key performance metrics for optimal pattern
+                optimal_idx <- which(results$patterns == optimal_pattern$pattern)
+                if (length(optimal_idx) == 0) return("<p><strong>Clinical Summary:</strong> Unable to determine optimal pattern.</p>")
+                
+                sens <- results$sensitivity[optimal_idx] * 100
+                spec <- results$specificity[optimal_idx] * 100 
+                ppv <- results$ppv[optimal_idx] * 100
+                npv <- results$npv[optimal_idx] * 100
+                acc <- results$accuracy[optimal_idx] * 100
+                
+                # Clinical quality assessment
+                clinical_quality <- dplyr::case_when(
+                    sens >= 90 && spec >= 90 ~ "excellent",
+                    sens >= 80 && spec >= 80 ~ "good", 
+                    sens >= 70 || spec >= 70 ~ "moderate",
+                    TRUE ~ "limited"
+                )
+                
+                # Clinical recommendation
+                clinical_use <- dplyr::case_when(
+                    sens > 90 ~ "This combination is excellent for <strong>ruling OUT</strong> disease (high sensitivity).",
+                    spec > 90 ~ "This combination is excellent for <strong>ruling IN</strong> disease (high specificity).",
+                    sens > 80 && spec > 80 ~ "This combination provides good overall diagnostic performance.",
+                    TRUE ~ "Consider clinical context and additional testing when interpreting results."
+                )
+                
+                # Generate natural language summary
+                summary_html <- paste0(
+                    "<div style='background-color: #f8f9fa; border-left: 4px solid #28a745; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='color: #155724; margin-top: 0;'>📋 Clinical Summary</h4>",
+                    "<p><strong>Optimal Test Combination:</strong> ", optimal_pattern$pattern, "</p>",
+                    "<p><strong>Performance:</strong> ", 
+                    sprintf("%.1f%% sensitivity, %.1f%% specificity, %.1f%% overall accuracy", sens, spec, acc), "</p>",
+                    "<p><strong>Clinical Interpretation:</strong> ", clinical_use, "</p>",
+                    "<p><strong>Predictive Values:</strong> ", 
+                    sprintf("%.1f%% positive predictive value, %.1f%% negative predictive value", ppv, npv), "</p>",
+                    "<p style='margin-bottom: 0;'><strong>Quality Assessment:</strong> ", 
+                    stringr::str_to_title(clinical_quality), " diagnostic performance for this test combination pattern.</p>",
+                    "</div>"
+                )
+                
+                return(summary_html)
+            },
+
+            .generateCopyReadyReport = function(results, optimal_pattern = NULL, test_names = NULL) {
+                # Generate copy-ready report sentences for clinical documentation
+                if (is.null(optimal_pattern) || is.null(results) || is.null(test_names)) {
+                    return("<p><em>Report template will be generated once analysis is complete.</em></p>")
+                }
+                
+                # Extract key performance metrics for optimal pattern
+                optimal_idx <- which(results$patterns == optimal_pattern$pattern)
+                if (length(optimal_idx) == 0) return("<p><em>Unable to generate report template.</em></p>")
+                
+                sens <- results$sensitivity[optimal_idx] * 100
+                spec <- results$specificity[optimal_idx] * 100 
+                ppv <- results$ppv[optimal_idx] * 100
+                npv <- results$npv[optimal_idx] * 100
+                acc <- results$accuracy[optimal_idx] * 100
+                
+                # Format test names
+                test_list <- paste(test_names, collapse = " and ")
+                n_tests <- length(test_names)
+                
+                # Generate copy-ready sentences
+                report_sentences <- paste0(
+                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 10px 0; border-radius: 5px;'>",
+                    "<h4 style='color: #856404; margin-top: 0;'>📄 Copy-Ready Report Template</h4>",
+                    "<div style='font-family: monospace; background-color: #f8f9fa; padding: 10px; border-left: 3px solid #6c757d; margin: 10px 0;'>",
+                    "<p><strong>Methods:</strong> We evaluated the diagnostic performance of ", test_list, 
+                    " compared to the gold standard reference test using ", n_tests, "-test combination analysis. ",
+                    "Wilson score confidence intervals were calculated for enhanced accuracy with categorical data.</p>",
+                    
+                    "<p><strong>Results:</strong> The optimal test combination pattern (", optimal_pattern$pattern, ") achieved ",
+                    sprintf("%.1f%% sensitivity (95%% CI: [calculated]), %.1f%% specificity (95%% CI: [calculated]), ", sens, spec),
+                    sprintf("and %.1f%% overall accuracy. ", acc),
+                    sprintf("Positive and negative predictive values were %.1f%% and %.1f%%, respectively.</p>", ppv, npv),
+                    
+                    "<p><strong>Clinical Interpretation:</strong> ",
+                    if (sens > 90) {
+                        "The high sensitivity makes this combination excellent for ruling out disease in clinical practice."
+                    } else if (spec > 90) {
+                        "The high specificity makes this combination excellent for confirming disease presence."
+                    } else if (sens > 80 && spec > 80) {
+                        "This combination provides good overall diagnostic performance for clinical decision-making."
+                    } else {
+                        "Results should be interpreted in appropriate clinical context with consideration of additional testing."
+                    },
+                    "</p>",
+                    "</div>",
+                    "<p style='font-size: 12px; color: #6c757d; margin-bottom: 0;'><em>Note: Copy the text above for use in manuscripts, reports, or clinical documentation. ",
+                    "Replace [calculated] with actual confidence interval values from the analysis tables.</em></p>",
+                    "</div>"
+                )
+                
+                return(report_sentences)
+            },
+
             .generateAnalysisSummaryHTML = function(num_tests, test_names, n_total_cases, 
                                                    n_positive_cases, n_negative_cases, 
                                                    patterns, descriptions, optimal_cutpoint = NULL) {
@@ -1663,6 +1584,92 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 return(html)
             },
             
+            .generateCombinationInterpretation = function(stats, pattern, description) {
+                # Generate clinical interpretation for individual test combination results
+                if (is.null(stats)) {
+                    return("No statistical results available")
+                } else if (any(is.na(c(stats$sens, stats$spec)))) {
+                    return("Sensitivity/specificity cannot be calculated - check data completeness")
+                } else if (any(is.na(c(stats$ppv, stats$npv)))) {
+                    return("Predictive values unavailable - may be due to extreme prevalence")
+                } else if (any(is.na(stats$acc))) {
+                    return("Accuracy calculation incomplete")
+                }
+                
+                # Performance quality assessment
+                sens <- stats$sens * 100
+                spec <- stats$spec * 100
+                ppv <- stats$ppv * 100
+                npv <- stats$npv * 100
+                acc <- stats$acc * 100
+                
+                # Determine combination strengths
+                strengths <- c()
+                recommendations <- c()
+                
+                # Sensitivity analysis
+                if (sens >= 95) {
+                    strengths <- c(strengths, "Excellent rule-out test")
+                    recommendations <- c(recommendations, "ideal for screening")
+                } else if (sens >= 85) {
+                    strengths <- c(strengths, "Good rule-out ability")
+                } else if (sens < 70) {
+                    recommendations <- c(recommendations, "may miss cases")
+                }
+                
+                # Specificity analysis  
+                if (spec >= 95) {
+                    strengths <- c(strengths, "Excellent rule-in test")
+                    recommendations <- c(recommendations, "ideal for confirmation")
+                } else if (spec >= 85) {
+                    strengths <- c(strengths, "Good rule-in ability")
+                } else if (spec < 70) {
+                    recommendations <- c(recommendations, "may have false positives")
+                }
+                
+                # PPV/NPV analysis
+                if (ppv >= 90) {
+                    strengths <- c(strengths, "High positive confidence")
+                }
+                if (npv >= 90) {
+                    strengths <- c(strengths, "High negative confidence")
+                }
+                
+                # Overall accuracy assessment
+                if (acc >= 90) {
+                    strengths <- c(strengths, "Excellent overall accuracy")
+                } else if (acc >= 80) {
+                    strengths <- c(strengths, "Good overall accuracy")
+                } else if (acc < 70) {
+                    recommendations <- c(recommendations, "limited clinical utility")
+                }
+                
+                # Construct interpretation
+                interpretation <- ""
+                if (length(strengths) > 0) {
+                    interpretation <- paste(strengths, collapse = "; ")
+                }
+                
+                if (length(recommendations) > 0) {
+                    if (interpretation != "") {
+                        interpretation <- paste0(interpretation, " — ", paste(recommendations, collapse = "; "))
+                    } else {
+                        interpretation <- paste(recommendations, collapse = "; ")
+                    }
+                }
+                
+                # Fallback if no specific interpretation
+                if (interpretation == "") {
+                    if (acc >= 70) {
+                        interpretation <- "Moderate diagnostic performance"
+                    } else {
+                        interpretation <- "Limited diagnostic utility"
+                    }
+                }
+                
+                return(interpretation)
+            },
+            
             .applyMultipleTestingCorrection = function(p_values, method = "holm") {
                 # Apply multiple testing correction for combination comparisons
                 # Methods: "holm" (default), "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
@@ -1709,6 +1716,45 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 return(chunks)
+            },
+            
+            .processChunkedBinaryConversion = function(mydata2, testVariables) {
+                # Efficient binary conversion for large datasets using chunked processing
+                chunk_size <- 10000
+                n_rows <- nrow(mydata2)
+                
+                # Create binary column names
+                test1_bin <- paste0(testVariables[1], "_bin")
+                test2_bin <- paste0(testVariables[2], "_bin")
+                test3_bin <- if (length(testVariables) >= 3) paste0(testVariables[3], "_bin") else NULL
+                
+                # Initialize binary columns
+                mydata2[[test1_bin]] <- numeric(n_rows)
+                mydata2[[test2_bin]] <- numeric(n_rows)
+                if (!is.null(test3_bin)) {
+                    mydata2[[test3_bin]] <- numeric(n_rows)
+                }
+                
+                # Process in chunks
+                for (i in seq(1, n_rows, chunk_size)) {
+                    end_idx <- min(i + chunk_size - 1, n_rows)
+                    chunk_indices <- i:end_idx
+                    
+                    # Vectorized binary conversion for chunk
+                    mydata2[[test1_bin]][chunk_indices] <- as.numeric(
+                        mydata2[[testVariables[1]]][chunk_indices] == self$options$test1Positive
+                    )
+                    mydata2[[test2_bin]][chunk_indices] <- as.numeric(
+                        mydata2[[testVariables[2]]][chunk_indices] == self$options$test2Positive
+                    )
+                    if (!is.null(test3_bin)) {
+                        mydata2[[test3_bin]][chunk_indices] <- as.numeric(
+                            mydata2[[testVariables[3]]][chunk_indices] == self$options$test3Positive
+                        )
+                    }
+                }
+                
+                return(mydata2)
             },
             
             .analyzeCombinations = function(mydata2, testVariables, goldVariable) {
@@ -1765,8 +1811,20 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 test3_bin <- if (length(testVariables) >= 3) paste0(testVariables[3], "_bin") else NULL
                 
                 # Binary conversion for each test based on positive levels
+                # Performance optimization: use vectorized operations for large datasets
+                n_rows <- nrow(mydata2)
+                if (n_rows > 50000) {
+                    # For very large datasets, process in chunks to manage memory
+                    mydata2 <- private$.processChunkedBinaryConversion(mydata2, testVariables)
+                } else {
+                    # Standard processing for smaller datasets
+                    mydata2[[test1_bin]] <- as.numeric(mydata2[[testVariables[1]]] == self$options$test1Positive)
+                }
                 
-                mydata2[[test1_bin]] <- as.numeric(mydata2[[testVariables[1]]] == self$options$test1Positive)
+                # Ensure all binary conversions are completed
+                if (!test1_bin %in% names(mydata2)) {
+                    mydata2[[test1_bin]] <- as.numeric(mydata2[[testVariables[1]]] == self$options$test1Positive)
+                }
                 mydata2[[test2_bin]] <- as.numeric(mydata2[[testVariables[2]]] == self$options$test2Positive)
                 if (!is.null(test3_bin)) {
                     mydata2[[test3_bin]] <- as.numeric(mydata2[[testVariables[3]]] == self$options$test3Positive)
@@ -1880,11 +1938,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         # Calculate diagnostic statistics
                         stats <- private$.calculateDiagnosticStats(tp, fp, fn, tn)
                         
-                        # Add to main statistics table
+                        # Generate clinical interpretation for this combination
+                        clinical_interpretation <- private$.generateCombinationInterpretation(stats, pattern, description)
+                        
+                        # Add to main statistics table with enhanced formatting
                         self$results$combStatsTable$addRow(
                             rowKey = pattern,
                             values = list(
-                                combination = paste0(pattern, " (", description, ")"),
+                                combination = paste0(
+                                    "<div style='font-weight: bold; color: #2c3e50;'>", pattern, "</div>",
+                                    "<div style='font-size: 0.9em; color: #555; margin-top: 2px;'>", description, "</div>",
+                                    "<div style='color: #0066cc; font-size: 0.85em; margin-top: 4px; font-style: italic; padding: 2px 6px; background-color: #f8f9fa; border-radius: 3px;'>", 
+                                    clinical_interpretation, "</div>"
+                                ),
                                 sens = stats$sens,
                                 spec = stats$spec,
                                 ppv = stats$ppv,
@@ -1953,9 +2019,31 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     )
                 }
                 
+                # Generate clinical summary if we have valid results
+                clinical_summary_html <- ""
+                if (plot_data_index > 0 && !is.null(optimal_cutpoint)) {
+                    # Prepare results structure for clinical summary
+                    results_for_summary <- list(
+                        patterns = patterns[1:plot_data_index],
+                        sensitivity = plot_data$sensitivity[1:plot_data_index],
+                        specificity = plot_data$specificity[1:plot_data_index],
+                        ppv = plot_data$ppv[1:plot_data_index],
+                        npv = plot_data$npv[1:plot_data_index],
+                        accuracy = plot_data$accuracy[1:plot_data_index]
+                    )
+                    
+                    clinical_summary_html <- private$.generateClinicalSummary(results_for_summary, optimal_cutpoint)
+                    
+                    # Generate copy-ready report
+                    report_template_html <- private$.generateCopyReadyReport(results_for_summary, optimal_cutpoint, test_names)
+                }
+                
+                # Combine all HTML components
+                combined_html <- paste0(clinical_summary_html, report_template_html, summary_html)
+                
                 # Set content
                 if ("combinationsAnalysis" %in% names(self$results)) {
-                    self$results$combinationsAnalysis$setContent(summary_html)
+                    self$results$combinationsAnalysis$setContent(combined_html)
                 }
                 
                 # Trim plot data to actual size and validate
@@ -1981,11 +2069,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         heatmap_image$setState(plot_data)
                     }
                     
-                    # Set data for ROC curves
-                    if ("rocCurves" %in% names(self$results)) {
-                        roc_image <- self$results$rocCurves
-                        roc_image$setState(plot_data)
-                    }
+                    # Note: ROC curves removed as not appropriate for categorical tests
                     
                     # Set data for decision tree
                     if ("decisionTree" %in% names(self$results)) {
@@ -2022,43 +2106,71 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             },
             
             .displayWelcomeMessage = function() {
-                # Display welcome message in the combinationsAnalysis HTML output
+                # Display comprehensive welcome message and analysis guide
                 html <- self$results$combinationsAnalysis
                 
                 welcome_html <- paste0(
-                    '<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">',
+                    '<div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px;">',
                     
                     '<h1 style="color: #2E86C1; text-align: center; border-bottom: 3px solid #2E86C1; padding-bottom: 15px;">',
-                    'Combine Medical Decision Tests</h1>',
+                    '🔬 Diagnostic Test Combination Analysis</h1>',
                     
+                    # About This Analysis Section
                     '<div style="background: linear-gradient(135deg, #EBF5FB 0%, #D6EAF8 100%); padding: 25px; border-radius: 10px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">',
-                    '<h2 style="color: #1B4F72; margin-top: 0; text-align: center;">Welcome to Advanced Diagnostic Test Combination Analysis!</h2>',
-                    '<p style="font-size: 16px; line-height: 1.6; text-align: center; color: #34495E;">',
-                    'This powerful tool evaluates the combined performance of multiple diagnostic tests against a gold standard, ',
-                    'providing comprehensive statistical analysis with optimal cut-point identification and clinical recommendations.',
+                    '<h2 style="color: #1B4F72; margin-top: 0;">📚 About This Analysis</h2>',
+                    '<p style="font-size: 16px; line-height: 1.8; color: #34495E;">',
+                    'This advanced statistical tool evaluates how well different combinations of diagnostic tests perform ',
+                    'compared to a gold standard reference. It systematically analyzes all possible test result patterns ',
+                    '(e.g., Test1+/Test2+, Test1+/Test2-, etc.) to find the optimal combination for your clinical scenario.',
                     '</p>',
                     '</div>',
                     
+                    # When to Use This
+                    '<div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #856404; margin-top: 0;">🎯 When to Use This Analysis</h3>',
+                    '<ul style="line-height: 1.8; color: #856404;">',
+                    '<li><strong>Test Validation:</strong> Comparing new diagnostic methods to established gold standards</li>',
+                    '<li><strong>Protocol Development:</strong> Optimizing diagnostic workflows by combining multiple tests</li>',
+                    '<li><strong>Clinical Research:</strong> Evaluating biomarker panels or multi-modal diagnostic approaches</li>',
+                    '<li><strong>Quality Assessment:</strong> Measuring inter-rater agreement between diagnostic methods</li>',
+                    '</ul>',
+                    '</div>',
+                    
+                    # Step-by-Step Guide
+                    '<div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #0c5460; margin-top: 0;">📋 Step-by-Step Guide</h3>',
+                    '<ol style="line-height: 1.8; color: #0c5460;">',
+                    '<li><strong>Select Gold Standard:</strong> Choose your reference test (e.g., biopsy, final diagnosis)</li>',
+                    '<li><strong>Define Disease Level:</strong> Specify which level indicates disease presence</li>',
+                    '<li><strong>Choose Test Variables:</strong> Select 1-3 diagnostic tests to combine and evaluate</li>',
+                    '<li><strong>Set Positive Levels:</strong> Define what constitutes a "positive" result for each test</li>',
+                    '<li><strong>Configure Options:</strong> Enable visualizations and set export preferences</li>',
+                    '<li><strong>Run Analysis:</strong> Get comprehensive performance metrics and clinical recommendations</li>',
+                    '</ol>',
+                    '</div>',
+                    
+                    # What You Get
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;">',
                     '<div style="background-color: #F8F9FA; padding: 20px; border-left: 5px solid #17A2B8; border-radius: 5px;">',
-                    '<h3 style="color: #138496; margin-top: 0;">📊 What This Analysis Provides</h3>',
+                    '<h3 style="color: #138496; margin-top: 0;">📊 Analysis Results</h3>',
                     '<ul style="line-height: 1.8; color: #495057;">',
                     '<li>Systematic evaluation of all test combinations</li>',
                     '<li>Wilson score confidence intervals</li>',
-                    '<li>ROC-based optimal cut-point identification</li>',
+                    '<li>Performance-based optimal pattern identification</li>',
                     '<li>Publication-quality visualizations</li>',
                     '<li>Clinical decision recommendations</li>',
                     '</ul>',
                     '</div>',
                     
                     '<div style="background-color: #F8F9FA; padding: 20px; border-left: 5px solid #28A745; border-radius: 5px;">',
-                    '<h3 style="color: #155724; margin-top: 0;">🎯 Getting Started</h3>',
-                    '<ol style="line-height: 1.8; color: #495057;">',
-                    '<li><strong>Select Gold Standard:</strong> Reference test variable</li>',
-                    '<li><strong>Choose Positive Level:</strong> Define positive result</li>',
-                    '<li><strong>Add Test Variables:</strong> At least Test 1 is required</li>',
-                    '<li><strong>Configure Options:</strong> Visualizations and outputs</li>',
-                    '</ol>',
+                    '<h3 style="color: #155724; margin-top: 0;">📈 Clinical Outputs</h3>',
+                    '<ul style="line-height: 1.8; color: #495057;">',
+                    '<li><strong>Clinical Summary:</strong> Plain-language interpretation of results</li>',
+                    '<li><strong>Copy-Ready Report:</strong> Templates for manuscripts and documentation</li>',
+                    '<li><strong>Performance Metrics:</strong> Sensitivity, specificity, PPV, NPV with CIs</li>',
+                    '<li><strong>Optimal Pattern:</strong> Best test combination recommendation</li>',
+                    '<li><strong>Visualizations:</strong> Heatmaps, decision trees, forest plots</li>',
+                    '</ul>',
                     '</div>',
                     '</div>',
                     

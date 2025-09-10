@@ -37,7 +37,8 @@
       "WebFetch(domain:www.rdocumentation.org)",
       "Bash(/dev/null)",
       "Read(//Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives/R/**)",
-      "WebFetch(domain:jthomasmock.github.io)"
+      "WebFetch(domain:jthomasmock.github.io)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": [],

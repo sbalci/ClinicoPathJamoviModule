@@ -20,8 +20,23 @@ items:
       type:  Html
       visible: (od)
       
+    - name: naturalLanguageSummary
+      title: '📋 Clinical Summary'
+      type: Html
+      visible: true
+      
+    - name: reportTemplate
+      title: '📄 Copy-Ready Report'
+      type: Html
+      visible: true
+
+    - name: aboutAnalysis
+      title: '📚 About This Analysis'
+      type: Html
+      visible: true
+
     - name: clinicalInterpretation
-      title: 'Clinical Interpretation Guide'
+      title: '🩺 Clinical Interpretation Guide'
       type: Html
       visible: true
 
@@ -343,16 +358,6 @@ items:
           - Fagan2
 
 
-    # - name: plot_roc
-    #   title: 'ROC Curve'
-    #   type: Image
-    #   width: 600
-    #   height: 450
-    #   renderFun: .plot_roc
-    #   requiresData: true
-    #   visible: (roc)
-    #   clearWith:
-    #       - vars
 
 
 

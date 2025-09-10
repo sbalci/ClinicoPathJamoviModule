@@ -176,10 +176,11 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The input data as a data frame.
 #' @param vars A set of variable names from \code{data} to include in the
 #'   Table One. Supports numeric, ordinal, and categorical variables.
-#' @param sty Specify the output style for the table. tableone provides
-#'   standard medical format, gtsummary adds publication-ready styling, arsenal
-#'   includes comprehensive comparisons, and janitor creates simple frequency
-#'   tables.
+#' @param sty Specify the output style for the descriptive table. 'tableone'
+#'   provides standard medical format with means/medians and frequencies,
+#'   'gtsummary' creates publication-ready descriptive tables, 'arsenal'
+#'   generates comprehensive descriptive summaries, and 'janitor' produces
+#'   simple frequency tables for categorical variables.
 #' @param excl Boolean option to exclude missing values (NA) from the
 #'   analysis. Note: Exclusion may remove entire cases.
 #' @return A results object containing:

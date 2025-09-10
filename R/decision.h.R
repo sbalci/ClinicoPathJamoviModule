@@ -113,6 +113,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
+        naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
+        reportTemplate = function() private$.items[["reportTemplate"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
         clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
         cTable = function() private$.items[["cTable"]],
         nTable = function() private$.items[["nTable"]],
@@ -143,8 +146,23 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(od)"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="naturalLanguageSummary",
+                title="\uD83D\uDCCB Clinical Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportTemplate",
+                title="\uD83D\uDCC4 Copy-Ready Report",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="\uD83D\uDCDA About This Analysis",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="clinicalInterpretation",
-                title="Clinical Interpretation Guide",
+                title="\uD83E\uDE7A Clinical Interpretation Guide",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -410,6 +428,9 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr

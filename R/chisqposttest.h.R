@@ -14,9 +14,9 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             excl = FALSE,
             exp = FALSE,
             plot = FALSE,
-            showResiduals = TRUE,
-            showEducational = TRUE,
-            showDetailedTables = TRUE,
+            showResiduals = FALSE,
+            showEducational = FALSE,
+            showDetailedTables = FALSE,
             residualsCutoff = 2,
             testSelection = "auto",
             exportResults = FALSE, ...) {
@@ -80,15 +80,15 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showResiduals <- jmvcore::OptionBool$new(
                 "showResiduals",
                 showResiduals,
-                default=TRUE)
+                default=FALSE)
             private$..showEducational <- jmvcore::OptionBool$new(
                 "showEducational",
                 showEducational,
-                default=TRUE)
+                default=FALSE)
             private$..showDetailedTables <- jmvcore::OptionBool$new(
                 "showDetailedTables",
                 showDetailedTables,
-                default=TRUE)
+                default=FALSE)
             private$..residualsCutoff <- jmvcore::OptionNumber$new(
                 "residualsCutoff",
                 residualsCutoff,
@@ -430,9 +430,9 @@ chisqposttest <- function(
     excl = FALSE,
     exp = FALSE,
     plot = FALSE,
-    showResiduals = TRUE,
-    showEducational = TRUE,
-    showDetailedTables = TRUE,
+    showResiduals = FALSE,
+    showEducational = FALSE,
+    showDetailedTables = FALSE,
     residualsCutoff = 2,
     testSelection = "auto",
     exportResults = FALSE) {

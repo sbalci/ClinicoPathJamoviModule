@@ -314,12 +314,12 @@ items:
           title: 'CI Lower'
           type: number
           format: zto
-          # visible: (bootstrap)
+          visible: (bootstrap)
         - name: ci_upper
           title: 'CI Upper'
           type: number
           format: zto
-          # visible: (bootstrap)
+          visible: (bootstrap)
         - name: interpretation
           title: 'Interpretation'
           type: text
@@ -474,6 +474,11 @@ items:
       type: Html
       visible: (showClinicalSummary)
 
+    - name: reportTemplate
+      title: Copy-Ready Report
+      type: Html
+      visible: (showClinicalSummary)
+
     - name: aboutAnalysis
       title: About This Analysis
       type: Html
@@ -488,6 +493,11 @@ items:
       title: Weighted Kappa Guide
       type: Html
       visible: (showWeightedKappaGuide && wght != 'unweighted')
+
+    - name: statisticalGlossary
+      title: Statistical Terms Glossary
+      type: Html
+      visible: (showStatisticalGlossary)
 
 
 

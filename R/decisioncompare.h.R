@@ -178,7 +178,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         mcnemarTable = function() private$.items[["mcnemarTable"]],
         diffTable = function() private$.items[["diffTable"]],
         plot1 = function() private$.items[["plot1"]],
-        plotRadar = function() private$.items[["plotRadar"]]),
+        plotRadar = function() private$.items[["plotRadar"]],
+        clinicalReport = function() private$.items[["clinicalReport"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -484,7 +486,17 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 clearWith=list(
                     "radarplot"),
                 refs=list(
-                    "ggplot2")))}))
+                    "ggplot2")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalReport",
+                title="Clinical Summary & Report Templates",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible=TRUE))}))
 
 decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncompareBase",
@@ -517,27 +529,76 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Basic comparison of two diagnostic tests
+#' library(ClinicoPath)
+#' data('histopathology')
+#'
+#' # Example 1: Compare imaging vs blood test performance
+#' result1 <- decisioncompare(
+#'     data = histopathology,
+#'     gold = "Golden Standart",
+#'     goldPositive = "1",
+#'     test1 = "New Test",
+#'     test1Positive = "1",
+#'     test2 = "Rater 1",
+#'     test2Positive = "1",
+#'     ci = TRUE,
+#'     plot = TRUE
+#' )
+#'
+#' # Example 2: Three-test comparison with statistical analysis
+#' result2 <- decisioncompare(
+#'     data = histopathology,
+#'     gold = "Golden Standart",
+#'     goldPositive = "1",
+#'     test1 = "New Test",
+#'     test1Positive = "1",
+#'     test2 = "Rater 1",
+#'     test2Positive = "1",
+#'     test3 = "Rater 2",
+#'     test3Positive = "1",
+#'     statComp = TRUE,
+#'     radarplot = TRUE
+#' )
+#'
+#' # Example 3: Using custom prevalence for clinical setting
+#' result3 <- decisioncompare(
+#'     data = histopathology,
+#'     gold = "Golden Standart",
+#'     goldPositive = "1",
+#'     test1 = "New Test",
+#'     test1Positive = "1",
+#'     test2 = "Rater 1",
+#'     test2Positive = "1",
+#'     pp = TRUE,
+#'     pprob = 0.15,  # 15\% prevalence in screening population
+#'     od = TRUE      # Show original frequency tables
+#' )
+#'
 #' @param data The data as a data frame.
-#' @param gold .
-#' @param goldPositive .
-#' @param test1 .
-#' @param test1Positive .
-#' @param test2 .
-#' @param test2Positive .
-#' @param test3 .
-#' @param test3Positive .
-#' @param pp .
+#' @param gold The gold standard reference variable representing true disease
+#'   status.
+#' @param goldPositive The level indicating presence of disease in the gold
+#'   standard variable.
+#' @param test1 The first diagnostic test variable being evaluated for
+#'   performance.
+#' @param test1Positive The level representing a positive result for Test 1.
+#' @param test2 The second diagnostic test variable for comparison analysis.
+#' @param test2Positive The level representing a positive result for Test 2.
+#' @param test3 Optional third diagnostic test variable for extended
+#'   comparison analysis.
+#' @param test3Positive The level representing a positive result for Test 3.
+#' @param pp Enable custom prior probability (prevalence) for predictive value
+#'   calculations.
 #' @param pprob Prior probability (disease prevalence in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param od Boolean selection whether to show frequency tables. Default is
 #'   'false'.
 #' @param fnote .
 #' @param ci .
-#' @param plot .
-#' @param radarplot .
+#' @param plot Generate comparison plot showing test performance metrics.
+#' @param radarplot Generate radar plot for comprehensive test comparison
+#'   visualization.
 #' @param statComp Perform statistical comparison between tests (McNemar's
 #'   test and confidence intervals for differences).
 #' @return A results object containing:
@@ -555,6 +616,8 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

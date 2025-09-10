@@ -10,7 +10,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sft = FALSE,
             heatmap = FALSE,
             heatmapDetails = FALSE,
-            heatmapTheme = "ryg",
+            heatmapTheme = "viridis",
             wght = "unweighted",
             exct = FALSE,
             multiraterMethod = "auto",
@@ -25,6 +25,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showAboutAnalysis = FALSE,
             showAssumptions = FALSE,
             showWeightedKappaGuide = TRUE,
+            showStatisticalGlossary = FALSE,
             diagnosticStyleAnalysis = FALSE,
             styleClusterMethod = "ward",
             styleDistanceMetric = "agreement",
@@ -86,11 +87,12 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "heatmapTheme",
                 heatmapTheme,
                 options=list(
-                    "ryg",
-                    "bwr",
                     "viridis",
-                    "plasma"),
-                default="ryg")
+                    "plasma",
+                    "cividis",
+                    "bwr",
+                    "ryg"),
+                default="viridis")
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
                 wght,
@@ -169,6 +171,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showWeightedKappaGuide",
                 showWeightedKappaGuide,
                 default=TRUE)
+            private$..showStatisticalGlossary <- jmvcore::OptionBool$new(
+                "showStatisticalGlossary",
+                showStatisticalGlossary,
+                default=FALSE)
             private$..diagnosticStyleAnalysis <- jmvcore::OptionBool$new(
                 "diagnosticStyleAnalysis",
                 diagnosticStyleAnalysis,
@@ -335,6 +341,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showAboutAnalysis)
             self$.addOption(private$..showAssumptions)
             self$.addOption(private$..showWeightedKappaGuide)
+            self$.addOption(private$..showStatisticalGlossary)
             self$.addOption(private$..diagnosticStyleAnalysis)
             self$.addOption(private$..styleClusterMethod)
             self$.addOption(private$..styleDistanceMetric)
@@ -386,6 +393,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showAboutAnalysis = function() private$..showAboutAnalysis$value,
         showAssumptions = function() private$..showAssumptions$value,
         showWeightedKappaGuide = function() private$..showWeightedKappaGuide$value,
+        showStatisticalGlossary = function() private$..showStatisticalGlossary$value,
         diagnosticStyleAnalysis = function() private$..diagnosticStyleAnalysis$value,
         styleClusterMethod = function() private$..styleClusterMethod$value,
         styleDistanceMetric = function() private$..styleDistanceMetric$value,
@@ -436,6 +444,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showAboutAnalysis = NA,
         ..showAssumptions = NA,
         ..showWeightedKappaGuide = NA,
+        ..showStatisticalGlossary = NA,
         ..diagnosticStyleAnalysis = NA,
         ..styleClusterMethod = NA,
         ..styleDistanceMetric = NA,
@@ -496,9 +505,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         raterFrequencyTables = function() private$.items[["raterFrequencyTables"]],
         crosstabTable = function() private$.items[["crosstabTable"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
+        reportTemplate = function() private$.items[["reportTemplate"]],
         aboutAnalysis = function() private$.items[["aboutAnalysis"]],
         assumptions = function() private$.items[["assumptions"]],
         weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
+        statisticalGlossary = function() private$.items[["statisticalGlossary"]],
         gwetACTable = function() private$.items[["gwetACTable"]],
         pabakTable = function() private$.items[["pabakTable"]],
         sampleSizeTable = function() private$.items[["sampleSizeTable"]],
@@ -898,12 +909,14 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="ci_lower", 
                         `title`="CI Lower", 
                         `type`="number", 
-                        `format`="zto"),
+                        `format`="zto", 
+                        `visible`="(bootstrap)"),
                     list(
                         `name`="ci_upper", 
                         `title`="CI Upper", 
                         `type`="number", 
-                        `format`="zto"),
+                        `format`="zto", 
+                        `visible`="(bootstrap)"),
                     list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
@@ -1065,6 +1078,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showClinicalSummary)"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="reportTemplate",
+                title="Copy-Ready Report",
+                visible="(showClinicalSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
                 visible="(showAboutAnalysis)"))
@@ -1078,6 +1096,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="weightedKappaGuide",
                 title="Weighted Kappa Guide",
                 visible="(showWeightedKappaGuide && wght != 'unweighted')"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="statisticalGlossary",
+                title="Statistical Terms Glossary",
+                visible="(showStatisticalGlossary)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="gwetACTable",
@@ -1409,6 +1432,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   common pitfalls, and interpretation guidelines for the analysis.
 #' @param showWeightedKappaGuide Show explanatory guide for weighted kappa
 #'   options, including when to use linear vs quadratic weighting schemes.
+#' @param showStatisticalGlossary Show glossary of statistical terms (kappa,
+#'   ICC, alpha, etc.) with clinical interpretations and usage guidelines.
 #' @param diagnosticStyleAnalysis Enable diagnostic style clustering analysis
 #'   using the Usubutun method to identify pathologist "schools" or diagnostic
 #'   approaches.
@@ -1498,9 +1523,11 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$raterFrequencyTables$frequencyTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$crosstabTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$statisticalGlossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$gwetACTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pabakTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sampleSizeTable} \tab \tab \tab \tab \tab a table \cr
@@ -1527,7 +1554,7 @@ agreement <- function(
     sft = FALSE,
     heatmap = FALSE,
     heatmapDetails = FALSE,
-    heatmapTheme = "ryg",
+    heatmapTheme = "viridis",
     wght = "unweighted",
     exct = FALSE,
     multiraterMethod = "auto",
@@ -1542,6 +1569,7 @@ agreement <- function(
     showAboutAnalysis = FALSE,
     showAssumptions = FALSE,
     showWeightedKappaGuide = TRUE,
+    showStatisticalGlossary = FALSE,
     diagnosticStyleAnalysis = FALSE,
     styleClusterMethod = "ward",
     styleDistanceMetric = "agreement",
@@ -1614,6 +1642,7 @@ agreement <- function(
         showAboutAnalysis = showAboutAnalysis,
         showAssumptions = showAssumptions,
         showWeightedKappaGuide = showWeightedKappaGuide,
+        showStatisticalGlossary = showStatisticalGlossary,
         diagnosticStyleAnalysis = diagnosticStyleAnalysis,
         styleClusterMethod = styleClusterMethod,
         styleDistanceMetric = styleDistanceMetric,

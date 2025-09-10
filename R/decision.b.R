@@ -36,33 +36,46 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             .init = function() {
                 cTable <- self$results$cTable
-                cTable$addRow(rowKey = "Test Positive", values = list(newtest = "Test Positive"))
-                cTable$addRow(rowKey = "Test Negative", values = list(newtest = "Test Negative"))
-                cTable$addRow(rowKey = "Total", values = list(newtest = "Total"))
+                cTable$addRow(rowKey = "Test Positive", values = list(newtest = .("Test Positive")))
+                cTable$addRow(rowKey = "Test Negative", values = list(newtest = .("Test Negative")))
+                cTable$addRow(rowKey = "Total", values = list(newtest = .("Total")))
             },
 
-            # Consolidated input validation for categorical diagnostic data
+            # Enhanced input validation for categorical diagnostic data
             .validateCategoricalInputs = function() {
-                # Check for required variables
-                vars_count <- length(self$options$testPositive) + length(self$options$newtest) +
-                             length(self$options$goldPositive) + length(self$options$gold)
-                if (vars_count < 4) {
-                    stop("Missing required variables: both test and gold standard variables must be specified with their positive levels")
+                # Check for required variables with helpful messages
+                if (length(self$options$gold) == 0) {
+                    stop(.("Please select a gold standard (reference) variable"))
+                }
+                if (length(self$options$newtest) == 0) {
+                    stop(.("Please select a test variable to evaluate"))
+                }
+                if (length(self$options$goldPositive) == 0) {
+                    stop(.("Please select the positive level for the gold standard variable"))
+                }
+                if (length(self$options$testPositive) == 0) {
+                    stop(.("Please select the positive level for the test variable"))
                 }
                 
                 # Check data availability
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    stop("No data provided for analysis")
+                    stop(.("No data available for analysis. Please ensure your data is loaded."))
+                }
+                
+                # Validate data has enough cases
+                if (nrow(self$data) < 4) {
+                    stop(.("Insufficient data: At least 4 cases are required for diagnostic test analysis"))
                 }
                 
                 # Validate prior probability if specified
                 if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
-                    stop("Prior probability must be between 0 and 1 (current value: ", self$options$pprob, ")")
+                    stop(.("Population prevalence must be between 0 and 1 (exclusive). Current value: {value}. Please enter a value like 0.05 for 5% prevalence.", 
+                         value = self$options$pprob))
                 }
                 
                 # Enforce UI business logic - mutual exclusion
                 if (self$options$pp && self$options$ci) {
-                    stop("Prior probability and confidence intervals cannot both be enabled")
+                    stop(.("Cannot use both population prevalence and confidence intervals simultaneously. Please choose one option."))
                 }
             },
 
@@ -72,8 +85,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 mydata <- jmvcore::naOmit(self$data)
                 
                 if (nrow(mydata) < nrow(self$data)) {
-                    warning(sprintf("Removed %d rows with missing values", 
-                                   nrow(self$data) - nrow(mydata)))
+                    warning(.("Removed {count} rows with missing values", 
+                             count = nrow(self$data) - nrow(mydata)))
                 }
                 
                 # Get variable names efficiently
@@ -104,6 +117,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         testVariable2 = forcats::fct_relevel(testVariable2, "Positive"),
                         goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
                     )
+                
+                # Validate contingency table structure after data preparation
+                test_table <- table(mydata$testVariable2, mydata$goldVariable2)
+                
+                # Check for empty cells that would cause problems
+                if (any(dim(test_table) != c(2, 2))) {
+                    stop(.("Invalid data structure: Both test and gold standard variables must have exactly 2 levels each"))
+                }
+                
+                # Check for zero cells that would cause division by zero
+                if (any(test_table == 0)) {
+                    warning(.("Zero counts detected in contingency table. Results may be unstable. Consider collecting more data."))
+                }
                 
                 return(list(data = mydata, testVar = testVar, goldVar = goldVar))
             },
@@ -144,39 +170,193 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 ))
             },
             
-            # Enhanced missing data analysis
+            # Basic missing data summary
             .analyzeMissingData = function(original_data, processed_data) {
                 if (nrow(original_data) == nrow(processed_data)) {
-                    return("No missing data detected.")
+                    return(.("No missing data detected."))
                 }
                 
                 missing_count <- nrow(original_data) - nrow(processed_data)
                 missing_percent <- round((missing_count / nrow(original_data)) * 100, 1)
                 
-                # Get variable names
-                testVar <- jmvcore::constructFormula(terms = self$options$newtest) %>%
-                          jmvcore::decomposeFormula() %>% unlist()
-                goldVar <- jmvcore::constructFormula(terms = self$options$gold) %>%
-                          jmvcore::decomposeFormula() %>% unlist()
-                
-                # Analyze missing patterns
-                test_missing <- sum(is.na(original_data[[testVar]]))
-                gold_missing <- sum(is.na(original_data[[goldVar]]))
-                both_missing <- sum(is.na(original_data[[testVar]]) & is.na(original_data[[goldVar]]))
-                
-                analysis <- sprintf(
-                    "Missing data analysis: %d cases (%s%%) removed.\n" %+%
-                    "Missing in %s: %d cases\n" %+%
-                    "Missing in %s: %d cases\n" %+%
-                    "Missing in both variables: %d cases\n" %+%
-                    "Complete case analysis performed. Consider impact on generalizability.",
-                    missing_count, missing_percent,
-                    testVar, test_missing,
-                    goldVar, gold_missing,
-                    both_missing
-                )
+                analysis <- .("Missing data summary: {count} cases ({percent}%) with missing values removed. Complete case analysis performed.",
+                             count = missing_count, percent = missing_percent)
                 
                 return(analysis)
+            },
+            
+            # Generate natural language summary for clinical use
+            .generateNaturalLanguageSummary = function(sens, spec, ppv, npv, lr_pos, lr_neg, 
+                                                      prevalence, test_name, gold_name) {
+                # Determine test quality
+                test_quality <- dplyr::case_when(
+                    sens >= 0.9 && spec >= 0.9 ~ "excellent",
+                    sens >= 0.8 && spec >= 0.8 ~ "good", 
+                    sens >= 0.7 || spec >= 0.7 ~ "moderate",
+                    TRUE ~ "limited"
+                )
+                
+                # Determine primary clinical utility
+                primary_utility <- dplyr::case_when(
+                    sens >= 0.9 && spec < 0.8 ~ "ruling out disease",
+                    spec >= 0.9 && sens < 0.8 ~ "confirming disease",
+                    sens >= 0.8 && spec >= 0.8 ~ "both ruling out and confirming disease",
+                    TRUE ~ "diagnostic screening"
+                )
+                
+                # Generate summary
+                summary <- sprintf(
+                    .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background: #f1f8e9;'>" %+%
+                    "<h3 style='color: #2E7D32; margin-top: 0;'>📋 Clinical Summary</h3>" %+%
+                    "<p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p>" %+%
+                    "<p><strong>Sample:</strong> %d cases analyzed with %.1f%% disease prevalence.</p>" %+%
+                    "<p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%.1f%%</strong> and specificity of <strong>%.1f%%</strong>.</p>" %+%
+                    "<p><strong>Clinical Utility:</strong> This test is most useful for <strong>%s</strong> in the clinical setting.</p>" %+%
+                    "<p><strong>Key Findings:</strong> When positive, the test increases disease probability to <strong>%.1f%%</strong> (PPV). When negative, it reduces disease probability to <strong>%.1f%%</strong> (NPV).</p>" %+%
+                    "</div>"),
+                    test_name, gold_name,
+                    # Will be filled in by caller
+                    0, prevalence * 100,  # Placeholder for sample size
+                    test_quality, sens * 100, spec * 100,
+                    primary_utility,
+                    ppv * 100, (100 - npv * 100)
+                )
+                
+                return(summary)
+            },
+            
+            # Generate copy-ready report template
+            .generateReportTemplate = function(sens, spec, ppv, npv, lr_pos, lr_neg, 
+                                             sens_ci = NULL, spec_ci = NULL, test_name, gold_name) {
+                # Create confidence interval text if available
+                ci_text <- if (!is.null(sens_ci) && !is.null(spec_ci)) {
+                    sprintf(.("(95%% CI: sensitivity %.1f-%.1f%%, specificity %.1f-%.1f%%)"), 
+                           sens_ci[1]*100, sens_ci[2]*100, spec_ci[1]*100, spec_ci[2]*100)
+                } else {
+                    ""
+                }
+                
+                # Determine clinical interpretation
+                interpretation <- dplyr::case_when(
+                    lr_pos >= 10 ~ .("strong evidence for disease when positive"),
+                    lr_pos >= 5 ~ .("moderate evidence for disease when positive"),
+                    lr_pos >= 2 ~ .("weak evidence for disease when positive"),
+                    TRUE ~ .("minimal evidence for disease when positive")
+                )
+                
+                # Generate template
+                template <- sprintf(
+                    .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'>" %+%
+                    "<h3 style='color: #1976D2; margin-top: 0;'>📄 Copy-Ready Clinical Report</h3>" %+%
+                    "<div style='background: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'>" %+%
+                    "<p><strong>DIAGNOSTIC TEST EVALUATION</strong></p>" %+%
+                    "<p>We evaluated the diagnostic performance of %s compared to the gold standard %s. " %+%
+                    "The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. " %+%
+                    "The positive predictive value was %.1f%% and negative predictive value was %.1f%%. " %+%
+                    "The positive likelihood ratio of %.1f provides %s. " %+%
+                    "These results suggest the test may be clinically useful for diagnostic evaluation.</p>" %+%
+                    "</div>" %+%
+                    "<p style='font-size: 12px; color: #666;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p>" %+%
+                    "</div>"),
+                    test_name, gold_name,
+                    sens * 100, spec * 100, ci_text,
+                    ppv * 100, npv * 100,
+                    lr_pos, interpretation
+                )
+                
+                return(template)
+            },
+            
+            # Enhanced misuse detection and warnings
+            .detectMisuse = function(conf_table, prevalence, n_total) {
+                warnings <- c()
+                
+                # Check for small cell counts
+                if (any(conf_table < 5)) {
+                    warnings <- c(warnings, 
+                        .("⚠️ Small cell counts detected (< 5). Results may be unstable. Consider collecting more data or using exact methods."))
+                }
+                
+                # Check for extreme prevalence
+                if (prevalence < 0.05) {
+                    warnings <- c(warnings,
+                        .("⚠️ Very low disease prevalence (< 5%). Positive predictive value may be unreliable. Consider the clinical context carefully."))
+                }
+                
+                if (prevalence > 0.95) {
+                    warnings <- c(warnings,
+                        .("⚠️ Very high disease prevalence (> 95%). Negative predictive value may be unreliable. Verify your data coding."))
+                }
+                
+                # Check for small sample size
+                if (n_total < 30) {
+                    warnings <- c(warnings,
+                        .("⚠️ Small sample size (< 30). Confidence intervals may be wide. Interpret results cautiously."))
+                }
+                
+                # Check for unbalanced data
+                pos_ratio <- sum(conf_table[1,]) / n_total
+                if (pos_ratio < 0.1 || pos_ratio > 0.9) {
+                    warnings <- c(warnings,
+                        .("⚠️ Highly unbalanced test results. Consider the appropriateness of the selected positive level."))
+                }
+                
+                return(warnings)
+            },
+            
+            # Generate About This Analysis content
+            .generateAboutAnalysis = function() {
+                about_content <- paste0(
+                    "<div style='margin: 15px; padding: 15px; background: #f5f5f5; border-radius: 8px;'>",
+                    "<h3 style='color: #1976D2; margin-top: 0;'>📚 About Diagnostic Test Evaluation</h3>",
+                    
+                    "<h4 style='color: #424242;'>", .("What This Analysis Does"), "</h4>",
+                    "<p>", .("This function evaluates diagnostic test performance by comparing test results to a gold standard (reference). It calculates key diagnostic accuracy measures including sensitivity, specificity, predictive values, and likelihood ratios."), "</p>",
+                    
+                    "<h4 style='color: #424242;'>", .("When to Use This Analysis"), "</h4>",
+                    "<ul>",
+                    "<li>", .("Validating new diagnostic tests or biomarkers"), "</li>",
+                    "<li>", .("Comparing performance of different diagnostic methods"), "</li>",
+                    "<li>", .("Clinical validation studies"), "</li>",
+                    "<li>", .("Quality assurance for laboratory tests"), "</li>",
+                    "<li>", .("Medical device evaluation"), "</li>",
+                    "</ul>",
+                    
+                    "<h4 style='color: #424242;'>", .("Key Output Measures"), "</h4>",
+                    "<ul>",
+                    "<li><strong>", .("Sensitivity"), ":</strong> ", .("Ability to correctly identify disease (true positive rate)"), "</li>",
+                    "<li><strong>", .("Specificity"), ":</strong> ", .("Ability to correctly identify healthy individuals (true negative rate)"), "</li>",
+                    "<li><strong>", .("PPV (Positive Predictive Value)"), ":</strong> ", .("Probability of disease given positive test"), "</li>",
+                    "<li><strong>", .("NPV (Negative Predictive Value)"), ":</strong> ", .("Probability of being healthy given negative test"), "</li>",
+                    "<li><strong>", .("LR+ (Positive Likelihood Ratio)"), ":</strong> ", .("How much a positive test increases disease odds"), "</li>",
+                    "<li><strong>", .("LR- (Negative Likelihood Ratio)"), ":</strong> ", .("How much a negative test decreases disease odds"), "</li>",
+                    "</ul>",
+                    
+                    "<h4 style='color: #424242;'>", .("Clinical Interpretation Guidelines"), "</h4>",
+                    "<div style='background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<strong>", .("Excellent Tests"), ":</strong><br>",
+                    "• ", .("Sensitivity/Specificity ≥ 90%"), "<br>",
+                    "• ", .("LR+ ≥ 10, LR- ≤ 0.1"), "<br>",
+                    "</div>",
+                    "<div style='background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<strong>", .("Good Tests"), ":</strong><br>", 
+                    "• ", .("Sensitivity/Specificity 80-89%"), "<br>",
+                    "• ", .("LR+ 5-9.9, LR- 0.1-0.2"), "<br>",
+                    "</div>",
+                    
+                    "<h4 style='color: #424242;'>", .("Important Considerations"), "</h4>",
+                    "<ul>",
+                    "<li>", .("Predictive values depend on disease prevalence in your population"), "</li>",
+                    "<li>", .("High sensitivity is crucial for screening tests (rule out disease)"), "</li>",
+                    "<li>", .("High specificity is crucial for confirmatory tests (rule in disease)"), "</li>",
+                    "<li>", .("Consider clinical consequences of false positives vs false negatives"), "</li>",
+                    "<li>", .("Results are only as good as your gold standard"), "</li>",
+                    "</ul>",
+                    
+                    "</div>"
+                )
+                
+                return(about_content)
             },
             
             # Centralized footnote management with clinical interpretation
@@ -186,13 +366,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # nTable footnotes
                 nTable <- self$results$nTable
                 footnotes_n <- list(
-                    TotalPop = "Total Number of Subjects in complete case analysis",
-                    DiseaseP = "Total Number of Subjects with Disease (Gold Standard Positive)", 
-                    DiseaseN = "Total Number of Healthy Subjects (Gold Standard Negative)",
-                    TestP = "Total Number of Positive Test Results",
-                    TestN = "Total Number of Negative Test Results",
-                    TestT = "Total Number of True Test Results (TP + TN)",
-                    TestW = "Total Number of Wrong Test Results (FP + FN)"
+                    TotalPop = .("Total Number of Subjects in complete case analysis"),
+                    DiseaseP = .("Total Number of Subjects with Disease (Gold Standard Positive)"), 
+                    DiseaseN = .("Total Number of Healthy Subjects (Gold Standard Negative)"),
+                    TestP = .("Total Number of Positive Test Results"),
+                    TestN = .("Total Number of Negative Test Results"),
+                    TestT = .("Total Number of True Test Results (TP + TN)"),
+                    TestW = .("Total Number of Wrong Test Results (FP + FN)")
                 )
                 
                 for (col in names(footnotes_n)) {
@@ -202,16 +382,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # ratioTable footnotes with clinical interpretation
                 ratioTable <- self$results$ratioTable
                 footnotes_ratio <- list(
-                    Sens = "Sensitivity: Proportion of diseased patients correctly identified (TP rate). Higher is better for ruling OUT disease when negative.",
-                    Spec = "Specificity: Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive.", 
-                    AccurT = "Accuracy: Overall proportion of correct test results. Consider prevalence dependency.",
-                    PrevalenceD = "Disease Prevalence: Proportion with disease in this population. Affects predictive values.",
-                    PPV = "Positive Predictive Value: Probability of disease given positive test. Depends on prevalence and specificity.",
-                    NPV = "Negative Predictive Value: Probability of being healthy given negative test. Depends on prevalence and sensitivity.",
-                    PostTestProbDisease = "Post-test Probability (Disease+): Probability of disease after positive test using population prevalence.",
-                    PostTestProbHealthy = "Post-test Probability (Disease-): Probability of being healthy after negative test using population prevalence.",
-                    LRP = "Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. >10 = strong evidence, >5 = moderate, >2 = weak but potentially useful.",
-                    LRN = "Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. <0.1 = strong evidence against disease, <0.2 = moderate, <0.5 = weak."
+                    Sens = .("Sensitivity: Proportion of diseased patients correctly identified (TP rate). Higher is better for ruling OUT disease when negative."),
+                    Spec = .("Specificity: Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive."), 
+                    AccurT = .("Accuracy: Overall proportion of correct test results. Consider prevalence dependency."),
+                    PrevalenceD = .("Disease Prevalence: Proportion with disease in this population. Affects predictive values."),
+                    PPV = .("Positive Predictive Value: Probability of disease given positive test. Depends on prevalence and specificity."),
+                    NPV = .("Negative Predictive Value: Probability of being healthy given negative test. Depends on prevalence and sensitivity."),
+                    PostTestProbDisease = .("Post-test Probability (Disease+): Probability of disease after positive test using population prevalence."),
+                    PostTestProbHealthy = .("Post-test Probability (Disease-): Probability of being healthy after negative test using population prevalence."),
+                    LRP = .("Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. >10 = strong evidence, >5 = moderate, >2 = weak but potentially useful."),
+                    LRN = .("Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. <0.1 = strong evidence against disease, <0.2 = moderate, <0.5 = weak.")
                 )
                 
                 for (col in names(footnotes_ratio)) {
@@ -262,100 +442,18 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 self$results$text2$setContent(result2)
 
 
-                # Extract and validate variables
-                # vars <- list(
-                #   test = self$options$newtest,
-                #   gold = self$options$gold,
-                #   test_pos = self$options$testPositive,
-                #   gold_pos = self$options$goldPositive
-                # )
-
-
-                # Prepare data
-                # prepared_data <- private$.prepare_data(self$data, vars)
-                # self$results$text3$setContent(prepared_data)
-
-
-
-                # Calculate basic metrics
-                # conf_matrix <- table(prepared_data$test, prepared_data$gold)
-
-                # self$results$text3$setContent(conf_matrix)
-
-                # metrics <- private$.calculate_basic_metrics(
-                #   conf_matrix[2,2], # TP
-                #   conf_matrix[2,1], # FP
-                #   conf_matrix[1,1], # TN
-                #   conf_matrix[1,2]  # FN
-                # )
-
-                # self$results$text3$setContent(list(conf_matrix, metrics))
-
-                # Populate main results tables
-                # private$.populate_main_tables(conf_matrix, metrics)
-
-
-
-                # Calculate confidence intervals if requested
-                # if (self$options$ci) {
-                #   ci <- private$.calculate_confidence_intervals(data, metrics)
-                #
-                #   self$results$text3$setContent(ci)
-                #
-                #   # private$.populate_ci_tables(ci)
-                #
-                #   }
-
-                # Create ROC plot if requested
-                # if (self$options$roc) {
-                #   roc_plot <- private$.create_roc_plot(
-                #     metrics$sensitivity,
-                #     metrics$specificity,
-                #     ci
-                #   )
-                #   self$results$plot_roc$setState(roc_plot)
-                # }
-
-                # Compare tests if requested
-                # if (self$options$compare_tests && !is.null(self$options$additional_test)) {
-                #   test_comparison <- private$.compare_tests(
-                #     metrics,
-                #     private$.calculate_metrics_for_additional_test(),
-                #     nrow(data)
-                #   )
-                #   private$.populate_comparison_tables(test_comparison)
-                # }
+                # Populate missing data summary if requested
+                if (self$options$od) {
+                    self$results$missingDataSummary$setContent(missing_analysis)
+                }
 
 
 
 
 
-                # results2 <- as.data.frame(results1)
-                #
-                # namesfrom <- names(results2)[2]
-                #
-                # results2 <- results2 %>%
-                #         tidyr::pivot_wider(data = .,
-                #                        names_from = namesfrom,
-                #                        values_from = Freq)
-                #
-                #
-                # self$results$text2$setContent(results2)
 
 
 
-                # Original Table -----
-
-                # origTable <- self$results$origTable
-
-
-                # xnames <- results2[,1]
-                #
-                #
-                # data_frame <- results2
-                # for (i in seq_along(data_frame[,1,drop = T])) {
-                #     origTable$addRow(rowKey = i, values = c(data_frame[i,]))
-                # }
 
 
                 # conf_table ----
@@ -363,24 +461,22 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 conf_table <- table(mydata[["testVariable2"]], mydata[["goldVariable2"]])
 
 
-                # Caret ----
-                # results_caret <- caret::confusionMatrix(conf_table, positive = "Positive")
 
-
-                # self$results$text2$setContent(
-                #     list(
-                #         conf_table,
-                #         results_caret
-                #         )
-                # )
-
-                TP <- conf_table[1, 1]
-
-                FP <- conf_table[1, 2]
-
-                FN <- conf_table[2, 1]
-
-                TN <- conf_table[2, 2]
+                # Extract confusion matrix values with error handling
+                tryCatch({
+                    TP <- conf_table[1, 1]
+                    FP <- conf_table[1, 2]
+                    FN <- conf_table[2, 1]
+                    TN <- conf_table[2, 2]
+                    
+                    # Validate extracted values
+                    if (any(is.na(c(TP, FP, FN, TN))) || any(c(TP, FP, FN, TN) < 0)) {
+                        stop(.("Invalid contingency table values detected"))
+                    }
+                }, error = function(e) {
+                    stop(.("Error extracting confusion matrix values: {message}. Please check your data formatting.",
+                          message = e$message))
+                })
 
 
 
@@ -445,17 +541,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 TestW <- FP + FN
 
-                Sens <- TP / DiseaseP
-
-                Spec <- TN / DiseaseN
-
-                AccurT <- TestT / TotalPop
-
-                PrevalenceD <- DiseaseP / TotalPop
-
-                PPV <- TP / TestP
-
-                NPV <- TN / TestN
+                # Calculate diagnostic metrics with division by zero protection
+                Sens <- ifelse(DiseaseP > 0, TP / DiseaseP, 0)
+                Spec <- ifelse(DiseaseN > 0, TN / DiseaseN, 0)
+                AccurT <- ifelse(TotalPop > 0, TestT / TotalPop, 0)
+                PrevalenceD <- ifelse(TotalPop > 0, DiseaseP / TotalPop, 0)
+                PPV <- ifelse(TestP > 0, TP / TestP, 0)
+                NPV <- ifelse(TestN > 0, TN / TestN, 0)
 
 
                 pp <- self$options$pp
@@ -481,41 +573,20 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
 
-                LRP <- Sens / (1 - Spec)
-
-                LRN <- (1 - Sens) / Spec
-
-
-
-                # Cache computed values
-                # private$.state <- list(
-                #     sens = Sens,
-                #     spec = Spec,
-                #     ppv = PPV,
-                #     npv = NPV,
-                #     tp = TP,
-                #     fp = FP,
-                #     tn = TN,
-                #     fn = FN,
-                #     n_pos = DiseaseP,
-                #     n_neg = DiseaseN,
-                #     prevalence = PriorProb
-                # )
+                # Calculate likelihood ratios with protection against division by zero
+                LRP <- ifelse((1 - Spec) > 0, Sens / (1 - Spec), Inf)
+                LRN <- ifelse(Spec > 0, (1 - Sens) / Spec, Inf)
+                
+                # Handle edge cases for likelihood ratios
+                if (is.infinite(LRP) && Sens == 1 && Spec == 1) {
+                    LRP <- NA  # Perfect test - undefined LR+
+                }
+                if (is.infinite(LRN) && Sens == 1 && Spec == 1) {
+                    LRN <- NA  # Perfect test - undefined LR-
+                }
 
 
 
-                # self$results$nTable2$setContent(
-                #     list(
-                #         tablename = "",
-                #         TotalPop = TotalPop,
-                #         DiseaseP = DiseaseP,
-                #         DiseaseN = DiseaseN,
-                #         TestP = TestP,
-                #         TestN = TestN,
-                #         TestT = TestT,
-                #         TestW = TestW
-                #     )
-                # )
 
 
 
@@ -563,39 +634,50 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     )
                 )
 
-                # Add clinical interpretation to results
-                interpretation <- private$.getDiagnosticInterpretation(LRP, LRN, Sens, Spec)
-                
-                # Create comprehensive clinical interpretation
-                clinical_summary <- sprintf(
-                    "<div style='margin: 15px; padding: 10px; border-left: 4px solid #2196F3; background: #f8f9fa;'>" %+%
-                    "<h4 style='color: #1976D2; margin-top: 0;'>Clinical Interpretation</h4>" %+%
-                    "<p><strong>Test Performance Summary:</strong></p>" %+%
-                    "<ul>" %+%
-                    "<li><strong>Sensitivity:</strong> %.1f%% - %s</li>" %+%
-                    "<li><strong>Specificity:</strong> %.1f%% - %s</li>" %+%
-                    "<li><strong>Youden's Index:</strong> %.3f - %s</li>" %+%
-                    "</ul>" %+%
-                    "<p><strong>Likelihood Ratio Interpretation:</strong></p>" %+%
-                    "<ul>" %+%
-                    "<li><strong>Positive LR (%.1f):</strong> %s</li>" %+%
-                    "<li><strong>Negative LR (%.2f):</strong> %s</li>" %+%
-                    "</ul>" %+%
-                    "<p><strong>Clinical Decision Making:</strong></p>" %+%
-                    "<ul>" %+%
-                    "<li>Pre-test probability: <strong>%.1f%%</strong></li>" %+%
-                    "<li>Post-test probability (if positive): <strong>%.1f%%</strong></li>" %+%
-                    "<li>Post-test probability (if negative): <strong>%.1f%%</strong></li>" %+%
-                    "</ul></div>",
-                    Sens * 100, if (Sens >= 0.9) "Excellent for ruling out disease" else if (Sens >= 0.8) "Good for ruling out disease" else "Limited ability to rule out disease",
-                    Spec * 100, if (Spec >= 0.9) "Excellent for ruling in disease" else if (Spec >= 0.8) "Good for ruling in disease" else "Limited ability to rule in disease",
-                    interpretation$youden_index, interpretation$test_utility,
-                    LRP, interpretation$lr_pos_interp,
-                    LRN, interpretation$lr_neg_interp,
-                    PriorProb * 100,
-                    PostTestProbDisease * 100,
-                    PostTestProbHealthy * 100
-                )
+                # Add clinical interpretation to results with error handling
+                tryCatch({
+                    interpretation <- private$.getDiagnosticInterpretation(LRP, LRN, Sens, Spec)
+                    
+                    # Create comprehensive clinical interpretation
+                    clinical_summary <- sprintf(
+                        "<div style='margin: 15px; padding: 10px; border-left: 4px solid #2196F3; background: #f8f9fa;'>" %+%
+                        "<h4 style='color: #1976D2; margin-top: 0;'>Clinical Interpretation</h4>" %+%
+                        "<p><strong>Test Performance Summary:</strong></p>" %+%
+                        "<ul>" %+%
+                        "<li><strong>Sensitivity:</strong> %.1f%% - %s</li>" %+%
+                        "<li><strong>Specificity:</strong> %.1f%% - %s</li>" %+%
+                        "<li><strong>Youden's Index:</strong> %.3f - %s</li>" %+%
+                        "</ul>" %+%
+                        "<p><strong>Likelihood Ratio Interpretation:</strong></p>" %+%
+                        "<ul>" %+%
+                        "<li><strong>Positive LR (%.1f):</strong> %s</li>" %+%
+                        "<li><strong>Negative LR (%.2f):</strong> %s</li>" %+%
+                        "</ul>" %+%
+                        "<p><strong>Clinical Decision Making:</strong></p>" %+%
+                        "<ul>" %+%
+                        "<li>Pre-test probability: <strong>%.1f%%</strong></li>" %+%
+                        "<li>Post-test probability (if positive): <strong>%.1f%%</strong></li>" %+%
+                        "<li>Post-test probability (if negative): <strong>%.1f%%</strong></li>" %+%
+                        "</ul></div>",
+                        Sens * 100, if (Sens >= 0.9) "Excellent for ruling out disease" else if (Sens >= 0.8) "Good for ruling out disease" else "Limited ability to rule out disease",
+                        Spec * 100, if (Spec >= 0.9) "Excellent for ruling in disease" else if (Spec >= 0.8) "Good for ruling in disease" else "Limited ability to rule in disease",
+                        interpretation$youden_index, interpretation$test_utility,
+                        ifelse(is.na(LRP), "undefined", LRP), interpretation$lr_pos_interp,
+                        ifelse(is.na(LRN), "undefined", LRN), interpretation$lr_neg_interp,
+                        PriorProb * 100,
+                        PostTestProbDisease * 100,
+                        PostTestProbHealthy * 100
+                    )
+                }, error = function(e) {
+                    clinical_summary <- sprintf(
+                        "<div style='margin: 15px; padding: 10px; border-left: 4px solid #ff9800; background: #fff3e0;'>" %+%
+                        "<h4 style='color: #f57c00; margin-top: 0;'>Clinical Interpretation</h4>" %+%
+                        "<p>Unable to generate detailed clinical interpretation due to data limitations.</p>" %+%
+                        "<p><strong>Basic Results:</strong> Sensitivity: %.1f%%, Specificity: %.1f%%</p>" %+%
+                        "</div>",
+                        Sens * 100, Spec * 100
+                    )
+                })
                 
                 # Store clinical interpretation for display (if results object exists)
                 tryCatch({
@@ -606,48 +688,118 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # Silently handle if clinical interpretation output doesn't exist
                 })
                 
+                # Generate and store About This Analysis content
+                tryCatch({
+                    about_content <- private$.generateAboutAnalysis()
+                    
+                    if ("aboutAnalysis" %in% names(self$results)) {
+                        self$results$aboutAnalysis$setContent(about_content)
+                    }
+                }, error = function(e) {
+                    # Silently handle if about analysis output doesn't exist
+                })
+                
+                # Generate and store natural language summary
+                tryCatch({
+                    test_name <- self$options$newtest
+                    gold_name <- self$options$gold
+                    
+                    natural_summary <- private$.generateNaturalLanguageSummary(
+                        Sens, Spec, PPV, NPV, LRP, LRN, 
+                        PriorProb, test_name, gold_name
+                    )
+                    
+                    # Update with actual sample size
+                    natural_summary <- gsub("0 cases analyzed", 
+                                          sprintf("%d cases analyzed", TotalPop), 
+                                          natural_summary)
+                    
+                    if ("naturalLanguageSummary" %in% names(self$results)) {
+                        self$results$naturalLanguageSummary$setContent(natural_summary)
+                    }
+                }, error = function(e) {
+                    # Provide fallback summary
+                    fallback_summary <- sprintf(
+                        .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #FF9800; background: #fff3e0;'>" %+%
+                        "<h3 style='color: #F57C00; margin-top: 0;'>📋 Basic Summary</h3>" %+%
+                        "<p>Diagnostic test analysis completed with %d cases. Sensitivity: %.1f%%, Specificity: %.1f%%</p>" %+%
+                        "</div>"),
+                        TotalPop, Sens * 100, Spec * 100
+                    )
+                    
+                    if ("naturalLanguageSummary" %in% names(self$results)) {
+                        self$results$naturalLanguageSummary$setContent(fallback_summary)
+                    }
+                })
+                
+                # Generate and store copy-ready report template
+                tryCatch({
+                    report_template <- private$.generateReportTemplate(
+                        Sens, Spec, PPV, NPV, LRP, LRN,
+                        NULL, NULL, test_name, gold_name  # CI values would be added if available
+                    )
+                    
+                    if ("reportTemplate" %in% names(self$results)) {
+                        self$results$reportTemplate$setContent(report_template)
+                    }
+                }, error = function(e) {
+                    # Provide basic template
+                    basic_template <- sprintf(
+                        .("<div style='margin: 15px; padding: 15px; border: 2px dashed #FF9800;'>" %+%
+                        "<h3>📄 Basic Report Template</h3>" %+%
+                        "<p>Test sensitivity: %.1f%%, specificity: %.1f%%, positive predictive value: %.1f%%, negative predictive value: %.1f%%</p>" %+%
+                        "</div>"),
+                        Sens * 100, Spec * 100, PPV * 100, NPV * 100
+                    )
+                    
+                    if ("reportTemplate" %in% names(self$results)) {
+                        self$results$reportTemplate$setContent(basic_template)
+                    }
+                })
+                
+                # Detect misuse and display warnings
+                tryCatch({
+                    warnings <- private$.detectMisuse(conf_table, PrevalenceD, TotalPop)
+                    
+                    if (length(warnings) > 0) {
+                        warning_text <- paste(warnings, collapse = "<br>")
+                        warning_panel <- sprintf(
+                            "<div style='margin: 10px; padding: 10px; border-left: 4px solid #FF5722; background: #ffebee;'>" %+%
+                            "<h4 style='color: #D32F2F; margin-top: 0;'>⚠️ Analysis Warnings</h4>" %+%
+                            "%s" %+%
+                            "</div>",
+                            warning_text
+                        )
+                        
+                        # Prepend warnings to clinical interpretation
+                        if ("clinicalInterpretation" %in% names(self$results)) {
+                            current_content <- clinical_summary
+                            self$results$clinicalInterpretation$setContent(paste0(warning_panel, current_content))
+                        }
+                    }
+                }, error = function(e) {
+                    # Silently handle misuse detection errors
+                })
+                
                 # Add footnotes using centralized method
                 private$.addFootnotes()
 
 
 
 
-                # Reorganize Table
-
-                # caretresult[['positive']]
-                # caretresult[['table']]
-                # caretresult[['overall']]
-                # caretresult[['overall']][['Accuracy']]
-                # caretresult[['overall']][['Kappa']]
-                # caretresult[['overall']][['AccuracyLower']]
-                # caretresult[['overall']][['AccuracyUpper']]
-                # caretresult[['overall']][['AccuracyNull']]
-                # caretresult[['overall']][['AccuracyPValue']]
-                # caretresult[['overall']][['McnemarPValue']]
-                # caretresult[['byClass']]
-                # caretresult[['byClass']][['Sensitivity']]
-                # caretresult[['byClass']][['Specificity']]
-                # caretresult[['byClass']][['Pos Pred Value']]
-                # caretresult[['byClass']][['Neg Pred Value']]
-                # caretresult[['byClass']][['Precision']]
-                # caretresult[['byClass']][['Recall']] caretresult[['byClass']][['F1']]
-                # caretresult[['byClass']][['Prevalence']]
-                # caretresult[['byClass']][['Detection Rate']]
-                # caretresult[['byClass']][['Detection Prevalence']]
-                # caretresult[['byClass']][['Balanced Accuracy']] caretresult[['mode']]
-                # caretresult[['dots']]
-
-                # Write Summary
 
                 # 95% CI ----
 
                 ci <- self$options$ci
 
                 if (ci) {
-                    # epiR ----
-
-
-                    epirresult <- epiR::epi.tests(dat = conf_table)
+                    # epiR confidence intervals with error handling
+                    tryCatch({
+                        epirresult <- epiR::epi.tests(dat = conf_table)
+                    }, error = function(e) {
+                        stop(.("Error calculating confidence intervals: {message}. This may be due to insufficient data or extreme values.",
+                              message = e$message))
+                    })
 
 
                     epirresult2 <- summary(epirresult)
@@ -657,25 +809,24 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                     epirresult2$statsnames <-
                         c(
-                            "Apparent prevalence",
-                            "True prevalence",
-                            "Test sensitivity",
-                            "Test specificity",
-                            "Diagnostic accuracy",
-                            "Diagnostic odds ratio",
-                            "Number needed to diagnose",
-                            "Youden's index",
-                            "Positive predictive value",
-                            "Negative predictive value",
-                            "Likelihood ratio of a positive test",
-                            "Likelihood ratio of a negative test",
-                            "Proportion of subjects with the outcome ruled out",
-                            "Proportion of subjects with the outcome ruled in",
-                            "Proportion of false positives",
-                            "Proportion of false negative",
-                            "False Discovery Rate",
-                            "False Omission Rate"
-
+                            .("Apparent prevalence"),
+                            .("True prevalence"),
+                            .("Test sensitivity"),
+                            .("Test specificity"),
+                            .("Diagnostic accuracy"),
+                            .("Diagnostic odds ratio"),
+                            .("Number needed to diagnose"),
+                            .("Youden's index"),
+                            .("Positive predictive value"),
+                            .("Negative predictive value"),
+                            .("Likelihood ratio of a positive test"),
+                            .("Likelihood ratio of a negative test"),
+                            .("Proportion of subjects with the outcome ruled out"),
+                            .("Proportion of subjects with the outcome ruled in"),
+                            .("Proportion of false positives"),
+                            .("Proportion of false negative"),
+                            .("False Discovery Rate"),
+                            .("False Omission Rate")
                         )
 
                     ratiorows <- c(
@@ -722,7 +873,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         epirTable_ratio$addFootnote(
                             rowNo = 5,
                             col = "statsnames",
-                            "Proportion of all tests that give a correct result."
+                            .("Proportion of all tests that give a correct result.")
                         )
                     }
 
@@ -752,21 +903,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         epirTable_number$addFootnote(
                             rowNo = 1,
                             col = "statsnames",
-                            "How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."
+                            .("How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease.")
                         )
 
                         epirTable_number$addFootnote(
                             rowNo = 2,
                             col = "statsnames",
-                            "Number of patients that need to be tested to give one correct positive test."
+                            .("Number of patients that need to be tested to give one correct positive test.")
                         )
-
 
                         epirTable_number$addFootnote(
                             rowNo = 3,
                             col = "statsnames",
-                            "Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."
-
+                            .("Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1).")
                         )
 
                     }
@@ -778,44 +927,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
 
-                # Send Data to Plot ----
+                # Prepare Fagan Nomogram Data ----
+                if (self$options$fagan) {
+                    plotData1 <- list(
+                        "Prevalence" = PriorProb,
+                        "Sens" = Sens,
+                        "Spec" = Spec,
+                        "Plr" = LRP,
+                        "Nlr" = LRN
+                    )
 
-
-                plotData1 <- list(
-                    "Prevalence" = PriorProb,
-                    "Sens" = Sens,
-                    "Spec" = Spec,
-                    "Plr" = LRP,
-                    "Nlr" = LRN
-                )
-
-
-                # self$results$plotcontent$setContent(plotData1)
-
-
-
-                image1 <- self$results$plot1
-                image1$setState(plotData1)
-
-
-
-
-                # if (self$options$roc) {
-                #     plotData2 <- list(
-                #         sens = Sens,
-                #         spec = Spec,
-                #         tp = TP,
-                #         fp = FP,
-                #         tn = TN,
-                #         fn = FN,
-                #         n_pos = DiseaseP,
-                #         n_neg = DiseaseN,
-                #         thresholds = NULL  # Add thresholds if available
-                #     )
-                #
-                #     image2 <- self$results$plot_roc
-                #     image2$setState(plotData2)
-                # }
+                    image1 <- self$results$plot1
+                    image1$setState(plotData1)
+                }
 
 
 
@@ -845,131 +969,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
 
-            # matrixdetails <- list(results_caret[["positive"]], results_caret[["table"]],
-            #     results_caret[["overall"]], results_caret[["overall"]][["Accuracy"]],
-            #     results_caret[["overall"]][["Kappa"]], results_caret[["overall"]][["AccuracyLower"]],
-            #     results_caret[["overall"]][["AccuracyUpper"]], results_caret[["overall"]][["AccuracyNull"]],
-            #     results_caret[["overall"]][["AccuracyPValue"]], results_caret[["overall"]][["McnemarPValue"]],
-            #     results_caret[["byClass"]], results_caret[["byClass"]][["Sensitivity"]],
-            #     results_caret[["byClass"]][["Specificity"]], results_caret[["byClass"]][["Pos Pred Value"]],
-            #     results_caret[["byClass"]][["Neg Pred Value"]], results_caret[["byClass"]][["Precision"]],
-            #     results_caret[["byClass"]][["Recall"]], results_caret[["byClass"]][["F1"]],
-            #     results_caret[["byClass"]][["Prevalence"]], results_caret[["byClass"]][["Detection Rate"]],
-            #     results_caret[["byClass"]][["Detection Prevalence"]], results_caret[["byClass"]][["Balanced Accuracy"]],
-            #     results_caret[["mode"]], results_caret[["dots"]])
-
-            # self$results$text3$setContent(matrixdetails)
-
-
-            # Individual analysis
-
-            # sens <- caret::sensitivity(conf_table, positive = 'Positive')
-
-            # PPV <- caret::posPredValue(conf_table, positive = 'Positive')
-
-            # summary_caret <- glue::glue('Sensitivity is {sens}.  PPV is {PPV}.')
-
-            # self$results$text4$setContent(summary_caret)
-
-
-            # bdpv ---- https://cran.r-project.org/web/packages/bdpv/bdpv.pdf
-
-
-
-            # epiR ---- https://cran.r-project.org/web/packages/epiR/epiR.pdf
-
-
-            # dat <- as.table( matrix(c(670,202,74,640), nrow = 2, byrow = TRUE) )
-
-            # colnames(dat) <- c('Dis+','Dis-') rownames(dat) <- c('Test+','Test-')
-
-            # rval <- epiR::epi.tests(dat, conf.level = 0.95)
-
-            # rval <- list( dat, rval, print(rval), summary(rval) )
-
-            # self$results$text5$setContent(rval)
-
-
-
-            # Prior Probability
-
-            # lvs <- c('normal', 'abnormal') truth <- factor(rep(lvs, times = c(86,
-            # 258)), levels = rev(lvs)) pred <- factor( c( rep(lvs, times = c(54,
-            # 32)), rep(lvs, times = c(27, 231))), levels = rev(lvs)) xtab <-
-            # table(pred, truth) confusionMatrix(xtab) confusionMatrix(pred, truth)
-            # confusionMatrix(xtab, prevalence = 0.25) ## 3 class example
-            # confusionMatrix(iris$Species, sample(iris$Species)) newPrior <- c(.05,
-            # .8, .15) names(newPrior) <- levels(iris$Species)
-            # confusionMatrix(iris$Species, sample(iris$Species))
 
 
 
 
 
 
-            # ,
-            # .plot_roc = function(image2, ggtheme, ...) {
-            #
-            #     plotData2 <- image2$state
-            #
-            #     if (is.null(plotData2)) return(FALSE)
-            #
-            #     # Calculate confidence intervals
-            #     auc <- 0.5 * (plotData2$sens * (1-plotData2$spec)) +
-            #         0.5 * (1 * (1-(1-plotData2$spec))) +
-            #         0.5 * ((1-plotData2$sens) * plotData2$spec)
-            #
-            #     ci <- auc_ci(auc, plotData2$n_pos, plotData2$n_neg)
-            #
-            #     # Create ROC curve points
-            #     roc_points <- data.frame(
-            #         fpr = c(0, 1-plotData2$spec, 1),
-            #         tpr = c(0, plotData2$sens, 1)
-            #     )
-            #
-            #     # Create plot with confidence band
-            #     p <- ggplot(roc_points, aes(x=fpr, y=tpr)) +
-            #         geom_line(color="blue", size=1) +
-            #         geom_point(data=data.frame(
-            #             fpr=1-plotData2$spec,
-            #             tpr=plotData2$sens),
-            #             color="red", size=3) +
-            #         geom_abline(slope=1, intercept=0,
-            #                     linetype="dashed", color="gray") +
-            #         annotate("text", x=0.75, y=0.25,
-            #                  label=sprintf("AUC = %.3f (%.3f-%.3f)",
-            #                                auc, ci[1], ci[2])) +
-            #         labs(x = "False Positive Rate (1 - Specificity)",
-            #              y = "True Positive Rate (Sensitivity)",
-            #              title = "ROC Curve") +
-            #         theme_minimal() +
-            #         coord_equal() +
-            #         theme(plot.title = element_text(hjust = 0.5))
-            #
-            #     print(p)
-            #     TRUE
-            # }
-
-
-
-            # ,
-            # .plot_comparative_roc = function(image, ggtheme, ...) {
-            #     test_data <- image$state
-            #     if (is.null(test_data) || length(test_data) < 2) return(FALSE)
-            #
-            #     n_tests <- length(test_data)
-            #
-            #     # Create base plot
-            #     p <- create_base_roc_plot(test_data)
-            #
-            #     # Add statistical tests if there are multiple tests
-            #     if(n_tests >= 2) {
-            #         p <- add_statistical_comparison(p, test_data)
-            #     }
-            #
-            #     print(p)
-            #     TRUE
-            # }
 
 
 

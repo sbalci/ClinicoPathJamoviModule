@@ -254,20 +254,6 @@ items:
         - plotHeight
       description: 'Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding.'
 
-    - name: rocCurves
-      title: 'ROC Analysis with Optimal Cut-point'
-      type: Image
-      width: 800
-      height: 600
-      visible: (showVisualization && (plotType == 'roc' || plotType == 'all'))
-      renderFun: .plotROCCurves
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - plotWidth
-        - plotHeight
-      description: 'ROC space analysis comparing all test combinations with automatic identification of optimal cut-point using Youden Index maximization for balanced sensitivity and specificity.'
 
     - name: decisionTree
       title: 'Decision Tree Visualization'
