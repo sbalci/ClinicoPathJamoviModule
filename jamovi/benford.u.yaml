@@ -15,3 +15,9 @@ children:
             name: var
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: digits
+        format: number

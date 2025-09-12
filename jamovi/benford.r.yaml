@@ -5,25 +5,46 @@ jrs:   '1.1'
 
 items:
 
+    - name:  explanation
+      title: About Benford's Law in Clinical Data
+      type:  Html
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Table
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: interpretation
+            title: Clinical Interpretation
+            type: text
+
     - name:  todo
-      title: To Do
+      title: Guidelines
       type:  Html
 
     - name:  text
-      title: Benford Analysis
+      title: Detailed Analysis Results
       type:  Preformatted
-
+      visible: false
 
     - name:  text2
-      title: Suspects
+      title: Suspicious Data Points
       type:  Preformatted
 
+    - name:  reportSentence
+      title: Clinical Report
+      type:  Html
 
     - name: plot
-      title: 'Benford Analysis'
+      title: 'Digit Distribution Analysis'
       type: Image
-      width:  600
-      height: 450
+      width:  700
+      height: 500
       renderFun: .plot
       requiresData: true
 
