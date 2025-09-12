@@ -55,6 +55,9 @@ A results object containing:
 \tabular{llllll}{
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nTable} \tab \tab \tab \tab \tab a table \cr

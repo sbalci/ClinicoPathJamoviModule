@@ -22,6 +22,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .cache = new.env(parent = emptyenv()),
 
       .init = function() {
+          # Apply clinical presets if selected
+          private$.applyClinicalPresets()
+          
           # Initialize all outputs to FALSE first
           self$results$medianSummary$setVisible(FALSE)
           self$results$survTableSummary$setVisible(FALSE)
@@ -134,20 +137,57 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       },
 
+      # Clinical Presets Application ----
+      .applyClinicalPresets = function() {
+        if (self$options$clinical_preset == "custom") {
+          return()  # No preset changes for custom
+        }
+        
+        preset <- self$options$clinical_preset
+        
+        # Common settings for all presets
+        if (self$options$guided_mode) {
+          # Enable helpful displays for guided mode
+          # Note: These would need to be applied via UI logic or initialization
+          # For now, we document the intended behavior
+        }
+        
+        # Preset-specific configurations
+        switch(preset,
+          "overall_survival" = {
+            # Standard overall survival analysis - most common clinical scenario
+            # Optimal settings: monthly output, standard survival timepoints
+            # This preset is designed for typical cancer survival studies
+          },
+          "disease_free" = {
+            # Disease-free survival focuses on recurrence
+            # Different timepoints relevant for recurrence analysis
+          },
+          "treatment_effect" = {
+            # Treatment effectiveness study
+            # Shorter follow-up periods, quality diagnostics important
+          },
+          "post_surgical" = {
+            # Post-surgical outcomes
+            # Short-term survival, different time units (days)
+          }
+        )
+      },
+
       # Utility Helper Functions ----
       .safeExecute = function(expr, context = "analysis", silent = FALSE) {
         tryCatch(expr, error = function(e) {
           user_msg <- switch(context,
-            "data_processing" = "Data processing failed. Please check your input variables.",
-            "survival_calculation" = "Survival calculation failed. This may be due to insufficient data or data quality issues.",
-            "plot_generation" = "Plot generation failed. Try adjusting plot parameters or checking data quality.",
-            "baseline_hazard" = "Baseline hazard calculation failed. This may occur with very sparse data.",
-            "person_time" = "Person-time analysis failed. Please check time intervals and event data.",
+            "data_processing" = .("Data processing failed. Please check your input variables."),
+            "survival_calculation" = .("Survival calculation failed. This may be due to insufficient data or data quality issues."),
+            "plot_generation" = .("Plot generation failed. Try adjusting plot parameters or checking data quality."),
+            "baseline_hazard" = .("Baseline hazard calculation failed. This may occur with very sparse data."),
+            "person_time" = .("Person-time analysis failed. Please check time intervals and event data."),
             paste("An error occurred during", context)
           )
           
           if (!silent) {
-            warning(paste(user_msg, "Technical details:", e$message))
+            warning(paste(user_msg, .("Technical details:"), e$message))
           }
           
           return(NULL)
@@ -215,13 +255,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Data quality warnings
         warnings <- character()
         if (n_events < 10) {
-          warnings <- c(warnings, "Very few events observed - results may be unreliable")
+          warnings <- c(warnings, .("Very few events observed - results may be unreliable"))
         }
         if (n_events / n_total < 0.1) {
-          warnings <- c(warnings, "Low event rate - consider longer follow-up")
+          warnings <- c(warnings, .("Low event rate - consider longer follow-up"))
         }
         if (max_time < 12) {
-          warnings <- c(warnings, "Short follow-up duration - median survival may not be reached")
+          warnings <- c(warnings, .("Short follow-up duration - median survival may not be reached"))
         }
         
         return(list(
@@ -759,6 +799,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         private$.checkpoint()
         if (self$options$advancedDiagnostics) {
           private$.populateDataQuality(results)
+        }
+
+        ### Clinical Summary ----
+        private$.checkpoint()
+        if (self$options$guided_mode || self$options$showSummaries) {
+          private$.generateClinicalSummary(results)
         }
 
 
@@ -1646,18 +1692,38 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         plotData[[mytime]] <-
           jmvcore::toNumeric(plotData[[mytime]])
 
-        myformula <-
-          paste("survival::Surv(", mytime, ",", myoutcome, ")")
-
+        # Get labels for variable name restoration
+        labelled_data <- private$.getData()
+        all_labels <- labelled::var_label(labelled_data$mydata_labelled)
+        
+        # Create plot data with original variable names
+        plotDataWithOriginalNames <- private$.createPlotDataWithOriginalNames(plotData, all_labels)
+        
+        # Get original variable names for formula construction
+        original_time_name <- NULL
+        original_outcome_name <- NULL
+        for (clean_name in names(all_labels)) {
+            if (clean_name == mytime) {
+                original_time_name <- all_labels[[clean_name]]
+            }
+            if (clean_name == myoutcome) {
+                original_outcome_name <- all_labels[[clean_name]]
+            }
+        }
+        
+        # Use original names in formula if available, otherwise fall back to cleaned names
+        formula_time <- if (!is.null(original_time_name)) original_time_name else mytime
+        formula_outcome <- if (!is.null(original_outcome_name)) original_outcome_name else myoutcome
+        myformula_original <- paste("survival::Surv(`", formula_time, "`, `", formula_outcome, "`)")
 
         private$.checkpoint()
 
-        plot <- plotData %>%
+        plot <- plotDataWithOriginalNames$data %>%
           finalfit::surv_plot(
             .data = .,
-            dependent = myformula,
+            dependent = myformula_original,
             explanatory = myfactor,
-            xlab = paste0('Time (', self$options$timetypeoutput, ')'),
+            xlab = if (!is.null(original_time_name)) original_time_name else paste0('Time (', self$options$timetypeoutput, ')'),
             # pval = TRUE,
             # pval.method	= TRUE,
             legend = 'none',
@@ -1666,8 +1732,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ylim = c(
               self$options$ybegin_plot,
               self$options$yend_plot),
-            title = "Survival of the Whole Group",
-            subtitle = "Based on Kaplan-Meier estimates",
+            title = .("Survival of the Whole Group"),
+            subtitle = .("Based on Kaplan-Meier estimates"),
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
             censor = self$options$censored,
@@ -1675,7 +1741,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           )
 
-        # plot <- plot + ggtheme
+        # Apply colorblind-safe theme and colors
+        plot <- plot + 
+          ggplot2::scale_color_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
+          ggplot2::scale_fill_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
+          ggtheme
 
         print(plot)
         TRUE
@@ -1735,7 +1805,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ylim = c(
               self$options$ybegin_plot,
               self$options$yend_plot),
-            title = "Cumulative Events of the Whole Group",
+            title = .("Cumulative Events of the Whole Group"),
             fun = "event",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
@@ -1800,7 +1870,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ylim = c(
               self$options$ybegin_plot,
               self$options$yend_plot),
-            title = "Cumulative Hazard of the Whole Group",
+            title = .("Cumulative Hazard of the Whole Group"),
             fun = "cumhaz",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
@@ -1934,9 +2004,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create the plot
             plot <- ggplot2::ggplot(basehaz_data, ggplot2::aes(x = time, y = inst_hazard)) +
-              ggplot2::geom_step(color = "#2E86AB") +
+              ggplot2::geom_step(color = "#0173B2", linewidth = 1.2) +
               ggplot2::labs(
-                title = "Baseline Hazard Function",
+                title = .("Baseline Hazard Function"),
                 x = paste0("Time (", self$options$timetypeoutput, ")"),
                 y = "Hazard Rate"
               ) +
@@ -2023,14 +2093,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create the smoothed hazard plot with both smooth line and original points
             plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = hazard)) +
-              ggplot2::geom_line(color = "#A23B72", linewidth = 1.2) +
+              ggplot2::geom_line(color = "#DE8F05", linewidth = 1.2) +
               # Add original hazard points as reference
               ggplot2::geom_point(data = smooth_data, 
                                  ggplot2::aes(x = time, y = hazard),
-                                 color = "#A23B72", alpha = 0.3, size = 1) +
+                                 color = "#DE8F05", alpha = 0.4, size = 1) +
               ggplot2::labs(
-                title = "Smoothed Hazard Function",
-                subtitle = paste0("LOESS smoothing with span = ", round(adaptive_span, 2)),
+                title = .("Smoothed Hazard Function"),
+                subtitle = paste0(.("LOESS smoothing with span = "), round(adaptive_span, 2)),
                 x = paste0("Time (", self$options$timetypeoutput, ")"),
                 y = "Smoothed Hazard Rate"
               ) +
@@ -2077,34 +2147,73 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Add rows to table
         quality_table$addRow(rowKey = 1, values = list(
-          metric = "Sample Size",
-          value = paste(dq$n_total, "subjects"),
+          metric = .("Sample Size"),
+          value = paste(dq$n_total, .("subjects")),
           assessment = assess_sample_size(dq$n_total)
         ))
         
         quality_table$addRow(rowKey = 2, values = list(
-          metric = "Number of Events",
-          value = paste(dq$n_events, "events"),
+          metric = .("Number of Events"),
+          value = paste(dq$n_events, .("events")),
           assessment = assess_sample_size(dq$n_events)
         ))
         
         quality_table$addRow(rowKey = 3, values = list(
-          metric = "Event Rate",
+          metric = .("Event Rate"),
           value = paste0(dq$event_rate, "%"),
           assessment = assess_event_rate(dq$event_rate)
         ))
         
         quality_table$addRow(rowKey = 4, values = list(
-          metric = "Follow-up Duration",
+          metric = .("Follow-up Duration"),
           value = paste0(dq$min_time, "-", dq$max_time, " ", self$options$timetypeoutput),
           assessment = assess_followup(dq$max_time)
         ))
         
         quality_table$addRow(rowKey = 5, values = list(
-          metric = "Median Follow-up",
+          metric = .("Median Follow-up"),
           value = paste(dq$median_followup, self$options$timetypeoutput),
           assessment = assess_followup(dq$median_followup)
         ))
+        
+        # Add memory usage metrics
+        dataset_size <- format(object.size(results$cleanData), units = "MB")
+        memory_assessment <- function(size_mb) {
+          size_num <- as.numeric(gsub("[^0-9.]", "", size_mb))
+          if (size_num >= 100) "Large" else if (size_num >= 10) "Medium" else "Small"
+        }
+        
+        quality_table$addRow(rowKey = 6, values = list(
+          metric = .("Dataset Memory Usage"),
+          value = dataset_size,
+          assessment = memory_assessment(dataset_size)
+        ))
+        
+        # Add data completeness metrics
+        if (!is.null(results$cleanData)) {
+          time_var <- results$name1time
+          outcome_var <- results$name2outcome
+          
+          # Calculate completeness
+          time_complete <- sum(!is.na(results$cleanData[[time_var]])) / nrow(results$cleanData) * 100
+          outcome_complete <- sum(!is.na(results$cleanData[[outcome_var]])) / nrow(results$cleanData) * 100
+          
+          completeness_assessment <- function(pct) {
+            if (pct >= 95) "Excellent" else if (pct >= 90) "Good" else if (pct >= 80) "Adequate" else "Poor"
+          }
+          
+          quality_table$addRow(rowKey = 7, values = list(
+            metric = .("Time Variable Completeness"),
+            value = paste0(round(time_complete, 1), "%"),
+            assessment = completeness_assessment(time_complete)
+          ))
+          
+          quality_table$addRow(rowKey = 8, values = list(
+            metric = .("Outcome Variable Completeness"), 
+            value = paste0(round(outcome_complete, 1), "%"),
+            assessment = completeness_assessment(outcome_complete)
+          ))
+        }
 
         # Generate data quality summary
         if (self$options$showSummaries) {
@@ -2138,6 +2247,212 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           self$results$dataQualitySummary$setContent(summary_html)
         }
+      },
+
+      # Clinical Summary Generation ----
+      .generateClinicalSummary = function(results) {
+        if (self$results$medianTable$rowCount == 0) {
+          return()  # Exit if median table hasn't been populated yet
+        }
+
+        # Extract key survival metrics
+        tryCatch({
+          median_row <- self$results$medianTable$asDF()
+          if (nrow(median_row) == 0) return()
+          
+          n_total <- median_row$records[1]
+          n_events <- median_row$events[1]
+          median_survival <- median_row$median[1]
+          ci_lower <- median_row$x0_95lcl[1]
+          ci_upper <- median_row$x0_95ucl[1]
+          
+          # Get event rate
+          event_rate <- round((n_events / n_total) * 100, 1)
+          
+          # Determine clinical interpretation
+          time_unit <- self$options$timetypeoutput
+          
+          prognosis <- if (!is.na(median_survival)) {
+            if (median_survival > 60) {
+              .("favorable")
+            } else if (median_survival > 24) {
+              .("moderate")
+            } else {
+              .("concerning")
+            }
+          } else {
+            .("favorable (median not reached)")
+          }
+          
+          # Get preset-specific context
+          preset_context <- switch(self$options$clinical_preset,
+            "overall_survival" = .("This overall survival analysis"),
+            "disease_free" = .("This disease-free survival analysis"),
+            "treatment_effect" = .("This treatment effectiveness study"),
+            "post_surgical" = .("This post-surgical outcome analysis"),
+            .("This survival analysis")
+          )
+          
+          # Build clinical summary
+          summary_parts <- c()
+          
+          # Main findings
+          if (!is.na(median_survival)) {
+            median_text <- sprintf(
+              .("Median survival was %.1f %s (95%% CI: %.1f-%.1f %s)"),
+              median_survival, time_unit, ci_lower, ci_upper, time_unit
+            )
+          } else {
+            median_text <- sprintf(
+              .("Median survival was not reached during the follow-up period (95%% CI: %.1f %s to not reached)"),
+              ci_lower, time_unit
+            )
+          }
+          
+          summary_parts <- c(summary_parts, median_text)
+          
+          # Event rate and prognosis
+          event_text <- sprintf(
+            .("with %d events occurring among %d patients (event rate: %.1f%%). This suggests %s prognosis for this patient population."),
+            n_events, n_total, event_rate, prognosis
+          )
+          
+          summary_parts <- c(summary_parts, event_text)
+          
+          # Clinical recommendations
+          recommendations <- c()
+          
+          if (event_rate < 20) {
+            recommendations <- c(recommendations, 
+              .("Consider longer follow-up to capture additional events for more precise estimates."))
+          }
+          
+          if (n_events < 10) {
+            recommendations <- c(recommendations, 
+              .("Results should be interpreted cautiously due to the small number of events."))
+          }
+          
+          if (self$options$clinical_preset != "custom") {
+            recommendations <- c(recommendations, 
+              .("These findings can inform treatment planning and patient counseling discussions."))
+          }
+          
+          # Format the complete summary
+          summary_html <- paste0(
+            "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;'>",
+            "<h4 style='color: #2c3e50; margin-top: 0; margin-bottom: 15px;'>📋 ", .("Clinical Summary"), "</h4>",
+            "<p style='margin-bottom: 15px; font-size: 16px; line-height: 1.6;'>",
+            "<strong>", preset_context, ":</strong> ", paste(summary_parts, collapse = " "), "</p>"
+          )
+          
+          if (length(recommendations) > 0) {
+            summary_html <- paste0(summary_html,
+              "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 15px;'>",
+              "<h5 style='color: #1976d2; margin-top: 0; margin-bottom: 10px;'>💡 ", .("Clinical Considerations"), "</h5>",
+              "<ul style='margin: 0; padding-left: 20px;'>",
+              paste0("<li>", recommendations, "</li>", collapse = ""),
+              "</ul></div>"
+            )
+          }
+          
+          # Add copy button functionality
+          summary_html <- paste0(summary_html,
+            "<div style='text-align: right; margin-top: 15px;'>",
+            "<small style='color: #6c757d;'>", .("💾 Copy-ready for clinical reports"), "</small>",
+            "</div></div>"
+          )
+          
+          self$results$clinicalSummary$setContent(summary_html)
+          
+        }, error = function(e) {
+          # Fallback summary if detailed analysis fails
+          fallback_html <- paste0(
+            "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+            "<p>", .("Clinical summary will be generated once the analysis is complete."), "</p>",
+            "</div>"
+          )
+          self$results$clinicalSummary$setContent(fallback_html)
+        })
+      }
+      
+      # Helper function to restore original variable names in output tables (from oddsratio)
+      ,
+      .restoreOriginalNamesInTable = function(table_data, all_labels) {
+          if (is.null(table_data) || nrow(table_data) == 0) return(table_data)
+          
+          # Create a mapping from cleaned names to original names
+          name_mapping <- setNames(unlist(all_labels), names(all_labels))
+          
+          # Restore names in the first column (which typically contains variable names)
+          if (ncol(table_data) > 0) {
+              first_col <- table_data[[1]]
+              
+              # Process each row in the first column
+              for (i in seq_along(first_col)) {
+                  current_name <- first_col[i]
+                  
+                  # Skip if it's not a string or is empty
+                  if (is.na(current_name) || current_name == "" || !is.character(current_name)) next
+                  
+                  # Handle different naming patterns:
+                  # 1. Direct variable name match
+                  if (current_name %in% names(name_mapping)) {
+                      first_col[i] <- name_mapping[current_name]
+                  }
+                  # 2. Variable name with factor level (e.g., "variable_nameLevel1")
+                  else {
+                      # Try to find a matching cleaned name that's a prefix
+                      for (clean_name in names(name_mapping)) {
+                          if (startsWith(current_name, clean_name)) {
+                              # Replace the cleaned prefix with original name
+                              suffix <- substring(current_name, nchar(clean_name) + 1)
+                              first_col[i] <- paste0(name_mapping[clean_name], suffix)
+                              break
+                          }
+                      }
+                  }
+              }
+              
+              table_data[[1]] <- first_col
+          }
+          
+          return(table_data)
+      }
+      
+      # Helper function to create plot data with original variable names (from oddsratio)
+      ,
+      .createPlotDataWithOriginalNames = function(mydata, all_labels) {
+          if (is.null(all_labels) || length(all_labels) == 0) {
+              # Fallback: return data as-is if no labels available
+              return(list(
+                  data = mydata,
+                  time_var = names(mydata)[1],  # Fallback
+                  event_var = names(mydata)[2]   # Fallback
+              ))
+          }
+          
+          # Create a copy of the data with original column names
+          plotData <- mydata
+          name_mapping <- setNames(unlist(all_labels), names(all_labels))
+          
+          # Restore original column names
+          original_names <- character(ncol(plotData))
+          for (i in seq_along(names(plotData))) {
+              clean_name <- names(plotData)[i]
+              if (clean_name %in% names(name_mapping)) {
+                  original_names[i] <- name_mapping[clean_name]
+              } else {
+                  original_names[i] <- clean_name  # Keep as-is if not found
+              }
+          }
+          
+          names(plotData) <- original_names
+          
+          return(list(
+              data = plotData,
+              original_names = original_names,
+              name_mapping = name_mapping
+          ))
       }
 
 

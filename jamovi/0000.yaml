@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.62
+version: 0.0.31.63
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-09'
+date: '2025-09-12'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -872,7 +872,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -889,7 +889,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -906,7 +906,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -915,7 +915,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -934,8 +934,8 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: SurvivalT2
-    menuSubgroup: ClinicoPath Survival
+    menuGroup: ClinicoPathDescriptives
+    menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
     description: Function for Odds Ratio Table and Plot.
@@ -1060,7 +1060,7 @@ analyses:
   - title: Power Analysis for Survival Studies
     name: powersurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Power Analysis for Survival Studies
     menuSubgroup: Design and Analysis
     menuSubtitle: Power analysis for survival studies
@@ -1084,7 +1084,7 @@ analyses:
   - title: Survival Analysis Power & Sample Size
     name: survivalpower
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Survival Analysis Power & Sample Size
     menuSubgroup: Design and Analysis
     menuSubtitle: Power Analysis for Survival Studies

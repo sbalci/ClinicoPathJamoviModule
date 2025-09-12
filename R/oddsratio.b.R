@@ -146,7 +146,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (length(outcome_data) == 0) {
                     validation_results$errors <- c(validation_results$errors,
-                        "Outcome variable contains no non-missing values.")
+                        .("Outcome variable contains no non-missing values."))
                     validation_results$should_stop <- TRUE
                 } else {
                     # Check if outcome is factor or can be converted to factor
@@ -162,11 +162,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Check for binary nature
                     if (length(outcome_levels) < 2) {
                         validation_results$errors <- c(validation_results$errors,
-                            "Outcome variable must have at least 2 different values for logistic regression.")
+                            .("Outcome variable must have at least 2 different values for logistic regression."))
                         validation_results$should_stop <- TRUE
                     } else if (length(outcome_levels) > 2) {
                         validation_results$errors <- c(validation_results$errors,
-                            paste("Outcome variable has", length(outcome_levels), "levels. For odds ratio analysis, the outcome must be binary (exactly 2 levels). Consider creating a binary variable or using multinomial regression."))
+                            paste(.("Outcome variable has"), length(outcome_levels), .("levels. For odds ratio analysis, the outcome must be binary (exactly 2 levels). Consider creating a binary variable or using multinomial regression.")))
                         validation_results$should_stop <- TRUE
                     } else {
                         # Binary outcome - check for severe imbalance
@@ -176,16 +176,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         if (min_count < 5) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                paste("Outcome variable has very few observations in one category (", min_count, " out of ", total_count, "). Results may be unreliable.", sep=""))
+                                .(paste("Outcome variable has very few observations in one category ({min_count} out of {total_count}). Results may be unreliable.")))
                         } else if (min_proportion < 0.05) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                paste("Outcome variable is severely imbalanced (", round(min_proportion * 100, 1), "% in minority class). Consider using specialized methods for imbalanced data.", sep=""))
+                                .(paste("Outcome variable is severely imbalanced ({proportion}% in minority class). Consider using specialized methods for imbalanced data.")))
                         }
                         
                         # Require and validate user-specified outcome level
                         if (is.null(user_outcome_level)) {
                             validation_results$errors <- c(validation_results$errors,
-                                "Please select the positive outcome level from the dropdown menu below the outcome variable.")
+                                .("Please select the positive outcome level from the dropdown menu below the outcome variable."))
                             validation_results$should_stop <- TRUE
                         } else if (!user_outcome_level %in% outcome_levels) {
                             validation_results$errors <- c(validation_results$errors,
@@ -208,10 +208,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         if (length(var_data_clean) == 0) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                paste("Explanatory variable '", var_name, "' contains no non-missing values.", sep=""))
+                                paste(.("Explanatory variable '{var_name}' contains no non-missing values.")))
                         } else if (length(unique(var_data_clean)) == 1) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                paste("Explanatory variable '", var_name, "' has no variation (all values are the same). It will not contribute to the model.", sep=""))
+                                paste(.("Explanatory variable '{var_name}' has no variation (all values are the same). It will not contribute to the model.")))
                         } else if (is.factor(var_data)) {
                             # Factor variable validation
                             factor_levels <- levels(var_data)
@@ -219,20 +219,20 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             
                             if (length(factor_levels) > 10) {
                                 validation_results$warnings <- c(validation_results$warnings,
-                                    paste("Explanatory variable '", var_name, "' has ", length(factor_levels), " levels. Consider grouping categories or using as continuous if ordinal.", sep=""))
+                                    paste(.("Explanatory variable '{var_name}' has {levels} levels. Consider grouping categories or using as continuous if ordinal.")))
                             }
                             
                             # Check for sparse categories
                             sparse_categories <- sum(factor_counts < 5)
                             if (sparse_categories > 0) {
                                 validation_results$warnings <- c(validation_results$warnings,
-                                    paste("Explanatory variable '", var_name, "' has ", sparse_categories, " categories with fewer than 5 observations. Consider combining categories.", sep=""))
+                                    paste(.("Explanatory variable '{var_name}' has {sparse_categories} categories with fewer than 5 observations. Consider combining categories.")))
                             }
                         } else if (is.numeric(var_data)) {
                             # Numeric variable validation
                             if (any(is.infinite(var_data_clean))) {
                                 validation_results$warnings <- c(validation_results$warnings,
-                                    paste("Explanatory variable '", var_name, "' contains infinite values.", sep=""))
+                                    paste(.("Explanatory variable '{var_name}' contains infinite values.")))
                             }
                             
                             # Check for extreme values
@@ -243,7 +243,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             
                             if (extreme_high + extreme_low > 0) {
                                 validation_results$info <- c(validation_results$info,
-                                    paste("Explanatory variable '", var_name, "' may contain extreme outliers (", extreme_high + extreme_low, " potential outliers).", sep=""))
+                                    paste(.("Explanatory variable '{var_name}' may contain extreme outliers ({outliers} potential outliers).")))
                             }
                         }
                     }
@@ -306,7 +306,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         Outcome variable should be coded binary, defining whether the patient is dead or event (recurrence) occured
                     or censored (patient is alive or free of disease) at the last visit.
                     <br><br>
-                        Variable names with empty spaces or special characters may not work properly. Consider renaming them.
+                        Variable names with spaces or special characters are automatically cleaned for analysis while preserving original names in output.
                     <br><br>
                         This function uses finalfit package. Please cite jamovi and the packages as given below.
                     <br><br>
@@ -367,20 +367,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 if (nrow(self$data) == 0) {
-                    error_msg <- paste(
-                        "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                        "<b>❌ Data Error:</b> No data available for analysis<br><br>",
-                        "<b>💡 Possible reasons:</b><br>",
-                        "• Dataset has no rows<br>",
-                        "• All rows contain missing values<br>",
-                        "• Data filtering has removed all observations<br><br>",
-                        "<b>🔧 Solutions:</b><br>",
-                        "• Check your data import process<br>",
-                        "• Verify variable selections<br>",
-                        "• Review data quality and missing value patterns<br>",
-                        "• Ensure your dataset contains complete observations",
-                        "</div>",
-                        collapse = ""
+                    error_msg <- private$.formatErrorMessage(
+                        "data_error",
+                        "No data available for analysis",
+                        "Dataset has no rows or all observations have been filtered out.",
+                        c(
+                            "Check your data import process",
+                            "Verify variable selections",
+                            "Review data quality and missing value patterns",
+                            "Ensure your dataset contains complete observations"
+                        )
                     )
                     stop(error_msg)
                 }
@@ -400,17 +396,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Handle validation errors - stop execution if critical errors found
                 if (validation_results$should_stop) {
-                    error_msg <- paste(
-                        "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                        "<b>❌ Critical Error(s) Detected:</b><br>",
-                        paste(validation_results$errors, collapse = "<br>"),
-                        "<br><br><b>💡 Suggestions:</b><br>",
-                        "• Check your data format and variable types<br>",
-                        "• Ensure outcome variable has exactly 2 levels<br>",
-                        "• Verify that explanatory variables have sufficient variation<br>",
-                        "• Consider removing rows with missing data",
-                        "</div>",
-                        collapse = ""
+                    error_msg <- private$.formatErrorMessage(
+                        "validation_error",
+                        "Critical validation errors detected",
+                        paste(validation_results$errors, collapse = "; "),
+                        c(
+                            "Check your data format and variable types",
+                            "Ensure outcome variable has exactly 2 levels", 
+                            "Verify that explanatory variables have sufficient variation",
+                            "Consider removing rows with missing data"
+                        )
                     )
                     stop(error_msg)
                 }
@@ -433,6 +428,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 mydata <- jmvcore::naOmit(mydata)
+                
+                # Monitor memory usage for large datasets
+                memory_status <- private$.checkMemoryUsage(operation = "odds ratio analysis")
 
                 original_names <- names(mydata)
 
@@ -490,6 +488,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                    # formula = myformula,
                                    metrics = TRUE
                                    ) -> tOdds
+                
+                # Restore original variable names in the finalfit output table
+                if (!is.null(tOdds[[1]]) && nrow(tOdds[[1]]) > 0) {
+                    tOdds[[1]] <- private$.restoreOriginalNamesInTable(tOdds[[1]], all_labels)
+                }
 
 
 
@@ -551,7 +554,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plotData <- list(
                     "plotData" = mydata,
                     "formulaDependent" = formulaDependent,
-                    "formulaExplanatory" = formulaExplanatory
+                    "formulaExplanatory" = formulaExplanatory,
+                    "originalNames" = all_labels,
+                    "originalOutcomeName" = self$options$outcome,
+                    "originalExplanatoryNames" = self$options$explanatory
                 )
 
                 image <- self$results$plot
@@ -578,6 +584,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     # Create diagnostic metrics text with explanatory information
+                    # Include statistical warnings and recommendations if present
+                    statistical_warnings <- if (!is.null(lr_results$statistical_warnings) && lr_results$statistical_warnings != "") lr_results$statistical_warnings else ""
+                    statistical_recommendations <- if (!is.null(lr_results$statistical_recommendations) && lr_results$statistical_recommendations != "") lr_results$statistical_recommendations else ""
+                    
                     metrics_text <- glue::glue("
                     <br>
                     <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>
@@ -587,6 +597,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         Positive LR: {format(lr_results$positive_lr, digits=2)}<br>
                         Negative LR: {format(lr_results$negative_lr, digits=2)}<br>
                     </div>
+                    
+                    {statistical_warnings}
+                    {statistical_recommendations}
                     
                     <div style='background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 10px 0;'>
                         <b>⚠️ Important: Please Verify These Interpretations</b><br>
@@ -690,15 +703,15 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Ensure we have a 2x2 table for binary variables
             if (nrow(cont_table) != 2 || ncol(cont_table) != 2) {
                 warning(paste(
-                    "⚠️ Likelihood Ratio Calculation Error:",
-                    "This calculation requires both predictor and outcome variables to be binary (exactly 2 levels each).",
-                    "Current situation:",
-                    paste("- Predictor variable '", predictor_var, "' has", nrow(cont_table), "levels"),
-                    paste("- Outcome variable '", outcome_var, "' has", ncol(cont_table), "levels"),
-                    "📋 Solutions:",
-                    "• For continuous variables: Create binary categories (e.g., above/below median)",
-                    "• For categorical variables: Combine categories to create binary grouping",
-                    "• Use a different analysis method for multi-level variables",
+                    .("⚠️ Likelihood Ratio Calculation Error:"),
+                    .("This calculation requires both predictor and outcome variables to be binary (exactly 2 levels each)."),
+                    .("Current situation:"),
+                    paste(.("- Predictor variable '{predictor_var}' has {levels} levels")),
+                    paste(.("- Outcome variable '{outcome_var}' has {levels} levels")),
+                    .("📋 Solutions:"),
+                    .("• For continuous variables: Create binary categories (e.g., above/below median)"),
+                    .("• For categorical variables: Combine categories to create binary grouping"),
+                    .("• Use a different analysis method for multi-level variables"),
                     sep = "\n"
                 ))
                 return(list(
@@ -730,25 +743,50 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             positive_outcome_idx <- which(outcome_levels == positive_outcome_level)
             outcome_determination_method <- "User-specified"
             
-            # Determine positive predictor level (usually second level alphabetically)
-            positive_predictor_indicators <- c("Positive", "Yes", "Present", "Exposed", "1", "TRUE", "Bad")
-            positive_predictor_idx <- which(predictor_levels %in% positive_predictor_indicators)
-            
-            if (length(positive_predictor_idx) == 1) {
-                positive_predictor_level <- predictor_levels[positive_predictor_idx]
-                predictor_determination_method <- "Automatic detection"
-            } else {
-                # Default to second level (alphabetically last)
-                positive_predictor_idx <- 2
-                positive_predictor_level <- predictor_levels[positive_predictor_idx]
-                predictor_determination_method <- "Default (second level alphabetically)"
-            }
+            # Determine positive predictor level using configurable detection
+            detection_result <- private$.detectPositiveLevels(predictor_levels)
+            positive_predictor_level <- detection_result$level
+            predictor_determination_method <- detection_result$method
+            positive_predictor_idx <- which(predictor_levels == positive_predictor_level)
             
             # Calculate 2x2 table components
             tp <- cont_table[positive_predictor_idx, positive_outcome_idx]
             fp <- cont_table[positive_predictor_idx, -positive_outcome_idx]
             fn <- cont_table[-positive_predictor_idx, positive_outcome_idx]
             tn <- cont_table[-positive_predictor_idx, -positive_outcome_idx]
+            
+            # Check statistical assumptions and provide recommendations
+            assumption_check <- private$.checkStatisticalAssumptions(cont_table)
+            
+            # Add assumption warnings to diagnostic info if present
+            diagnostic_warnings <- ""
+            if (length(assumption_check$warnings) > 0) {
+                diagnostic_warnings <- paste0(
+                    "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<b>Statistical Assumptions Check:</b><br>",
+                    paste(assumption_check$warnings, collapse = "<br>"),
+                    "</div>"
+                )
+            }
+            
+            # Add recommendations if any
+            recommendation_text <- ""
+            if (length(assumption_check$recommendations) > 0) {
+                recommendations_list <- lapply(assumption_check$recommendations, function(rec) {
+                    if (is.list(rec)) {
+                        paste0("• <b>", rec$test, ":</b> ", rec$reason, " (Use: ", rec$code, ")")
+                    } else {
+                        paste0("• ", rec)
+                    }
+                })
+                
+                recommendation_text <- paste0(
+                    "<div style='background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<b>💡 Statistical Recommendations:</b><br>",
+                    paste(recommendations_list, collapse = "<br>"),
+                    "</div>"
+                )
+            }
             
             # Calculate sensitivity and specificity
             sensitivity <- tp / (tp + fn)  # True Positive Rate
@@ -929,15 +967,19 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mydata <- plotList$plotData
                     formulaDependent <- plotList$formulaDependent
                     formulaExplanatory <- plotList$formulaExplanatory
+                    originalNames <- plotList$originalNames
+                    
+                    # Create a temporary dataset with restored variable names for plotting
+                    plotDataWithOriginalNames <- private$.createPlotDataWithOriginalNames(mydata, originalNames)
 
                     private$.checkpoint()
 
                     plot <-
                         # finalfit::or_plot(
                         finalfit::ff_plot(
-                            .data = mydata,
-                            dependent = formulaDependent,
-                            explanatory = formulaExplanatory,
+                            .data = plotDataWithOriginalNames$data,
+                            dependent = plotDataWithOriginalNames$formulaDependent,
+                            explanatory = plotDataWithOriginalNames$formulaExplanatory,
                             remove_ref = FALSE,
                             table_text_size = 4,
                             title_text_size = 14,
@@ -947,7 +989,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             confint_type = NULL,
                             breaks = NULL,
                             column_space = c(-0.5, 0, 0.5),
-                            dependent_label = self$options$outcome,
+                            dependent_label = plotList$originalOutcomeName,
                             prefix = "",
                             suffix = ": OR (95% CI, p-value)",
                             table_opts = NULL,
@@ -969,110 +1011,313 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Natural Language Summary Generation ----
         ,
-        .generateOddsRatioSummary = function(tOdds, formulaDependent, formulaExplanatory) {
-            tryCatch({
-                # Extract the OR table and metrics
-                or_table <- tOdds[[1]]
-                metrics <- tOdds[[2]]
-                
-                # Count significant predictors
-                significant_count <- 0
-                total_predictors <- 0
-                strongest_predictor <- NULL
-                strongest_or <- 0
-                
-                # Parse the table to identify significant predictors
-                if (!is.null(or_table) && nrow(or_table) > 0) {
-                    for (i in 1:nrow(or_table)) {
-                        if (!is.na(or_table[i, "p"]) && or_table[i, "p"] != "") {
-                            p_value <- as.numeric(or_table[i, "p"])
-                            if (!is.na(p_value)) {
-                                total_predictors <- total_predictors + 1
-                                if (p_value < 0.05) {
-                                    significant_count <- significant_count + 1
-                                    # Track strongest predictor
-                                    or_value <- or_table[i, "OR"]
-                                    if (!is.na(or_value) && or_value != "" && or_value != "-") {
-                                        or_numeric <- as.numeric(or_value)
-                                        if (!is.na(or_numeric)) {
-                                            # Calculate effect size (distance from 1.0)
-                                            effect_size <- abs(log(or_numeric))
-                                            if (effect_size > abs(log(strongest_or + 0.001))) {
-                                                strongest_or <- or_numeric
-                                                strongest_predictor <- or_table[i, 1]
-                                            }
-                                        }
-                                    }
+        # Helper function to extract significant predictors from odds ratio table
+        .extractSignificantPredictors = function(or_table) {
+            if (is.null(or_table) || length(or_table) == 0 || is.null(or_table[[1]])) {
+                return(list(significant_count = 0, total_predictors = 0, strongest = NULL))
+            }
+            
+            significant_predictors <- list()
+            strongest_or <- 1
+            strongest_predictor <- ""
+            
+            for (i in 2:nrow(or_table)) {  # Skip header row
+                if (!is.na(or_table[i, "p"]) && or_table[i, "p"] != "") {
+                    p_value <- as.numeric(or_table[i, "p"])
+                    if (!is.na(p_value) && p_value < 0.05) {
+                        or_value <- or_table[i, "OR"]
+                        if (!is.na(or_value) && or_value != "" && or_value != "-") {
+                            or_numeric <- as.numeric(or_value)
+                            if (!is.na(or_numeric)) {
+                                # Track strongest association (furthest from 1)
+                                if (abs(log(or_numeric)) > abs(log(strongest_or))) {
+                                    strongest_or <- or_numeric
+                                    strongest_predictor <- or_table[i, 1]  # First column is predictor name
                                 }
+                                significant_predictors[[length(significant_predictors) + 1]] <- list(
+                                    name = or_table[i, 1],
+                                    or = or_numeric,
+                                    p_value = p_value
+                                )
                             }
                         }
                     }
                 }
-                
-                # Generate summary text
-                summary_html <- paste0(
-                    '<div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
-                    '<h4 style="color: #2c5282; margin-top: 0;">📊 Odds Ratio Analysis Summary</h4>',
-                    '<p style="margin: 10px 0;"><strong>Analysis Overview:</strong> Logistic regression was performed to examine the relationship between ',
-                    length(strsplit(formulaExplanatory, " \\+ ")[[1]]), ' explanatory variable(s) and the outcome <em>', formulaDependent, '</em>.</p>'
+            }
+            
+            return(list(
+                significant_count = length(significant_predictors),
+                total_predictors = nrow(or_table) - 1,  # Exclude header
+                significant_predictors = significant_predictors,
+                strongest_or = strongest_or,
+                strongest_predictor = strongest_predictor
+            ))
+        }
+
+        # Standardized error message formatter
+        ,
+        .formatErrorMessage = function(error_type, message, details = NULL, suggestions = NULL) {
+            icons <- list(
+                "data_error" = "❌",
+                "validation_error" = "⚠️", 
+                "calculation_error" = "🔢",
+                "memory_error" = "💾",
+                "statistical_error" = "📊"
+            )
+            
+            icon <- if (error_type %in% names(icons)) {
+                icons[[error_type]]
+            } else {
+                "⚠️"
+            }
+            
+            # Base error HTML with consistent styling
+            error_html <- paste0(
+                '<div style="background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 12px; margin: 10px 0; border-radius: 6px;">',
+                '<p style="margin: 0; color: #721c24; font-weight: bold;">', 
+                icon, ' ', stringr::str_to_title(gsub("_", " ", error_type)), '</p>',
+                '<p style="margin: 8px 0 0 0; color: #2d3748;">', message, '</p>'
+            )
+            
+            # Add details if provided
+            if (!is.null(details)) {
+                error_html <- paste0(error_html,
+                    '<p style="margin: 8px 0 0 0; color: #4a5568; font-size: 0.9em;"><em>', details, '</em></p>'
+                )
+            }
+            
+            # Add suggestions if provided
+            if (!is.null(suggestions) && length(suggestions) > 0) {
+                error_html <- paste0(error_html,
+                    '<div style="margin-top: 10px; padding: 8px; background-color: #f0fff4; border-radius: 4px;">',
+                    '<p style="margin: 0; color: #276749; font-weight: bold;">💡 Suggestions:</p>',
+                    '<ul style="margin: 4px 0 0 0; color: #2f855a; font-size: 0.9em;">'
                 )
                 
-                # Add findings summary
-                if (significant_count > 0) {
-                    summary_html <- paste0(summary_html,
-                        '<p style="margin: 10px 0;"><strong>Key Findings:</strong></p>',
-                        '<ul style="margin: 5px 0; padding-left: 20px;">',
-                        '<li>', significant_count, ' out of ', total_predictors, ' predictor(s) showed statistically significant associations (p < 0.05)</li>'
-                    )
-                    
-                    if (!is.null(strongest_predictor)) {
-                        interpretation <- if (strongest_or > 1) {
-                            paste0('increased odds (OR = ', round(strongest_or, 2), ')')
-                        } else {
-                            paste0('decreased odds (OR = ', round(strongest_or, 2), ')')
-                        }
-                        summary_html <- paste0(summary_html,
-                            '<li>Strongest association: <em>', strongest_predictor, '</em> with ', interpretation, '</li>'
-                        )
-                    }
-                    
-                    summary_html <- paste0(summary_html, '</ul>')
-                } else if (total_predictors > 0) {
-                    summary_html <- paste0(summary_html,
-                        '<p style="margin: 10px 0;"><strong>Key Findings:</strong> None of the ', total_predictors, 
-                        ' predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05).</p>'
-                    )
-                } else {
-                    summary_html <- paste0(summary_html,
-                        '<p style="margin: 10px 0;"><strong>Note:</strong> Unable to extract predictor information from the analysis.</p>'
-                    )
+                for (suggestion in suggestions) {
+                    error_html <- paste0(error_html, '<li>', suggestion, '</li>')
                 }
                 
-                # Add model performance metrics if available
-                if (!is.null(metrics)) {
-                    summary_html <- paste0(summary_html,
-                        '<p style="margin: 10px 0;"><strong>Model Performance:</strong> ', metrics, '</p>'
-                    )
-                }
+                error_html <- paste0(error_html, '</ul></div>')
+            }
+            
+            error_html <- paste0(error_html, '</div>')
+            return(error_html)
+        }
+
+        # Helper function to format odds ratio interpretation text
+        ,
+        .formatOddsRatioText = function(or_value, predictor_name) {
+            if (or_value > 1) {
+                return(paste0('increased odds (OR = ', round(or_value, 2), ')'))
+            } else if (or_value < 1) {
+                return(paste0('decreased odds (OR = ', round(or_value, 2), ')'))
+            } else {
+                return('no significant association')
+            }
+        }
+
+        # Clinical preset configurations for common scenarios
+        ,
+        .applyClinicalPreset = function(preset_name, data_info) {
+            presets <- list(
+                "diagnostic_test" = list(
+                    focus = "sensitivity_specificity",
+                    interpretation = "diagnostic",
+                    recommendations = c("Consider ROC analysis", "Evaluate predictive values", "Check diagnostic accuracy"),
+                    terminology = list(positive = "Disease Present", negative = "Disease Absent")
+                ),
+                "risk_factor" = list(
+                    focus = "odds_ratios",
+                    interpretation = "epidemiological", 
+                    recommendations = c("Examine dose-response", "Consider confounders", "Evaluate effect modification"),
+                    terminology = list(positive = "Exposed", negative = "Not Exposed")
+                ),
+                "treatment_response" = list(
+                    focus = "efficacy",
+                    interpretation = "therapeutic",
+                    recommendations = c("Calculate NNT", "Assess clinical significance", "Consider adverse effects"),
+                    terminology = list(positive = "Response", negative = "No Response")
+                ),
+                "biomarker" = list(
+                    focus = "prediction",
+                    interpretation = "prognostic",
+                    recommendations = c("Validate biomarker", "Assess clinical utility", "Consider cost-effectiveness"),
+                    terminology = list(positive = "High Expression", negative = "Low Expression")
+                ),
+                "screening" = list(
+                    focus = "detection",
+                    interpretation = "population_health",
+                    recommendations = c("Evaluate screening performance", "Consider false positive rate", "Assess population benefit"),
+                    terminology = list(positive = "Screen Positive", negative = "Screen Negative")
+                )
+            )
+            
+            if (preset_name %in% names(presets)) {
+                return(presets[[preset_name]])
+            }
+            return(NULL)
+        }
+
+        # Helper function to detect likely clinical scenario based on variable names
+        ,
+        .detectClinicalScenario = function(outcome_var, explanatory_vars) {
+            outcome_lower <- tolower(outcome_var)
+            explanatory_lower <- tolower(paste(explanatory_vars, collapse = " "))
+            
+            # Diagnostic test scenario
+            if (any(grepl("(diagnos|test|positive|negative|disease|pathology)", outcome_lower)) ||
+                any(grepl("(test|assay|marker|score)", explanatory_lower))) {
+                return("diagnostic_test")
+            }
+            
+            # Treatment response scenario
+            if (any(grepl("(response|treatment|therapy|outcome|recovery|improvement)", outcome_lower)) ||
+                any(grepl("(drug|treatment|therapy|dose|intervention)", explanatory_lower))) {
+                return("treatment_response") 
+            }
+            
+            # Biomarker scenario
+            if (any(grepl("(biomarker|marker|expression|level|concentration)", explanatory_lower)) ||
+                any(grepl("(gene|protein|metabolite|cytokine)", explanatory_lower))) {
+                return("biomarker")
+            }
+            
+            # Screening scenario
+            if (any(grepl("(screen|detect|early|prevention)", outcome_lower))) {
+                return("screening")
+            }
+            
+            # Risk factor scenario (default for epidemiological studies)
+            if (any(grepl("(risk|factor|exposure|smoking|diet|lifestyle)", explanatory_lower))) {
+                return("risk_factor")
+            }
+            
+            # Default to risk factor if unclear
+            return("risk_factor")
+        }
+
+        # Helper function to build summary HTML content with clinical context
+        ,
+        .buildSummaryHTML = function(findings, metrics = NULL, outcome_var = NULL, explanatory_vars = NULL) {
+            # Detect clinical scenario and apply appropriate preset
+            clinical_scenario <- if (!is.null(outcome_var) && !is.null(explanatory_vars)) {
+                private$.detectClinicalScenario(outcome_var, explanatory_vars)
+            } else {
+                "risk_factor" # Default
+            }
+            
+            preset <- private$.applyClinicalPreset(clinical_scenario, NULL)
+            
+            # Context-aware summary title and description
+            context_descriptions <- list(
+                "diagnostic_test" = "diagnostic test evaluation",
+                "treatment_response" = "treatment efficacy assessment", 
+                "biomarker" = "biomarker analysis",
+                "screening" = "screening performance evaluation",
+                "risk_factor" = "risk factor analysis"
+            )
+            
+            analysis_context <- if (clinical_scenario %in% names(context_descriptions)) {
+                context_descriptions[[clinical_scenario]]
+            } else {
+                "statistical analysis"
+            }
+            
+            summary_html <- paste0(
+                '<div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
+                '<h4 style="color: #2c5282; margin-top: 0;">📊 ', stringr::str_to_title(analysis_context), ' Summary</h4>',
+                '<p style="margin: 10px 0;"><strong>Analysis Overview:</strong> Logistic regression was performed for ',
+                analysis_context, ' examining ', findings$total_predictors, ' explanatory variable(s) and their relationship to the outcome.</p>'
+            )
+            
+            # Add key findings section
+            if (findings$significant_count > 0) {
+                interpretation <- private$.formatOddsRatioText(findings$strongest_or, findings$strongest_predictor)
                 
-                # Add interpretation guide
                 summary_html <- paste0(summary_html,
-                    '<div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-top: 10px;">',
-                    '<strong>💡 Interpretation Guide:</strong>',
-                    '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
-                    '<li>OR > 1: Factor increases the odds of the outcome</li>',
-                    '<li>OR < 1: Factor decreases the odds of the outcome</li>',
-                    '<li>OR = 1: No association between factor and outcome</li>',
-                    '<li>95% CI not crossing 1.0 indicates statistical significance</li>',
-                    '</ul>',
-                    '</div>',
-                    '</div>'
+                    '<p style="margin: 10px 0;"><strong>Key Findings:</strong></p>',
+                    '<ul style="margin: 5px 0; padding-left: 20px;">',
+                    '<li>', findings$significant_count, ' out of ', findings$total_predictors, ' predictor(s) showed statistically significant associations (p < 0.05)</li>'
                 )
                 
-                return(summary_html)
+                if (findings$strongest_predictor != "") {
+                    summary_html <- paste0(summary_html,
+                        '<li>Strongest association: <em>', findings$strongest_predictor, '</em> with ', interpretation, '</li>'
+                    )
+                }
+                
+                summary_html <- paste0(summary_html, '</ul>')
+            } else {
+                summary_html <- paste0(summary_html,
+                    '<p style="margin: 10px 0;"><strong>Key Findings:</strong> None of the ', findings$total_predictors, 
+                    ' predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05).</p>'
+                )
+            }
+            
+            # Add model performance if available
+            if (!is.null(metrics) && metrics != "") {
+                summary_html <- paste0(summary_html,
+                    '<p style="margin: 10px 0;"><strong>Model Performance:</strong> ', metrics, '</p>'
+                )
+            }
+            
+            # Add clinical recommendations based on detected scenario
+            if (!is.null(preset) && !is.null(preset$recommendations)) {
+                summary_html <- paste0(summary_html,
+                    '<div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;">',
+                    '<strong>🩺 Clinical Recommendations:</strong>',
+                    '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">'
+                )
+                
+                for (rec in preset$recommendations) {
+                    summary_html <- paste0(summary_html, '<li>', rec, '</li>')
+                }
+                
+                summary_html <- paste0(summary_html, '</ul></div>')
+            }
+            
+            # Add interpretation guide
+            summary_html <- paste0(summary_html,
+                '<div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-top: 10px;">',
+                '<strong>💡 Interpretation Guide:</strong>',
+                '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
+                '<li>OR > 1: Factor increases the odds of the outcome</li>',
+                '<li>OR < 1: Factor decreases the odds of the outcome</li>',
+                '<li>OR = 1: No association between factor and outcome</li>',
+                '<li>95% CI not crossing 1.0 indicates statistical significance</li>',
+                '</ul>',
+                '</div>',
+                '</div>'
+            )
+            
+            return(summary_html)
+        }
+
+        # Main function now simplified and focused
+        ,
+        .generateOddsRatioSummary = function(tOdds, formulaDependent, formulaExplanatory) {
+            tryCatch({
+                # Use helper functions for cleaner, maintainable code
+                findings <- private$.extractSignificantPredictors(tOdds[[1]])
+                metrics <- if (!is.null(tOdds[[2]])) tOdds[[2]] else NULL
+                
+                # Extract variable names for clinical scenario detection
+                explanatory_vars <- if (!is.null(formulaExplanatory)) {
+                    strsplit(formulaExplanatory, " \\+ ")[[1]]
+                } else {
+                    character(0)
+                }
+                
+                return(private$.buildSummaryHTML(findings, metrics, formulaDependent, explanatory_vars))
                 
             }, error = function(e) {
-                return('<p style="color: #721c24;">Unable to generate summary. Please check the analysis results.</p>')
+                return(private$.formatErrorMessage(
+                    "calculation_error",
+                    "Unable to generate analysis summary",
+                    "There was an error processing the odds ratio results",
+                    c("Check that your data meets analysis requirements", "Verify variable types and completeness")
+                ))
             })
         }
         ,
@@ -1108,7 +1353,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(summary_html)
                 
             }, error = function(e) {
-                return('<p style="color: #721c24;">Unable to generate nomogram summary. Please check the analysis results.</p>')
+                return(private$.formatErrorMessage(
+                    "calculation_error", 
+                    "Unable to generate nomogram summary",
+                    "There was an error processing the nomogram results",
+                    c("Ensure sufficient data for nomogram creation", "Verify model convergence", "Check variable completeness")
+                ))
             })
         }
         ,
@@ -1212,6 +1462,231 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
             })
+        }
+
+        # Helper function to restore original variable names in finalfit output table
+        ,
+        .restoreOriginalNamesInTable = function(table_data, all_labels) {
+            if (is.null(table_data) || nrow(table_data) == 0) return(table_data)
+            
+            # Create a mapping from cleaned names to original names
+            name_mapping <- setNames(unlist(all_labels), names(all_labels))
+            
+            # Restore names in the first column (which typically contains variable names)
+            if (ncol(table_data) > 0) {
+                first_col <- table_data[[1]]
+                
+                # Process each row in the first column
+                for (i in seq_along(first_col)) {
+                    current_name <- first_col[i]
+                    
+                    # Skip if it's not a string or is empty
+                    if (is.na(current_name) || current_name == "" || !is.character(current_name)) next
+                    
+                    # Handle different finalfit naming patterns:
+                    # 1. Direct variable name match
+                    if (current_name %in% names(name_mapping)) {
+                        first_col[i] <- name_mapping[current_name]
+                    }
+                    # 2. Variable name with factor level (e.g., "variable_nameLevel1")
+                    else {
+                        # Try to find a matching cleaned name that's a prefix
+                        for (clean_name in names(name_mapping)) {
+                            if (startsWith(current_name, clean_name)) {
+                                # Replace the cleaned prefix with original name
+                                suffix <- substring(current_name, nchar(clean_name) + 1)
+                                first_col[i] <- paste0(name_mapping[clean_name], suffix)
+                                break
+                            }
+                        }
+                    }
+                }
+                
+                table_data[[1]] <- first_col
+            }
+            
+            return(table_data)
+        }
+
+        # Helper function to check statistical assumptions and recommend alternatives
+        ,
+        .checkStatisticalAssumptions = function(cont_table) {
+            assumptions_ok <- TRUE
+            recommendations <- list()
+            warnings <- list()
+            
+            # Check minimum expected cell counts for chi-square assumptions
+            if (is.matrix(cont_table) && nrow(cont_table) == 2 && ncol(cont_table) == 2) {
+                # Calculate expected counts under independence assumption
+                row_totals <- rowSums(cont_table)
+                col_totals <- colSums(cont_table)
+                total_n <- sum(cont_table)
+                
+                expected_counts <- matrix(0, nrow = 2, ncol = 2)
+                for (i in 1:2) {
+                    for (j in 1:2) {
+                        expected_counts[i, j] <- (row_totals[i] * col_totals[j]) / total_n
+                    }
+                }
+                
+                min_expected <- min(expected_counts)
+                
+                if (min_expected < 5) {
+                    assumptions_ok <- FALSE
+                    warnings <- append(warnings, paste0(
+                        "⚠️ Small expected cell counts detected (minimum = ", round(min_expected, 2), "). ",
+                        "Chi-square assumptions may be violated."
+                    ))
+                    
+                    recommendations <- append(recommendations, list(
+                        test = "Fisher's exact test",
+                        reason = "More reliable for small cell counts",
+                        code = "fisher.test()",
+                        interpretation = "Provides exact p-values regardless of sample size"
+                    ))
+                }
+                
+                # Check for very small total sample size
+                if (total_n < 20) {
+                    warnings <- append(warnings, paste0(
+                        "⚠️ Very small sample size (n = ", total_n, "). ",
+                        "Results should be interpreted with extreme caution."
+                    ))
+                }
+                
+                # Check for zero cells
+                if (any(cont_table == 0)) {
+                    warnings <- append(warnings, 
+                        "⚠️ Zero cells detected in contingency table. This may affect odds ratio calculation."
+                    )
+                }
+            }
+            
+            return(list(
+                assumptions_ok = assumptions_ok,
+                warnings = warnings,
+                recommendations = recommendations,
+                expected_counts = if (exists("expected_counts")) expected_counts else NULL
+            ))
+        }
+
+        # Helper function to monitor memory usage for large datasets
+        ,
+        .checkMemoryUsage = function(data_size_mb, operation = "analysis") {
+            # Get current memory usage
+            current_memory <- as.numeric(object.size(self$data)) / 1024^2  # Convert to MB
+            
+            # Define memory thresholds
+            warning_threshold <- 100  # MB
+            critical_threshold <- 500  # MB
+            
+            if (current_memory > critical_threshold) {
+                warning(paste0(
+                    "⚠️ Large Dataset Warning: Dataset size is ", round(current_memory, 1), " MB. ",
+                    "This may cause performance issues or memory problems during ", operation, ". ",
+                    "Consider:\n",
+                    "• Working with a representative sample\n",
+                    "• Reducing the number of variables\n", 
+                    "• Checking available system memory"
+                ))
+                return("critical")
+            } else if (current_memory > warning_threshold) {
+                message(paste0(
+                    "ℹ️ Dataset size: ", round(current_memory, 1), " MB. ",
+                    "Analysis may take longer than usual."
+                ))
+                return("warning")
+            }
+            return("normal")
+        }
+
+        # Helper function for configurable positive level detection
+        ,
+        .detectPositiveLevels = function(levels, language = "auto") {
+            # Configure positive indicators by language
+            if (language == "auto") {
+                # Detect language from levels or use default
+                language <- if (any(grepl("[ıüğşçöİÜĞŞÇÖ]", levels))) "tr" else "en"
+            }
+            
+            # Positive indicators by language
+            indicators <- switch(language,
+                "en" = c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "1", "TRUE", "Bad", "Dead", "Event"),
+                "tr" = c("Pozitif", "Evet", "Mevcut", "Maruz", "Yüksek", "Anormal", "1", "DOĞRU", "Kötü", "Ölü", "Olay", 
+                        "Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "TRUE", "Bad", "Dead", "Event"), # Fallback to English
+                c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "1", "TRUE", "Bad", "Dead", "Event") # Default
+            )
+            
+            # Try to find positive level
+            positive_matches <- levels[levels %in% indicators]
+            
+            if (length(positive_matches) == 1) {
+                return(list(
+                    level = positive_matches[1],
+                    method = paste("Automatic detection (", language, ")", sep = "")
+                ))
+            } else if (length(positive_matches) > 1) {
+                # Multiple matches - use first priority match
+                return(list(
+                    level = positive_matches[1],
+                    method = paste("Automatic detection - first match (", language, ")", sep = "")
+                ))
+            } else {
+                # No matches - use default (second level alphabetically)
+                return(list(
+                    level = levels[min(2, length(levels))],
+                    method = "Default (second level alphabetically)"
+                ))
+            }
+        }
+
+        # Helper function to create plot data with original variable names
+        ,
+        .createPlotDataWithOriginalNames = function(mydata, all_labels) {
+            if (is.null(all_labels) || length(all_labels) == 0) {
+                # Fallback: return data as-is if no labels available
+                return(list(
+                    data = mydata,
+                    formulaDependent = names(mydata)[1],  # Fallback
+                    formulaExplanatory = names(mydata)[-1]  # Fallback
+                ))
+            }
+            
+            # Create a copy of the data with original column names
+            plotData <- mydata
+            name_mapping <- setNames(unlist(all_labels), names(all_labels))
+            
+            # Restore original column names
+            original_names <- character(ncol(plotData))
+            for (i in seq_along(names(plotData))) {
+                clean_name <- names(plotData)[i]
+                if (clean_name %in% names(name_mapping)) {
+                    original_names[i] <- name_mapping[clean_name]
+                } else {
+                    original_names[i] <- clean_name  # Keep as-is if not found
+                }
+            }
+            
+            names(plotData) <- original_names
+            
+            # Create formulas with original names
+            original_dependent <- original_names[1]  # Assuming first column is dependent
+            original_explanatory <- original_names[-1]  # Rest are explanatory
+            
+            # Find the correct dependent and explanatory variables
+            # Match with the labels to find the right variables
+            for (clean_name in names(name_mapping)) {
+                original_name <- name_mapping[clean_name]
+                if (original_name %in% original_names) {
+                    # This helps maintain the correct variable identification
+                }
+            }
+            
+            return(list(
+                data = plotData,
+                formulaDependent = original_dependent,
+                formulaExplanatory = original_explanatory
+            ))
         }
 
 

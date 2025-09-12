@@ -65,7 +65,37 @@ A results object containing:
 Function for Odds Ratio Table and Plot.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Basic odds ratio analysis with binary outcome
+library(ClinicoPath)
+data('histopathology')
+
+# Example 1: Simple odds ratio analysis
+result1 <- oddsratio(
+    data = histopathology,
+    explanatory = c("New Test", "Rater 1"),
+    outcome = "Golden Standart",
+    outcomeLevel = "1"
+)
+
+# Example 2: Comprehensive analysis with nomogram
+result2 <- oddsratio(
+    data = histopathology,
+    explanatory = c("New Test", "Rater 1", "Rater 2"),
+    outcome = "Golden Standart",
+    outcomeLevel = "1",
+    showNomogram = TRUE,
+    showSummaries = TRUE,
+    showExplanations = TRUE
+)
+
+# Example 3: Analysis with continuous and categorical predictors
+# Assuming additional variables in dataset
+result3 <- oddsratio(
+    data = clinical_data,
+    explanatory = c("age", "gender", "treatment"),
+    outcome = "mortality",
+    outcomeLevel = "Dead",
+    showSummaries = TRUE
+)
+
 }

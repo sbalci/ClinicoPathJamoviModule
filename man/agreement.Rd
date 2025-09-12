@@ -10,7 +10,7 @@ agreement(
   sft = FALSE,
   heatmap = FALSE,
   heatmapDetails = FALSE,
-  heatmapTheme = "ryg",
+  heatmapTheme = "viridis",
   wght = "unweighted",
   exct = FALSE,
   multiraterMethod = "auto",
@@ -25,12 +25,18 @@ agreement(
   showAboutAnalysis = FALSE,
   showAssumptions = FALSE,
   showWeightedKappaGuide = TRUE,
+  showStatisticalGlossary = FALSE,
   diagnosticStyleAnalysis = FALSE,
   styleClusterMethod = "ward",
   styleDistanceMetric = "agreement",
   styleGroups = 3,
   raterCharacteristics = FALSE,
+  experienceVar,
+  trainingVar,
+  institutionVar,
+  specialtyVar,
   identifyDiscordantCases = FALSE,
+  caseID,
   icc = FALSE,
   bootstrap = FALSE,
   bootstrapSamples = 1000,
@@ -115,6 +121,9 @@ common pitfalls, and interpretation guidelines for the analysis.}
 \item{showWeightedKappaGuide}{Show explanatory guide for weighted kappa
 options, including when to use linear vs quadratic weighting schemes.}
 
+\item{showStatisticalGlossary}{Show glossary of statistical terms (kappa,
+ICC, alpha, etc.) with clinical interpretations and usage guidelines.}
+
 \item{diagnosticStyleAnalysis}{Enable diagnostic style clustering analysis
 using the Usubutun method to identify pathologist "schools" or diagnostic
 approaches.}
@@ -131,8 +140,23 @@ et al. found 3 groups optimal for most analyses.}
 \item{raterCharacteristics}{Include rater background characteristics
 (experience, training, institution) in style analysis.}
 
+\item{experienceVar}{Optional variable containing rater experience
+information (years of experience, level of training, etc.)}
+
+\item{trainingVar}{Optional variable containing rater training institution
+or background information}
+
+\item{institutionVar}{Optional variable containing rater current
+institution or location information}
+
+\item{specialtyVar}{Optional variable containing rater medical specialty or
+subspecialty information}
+
 \item{identifyDiscordantCases}{Identify cases that distinguish different
 diagnostic styles - useful for training and consensus development.}
+
+\item{caseID}{Optional variable containing case identifiers. If not
+specified, cases will be numbered automatically.}
 
 \item{icc}{Calculate ICC for continuous or ordinal data. Provides
 additional reliability measures beyond kappa.}
@@ -216,12 +240,15 @@ A results object containing:
 \code{results$confusionMatrixPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$diagnosticStyleDendrogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$diagnosticStyleHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticStyleCombined} \tab \tab \tab \tab \tab an image \cr
 \code{results$raterFrequencyTables$frequencyTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$crosstabTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$statisticalGlossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$gwetACTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pabakTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$sampleSizeTable} \tab \tab \tab \tab \tab a table \cr

@@ -25,3 +25,10 @@ children:
       - type: TextBox
         name: decimal_places
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: outliers
+      - type: CheckBox
+        name: report_sentences

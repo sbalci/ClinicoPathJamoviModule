@@ -19,6 +19,16 @@ items:
       title: To Do
       type:  Html
 
+    - name: aboutAnalysis
+      title: "About This Analysis"
+      type: Html
+      visible: true
+
+    - name: clinicalSummary
+      title: "Clinical Summary"
+      type: Html
+      visible: true
+
     - title: Summary of True Counts
       name: summary
       type: Table
@@ -60,6 +70,16 @@ items:
       requiresData: true
       refs:
         - upset
+
+    - name: reportSentences
+      title: "Copy-Ready Clinical Summary"
+      type: Html
+      visible: true
+
+    - name: assumptions
+      title: "Interpretation Guide & Assumptions"
+      type: Html
+      visible: true
 
 refs:
     - ClinicoPathJamoviModule

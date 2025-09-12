@@ -200,6 +200,44 @@
 #' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme
 #'
 
+# Helper function to escape variable names with special characters for formulas
+.escapeVariableNames <- function(var_names) {
+    # Check if variable names contain special characters that need escaping
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    return(var_names)
+}
+
+# Helper function to restore original variable names in finalfit output tables
+.restoreOriginalNamesInSurvivalTable <- function(table_data, name_mapping) {
+    if (is.null(table_data) || nrow(table_data) == 0 || is.null(name_mapping)) {
+        return(table_data)
+    }
+    
+    # Restore names in the first column (which typically contains variable names)
+    if (ncol(table_data) > 0) {
+        first_col <- table_data[[1]]
+        
+        # For each cell in the first column, try to restore original name
+        for (j in seq_along(first_col)) {
+            cell_value <- first_col[j]
+            if (!is.na(cell_value) && cell_value %in% names(name_mapping)) {
+                table_data[j, 1] <- name_mapping[cell_value]
+            }
+        }
+    }
+    
+    return(table_data)
+}
+
+# Helper function to get display name for variables (original name or fallback)
+.getDisplayName <- function(var_name, name_mapping) {
+    if (is.null(name_mapping) || is.null(var_name) || length(var_name) == 0) {
+        return(as.character(var_name))
+    }
+    return(name_mapping[var_name] %||% as.character(var_name))
+}
+
 survivalClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "survivalClass",
@@ -488,6 +526,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 , "mydxdate_labelled" = mydxdate
                 , "myfudate_labelled" = myfudate
                 , "myexplanatory_labelled" = myexplanatory
+                , "all_labels" = all_labels
+                , "original_names_mapping" = corrected_labels
             ))
 
 
@@ -530,11 +570,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .validateInputs = function() {
                 # Check required variables
                 if (is.null(self$options$outcome)) {
-                    jmvcore::reject("Outcome variable is required. Please select a variable that indicates whether an event occurred (e.g., death, recurrence).", code="missing_outcome")
+                    jmvcore::reject(.("Outcome variable is required. Please select a variable that indicates whether an event occurred (e.g., death, recurrence)."), code="missing_outcome")
                 }
                 
                 if (is.null(self$options$explanatory)) {
-                    jmvcore::reject("Explanatory variable is required. Please select a categorical variable to compare survival between groups.", code="missing_explanatory")
+                    jmvcore::reject(.("Explanatory variable is required. Please select a categorical variable to compare survival between groups."), code="missing_explanatory")
                 }
                 
                 # Check time variables
@@ -542,23 +582,23 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 dates_provided <- self$options$tint && !is.null(self$options$dxdate) && !is.null(self$options$fudate)
                 
                 if (!time_provided && !dates_provided) {
-                    jmvcore::reject("Time information is required. Either provide a survival time variable or enable date calculation with diagnosis and follow-up dates.", code="missing_time")
+                    jmvcore::reject(.("Time information is required. Either provide a survival time variable or enable date calculation with diagnosis and follow-up dates."), code="missing_time")
                 }
                 
                 if (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) {
-                    jmvcore::reject("When using dates to calculate survival time, both diagnosis date and follow-up date are required.", code="incomplete_dates")
+                    jmvcore::reject(.("When using dates to calculate survival time, both diagnosis date and follow-up date are required."), code="incomplete_dates")
                 }
                 
                 # Check multievent configuration
                 if (self$options$multievent) {
                     if (is.null(self$options$dod) && is.null(self$options$dooc)) {
-                        jmvcore::reject("When using multiple event levels, at least one event type (Dead of Disease or Dead of Other) must be specified.", code="missing_multievent")
+                        jmvcore::reject(.("When using multiple event levels, at least one event type (Dead of Disease or Dead of Other) must be specified."), code="missing_multievent")
                     }
                 }
                 
                 # Check data availability
                 if (nrow(self$data) == 0) {
-                    jmvcore::reject("No data available for analysis. Please check your dataset.", code="empty_data")
+                    jmvcore::reject(.("No data available for analysis. Please check your dataset."), code="empty_data")
                 }
                 
                 return(TRUE)
@@ -596,7 +636,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                 }, error = function(e) {
                     # Log error but don't break the analysis
-                    warning(paste("Table population failed:", e$message))
+                    warning(paste(.("Table population failed:"), e$message))
                 })
             }
             
@@ -681,14 +721,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         mydata[["start"]] <- date_parser(mydata[[dxdate]])
                         mydata[["end"]] <- date_parser(mydata[[fudate]])
                     } else {
-                        stop(sprintf("Unknown date format: %s. Supported formats are: %s",
+                        stop(sprintf(.("Unknown date format: %s. Supported formats are: %s"),
                                    timetypedata, 
                                    paste(names(lubridate_functions), collapse = ", ")))
                     }
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
-                        stop(sprintf("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: %s", self$options$timetypedata))
+                        stop(sprintf(.("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: %s"), self$options$timetypedata))
                     }
 
                     timetypeoutput <-
@@ -739,7 +779,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         unique_values <- unique(outcome1[!is.na(outcome1)])
                         if (!(length(unique_values) == 2 && all(unique_values %in% c(0, 1)))) {
                             stop(sprintf(
-                                'Outcome variable must be binary (0/1) for survival analysis.\n- Use 0 for censored observations (alive/disease-free)\n- Use 1 for events (death/recurrence)\nCurrent values found: %s\n\nFor multi-state outcomes, enable "Multiple Event Levels" option.',
+                                .('Outcome variable must be binary (0/1) for survival analysis.\n- Use 0 for censored observations (alive/disease-free)\n- Use 1 for events (death/recurrence)\nCurrent values found: %s\n\nFor multi-state outcomes, enable "Multiple Event Levels" option.'),
                                 paste(unique_values, collapse = ", ")
                             ))
 
@@ -758,7 +798,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     } else {
                         stop(sprintf(
-                            'Invalid outcome variable format.\nFor survival analysis, the outcome variable must be:\n- Binary numeric (0/1): 0=censored, 1=event\n- Factor variable: Select appropriate event level\n\nCurrent variable type: %s\nFor complex outcomes with multiple states, enable "Multiple Event Levels" option.',
+                            .('Invalid outcome variable format.\nFor survival analysis, the outcome variable must be:\n- Binary numeric (0/1): 0=censored, 1=event\n- Factor variable: Select appropriate event level\n\nCurrent variable type: %s\nFor complex outcomes with multiple states, enable "Multiple Event Levels" option.'),
                             class(outcome1)[1]
                         ))
 
@@ -869,7 +909,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 factor <- private$.definemyfactor()
 
                 if (is.null(time) || is.null(outcome) || is.null(factor)) {
-                    stop("Error: Data could not be cleaned for analysis.")
+                    stop(.("Error: Data could not be cleaned for analysis."))
                 }
 
                 cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>%
@@ -973,17 +1013,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Run core survival analysis components
                 private$.safeAnalysis(function() {
                     private$.medianSurv(results)
-                }, "Median survival analysis failed")
+                }, .("Median survival analysis failed"))
                 private$.checkpoint()
                 
                 private$.safeAnalysis(function() {
                     private$.cox(results)
-                }, "Cox regression analysis failed")
+                }, .("Cox regression analysis failed"))
                 private$.checkpoint()
                 
                 private$.safeAnalysis(function() {
                     private$.survTable(results)
-                }, "Survival table generation failed")
+                }, .("Survival table generation failed"))
                 private$.checkpoint()
             }
             
@@ -1020,7 +1060,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             # Add interpretation
                             self$results$rmstSummary$setContent(rmst_results$interpretation)
                         }
-                    }, "RMST analysis failed")
+                    }, .("RMST analysis failed"))
                     private$.checkpoint()
                 }
                 
@@ -1028,7 +1068,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$use_parametric) {
                     private$.safeAnalysis(function() {
                         private$.parametricSurvival(results)
-                    }, "Parametric survival analysis failed")
+                    }, .("Parametric survival analysis failed"))
                     private$.checkpoint()
                 }
                 
@@ -1036,7 +1076,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$pw) {
                     private$.safeAnalysis(function() {
                         private$.pairwise(results)
-                    }, "Pairwise comparison analysis failed")
+                    }, .("Pairwise comparison analysis failed"))
                     private$.checkpoint()
                 }
                 
@@ -1044,7 +1084,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$person_time) {
                     private$.safeAnalysis(function() {
                         private$.personTimeAnalysis(results)
-                    }, "Person-time analysis failed")
+                    }, .("Person-time analysis failed"))
                     private$.checkpoint()
                 }
             }
@@ -1055,7 +1095,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Handle data exports and final result population
                 private$.safeAnalysis(function() {
                     private$.exportSurvivalData(results)
-                }, "Survival data export failed")
+                }, .("Survival data export failed"))
                 
                 # Add Calculated Time to Data
                 if (self$options$tint && self$options$calculatedtime && 
@@ -1073,6 +1113,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Populate explanations if enabled
                 private$.populateExplanations()
+                
+                # Populate enhanced clinical content
+                private$.populateEnhancedClinicalContent()
             }
 
             # Main Run Function (Refactored) ----
@@ -1214,6 +1257,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Populate explanations if enabled
                 private$.populateExplanations()
+                
+                # Populate enhanced clinical content
+                private$.populateEnhancedClinicalContent()
             }
 
             # RMST Analysis Function ----
@@ -1233,7 +1279,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         tau <- quantile(mydata[[mytime]], 0.75, na.rm = TRUE)
                     }
                     
-                    formula <- paste('survival::Surv(', mytime, ',', myoutcome, ') ~ ', myfactor)
+                    # Escape variable names for safe formula construction
+                    escaped_mytime <- .escapeVariableNames(mytime)
+                    escaped_myoutcome <- .escapeVariableNames(myoutcome)
+                    escaped_myfactor <- .escapeVariableNames(myfactor)
+                    
+                    formula <- paste('survival::Surv(', escaped_mytime, ',', escaped_myoutcome, ') ~ ', escaped_myfactor)
                     formula <- as.formula(formula)
                     
                     private$.checkpoint()
@@ -1454,7 +1505,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # Modify explanatory variable to include stratification
                         myfactor_with_strata <- paste0(myfactor, " + strata(", strata_var, ")")
                     } else {
-                        warning(paste("Stratification variable", strata_var, "not found. Using standard Cox regression."))
+                        warning(paste(.("Stratification variable"), strata_var, .("not found. Using standard Cox regression.")))
                         myfactor_with_strata <- myfactor
                     }
                 } else {
@@ -1476,6 +1527,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     explanatory = explanatory_formula,
                     metrics = TRUE
                 ) -> tCox
+                
+                # Restore original variable names in Cox regression table
+                if (!is.null(tCox[[1]]) && nrow(tCox[[1]]) > 0) {
+                    labelled_data <- private$.getData()
+                    original_names_mapping <- labelled_data$original_names_mapping
+                    tCox[[1]] <- .restoreOriginalNamesInSurvivalTable(tCox[[1]], original_names_mapping)
+                }
 
                 tCoxtext2 <- glue::glue("
                                 <br>
@@ -1692,7 +1750,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(residuals_df)
                     
                 }, error = function(e) {
-                    warning(paste("Error calculating residuals:", e$message))
+                    warning(paste(.("Error calculating residuals:"), e$message))
                     return(NULL)
                 })
             }
@@ -1713,7 +1771,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
                     
-                    formula <- paste('survival::Surv(', mytime, ',', myoutcome, ') ~ ', myfactor)
+                    # Escape variable names for safe formula construction
+                    escaped_mytime <- .escapeVariableNames(mytime)
+                    escaped_myoutcome <- .escapeVariableNames(myoutcome)
+                    escaped_myfactor <- .escapeVariableNames(myfactor)
+                    
+                    formula <- paste('survival::Surv(', escaped_mytime, ',', escaped_myoutcome, ') ~ ', escaped_myfactor)
                     formula <- as.formula(formula)
                     
                     private$.checkpoint()
@@ -1757,7 +1820,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$survivalExportSummary$setContent(export_summary)
                     
                 }, error = function(e) {
-                    warning(paste("Error exporting survival data:", e$message))
+                    warning(paste(.("Error exporting survival data:"), e$message))
                 })
             }
 
@@ -1948,9 +2011,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 thefactor <-
                     jmvcore::constructFormula(terms = self$options$explanatory)
 
-                title2 <- as.character(thefactor)
+                # Get original display name for table title
+                labelled_data <- private$.getData()
+                original_names_mapping <- labelled_data$original_names_mapping
+                title2 <- .getDisplayName(self$options$explanatory, original_names_mapping)
 
-                pairwiseTable$setTitle(paste0('Pairwise Comparisons ', title2))
+                pairwiseTable$setTitle(paste0(.('Pairwise Comparisons '), title2))
 
                 pairwiseTable$setNote(
                     key = padjustmethod,
@@ -2189,10 +2255,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
+                # Escape variable names for safe formula construction
+                escaped_mytime <- .escapeVariableNames(mytime)
+                escaped_myoutcome <- .escapeVariableNames(myoutcome)
+                
                 myformula <-
-                    paste("survival::Surv(", mytime, ",", myoutcome, ")")
+                    paste("survival::Surv(", escaped_mytime, ",", escaped_myoutcome, ")")
 
-                title2 <- as.character(myfactor)
+                # Get original display name for plot title
+                labelled_data <- private$.getData()
+                original_names_mapping <- labelled_data$original_names_mapping
+                title2 <- .getDisplayName(myfactor, original_names_mapping)
 
                 plot <- plotData %>%
                     finalfit::surv_plot(
@@ -2208,8 +2281,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ylim = c(
                             self$options$ybegin_plot,
                             self$options$yend_plot),
-                        title = paste0("Survival curves for ", title2),
-                        subtitle = "Based on Kaplan-Meier estimates",
+                        title = paste0(.("Survival curves for "), title2),
+                        subtitle = .("Based on Kaplan-Meier estimates"),
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
                         censor = self$options$censored,
@@ -2257,10 +2330,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
+                # Escape variable names for safe formula construction
+                escaped_mytime <- .escapeVariableNames(mytime)
+                escaped_myoutcome <- .escapeVariableNames(myoutcome)
+                
                 myformula <-
-                    paste("survival::Surv(", mytime, ",", myoutcome, ")")
+                    paste("survival::Surv(", escaped_mytime, ",", escaped_myoutcome, ")")
 
-                title2 <- as.character(myfactor)
+                # Get original display name for plot title
+                labelled_data <- private$.getData()
+                original_names_mapping <- labelled_data$original_names_mapping
+                title2 <- .getDisplayName(myfactor, original_names_mapping)
 
                 plot2 <- plotData %>%
                     finalfit::surv_plot(
@@ -2276,7 +2356,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ylim = c(
                             self$options$ybegin_plot,
                             self$options$yend_plot),
-                        title = paste0("Cumulative Events ", title2),
+                        title = paste0(.("Cumulative Events "), title2),
                         fun = "event",
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
@@ -2323,10 +2403,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
+                # Escape variable names for safe formula construction
+                escaped_mytime <- .escapeVariableNames(mytime)
+                escaped_myoutcome <- .escapeVariableNames(myoutcome)
+                
                 myformula <-
-                    paste("survival::Surv(", mytime, ",", myoutcome, ")")
+                    paste("survival::Surv(", escaped_mytime, ",", escaped_myoutcome, ")")
 
-                title2 <- as.character(myfactor)
+                # Get original display name for plot title
+                labelled_data <- private$.getData()
+                original_names_mapping <- labelled_data$original_names_mapping
+                title2 <- .getDisplayName(myfactor, original_names_mapping)
 
 
                 plot3 <- plotData %>%
@@ -2343,7 +2430,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ylim = c(
                             self$options$ybegin_plot,
                             self$options$yend_plot),
-                        title = paste0("Cumulative Hazard ", title2),
+                        title = paste0(.("Cumulative Hazard "), title2),
                         fun = "cumhaz",
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
@@ -2400,19 +2487,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 km_fit <-
                     survival::survfit(myformula, data = plotData)
 
-                title2 <- as.character(myfactor)
+                # Get original display name for plot title
+                labelled_data <- private$.getData()
+                original_names_mapping <- labelled_data$original_names_mapping
+                title2 <- .getDisplayName(myfactor, original_names_mapping)
 
                 # Create log-log plot
                 tryCatch({
                     plot7 <- plotData %>%
                         finalfit::surv_plot(
                             .data = .,
-                            dependent = paste("Surv(", mytime, ",", myoutcome, ")"),
+                            dependent = paste("Surv(", escaped_mytime, ",", escaped_myoutcome, ")"),
                             explanatory = myfactor,
                             xlab = paste0('log(Time) (', self$options$timetypeoutput, ')'),
                             ylab = 'log(-log(Survival))',
-                            title = paste0("Log-Log Plot for ", title2),
-                            subtitle = "Assessment of Proportional Hazards Assumption",
+                            title = paste0(.("Log-Log Plot for "), title2),
+                            subtitle = .("Assessment of Proportional Hazards Assumption"),
                             fun = function(x) log(-log(x)),
                             legend = 'right'
                         ) +
@@ -2445,8 +2535,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ggplot2::labs(
                             x = paste0('log(Time) (', self$options$timetypeoutput, ')'),
                             y = 'log(-log(Survival))',
-                            title = paste0("Log-Log Plot for ", title2),
-                            subtitle = "Parallel lines suggest proportional hazards"
+                            title = paste0(.("Log-Log Plot for "), title2),
+                            subtitle = .("Parallel lines suggest proportional hazards")
                         ) +
                         ggtheme
                     
@@ -2488,7 +2578,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     jmvcore::toNumeric(plotData[[mytime]])
 
 
-                title2 <- as.character(myfactor)
+                # Get original display name for plot title
+                labelled_data <- private$.getData()
+                original_names_mapping <- labelled_data$original_names_mapping
+                title2 <- .getDisplayName(myfactor, original_names_mapping)
 
 
                 myformula <-
@@ -2547,8 +2640,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ggplot2::labs(
                             x = "Observation Index",
                             y = "Martingale Residuals",
-                            title = "Cox Model Residual Diagnostics",
-                            subtitle = "Martingale residuals should be randomly scattered around zero"
+                            title = .("Cox Model Residual Diagnostics"),
+                            subtitle = .("Martingale residuals should be randomly scattered around zero")
                         ) +
                         ggtheme
                     
@@ -2556,7 +2649,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     TRUE
                     
                 }, error = function(e) {
-                    warning(paste("Error creating residuals plot:", e$message))
+                    warning(paste(.("Error creating residuals plot:"), e$message))
                     FALSE
                 })
             }
@@ -2935,6 +3028,489 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ')
             }
             
+            # Clinical Interpretation Helper Functions ----
+            ,
+            .generateClinicalInterpretation = function(results, analysis_type = "overall") {
+                if (!self$options$showSummaries) return("")
+                
+                interpretations <- list()
+                
+                # Median Survival Clinical Context
+                if (!is.null(results$medianData) && nrow(results$medianData) > 0) {
+                    for (i in seq_len(nrow(results$medianData))) {
+                        # Safe column access with fallbacks
+                        group_name <- tryCatch({
+                            results$medianData[[i, 1]]
+                        }, error = function(e) paste("Group", i))
+                        
+                        median_val <- tryCatch({
+                            col_names <- names(results$medianData)
+                            if ("median" %in% col_names) {
+                                results$medianData[[i, "median"]]
+                            } else if ("time" %in% col_names) {
+                                results$medianData[[i, "time"]]
+                            } else if (ncol(results$medianData) >= 2) {
+                                results$medianData[[i, 2]]  # Second column as fallback
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_lower <- tryCatch({
+                            col_names <- names(results$medianData)
+                            if ("lcl" %in% col_names) {
+                                results$medianData[[i, "lcl"]]
+                            } else if ("lower" %in% col_names) {
+                                results$medianData[[i, "lower"]]
+                            } else if ("conf.low" %in% col_names) {
+                                results$medianData[[i, "conf.low"]]
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_upper <- tryCatch({
+                            col_names <- names(results$medianData)
+                            if ("ucl" %in% col_names) {
+                                results$medianData[[i, "ucl"]]
+                            } else if ("upper" %in% col_names) {
+                                results$medianData[[i, "upper"]]
+                            } else if ("conf.high" %in% col_names) {
+                                results$medianData[[i, "conf.high"]]
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        if (is.na(median_val) || median_val == "NR") {
+                            clinical_meaning <- paste(.("In the"), group_name, .("group, fewer than half of the patients experienced the event during the follow-up period. This is typically considered a favorable prognostic finding."))
+                        } else {
+                            # Generate time-specific clinical context
+                            time_context <- ""
+                            if (median_val <= 6) {
+                                time_context <- .("indicating a rapidly progressing condition requiring urgent intervention")
+                            } else if (median_val <= 12) {
+                                time_context <- .("suggesting an acute condition with significant short-term impact")
+                            } else if (median_val <= 36) {
+                                time_context <- .("indicating a condition with moderate progression timeline")
+                            } else if (median_val <= 60) {
+                                time_context <- .("suggesting a chronic condition with extended survival")
+                            } else {
+                                time_context <- .("indicating excellent long-term prognosis")
+                            }
+                            
+                            clinical_meaning <- paste(.("In the"), group_name, .("group, half of the patients experienced the event by"), median_val, .("months,"), time_context, .(". The 95% confidence interval ("), ci_lower, .("to"), ci_upper, .(") provides the range of uncertainty around this estimate."))
+                        }
+                        
+                        interpretations[[paste("median", group_name)]] <- clinical_meaning
+                    }
+                }
+                
+                # Cox Regression Clinical Context
+                if (!is.null(results$coxData) && nrow(results$coxData) > 0) {
+                    for (i in seq_len(nrow(results$coxData))) {
+                        # Safer column access with dynamic column detection
+                        cox_cols <- names(results$coxData)
+                        
+                        comparison <- tryCatch({
+                            if (any(c("comparison", "term", "group", "variable") %in% cox_cols)) {
+                                idx <- which(c("comparison", "term", "group", "variable") %in% cox_cols)[1]
+                                col_name <- c("comparison", "term", "group", "variable")[idx]
+                                results$coxData[[i, col_name]]
+                            } else if (ncol(results$coxData) >= 1) {
+                                results$coxData[[i, 1]]  # First column as fallback
+                            } else {
+                                paste("Group", i)
+                            }
+                        }, error = function(e) paste("Group", i))
+                        
+                        hr <- tryCatch({
+                            hr_candidates <- c("hr", "hazard.ratio", "exp.coef", "HR", "exp_coef")
+                            hr_col <- intersect(hr_candidates, cox_cols)[1]
+                            if (!is.na(hr_col)) {
+                                as.numeric(results$coxData[[i, hr_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_lower <- tryCatch({
+                            lower_candidates <- c("hrLower", "conf.low", "lower", "hr.lower", "ci_lower")
+                            lower_col <- intersect(lower_candidates, cox_cols)[1]
+                            if (!is.na(lower_col)) {
+                                as.numeric(results$coxData[[i, lower_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_upper <- tryCatch({
+                            upper_candidates <- c("hrUpper", "conf.high", "upper", "hr.upper", "ci_upper")
+                            upper_col <- intersect(upper_candidates, cox_cols)[1]
+                            if (!is.na(upper_col)) {
+                                as.numeric(results$coxData[[i, upper_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        p_val <- tryCatch({
+                            p_candidates <- c("hrp", "p.value", "pvalue", "p", "Pr...z..")
+                            p_col <- intersect(p_candidates, cox_cols)[1]
+                            if (!is.na(p_col)) {
+                                as.numeric(results$coxData[[i, p_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        if (!is.na(hr)) {
+                            # Clinical interpretation based on HR magnitude
+                            risk_interpretation <- ""
+                            clinical_significance <- ""
+                            
+                            if (hr < 0.5) {
+                                risk_interpretation <- paste(.("strongly protective effect ("), round((1-hr)*100, 0), .("% risk reduction)"))
+                                clinical_significance <- .("This represents a clinically meaningful protective effect")
+                            } else if (hr < 0.8) {
+                                risk_interpretation <- paste(.("moderate protective effect ("), round((1-hr)*100, 0), .("% risk reduction)"))
+                                clinical_significance <- .("This suggests a moderate clinical benefit")
+                            } else if (hr < 1.2) {
+                                risk_interpretation <- .("minimal difference in risk")
+                                clinical_significance <- .("This difference may not be clinically meaningful")
+                            } else if (hr < 2.0) {
+                                risk_interpretation <- paste(.("moderately increased risk ("), round((hr-1)*100, 0), .("% higher risk)"))
+                                clinical_significance <- .("This suggests a moderate increase in clinical risk")
+                            } else {
+                                risk_interpretation <- paste(.("substantially increased risk ("), round((hr-1)*100, 0), .("% higher risk)"))
+                                clinical_significance <- .("This represents a clinically significant increase in risk")
+                            }
+                            
+                            # Statistical vs Clinical Significance
+                            statistical_context <- ""
+                            if (p_val < 0.001) {
+                                statistical_context <- .("with very strong statistical evidence")
+                            } else if (p_val < 0.01) {
+                                statistical_context <- .("with strong statistical evidence")
+                            } else if (p_val < 0.05) {
+                                statistical_context <- .("with statistical significance")
+                            } else {
+                                statistical_context <- .("but without statistical significance")
+                            }
+                            
+                            clinical_meaning <- paste(.("Comparing"), comparison, .(": shows a"), risk_interpretation, statistical_context, .(". "), clinical_significance, .(". The hazard ratio of"), round(hr, 2), .("(95% CI:"), round(ci_lower, 2), .("to"), round(ci_upper, 2), .(") indicates the relative risk between groups."))
+                            
+                            interpretations[[paste("cox", gsub(" ", "_", comparison))]] <- clinical_meaning
+                        }
+                    }
+                }
+                
+                return(interpretations)
+            }
+            
+            ,
+            .generateClinicalGlossary = function() {
+                glossary_html <- '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
+                    <h4>📖 Clinical Terminology Glossary</h4>
+                    
+                    <div style="display: grid; gap: 10px; margin-top: 15px;">
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>Event:</strong> The outcome of interest being studied (e.g., death, disease recurrence, treatment failure)
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>Censoring:</strong> When a patient is lost to follow-up or the study ends before the event occurs
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>Median Survival:</strong> Time point when 50% of patients have experienced the event
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>Hazard Ratio (HR):</strong> Risk multiplier comparing two groups (HR=2 means twice the risk)
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>95% Confidence Interval:</strong> Range where we are 95% confident the true value lies
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>P-value:</strong> Probability that observed differences occurred by chance (p&lt;0.05 = statistically significant)
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>Person-Time:</strong> Total follow-up time accounting for varying observation periods
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>Kaplan-Meier:</strong> Non-parametric method to estimate survival probability over time
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>Cox Regression:</strong> Statistical model comparing hazard rates between groups adjusting for time
+                        </div>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                            <strong>RMST:</strong> Restricted Mean Survival Time - average survival within a specific time window
+                        </div>
+                    </div>
+                </div>
+                ';
+                
+                return(glossary_html)
+            }
+            
+            ,
+            .generateCopyReadySentences = function(results) {
+                if (!self$options$showSummaries) return("")
+                
+                sentences <- list()
+                
+                # Generate copy-ready sentences for median survival
+                if (!is.null(results$medianData) && nrow(results$medianData) > 0) {
+                    median_sentences <- c()
+                    
+                    for (i in seq_len(nrow(results$medianData))) {
+                        # Safe column access for median survival data
+                        group_name <- tryCatch({
+                            results$medianData[[i, 1]]
+                        }, error = function(e) paste("Group", i))
+                        
+                        median_val <- tryCatch({
+                            col_names <- names(results$medianData)
+                            if ("median" %in% col_names) {
+                                results$medianData[[i, "median"]]
+                            } else if ("time" %in% col_names) {
+                                results$medianData[[i, "time"]]
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_lower <- tryCatch({
+                            col_names <- names(results$medianData)
+                            if ("lcl" %in% col_names) {
+                                results$medianData[[i, "lcl"]]
+                            } else if ("lower" %in% col_names) {
+                                results$medianData[[i, "lower"]]
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_upper <- tryCatch({
+                            col_names <- names(results$medianData)
+                            if ("ucl" %in% col_names) {
+                                results$medianData[[i, "ucl"]]
+                            } else if ("upper" %in% col_names) {
+                                results$medianData[[i, "upper"]]
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        if (is.na(median_val) || median_val == "NR") {
+                            sentence <- paste(.("Median survival was not reached for the"), group_name, .("group, indicating that fewer than half of patients experienced the event during follow-up."))
+                        } else {
+                            sentence <- paste(.("Median survival for the"), group_name, .("group was"), median_val, .("months (95% CI:"), ci_lower, .("to"), ci_upper, .("months)."))
+                        }
+                        median_sentences <- c(median_sentences, sentence)
+                    }
+                    
+                    sentences[["median_results"]] <- median_sentences
+                }
+                
+                # Generate copy-ready sentences for Cox regression
+                if (!is.null(results$coxData) && nrow(results$coxData) > 0) {
+                    cox_sentences <- c()
+                    
+                    for (i in seq_len(nrow(results$coxData))) {
+                        # Safe column access for Cox regression data
+                        cox_cols <- names(results$coxData)
+                        
+                        comparison <- tryCatch({
+                            if (any(c("comparison", "term", "group", "variable") %in% cox_cols)) {
+                                idx <- which(c("comparison", "term", "group", "variable") %in% cox_cols)[1]
+                                col_name <- c("comparison", "term", "group", "variable")[idx]
+                                results$coxData[[i, col_name]]
+                            } else {
+                                paste("Group", i)
+                            }
+                        }, error = function(e) paste("Group", i))
+                        
+                        hr <- tryCatch({
+                            hr_candidates <- c("hr", "hazard.ratio", "exp.coef", "HR")
+                            hr_col <- intersect(hr_candidates, cox_cols)[1]
+                            if (!is.na(hr_col)) {
+                                as.numeric(results$coxData[[i, hr_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_lower <- tryCatch({
+                            lower_candidates <- c("hrLower", "conf.low", "lower", "hr.lower")
+                            lower_col <- intersect(lower_candidates, cox_cols)[1]
+                            if (!is.na(lower_col)) {
+                                as.numeric(results$coxData[[i, lower_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        ci_upper <- tryCatch({
+                            upper_candidates <- c("hrUpper", "conf.high", "upper", "hr.upper")
+                            upper_col <- intersect(upper_candidates, cox_cols)[1]
+                            if (!is.na(upper_col)) {
+                                as.numeric(results$coxData[[i, upper_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        p_val <- tryCatch({
+                            p_candidates <- c("hrp", "p.value", "pvalue", "p", "Pr...z..")
+                            p_col <- intersect(p_candidates, cox_cols)[1]
+                            if (!is.na(p_col)) {
+                                as.numeric(results$coxData[[i, p_col]])
+                            } else {
+                                NA
+                            }
+                        }, error = function(e) NA)
+                        
+                        if (!is.na(hr)) {
+                            significance <- ifelse(p_val < 0.05, .("statistically significant"), .("not statistically significant"))
+                            direction <- ifelse(hr < 1, .("reduced"), .("increased"))
+                            
+                            sentence <- paste(.("Cox regression analysis showed"), direction, .("risk for"), comparison, .(", with a hazard ratio of"), round(hr, 2), .("(95% CI:"), round(ci_lower, 2), .("to"), round(ci_upper, 2), .(", p ="), round(p_val, 3), .("), which was"), significance, .("."))
+                            cox_sentences <- c(cox_sentences, sentence)
+                        }
+                    }
+                    
+                    sentences[["cox_results"]] <- cox_sentences
+                }
+                
+                # Generate copy-ready sentences for survival probabilities
+                if (!is.null(results$survTable) && nrow(results$survTable) > 0) {
+                    surv_sentences <- c()
+                    
+                    # Common time points for reporting
+                    common_times <- c(12, 36, 60)
+                    
+                    for (time_point in common_times) {
+                        surv_at_time <- results$survTable[results$survTable$time == time_point, ]
+                        
+                        if (nrow(surv_at_time) > 0) {
+                            for (j in seq_len(nrow(surv_at_time))) {
+                                group <- surv_at_time[[j, 1]]
+                                survival <- round(surv_at_time[[j, "survival"]] * 100, 1)
+                                ci_lower <- round(surv_at_time[[j, "lower"]] * 100, 1)
+                                ci_upper <- round(surv_at_time[[j, "upper"]] * 100, 1)
+                                
+                                years <- time_point / 12
+                                sentence <- paste(.("The"), years, .("-year survival rate for the"), group, .("group was"), survival, .("% (95% CI:"), ci_lower, .("% to"), ci_upper, .("%)."))
+                                surv_sentences <- c(surv_sentences, sentence)
+                            }
+                        }
+                    }
+                    
+                    sentences[["survival_probabilities"]] <- surv_sentences
+                }
+                
+                return(sentences)
+            }
+            
+            ,
+            .populateEnhancedClinicalContent = function() {
+                if (!self$options$showExplanations && !self$options$showSummaries) return()
+                
+                # Collect all analysis results from result objects with enhanced validation
+                results <- list()
+                
+                # More robust data collection with validation
+                tryCatch({
+                    if (!is.null(self$results$medianSurvivalTable) && 
+                        self$results$medianSurvivalTable$rowCount > 0) {
+                        df <- self$results$medianSurvivalTable$asDF()
+                        if (nrow(df) > 0 && ncol(df) > 0) {
+                            results$medianData <- df
+                        }
+                    }
+                }, error = function(e) {
+                    # Log warning but continue
+                    warning(paste(.("Could not access median survival data:"), e$message))
+                })
+                
+                tryCatch({
+                    if (!is.null(self$results$coxTable) && 
+                        self$results$coxTable$rowCount > 0) {
+                        df <- self$results$coxTable$asDF()
+                        if (nrow(df) > 0 && ncol(df) > 0) {
+                            results$coxData <- df
+                        }
+                    }
+                }, error = function(e) {
+                    # Log warning but continue
+                    warning(paste(.("Could not access Cox regression data:"), e$message))
+                })
+                
+                tryCatch({
+                    if (!is.null(self$results$survTable) && 
+                        self$results$survTable$rowCount > 0) {
+                        df <- self$results$survTable$asDF()
+                        if (nrow(df) > 0 && ncol(df) > 0) {
+                            results$survTable <- df
+                        }
+                    }
+                }, error = function(e) {
+                    # Log warning but continue
+                    warning(paste(.("Could not access survival probability data:"), e$message))
+                })
+                
+                # Generate clinical interpretations
+                clinical_interpretations <- private$.generateClinicalInterpretation(results)
+                
+                # Generate copy-ready sentences
+                copy_sentences <- private$.generateCopyReadySentences(results)
+                
+                # Add Clinical Glossary
+                if (self$options$showExplanations) {
+                    private$.setExplanationContent("clinicalGlossaryExplanation", private$.generateClinicalGlossary())
+                }
+                
+                # Add Enhanced Clinical Interpretation
+                if (self$options$showSummaries && length(clinical_interpretations) > 0) {
+                    interpretation_html <- paste(
+                        '<div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #007bff;">',
+                        '<h4>🏥 Clinical Interpretation</h4>',
+                        paste(lapply(clinical_interpretations, function(x) paste('<p>', x, '</p>')), collapse = ""),
+                        '</div>'
+                    )
+                    
+                    private$.setExplanationContent("clinicalInterpretationExplanation", interpretation_html)
+                }
+                
+                # Add Copy-Ready Clinical Report Sentences
+                if (self$options$showSummaries && length(copy_sentences) > 0) {
+                    copy_html <- '<div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;"><h4>📝 Copy-Ready Clinical Report Sentences</h4>'
+                    
+                    for (section_name in names(copy_sentences)) {
+                        copy_html <- paste0(copy_html, '<h5>', tools::toTitleCase(gsub("_", " ", section_name)), ':</h5><div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">')
+                        
+                        for (sentence in copy_sentences[[section_name]]) {
+                            copy_html <- paste0(copy_html, '<p style="margin: 5px 0; padding: 5px; background-color: #f8f9fa; border-radius: 3px;">', sentence, '</p>')
+                        }
+                        
+                        copy_html <- paste0(copy_html, '</div>')
+                    }
+                    
+                    copy_html <- paste0(copy_html, '</div>')
+                    
+                    private$.setExplanationContent("copyReadySentencesExplanation", copy_html)
+                }
+            }
+            
             # Parametric Survival Analysis Methods ----
             
             ,
@@ -2942,7 +3518,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Check if flexsurv package is available
                 if (!requireNamespace("flexsurv", quietly = TRUE)) {
-                    warning("flexsurv package is required for parametric survival models. Please install it: install.packages('flexsurv')")
+                    warning(.("flexsurv package is required for parametric survival models. Please install it: install.packages('flexsurv')"))
                     return()
                 }
                 
@@ -2953,8 +3529,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Prepare formula for parametric models
                 if (self$options$parametric_covariates && !is.null(self$options$explanatory)) {
                     explanatory_names <- self$options$explanatory
+                    # Escape variable names for safe formula construction
+                    escaped_explanatory_names <- .escapeVariableNames(explanatory_names)
                     # Build covariate formula
-                    covariate_formula <- paste(explanatory_names, collapse = " + ")
+                    covariate_formula <- paste(escaped_explanatory_names, collapse = " + ")
                     formula_str <- paste("Surv(CalculatedTime, CalculatedOutcome) ~", covariate_formula)
                 } else {
                     # Intercept-only model
@@ -3005,7 +3583,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ))
                         
                     }, error = function(e) {
-                        message(paste("Failed to fit", dist, "distribution:", e$message))
+                        message(paste(.("Failed to fit"), dist, .("distribution:"), e$message))
                     })
                 }
                 
@@ -3181,11 +3759,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         geom_line(size = 1) +
                         geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
                         labs(
-                            title = paste("Parametric Survival Curves:", private$.parametric_model_name),
-                            x = "Time",
-                            y = "Survival Probability",
+                            title = paste(.("Parametric Survival Curves:"), private$.parametric_model_name),
+                            x = .("Time"),
+                            y = .("Survival Probability"),
                             color = self$options$explanatory,
-                            linetype = "Method"
+                            linetype = .("Method")
                         ) +
                         theme_minimal() +
                         scale_y_continuous(limits = c(0, 1))
@@ -3220,10 +3798,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         geom_line(size = 1, color = "blue") +
                         geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "blue") +
                         labs(
-                            title = paste("Parametric vs Kaplan-Meier Survival:", private$.parametric_model_name),
-                            x = "Time", 
-                            y = "Survival Probability",
-                            linetype = "Method"
+                            title = paste(.("Parametric vs Kaplan-Meier Survival:"), private$.parametric_model_name),
+                            x = .("Time"), 
+                            y = .("Survival Probability"),
+                            linetype = .("Method")
                         ) +
                         theme_minimal() +
                         scale_y_continuous(limits = c(0, 1))
@@ -3278,9 +3856,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             geom_line(size = 1) +
                             geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
                             labs(
-                                title = paste("Hazard Function:", private$.parametric_model_name),
-                                x = "Time",
-                                y = "Hazard Rate",
+                                title = paste(.("Hazard Function:"), private$.parametric_model_name),
+                                x = .("Time"),
+                                y = .("Hazard Rate"),
                                 color = self$options$explanatory
                             ) +
                             theme_minimal()
@@ -3299,9 +3877,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             geom_line(size = 1, color = "red") +
                             geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "red") +
                             labs(
-                                title = paste("Hazard Function:", private$.parametric_model_name),
-                                x = "Time",
-                                y = "Hazard Rate"
+                                title = paste(.("Hazard Function:"), private$.parametric_model_name),
+                                x = .("Time"),
+                                y = .("Hazard Rate")
                             ) +
                             theme_minimal()
                     }
@@ -3312,7 +3890,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Fallback simple plot if hazard estimation fails
                     p <- ggplot() +
                         annotate("text", x = 0.5, y = 0.5, 
-                                label = paste("Hazard plot unavailable for", private$.parametric_model_name),
+                                label = paste(.("Hazard plot unavailable for"), private$.parametric_model_name),
                                 size = 4) +
                         theme_void()
                     print(p)
@@ -3407,13 +3985,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
                         geom_vline(xintercept = max_observed_time, linetype = "dashed", color = "gray") +
                         annotate("text", x = max_observed_time, y = 0.9, 
-                                label = "End of observed data", angle = 90, vjust = -0.5) +
+                                label = .("End of observed data"), angle = 90, vjust = -0.5) +
                         labs(
-                            title = paste("Survival Extrapolation:", private$.parametric_model_name),
-                            x = "Time",
-                            y = "Survival Probability",
+                            title = paste(.("Survival Extrapolation:"), private$.parametric_model_name),
+                            x = .("Time"),
+                            y = .("Survival Probability"),
                             color = self$options$explanatory,
-                            linetype = "Period"
+                            linetype = .("Period")
                         ) +
                         theme_minimal() +
                         scale_y_continuous(limits = c(0, 1))
@@ -3446,12 +4024,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "blue") +
                         geom_vline(xintercept = max_observed_time, linetype = "dashed", color = "gray") +
                         annotate("text", x = max_observed_time, y = 0.9, 
-                                label = "End of observed data", angle = 90, vjust = -0.5) +
+                                label = .("End of observed data"), angle = 90, vjust = -0.5) +
                         labs(
-                            title = paste("Survival Extrapolation:", private$.parametric_model_name),
-                            x = "Time",
-                            y = "Survival Probability",
-                            linetype = "Period"
+                            title = paste(.("Survival Extrapolation:"), private$.parametric_model_name),
+                            x = .("Time"),
+                            y = .("Survival Probability"),
+                            linetype = .("Period")
                         ) +
                         theme_minimal() +
                         scale_y_continuous(limits = c(0, 1))

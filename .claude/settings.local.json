@@ -38,7 +38,12 @@
       "Bash(/dev/null)",
       "Read(//Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives/R/**)",
       "WebFetch(domain:jthomasmock.github.io)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(awk:*)",
+      "Read(///**)",
+      "Bash(cut:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": [],

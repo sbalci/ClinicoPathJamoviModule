@@ -603,7 +603,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         hazardFunctionPlot = function() private$.items[["hazardFunctionPlot"]],
         extrapolationPlot = function() private$.items[["extrapolationPlot"]],
         extrapolationTable = function() private$.items[["extrapolationTable"]],
-        parametricModelsExplanation = function() private$.items[["parametricModelsExplanation"]]),
+        parametricModelsExplanation = function() private$.items[["parametricModelsExplanation"]],
+        clinicalGlossaryExplanation = function() private$.items[["clinicalGlossaryExplanation"]],
+        clinicalInterpretationExplanation = function() private$.items[["clinicalInterpretationExplanation"]],
+        copyReadySentencesExplanation = function() private$.items[["copyReadySentencesExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1549,6 +1552,27 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "use_parametric",
                     "parametric_distribution",
                     "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalGlossaryExplanation",
+                title="Clinical Terminology Glossary",
+                visible="(showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretationExplanation",
+                title="Enhanced Clinical Interpretation",
+                visible="(showSummaries)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="copyReadySentencesExplanation",
+                title="Copy-Ready Clinical Report Sentences",
+                visible="(showSummaries)",
+                clearWith=list(
+                    "explanatory",
                     "outcome")))}))
 
 survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1755,6 +1779,9 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$extrapolationPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$extrapolationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$parametricModelsExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalGlossaryExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalInterpretationExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$copyReadySentencesExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

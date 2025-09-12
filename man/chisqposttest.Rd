@@ -14,9 +14,9 @@ chisqposttest(
   excl = FALSE,
   exp = FALSE,
   plot = FALSE,
-  showResiduals = TRUE,
-  showEducational = TRUE,
-  showDetailedTables = TRUE,
+  showResiduals = FALSE,
+  showEducational = FALSE,
+  showDetailedTables = FALSE,
   residualsCutoff = 2,
   testSelection = "auto",
   exportResults = FALSE

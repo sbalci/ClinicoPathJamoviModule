@@ -12,8 +12,11 @@ tableone(data, vars, sty = "t1", excl = FALSE)
 \item{vars}{A set of variable names from \code{data} to include in the
 Table One. Supports numeric, ordinal, and categorical variables.}
 
-\item{sty}{Specify the output style for the table. Each option uses a
-different package for formatting.}
+\item{sty}{Specify the output style for the descriptive table. 'tableone'
+provides standard medical format with means/medians and frequencies,
+'gtsummary' creates publication-ready descriptive tables, 'arsenal'
+generates comprehensive descriptive summaries, and 'janitor' produces
+simple frequency tables for categorical variables.}
 
 \item{excl}{Boolean option to exclude missing values (NA) from the
 analysis. Note: Exclusion may remove entire cases.}
@@ -22,6 +25,9 @@ analysis. Note: Exclusion may remove entire cases.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
