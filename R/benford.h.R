@@ -6,7 +6,8 @@ benfordOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            var = NULL, ...) {
+            var = NULL,
+            digits = 2, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -21,22 +22,34 @@ benfordOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..digits <- jmvcore::OptionInteger$new(
+                "digits",
+                digits,
+                default=2,
+                min=1,
+                max=4)
 
             self$.addOption(private$..var)
+            self$.addOption(private$..digits)
         }),
     active = list(
-        var = function() private$..var$value),
+        var = function() private$..var$value,
+        digits = function() private$..digits$value),
     private = list(
-        ..var = NA)
+        ..var = NA,
+        ..digits = NA)
 )
 
 benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "benfordResults",
     inherit = jmvcore::Group,
     active = list(
+        explanation = function() private$.items[["explanation"]],
+        summary = function() private$.items[["summary"]],
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
+        reportSentence = function() private$.items[["reportSentence"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -50,22 +63,48 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="explanation",
+                title="About Benford's Law in Clinical Data"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="todo",
-                title="To Do"))
+                title="Guidelines"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Benford Analysis"))
+                title="Detailed Analysis Results",
+                visible=FALSE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Suspects"))
+                title="Suspicious Data Points"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentence",
+                title="Clinical Report"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Benford Analysis",
-                width=600,
-                height=450,
+                title="Digit Distribution Analysis",
+                width=700,
+                height=500,
                 renderFun=".plot",
                 requiresData=TRUE))}))
 
@@ -96,18 +135,29 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param var a string naming the variable from \code{data} that contains the
 #'   continuous values used for the report
+#' @param digits Number of first digits to analyze (default: 2)
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 benford <- function(
     data,
-    var) {
+    var,
+    digits = 2) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("benford requires jmvcore to be installed (restart may be required)")
@@ -120,7 +170,8 @@ benford <- function(
 
 
     options <- benfordOptions$new(
-        var = var)
+        var = var,
+        digits = digits)
 
     analysis <- benfordClass$new(
         options = options,

@@ -55,12 +55,6 @@ run devtools::document() to see if there are any errors
 ***
 
 
-- benford - Benford Analysis
-echo "/check-function benford" | claude
-echo "/prepare-translation benford" | claude
-echo "/review-function benford" | claude
-echo "/fix-function benford" | claude
-
 
 - alluvial - Alluvial Diagrams
 echo "/check-function alluvial" | claude
