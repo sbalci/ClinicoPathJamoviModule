@@ -59,6 +59,24 @@ options:
         R: >
           Number of decimal places to display for statistical measures.
 
+    - name: outliers
+      title: "Outlier Detection"
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, detect and report potential outliers using IQR method.
+          Helpful for quality control and identifying data entry errors.
+
+    - name: report_sentences
+      title: "Generate Report Sentences"
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, generate copy-ready clinical report sentences
+          for direct use in medical documentation.
+
 
 #
 #     - name: grvar

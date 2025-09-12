@@ -143,6 +143,14 @@ msgstr ""
 msgid "- May not meet screening standards"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "- Outcome variable '{outcome_var}' has {levels} levels"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "- Predictor variable '{predictor_var}' has {levels} levels"
+msgstr ""
+
 #: advancedbarplot/options/color_palette/separator1.title
 #: raincloud/options/color_palette/separator_prism.title
 msgid "--- GraphPad Prism Palettes ---"
@@ -159,8 +167,40 @@ msgstr ""
 msgid "-LR"
 msgstr ""
 
+#: R/survival.b.R
+msgid "-year survival rate for the"
+msgstr ""
+
+#: R/survival.b.R
+msgid ", p ="
+msgstr ""
+
 #: R/jjridges.b.R
 msgid ", using defaults"
+msgstr ""
+
+#: R/survival.b.R
+msgid ", with a hazard ratio of"
+msgstr ""
+
+#: R/survival.b.R
+msgid ": shows a"
+msgstr ""
+
+#: R/survival.b.R
+msgid "."
+msgstr ""
+
+#: R/survival.b.R
+msgid ". "
+msgstr ""
+
+#: R/survival.b.R
+msgid ". The 95% confidence interval ("
+msgstr ""
+
+#: R/survival.b.R
+msgid ". The hazard ratio of"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -235,6 +275,10 @@ msgstr ""
 msgid "(%s)"
 msgstr ""
 
+#: R/survival.b.R
+msgid "(95% CI:"
+msgstr ""
+
 #: R/decision.b.R
 msgid "(95%% CI: sensitivity %.1f-%.1f%%, specificity %.1f-%.1f%%)"
 msgstr ""
@@ -253,6 +297,10 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid ") between "
+msgstr ""
+
+#: R/survival.b.R
+msgid ") indicates the relative risk between groups."
 msgstr ""
 
 #: R/jjridges.b.R
@@ -275,6 +323,14 @@ msgstr ""
 msgid ") observations ("
 msgstr ""
 
+#: R/survival.b.R
+msgid ") provides the range of uncertainty around this estimate."
+msgstr ""
+
+#: R/survival.b.R
+msgid "), which was"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "). Consider reducing groups or using faceting for clarity."
 msgstr ""
@@ -285,6 +341,10 @@ msgstr ""
 
 #: R/nonparametric.b.R
 msgid "{} group(s) have fewer than 5 observations. Results may be unreliable for small samples."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "{level}: n = {n}, {percent} of valid cases. "
 msgstr ""
 
 #: enhancedcrosstable/options/percent_pattern/col_percent.title
@@ -305,6 +365,10 @@ msgstr ""
 
 #: enhancedcrosstable/options/percent_pattern/percent_only.title
 msgid "{p_col} only"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "{var} Optimal Cut-off Analysis"
 msgstr ""
 
 #: ggprism/options/pvalue_format/stars.title
@@ -437,6 +501,10 @@ msgstr ""
 msgid "%"
 msgstr ""
 
+#: R/survival.b.R
+msgid "% (95% CI:"
+msgstr ""
+
 #: enhancedROC/results/results/detailedComparison.columns.title
 #: labinterpret/results/deltaChecksTable.columns.title
 #: stagemigration/results/frailtyModelsVarianceComponents.columns.title
@@ -447,6 +515,10 @@ msgstr ""
 #: factoranalysis/results/results/eigenvaluesTable.columns.title
 #: jsummarytools/results/frequency_table.columns.title
 msgid "% Cumulative"
+msgstr ""
+
+#: R/survival.b.R
+msgid "% higher risk)"
 msgstr ""
 
 #: stagemigration/results/clinicalUtilityNetBenefit.columns.title
@@ -481,10 +553,15 @@ msgstr ""
 msgid "% Responders"
 msgstr ""
 
+#: R/survival.b.R
+msgid "% risk reduction)"
+msgstr ""
+
 #: waterfall/results/personTimeTable.columns.title
 msgid "% Time"
 msgstr ""
 
+#: R/survival.b.R
 #: likelihoodratio/ui[3][2]/customPrevalenceMin.suffix
 msgid "% to"
 msgstr ""
@@ -508,6 +585,10 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "%)"
+msgstr ""
+
+#: R/survival.b.R
+msgid "%)."
 msgstr ""
 
 #: R/jjridges.b.R
@@ -554,6 +635,14 @@ msgstr ""
 msgid "• Dominated strategies identified and excluded"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "• For categorical variables: Combine categories to create binary grouping"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "• For continuous variables: Create binary categories (e.g., above/below median)"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "• Lifetime costs and utilities calculated"
 msgstr ""
@@ -592,6 +681,10 @@ msgstr ""
 
 #: decisionpanel/ui[7][0][1].label
 msgid "• Specificity: Proportion of true negative cases correctly identified (true negative rate)"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "• Use a different analysis method for multi-level variables"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -1468,12 +1561,24 @@ msgstr ""
 msgid "⚠️ Assumptions & Caveats"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "⚠️ Data Quality Alert"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "⚠️ High missing data rate may affect interpretation"
+msgstr ""
+
 #: R/decision.b.R
 msgid "⚠️ Highly unbalanced test results. Consider the appropriateness of the selected positive level."
 msgstr ""
 
 #: decision/ui[5].label
 msgid "⚠️ Important Notes"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "⚠️ Likelihood Ratio Calculation Error:"
 msgstr ""
 
 #: R/linechart.b.R
@@ -1530,6 +1635,10 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "✓ Central tendency displayed"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "✓ Excellent data completeness"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -1756,6 +1865,10 @@ msgstr ""
 msgid "💵 NMB: Net Monetary Benefit using willingness-to-pay threshold"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "💾 Copy-ready for clinical reports"
+msgstr ""
+
 #: modelbuilder/ui[8][2][0].label
 msgid "💾 Data Export & Integration"
 msgstr ""
@@ -1895,6 +2008,10 @@ msgstr ""
 
 #: agreement/ui[6][0]/show_consensus_table.label
 msgid "📋 Show Detailed Case-by-Case Results"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "📋 Solutions:"
 msgstr ""
 
 #: agreement/ui[10].label
@@ -3118,6 +3235,10 @@ msgstr ""
 msgid "95% CI Lower"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "95% CI not crossing 1.0 indicates statistical significance"
+msgstr ""
+
 #: aivalidation/results/modelComparisonTable.columns.title
 #: aivalidation/results/nriIdiTable.columns.title
 #: biomarkerdiscovery/results/discovery_performance.columns.title
@@ -3444,10 +3565,18 @@ msgstr ""
 msgid "Ability to correctly identify healthy individuals (true negative rate)"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "About Categorical Variable Analysis"
+msgstr ""
+
+#: R/summarydata.b.R
 #: agreement/options/showAboutAnalysis.title
 #: agreement/results/aboutAnalysis.title
+#: decisioncompare/results/aboutAnalysis.title
 #: jjbarstats/results/about.title
 #: jjpiestats/results/about.title
+#: reportcat/results/aboutAnalysis.title
+#: summarydata/results/aboutAnalysis.title
 #: tableone/results/about.title
 msgid "About This Analysis"
 msgstr ""
@@ -3748,6 +3877,10 @@ msgstr ""
 #: labcontrolcharts/results/violationDetails.columns.title
 #: qualitycontrol/results/westgardRules.columns.title
 msgid "Action Required"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Action Required:"
 msgstr ""
 
 #: biomarkerdiscovery/results/quality_control_summary.columns.title
@@ -4907,7 +5040,7 @@ msgstr ""
 #: mixedcox/ui[3].label
 #: multisurvival/ui[1].label
 #: penalizedcox/ui[4].label
-#: singlearm/ui[1].label
+#: singlearm/ui[2].label
 #: surveysurvival/ui[2].label
 #: survival/ui[1].label
 #: survivalcont/ui[2].label
@@ -6021,6 +6154,10 @@ msgstr ""
 msgid "All observations excluded due to missing ID values. Longitudinal connections disabled."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "all p-values ≥ 0.05"
+msgstr ""
+
 #: bayesiannetworkma/results/pairwiseComparisons.title
 msgid "All Pairwise Comparisons"
 msgstr ""
@@ -6342,6 +6479,14 @@ msgstr ""
 msgid "Alternative Tests"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Alternative:"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Alternatives available in this module:"
+msgstr ""
+
 #: enhancedcrosstable/options/showNA/always.title
 #: gtsummary/options/includeMissing/always.title
 msgid "Always"
@@ -6381,6 +6526,10 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "An analysis that uses probability distributions to describe uncertainty in parameters and uses Monte Carlo simulation."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "An error occurred during the survival analysis:"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -6464,6 +6613,14 @@ msgstr ""
 msgid "Analysis Complete"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Analysis completed for {variable}."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Analysis completed. Review detailed results below."
+msgstr ""
+
 #: stagemigration/results/competingRisksSummary.columns.title
 #: stagemigration/results/multiStateSummary.columns.title
 #: stagemigration/results/forestStagingComparison.columns.title
@@ -6509,11 +6666,16 @@ msgstr ""
 
 #: R/linechart.b.R
 #: R/riverplot.b.R
+#: R/survivalcont.b.R
 msgid "Analysis Error"
 msgstr ""
 
 #: survival/ui[8].label
 msgid "Analysis Explanations"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Analysis failed in {context}: {error}. Using fallback method."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -6602,6 +6764,18 @@ msgstr ""
 
 #: ihccluster/results/text.title
 msgid "Analysis Notes (Legacy)"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Analysis of {n} categorical variables from {patients} patients/cases."
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Analysis of {n} continuous variable(s) from {total} patient records"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Analysis of {variable} could not determine hazard ratio."
 msgstr ""
 
 #: enhancedfrequency/results/results/categoryBalancePlot.description
@@ -6706,6 +6880,10 @@ msgstr ""
 
 #: multiplexanalysis/results/interpretation.title
 msgid "Analysis Overview and Clinical Context"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Analysis Overview:"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -6984,7 +7162,7 @@ msgstr ""
 #: simonmakuch/options/analysisType.title
 #: simonmakuch/ui[2][0][0]/analysisType.label
 #: simonmakuch/results/immortalTimeBias.columns.title
-#: singlearm/ui[2][1].label
+#: singlearm/ui[3][1].label
 #: stagemigration/results/concordanceProbabilityRobustness.columns.title
 #: stagemigration/results/winRatioSensitivityResults.columns.title
 #: survival/ui[2][0][0]/analysistype.label
@@ -6992,6 +7170,10 @@ msgstr ""
 #: timeroc/options/analysisType.title
 #: treatmentswitching/results/sensitivityTable.columns.title
 msgid "Analysis Type"
+msgstr ""
+
+#: singlearm/ui[0][0][0]/clinical_preset.label
+msgid "Analysis Type (Select your study scenario)"
 msgstr ""
 
 #: simonmakuch/ui[2][0][0].label
@@ -7002,8 +7184,12 @@ msgstr ""
 msgid "Analysis Type:"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Analysis will proceed, but consider these recommendations for optimal results."
+msgstr ""
+
 #: multisurvival/ui[2].label
-#: singlearm/ui[2].label
+#: singlearm/ui[3].label
 #: survival/ui[2].label
 #: survivalcont/ui[3].label
 msgid "Analysis with Multiple Outcomes"
@@ -7021,6 +7207,10 @@ msgstr ""
 #: R/jjridges.b.R
 #: R/nogoldstandard.b.R
 msgid "Analysis:"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "analysis."
 msgstr ""
 
 #: sigmametrics/results/sigmaResults.columns.title
@@ -7160,6 +7350,7 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 #: R/linechart.b.R
+#: R/reportcat.b.R
 msgid "and"
 msgstr ""
 
@@ -7320,6 +7511,10 @@ msgstr ""
 #: jjarcdiagram/ui[4].label
 #: jwaffle/ui[1][1].label
 msgid "Appearance"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "appears to be normally distributed"
 msgstr ""
 
 #: tidyplots/options/colorScheme/apple.title
@@ -7727,6 +7922,10 @@ msgstr ""
 msgid "Assess sensitivity to prior specifications"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Assessing data quality and completeness before main analysis"
+msgstr ""
+
 #: icccoeff/results/reliability_assessment.columns.title
 #: markovmultistate/results/modelFitStatistics.columns.title
 #: nonparametric/results/assumptions.columns.title
@@ -7747,6 +7946,10 @@ msgstr ""
 #: clinicaltrialdesign/results/assumptions_check.columns.title
 #: screeningevaluation/results/overdiagnosis_assessment.columns.title
 msgid "Assessment Method"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Assessment of Proportional Hazards Assumption"
 msgstr ""
 
 #: screeningevaluation/results/adherence_analysis.columns.title
@@ -8388,6 +8591,10 @@ msgstr ""
 msgid "Automatically selects and generates the most appropriate statistical visualization based on variable data types. Features enhanced error messages with contextual guidance, robust data validation, and comprehensive fallback options. Supports both independent and repeated measures designs with various plot types including violin plots, scatter plots, bar charts, and alluvial diagrams."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Automatically switching to"
+msgstr ""
+
 #: treecompare/options/tune_parameters.description
 msgid "Automatically tune key parameters for each algorithm."
 msgstr ""
@@ -8399,6 +8606,18 @@ msgstr ""
 #: advancedimputation/options/auxiliary_vars.title
 #: advancedimputation/ui[0][1].label
 msgid "Auxiliary Variables"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Available in model outputs"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Available Metrics:"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Available via survivalROC"
 msgstr ""
 
 #: jvisr/options/aval_var.title
@@ -8431,6 +8650,10 @@ msgstr ""
 msgid "Average Linkage"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Average missing data: {pct}%"
+msgstr ""
+
 #: patientdashboard/results/workflowAnalysisTable.columns.title
 msgid "Average Time (min)"
 msgstr ""
@@ -8445,6 +8668,10 @@ msgstr ""
 
 #: treatmenteffects/options/estimand/att.title
 msgid "Average Treatment Effect on Treated (ATT)"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Average value of all observations. Sensitive to outliers."
 msgstr ""
 
 #: coxphw/options/weight_method/average.title
@@ -8477,6 +8704,10 @@ msgstr ""
 
 #: agreement/results/styleSummaryTable.columns.title
 msgid "Avg Within-Group Agreement %"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Avoid reserved R keywords as column names (e.g., 'if', 'else', 'for')"
 msgstr ""
 
 #: jjradarplot/options/axisLabelSize.title
@@ -8813,6 +9044,11 @@ msgstr ""
 msgid "Base Value"
 msgstr ""
 
+#: R/singlearm.b.R
+#: R/survival.b.R
+msgid "Based on Kaplan-Meier estimates"
+msgstr ""
+
 #: decisionpanel/results/panelBuilding.columns.title
 msgid "Baseline Accuracy"
 msgstr ""
@@ -8893,10 +9129,15 @@ msgstr ""
 msgid "Baseline Hazard Analysis Summary"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Baseline hazard calculation failed. This may occur with very sparse data."
+msgstr ""
+
 #: singlearm/results/baselineHazardTable.title
 msgid "Baseline Hazard Estimates"
 msgstr ""
 
+#: R/singlearm.b.R
 #: adaptivelasso/results/baselineHazardPlot.title
 #: singlearm/results/baselineHazardPlot.title
 msgid "Baseline Hazard Function"
@@ -9729,6 +9970,10 @@ msgstr ""
 msgid "Best for"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Best Lambda:"
+msgstr ""
+
 #: stagemigration/results/forestCoxComparison.columns.title
 msgid "Best Method"
 msgstr ""
@@ -10303,6 +10548,10 @@ msgstr ""
 msgid "Biomarker Analysis"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Biomarker characterization studies"
+msgstr ""
+
 #: haralicktexture/options/biomarker_context.title
 msgid "Biomarker Context"
 msgstr ""
@@ -10349,6 +10598,10 @@ msgstr ""
 
 #: jjhistostats/options/clinicalPreset/biomarkers.title
 msgid "Biomarker Distribution (nonparametric, robust)"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Biomarker distribution assessment"
 msgstr ""
 
 #: biomarkerdiscovery/results/biomarker_distribution_plot.title
@@ -11680,6 +11933,10 @@ msgstr ""
 msgid "Burn-in Samples"
 msgstr ""
 
+#: R/survival.b.R
+msgid "but without statistical significance"
+msgstr ""
+
 #: jjbarstats/options/padjustmethod/BY.title
 #: jjbetweenstats/options/padjustmethod/BY.title
 #: jjcorrmat/options/padjustmethod/BY.title
@@ -12478,7 +12735,7 @@ msgid "Calculated H-scores, Allred scores, and binary classifications"
 msgstr ""
 
 #: multisurvival/ui[2][2].label
-#: singlearm/ui[2][2].label
+#: singlearm/ui[3][2].label
 msgid "Calculated Outcome to Data"
 msgstr ""
 
@@ -12493,7 +12750,7 @@ msgstr ""
 #: mixedcox/ui[3][1].label
 #: multisurvival/ui[1][2].label
 #: penalizedcox/ui[4][1].label
-#: singlearm/ui[1][2].label
+#: singlearm/ui[2][2].label
 #: surveysurvival/ui[2][1].label
 msgid "Calculated Time to Data"
 msgstr ""
@@ -12604,6 +12861,10 @@ msgstr ""
 msgid "Calibration Analysis"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Calibration and validation procedures"
+msgstr ""
+
 #: clinicalnomograms/options/calibration_assessment.title
 #: clinicalnomograms/results/calibrationResults.title
 #: clinicalvalidation/options/calibration_method.title
@@ -12645,6 +12906,7 @@ msgstr ""
 msgid "Calibration performance metrics"
 msgstr ""
 
+#: R/multisurvival.b.R
 #: aivalidation/options/calibrationPlot.title
 #: aivalidation/results/calibrationPlot.title
 #: clinicalnomograms/results/calibrationPlot.title
@@ -12982,6 +13244,10 @@ msgstr ""
 msgid "Categorical"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "categorical"
+msgstr ""
+
 #: biomarkerresponse/options/responseType/categorical.title
 msgid "Categorical (CR/PR/SD/PD)"
 msgstr ""
@@ -13009,7 +13275,6 @@ msgstr ""
 msgid "Categorical Covariates (Optional)"
 msgstr ""
 
-#: reportcat/results/text1.title
 #: reportcat2/results/text1.title
 msgid "Categorical Data"
 msgstr ""
@@ -13086,6 +13351,10 @@ msgstr ""
 
 #: treemedical/options/facs.description
 msgid "Categorical variables such as tumor grade, stage,  histological type, or patient demographics."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Categorical Variables Summary"
 msgstr ""
 
 #: stagemigration/options/categoricalCovariates.description
@@ -13907,6 +14176,10 @@ msgstr ""
 msgid "Check for missing values and remove incomplete cases"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Check for special characters or spaces in column names"
+msgstr ""
+
 #: adaptivelasso/options/proportional_hazards.title
 msgid "Check Proportional Hazards"
 msgstr ""
@@ -13915,8 +14188,24 @@ msgstr ""
 msgid "Check that all selected variables exist in your dataset."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Check that all variables have valid names after cleaning"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Check that selected variables exist in your dataset"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Check that the data was imported correctly"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Check that the variable name is correct in your dataset"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Check that you have sufficient events (at least 10 recommended)"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -13930,6 +14219,10 @@ msgstr ""
 
 #: clinicaldataintegration/results/consistencyChecks.columns.title
 msgid "Check Type"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Check your data for missing or invalid values in time and outcome variables"
 msgstr ""
 
 #: ihcscoring/options/checkpoint_cutoffs.title
@@ -14860,6 +15153,7 @@ msgstr ""
 #: jjpiestats/options/clinicalpreset.title
 #: jjsegmentedtotalbar/options/analysis_preset.title
 #: jjwithinstats/options/clinicalpreset.title
+#: singlearm/options/clinical_preset.title
 msgid "Clinical Analysis Preset"
 msgstr ""
 
@@ -14892,6 +15186,7 @@ msgstr ""
 msgid "Clinical Annotation Summary"
 msgstr ""
 
+#: R/survivalcont.b.R
 #: clinicalvalidation/options/clinical_context.title
 #: clinicalvalidationinteractive/options/clinical_context.title
 #: enhancedROC/ui[4][0][0][0].label
@@ -14936,6 +15231,11 @@ msgstr ""
 msgid "Clinical Application:"
 msgstr ""
 
+#: R/reportcat.b.R
+#: R/summarydata.b.R
+msgid "Clinical Applications"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Clinical Applications:"
 msgstr ""
@@ -14955,6 +15255,14 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Clinical Assumptions & Recommendations"
+msgstr ""
+
+#: survivalcont/results/clinicalWarnings.title
+msgid "Clinical Assumptions and Warnings"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Clinical Assumptions Warning"
 msgstr ""
 
 #: ggflowchart/options/node_fill_palette/clinical_blue.title
@@ -14980,6 +15288,7 @@ msgstr ""
 msgid "Clinical Components"
 msgstr ""
 
+#: R/singlearm.b.R
 #: decisionpanel/results/clinicalWarnings.title
 #: treatmentoptim/results/treatmentSelection.columns.title
 msgid "Clinical Considerations"
@@ -15312,6 +15621,7 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 #: R/lollipop.b.R
+#: R/survivalcont.b.R
 #: bayesianci/options/clinical_interpretation.title
 #: bayesianci/results/clinicalInterpretation.columns.title
 #: bayesianclinical/options/clinical_interpretation.title
@@ -15386,6 +15696,7 @@ msgstr ""
 #: qualityoflife/results/clinical_correlations.columns.title
 #: qualityoflife/results/mid_analysis.columns.title
 #: relativesurvival/results/interpretation.title
+#: reportcat/results/clinicalSummary.title
 #: screeningevaluation/results/diagnostic_accuracy_summary.columns.title
 #: screeningevaluation/results/overdiagnosis_assessment.columns.title
 #: spatialautocorrelation/options/clinical_interpretation.title
@@ -15408,6 +15719,7 @@ msgstr ""
 #: stagemigration/results/winRatioSummary.columns.title
 #: stagemigration/results/frailtyModelsOverview.columns.title
 #: stagemigration/results/clinicalUtilityOverview.columns.title
+#: summarydata/results/clinicalInterpretation.title
 #: survivalpower/results/interpretation.title
 #: survivalvalidation/results/interpretation.title
 #: swimmerplot/results/interpretation.title
@@ -15503,6 +15815,7 @@ msgid "Clinical Interpretation Guidance"
 msgstr ""
 
 #: R/riverplot.b.R
+#: R/summarydata.b.R
 #: bayesianci/results/clinicalInterpretation.title
 #: clinicalalerts/options/interpretation_guide.title
 #: cochranq/results/clinicalInterpretation.title
@@ -15603,6 +15916,10 @@ msgstr ""
 #: clinicalnomograms/ui.title
 #: clinicalnomograms/results.title
 msgid "Clinical Nomograms & Risk Calculators"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Clinical Note"
 msgstr ""
 
 #: progressionsurvival/results/progression_patterns.columns.title
@@ -15978,6 +16295,10 @@ msgstr ""
 msgid "Clinical Significance Thresholds"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Clinical Significance:"
+msgstr ""
+
 #: clinicaldataintegration/ui[1][2].label
 msgid "Clinical Standards"
 msgstr ""
@@ -15985,7 +16306,10 @@ msgstr ""
 #: R/jjridges.b.R
 #: R/jjsegmentedtotalbar.b.R
 #: R/lollipop.b.R
+#: R/multisurvival.b.R
 #: R/nogoldstandard.b.R
+#: R/reportcat.b.R
+#: R/singlearm.b.R
 #: agreement/options/showClinicalSummary.title
 #: agreement/results/clinicalSummary.title
 #: decisionpanel/results/clinicalSummary.title
@@ -15995,12 +16319,28 @@ msgstr ""
 msgid "Clinical Summary"
 msgstr ""
 
+#: singlearm/results/clinicalSummary.title
+msgid "Clinical Summary (Copy-Ready for Reports)"
+msgstr ""
+
+#: decisioncompare/results/clinicalReport.title
+msgid "Clinical Summary & Report Templates"
+msgstr ""
+
 #: patientdashboard/results/clinicalSummaryReport.title
 msgid "Clinical Summary Report"
 msgstr ""
 
 #: patientdashboard/options/summary_reports.title
 msgid "Clinical Summary Reports"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Clinical summary will be generated once the analysis is complete."
+msgstr ""
+
+#: survival/results/clinicalGlossaryExplanation.title
+msgid "Clinical Terminology Glossary"
 msgstr ""
 
 #: clinicaldataintegration/options/terminologyMapping.title
@@ -16210,6 +16550,10 @@ msgstr ""
 
 #: jvisr/results/plot.title
 msgid "Clinical Visualization Plot"
+msgstr ""
+
+#: singlearm/ui[0].label
+msgid "Clinical Wizard (Recommended for New Users)"
 msgstr ""
 
 #: spatialanalysis/options/analysis_scope/clinical.title
@@ -16449,7 +16793,6 @@ msgstr ""
 #: package/analyses/survival.menuSubgroup
 #: package/analyses/survivalcont.menuSubgroup
 #: package/analyses/multisurvival.menuSubgroup
-#: package/analyses/oddsratio.menuSubgroup
 #: package/analyses/groupedforest.menuSubgroup
 #: package/analyses/coxdiagnostics.menuSubgroup
 #: package/analyses/jvisr.menuSubgroup
@@ -16489,7 +16832,6 @@ msgstr ""
 #: marginalrecurrent/options.menuSubgroup
 #: mixedcox/options.menuSubgroup
 #: multisurvival/options.menuSubgroup
-#: oddsratio/options.menuSubgroup
 #: penalizedcox/options.menuSubgroup
 #: penalizedcoxregression/options.menuSubgroup
 #: simonmakuch/options.menuSubgroup
@@ -16602,10 +16944,12 @@ msgstr ""
 msgid "ClinicoPathD Survival"
 msgstr ""
 
+#: package/analyses/oddsratio.menuGroup
 #: package/analyses/effectsize.menuGroup
 #: package/analyses/factoranalysis.menuGroup
 #: effectsize/options.menuGroup
 #: factoranalysis/options.menuGroup
+#: oddsratio/options.menuGroup
 msgid "ClinicoPathDescriptives"
 msgstr ""
 
@@ -17560,6 +17904,10 @@ msgstr ""
 msgid "Column Label Size"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Column names should describe your variables (e.g., 'Age', 'Survival_Time', 'Event_Status')"
+msgstr ""
+
 #: gtsummary/options/percentType/column.title
 msgid "Column percent"
 msgstr ""
@@ -18143,6 +18491,10 @@ msgstr ""
 msgid "Compare with Linear Model"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Comparing"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Comparing across groups:"
 msgstr ""
@@ -18649,6 +19001,10 @@ msgstr ""
 
 #: venn/options/upsetType/complexUpset.title
 msgid "ComplexUpset (Advanced)"
+msgstr ""
+
+#: R/venn.b.R
+msgid "ComplexUpset Diagram of Selected Variables"
 msgstr ""
 
 #: patientdashboard/results/medicationTable.columns.title
@@ -19430,6 +19786,14 @@ msgstr ""
 msgid "Comprehensive statistical summary for each scoring method"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Comprehensive statistics for categorical variables"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Comprehensive statistics for numeric variables"
+msgstr ""
+
 #: causespecifichazards/results/model_summary.description
 msgid "Comprehensive summary and interpretation of cause-specific hazards analysis"
 msgstr ""
@@ -19597,6 +19961,10 @@ msgstr ""
 msgid "Concentration Tested"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "concerning"
+msgstr ""
+
 #: advancedanova/results/assumptions.columns.title
 #: cochranq/results/cochranQTest.columns.title
 #: flexparametricadv/results/goodnessOfFitTests.columns.title
@@ -19654,6 +20022,7 @@ msgstr ""
 msgid "Concordance Correlation Coefficient (CCC)"
 msgstr ""
 
+#: R/multisurvival.b.R
 #: survivalmodelvalidation/options/performance_metrics/concordance_index.title
 #: survivalvalidation/options/concordance_index.title
 msgid "Concordance Index (C-index)"
@@ -19661,6 +20030,10 @@ msgstr ""
 
 #: survivalvalidation/results/concordanceTable.title
 msgid "Concordance Index Results"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Concordance Index:"
 msgstr ""
 
 #: stagemigration/options/concordanceProbabilityMethods.title
@@ -20519,6 +20892,10 @@ msgstr ""
 msgid "Consider checking for missing values or selecting different variables."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Consider checking for outliers or extreme values"
+msgstr ""
+
 #: R/decision.b.R
 msgid "Consider clinical consequences of false positives vs false negatives"
 msgstr ""
@@ -20533,6 +20910,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Consider combining with additional markers or clinical information."
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Consider data transformations if distributions are highly skewed"
 msgstr ""
 
 #: treemedical/options/cost_sensitive.description
@@ -20555,12 +20936,36 @@ msgstr ""
 msgid "Consider log transformation or outlier investigation."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Consider longer follow-up or different endpoint."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Consider longer follow-up to capture additional events for more precise estimates."
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid "Consider potential confounding variables in your analysis."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Consider this factor in clinical decision-making and patient counseling."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Consider using confidence intervals for small sample sizes"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Consider using data sampling or chunking for very large datasets"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Consider using Python packages like 'shap' with 'scikit-survival' for comprehensive survival SHAP values."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Consider using Random Survival Forest or XGBoost for advanced non-linear survival modeling."
 msgstr ""
 
 #: netreclassification/results/sensitivityTable.columns.title
@@ -20721,6 +21126,10 @@ msgstr ""
 #: survivalcont/options/contexpl.title
 #: survivalcont/ui[0][2].label
 msgid "Continuous Explanatory Variable"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Continuous explanatory variable contains missing values. These observations will be excluded from analysis."
 msgstr ""
 
 #: ihccluster/options/contVars.title
@@ -21205,6 +21614,14 @@ msgstr ""
 msgid "Copy the text above and modify as needed for your manuscript or report."
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Copy the text above for use in clinical reports, research manuscripts, or medical documentation."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Copy these sentences directly into clinical reports or manuscripts."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Copy to Clipboard"
 msgstr ""
@@ -21213,8 +21630,19 @@ msgstr ""
 msgid "Copy-Ready Clinical Report"
 msgstr ""
 
+#: survival/results/copyReadySentencesExplanation.title
+msgid "Copy-Ready Clinical Report Sentences"
+msgstr ""
+
 #: enhancedROC/results/results/clinicalReport.description
 msgid "Copy-ready clinical report sentences for publications and reports"
+msgstr ""
+
+#: R/reportcat.b.R
+#: R/summarydata.b.R
+#: reportcat/results/reportSentences.title
+#: summarydata/results/reportSentences.title
+msgid "Copy-Ready Clinical Summary"
 msgstr ""
 
 #: agreement/results/reportTemplate.title
@@ -21236,6 +21664,10 @@ msgstr ""
 #: R/linechart.b.R
 #: jjarcdiagram/results/reportSentence.title
 msgid "Copy-Ready Summary"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Copy-ready summary for clinical reports:"
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -21785,6 +22217,18 @@ msgstr ""
 msgid "Cost-sensitive trees"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Could not access Cox regression data:"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Could not access median survival data:"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Could not access survival probability data:"
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "Could not calculate {metric} difference for {comparison} (n1={n1}, n2={n2}). Check for extreme values or zero denominators. Error: {error}"
 msgstr ""
@@ -21797,10 +22241,23 @@ msgstr ""
 msgid "Could not calculate reliable agreement measure. Check your data for sufficient cases and category distribution."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Could not find the elapsed time variable."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Could not find the outcome variable."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Could not parse survival time points: {error}. Using default values (1, 3, 5 years)"
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}"
 msgstr ""
 
+#: R/reportcat.b.R
 #: advancedbarplot/options/stat_type/count.title
 #: checkdata/results/duplicates.columns.title
 #: enhancedfactorvariable/results/results/detailedLevelsAnalysis.columns.title
@@ -22172,6 +22629,10 @@ msgstr ""
 msgid "Cox Coefficient"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Cox Model Residual Diagnostics"
+msgstr ""
+
 #: survival/results/residualsTable.title
 #: survivalcont/results/residualsTable.title
 msgid "Cox Model Residuals"
@@ -22236,6 +22697,10 @@ msgstr ""
 msgid "Cox Proportional Hazards Model Diagnostics"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Cox Proportional Hazards with Gradient Boosting"
+msgstr ""
+
 #: advancedtrials/options/statistical_test/cox_regression.title
 #: clinicalprediction/options/model_type/cox_regression.title
 #: coefplot/options/model_type/cox.title
@@ -22244,14 +22709,31 @@ msgstr ""
 msgid "Cox Regression"
 msgstr ""
 
+#: R/survivalcont.b.R
 #: survival/ui[3][0].label
 #: survival/results/coxRegressionHeading.title
 #: survivalcont/ui[6][0].label
 msgid "Cox Regression Analysis"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Cox regression analysis"
+msgstr ""
+
 #: survival/results/coxRegressionHeading3.title
 msgid "Cox Regression Analysis Explanations"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Cox regression analysis failed"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Cox regression analysis showed"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Cox regression estimates the hazard ratio (HR) which represents the risk of the event occurring at any time for one group relative to another. HR > 1 indicates increased risk, HR < 1 indicates decreased risk."
 msgstr ""
 
 #: survivalcont/results/coxRegressionHeading3.title
@@ -22679,6 +23161,10 @@ msgstr ""
 msgid "Creates waterfall and spider plots to analyze tumor response data following RECIST criteria. Supports both raw tumor measurements and pre-calculated percentage changes. Provides comprehensive response analysis including ORR, DCR, and person-time metrics."
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Creating baseline characteristics tables for research papers"
+msgstr ""
+
 #: bayesianmetaanalysis/options/credibleInterval.title
 #: metaanalysis/results/networkResults.columns.title
 msgid "Credible Interval"
@@ -22945,6 +23431,10 @@ msgstr ""
 msgid "Cross-Validation Error Plot"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Cross-validation error: {e$message}"
+msgstr ""
+
 #: aivalidation/results/cvFoldResults.title
 msgid "Cross-Validation Fold Details"
 msgstr ""
@@ -22969,6 +23459,10 @@ msgstr ""
 #: survivalvalidation/options/cv_folds.title
 #: timedependent/options/cv_folds.title
 msgid "Cross-Validation Folds"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Cross-Validation Folds:"
 msgstr ""
 
 #: aivalidation/options/crossValidation.title
@@ -23176,6 +23670,14 @@ msgstr ""
 msgid "Cumulative Events"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Cumulative Events "
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Cumulative Events of the Whole Group"
+msgstr ""
+
 #: survivalcont/ui[4][0][0]/ce.label
 msgid "Cumulative Events Plot"
 msgstr ""
@@ -23197,6 +23699,10 @@ msgstr ""
 msgid "Cumulative Hazard"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Cumulative Hazard "
+msgstr ""
+
 #: flexiblebaseline/results/cumulativeHazardPlot.title
 #: recurrentsurvival/results/cumulative_hazard_plot.title
 #: splinehazard/results/cumulativePlot.title
@@ -23210,6 +23716,10 @@ msgstr ""
 #: flexmultistate/results/cumhazPlot.title
 #: multistatesurvival/results/cumhazardPlot.title
 msgid "Cumulative Hazard Functions"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Cumulative Hazard of the Whole Group"
 msgstr ""
 
 #: smoothhazard/options/cumulative_hazard_plot.title
@@ -23562,6 +24072,10 @@ msgstr ""
 msgid "Current Sigma Cost ($)"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Current situation:"
+msgstr ""
+
 #: jointmodeling/options/association_structure/current_slope.title
 msgid "Current Slope"
 msgstr ""
@@ -23671,6 +24185,10 @@ msgstr ""
 #: jjcorrmat/options/clinicalpreset/custom.title
 #: psychopdaROC/options/clinicalPreset/none.title
 msgid "Custom Analysis"
+msgstr ""
+
+#: singlearm/options/clinical_preset/custom.title
+msgid "Custom analysis (advanced users)"
 msgstr ""
 
 #: modelbuilder/options/clinicalPreset/none.title
@@ -24309,6 +24827,10 @@ msgstr ""
 msgid "Cut-off #"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Cut-off = 3.5 means patients with values ≥3.5 are in the high-risk group"
+msgstr ""
+
 #: survivalcont/results/cutoffAnalysisHeading3.title
 msgid "Cut-off Analysis Explanations"
 msgstr ""
@@ -24700,6 +25222,10 @@ msgstr ""
 msgid "Dashed"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Data"
+msgstr ""
+
 #: advancedbarplot/ui[5].label
 msgid "Data & Statistics"
 msgstr ""
@@ -24720,6 +25246,10 @@ msgstr ""
 msgid "Data Cleaning Summary"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Data columns: {cols}"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Data Configuration:"
 msgstr ""
@@ -24729,7 +25259,13 @@ msgstr ""
 #: R/jjbetweenstats.b.R
 #: R/jjcorrmat.b.R
 #: R/jjwithinstats.b.R
+#: R/survivalcont.b.R
+#: R/venn.b.R
 msgid "Data contains no (complete) rows"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Data contains no (complete) rows."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -24820,6 +25356,10 @@ msgstr ""
 msgid "Data must contain at least two rows (observations)."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Data must have column names."
+msgstr ""
+
 #: multiplexanalysis/options/normalization_method.title
 msgid "Data Normalization"
 msgstr ""
@@ -24869,14 +25409,28 @@ msgstr ""
 msgid "Data Processing Diagnostics"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Data processing failed. Please check your input variables."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Data Quality"
+msgstr ""
+
+#: reportcat/results/assumptions.title
 #: tableone/results/assumptions.title
 msgid "Data Quality & Assumptions"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Data Quality & Statistical Considerations"
 msgstr ""
 
 #: R/linechart.b.R
 msgid "Data Quality Alerts:"
 msgstr ""
 
+#: R/summarydata.b.R
 #: package/analyses/dataquality.title
 #: package/analyses/dataquality.menuTitle
 #: package/analyses/checkdata.title
@@ -24941,6 +25495,10 @@ msgstr ""
 msgid "Data Quality Warnings"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Data Requirements"
+msgstr ""
+
 #: decision/ui[5][0].label
 msgid "Data Requirements: Both variables must be categorical (factor), each with exactly 2 levels, minimum 4 cases (preferably 30+)"
 msgstr ""
@@ -24955,6 +25513,14 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Data should be categorical (factors or characters)"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Data showed non-normal distribution (Shapiro-Wilk p = {p})"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Data showed normal distribution (Shapiro-Wilk p = {p})"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -25033,8 +25599,16 @@ msgstr ""
 msgid "Data Types (vis_guess)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Data Validation Issues"
+msgstr ""
+
 #: swimmerplot/results/validationReport.title
 msgid "Data Validation Report"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Data Validation Warnings"
 msgstr ""
 
 #: decisiongraph/ui[1].label
@@ -25084,6 +25658,12 @@ msgstr ""
 msgid "Dataset is empty. Please ensure your data contains observations."
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Dataset Memory Usage"
+msgstr ""
+
+#: R/reportcat.b.R
+#: R/summarydata.b.R
 #: autoeda/results/overview.title
 #: enhancedfactorvariable/options/showDatasetOverview.title
 #: enhancedfactorvariable/results/results/datasetOverview.title
@@ -25096,6 +25676,7 @@ msgstr ""
 msgid "Dataset Overview (introduce)"
 msgstr ""
 
+#: R/summarydata.b.R
 #: biomarkerdiscovery/results/data_summary.title
 msgid "Dataset Summary"
 msgstr ""
@@ -25137,6 +25718,10 @@ msgstr ""
 msgid "Date Options"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Date parsing error: {error}. Please check that your dates match the selected format: {format}"
+msgstr ""
+
 #: groupsummary/results/dateInfo.title
 msgid "Date Processing Information"
 msgstr ""
@@ -25157,7 +25742,7 @@ msgstr ""
 #: mixedcox/ui[3][0][0][1].label
 #: multisurvival/ui[1][0][0][1].label
 #: penalizedcox/ui[4][0][0][1].label
-#: singlearm/ui[1][0][0][1].label
+#: singlearm/ui[2][0][0][1].label
 #: summarydata2/options/date_vars.title
 #: summarydata2/ui[0][1].label
 #: surveysurvival/ui[2][0][0][1].label
@@ -25306,6 +25891,10 @@ msgstr ""
 
 #: epidemiosurvival/results/life_table.columns.title
 msgid "Deaths"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Debug survival for {group} at time {time}: raw surv = {surv}, n.risk = {risk}"
 msgstr ""
 
 #: survivalmodelvalidation/options/calibration_method/decile_based.title
@@ -25599,6 +26188,14 @@ msgstr ""
 msgid "Decision Tree Analysis"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Decision tree analysis could not be completed."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Decision tree calculation error:"
+msgstr ""
+
 #: clinicalcalculators/options/calculator_type/decision_tree.title
 msgid "Decision Tree Calculator"
 msgstr ""
@@ -25635,6 +26232,10 @@ msgstr ""
 msgid "Decision Tree Visualization"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Decision tree visualization (rule-based interpretability)"
+msgstr ""
+
 #: decisiongraph/results/treeplot.description
 msgid "Decision tree visualization with nodes and branches"
 msgstr ""
@@ -25653,6 +26254,14 @@ msgstr ""
 
 #: netreclassification/options/decompose_nri.title
 msgid "Decompose NRI"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "decreased hazard"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "decreased risk"
 msgstr ""
 
 #: R/linechart.b.R
@@ -25689,6 +26298,18 @@ msgstr ""
 
 #: multisurvival/options/ml_method/deepsurv.title
 msgid "Deep Survival (Neural Network)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Deep Survival Learning"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Deep survival libraries (pycox, scikit-survival)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Deep survival methods are computationally intensive and typically require specialized Python packages (DeepSurv, DeepHit)."
 msgstr ""
 
 #: advancedraincloud/options/journal_style/default.title
@@ -26108,6 +26729,7 @@ msgstr ""
 msgid "Descending"
 msgstr ""
 
+#: R/multisurvival.b.R
 #: R/nogoldstandard.b.R
 #: adaptivelasso/results/performanceMetrics.columns.title
 #: bayesianma/results/summary.columns.title
@@ -26226,6 +26848,10 @@ msgstr ""
 
 #: factoranalysis/results/results/factorScoresStats.description
 msgid "Descriptive statistics for factor scores"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Descriptive statistics: mean, median, standard deviation, min/max"
 msgstr ""
 
 #: outbreakanalysis/results/descriptive_summary.title
@@ -26405,7 +27031,7 @@ msgstr ""
 #: advancedimputation/options/show_detailed_output.title
 #: clinicalprediction/options/detailed_output.title
 #: patientreported/options/detailed_output.title
-#: singlearm/ui[7].label
+#: singlearm/ui[8].label
 #: survivalcont/ui[8].label
 msgid "Detailed Output"
 msgstr ""
@@ -26420,6 +27046,10 @@ msgstr ""
 
 #: jscattermore/results/performance.description
 msgid "Detailed performance metrics and comparisons"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Detailed performance metrics require additional computational resources and specialized packages. Use the cross-validation option for robust performance assessment."
 msgstr ""
 
 #: featurequality/options/detailed_plots.title
@@ -26578,6 +27208,10 @@ msgstr ""
 
 #: ncvregcox/results/model_summary.columns.title
 msgid "Deviance Explained (%)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Deviance Explained:"
 msgstr ""
 
 #: penalizedcoxregression/results/penaltyPath.columns.title
@@ -27130,6 +27764,10 @@ msgstr ""
 msgid "Difference (%)"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Difference between maximum and minimum values."
+msgstr ""
+
 #: bayesdca/results/comparisonTable.columns.title
 msgid "Difference from Next Best"
 msgstr ""
@@ -27414,6 +28052,10 @@ msgstr ""
 msgid "Discrimination"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Discrimination ability"
+msgstr ""
+
 #: idi/results/discriminationAnalysis.title
 #: survivalmodelvalidation/results/discriminationAnalysis.title
 msgid "Discrimination Analysis"
@@ -27632,6 +28274,10 @@ msgstr ""
 #: advancedtrials/options/primary_endpoint/disease_free_survival.title
 #: outcomeorganizer/options/analysistype/dfs.title
 msgid "Disease-Free Survival (DFS)"
+msgstr ""
+
+#: singlearm/options/clinical_preset/disease_free.title
+msgid "Disease-free survival analysis"
 msgstr ""
 
 #: qualityoflife/options/instrument_type/fact_specific.title
@@ -28341,7 +28987,7 @@ msgstr ""
 #: screeningcalculator/ui[1].label
 #: semimarkov/ui[4].label
 #: sequentialtests/ui[4].label
-#: singlearm/ui[7][0].label
+#: singlearm/ui[8][0].label
 #: smoothtimevary/ui[5][0].label
 #: subgroupforest/ui[2].label
 #: survivalcont/ui[8][0].label
@@ -28922,6 +29568,10 @@ msgstr ""
 msgid "Distribution Analysis Plots"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Distribution and missing value analysis"
+msgstr ""
+
 #: batcheffect/results/quality_plot.description
 msgid "Distribution and quality assessment plots for features"
 msgstr ""
@@ -28938,10 +29588,15 @@ msgstr ""
 msgid "Distribution Comparison Plots"
 msgstr ""
 
+#: R/summarydata.b.R
 #: economistplots/results/distribution_diagnostics.title
 #: summarydata/options/distr.title
 #: summarydata2/options/distr.title
 msgid "Distribution Diagnostics"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Distribution Diagnostics for"
 msgstr ""
 
 #: conditionalgee/options/distribution_family.title
@@ -29087,6 +29742,10 @@ msgstr ""
 msgid "Distribution-free regression modeling for flexible data analysis"
 msgstr ""
 
+#: R/survival.b.R
+msgid "distribution:"
+msgstr ""
+
 #: ihccluster/results/distr.title
 msgid "Distributions (Legacy)"
 msgstr ""
@@ -29131,6 +29790,10 @@ msgstr ""
 
 #: groupedbar/options/plottype/dodged.title
 msgid "Dodged"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "does not appear to be normally distributed. Please use relevant visualisation and tests to verify the characteristics of distribution."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -29552,6 +30215,10 @@ msgstr ""
 msgid "Dynamic Covariates"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Dynamic discrimination"
+msgstr ""
+
 #: package/analyses/timedependent.menuSubtitle
 #: timedependent/options.menuSubtitle
 msgid "Dynamic Effects and Time-Varying Predictions"
@@ -29642,6 +30309,10 @@ msgstr ""
 
 #: treatmenteffects/options/sensitivity_method/e_values.title
 msgid "E-values"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Each category should have sufficient sample size for reliable percentages"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -30361,6 +31032,10 @@ msgstr ""
 msgid "Empirical Bayes Priors"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Enable 'Distribution Diagnostics' for normality assessment"
+msgstr ""
+
 #: autoeda/options/advanced_options.description.jamovi
 msgid "Enable advanced automated analysis features."
 msgstr ""
@@ -30640,11 +31315,19 @@ msgstr ""
 msgid "Enables landmark analysis, which addresses immortal time bias by analyzing survival only for patients who survive to a specified timepoint (the landmark). Use this when you want to eliminate the effect of early deaths or when comparing treatments that can only be given to patients who survive long enough to receive them."
 msgstr ""
 
+#: singlearm/options/guided_mode.description
+msgid "Enables step-by-step guidance and clinical interpretation helpers. Recommended for users new to survival analysis."
+msgstr ""
+
 #: jiwillsurvive/options/end_date_var.title
 #: jiwillsurvive/ui[1][4].label
 #: timeinterval/options/fu_date.title
 #: timeinterval/ui[0][1].label
 msgid "End Date Variable"
+msgstr ""
+
+#: R/survival.b.R
+msgid "End of observed data"
 msgstr ""
 
 #: labcontrolcharts/results/trendAnalysis.columns.title
@@ -30735,6 +31418,10 @@ msgstr ""
 
 #: package/analyses/classification.description
 msgid "Enhanced classification analysis with clinical performance metrics, class imbalance handling, and validation methods for medical research."
+msgstr ""
+
+#: survival/results/clinicalInterpretationExplanation.title
+msgid "Enhanced Clinical Interpretation"
 msgstr ""
 
 #: modelbuilder/results/enhancedModelSummary.title
@@ -31104,12 +31791,36 @@ msgstr ""
 msgid "Ensure at least 3 observations are available for analysis"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Ensure column names don't start with numbers"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Ensure dependent variable is categorical"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Ensure explanatory variables have appropriate data types"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Ensure no variables have completely missing data"
+msgstr ""
+
 #: R/nonparametric.b.R
 msgid "Ensure random sampling and no clustering"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Ensure the time variable contains positive numeric values"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Ensure the variable contains numeric time values (days, months, years)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Ensure the variable is coded as 0/1 or FALSE/TRUE (0=censored, 1=event)"
 msgstr ""
 
 #: R/linechart.b.R
@@ -31118,6 +31829,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Ensure variables contain appropriate data types (numeric for Y-axis)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Ensure your dataset has proper column headers"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -31263,6 +31978,10 @@ msgstr ""
 
 #: grouplasso/results/groupSummary.columns.title
 msgid "Entry Order"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Entry significance must be less than removal significance"
 msgstr ""
 
 #: illnessdeath/options/time_entry.title
@@ -31471,6 +32190,11 @@ msgstr ""
 msgid "ER Upper"
 msgstr ""
 
+#: R/reportcat.b.R
+#: R/summarydata.b.R
+msgid "Error"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "Error applying clinical preset:"
 msgstr ""
@@ -31502,13 +32226,37 @@ msgstr ""
 msgid "Error calculating Krippendorff's alpha:"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Error calculating log-rank test: {error}"
+msgstr ""
+
 #: R/agreement.b.R
 msgid "Error calculating PABAK:"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Error calculating residuals:"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Error calculating survival at time {time} for group {group}: {error}"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Error cleaning variable names."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Error creating residuals plot:"
 msgstr ""
 
 #: survivalbart/options/prior_distribution.title
 #: transformationmodels/options/distribution.title
 msgid "Error Distribution"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Error exporting survival data:"
 msgstr ""
 
 #: R/decision.b.R
@@ -31531,6 +32279,10 @@ msgstr ""
 msgid "Error in ggplot: "
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Error in multiple cutoffs analysis: {error}"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Error in Pie Chart Analysis"
 msgstr ""
@@ -31551,12 +32303,20 @@ msgstr ""
 msgid "Error in trend analysis:"
 msgstr ""
 
+#: reportcat/results/error.title
+msgid "Error Message"
+msgstr ""
+
 #: jointmodeling/results/errors.title
 msgid "Error Messages"
 msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Error parsing ratio: {error}. Using equal proportions."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Error setting variable labels."
 msgstr ""
 
 #: jointmodeling/options/error_structure.title
@@ -31588,6 +32348,10 @@ msgstr ""
 msgid "Error:"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Error: Data could not be cleaned for analysis."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 #: R/raincloud.b.R
 msgid "Error: No complete cases found for the selected variables."
@@ -31595,6 +32359,7 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 #: R/raincloud.b.R
+#: R/summarydata.b.R
 msgid "Error: The provided dataset contains no complete rows. Please check your data and try again."
 msgstr ""
 
@@ -32119,6 +32884,7 @@ msgstr ""
 msgid "Event Probability:"
 msgstr ""
 
+#: R/singlearm.b.R
 #: biomarkerdiscovery/results/risk_stratification_results.columns.title
 #: clinicalprediction/results/risk_stratification.columns.title
 #: coxphw/results/rareEventAnalysis.columns.title
@@ -32395,6 +33161,10 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "events"
+msgstr ""
+
 #: netreclassification/results/transitions.columns.title
 msgid "Events (%)"
 msgstr ""
@@ -32433,6 +33203,14 @@ msgstr ""
 
 #: treatmentmeta/options/events_treatment.title
 msgid "Events in Treatment Group"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "events observed during follow-up."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Events observed:"
 msgstr ""
 
 #: idi/results/decomposition.columns.title
@@ -32693,6 +33471,10 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Excellent"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Excellent data completeness (average missing: {rate}%)."
 msgstr ""
 
 #: R/decision.b.R
@@ -33073,6 +33855,10 @@ msgstr ""
 msgid "Expected Proportions (Optional)"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Expected range"
+msgstr ""
+
 #: friedmantest/results/rankAnalysis.columns.title
 #: pagetrendtest/results/trendOrdering.columns.title
 #: pagetrendtest/results/rankAnalysis.columns.title
@@ -33321,6 +34107,38 @@ msgstr ""
 msgid "Explanatory Variable"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{var_name}' contains infinite values."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{var_name}' contains no non-missing values."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{var_name}' has {levels} levels. Consider grouping categories or using as continuous if ordinal."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{var_name}' has {sparse_categories} categories with fewer than 5 observations. Consider combining categories."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{var_name}' has no variation (all values are the same). It will not contribute to the model."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{var_name}' may contain extreme outliers ({outliers} potential outliers)."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Explanatory variable is required. Please select a categorical variable to compare survival between groups."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "explanatory variable(s) and the time-to-event outcome"
+msgstr ""
+
 #: causespecifichazards/options/covariates.title
 #: causespecifichazards/ui/covariates.label
 #: directregression/options/explanatory.title
@@ -33490,6 +34308,10 @@ msgstr ""
 #: vartree/options.menuGroup
 #: venn/options.menuGroup
 msgid "ExplorationT2"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Exploring categorical variable distributions in clinical datasets"
 msgstr ""
 
 #: causespecifichazards/options/model_type/exponential.title
@@ -34309,6 +35131,14 @@ msgstr ""
 msgid "Factorial ANOVA"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "factors examined"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "factors showed statistically significant associations with the outcome"
+msgstr ""
+
 #: cotest/options/fagan.title
 #: screeningcalculator/options/fagan.title
 msgid "Fagan Nomogram"
@@ -34353,8 +35183,16 @@ msgstr ""
 msgid "Failed iterations: %d (%.1f%%)"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Failed to calculate cutoff values"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "Failed to create base plot: "
+msgstr ""
+
+#: R/survival.b.R
+msgid "Failed to fit"
 msgstr ""
 
 #: semimarkov/results/reliabilityAnalysis.columns.title
@@ -34483,6 +35321,14 @@ msgstr ""
 #: package/analyses/jscattermore.menuSubtitle
 #: jscattermore/options.menuSubtitle
 msgid "Fast Scatter Plots for Large Datasets"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "favorable"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "favorable (median not reached)"
 msgstr ""
 
 #: jforester/options/left_arrow_label.default
@@ -35006,6 +35852,10 @@ msgstr ""
 msgid "First"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "First and third quartiles (25th and 75th percentiles)."
+msgstr ""
+
 #: desctools/options/cat_var1.title
 #: desctools/ui[9][0].label
 msgid "First Categorical Variable"
@@ -35483,6 +36333,10 @@ msgstr ""
 msgid "Flexible Survival Curves"
 msgstr ""
 
+#: R/survival.b.R
+msgid "flexsurv package is required for parametric survival models. Please install it: install.packages('flexsurv')"
+msgstr ""
+
 #: enhancedcrosstable/options/export_format/flextable.title
 msgid "Flextable for Word"
 msgstr ""
@@ -35662,6 +36516,10 @@ msgstr ""
 msgid "Follow-up Date"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Follow-up Duration"
+msgstr ""
+
 #: qualityoflife/results/change_analysis_results.columns.title
 msgid "Follow-up Mean"
 msgstr ""
@@ -35768,6 +36626,18 @@ msgstr ""
 
 #: decisioncompare/options/fnote.title
 msgid "Footnotes"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "For {var}, analysis of {n} observations showed mean {mean} ± {sd} (median {median}, range {min}-{max})"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "For {variable}, the most common category was '{category}' (n = {n}, {percent}% of valid cases)."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "For advanced SHAP analysis:"
 msgstr ""
 
 #: multiclassdiagnostics/options/positiveClass.description
@@ -36467,6 +37337,10 @@ msgstr ""
 msgid "Full Cox Model Weights"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Full deep learning integration would require:"
+msgstr ""
+
 #: assayoptimization/options/design_type/factorial.title
 msgid "Full Factorial"
 msgstr ""
@@ -36480,12 +37354,20 @@ msgstr ""
 msgid "Full Method Validation"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Full nomogram generation requires:"
+msgstr ""
+
 #: spikeslabpriors/options/prediction_method/full_posterior.title
 msgid "Full Posterior"
 msgstr ""
 
 #: likelihoodratio/options/prevalenceRange/full.title
 msgid "Full range (1% to 99%)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Full SHAP implementation requires specialized packages and significant computation time."
 msgstr ""
 
 #: enhancedtables/options/table_width/full.title
@@ -36958,6 +37840,11 @@ msgstr ""
 msgid "General Spatial Analysis"
 msgstr ""
 
+#: package/analyses/oddsratio.menuSubgroup
+#: oddsratio/options.menuSubgroup
+msgid "General Statistics"
+msgstr ""
+
 #: poweranalysis/options/primary_endpoint/time_to_event.title
 msgid "General Time-to-Event"
 msgstr ""
@@ -37322,6 +38209,10 @@ msgstr ""
 msgid "Generate regression diagnostic plots and statistics"
 msgstr ""
 
+#: summarydata/options/report_sentences.title
+msgid "Generate Report Sentences"
+msgstr ""
+
 #: intervalsurvival/options/residual_analysis.description.ui
 msgid "Generate residual plots and statistics"
 msgstr ""
@@ -37422,6 +38313,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Generates pie charts with statistical analysis to compare categorical variables across groups. Performs chi-square tests, Fisher\'s exact tests, or other appropriate statistical tests based on your data."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Generating descriptive statistics for pathology or clinical reports"
 msgstr ""
 
 #: treatmentmeta/options/outcome_type/generic.title
@@ -37716,6 +38611,10 @@ msgstr ""
 msgid "GLM Family"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "glmnet package not available. Please install it to use regularized regression."
+msgstr ""
+
 #: jggheatmap/options/scaling/global.title
 msgid "Global"
 msgstr ""
@@ -37868,6 +38767,10 @@ msgstr ""
 msgid "Good"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Good data completeness (average missing: {rate}%)."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Good diagnostic performance - balanced sensitivity and specificity"
 msgstr ""
@@ -37952,6 +38855,10 @@ msgstr ""
 
 #: ihcstats/options/distanceMetric/gower.title
 msgid "Gower"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "GPU acceleration for optimal performance"
 msgstr ""
 
 #: advancedimputation/results/amputation_test_results.columns.title
@@ -38055,6 +38962,10 @@ msgstr ""
 
 #: ihcstats/options/tilAnalysisMode/granzyme_til.title
 msgid "Granzyme B+ TIL Count"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Graphical nomogram construction"
 msgstr ""
 
 #: jjsegmentedtotalbar/options/chart_style/prism_style.title
@@ -38552,6 +39463,10 @@ msgstr ""
 msgid "Group Variable Selection Results"
 msgstr ""
 
+#: R/survival.b.R
+msgid "group was"
+msgstr ""
+
 #: sparsegrouplasso/results/adaptiveWeights.columns.title
 msgid "Group Weight"
 msgstr ""
@@ -38570,6 +39485,18 @@ msgstr ""
 
 #: grouplasso/options/adaptive_weights_method/univariate.title
 msgid "Group-wise Univariate"
+msgstr ""
+
+#: R/survival.b.R
+msgid "group, fewer than half of the patients experienced the event during the follow-up period. This is typically considered a favorable prognostic finding."
+msgstr ""
+
+#: R/survival.b.R
+msgid "group, half of the patients experienced the event by"
+msgstr ""
+
+#: R/survival.b.R
+msgid "group, indicating that fewer than half of patients experienced the event during follow-up."
 msgstr ""
 
 #: advancedbarplot/options/bar_position/dodge.title
@@ -38882,6 +39809,10 @@ msgstr ""
 msgid "Guided Analysis Mode"
 msgstr ""
 
+#: singlearm/options/guided_mode.title
+msgid "Guided Setup Mode"
+msgstr ""
+
 #: measurementuncertainty/options/uncertainty_method/gum_approach.title
 msgid "GUM Approach (ISO Guide)"
 msgstr ""
@@ -39026,6 +39957,10 @@ msgstr ""
 msgid "Harris-Boyd Partitioning Test"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "has"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "has identical values across all observations. ROC analysis requires variation in predictor values."
 msgstr ""
@@ -39038,7 +39973,7 @@ msgstr ""
 msgid "Haversine Distance"
 msgstr ""
 
-#: singlearm/ui[6].label
+#: singlearm/ui[7].label
 msgid "Hazard Analysis"
 msgstr ""
 
@@ -39111,6 +40046,10 @@ msgstr ""
 msgid "Hazard Function Summary"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Hazard Function:"
+msgstr ""
+
 #: flexparametric/ui[3][0]/show_hazard_plot.label
 #: timeupdatedsurvival/options/plotType/hazards.title
 msgid "Hazard Functions"
@@ -39134,6 +40073,11 @@ msgstr ""
 msgid "Hazard Peak Analysis"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Hazard plot unavailable for"
+msgstr ""
+
+#: R/survival.b.R
 #: flexiblebaseline/results/predictionTable.columns.title
 #: flexparametricadv/results/survivalPredictions.columns.title
 #: flexparametricadv/results/hazardAnalysis.columns.title
@@ -39219,6 +40163,10 @@ msgstr ""
 msgid "Hazard Ratio"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "hazard ratio"
+msgstr ""
+
 #: subgroupforest/options/effectMeasure/hr.title
 msgid "Hazard Ratio (HR) - for survival"
 msgstr ""
@@ -39251,6 +40199,10 @@ msgstr ""
 
 #: groupedforest/results/statistics_table.title
 msgid "Hazard Ratios by Group"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Hazard ratios from Cox regression (traditional interpretability)"
 msgstr ""
 
 #: simonmakuch/options/showHazardRatios.title
@@ -39848,6 +40800,10 @@ msgstr ""
 
 #: toxicityprofile/options/sortBy/high_grade.title
 msgid "High Grade Frequency (≥3)"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "High missing data rates (>20%) require careful interpretation"
 msgstr ""
 
 #: likelihoodratio/options/prevalenceRange/high.title
@@ -40529,6 +41485,10 @@ msgstr ""
 msgid "How to summarize continuous variables in the table."
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "How to Use"
+msgstr ""
+
 #: eurostatmap/ui[0][0].label
 msgid "How to Use Eurostat Maps"
 msgstr ""
@@ -40571,6 +41531,22 @@ msgstr ""
 #: survival/results/coxTable.columns.title
 #: survivalcont/results/coxTable.columns.title
 msgid "HR (Univariable)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "HR < 1: Factor decreases the hazard (risk) of the event"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "HR = 1: No association between factor and event timing"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "HR = 2.5 means the group has 2.5 times higher risk of the event"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "HR > 1: Factor increases the hazard (risk) of the event"
 msgstr ""
 
 #: biomarkerdiscovery/results/risk_stratification_results.columns.title
@@ -41391,6 +42367,10 @@ msgstr ""
 msgid "Implementation Guidance"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Implementation Note:"
+msgstr ""
+
 #: featurequality/results/transformation_recommendations.columns.title
 msgid "Implementation Notes"
 msgstr ""
@@ -41540,6 +42520,7 @@ msgid "Importance Type"
 msgstr ""
 
 #: R/decision.b.R
+#: R/reportcat.b.R
 msgid "Important Considerations"
 msgstr ""
 
@@ -41630,6 +42611,10 @@ msgstr ""
 
 #: advancedraincloud/options/p_value_position/table.title
 msgid "In Table"
+msgstr ""
+
+#: R/survival.b.R
+msgid "In the"
 msgstr ""
 
 #: jjsegmentedtotalbar/ui[9][0]/plot_width.suffix
@@ -42407,6 +43392,18 @@ msgstr ""
 msgid "Increase Factor"
 msgstr ""
 
+#: R/survival.b.R
+msgid "increased"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "increased hazard"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "increased risk"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "increasing"
 msgstr ""
@@ -42520,8 +43517,20 @@ msgstr ""
 msgid "Indicate the concentration and variability of values"
 msgstr ""
 
+#: R/survival.b.R
+msgid "indicating a condition with moderate progression timeline"
+msgstr ""
+
+#: R/survival.b.R
+msgid "indicating a rapidly progressing condition requiring urgent intervention"
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid "indicating excellent discriminatory ability. This test can reliably distinguish between diseased and healthy patients."
+msgstr ""
+
+#: R/survival.b.R
+msgid "indicating excellent long-term prognosis"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -42870,6 +43879,10 @@ msgstr ""
 msgid "Initial and extracted communalities"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Initial data exploration and quality assessment"
+msgstr ""
+
 #: consort/ui[0][0][0].label
 msgid "Initial Numbers"
 msgstr ""
@@ -42946,6 +43959,10 @@ msgstr ""
 msgid "Install required packages using the provided commands."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Install the package using:"
+msgstr ""
+
 #: agreement/options/institutionVar.title
 #: stagemigration/options/institutionVariable.title
 #: stagemigration/ui[10][0].label
@@ -42956,6 +43973,7 @@ msgstr ""
 msgid "Institutional Ranges"
 msgstr ""
 
+#: R/reportcat.b.R
 #: adaptivelasso/results/instructions.title
 #: advancedbarplot/results/instructions.title
 #: advancedraincloud/results/todo.title
@@ -43128,6 +44146,14 @@ msgstr ""
 msgid "Insufficient data for correlation interpretation."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Insufficient data for multiple cutoffs analysis"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Insufficient data for outlier detection"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Insufficient data for residual normality testing."
 msgstr ""
@@ -43138,6 +44164,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Insufficient data: At least 4 cases are required for diagnostic test analysis"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Insufficient events for analysis:"
 msgstr ""
 
 #: advancedbarplot/options/value_format/integer.title
@@ -43163,6 +44193,10 @@ msgstr ""
 #: survivalmodelvalidation/options/performance_metrics/integrated_brier.title
 #: survivalvalidation/options/integrated_brier.title
 msgid "Integrated Brier Score"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Integrated Brier Score (IBS)"
 msgstr ""
 
 #: imagingcorrelation/options/report_generation.title
@@ -43766,6 +44800,7 @@ msgid "Interpretation Guide"
 msgstr ""
 
 #: R/jjridges.b.R
+#: R/multisurvival.b.R
 msgid "Interpretation Guide:"
 msgstr ""
 
@@ -43800,6 +44835,7 @@ msgstr ""
 msgid "Interrater Reliability"
 msgstr ""
 
+#: R/venn.b.R
 #: jcomplexupset/options/sort_by/cardinality.title
 #: jcomplexupset/options/annotations/intersection_size.title
 msgid "Intersection Size"
@@ -43998,6 +45034,10 @@ msgstr ""
 msgid "Invalid data structure: Both test and gold standard variables must have exactly 2 levels each"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Invalid outcome variable format.\nFor survival analysis, the outcome variable must be:\n- Binary numeric (0/1): 0=censored, 1=event\n- Factor variable: Select appropriate event level\n\nCurrent variable type: %s\nFor complex outcomes with multiple states, enable \"Multiple Event Levels\" option."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "Invalid quantiles specified: "
 msgstr ""
@@ -44065,6 +45105,10 @@ msgstr ""
 msgid "Inverse-Gamma"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Investigate outliers before proceeding with inferential statistics"
+msgstr ""
+
 #: riverplot/options/nodeStyle/invisible.title
 msgid "Invisible (hidden nodes)"
 msgstr ""
@@ -44097,6 +45141,7 @@ msgstr ""
 msgid "IQR"
 msgstr ""
 
+#: R/summarydata.b.R
 #: advancedraincloud/options/outlier_method/iqr.title
 #: batcheffect/options/outlier_method/iqr.title
 #: idi/options/outlier_method/iqr.title
@@ -44139,6 +45184,10 @@ msgstr ""
 msgid "IRT-Based Scoring"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "is"
+msgstr ""
+
 #: spikeslabpriors/options/spike_slab_type/ishwaran_rao.title
 msgid "Ishwaran-Rao"
 msgstr ""
@@ -44169,6 +45218,10 @@ msgstr ""
 
 #: labcontrolcharts/results/correctiveActions.columns.title
 msgid "Issue Identified"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Issue:"
 msgstr ""
 
 #: clinicaldataintegration/results/consistencyChecks.columns.title
@@ -44844,6 +45897,10 @@ msgstr ""
 msgid "Kernel-Weighted Estimation"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Kernel:"
+msgstr ""
+
 #: treatmentswitching/results/causalEffectTable.columns.title
 msgid "Key Assumption"
 msgstr ""
@@ -44858,6 +45915,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Key Assumptions:"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Key considerations"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -44882,12 +45943,17 @@ msgstr ""
 msgid "Key Finding"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Key Finding:"
+msgstr ""
+
 #: R/decisiongraph.b.R
 #: R/lollipop.b.R
 msgid "Key Findings"
 msgstr ""
 
 #: R/jjcorrmat.b.R
+#: R/multisurvival.b.R
 msgid "Key Findings:"
 msgstr ""
 
@@ -45055,6 +46121,7 @@ msgstr ""
 msgid "KS Test p-value"
 msgstr ""
 
+#: R/summarydata.b.R
 #: featurequality/results/quality_summary.columns.title
 #: ihcscoring/results/advancedmetrics/distributionanalysis.columns.title
 #: jsummarytools/results/descriptive_stats.columns.title
@@ -45243,6 +46310,10 @@ msgstr ""
 #: qualitycontrol/ui.title
 #: qualitycontrol/results.title
 msgid "Laboratory Quality Control Statistics"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Laboratory reference range studies"
 msgstr ""
 
 #: package/analyses/labinterpret.title
@@ -45503,7 +46574,7 @@ msgstr ""
 #: progressionsurvival/results/landmark_results.columns.title
 #: simonmakuch/results/landmarkResults.columns.title
 #: singlearm/options/landmark.title
-#: singlearm/ui[1][1].label
+#: singlearm/ui[2][1].label
 #: survival/options/landmark.title
 #: survival/ui[1][1][0]/uselandmark/landmark.label
 #: survivalcont/options/landmark.title
@@ -45566,6 +46637,10 @@ msgstr ""
 
 #: jforester/options/point_size_range/large.title
 msgid "Large (4-8)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Large clinical effect - high priority for clinical consideration."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -45775,6 +46850,10 @@ msgstr ""
 #: deeplearningprediction/results/trainingMetrics/trainingHistory.columns.title
 #: gradientboosting/options/learning_rate.title
 msgid "Learning Rate"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Learning Rate:"
 msgstr ""
 
 #: bayesianclinical/results/prior_posterior_comparison.columns.title
@@ -46076,6 +47155,7 @@ msgstr ""
 msgid "Level/Value"
 msgstr ""
 
+#: R/reportcat.b.R
 #: survival/results/medianTable.columns.title
 #: survival/results/coxTable.columns.title
 #: survival/results/survTable.columns.title
@@ -46084,6 +47164,14 @@ msgstr ""
 #: survivalcont/results/medianTable.columns.title
 #: survivalcont/results/survTable.columns.title
 msgid "Levels"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "levels"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "levels. For odds ratio analysis, the outcome must be binary (exactly 2 levels). Consider creating a binary variable or using multinomial regression."
 msgstr ""
 
 #: grafify/options/comparison_method/levelwise.title
@@ -46311,6 +47399,10 @@ msgstr ""
 
 #: treatmenteffects/options/iv_method/limited_information.title
 msgid "Limited Information Maximum Likelihood"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Limited variability in continuous explanatory variable. Consider treating as categorical."
 msgstr ""
 
 #: methodcomparison/options/limits_method.title
@@ -46734,6 +47826,10 @@ msgstr ""
 msgid "LOESS Smoothing"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "LOESS smoothing with span = "
+msgstr ""
+
 #: nonparametricregression/options/loess_span.title
 msgid "LOESS Span Parameter"
 msgstr ""
@@ -46897,6 +47993,10 @@ msgstr ""
 
 #: survivalcont/ui[4][0][0]/loglog.label
 msgid "Log-Log Plot (Proportional Hazards Check)"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Log-Log Plot for "
 msgstr ""
 
 #: mediansurvival/options/confidence_method/loglog_transform.title
@@ -47270,6 +48370,18 @@ msgstr ""
 
 #: differentialdiagnosis/results/sensitivityAnalysis.columns.title
 msgid "Low Estimate"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Low event rate - consider longer follow-up"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Low event rate ({rate}%). May need larger sample or longer follow-up for reliable survival analysis."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Low event rate:"
 msgstr ""
 
 #: likelihoodratio/options/prevalenceRange/low.title
@@ -47688,6 +48800,10 @@ msgstr ""
 msgid "Machine Learning Model Performance"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Machine Learning Performance Metrics"
+msgstr ""
+
 #: jsummarytools/results/descriptive_stats.columns.title
 #: nonparametric/results/descriptives.columns.title
 msgid "MAD"
@@ -47982,6 +49098,10 @@ msgstr ""
 msgid "Marginal Likelihood"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Marginal method failed, falling back to average method"
+msgstr ""
+
 #: package/analyses/marginalrecurrent.description
 #: marginalrecurrent/options.description.main
 msgid "Marginal models for analyzing recurrent event data using rate-based approaches.  This analysis provides population-average estimates of covariate effects on  recurrent event rates, with options for marginal rate models, accelerated rate  models, and gamma frailty models to handle within-subject correlation."
@@ -48176,6 +49296,10 @@ msgstr ""
 msgid "Martingale Residuals"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Martingale residuals should be randomly scattered around zero"
+msgstr ""
+
 #: screeningevaluation/options/screening_type/mass_screening.title
 msgid "Mass Screening Campaign"
 msgstr ""
@@ -48285,6 +49409,7 @@ msgstr ""
 msgid "Matthews Correlation"
 msgstr ""
 
+#: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: featurequality/results/distribution_analysis.columns.title
 #: groupedbar/options/statistic/max.title
@@ -48317,6 +49442,10 @@ msgstr ""
 
 #: treeadvanced/options/max_depth_range.title
 msgid "Max Depth Range (min:max)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Max Depth:"
 msgstr ""
 
 #: jsummarytools/options/max_distinct_values.title
@@ -48964,6 +50093,7 @@ msgid "mdy"
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/mean.title
 #: alluvial/options/bin/mean.title
@@ -49167,6 +50297,10 @@ msgstr ""
 msgid "Mean Obs"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Mean of"
+msgstr ""
+
 #: tidydensity/options/lognormal_meanlog.title
 msgid "Mean of Log"
 msgstr ""
@@ -49326,6 +50460,10 @@ msgstr ""
 msgid "Measure of sampling adequacy"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Measure of variability around the mean."
+msgstr ""
+
 #: clinicalalerts/results/detailedAlerts.columns.title
 msgid "Measured Value"
 msgstr ""
@@ -49377,8 +50515,16 @@ msgstr ""
 msgid "Measurement Variable"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Measures asymmetry. 0 = symmetric, >0 = right-skewed, <0 = left-skewed."
+msgstr ""
+
 #: enhancedtwowayfrequency/results/associationMeasuresTable.title
 msgid "Measures of Association"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Measures tail heaviness. 3 = normal, >3 = heavy tails, <3 = light tails."
 msgstr ""
 
 #: treatmentoptim/results/drugInteractions.columns.title
@@ -49498,6 +50644,7 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 #: R/nonparametric.b.R
+#: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/median.title
 #: alluvial/options/bin/median.title
@@ -49600,6 +50747,7 @@ msgstr ""
 msgid "Median Exposure Duration"
 msgstr ""
 
+#: R/singlearm.b.R
 #: progressionsurvival/results/pfs_summary.columns.title
 msgid "Median Follow-up"
 msgstr ""
@@ -49700,6 +50848,10 @@ msgstr ""
 msgid "Median Survival Analysis Explanations"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Median survival analysis failed"
+msgstr ""
+
 #: singlearm/results/medianSummary.title
 msgid "Median Survival Analysis Natural Language Summary"
 msgstr ""
@@ -49718,6 +50870,10 @@ msgstr ""
 #: mediansurvival/ui.title
 #: mediansurvival/results.title
 msgid "Median Survival Comparisons"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Median survival for the"
 msgstr ""
 
 #: survival/ui[4][1][0]/medianline.label
@@ -49741,8 +50897,24 @@ msgstr ""
 msgid "Median Survival Time (Control Group)"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Median survival time for {group} could not be determined."
+msgstr ""
+
 #: mediansurvival/results/medianTable.title
 msgid "Median Survival Times"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Median survival was %.1f %s (95%% CI: %.1f-%.1f %s)"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Median survival was not reached during the follow-up period (95%% CI: %.1f %s to not reached)"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Median survival was not reached for the"
 msgstr ""
 
 #: treatmentswitching/results/switchingPatternsTable.columns.title
@@ -50071,6 +51243,7 @@ msgstr ""
 msgid "Metabolomics"
 msgstr ""
 
+#: R/survival.b.R
 #: advancedimputation/results/missing_summary.columns.title
 #: advancedimputation/results/cross_validation_results.columns.title
 #: agreement/results/kappaTable.columns.title
@@ -50578,6 +51751,7 @@ msgstr ""
 msgid "Methods Section Template"
 msgstr ""
 
+#: R/multisurvival.b.R
 #: adaptivelasso/results/performanceMetrics.columns.title
 #: agreement/results/consensusSummary.columns.title
 #: aivalidation/results/nriIdiTable.columns.title
@@ -50739,6 +51913,10 @@ msgstr ""
 msgid "Middle Cerebral Artery Velocity (MCAv)"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Middle value when data is ordered. Less affected by outliers."
+msgstr ""
+
 #: epidemiosurvival/options/par_method/miettinen.title
 msgid "Miettinen's Method"
 msgstr ""
@@ -50857,6 +52035,7 @@ msgstr ""
 msgid "Miller-Siegmund"
 msgstr ""
 
+#: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: featurequality/results/distribution_analysis.columns.title
 #: groupedbar/options/statistic/min.title
@@ -50961,6 +52140,10 @@ msgstr ""
 msgid "Minimal difference"
 msgstr ""
 
+#: R/survival.b.R
+msgid "minimal difference in risk"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Minimal effect"
 msgstr ""
@@ -51023,6 +52206,10 @@ msgstr ""
 #: methodcomparison/results/descriptiveStats.columns.title
 #: tidydensity/options/uniform_min.title
 msgid "Minimum"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Minimum 10 events recommended."
 msgstr ""
 
 #: R/linechart.b.R
@@ -51369,6 +52556,8 @@ msgstr ""
 msgid "MissForest Imputation"
 msgstr ""
 
+#: R/reportcat.b.R
+#: R/summarydata.b.R
 #: dendrogram/results/summary.columns.title
 #: icccoeff/results/descriptive_stats.columns.title
 #: jsummarytools/results/data_summary_table.columns.title
@@ -51476,6 +52665,10 @@ msgstr ""
 msgid "Missing Data Method"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Missing data or model for pairwise comparisons"
+msgstr ""
+
 #: missingdata/results/pattern_plot.title
 msgid "Missing Data Pattern"
 msgstr ""
@@ -51510,6 +52703,10 @@ msgstr ""
 
 #: haralicktexture/results/qualityassessment/missingdata.description
 msgid "Missing data patterns and impact"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Missing data patterns should be examined for potential bias"
 msgstr ""
 
 #: survivalmodelvalidation/options/missing_data_sensitivity.title
@@ -51548,6 +52745,10 @@ msgstr ""
 
 #: multiplexanalysis/results/qualitycontrol/qcmetrics.description
 msgid "Missing data, outliers, and technical quality"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Missing data: {n} cases ({percent}%)."
 msgstr ""
 
 #: datecorrection/options/day_impute.title
@@ -51628,6 +52829,7 @@ msgstr ""
 msgid "Missing Values"
 msgstr ""
 
+#: R/reportcat.b.R
 #: gtsummary/options/statistics/missing.title
 msgid "Missing values"
 msgstr ""
@@ -52344,6 +53546,10 @@ msgstr ""
 msgid "Model Fit Summary"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Model fitting using rms::cph() instead of survival::coxph()"
+msgstr ""
+
 #: continuousrelationship/results/modelFormula.title
 #: jggstats/options/model_formula.title
 #: survivalvalidation/options/model_formula.title
@@ -52465,6 +53671,10 @@ msgstr ""
 msgid "Model Performance Summary"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Model Performance:"
+msgstr ""
+
 #: bayesianma/results/modelProbsPlot.title
 msgid "Model Posterior Probabilities"
 msgstr ""
@@ -52567,6 +53777,10 @@ msgstr ""
 #: sparsegrouplasso/options/selection_criterion.title
 #: spatialbayesiansurvival/options/model_selection_criteria.title
 msgid "Model Selection Criterion"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Model selection error:"
 msgstr ""
 
 #: aivalidation/options/modelSelection.title
@@ -52754,6 +53968,10 @@ msgstr ""
 msgid "Model Type"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Model Type:"
+msgstr ""
+
 #: bayesianma/results/uncertaintyQuantification.columns.title
 msgid "Model Uncertainty"
 msgstr ""
@@ -52817,12 +54035,21 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/jjcorrmat.b.R
 #: R/linechart.b.R
+#: R/singlearm.b.R
 msgid "moderate"
 msgstr ""
 
 #: R/agreement.b.R
 #: R/enhancedROC.b.R
 msgid "Moderate"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Moderate clinical effect - clinically meaningful."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Moderate data completeness (average missing: {rate}%). Consider impact on analysis validity."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -52853,6 +54080,10 @@ msgstr ""
 msgid "Moderate prevalence setting - balanced diagnostic performance"
 msgstr ""
 
+#: R/survival.b.R
+msgid "moderate protective effect ("
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid "moderate-to-strong"
 msgstr ""
@@ -52863,6 +54094,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "moderately connected"
+msgstr ""
+
+#: R/survival.b.R
+msgid "moderately increased risk ("
 msgstr ""
 
 #: metaanalysis/results/metaRegressionResults.columns.title
@@ -53104,12 +54339,27 @@ msgstr ""
 #: mixedcox/options/timetypeoutput/months.title
 #: multisurvival/options/timetypeoutput/months.title
 #: penalizedcox/options/timetypeoutput/months.title
-#: singlearm/options/timetypeoutput/months.title
 #: surveysurvival/options/timetypeoutput/months.title
 #: survival/options/timetypeoutput/months.title
 #: survivalcont/options/timetypeoutput/months.title
 #: timeroc/options/timetypeoutput/months.title
 msgid "months"
+msgstr ""
+
+#: R/survival.b.R
+msgid "months (95% CI:"
+msgstr ""
+
+#: singlearm/options/timetypeoutput/months.title
+msgid "months (recommended for oncology)"
+msgstr ""
+
+#: R/survival.b.R
+msgid "months,"
+msgstr ""
+
+#: R/survival.b.R
+msgid "months)."
 msgstr ""
 
 #: nonparametric/options/test_type/mood_median.title
@@ -53146,6 +54396,7 @@ msgstr ""
 msgid "Mosaic plot visualization of association patterns"
 msgstr ""
 
+#: R/reportcat.b.R
 #: enhancedfrequency/results/results/variableSummary.columns.title
 msgid "Most Common"
 msgstr ""
@@ -53405,6 +54656,10 @@ msgstr ""
 msgid "Multicollinearity Analysis (VIF)"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "multicut_results is null or invalid"
+msgstr ""
+
 #: stagemigration/ui[12].label
 msgid "Multifactorial Analysis"
 msgstr ""
@@ -53517,6 +54772,10 @@ msgstr ""
 msgid "Multiple Cut-off Points"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Multiple cutoffs analysis: n = {n}, method = {method}, num_cuts = {cuts}"
+msgstr ""
+
 #: survival/ui[2][0].label
 #: survivalcont/ui[3][0].label
 msgid "Multiple Event Configuration"
@@ -53526,7 +54785,7 @@ msgstr ""
 #: multisurvival/ui[2][0].label
 #: outcomeorganizer/options/multievent.title
 #: singlearm/options/multievent.title
-#: singlearm/ui[2][0].label
+#: singlearm/ui[3][0].label
 #: survival/options/multievent.title
 #: survivalcont/options/multievent.title
 msgid "Multiple Event Levels"
@@ -53644,6 +54903,10 @@ msgstr ""
 msgid "Multiple treatment comparison with network geometry"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "multipleCutoffTables called"
+msgstr ""
+
 #: package/analyses/multiplexanalysis.title
 #: package/analyses/multiplexanalysis.menuTitle
 #: multiplexanalysis/options.title
@@ -53688,8 +54951,16 @@ msgstr ""
 msgid "Multivariable Cox Explanations"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Multivariable Cox proportional hazards regression was performed to examine the relationship between"
+msgstr ""
+
 #: multisurvival/results/multivariableCoxHeading.title
 msgid "Multivariable Cox Regression"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Multivariable Cox Regression Summary"
 msgstr ""
 
 #: package/analyses/multisurvival.menuSubtitle
@@ -53809,6 +55080,8 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 #: R/nonparametric.b.R
+#: R/reportcat.b.R
+#: R/summarydata.b.R
 #: adaptivelasso/results/riskGroups.columns.title
 #: advancedanova/results/descriptives.columns.title
 #: alluvialSurvival/results/survivalStats.columns.title
@@ -54217,6 +55490,10 @@ msgstr ""
 msgid "Nearest Point"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Need at least 2 levels for pairwise comparisons"
+msgstr ""
+
 #: ppv/results/confusion.columns.content
 msgid "Negative"
 msgstr ""
@@ -54270,6 +55547,10 @@ msgstr ""
 
 #: cochranq/results/marginalFrequencies.columns.title
 msgid "Negative Responses"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Negative survival times detected:"
 msgstr ""
 
 #: decision/results/nTable.columns.title
@@ -54791,8 +56072,20 @@ msgstr ""
 msgid "No case observations found for predictor"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "No categorical variables available for summary table."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "No categorical variables found."
+msgstr ""
+
 #: patientreported/options/change_analysis/none.title
 msgid "No Change Analysis"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "No clinical effect detected."
 msgstr ""
 
 #: explainableai/options/clustering_method/none.title
@@ -54849,6 +56142,10 @@ msgstr ""
 
 #: R/jjsegmentedtotalbar.b.R
 msgid "No data available for analysis."
+msgstr ""
+
+#: R/survival.b.R
+msgid "No data available for analysis. Please check your dataset."
 msgstr ""
 
 #: R/decision.b.R
@@ -54912,6 +56209,10 @@ msgstr ""
 msgid "No Normalization"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "No numeric variables selected for summary table."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "No outcome variable selected"
 msgstr ""
@@ -54919,6 +56220,10 @@ msgstr ""
 #: qualitycontrol/options/outlier_detection/none.title
 #: referenceintervals/options/outlier_detection/none.title
 msgid "No Outlier Detection"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "No outliers detected"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -54957,6 +56262,10 @@ msgstr ""
 msgid "No Scaling"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "No significant associations found in Cox regression analysis."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "No significant difference (p ≥ 0.05)"
 msgstr ""
@@ -54979,6 +56288,10 @@ msgstr ""
 msgid "No Spending Function"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "No statistically significant associations were identified among the"
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "No test variables selected. Please select at least Test 1 and Test 2 for comparison analysis."
 msgstr ""
@@ -54991,8 +56304,24 @@ msgstr ""
 msgid "No Unmeasured Confounding"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "No valid categorical data available for report generation."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "No valid categorical variables remaining after validation."
+msgstr ""
+
 #: R/jjsegmentedtotalbar.b.R
 msgid "No valid data after processing. Please check your input variables."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "No valid time points specified. Using default values (1, 3, 5 years)"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "No valid variables selected."
 msgstr ""
 
 #: classification/options/noCrossValidations.title
@@ -55134,6 +56463,7 @@ msgstr ""
 msgid "Nomogram"
 msgstr ""
 
+#: R/multisurvival.b.R
 #: multisurvival/results/nomogramHeading.title
 #: oddsratio/results/nomogramHeading.title
 msgid "Nomogram Analysis"
@@ -55143,12 +56473,24 @@ msgstr ""
 msgid "Nomogram Analysis Summary"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Nomogram calculation error:"
+msgstr ""
+
 #: oddsratio/results/nomogram.title
 msgid "Nomogram Details"
 msgstr ""
 
 #: biomarkerdiscovery/options/nomogram_development.title
 msgid "Nomogram Development"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Nomogram for Risk Prediction"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Nomogram generation requires specialized implementation with the 'rms' package."
 msgstr ""
 
 #: clinicalcalculators/options/calculator_type/nomogram.title
@@ -55171,6 +56513,14 @@ msgstr ""
 msgid "Nomogram Type"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Nomograms provide a visual calculator for individual risk prediction based on the multivariable Cox model."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Nomograms provide visual tools for calculating individual risk predictions from multivariable models."
+msgstr ""
+
 #: crosstablepivot/ui[0][0][2].label
 msgid "Non-breaking addition to existing crosstable module"
 msgstr ""
@@ -55181,6 +56531,10 @@ msgstr ""
 
 #: outbreakanalysis/results/descriptive_summary.columns.title
 msgid "Non-Cases (N)"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Non-categorical variables detected"
 msgstr ""
 
 #: psychopdaROC/results/nriTable.columns.title
@@ -55484,6 +56838,10 @@ msgstr ""
 msgid "None (no central line)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "None of the"
+msgstr ""
+
 #: clinicalcalculators/options/regulatory_compliance/none.title
 msgid "None Specified"
 msgstr ""
@@ -55665,6 +57023,10 @@ msgstr ""
 msgid "Normality Test Method"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Normality test not applicable due to sample size"
+msgstr ""
+
 #: directregression/results/residualAnalysis.columns.title
 msgid "Normality Test p"
 msgstr ""
@@ -55723,6 +57085,10 @@ msgstr ""
 msgid "not found in grouping variable. Highlight will be ignored."
 msgstr ""
 
+#: R/survival.b.R
+msgid "not found. Using standard Cox regression."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid "Not recommended as standalone diagnostic marker"
 msgstr ""
@@ -55748,6 +57114,7 @@ msgid "Not specified"
 msgstr ""
 
 #: R/linechart.b.R
+#: R/survival.b.R
 msgid "not statistically significant"
 msgstr ""
 
@@ -55760,9 +57127,14 @@ msgid "Notable variation observed between groups, suggesting clinically meaningf
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/summarydata.b.R
 #: crosstable/results/pairwiseNote.title
 #: exacttests/results/note.title
 msgid "Note"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Note:"
 msgstr ""
 
 #: treeadvanced/ui[3][1][1].label
@@ -55783,6 +57155,10 @@ msgstr ""
 
 #: R/lollipop.b.R
 msgid "Note: Small sample size. Results should be interpreted with caution."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Note: This method requires the 'survivalsvm' package."
 msgstr ""
 
 #: R/linechart.b.R
@@ -56207,6 +57583,7 @@ msgstr ""
 msgid "Number of decimal places to display."
 msgstr ""
 
+#: R/singlearm.b.R
 #: causespecifichazards/results/cause_summary.columns.title
 #: oneSurvival/results/onesurvTable1.columns.title
 #: parametricfrailty/results/overview.columns.title
@@ -56583,6 +57960,10 @@ msgstr ""
 msgid "Number of risk groups for survival stratification"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Number of Rounds:"
+msgstr ""
+
 #: jwaffle/options/rows.title
 #: jwaffle/ui[1][0][0]/rows.label
 msgid "Number of Rows"
@@ -56684,6 +58065,10 @@ msgstr ""
 
 #: stagemigration/options/forestNTrees.description
 msgid "Number of trees in the random forest. More trees generally improve  performance but increase computation time. 500 trees provide good  balance between accuracy and speed for most applications."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Number of Trees:"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -56851,6 +58236,8 @@ msgstr ""
 #: R/advancedraincloud.b.R
 #: R/jjpiestats.b.R
 #: R/linechart.b.R
+#: R/multisurvival.b.R
+#: R/reportcat.b.R
 msgid "observations"
 msgstr ""
 
@@ -56864,6 +58251,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Observations should be independent"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "observations. Consider adding small constant (0.5 days)."
 msgstr ""
 
 #: continuousmarkov/results/transitionMatrix.columns.title
@@ -57264,6 +58655,10 @@ msgstr ""
 msgid "Only {available} is selected. Please also select {needed} to perform comparison analysis."
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Only Nominal, Ordinal, or Categorical variables (factors) are allowed."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Only one time point detected: Temporal flow analysis requires multiple time points."
 msgstr ""
@@ -57357,6 +58752,14 @@ msgstr ""
 msgid "Optimal Composition Patterns"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Optimal Cut-off Analysis"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Optimal cut-off point for {variable} could not be determined."
+msgstr ""
+
 #: stagemigration/results/optimalCutpointAnalysis.columns.title
 msgid "Optimal Cut-point"
 msgstr ""
@@ -57377,6 +58780,10 @@ msgstr ""
 
 #: enhancedROC/results/results/optimalCutoffSummary.title
 msgid "Optimal Cutoff Analysis"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Optimal cutoff analysis"
 msgstr ""
 
 #: timeroc/results/cutoffTable.title
@@ -57665,6 +59072,10 @@ msgstr ""
 msgid "Optional inner confidence interval for enhanced visualization. Set to 0 to disable inner CI. Common values are 0.8 or 0.9."
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Optional normality testing and distribution diagnostics"
+msgstr ""
+
 #: jjsegmentedtotalbar/ui[0][3]/facet_var.label
 msgid "Optional Panels (e.g., by Site)"
 msgstr ""
@@ -57850,6 +59261,10 @@ msgstr ""
 
 #: deeplearningprediction/ui[3].label
 msgid "Ordinal Regression Options"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Ordinal variables should maintain their natural ordering"
 msgstr ""
 
 #: pseudosurvival/options/regression_method/ols.title
@@ -58045,6 +59460,10 @@ msgstr ""
 msgid "Other/General"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "out of"
+msgstr ""
+
 #: qualitycontrol/results/controlChartsResults.columns.title
 msgid "Out of Control"
 msgstr ""
@@ -58055,6 +59474,10 @@ msgstr ""
 
 #: extratrees/results/oobErrorPlot.title
 msgid "Out-of-Bag Error Convergence"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Out-of-Bag Error Rate:"
 msgstr ""
 
 #: extratrees/results/oobPredictions.title
@@ -58099,7 +59522,7 @@ msgstr ""
 #: penalizedcox/options/outcome.title
 #: penalizedcox/ui[0][1].label
 #: singlearm/options/outcome.title
-#: singlearm/ui[0][1].label
+#: singlearm/ui[1][1].label
 #: stratifiedparametric/options/outcome.title
 #: surveysurvival/options/outcome.title
 #: surveysurvival/ui[0][1].label
@@ -58162,6 +59585,10 @@ msgstr ""
 #: outcomeorganizer/options.title
 #: outcomeorganizer/ui.title
 msgid "Outcome Organizer for Survival Analysis"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Outcome should be binary (0/1 or TRUE/FALSE)"
 msgstr ""
 
 #: clinicaldashboard/results/outcomeStats.title
@@ -58256,8 +59683,36 @@ msgstr ""
 msgid "Outcome Variable (what you're measuring)"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Outcome Variable Completeness"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Outcome variable contains missing values. Please remove or impute missing data before analysis."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Outcome variable contains no non-missing values."
+msgstr ""
+
 #: jforestmodel/options/dependent_var.description
 msgid "Outcome variable for regression modeling"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Outcome variable has"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Outcome variable is required. Please select a variable that indicates whether an event occurred (e.g., death, recurrence)."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Outcome variable must be binary (0/1) for survival analysis.\n- Use 0 for censored observations (alive/disease-free)\n- Use 1 for events (death/recurrence)\nCurrent values found: %s\n\nFor multi-state outcomes, enable \"Multiple Event Levels\" option."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Outcome variable must have at least 2 different values for logistic regression."
 msgstr ""
 
 #: highdimcox/ui[1][0].label
@@ -58331,6 +59786,7 @@ msgstr ""
 msgid "Outlier Count"
 msgstr ""
 
+#: R/summarydata.b.R
 #: batcheffect/ui[3][0].label
 #: biomarkerdiscovery/options/outlier_detection.title
 #: clinicalcalculators/options/outlier_detection.title
@@ -58348,6 +59804,7 @@ msgstr ""
 #: robustaft/results/outlierAnalysis.title
 #: robustcorrelation/options/outlier_detection.title
 #: robustcorrelation/ui[3].label
+#: summarydata/options/outliers.title
 msgid "Outlier Detection"
 msgstr ""
 
@@ -58387,10 +59844,12 @@ msgstr ""
 msgid "Outlier Detection Plots"
 msgstr ""
 
+#: R/summarydata.b.R
 #: haralicktexture/results/outliertable.title
 #: outlierdetection/results/outlier_table.title
 #: qualitycontrol/results/outlierAnalysis.title
 #: robustcorrelation/results/outlier_table.title
+#: summarydata/results/outlierReport.title
 msgid "Outlier Detection Results"
 msgstr ""
 
@@ -58469,6 +59928,18 @@ msgstr ""
 
 #: idi/results/outlierAnalysis.columns.title
 msgid "Outliers Baseline"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "outliers detected"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Outliers detected using IQR method (values beyond Q1-1.5×IQR or Q3+1.5×IQR):"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Outliers may indicate data entry errors, measurement issues, or genuine extreme values. Review outliers in clinical context before exclusion."
 msgstr ""
 
 #: idi/results/outlierAnalysis.columns.title
@@ -58624,6 +60095,10 @@ msgstr ""
 msgid "Output: ICERs, dominance analysis, cost-effectiveness ratios"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Outputs Provided"
+msgstr ""
+
 #: groupedbar/options/valueposition/outside.title
 msgid "Outside Bar"
 msgstr ""
@@ -58759,6 +60234,10 @@ msgstr ""
 #: advancedtrials/options/primary_endpoint/overall_survival.title
 #: outcomeorganizer/options/analysistype/os.title
 msgid "Overall Survival (OS)"
+msgstr ""
+
+#: singlearm/options/clinical_preset/overall_survival.title
+msgid "Overall survival analysis (most common)"
 msgstr ""
 
 #: competingsurvival/options/overalltime.title
@@ -59503,6 +60982,14 @@ msgstr ""
 msgid "Package Installation Required"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "package is required but not installed."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Package Not Available"
+msgstr ""
+
 #: epidemiosurvival/results/population_attributable_risk.columns.title
 msgid "PAF (%)"
 msgstr ""
@@ -59617,6 +61104,10 @@ msgstr ""
 msgid "Pairwise Comparison Analysis"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Pairwise comparison analysis failed"
+msgstr ""
+
 #: cochranq/results/pairwiseComparisonPlot.title
 msgid "Pairwise Comparison Heatmap"
 msgstr ""
@@ -59648,6 +61139,10 @@ msgstr ""
 #: crosstable/options/pairwise.title
 #: survival/options/pw.title
 msgid "Pairwise comparisons"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Pairwise Comparisons "
 msgstr ""
 
 #: nonparametric/ui[3][0]/post_hoc.label
@@ -59812,6 +61307,10 @@ msgstr ""
 
 #: sparsegrouplasso/options/parallel_cv.title
 msgid "Parallel Cross-Validation"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Parallel lines suggest proportional hazards"
 msgstr ""
 
 #: bayesianma/options/parallel_processing.title
@@ -60155,10 +61654,18 @@ msgstr ""
 msgid "Parametric Survival"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Parametric survival analysis failed"
+msgstr ""
+
 #: flexparametric/results/survivalPlot.title
 #: flexparametricadvanced/results/survival_curves_plot.title
 #: survival/results/parametricSurvivalPlot.title
 msgid "Parametric Survival Curves"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Parametric Survival Curves:"
 msgstr ""
 
 #: survival/ui[9].label
@@ -60176,6 +61683,10 @@ msgstr ""
 
 #: enhancedtables/options/test_type/parametric.title
 msgid "Parametric Tests"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Parametric vs Kaplan-Meier Survival:"
 msgstr ""
 
 #: statsplot2/options/distribution.description.ui
@@ -60746,6 +62257,10 @@ msgstr ""
 
 #: stagemigration/results/advancedMigrationHeatmapStats.columns.title
 msgid "Patients Lost"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "patients with"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -61919,6 +63434,10 @@ msgstr ""
 msgid "Performance Metrics Comparison"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Performance metrics error: {e$message}"
+msgstr ""
+
 #: aivalidation/results/cvFoldResults.description
 msgid "Performance metrics for each cross-validation fold"
 msgstr ""
@@ -62123,6 +63642,7 @@ msgstr ""
 msgid "Performs weighted log-rank tests for comparing survival distributions between groups. These tests provide enhanced power for detecting differences at specific time points using various weighting schemes. Includes Gehan-Wilcoxon, Tarone-Ware, Peto-Peto, and custom weight function approaches for comprehensive survival comparison."
 msgstr ""
 
+#: R/survival.b.R
 #: clinmon/options/output_level/period.title
 #: relativesurvival/results/periodAnalysisTable.columns.title
 #: stagemigration/results/willRogersEnhancedAnalysis.columns.title
@@ -62226,7 +63746,7 @@ msgstr ""
 #: multisurvival/ui[9].label
 #: multisurvival/results/personTimeHeading.title
 #: multisurvival/results/personTimeTable.title
-#: singlearm/ui[5].label
+#: singlearm/ui[6].label
 #: singlearm/results/personTimeHeading.title
 #: singlearm/results/personTimeTable.title
 #: survival/ui[6].label
@@ -62242,6 +63762,14 @@ msgstr ""
 
 #: singlearm/results/personTimeHeading3.title
 msgid "Person-Time Analysis Explanations"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Person-time analysis failed"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Person-time analysis failed. Please check time intervals and event data."
 msgstr ""
 
 #: singlearm/results/personTimeHeading2.title
@@ -62518,6 +64046,14 @@ msgstr ""
 msgid "Please cite jamovi and the packages as given below."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Please correct these issues before proceeding with analysis."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Please install it using:"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Please install with:"
 msgstr ""
@@ -62542,8 +64078,16 @@ msgstr ""
 msgid "Please select a test variable to evaluate"
 msgstr ""
 
+#: R/venn.b.R
+msgid "Please select at least Variable 1 and Variable 2 to proceed."
+msgstr ""
+
 #: R/nonparametric.b.R
 msgid "Please select dependent variable(s) and grouping variable to begin analysis."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Please select only categorical (factor or character) variables."
 msgstr ""
 
 #: R/decision.b.R
@@ -62552,6 +64096,30 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Please select the positive level for the test variable"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Please select the positive outcome level from the dropdown menu below the outcome variable."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Please select the Variables you wish to analyze."
+msgstr ""
+
+#: R/venn.b.R
+msgid "Please select which level in Variable 1 represents the 'true' condition."
+msgstr ""
+
+#: R/venn.b.R
+msgid "Please select which level in Variable 2 represents the 'true' condition."
+msgstr ""
+
+#: R/venn.b.R
+msgid "Please select which level in Variable 3 represents the 'true' condition."
+msgstr ""
+
+#: R/venn.b.R
+msgid "Please select which level in Variable 4 represents the 'true' condition."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -62579,7 +64147,7 @@ msgid "Plot Appearance"
 msgstr ""
 
 #: multisurvival/ui[4][0].label
-#: singlearm/ui[3][1].label
+#: singlearm/ui[4][1].label
 #: surveysurvival/ui[4][1].label
 msgid "Plot Arguments"
 msgstr ""
@@ -62810,6 +64378,10 @@ msgstr ""
 
 #: conditionalgee/options/plotPredictions.title
 msgid "Plot Gap Time Predictions"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Plot generation failed. Try adjusting plot parameters or checking data quality."
 msgstr ""
 
 #: sparsegrouplasso/options/plot_groups.title
@@ -63402,8 +64974,8 @@ msgstr ""
 #: parametricfrailty/ui[8][0].label
 #: penalizedcox/ui[7].label
 #: sigmametrics/ui[1][3].label
-#: singlearm/ui[3].label
-#: singlearm/ui[3][0].label
+#: singlearm/ui[4].label
+#: singlearm/ui[4][0].label
 #: survivalcont/ui[4].label
 #: timedependent/ui[8][0].label
 #: vartree/ui[1][1][0].label
@@ -63709,6 +65281,10 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Poor"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Populating tables with {n} cutoffs"
 msgstr ""
 
 #: advancedtrials/results/biomarker_strategy_results.columns.title
@@ -64128,6 +65704,10 @@ msgstr ""
 msgid "Positivity rates across different cut-off thresholds"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Possible solutions:"
+msgstr ""
+
 #: nonparametric/ui[3].label
 msgid "Post Hoc Analysis and Multiple Comparisons"
 msgstr ""
@@ -64226,6 +65806,10 @@ msgstr ""
 
 #: populationhealth/results/interventionAnalysisTable.columns.title
 msgid "Post-Intervention Value"
+msgstr ""
+
+#: singlearm/options/clinical_preset/post_surgical.title
+msgid "Post-surgical outcomes"
 msgstr ""
 
 #: decision/results/ratioTable.columns.title
@@ -64473,6 +66057,10 @@ msgstr ""
 
 #: patientreported/results/response_patterns.columns.title
 msgid "Potential Issue"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "potential risk factors in"
 msgstr ""
 
 #: sigmametrics/results/costOfQuality.columns.title
@@ -65180,6 +66768,10 @@ msgstr ""
 msgid "Prediction Region"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Prediction reliability"
+msgstr ""
+
 #: deeplearningprediction/results/predictionResults.title
 msgid "Prediction Results"
 msgstr ""
@@ -65476,6 +67068,14 @@ msgstr ""
 msgid "Predictor with highest AUC value"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "predictor(s) showed statistically significant associations (p < 0.05)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05)."
+msgstr ""
+
 #: penalizedcoxregression/options/predictors.title
 #: penalizedcoxregression/ui[0][2].label
 msgid "Predictors"
@@ -65521,6 +67121,10 @@ msgstr ""
 
 #: coxphw/options/weight_method/prentice.title
 msgid "Prentice weights"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Preparation for statistical modeling"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -66404,6 +68008,10 @@ msgstr ""
 msgid "Processing large dataset (%d rows) - this may take a moment..."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Processing large dataset: {rows} rows, ~{memory} memory usage"
+msgstr ""
+
 #: nonparametricregression/options/multivariate_method/product.title
 msgid "Product Kernel"
 msgstr ""
@@ -67162,12 +68770,20 @@ msgstr ""
 msgid "Purple"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Purpose:"
+msgstr ""
+
 #: recurrentsurvival/options/model_type/pwp_cp.title
 msgid "PWP Conditional Process"
 msgstr ""
 
 #: recurrentsurvival/options/model_type/pwp_gt.title
 msgid "PWP Gap Time"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Python environment with TensorFlow/PyTorch"
 msgstr ""
 
 #: psychopdaROC/results/metaAnalysisTable.columns.title
@@ -67249,6 +68865,11 @@ msgctxt "Q1-Q3"
 msgid "Median"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Q1, Q3"
+msgstr ""
+
+#: R/summarydata.b.R
 #: featurequality/results/distribution_analysis.columns.title
 msgid "Q25"
 msgstr ""
@@ -67267,6 +68888,7 @@ msgstr ""
 msgid "Q3 Time"
 msgstr ""
 
+#: R/summarydata.b.R
 #: featurequality/results/distribution_analysis.columns.title
 msgid "Q75"
 msgstr ""
@@ -67439,6 +69061,10 @@ msgstr ""
 #: assayoptimization/results/quality_control_summary.title
 #: biomarkerdiscovery/options/quality_control.title
 msgid "Quality Control Analysis"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Quality control and outlier detection"
 msgstr ""
 
 #: ihcscoring/options/quality_control.title
@@ -67676,6 +69302,10 @@ msgstr ""
 #: jjbarstats/ui[0].label
 #: jjpiestats/ui[0].label
 msgid "Quick Clinical Setup"
+msgstr ""
+
+#: singlearm/ui[0][0].label
+msgid "Quick Start Guide"
 msgstr ""
 
 #: R/linechart.b.R
@@ -67999,6 +69629,10 @@ msgstr ""
 msgid "Random Forest Model Performance"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Random Forest Survival Model Results"
+msgstr ""
+
 #: stagemigration/results/forestVariableImportance.title
 msgid "Random Forest Variable Importance"
 msgstr ""
@@ -68156,6 +69790,10 @@ msgstr ""
 msgid "Random-Effects Model (REML)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "randomForestSRC package not available. Please install it to use Random Survival Forest."
+msgstr ""
+
 #: consort/ui[1][0][0].label
 msgid "Randomization"
 msgstr ""
@@ -68177,6 +69815,7 @@ msgid "Randomized Block"
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: R/summarydata.b.R
 #: decisiongraph/results/sensitivityTable.columns.title
 #: ihccluster/results/markerSummary.columns.title
 #: qualityoflife/results/health_utilities_summary.columns.title
@@ -68598,6 +70237,10 @@ msgstr ""
 msgid "Raw Values (numeric)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "RBF (Radial Basis Function)"
+msgstr ""
+
 #: advancedbarplot/options/color_palette/dark2.title
 #: jjsegmentedtotalbar/options/color_palette/dark2.title
 msgid "RColorBrewer Dark2"
@@ -68809,6 +70452,10 @@ msgstr ""
 msgid "Recommendation Rank"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Recommendation:"
+msgstr ""
+
 #: R/decisiongraph.b.R
 #: adaptivetrialdesign/results/regulatoryConsiderations.columns.title
 #: aivalidation/results/recommendationsText.title
@@ -68996,6 +70643,10 @@ msgstr ""
 msgid "Reds"
 msgstr ""
 
+#: R/survival.b.R
+msgid "reduced"
+msgstr ""
+
 #: highdimcox/results/dimensionalityReduction.columns.title
 #: spikeslabpriors/results/dimensionSummary.columns.title
 msgid "Reduction Ratio"
@@ -69181,6 +70832,10 @@ msgstr ""
 
 #: labinterpret/options/reference_source.title
 msgid "Reference Range Source"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Reference range validation"
 msgstr ""
 
 #: labinterpret/options/reference_visualization.title
@@ -69445,6 +71100,10 @@ msgstr ""
 
 #: highdimcox/ui[2][0].label
 msgid "Regularization Settings"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Regularized Cox Regression Results"
 msgstr ""
 
 #: adaptivetrialdesign/results/regulatoryConsiderations.columns.title
@@ -69759,6 +71418,10 @@ msgstr ""
 msgid "REML (Default)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Remove any duplicate column names"
+msgstr ""
+
 #: advancedimputation/options/remove_collinear.title
 msgid "Remove Collinear Variables"
 msgstr ""
@@ -70060,6 +71723,14 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "requires careful evaluation"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Requires pec package"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Requires specialized implementation"
 msgstr ""
 
 #: enhancedROC/options/clinicalPresets/research_comprehensive.title
@@ -70527,6 +72198,10 @@ msgstr ""
 msgid "Results Section"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Results should be interpreted cautiously due to the small number of events."
+msgstr ""
+
 #: retracted/results/summary.title
 msgid "Results Summary"
 msgstr ""
@@ -70604,6 +72279,10 @@ msgstr ""
 
 #: bayesianma/options/mcmc_method/reversible_jump.title
 msgid "Reversible Jump MCMC"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Review the variable summaries and data quality metrics"
 msgstr ""
 
 #: treecompare/options/rf_mtry_method.title
@@ -70842,6 +72521,10 @@ msgstr ""
 
 #: outbreakanalysis/results/risk_factor_forest_plot.title
 msgid "Risk Factors Forest Plot"
+msgstr ""
+
+#: R/survival.b.R
+msgid "risk for"
 msgstr ""
 
 #: adaptivelasso/results/riskGroups.columns.title
@@ -71152,6 +72835,10 @@ msgstr ""
 
 #: stagemigration/results/rmstByStage.title
 msgid "RMST Analysis by Stage"
+msgstr ""
+
+#: R/survival.b.R
+msgid "RMST analysis failed"
 msgstr ""
 
 #: poweranalysis/results/rmst_analysis_table.title
@@ -72029,6 +73716,7 @@ msgid "Sample Mean"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/singlearm.b.R
 #: adaptivetrialdesign/results/interimResults.columns.title
 #: advancedtrials/results/biomarker_strategy_results.columns.title
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
@@ -72856,6 +74544,7 @@ msgid "Screening Test Type"
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
 #: biomarkerresponse/results/groupComparison.columns.title
@@ -73282,6 +74971,10 @@ msgstr ""
 msgid "Select categorical variable to group distributions by."
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Select categorical variables (factors or text variables) from your dataset"
+msgstr ""
+
 #: basegraphics/options/y_var.description.jamovi
 msgid "Select continuous variable for the y-axis."
 msgstr ""
@@ -73463,12 +75156,20 @@ msgstr ""
 msgid "Select the summary format style. summarytools options provide automated EDA analysis."
 msgstr ""
 
+#: singlearm/options/timetypeoutput.description
+msgid "Select the time unit for displaying survival results. Months is most common  in clinical oncology studies. Choose the unit that best matches your clinical  practice and makes results most interpretable for your audience."
+msgstr ""
+
 #: decisiongraph/ui[0][0].label
 msgid "Select the type of decision analysis to perform"
 msgstr ""
 
 #: ggoncoplot/options/plotType.description.jamovi
 msgid "Select the type of genomic visualization to create."
+msgstr ""
+
+#: singlearm/options/clinical_preset.description
+msgid "Select the type of survival analysis that matches your research question. This automatically configures appropriate settings for your study type."
 msgstr ""
 
 #: singlearm/options/analysistype.description
@@ -73641,6 +75342,10 @@ msgstr ""
 #: adaptivelasso/results/coefficients.title
 #: penalizedcox/results/coefficientTable.title
 msgid "Selected Variables and Coefficients"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Selected Variables:"
 msgstr ""
 
 #: rmstregression/results/tauSelection.columns.title
@@ -74331,6 +76036,10 @@ msgstr ""
 msgid "SHAP Biomarker Importance"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "SHAP calculation error: {e$message}"
+msgstr ""
+
 #: stagemigration/options/shapExplanationType.title
 msgid "SHAP Explanation Method"
 msgstr ""
@@ -74422,6 +76131,14 @@ msgstr ""
 msgid "SHAP Values"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "SHAP Values (SHapley Additive exPlanations)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "SHAP values provide model-agnostic interpretability by showing how each feature contributes to individual predictions."
+msgstr ""
+
 #: clinicalprediction/results/shap_summary.title
 #: explainableai/results/shapanalysis/shapvaluestable.title
 msgid "SHAP Values Summary"
@@ -74489,6 +76206,11 @@ msgstr ""
 msgid "Shapiro-Wilk p"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Shapiro-Wilk p-value"
+msgstr ""
+
+#: R/summarydata.b.R
 #: featurequality/options/normality_method/shapiro.title
 msgid "Shapiro-Wilk Test"
 msgstr ""
@@ -74540,6 +76262,14 @@ msgstr ""
 
 #: clinicalcalculators/options/export_format/shiny.title
 msgid "Shiny Application"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Short follow-up duration - median survival may not be reached"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Short median follow-up ({time} {units}). May be insufficient for meaningful survival analysis."
 msgstr ""
 
 #: waterfall/options/showThresholds.description.jamovi
@@ -74634,7 +76364,7 @@ msgstr ""
 #: multisurvival/options/showExplanations.title
 #: penalizedcox/options/showExplanations.title
 #: singlearm/options/showExplanations.title
-#: singlearm/ui[7][0][0]/showExplanations.label
+#: singlearm/ui[8][0][0]/showExplanations.label
 #: surveysurvival/options/showExplanations.title
 #: survival/options/showExplanations.title
 #: survival/ui[8][0][0]/showExplanations.label
@@ -74755,6 +76485,7 @@ msgstr ""
 msgid "Show Cell Values"
 msgstr ""
 
+#: singlearm/ui[4][1][0]/censored.label
 #: survivalcont/ui[4][1][0]/censored.label
 msgid "Show Censored Observations"
 msgstr ""
@@ -76121,7 +77852,7 @@ msgstr ""
 #: oddsratio/options/showSummaries.title
 #: penalizedcox/options/showSummaries.title
 #: singlearm/options/showSummaries.title
-#: singlearm/ui[7][0][0]/showSummaries.label
+#: singlearm/ui[8][0][0]/showSummaries.label
 #: surveysurvival/options/showSummaries.title
 #: survival/options/showSummaries.title
 #: survival/ui[8][0][0]/showSummaries.label
@@ -76672,6 +78403,7 @@ msgstr ""
 #: jiwillsurvive/options/show_risk_table.title
 #: jvisr/options/risk_table.title
 #: mediansurvival/options/show_risk_table.title
+#: singlearm/ui[4][1][0]/risktable.label
 msgid "Show Risk Table"
 msgstr ""
 
@@ -77915,6 +79647,7 @@ msgstr ""
 msgid "Skeptical Priors"
 msgstr ""
 
+#: R/summarydata.b.R
 #: featurequality/results/quality_summary.columns.title
 #: flexparametricadvanced/results/residual_analysis.columns.title
 #: ihcscoring/results/advancedmetrics/distributionanalysis.columns.title
@@ -77977,6 +79710,10 @@ msgstr ""
 msgid "Small (2-4)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Small clinical effect - limited clinical impact."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Small dataset (n<20): Flow patterns may be unstable. Consider larger sample for reliable results."
 msgstr ""
@@ -78006,8 +79743,20 @@ msgstr ""
 msgid "Small Sample Correction"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Small sample size (n < 20). Results may be unreliable."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Small sample size (n = {n}). Consider larger sample for more reliable cut-off analysis."
+msgstr ""
+
 #: treatmentmeta/options/small_study_correction.title
 msgid "Small Study Correction"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Small to moderate clinical effect - may be clinically relevant."
 msgstr ""
 
 #: factoranalysis/options/priorCommunalities/smc.title
@@ -78076,6 +79825,7 @@ msgstr ""
 msgid "Smooth Trend Lines"
 msgstr ""
 
+#: R/singlearm.b.R
 #: singlearm/options/hazard_smoothing.title
 #: singlearm/results/smoothedHazardPlot.title
 msgid "Smoothed Hazard Function"
@@ -78236,6 +79986,10 @@ msgstr ""
 msgid "Solid (single color)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Solution:"
+msgstr ""
+
 #: R/jjsegmentedtotalbar.b.R
 msgid "Some categories have fewer than 5 observations. Results may be unreliable for small groups: "
 msgstr ""
@@ -78248,12 +80002,20 @@ msgstr ""
 msgid "Some groups have fewer than 2 observations. Results may be unreliable."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Some groups have zero observations"
+msgstr ""
+
 #: R/jjsegmentedtotalbar.b.R
 msgid "Some segments represent <1% with very small counts. These may not be clinically meaningful."
 msgstr ""
 
 #: R/jjsegmentedtotalbar.b.R
 msgid "Some segments represent >95% of their category. Consider combining rare categories or checking data quality."
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Some variables contain infinite or extreme values that may require investigation"
 msgstr ""
 
 #: nonparametric/options/effect_size_method/somers_d.title
@@ -79661,6 +81423,7 @@ msgstr ""
 msgid "Standard Deviation"
 msgstr ""
 
+#: R/summarydata.b.R
 #: grafify/options/error_type/sd.title
 msgid "Standard Deviation (SD)"
 msgstr ""
@@ -80239,12 +82002,20 @@ msgstr ""
 msgid "Statistical Analysis Results"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Statistical Analysis Warning"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Statistical analysis will be performed based on your data characteristics."
 msgstr ""
 
 #: statsplot2/options/distribution.title
 msgid "Statistical Approach"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Statistical assumption verification"
 msgstr ""
 
 #: clinicaltrialdesign/results/assumptions_check.title
@@ -80392,6 +82163,14 @@ msgstr ""
 
 #: advancedbarplot/options/stat_type.description.jamovi
 msgid "Statistical function to apply to y-variable."
+msgstr ""
+
+#: summarydata/results/glossary.title
+msgid "Statistical Glossary"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Statistical Guidance"
 msgstr ""
 
 #: enhancedcrosstable/results/interpretation.title
@@ -80648,6 +82427,10 @@ msgstr ""
 msgid "Statistical Summary Table"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Statistical Terminology"
+msgstr ""
+
 #: agreement/options/showStatisticalGlossary.title
 #: agreement/results/statisticalGlossary.title
 msgid "Statistical Terms Glossary"
@@ -80778,6 +82561,7 @@ msgid "Statistical Visualization"
 msgstr ""
 
 #: R/linechart.b.R
+#: R/survival.b.R
 msgid "statistically significant"
 msgstr ""
 
@@ -80817,6 +82601,7 @@ msgstr ""
 msgid "Statistics/Values"
 msgstr ""
 
+#: R/multisurvival.b.R
 #: advancedimputation/results/convergence_assessment.columns.title
 #: batcheffect/results/summary.columns.title
 #: betabinomialdiagnostic/results/convergenceDiagnostics.columns.title
@@ -80870,6 +82655,10 @@ msgstr ""
 
 #: optimalcutpoint/ui[0][3].label
 msgid "Status Variable (Survival)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Status:"
 msgstr ""
 
 #: deeplearningprediction/results/explainabilityAnalysis/attentionSummary.columns.title
@@ -81132,6 +82921,10 @@ msgstr ""
 msgid "Stratification Variable"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Stratification variable"
+msgstr ""
+
 #: clinicalprediction/options/stratify_var.title
 #: coxdiagnostics/options/strata_var.title
 #: coxdiagnostics/ui[0][3].label
@@ -81381,6 +83174,18 @@ msgstr ""
 msgid "Strong partial correlations suggest a direct relationship that persists even after controlling for other factors"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Strongest association:"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Strongest predictor:"
+msgstr ""
+
+#: R/survival.b.R
+msgid "strongly protective effect ("
+msgstr ""
+
 #: continuousmarkov/options/model_structure.description.ui
 #: markovmultistate/options/transitionMatrix.description
 #: semimarkov/options/transitionStructure.description
@@ -81474,6 +83279,10 @@ msgstr ""
 
 #: powersurvival/ui[2][0]/study_design.label
 msgid "Study Design:"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Study Details:"
 msgstr ""
 
 #: advancedtrials/results/sample_size_calculations.columns.title
@@ -81825,6 +83634,7 @@ msgstr ""
 msgid "Subject/Group"
 msgstr ""
 
+#: R/singlearm.b.R
 #: clinicaltrialdesign/ui[1][0]/sample_size.suffix
 msgid "subjects"
 msgstr ""
@@ -81873,6 +83683,10 @@ msgstr ""
 msgid "Substantial"
 msgstr ""
 
+#: R/survival.b.R
+msgid "substantially increased risk ("
+msgstr ""
+
 #: jjtreemap/ui[2][0][0]/subtitle.label
 msgid "Subtitle"
 msgstr ""
@@ -81919,6 +83733,14 @@ msgstr ""
 
 #: clinicalvalidationinteractive/results/performanceWarnings.columns.title
 msgid "Suggested Action"
+msgstr ""
+
+#: R/survival.b.R
+msgid "suggesting a chronic condition with extended survival"
+msgstr ""
+
+#: R/survival.b.R
+msgid "suggesting an acute condition with significant short-term impact"
 msgstr ""
 
 #: R/linechart.b.R
@@ -81992,6 +83814,10 @@ msgstr ""
 #: enhancedcrosstable/options/funs_arg.title
 #: grafify/options/summary_function.title
 msgid "Summary Function"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Summary generation encountered an error."
 msgstr ""
 
 #: vartree/options/summarylocation.title
@@ -82253,6 +84079,7 @@ msgstr ""
 
 #: decisiongraph/options/summaryTable.title
 #: gtsummary/results/maintable.title
+#: reportcat/results/text1.title
 msgid "Summary Table"
 msgstr ""
 
@@ -82389,8 +84216,16 @@ msgstr ""
 msgid "Support Vector Machine (SVM)"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Support Vector Machines for Survival Analysis"
+msgstr ""
+
 #: multisurvival/options/ml_method/svm.title
 msgid "Support Vector Survival"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Support Vector Survival Model Results"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -82593,6 +84428,10 @@ msgstr ""
 msgid "Survival Analysis by Cluster"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Survival Analysis Error"
+msgstr ""
+
 #: survivalcont/ui.title
 msgid "Survival Analysis for Continuous Explanatory"
 msgstr ""
@@ -82634,6 +84473,10 @@ msgstr ""
 
 #: pcacox/results/survivalPlot.title
 msgid "Survival by Principal Component Scores"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Survival calculation failed. This may be due to insufficient data or data quality issues."
 msgstr ""
 
 #: excessmortality/results/predictions.columns.title
@@ -82725,6 +84568,10 @@ msgstr ""
 msgid "Survival Curves Comparison"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Survival curves for "
+msgstr ""
+
 #: optimalcutpoint/results/survivalplot.description
 msgid "Survival curves for optimal groups"
 msgstr ""
@@ -82753,6 +84600,10 @@ msgstr ""
 #: flexparametricadv/ui[0][0].label
 #: timeupdatesurvival/ui[0][0].label
 msgid "Survival Data"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Survival data export failed"
 msgstr ""
 
 #: multisurvival/results/survivalTreeHeading.title
@@ -82824,6 +84675,10 @@ msgstr ""
 
 #: survival/results/extrapolationPlot.title
 msgid "Survival Extrapolation Plot"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Survival Extrapolation:"
 msgstr ""
 
 #: package/analyses/competingsurvival.menuSubtitle
@@ -82920,6 +84775,10 @@ msgstr ""
 msgid "Survival Nomogram"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Survival of the Whole Group"
+msgstr ""
+
 #: treatmentmeta/ui[0][4].label
 msgid "Survival Outcomes"
 msgstr ""
@@ -82984,6 +84843,7 @@ msgstr ""
 msgid "Survival Prob (%)"
 msgstr ""
 
+#: R/survival.b.R
 #: directregression/results/pseudoValues.columns.title
 #: dynamicprediction/results/predictionSummary.columns.title
 #: epidemiosurvival/results/life_table.columns.title
@@ -83065,7 +84925,7 @@ msgstr ""
 msgid "Survival Summary Table"
 msgstr ""
 
-#: singlearm/ui[4][0].label
+#: singlearm/ui[5][0].label
 msgid "Survival table"
 msgstr ""
 
@@ -83077,7 +84937,11 @@ msgstr ""
 msgid "Survival Table Explanations"
 msgstr ""
 
-#: singlearm/ui[4].label
+#: R/survival.b.R
+msgid "Survival table generation failed"
+msgstr ""
+
+#: singlearm/ui[5].label
 #: survival/ui[5].label
 #: survivalcont/ui[5].label
 msgid "Survival Tables"
@@ -83246,17 +85110,29 @@ msgstr ""
 msgid "SurvivalD"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "survivalsvm package not available. Please install it to use SVM survival analysis."
+msgstr ""
+
 #: package/analyses/singlearm.menuGroup
 #: package/analyses/survival.menuGroup
 #: package/analyses/survivalcont.menuGroup
 #: package/analyses/multisurvival.menuGroup
-#: package/analyses/oddsratio.menuGroup
+#: package/analyses/powersurvival.menuGroup
+#: package/analyses/survivalpower.menuGroup
+#: multisurvival/options.menuGroup
+#: powersurvival/options.menuGroup
+#: singlearm/options.menuGroup
+#: survival/options.menuGroup
+#: survivalcont/options.menuGroup
+#: survivalpower/options.menuGroup
+msgid "SurvivalT"
+msgstr ""
+
 #: package/analyses/timeinterval.menuGroup
 #: package/analyses/datecorrection.menuGroup
 #: package/analyses/outcomeorganizer.menuGroup
-#: package/analyses/powersurvival.menuGroup
 #: package/analyses/coxdiagnostics.menuGroup
-#: package/analyses/survivalpower.menuGroup
 #: package/analyses/comparingSurvival.menuGroup
 #: package/analyses/competingsurvival.menuGroup
 #: package/analyses/multistatesurvival.menuGroup
@@ -83270,16 +85146,9 @@ msgstr ""
 #: coxdiagnostics/options.menuGroup
 #: datecorrection/options.menuGroup
 #: multistatesurvival/options.menuGroup
-#: multisurvival/options.menuGroup
-#: oddsratio/options.menuGroup
 #: outcomeorganizer/options.menuGroup
 #: poweranalysis/options.menuGroup
 #: powercomprisk/options.menuGroup
-#: powersurvival/options.menuGroup
-#: singlearm/options.menuGroup
-#: survival/options.menuGroup
-#: survivalcont/options.menuGroup
-#: survivalpower/options.menuGroup
 #: survivalvalidation/options.menuGroup
 #: timeinterval/options.menuGroup
 msgid "SurvivalT2"
@@ -83308,6 +85177,14 @@ msgstr ""
 
 #: classification/options/svmKernel.title
 msgid "SVM Kernel"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "SVM survival analysis provides non-parametric survival predictions"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "SVM Survival error:"
 msgstr ""
 
 #: biomarkerdiscovery/options/discovery_method/svm_rfe.title
@@ -83551,6 +85428,10 @@ msgstr ""
 
 #: decisioncompare/ui[1].label
 msgid "Table Options"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Table population failed:"
 msgstr ""
 
 #: jforester/options/table_position.title
@@ -83842,6 +85723,10 @@ msgstr ""
 #: pcacox/results/technicalDetails.title
 #: stagemigration/ui[16][1].label
 msgid "Technical Details"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Technical details:"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -84950,6 +86835,10 @@ msgstr ""
 msgid "Tests for Effect Constancy"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Tests if data follows normal distribution. p > 0.05 suggests normality."
+msgstr ""
+
 #: advancedanova/results/assumptions.description
 msgid "Tests of ANOVA assumptions"
 msgstr ""
@@ -85010,6 +86899,15 @@ msgstr ""
 
 #: haralicktexture/options/texture_interpretation.title
 msgid "Texture Interpretation Guide"
+msgstr ""
+
+#: R/multisurvival.b.R
+#: R/survival.b.R
+msgid "The"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "The 'rms' package is required for nomogram generation but is not available."
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -85236,6 +87134,10 @@ msgstr ""
 msgid "The maximum value that perfect information about all uncertain parameters would have for the decision maker."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "The median survival time for patients with {group} was {median} {time_unit}."
+msgstr ""
+
 #: powersurvival/options/median_survival.description
 msgid "The median survival time in the control group, in years. Used to estimate the baseline hazard rate. Only used for complex designs."
 msgstr ""
@@ -85252,12 +87154,20 @@ msgstr ""
 msgid "The null hypothesis value of kappa."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "The optimal cut-off point for {variable} is {cutoff}, which best separates patients into high-risk and low-risk groups."
+msgstr ""
+
 #: stagemigration/options/oldStage.description
 msgid "The original staging variable (e.g., TNM 7th edition, AJCC 7th edition). Should be coded as ordered factor with appropriate stage levels."
 msgstr ""
 
 #: singlearm/options/outcome.description
 msgid "The outcome or event of interest for each patient. Should be a factor or numeric variable indicating whether the patient experienced the event (e.g., death) or censoring (e.g., end of follow-up)."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "The outcome should indicate whether the event of interest occurred"
 msgstr ""
 
 #: coefplot/options/dep.description
@@ -85336,6 +87246,10 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "The time period for each cycle in a Markov model, commonly one year."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "The time variable should represent time from study entry to event or last follow-up"
 msgstr ""
 
 #: survivalcont/options/elapsedtime.description
@@ -85447,8 +87361,24 @@ msgstr ""
 msgid "These features are being tested and will be activated in further releases"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "These findings can inform treatment planning and patient counseling discussions."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "These findings suggest that %s has %s for %s applications. The observed AUC indicates %s discriminatory ability, which %s for clinical implementation in this context."
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "These statistics help assess data distribution, identify unusual values, and guide appropriate statistical analyses."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "These summaries are suitable for baseline characteristics tables, data quality assessment, and descriptive analysis in clinical research."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "These will be excluded from analysis."
 msgstr ""
 
 #: jforestmodel/options/line_size.description
@@ -85509,6 +87439,10 @@ msgstr ""
 msgid "This analysis examined %d observations across %d categories of %s, with data segmented by %s into %d distinct groups. The most prominent finding was '%s' in the '%s' category, representing %.1f%% of that group. The '%s' category showed the most balanced distribution across all segments, indicating relatively equal representation of different outcomes within that group."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "This analysis identifies the cut-off value that best separates patients into high and low risk groups. The optimal cut-off maximizes the statistical difference in survival between groups while ensuring adequate sample sizes for reliable analysis."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "This analysis is optimized for biomarker distribution analysis with robust statistical methods."
 msgstr ""
@@ -85531,6 +87465,18 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "This analysis visualizes %s using %s across %d stages with %d categories (%d observations)."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "This calculation requires both predictor and outcome variables to be binary (exactly 2 levels each)."
+msgstr ""
+
+#: R/survival.b.R
+msgid "This difference may not be clinically meaningful"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "This disease-free survival analysis"
 msgstr ""
 
 #: R/linechart.b.R
@@ -85587,8 +87533,20 @@ msgid "This module provides data quality assessment including duplicate detectio
 "missing value analysis, and data completeness summary (similar to sumvar's dup() function)."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "This multivariable Cox regression analysis examined"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "This non-parametric measure is robust to outliers."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "This overall survival analysis"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "This post-surgical outcome analysis"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -85607,6 +87565,26 @@ msgstr ""
 msgid "This relationship is statistically significant and may have clinical relevance."
 msgstr ""
 
+#: R/survival.b.R
+msgid "This represents a clinically meaningful protective effect"
+msgstr ""
+
+#: R/survival.b.R
+msgid "This represents a clinically significant increase in risk"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "This represents a mild clinical effect."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "This represents a moderate clinical effect."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "This represents a substantial clinical effect."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "This suggests a clinically meaningful relationship."
 msgstr ""
@@ -85615,16 +87593,44 @@ msgstr ""
 msgid "This suggests a moderate association worth investigating."
 msgstr ""
 
+#: R/survival.b.R
+msgid "This suggests a moderate clinical benefit"
+msgstr ""
+
+#: R/survival.b.R
+msgid "This suggests a moderate increase in clinical risk"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "This suggests a weak association with limited clinical significance."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "This survival analysis"
 msgstr ""
 
 #: R/riverplot.b.R
 msgid "This text is formatted for inclusion in clinical reports, research manuscripts, or case presentations. Adjust terminology as needed for your specific context."
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "This tool generates a summary of your selected categorical variables."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "This tool generates comprehensive frequency distributions and descriptive statistics for categorical (nominal/ordinal) variables, including counts, percentages, missing value patterns, and data quality metrics."
+msgstr ""
+
+#: R/venn.b.R
+msgid "This tool helps you visualize overlaps between categorical variables using Venn and Upset diagrams."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "This tool will help you generate Pie Charts with statistical analysis."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "This treatment effectiveness study"
 msgstr ""
 
 #: screeningcalculator/results/repeatTest3Table.title
@@ -85851,6 +87857,7 @@ msgstr ""
 msgid "TIL Signature Characterization"
 msgstr ""
 
+#: R/survival.b.R
 #: causespecifichazards/results/cumulative_incidence_table.columns.title
 #: comparingSurvival/options/times.title
 #: comparingSurvival/ui[0][0].label
@@ -85953,6 +87960,14 @@ msgstr ""
 msgid "Time Correlation"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {type}"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: %s"
+msgstr ""
+
 #: swimmerplot/options/timeDisplay.title
 msgid "Time Display Mode"
 msgstr ""
@@ -85966,7 +87981,7 @@ msgstr ""
 #: penalizedcox/options/elapsedtime.title
 #: penalizedcox/ui[0][0].label
 #: singlearm/options/elapsedtime.title
-#: singlearm/ui[0][0].label
+#: singlearm/ui[1][0].label
 #: surveysurvival/options/elapsedtime.title
 #: surveysurvival/ui[0][0].label
 #: survival/options/elapsedtime.title
@@ -86018,6 +88033,10 @@ msgstr ""
 msgid "Time horizons for risk prediction (comma-separated)"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Time information is required. Either provide a survival time variable or enable date calculation with diagnosis and follow-up dates."
+msgstr ""
+
 #: swimmerplot/options/timeType.title
 msgid "Time Input Type"
 msgstr ""
@@ -86038,7 +88057,7 @@ msgstr ""
 #: penalizedcox/ui[4][0].label
 #: relativesurvival/results/excessMortalityTable.columns.title
 #: singlearm/options/byplot.title
-#: singlearm/ui[1][0].label
+#: singlearm/ui[2][0].label
 #: singlearm/results/personTimeTable.columns.title
 #: surveysurvival/options/byplot.title
 #: surveysurvival/ui[2][0].label
@@ -86389,7 +88408,7 @@ msgstr ""
 #: mixedcox/ui[3][0][0][2].label
 #: multisurvival/ui[1][0][0][2].label
 #: penalizedcox/ui[4][0][0][2].label
-#: singlearm/ui[1][0][0][2].label
+#: singlearm/ui[2][0][0][2].label
 #: surveysurvival/ui[2][0][0][2].label
 msgid "Time Type"
 msgstr ""
@@ -86634,6 +88653,18 @@ msgstr ""
 msgid "Time Variable (Survival)"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Time Variable Completeness"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Time variable contains missing values. Please remove or impute missing data before analysis."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Time variable contains zero or negative values. Survival times must be positive."
+msgstr ""
+
 #: jointmodeling/options/time_longitudinal.description.ui
 msgid "Time variable for longitudinal measurements (e.g., visit time, months since baseline)"
 msgstr ""
@@ -86694,6 +88725,7 @@ msgstr ""
 msgid "Time-Dependent & Binary ROC"
 msgstr ""
 
+#: R/multisurvival.b.R
 #: adaptivelasso/options/cv_measure/auc.title
 #: survivalvalidation/options/time_dependent_auc.title
 msgid "Time-dependent AUC"
@@ -86775,6 +88807,10 @@ msgstr ""
 msgid "Time-Dependent Model Diagnostics"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Time-dependent prediction error"
+msgstr ""
+
 #: timeroc/options/analysisType/timedep.title
 msgid "Time-Dependent ROC"
 msgstr ""
@@ -86834,6 +88870,10 @@ msgstr ""
 
 #: clinicalprediction/results/survival_metrics.columns.title
 msgid "Time-specific AUC"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Time-specific risk calculations"
 msgstr ""
 
 #: clinicalvalidation/options/validation_method/time_split.title
@@ -87135,6 +89175,7 @@ msgstr ""
 
 #: R/linechart.b.R
 #: R/nogoldstandard.b.R
+#: R/survival.b.R
 msgid "to"
 msgstr ""
 
@@ -87504,6 +89545,10 @@ msgstr ""
 
 #: alluvialSurvival/results/summaryTable.columns.title
 msgid "Total Patients"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Total patients:"
 msgstr ""
 
 #: enhancedcrosstable/options/margin/table.title
@@ -88216,6 +90261,10 @@ msgstr ""
 msgid "Treatment Effect Variable"
 msgstr ""
 
+#: singlearm/options/clinical_preset/treatment_effect.title
+msgid "Treatment effectiveness study"
+msgstr ""
+
 #: package/analyses/treatmenteffects.menuTitle
 #: treatmenteffects/options.menuTitle
 msgid "Treatment Effects Analysis"
@@ -88831,6 +90880,18 @@ msgstr ""
 msgid "Truth"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Try reloading your data file"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Try running the analysis with fewer variables"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Trying to access variable: {var}"
+msgstr ""
+
 #: nonparametricregression/options/robust_method/bisquare.title
 msgid "Tukey Bisquare"
 msgstr ""
@@ -89013,6 +91074,8 @@ msgstr ""
 msgid "Two-way ANOVA"
 msgstr ""
 
+#: R/reportcat.b.R
+#: R/summarydata.b.R
 #: classification/results/printRandForest/randomForestModel.columns.title
 #: decisiongraph/results/nodeTable.columns.title
 #: enhancedfrequency/results/results/variableSummary.columns.title
@@ -89325,8 +91388,20 @@ msgstr ""
 msgid "Unable to assess"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Unable to assess clinical significance."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Unable to assess linearity automatically."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Unable to extract predictor information from the analysis."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Unable to generate nomogram: Cox model results not available."
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -89971,6 +92046,10 @@ msgstr ""
 msgid "Unknown clinical preset:"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Unknown date format: %s. Supported formats are: %s"
+msgstr ""
+
 #: outbreakanalysis/options/outbreak_type/unknown.title
 msgid "Unknown Pattern"
 msgstr ""
@@ -90023,6 +92102,10 @@ msgstr ""
 
 #: hierarchicalbayes/options/correlation_model/unstructured.title
 msgid "Unstructured Correlation"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Unsupported time type: {type}. Supported formats: {formats}"
 msgstr ""
 
 #: agreement/options/wght/unweighted.title
@@ -90298,6 +92381,10 @@ msgstr ""
 msgid "UpSetR (Classic)"
 msgstr ""
 
+#: R/venn.b.R
+msgid "UpSetR Diagram of Selected Variables"
+msgstr ""
+
 #: imagingcorrelation/results/stagingCorrelationTable.columns.title
 msgid "Upstaging Rate"
 msgstr ""
@@ -90308,6 +92395,10 @@ msgstr ""
 
 #: relativesurvival/options/ratetable/us.title
 msgid "US Population (survexp.us)"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Usage"
 msgstr ""
 
 #: datecorrection/results/interpretation.title
@@ -90458,6 +92549,10 @@ msgstr ""
 msgid "Use Edge Gradients"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Use ensemble methods or XGBoost for similar performance with easier implementation."
+msgstr ""
+
 #: outcomeorganizer/options/useHierarchy.title
 msgid "Use Event Hierarchy"
 msgstr ""
@@ -90533,6 +92628,10 @@ msgstr ""
 
 #: grafify/options/use_grafify_theme.title
 msgid "Use Grafify Theme"
+msgstr ""
+
+#: singlearm/ui[0][0][0]/guided_mode.label
+msgid "Use guided setup (recommended)"
 msgstr ""
 
 #: bayesiandiagnostic/options/hpdi.title
@@ -90754,6 +92853,14 @@ msgstr ""
 msgid "Use Survival Decision Tree"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Use the copy-ready sentences for clinical reports if needed"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Use the risk score functionality for individual risk stratification."
+msgstr ""
+
 #: R/jjsegmentedtotalbar.b.R
 msgid "Use this visualization to compare proportional outcomes across treatment groups, patient populations, or time periods. Ideal for showing response rates, demographic compositions, or biomarker distributions in clinical research."
 msgstr ""
@@ -90835,6 +92942,10 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "Using default labels."
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Using fallback table format"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -91427,6 +93538,7 @@ msgstr ""
 msgid "Value Variable (Y-axis)"
 msgstr ""
 
+#: R/summarydata.b.R
 #: alluvial/options/fill/values.title
 #: alluvial2/options/fill/values.title
 msgid "Values"
@@ -91434,6 +93546,10 @@ msgstr ""
 
 #: jjsegmentedtotalbar/ui[0][1]/y_var.label
 msgid "Values (e.g., Patient Counts)"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Values beyond Q1-1.5×IQR or Q3+1.5×IQR are considered outliers."
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -91464,6 +93580,8 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 #: R/nonparametric.b.R
+#: R/reportcat.b.R
+#: R/summarydata.b.R
 #: aalenhazard/results/coefficientsTable.columns.title
 #: aalenhazard/results/constantEffectsTest.columns.title
 #: adaptivelasso/results/coefficients.columns.title
@@ -91604,6 +93722,18 @@ msgstr ""
 msgid "Variable '{name}' not found in data"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Variable '{var}' has {n} categories with <5 cases. Consider combining rare categories."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Variable '{var}' has {n} categories. Consider recoding variables with >20 categories for clearer interpretation."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Variable '{var}' has {rate}% missing data. High missing rates may indicate data quality issues."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Variable '%s' has %d categories: Too many categories may create cluttered visualization. Consider grouping into 5-10 meaningful categories."
 msgstr ""
@@ -91626,6 +93756,14 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid "Variable \"%s\" not found in data"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Variable {var} is NULL"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Variable {var} not found in data. Available columns: {cols}"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -91652,6 +93790,10 @@ msgstr ""
 msgid "Variable 1 (Required)"
 msgstr ""
 
+#: R/venn.b.R
+msgid "Variable 1 Selected but True Level Missing"
+msgstr ""
+
 #: enhancedcorrelation/results/text.columns.title
 #: partialcorrelation/results/partialCorr.columns.title
 #: partialcorrelation/results/zeroOrder.columns.title
@@ -91668,6 +93810,10 @@ msgstr ""
 msgid "Variable 2 (Required)"
 msgstr ""
 
+#: R/venn.b.R
+msgid "Variable 2 Selected but True Level Missing"
+msgstr ""
+
 #: venn/ui[0][2].label
 msgid "Variable 3"
 msgstr ""
@@ -91676,12 +93822,20 @@ msgstr ""
 msgid "Variable 3 (Optional)"
 msgstr ""
 
+#: R/venn.b.R
+msgid "Variable 3 Selected but True Level Missing"
+msgstr ""
+
 #: venn/ui[0][3].label
 msgid "Variable 4"
 msgstr ""
 
 #: venn/options/var4.title
 msgid "Variable 4 (Optional)"
+msgstr ""
+
+#: R/venn.b.R
+msgid "Variable 4 Selected but True Level Missing"
 msgstr ""
 
 #: jiwillsurvive/options/end_date_var.description.jamovi
@@ -91761,6 +93915,10 @@ msgstr ""
 #: autoeda/options/analysis_type/distributions.title
 #: autoeda/results/distributions.title
 msgid "Variable Distributions"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Variable exists: {exists}"
 msgstr ""
 
 #: multisurvival/options/adjexplanatory.title
@@ -91911,6 +94069,10 @@ msgstr ""
 msgid "Variable Importance Scores"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Variable importance scores (available in Random Forest and XGBoost methods)"
+msgstr ""
+
 #: clinicalnomograms/results/variableImportancePlot.description
 msgid "Variable importance visualization"
 msgstr ""
@@ -92028,6 +94190,10 @@ msgstr ""
 msgid "Variable Selection Output"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Variable selection requires at least 2 predictor variables"
+msgstr ""
+
 #: clinicalnomograms/results/variableSelection.title
 #: spikeslabpriors/results/variableSelection.title
 msgid "Variable Selection Results"
@@ -92053,6 +94219,10 @@ msgstr ""
 
 #: multisurvival/options/td_suffix_pattern.title
 msgid "Variable Suffix Pattern"
+msgstr ""
+
+#: reportcat/results/text.title
+msgid "Variable Summaries"
 msgstr ""
 
 #: enhancedfrequency/options/showVariableSummary.title
@@ -92166,6 +94336,10 @@ msgstr ""
 msgid "Variable Weights (optional)"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Variable-by-variable summaries with counts and percentages, visual summary table, clinical interpretation, and copy-ready report sentences."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Variable:"
 msgstr ""
@@ -92238,6 +94412,10 @@ msgstr ""
 #: crosstablepivot/options/vars.title
 #: crosstablepivot/ui[0][1]/variableSupplier[0].label
 msgid "Variables (Rows)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Variables analyzed:"
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -92351,6 +94529,10 @@ msgstr ""
 msgid "Variables Included"
 msgstr ""
 
+#: R/reportcat.b.R
+msgid "Variables not found in data"
+msgstr ""
+
 #: R/jjpiestats.b.R
 #: R/linechart.b.R
 #: R/lollipop.b.R
@@ -92392,6 +94574,10 @@ msgstr ""
 #: sparsegrouplasso/results/comparisonTable.columns.title
 #: spikeslabpriors/results/groupSelection.columns.title
 msgid "Variables Selected"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Variables should be truly categorical (nominal or ordinal)"
 msgstr ""
 
 #: enhancedfrequency/results/results/variableSummary.title
@@ -92466,6 +94652,18 @@ msgstr ""
 
 #: survivalmodelvalidation/options/covariates.description.ui
 msgid "Variables used in the original survival model"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Variables Used:"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Variables with >20 categories may need recoding for analysis"
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Variables with no valid levels or all missing values"
 msgstr ""
 
 #: flexmultistate/options/shared_effects.description.ui
@@ -92654,6 +94852,10 @@ msgstr ""
 msgid "Venn Diagram"
 msgstr ""
 
+#: R/venn.b.R
+msgid "Venn Diagram of Selected Variables"
+msgstr ""
+
 #: package/analyses/venn.menuSubtitle
 #: venn/options.menuSubtitle
 msgid "Venn Diagram, UpSet Plot"
@@ -92687,6 +94889,26 @@ msgstr ""
 msgid "Verify that the grouping variable has meaningful categories."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "Verify the data is not empty"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Verify the dataset is not corrupted"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Verify the outcome variable is binary (0/1 or FALSE/TRUE)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Verify there are no missing values in the outcome variable"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Verify there are no special characters in the variable name"
+msgstr ""
+
 #: advancedbarplot/options/orientation/vertical.title
 #: alluvial/options/orient/vert.title
 #: alluvial2/options/orient/vert.title
@@ -92713,12 +94935,20 @@ msgstr ""
 msgid "Vertical Bars"
 msgstr ""
 
+#: R/singlearm.b.R
+msgid "Very few events observed - results may be unreliable"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "Very few subjects with repeated measures ("
 msgstr ""
 
 #: R/riverplot.b.R
 msgid "Very few unique IDs relative to data size: Check if ID variable is correctly specified."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Very high event rate ({rate}%). Consider competing risks or cause-specific analysis."
 msgstr ""
 
 #: netreclassification/results/reclassification.columns.title
@@ -92731,6 +94961,14 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Very small effect size - minimal practical significance."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Very small sample size (n = {n}). Results may be unreliable. Recommend n ≥ 50 for stable cut-off analysis."
+msgstr ""
+
+#: R/reportcat.b.R
+msgid "Very sparse categories (<5 cases) may need combination"
 msgstr ""
 
 #: R/linechart.b.R
@@ -92934,6 +95172,10 @@ msgstr ""
 
 #: vartree/options/style.title
 msgid "Visual Style"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Visual summary tables with distribution plots"
 msgstr ""
 
 #: enhancedfactorvariable/options/plotTheme.description
@@ -93162,7 +95404,12 @@ msgid "Warmup/Burn-in Iterations"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/reportcat.b.R
 msgid "Warning"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Warning in {context}: {warning}"
 msgstr ""
 
 #: jointmodeling/results/warnings.title
@@ -93210,6 +95457,10 @@ msgstr ""
 #: curemodels/results/warnings.title
 #: partialcorrelation/results/diagnostics.columns.title
 msgid "Warnings"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "was associated with"
 msgstr ""
 
 #: explainableai/options/plot_type/waterfall.title
@@ -93625,7 +95876,12 @@ msgid "Welcome message and instructions"
 msgstr ""
 
 #: R/jjpiestats.b.R
+#: R/reportcat.b.R
 msgid "Welcome to ClinicoPath"
+msgstr ""
+
+#: R/venn.b.R
+msgid "Welcome to ClinicoPath Venn Diagram Tool"
 msgstr ""
 
 #: R/linechart.b.R
@@ -93682,11 +95938,20 @@ msgid "What this analysis does"
 msgstr ""
 
 #: R/decision.b.R
+#: R/reportcat.b.R
 msgid "What This Analysis Does"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "What this analysis provides"
 msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "What you\'ll get"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "When {variable} increases by 1 unit, the hazard (risk) of the event changes by a factor of {hr}."
 msgstr ""
 
 #: R/linechart.b.R
@@ -93710,11 +95975,32 @@ msgid "When to Use Ridge Plots:"
 msgstr ""
 
 #: R/decision.b.R
+#: R/reportcat.b.R
 msgid "When to Use This Analysis"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "When to use this analysis"
 msgstr ""
 
 #: decision/ui[0][1].label
 msgid "When to use: Validating new tests, clinical validation studies, test comparisons"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0. If you are using a factor as an outcome, please check the levels and content."
+msgstr ""
+
+#: R/survival.b.R
+msgid "When using dates to calculate survival time, both diagnosis date and follow-up date are required."
+msgstr ""
+
+#: R/survival.b.R
+msgid "When using multiple event levels, at least one event type (Dead of Disease or Dead of Other) must be specified."
 msgstr ""
 
 #: advancedbarplot/options/legend_position.description.jamovi
@@ -94003,8 +96289,20 @@ msgstr ""
 msgid "Wisconsin Breast Cancer Database dataset, obtained from {mlbench}."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid "with"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "with %d events occurring among %d patients (event rate: %.1f%%). This suggests %s prognosis for this patient population."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "with equal flow weights"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "With fewer than 10 events, results should be interpreted cautiously. Consider longer follow-up or pooled analysis."
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -94017,6 +96315,18 @@ msgstr ""
 
 #: decisionpanel/results/incrementalValue.columns.title
 msgid "With Others"
+msgstr ""
+
+#: R/survival.b.R
+msgid "with statistical significance"
+msgstr ""
+
+#: R/survival.b.R
+msgid "with strong statistical evidence"
+msgstr ""
+
+#: R/survival.b.R
+msgid "with very strong statistical evidence"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -94309,6 +96619,14 @@ msgstr ""
 #: jjscatterstats/options/xtitle.title
 #: jjwithinstats/options/xtitle.title
 msgid "X-Title"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "xgboost package not available. Please install it to use XGBoost survival models."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "XGBoost Survival Model Results"
 msgstr ""
 
 #: grafify/options/plot_type/xy_catgroup.title
@@ -94799,6 +97117,10 @@ msgstr ""
 
 #: bayesiannetworkma/options/zero_events_correction.title
 msgid "Zero Events Correction"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Zero survival times detected:"
 msgstr ""
 
 #: hierarchicalbayes/options/model_type/zero_inflated.title

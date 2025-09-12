@@ -5,6 +5,8 @@
 \title{Single Arm Survival}
 \usage{
 singlearm(
+  clinical_preset = "overall_survival",
+  guided_mode = TRUE,
   data,
   elapsedtime,
   tint = FALSE,
@@ -46,6 +48,13 @@ singlearm(
 )
 }
 \arguments{
+\item{clinical_preset}{Select the type of survival analysis that matches
+your research question. This automatically configures appropriate settings
+for your study type.}
+
+\item{guided_mode}{Enables step-by-step guidance and clinical
+interpretation helpers. Recommended for users new to survival analysis.}
+
 \item{data}{The data as a data frame.}
 
 \item{elapsedtime}{The time-to-event or follow-up duration for each
@@ -103,7 +112,10 @@ survival probabilities at 1, 3, and 5 years.}
 
 \item{timetypedata}{select the time type in data (e.g., YYYY-MM-DD)}
 
-\item{timetypeoutput}{select the time type in output (default is months)}
+\item{timetypeoutput}{Select the time unit for displaying survival results.
+Months is most common  in clinical oncology studies. Choose the unit that
+best matches your clinical  practice and makes results most interpretable
+for your audience.}
 
 \item{uselandmark}{Enables landmark analysis, which addresses immortal time
 bias by analyzing survival only for patients who survive to a specified
@@ -213,6 +225,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr

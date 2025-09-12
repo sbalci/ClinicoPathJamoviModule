@@ -148,6 +148,228 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Private fields for storing analysis results
             residuals_data = NULL,
 
+            # Helper function to escape variable names with special characters for formulas
+            .escapeVariableNames = function(var_names) {
+                # Check if variable names contain special characters that need escaping
+                need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+                var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+                return(var_names)
+            },
+
+            # Helper function to create clinical tooltips and explanations
+            .createClinicalTooltip = function(term, definition, example = NULL) {
+                tooltip_html <- glue::glue(
+                    '<div class="clinical-tooltip">
+                    <strong>{term}</strong><br>
+                    <span class="definition">{definition}</span>
+                    {if (!is.null(example)) paste0("<br><em>Example: ", example, "</em>") else ""}
+                    </div>'
+                )
+                return(tooltip_html)
+            },
+
+            # Helper function to create clinical interpretation boxes
+            .createInterpretationBox = function(title, content, warning = NULL) {
+                warning_html <- if (!is.null(warning)) {
+                    glue::glue('<div class="warning-box">⚠️ {warning}</div>')
+                } else ""
+                
+                interpretation_html <- glue::glue(
+                    '<div class="interpretation-box">
+                    <h4 class="interpretation-title">📊 {title}</h4>
+                    <div class="interpretation-content">{content}</div>
+                    {warning_html}
+                    </div>'
+                )
+                return(interpretation_html)
+            },
+
+            # Helper function to generate copy-ready clinical sentences
+            .generateClinicalSentence = function(analysis_type, variable_name, result_values) {
+                switch(analysis_type,
+                    "cox_regression" = {
+                        # Safe access to Cox regression results with fallbacks
+                        hr_val <- ifelse(is.null(result_values$hr) || result_values$hr == "-", "N/A", round(as.numeric(result_values$hr), 2))
+                        if (hr_val == "N/A") {
+                            glue::glue(.('Analysis of {variable} could not determine hazard ratio.'), variable = variable_name)
+                        } else {
+                            glue::glue(.('When {variable} increases by 1 unit, the hazard (risk) of the event changes by a factor of {hr}.'), 
+                                     variable = variable_name, hr = hr_val)
+                        }
+                    },
+                    
+                    "median_survival" = {
+                        median_val <- ifelse(is.null(result_values$median), "N/A", round(result_values$median, 1))
+                        time_unit <- ifelse(is.null(result_values$time_unit), "time units", result_values$time_unit)
+                        group_name <- ifelse(is.null(result_values$group), "this group", result_values$group)
+                        
+                        if (median_val == "N/A") {
+                            glue::glue(.('Median survival time for {group} could not be determined.'), group = group_name)
+                        } else {
+                            glue::glue(.('The median survival time for patients with {group} was {median} {time_unit}.'),
+                                     group = group_name, median = median_val, time_unit = time_unit)
+                        }
+                    },
+                    
+                    "cutoff_analysis" = {
+                        cutoff_val <- ifelse(is.null(result_values$cutoff), "N/A", round(as.numeric(result_values$cutoff), 2))
+                        if (cutoff_val == "N/A") {
+                            glue::glue(.('Optimal cut-off point for {variable} could not be determined.'), variable = variable_name)
+                        } else {
+                            glue::glue(.('The optimal cut-off point for {variable} is {cutoff}, which best separates patients into high-risk and low-risk groups.'),
+                                     variable = variable_name, cutoff = cutoff_val)
+                        }
+                    },
+                    
+                    # Default case
+                    glue::glue(.('Analysis completed for {variable}.'), variable = variable_name)
+                )
+            },
+
+            # Error recovery wrapper for safe analysis execution
+            .safeAnalysis = function(analysis_function, context = "", fallback_value = NULL) {
+                tryCatch({
+                    analysis_function()
+                }, error = function(e) {
+                    warning(.('Analysis failed in {context}: {error}. Using fallback method.'), 
+                            context = context, error = e$message)
+                    return(fallback_value)
+                }, warning = function(w) {
+                    message(.('Warning in {context}: {warning}'), 
+                            context = context, warning = w$message)
+                    suppressWarnings(analysis_function())
+                })
+            },
+
+            # Clinical assumption checking
+            .checkClinicalAssumptions = function(data, time_var, outcome_var, contexpl_var = NULL) {
+                warnings <- list()
+                
+                # Sample size checks
+                n <- nrow(data)
+                if (n < 30) {
+                    warnings <- append(warnings, .('Very small sample size (n = {n}). Results may be unreliable. Recommend n ≥ 50 for stable cut-off analysis.'))
+                } else if (n < 50) {
+                    warnings <- append(warnings, .('Small sample size (n = {n}). Consider larger sample for more reliable cut-off analysis.'))
+                }
+                
+                # Event rate checks
+                events <- sum(data[[outcome_var]], na.rm = TRUE)
+                event_rate <- events / n
+                if (event_rate < 0.1) {
+                    warnings <- append(warnings, .('Low event rate ({rate}%). May need larger sample or longer follow-up for reliable survival analysis.'))
+                } else if (event_rate > 0.9) {
+                    warnings <- append(warnings, .('Very high event rate ({rate}%). Consider competing risks or cause-specific analysis.'))
+                }
+                
+                # Follow-up time checks
+                median_time <- median(data[[time_var]], na.rm = TRUE)
+                if (median_time < 6) {
+                    warnings <- append(warnings, .('Short median follow-up ({time} {units}). May be insufficient for meaningful survival analysis.'))
+                }
+                
+                # Continuous variable distribution checks
+                if (!is.null(contexpl_var) && contexpl_var %in% names(data)) {
+                    cont_var <- data[[contexpl_var]]
+                    if (length(unique(cont_var[!is.na(cont_var)])) < 10) {
+                        warnings <- append(warnings, .('Limited variability in continuous explanatory variable. Consider treating as categorical.'))
+                    }
+                }
+                
+                return(warnings)
+            },
+
+            # Helper function to restore original variable names in output tables
+            .restoreOriginalNamesInTable = function(table_data, all_labels) {
+                if (is.null(table_data) || nrow(table_data) == 0) return(table_data)
+                
+                # Create a mapping from cleaned names to original names
+                name_mapping <- setNames(unlist(all_labels), names(all_labels))
+                
+                # Restore names in the first column (which typically contains variable names)
+                if (ncol(table_data) > 0) {
+                    first_col <- table_data[[1]]
+                    
+                    # Process each row in the first column
+                    for (i in seq_along(first_col)) {
+                        current_name <- first_col[i]
+                        
+                        # Skip if it's not a string or is empty
+                        if (is.na(current_name) || current_name == "" || !is.character(current_name)) next
+                        
+                        # Check if this name exists in our mapping and replace it
+                        if (current_name %in% names(name_mapping)) {
+                            table_data[i, 1] <- name_mapping[current_name]
+                        }
+                        
+                        # Also handle factor level names (e.g., "variable_name=level")
+                        for (clean_name in names(name_mapping)) {
+                            original_name <- name_mapping[clean_name]
+                            pattern <- paste0("^", clean_name, "([=:].*)?$")
+                            if (grepl(pattern, current_name)) {
+                                table_data[i, 1] <- gsub(clean_name, original_name, current_name)
+                                break
+                            }
+                        }
+                    }
+                }
+                
+                return(table_data)
+            },
+            
+            .detectCommonMisuses = function() {
+                warnings <- c()
+                
+                # Detect multiple testing without correction
+                plot_count <- sum(c(
+                    self$options$sc, self$options$kmunicate, self$options$ce, 
+                    self$options$ch, self$options$loglog
+                ))
+                if (plot_count > 3) {
+                    warnings <- c(warnings, .(
+                        "Multiple analysis outputs selected. Consider adjusting for multiple comparisons if making statistical inferences from multiple tests."
+                    ))
+                }
+                
+                # Detect inappropriate cut-off hunting
+                if (self$options$multiple_cutoffs && !is.null(self$options$num_cutoffs)) {
+                    num_cuts <- as.numeric(self$options$num_cutoffs)
+                    if (num_cuts > 5) {
+                        warnings <- c(warnings, .(
+                            "Testing many cut-offs ({n}) increases risk of false discoveries. Consider pre-specified cut-offs or correction for multiple testing."
+                        ) %>% glue::glue(n = num_cuts))
+                    }
+                }
+                
+                # Detect potential data snooping
+                if (self$options$findcut && self$options$multiple_cutoffs) {
+                    warnings <- c(warnings, .(
+                        "Using both optimal cut-off and multiple cut-offs may lead to overfitting. Consider validation in independent dataset or cross-validation."
+                    ))
+                }
+                
+                # Detect inappropriate landmark analysis
+                if (self$options$uselandmark && !is.null(self$options$landmark)) {
+                    landmark_time <- as.numeric(self$options$landmark)
+                    if (landmark_time > 0 && nrow(self$data) > 0) {
+                        # Check if landmark time removes too many patients
+                        time_var <- self$options$elapsedtime
+                        if (!is.null(time_var) && time_var %in% names(self$data)) {
+                            time_data <- self$data[[time_var]]
+                            patients_excluded <- sum(time_data < landmark_time, na.rm = TRUE)
+                            exclusion_rate <- patients_excluded / length(time_data)
+                            if (exclusion_rate > 0.3) {
+                                warnings <- c(warnings, .(
+                                    "Landmark analysis excludes {rate}% of patients. High exclusion rates may introduce bias."
+                                ) %>% glue::glue(rate = round(exclusion_rate * 100, 1)))
+                            }
+                        }
+                    }
+                }
+                
+                return(warnings)
+            },
+
             # init ----
             .init = function() {
                 # Initialize all outputs to FALSE first (following singlearm pattern)
@@ -367,7 +589,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     "myoutcome_labelled" = myoutcome,
                     "mydxdate_labelled" = mydxdate,
                     "myfudate_labelled" = myfudate,
-                    "mycontexpl_labelled" = mycontexpl
+                    "mycontexpl_labelled" = mycontexpl,
+                    "all_labels" = all_labels
                 ))
             }
 
@@ -375,27 +598,24 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # todo ----
             ,
             .todo = function() {
-                todo <- glue::glue(
-                    "
-                <br>Welcome to ClinicoPath
-                <br><br>
-                This tool will help you calculate a cut-off for a continuous variable based on survival outcome.
-                <br>
-                After the cut-off is determined median survivals and 1,3,5-yr survivals are calculated.
-                <br><br>
-                Explanatory variable is continuous.
-                <br><br>
-                Select outcome level from Outcome variable.
-                <br><br>
-                Outcome Level: if patient is dead or event (recurrence) occured. You may also use advanced outcome options depending on your analysis type.
-                <br><br>
-                Survival time should be numeric and continuous. You may also use dates to calculate survival time in advanced elapsed time options.
-                <br><br>
-                This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-                <br><hr>
-                <br>
-                See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."
-                )
+                todo <- glue::glue(.(
+                    'Welcome to ClinicoPath
+                    
+                    This tool will help you calculate a cut-off for a continuous variable based on survival outcome.
+                    
+                    After the cut-off is determined median survivals and 1,3,5-yr survivals are calculated.
+                    
+                    Explanatory variable is continuous.
+                    
+                    Select outcome level from Outcome variable.
+                    
+                    Outcome Level: if patient is dead or event (recurrence) occured. You may also use advanced outcome options depending on your analysis type.
+                    
+                    Survival time should be numeric and continuous. You may also use dates to calculate survival time in advanced elapsed time options.
+                    
+                    This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
+                    
+                    See details for survival [here](https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf).'))
 
                 html <- self$results$todo
                 html$setContent(todo)
@@ -453,19 +673,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             mydata[["start"]] <- func(mydata[[dxdate]])
                             mydata[["end"]] <- func(mydata[[fudate]])
                         }, error = function(e) {
-                            stop(paste0("Date parsing error: ", e$message, 
-                                      ". Please check that your dates match the selected format: ", 
-                                      timetypedata))
+                            stop(.('Date parsing error: {error}. Please check that your dates match the selected format: {format}'), 
+                                 error = e$message, format = timetypedata)
                         })
                     } else {
-                        stop(paste0("Unsupported time type: ", timetypedata, 
-                                  ". Supported formats: ", paste(names(lubridate_functions), collapse = ", ")))
+                        stop(.('Unsupported time type: {type}. Supported formats: {formats}'), 
+                             type = timetypedata, formats = paste(names(lubridate_functions), collapse = ", "))
                     }
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
-                        stop(paste0("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ", self$options$timetypedata)
-                        )
+                        stop(.('Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {type}'), 
+                             type = self$options$timetypedata)
                     }
 
                     timetypeoutput <-
@@ -515,9 +734,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         )) == 2) && (sum(unique(
                             outcome1[!is.na(outcome1)]
                         )) == 1))) {
-                            stop(
-                                'When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.'
-                            )
+                            stop(.('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.'))
 
                         }
 
@@ -533,9 +750,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             )
 
                     } else {
-                        stop(
-                            'When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0. If you are using a factor as an outcome, please check the levels and content.'
-                        )
+                        stop(.('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0. If you are using a factor as an outcome, please check the levels and content.'))
 
                     }
 
@@ -620,6 +835,69 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
             }
 
+            # Validation Methods ----
+            ,
+            .validateAnalysisRequirements = function() {
+                # Basic variable checks
+                has_outcome <- !is.null(self$options$outcome)
+                
+                # If multi-event analysis is enabled, check for required event levels
+                if (self$options$multievent) {
+                    has_required_events <- !is.null(self$options$dod) || !is.null(self$options$dooc)
+                    outcome_valid <- has_outcome && has_required_events
+                } else {
+                    outcome_valid <- has_outcome
+                }
+                
+                # Check time variable requirements
+                if (self$options$tint) {
+                    # Time calculation from dates
+                    time_valid <- !is.null(self$options$dxdate) && !is.null(self$options$fudate)
+                } else {
+                    # Direct elapsed time
+                    time_valid <- !is.null(self$options$elapsedtime)
+                }
+                
+                # Check continuous explanatory variable
+                contexpl_valid <- !is.null(self$options$contexpl)
+                
+                basic_requirements <- outcome_valid && time_valid && contexpl_valid
+                
+                # Misuse Detection Guards
+                if (basic_requirements && nrow(self$data) > 0) {
+                    misuse_warnings <- private$.detectCommonMisuses()
+                    if (length(misuse_warnings) > 0) {
+                        warning_content <- private$.createInterpretationBox(
+                            .("Statistical Analysis Warning"),
+                            paste(misuse_warnings, collapse = "<br><br>"),
+                            warning = TRUE
+                        )
+                        self$results$todo$setContent(warning_content)
+                        self$results$todo$setVisible(TRUE)
+                    }
+                }
+                
+                return(basic_requirements)
+            }
+            ,
+            .handleIncompleteAnalysis = function() {
+                private$.todo()
+                # Hide all analysis results
+                self$results$coxSummary$setVisible(FALSE)
+                self$results$coxTable$setVisible(FALSE)
+                self$results$tCoxtext2$setVisible(FALSE)
+                self$results$rescutTable$setVisible(FALSE)
+                self$results$medianSummary$setVisible(FALSE)
+                self$results$medianTable$setVisible(FALSE)
+                self$results$survTableSummary$setVisible(FALSE)
+                self$results$survTable$setVisible(FALSE)
+                self$results$plot4$setVisible(FALSE)
+                self$results$plot5$setVisible(FALSE)
+                self$results$plot2$setVisible(FALSE)
+                self$results$plot3$setVisible(FALSE)
+                self$results$plot6$setVisible(FALSE)
+                self$results$todo$setVisible(TRUE)
+            }
 
             # Clean Data For Analysis ----
             ,
@@ -711,64 +989,20 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             ,
             .run = function() {
                 
-                # # Debug: Check if .run is being called at all
-                # tryCatch({
-                #     self$results$mydataview_multipleCutoffs1$setContent(
-                #         list(
-                #             step = "Start of .run method",
-                #             run_method_called = "YES, .run method is being executed",
-                #             multiple_cutoffs_available = exists("multiple_cutoffs", where = self$options)
-                #         )
-                #     )
-                # }, error = function(e) {
-                #     # If mydataview_multipleCutoffs1 does not exist, try the console
-                #     message("Debug: .run method called but mydataview_multipleCutoffs1 not available")
-                # })
 
                 # Errors, Warnings ----
 
                 ## No variable todo ----
 
-                ## Define subconditions ----
-
-                subcondition1a <- !is.null(self$options$outcome)
-                subcondition1b1 <- self$options$multievent
-                subcondition1b2 <- !is.null(self$options$dod)
-                subcondition1b3 <- !is.null(self$options$dooc)
-                # subcondition1b4 <- !is.null(self$options$awd)
-                # subcondition1b5 <- !is.null(self$options$awod)
-                subcondition2a <- !is.null(self$options$elapsedtime)
-                subcondition2b1 <- self$options$tint
-                subcondition2b2 <- !is.null(self$options$dxdate)
-                subcondition2b3 <- !is.null(self$options$fudate)
-                condition3 <- !is.null(self$options$contexpl)
-
-                condition1 <- subcondition1a && !subcondition1b1 || subcondition1b1 && subcondition1b2 || subcondition1b1 && subcondition1b3
-
-                condition2 <- subcondition2b1 && subcondition2b2 && subcondition2b3 || subcondition2a && !subcondition2b1 && !subcondition2b2 && !subcondition2b3
-
-                not_continue_analysis <- !(condition1 && condition2 && condition3)
+                ## Validate Analysis Requirements ----
+                not_continue_analysis <- !private$.validateAnalysisRequirements()
 
 
                 if (not_continue_analysis) {
-                    private$.todo()
-                    self$results$coxSummary$setVisible(FALSE)
-                    self$results$coxTable$setVisible(FALSE)
-                    self$results$tCoxtext2$setVisible(FALSE)
-                    self$results$rescutTable$setVisible(FALSE)
-                    self$results$medianSummary$setVisible(FALSE)
-                    self$results$medianTable$setVisible(FALSE)
-                    self$results$survTableSummary$setVisible(FALSE)
-                    self$results$survTable$setVisible(FALSE)
-                    self$results$plot4$setVisible(FALSE)
-                    self$results$plot5$setVisible(FALSE)
-                    self$results$plot2$setVisible(FALSE)
-                    self$results$plot3$setVisible(FALSE)
-                    self$results$plot6$setVisible(FALSE)
-                    self$results$todo$setVisible(TRUE)
+                    private$.handleIncompleteAnalysis()
                     return()
                 } else {
-                  self$results$todo$setVisible(FALSE)
+                    self$results$todo$setVisible(FALSE)
                 }
 
 
@@ -776,12 +1010,34 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Enhanced input validation using helper method
                 if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
+                    stop(.('Data contains no (complete) rows'))
 
                 private$.checkpoint()
 
                 # Get Clean Data ----
                 results <- private$.cleandata()
+                
+                # Clinical Assumption Checking ----
+                if (!is.null(results) && !is.null(results$cleanData)) {
+                    clinical_warnings <- private$.checkClinicalAssumptions(
+                        results$cleanData,
+                        results$name1time,
+                        results$name2outcome,
+                        results$name3contexpl
+                    )
+                    
+                    if (length(clinical_warnings) > 0) {
+                        warning_content <- private$.createInterpretationBox(
+                            .("Clinical Assumptions Warning"),
+                            paste(clinical_warnings, collapse = "<br><br>"),
+                            warning = TRUE
+                        )
+                        
+                        # Store warnings for display
+                        self$results$clinicalWarnings$setContent(warning_content)
+                        self$results$clinicalWarnings$setVisible(TRUE)
+                    }
+                }
                 
                 # Additional validation after data cleaning
                 if (!is.null(results$cleanData)) {
@@ -796,15 +1052,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     private$.checkMemoryUsage(results$cleanData)
                 }
                 
-                # Debug: Check if we have results after cleandata
-                # self$results$mydataview_multipleCutoffs1$setContent(
-                #     list(
-                #         step = "After .cleandata()",
-                #         results_created = !is.null(results),
-                #         cleanData_exists = if(!is.null(results)) !is.null(results$cleanData) else FALSE,
-                #         has_variables = if(!is.null(results)) all(c("name1time", "name2outcome", "name3contexpl") %in% names(results)) else FALSE
-                #     )
-                # )
 
                 # Run Analysis ----
 
@@ -835,34 +1082,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 ## Run Multiple Cut-offs Analysis (INDEPENDENT) ----
                 multicut_results <- NULL
-                message(paste("multiple_cutoffs option:", self$options$multiple_cutoffs))
                 
-                # Debug: Always show debug info regardless of option
-                # self$results$mydataview_multipleCutoffs1$setContent(
-                #     list(
-                #         step = "Before multiple_cutoffs check",
-                #         multiple_cutoffs_option = self$options$multiple_cutoffs,
-                #         results_available = !is.null(results),
-                #         cleanData_available = if(!is.null(results)) !is.null(results$cleanData) else FALSE,
-                #         name1time = if(!is.null(results)) results$name1time else "NULL",
-                #         name2outcome = if(!is.null(results)) results$name2outcome else "NULL",
-                #         name3contexpl = if(!is.null(results)) results$name3contexpl else "NULL"
-                #     )
-                # )
                 
-                # Debug: Check the condition
-                # self$results$mydataview_multipleCutoffs1$setContent(
-                #     list(
-                #         step = "At multiple_cutoffs condition",
-                #         multiple_cutoffs_option = self$options$multiple_cutoffs,
-                #         option_type = class(self$options$multiple_cutoffs),
-                #         condition_result = as.logical(self$options$multiple_cutoffs)
-                #     )
-                # )
                 
-                # Force enable for debugging
-                if (TRUE) { # self$options$multiple_cutoffs) {
-                    message("Starting multiple cutoffs analysis...")
+                if (self$options$multiple_cutoffs) {
                     # Use the original clean data, before any single cutoff processing
                     multicut_results <- private$.multipleCutoffs(results)
                     if (!is.null(multicut_results)) {
@@ -1022,58 +1245,81 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 private$.checkpoint()
 
                 ## Cox Regression ----
+                
+                # Wrap Cox regression analysis in error recovery
+                cox_result <- private$.safeAnalysis(function() {
+                    
+                    mytime <- results$name1time
+                    mytime <- jmvcore::constructFormula(terms = mytime)
 
-                mytime <- results$name1time
-                mytime <- jmvcore::constructFormula(terms = mytime)
+                    myoutcome <- results$name2outcome
+                    myoutcome <-
+                        jmvcore::constructFormula(terms = myoutcome)
 
-                myoutcome <- results$name2outcome
-                myoutcome <-
-                    jmvcore::constructFormula(terms = myoutcome)
+                    myfactor <- results$name3contexpl
+                    myfactor <-
+                        jmvcore::constructFormula(terms = myfactor)
 
+                    mydata <- results$cleanData
 
-                myfactor <- results$name3contexpl
-                myfactor <-
-                    jmvcore::constructFormula(terms = myfactor)
+                    mydata[[mytime]] <-
+                        jmvcore::toNumeric(mydata[[mytime]])
 
-                mydata <- results$cleanData
+                    myformula <-
+                        paste("Surv(", mytime, ",", myoutcome, ")")
 
-                mydata[[mytime]] <-
-                    jmvcore::toNumeric(mydata[[mytime]])
+                    finalfit::finalfit(
+                        .data = mydata,
+                        dependent = myformula,
+                        explanatory = myfactor,
+                        metrics = TRUE
+                    )
+                }, context = .("Cox regression analysis"), fallback_value = list(NULL, NULL))
+                
+                tCox <- cox_result
 
-                myformula <-
-                    paste("Surv(", mytime, ",", myoutcome, ")")
+                # Check if Cox analysis was successful
+                if (is.null(tCox) || is.null(tCox[[1]]) || is.null(tCox[[2]])) {
+                    error_msg <- .(
+                        "Cox regression analysis failed. This may be due to insufficient data, convergence issues, or inappropriate data structure. Please check your variables and try again."
+                    )
+                    self$results$tCoxtext2$setContent(private$.createInterpretationBox(
+                        .("Analysis Error"), error_msg, warning = TRUE
+                    ))
+                    return()
+                }
+                
+                # Restore original variable names in finalfit output table
+                if (!is.null(tCox[[1]]) && nrow(tCox[[1]]) > 0) {
+                    labelled_data <- private$.getData()
+                    tCox[[1]] <- private$.restoreOriginalNamesInTable(tCox[[1]], labelled_data$all_labels)
+                }
 
-                finalfit::finalfit(
-                    .data = mydata,
-                    dependent = myformula,
-                    explanatory = myfactor,
-                    metrics = TRUE
-                ) -> tCox
-
-
-                tCoxtext2 <- glue::glue(
-                    "
-                                <br>
-                                <b>Model Metrics:</b>
-                                  ",
-                    unlist(tCox[[2]]),
-                    "
-                                <br>
-                                "
+                # Create enhanced Cox results with clinical context
+                cox_tooltip <- private$.createClinicalTooltip(
+                    .("Cox Regression Analysis"),
+                    .("Cox regression estimates the hazard ratio (HR) which represents the risk of the event occurring at any time for one group relative to another. HR > 1 indicates increased risk, HR < 1 indicates decreased risk."),
+                    .("HR = 2.5 means the group has 2.5 times higher risk of the event")
                 )
-
+                
+                tCoxtext2 <- glue::glue(.(
+                    '{tooltip}
+                    **Model Metrics:**
+                    {metrics}'),
+                    tooltip = cox_tooltip,
+                    metrics = unlist(tCox[[2]]))
 
                 if (self$options$uselandmark) {
                     landmark <- jmvcore::toNumeric(self$options$landmark)
 
-                    tCoxtext2 <- glue::glue(
-                        tCoxtext2,
-                        "Landmark time used as: ",
-                        landmark, " ",
-                        self$options$timetypeoutput, "."
-                    )
+                    tCoxtext2 <- glue::glue(.(
+                        '{previous_text} 
+                        
+                        **Landmark Analysis:** Analysis restricted to patients who survived beyond {time} {units}. This approach reduces lead time bias in prognostic studies.'),
+                        previous_text = tCoxtext2,
+                        time = landmark, 
+                        units = self$options$timetypeoutput)
                 }
-
 
                 self$results$tCoxtext2$setContent(tCoxtext2)
 
@@ -1127,21 +1373,39 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # https://stackoverflow.com/questions/51180290/mutate-by-group-in-r
 
+                # Enhanced clinical language summary
                 tCox_df %>%
                     dplyr::group_by(Explanatory) %>%
                     dplyr::mutate(firstlevel = dplyr::first(Levels)) %>%
                     dplyr::mutate(
-                        coxdescription = glue::glue(
-                            "When {Explanatory} increases 1 unit, the hazard increases {HR_multivariable} times."
+                        coxdescription = private$.generateClinicalSentence(
+                            "cox_regression", 
+                            Explanatory, 
+                            list(hr = HR_multivariable, hr_univariate = HR_univariable)
                         )
                     ) %>%
                     dplyr::filter(HR_univariable != "-") %>%
                     dplyr::pull(coxdescription) -> coxSummary
 
-
-
-                coxSummary <- unlist(coxSummary)
-                self$results$coxSummary$setContent(coxSummary)
+                # Add clinical interpretation box
+                if (length(coxSummary) > 0) {
+                    clinical_summary <- private$.createInterpretationBox(
+                        .("Clinical Interpretation"),
+                        paste(coxSummary, collapse = "<br><br>")
+                    )
+                    
+                    enhanced_summary <- paste(
+                        clinical_summary,
+                        "<br><hr><br>",
+                        .("Copy-ready summary for clinical reports:"),
+                        "<br><em>", paste(coxSummary, collapse = " "), "</em>",
+                        sep = ""
+                    )
+                    
+                    self$results$coxSummary$setContent(enhanced_summary)
+                } else {
+                    self$results$coxSummary$setContent(.("No significant associations found in Cox regression analysis."))
+                }
             }
 
 
@@ -1150,39 +1414,44 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             ,
             .cutoff = function(results) {
 
+                # Wrap cutoff analysis in error recovery
+                cutoff_result <- private$.safeAnalysis(function() {
+                    
+                    mytime <- results$name1time
+                    mytime <- jmvcore::constructFormula(terms = mytime)
 
-                mytime <- results$name1time
-                mytime <- jmvcore::constructFormula(terms = mytime)
+                    myoutcome <- results$name2outcome
+                    myoutcome <-
+                        jmvcore::constructFormula(terms = myoutcome)
 
-                myoutcome <- results$name2outcome
-                myoutcome <-
-                    jmvcore::constructFormula(terms = myoutcome)
+                    myfactor <- results$name3contexpl
+                    myfactor <-
+                        jmvcore::constructFormula(terms = myfactor)
 
+                    mydata <- results$cleanData
 
-                myfactor <- results$name3contexpl
-                myfactor <-
-                    jmvcore::constructFormula(terms = myfactor)
+                    mydata[[mytime]] <-
+                        jmvcore::toNumeric(mydata[[mytime]])
 
-                mydata <- results$cleanData
+                    private$.checkpoint()
 
-                mydata[[mytime]] <-
-                    jmvcore::toNumeric(mydata[[mytime]])
+                    # https://rpkgs.datanovia.com/survminer/reference/surv_cutpoint.html
 
-                private$.checkpoint()
+                    res.cut <- survminer::surv_cutpoint(
+                        mydata,
+                        time = mytime,
+                        event = myoutcome,
+                        variables = myfactor,
+                        minprop = 0.1
+                        # ,
+                        # progressbar = TRUE
+                    )
+                    
+                    return(res.cut)
+                    
+                }, context = .("Optimal cutoff analysis"), fallback_value = NULL)
 
-                # https://rpkgs.datanovia.com/survminer/reference/surv_cutpoint.html
-
-                res.cut <- survminer::surv_cutpoint(
-                    mydata,
-                    time = mytime,
-                    event = myoutcome,
-                    variables = myfactor,
-                    minprop = 0.1
-                    # ,
-                    # progressbar = TRUE
-                )
-
-                return(res.cut)
+                return(cutoff_result)
 
             }
 
@@ -1193,14 +1462,38 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 rescutTable <- self$results$rescutTable
 
-                rescutTable$setTitle(paste0(
-                  "Optimal Cutpoint Analysis for ", self$options$contexpl,
-                  " \n The cutpoint maximizes the statistical difference between groups while maintaining sufficient sample sizes"
-                ))
+                # Enhanced clinical title with tooltip
+                clinical_tooltip <- private$.createClinicalTooltip(
+                    .("Optimal Cut-off Analysis"),
+                    .("This analysis identifies the cut-off value that best separates patients into high and low risk groups. The optimal cut-off maximizes the statistical difference in survival between groups while ensuring adequate sample sizes for reliable analysis."),
+                    .("Cut-off = 3.5 means patients with values ≥3.5 are in the high-risk group")
+                )
 
+                rescutTable$setTitle(paste(
+                    clinical_tooltip,
+                    .('{var} Optimal Cut-off Analysis'),
+                    sep = "<br>"
+                ) %>% glue::glue(var = self$options$contexpl))
 
-
-                # rescutTable$setTitle(paste0(self$options$contexpl))
+                # Add clinical interpretation if cutoff was found
+                if (!is.null(rescut_summary) && nrow(rescut_summary) > 0) {
+                    cutoff_value <- rescut_summary[1, "cutpoint"]
+                    variable_name <- self$options$contexpl
+                    
+                    clinical_sentence <- private$.generateClinicalSentence(
+                        "cutoff_analysis",
+                        variable_name,
+                        list(cutoff = cutoff_value)
+                    )
+                    
+                    interpretation_box <- private$.createInterpretationBox(
+                        .("Clinical Application"),
+                        clinical_sentence
+                    )
+                    
+                    # Set table note with clinical context
+                    rescutTable$setNote(interpretation_box)
+                }
 
                 data_frame <- rescut_summary
                 for (i in seq_along(data_frame[, 1, drop = T])) {
@@ -1247,13 +1540,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     jmvcore::toNumeric(mydata[[mytime]])
 
 
+                # Escape variable names for safe formula construction
+                escaped_time <- private$.escapeVariableNames(mytime)
+                escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                escaped_contexpl <- private$.escapeVariableNames(mycontexpl)
+                
                 formula <-
                     paste('survival::Surv(',
-                          mytime,
+                          escaped_time,
                           ',',
-                          myoutcome,
+                          escaped_outcome,
                           ') ~ ',
-                          mycontexpl)
+                          escaped_contexpl)
 
                 formula <- as.formula(formula)
 
@@ -1283,8 +1581,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 results2table <- results1table
 
+                # Apply name restoration for better display 
+                labelled_data <- private$.getData()
                 results2table$factor <- gsub(pattern = paste0(mycontexpl,"="),
-                                             replacement = "",
+                                             replacement = paste0(self$options$contexpl, " = "),
                                              x = results1table$factor)
 
                 # self$results$mydataview$setContent(
@@ -1306,16 +1606,20 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 results1table %>%
                     dplyr::mutate(
                         description =
-                            glue::glue(
-                                "When {factor}, median survival is {round(median, digits = 1)} [{round(x0_95lcl, digits = 1)} - {round(x0_95ucl, digits = 1)}, 95% CI] ",
-                                self$options$timetypeoutput,
-                                "."
-                            )
+                            glue::glue(.(
+                                'When {factor_val}, median survival is {median_val} [{lower} - {upper}, 95% CI] {units}.'),
+                                factor_val = factor,
+                                median_val = round(median, digits = 1),
+                                lower = round(x0_95lcl, digits = 1),
+                                upper = round(x0_95ucl, digits = 1),
+                                units = self$options$timetypeoutput)
                     ) %>%
                     dplyr::mutate(
                         description = dplyr::case_when(
                             is.na(median) ~ paste0(
-                                glue::glue("{description} \n Note that when {factor}, the survival curve does not drop below 1/2 during \n the observation period, thus the median survival is undefined.")),
+                                glue::glue(.(
+                                    '{desc}. Note that when {factor_val}, the survival curve does not drop below 1/2 during the observation period, thus the median survival is undefined.'),
+                                    desc = description, factor_val = factor)),
                             TRUE ~ paste0(description)
                         )
                     ) %>%
@@ -1378,13 +1682,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     jmvcore::toNumeric(mydata[[mytime]])
 
 
+                # Escape variable names for safe formula construction
+                escaped_time <- private$.escapeVariableNames(mytime)
+                escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                escaped_contexpl <- private$.escapeVariableNames(mycontexpl)
+                
                 formula <-
                     paste('survival::Surv(',
-                          mytime,
+                          escaped_time,
                           ',',
-                          myoutcome,
+                          escaped_outcome,
                           ') ~ ',
-                          mycontexpl)
+                          escaped_contexpl)
 
                 formula <- as.formula(formula)
 
@@ -1414,7 +1723,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 km_fit_df2 <- km_fit_df
 
                 km_fit_df2$strata <- gsub(pattern = paste0(mycontexpl,"="),
-                                             replacement = "",
+                                             replacement = paste0(self$options$contexpl, " = "),
                                              x =km_fit_df2$strata)
 
                 data_frame <- km_fit_df2
@@ -1441,9 +1750,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 km_fit_df %>%
                     dplyr::mutate(
                         description =
-                            glue::glue(
-                                "When {strata}, {time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]."
-                            )
+                            glue::glue(.(
+                                'When {strata_val}, {time_val} month survival is {survival} [{ci_low}-{ci_high}, 95% CI].'),
+                                strata_val = strata, time_val = time,
+                                survival = scales::percent(surv),
+                                ci_low = scales::percent(lower),
+                                ci_high = scales::percent(upper))
                     ) %>%
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> survTableSummary
@@ -1581,13 +1893,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Create summary text with interpretation
-                summary_html <- glue::glue("
-<h4>Person-Time Analysis Summary</h4>
-<p>Total follow-up time: <b>{round(total_time, 1)} {time_unit}</b></p>
-<p>Number of events: <b>{total_events}</b></p>
-<p>Overall incidence rate: <b>{round(overall_rate, 2)}</b> per {rate_multiplier} {time_unit} [95% CI: {round(ci_lower, 2)}-{round(ci_upper, 2)}]</p>
-<p>This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk.</p>
-")
+                summary_html <- glue::glue(.(
+                    '<h4>Person-Time Analysis Summary</h4>
+                    <p>Total follow-up time: <b>{total_time_val} {units}</b></p>
+                    <p>Number of events: <b>{events}</b></p>
+                    <p>Overall incidence rate: <b>{rate}</b> per {multiplier} {units} [95% CI: {lower}-{upper}]</p>
+                    <p>This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk.</p>'),
+                    total_time_val = round(total_time, 1), units = time_unit,
+                    events = total_events, rate = round(overall_rate, 2),
+                    multiplier = rate_multiplier,
+                    lower = round(ci_lower, 2), upper = round(ci_upper, 2))
 
                 self$results$personTimeSummary$setContent(summary_html)
             }
@@ -1671,13 +1986,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     jmvcore::constructFormula(terms = mycontexpl)
 
 
+                # Escape variable names for safe formula construction
+                escaped_time <- private$.escapeVariableNames(mytime)
+                escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                escaped_contexpl <- private$.escapeVariableNames(mycontexpl)
+                
                 formula <-
                     paste('survival::Surv(',
-                          mytime,
+                          escaped_time,
                           ',',
-                          myoutcome,
+                          escaped_outcome,
                           ') ~ ',
-                          mycontexpl)
+                          escaped_contexpl)
 
                 myformula <- as.formula(formula)
 
@@ -1942,13 +2262,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     
                     # Extract continuous variable values
                     if (!mycontexpl %in% names(mydata)) {
-                        warning(paste("Variable", mycontexpl, "not found in data. Available columns:", paste(names(mydata), collapse = ", ")))
+                        warning(.('Variable {var} not found in data. Available columns: {cols}'), 
+                                var = mycontexpl, cols = paste(names(mydata), collapse = ", "))
                         return(NULL)
                     }
                     
                     cont_var <- mydata[[mycontexpl]]
                     if (is.null(cont_var)) {
-                        warning(paste("Variable", mycontexpl, "is NULL"))
+                        warning(.('Variable {var} is NULL'), var = mycontexpl)
                         return(NULL)
                     }
                     
@@ -1956,7 +2277,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     
                     # Check if we have enough data
                     if (length(cont_var) < 10) {
-                        warning("Insufficient data for multiple cutoffs analysis")
+                        warning(.('Insufficient data for multiple cutoffs analysis'))
                         return(NULL)
                     }
                     
@@ -1976,13 +2297,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                     # Debug information
-                    message(paste("Data columns:", paste(names(mydata), collapse = ", ")))
-                    message(paste("Trying to access variable:", mycontexpl))
-                    message(paste("Variable exists:", mycontexpl %in% names(mydata)))
+                    message(.('Data columns: {cols}'), cols = paste(names(mydata), collapse = ", "))
+                    message(.('Trying to access variable: {var}'), var = mycontexpl)
+                    message(.('Variable exists: {exists}'), exists = mycontexpl %in% names(mydata))
                     if (mycontexpl %in% names(mydata)) {
-                        message(paste("Multiple cutoffs analysis: n =", length(cont_var), 
-                                    "method =", self$options$cutoff_method,
-                                    "num_cuts =", self$options$num_cutoffs))
+                        message(.('Multiple cutoffs analysis: n = {n}, method = {method}, num_cuts = {cuts}'), 
+                                n = length(cont_var), 
+                                method = self$options$cutoff_method,
+                                cuts = self$options$num_cutoffs)
                     }
                     
                     # Determine number of cutoffs
@@ -2001,22 +2323,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     
                     # Check if cutoffs were successfully calculated
                     if (is.null(cutoff_values) || length(cutoff_values) == 0) {
-                        warning("Failed to calculate cutoff values")
+                        warning(.('Failed to calculate cutoff values'))
                         return(NULL)
                     }
                     
                     # Create risk groups
                     risk_groups <- private$.createRiskGroups(mydata[[mycontexpl]], cutoff_values)
                     
-                    # Debug: Update mydataview_multipleCutoffs2 with progress
-                    # self$results$mydataview_multipleCutoffs2$setContent(
-                    #     list(
-                    #         name_of_debug = 'Risk groups created successfully',
-                    #         cutoff_values = cutoff_values,
-                    #         risk_groups_length = length(risk_groups),
-                    #         unique_groups = length(unique(risk_groups))
-                    #     )
-                    # )
                     
                     # Calculate survival statistics for each group
                     group_stats <- private$.calculateGroupStats(mydata, mytime, myoutcome, risk_groups)
@@ -2032,7 +2345,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         myoutcome = myoutcome
                     ))
                 }, error = function(e) {
-                    warning(paste("Error in multiple cutoffs analysis:", e$message))
+                    warning(.('Error in multiple cutoffs analysis: {error}'), error = e$message)
                     return(NULL)
                 })
             }
@@ -2101,8 +2414,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
                 
                 tryCatch({
-                    # Prepare survival formula
-                    formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", mycontexpl)
+                    # Prepare survival formula with escaped variable names
+                    escaped_time <- private$.escapeVariableNames(mytime)
+                    escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                    escaped_contexpl <- private$.escapeVariableNames(mycontexpl)
+                    
+                    formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ ", escaped_contexpl)
                     formula <- as.formula(formula_str)
                     
                     # Fit survival tree with specified depth
@@ -2168,7 +2485,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         test_groups <- private$.createRiskGroups(cont_var, test_cuts)
                         
                         # Calculate log-rank test p-value
-                        formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ test_groups")
+                        escaped_time <- private$.escapeVariableNames(mytime)
+                        escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                        formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ test_groups")
                         formula <- as.formula(formula_str)
                         
                         test_data <- mydata
@@ -2229,7 +2548,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     
                     if (nrow(group_data) > 0) {
                         # Calculate median survival
-                        formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ 1")
+                        escaped_time <- private$.escapeVariableNames(mytime)
+                        escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                        formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ 1")
                         formula <- as.formula(formula_str)
                         
                         km_fit <- survival::survfit(formula, data = group_data)
@@ -2272,17 +2593,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Populate multiple cutoffs tables ----
             ,
             .multipleCutoffTables = function(multicut_results) {
-                message("multipleCutoffTables called")
+                message(.('multipleCutoffTables called'))
                 
                 # Check if results are valid
                 if (is.null(multicut_results) || 
                     is.null(multicut_results$cutoff_values) ||
                     is.null(multicut_results$group_stats)) {
-                    message("multicut_results is null or invalid")
+                    message(.('multicut_results is null or invalid'))
                     return()
                 }
                 
-                message(paste("Populating tables with", length(multicut_results$cutoff_values), "cutoffs"))
+                message(.('Populating tables with {n} cutoffs'), n = length(multicut_results$cutoff_values))
                 
                 # Populate cut-off points table (without statistical columns)
                 cutoff_table <- self$results$multipleCutTable
@@ -2304,7 +2625,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     myoutcome <- multicut_results$myoutcome
                     
                     # Perform log-rank test comparing all groups
-                    formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ multicut_results$risk_groups")
+                    escaped_time <- private$.escapeVariableNames(mytime)
+                    escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                    formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ multicut_results$risk_groups")
                     tryCatch({
                         logrank_test <- survival::survdiff(as.formula(formula_str), data = mydata)
                         overall_chisq <- logrank_test$chisq
@@ -2333,7 +2656,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         }
                         
                     }, error = function(e) {
-                        message(paste("Error calculating log-rank test:", e$message))
+                        message(.('Error calculating log-rank test: {error}'), error = e$message)
                     })
                 }
                 
@@ -2372,9 +2695,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 
                                 if (length(surv_summary$surv) > 0) {
                                     # Debug the raw values
-                                    message(paste("Debug survival for", group_name, "at time", time_point, 
-                                                ": raw surv =", surv_summary$surv[1], 
-                                                ", n.risk =", surv_summary$n.risk[1]))
+                                    message(.('Debug survival for {group} at time {time}: raw surv = {surv}, n.risk = {risk}'), 
+                                            group = group_name, time = time_point, 
+                                            surv = surv_summary$surv[1], risk = surv_summary$n.risk[1])
                                     
                                     # Don't multiply by 100 - the YAML format: pc does this automatically
                                     surv_prob <- surv_summary$surv[1]  # Keep as proportion (0-1)
@@ -2404,7 +2727,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                     ))
                                 }
                             }, error = function(e) {
-                                message(paste("Error calculating survival at time", time_point, "for group", group_name, ":", e$message))
+                                message(.('Error calculating survival at time {time} for group {group}: {error}'), 
+                                        time = time_point, group = group_name, error = e$message)
                             })
                         }
                     }
@@ -2516,7 +2840,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     myoutcome <- results$name2outcome
                     
                     # Create survival formula
-                    formula_str <- paste0('survival::Surv(', mytime, ',', myoutcome, ') ~ risk_groups')
+                    escaped_time <- private$.escapeVariableNames(mytime)
+                    escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                    formula_str <- paste0('survival::Surv(', escaped_time, ',', escaped_outcome, ') ~ risk_groups')
                     surv_formula <- as.formula(formula_str)
                     
                     # Fit survival model
@@ -2715,7 +3041,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 
                 tryCatch({
                     # Create Cox model formula
-                    formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", myexplanatory)
+                    escaped_time <- private$.escapeVariableNames(mytime)
+                    escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                    escaped_explanatory <- private$.escapeVariableNames(myexplanatory)
+                    formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ ", escaped_explanatory)
                     cox_formula <- as.formula(formula_str)
                     
                     # Fit Cox model
@@ -2806,8 +3135,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 myoutcome <- results$name2outcome
                 mycontexpl <- results$name3contexpl
                 
-                # Create formula
-                formula_str <- paste0('survival::Surv(', mytime, ',', myoutcome, ') ~ ', mycontexpl)
+                # Create formula with escaped variable names
+                escaped_time <- private$.escapeVariableNames(mytime)
+                escaped_outcome <- private$.escapeVariableNames(myoutcome)
+                escaped_contexpl <- private$.escapeVariableNames(mycontexpl)
+                
+                formula_str <- paste0('survival::Surv(', escaped_time, ',', escaped_outcome, ') ~ ', escaped_contexpl)
                 myformula <- as.formula(formula_str)
                 
                 # Fit survival model
@@ -3275,28 +3608,28 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Input validation helper - prevents common data issues
             .validateInputs = function(data, time_var, outcome_var, contexpl_var) {
                 if (is.null(data) || nrow(data) == 0) {
-                    stop('Data contains no (complete) rows')
+                    stop(.('Data contains no (complete) rows'))
                 }
                 
                 if (any(is.na(data[[time_var]]))) {
-                    stop("Time variable contains missing values. Please remove or impute missing data before analysis.")
+                    stop(.('Time variable contains missing values. Please remove or impute missing data before analysis.'))
                 }
                 
                 if (any(data[[time_var]] <= 0, na.rm = TRUE)) {
-                    stop("Time variable contains zero or negative values. Survival times must be positive.")
+                    stop(.('Time variable contains zero or negative values. Survival times must be positive.'))
                 }
                 
                 if (any(is.na(data[[outcome_var]]))) {
-                    stop("Outcome variable contains missing values. Please remove or impute missing data before analysis.")
+                    stop(.('Outcome variable contains missing values. Please remove or impute missing data before analysis.'))
                 }
                 
                 if (!is.null(contexpl_var) && any(is.na(data[[contexpl_var]]))) {
-                    warning("Continuous explanatory variable contains missing values. These observations will be excluded from analysis.")
+                    warning(.('Continuous explanatory variable contains missing values. These observations will be excluded from analysis.'))
                 }
                 
                 # Check for sufficient sample size
                 if (nrow(data) < 20) {
-                    warning("Small sample size (n < 20). Results may be unreliable.")
+                    warning(.('Small sample size (n < 20). Results may be unreliable.'))
                 }
                 
                 return(TRUE)
@@ -3308,11 +3641,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 
                 if (n_rows > warn_threshold) {
                     memory_usage <- format(object.size(data), units = "MB")
-                    message(sprintf("Processing large dataset: %d rows, ~%s memory usage", 
-                                  n_rows, memory_usage))
+                    message(.('Processing large dataset: {rows} rows, ~{memory} memory usage'), 
+                            rows = n_rows, memory = memory_usage)
                     
                     if (n_rows > 100000) {
-                        message("Consider using data sampling or chunking for very large datasets")
+                        message(.('Consider using data sampling or chunking for very large datasets'))
                     }
                 }
                 
@@ -3336,8 +3669,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 time_points <- tryCatch({
                     as.numeric(unlist(strsplit(cutp_string, "[,\\\\s]+")))
                 }, error = function(e) {
-                    warning(paste("Could not parse survival time points:", e$message, 
-                                "Using default values (1, 3, 5 years)"))
+                    warning(.('Could not parse survival time points: {error}. Using default values (1, 3, 5 years)'), 
+                            error = e$message)
                     return(default_points)
                 })
                 
@@ -3345,7 +3678,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 time_points <- time_points[!is.na(time_points) & time_points > 0]
                 
                 if (length(time_points) == 0) {
-                    warning("No valid time points specified. Using default values (1, 3, 5 years)")
+                    warning(.('No valid time points specified. Using default values (1, 3, 5 years)'))
                     return(default_points)
                 }
                 

@@ -6,6 +6,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            clinical_preset = "overall_survival",
+            guided_mode = TRUE,
             elapsedtime = NULL,
             tint = FALSE,
             dxdate = NULL,
@@ -50,6 +52,20 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..clinical_preset <- jmvcore::OptionList$new(
+                "clinical_preset",
+                clinical_preset,
+                options=list(
+                    "overall_survival",
+                    "disease_free",
+                    "treatment_effect",
+                    "post_surgical",
+                    "custom"),
+                default="overall_survival")
+            private$..guided_mode <- jmvcore::OptionBool$new(
+                "guided_mode",
+                guided_mode,
+                default=TRUE)
             private$..elapsedtime <- jmvcore::OptionVariable$new(
                 "elapsedtime",
                 elapsedtime,
@@ -236,6 +252,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 advancedDiagnostics,
                 default=FALSE)
 
+            self$.addOption(private$..clinical_preset)
+            self$.addOption(private$..guided_mode)
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
             self$.addOption(private$..dxdate)
@@ -277,6 +295,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..advancedDiagnostics)
         }),
     active = list(
+        clinical_preset = function() private$..clinical_preset$value,
+        guided_mode = function() private$..guided_mode$value,
         elapsedtime = function() private$..elapsedtime$value,
         tint = function() private$..tint$value,
         dxdate = function() private$..dxdate$value,
@@ -317,6 +337,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showSummaries = function() private$..showSummaries$value,
         advancedDiagnostics = function() private$..advancedDiagnostics$value),
     private = list(
+        ..clinical_preset = NA,
+        ..guided_mode = NA,
         ..elapsedtime = NA,
         ..tint = NA,
         ..dxdate = NA,
@@ -365,6 +387,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         medianHeading = function() private$.items[["medianHeading"]],
         medianTable = function() private$.items[["medianTable"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianHeading3 = function() private$.items[["medianHeading3"]],
         medianSurvivalExplanation = function() private$.items[["medianSurvivalExplanation"]],
@@ -471,6 +494,17 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary (Copy-Ready for Reports)",
+                visible="(guided_mode || showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "clinical_preset",
+                    "guided_mode")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -1006,6 +1040,11 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #   outcomeLevel = "Dead"
 #' # )
 #'}
+#' @param clinical_preset Select the type of survival analysis that matches
+#'   your research question. This automatically configures appropriate settings
+#'   for your study type.
+#' @param guided_mode Enables step-by-step guidance and clinical
+#'   interpretation helpers. Recommended for users new to survival analysis.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time-to-event or follow-up duration for each
 #'   patient. The sum of these values represents the total person-time follow-up
@@ -1049,7 +1088,10 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   units (e.g., months or years). For example, "12, 36, 60" calculates
 #'   survival probabilities at 1, 3, and 5 years.
 #' @param timetypedata select the time type in data (e.g., YYYY-MM-DD)
-#' @param timetypeoutput select the time type in output (default is months)
+#' @param timetypeoutput Select the time unit for displaying survival results.
+#'   Months is most common  in clinical oncology studies. Choose the unit that
+#'   best matches your clinical  practice and makes results most interpretable
+#'   for your audience.
 #' @param uselandmark Enables landmark analysis, which addresses immortal time
 #'   bias by analyzing survival only for patients who survive to a specified
 #'   timepoint (the landmark). Use this when you want to eliminate the effect of
@@ -1134,6 +1176,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -1176,6 +1219,8 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 singlearm <- function(
+    clinical_preset = "overall_survival",
+    guided_mode = TRUE,
     data,
     elapsedtime,
     tint = FALSE,
@@ -1232,6 +1277,8 @@ singlearm <- function(
 
 
     options <- singlearmOptions$new(
+        clinical_preset = clinical_preset,
+        guided_mode = guided_mode,
         elapsedtime = elapsedtime,
         tint = tint,
         dxdate = dxdate,

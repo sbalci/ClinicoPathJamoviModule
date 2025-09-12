@@ -998,6 +998,30 @@ items:
           - explanatory
           - outcome
 
+    # Clinical Glossary Explanation
+    - name: clinicalGlossaryExplanation
+      title: 'Clinical Terminology Glossary'
+      type: Html
+      visible: (showExplanations)
+
+    # Enhanced Clinical Interpretation
+    - name: clinicalInterpretationExplanation
+      title: 'Enhanced Clinical Interpretation'
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+          - explanatory
+          - outcome
+
+    # Copy-Ready Clinical Report Sentences
+    - name: copyReadySentencesExplanation
+      title: 'Copy-Ready Clinical Report Sentences'
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+          - explanatory
+          - outcome
+
 refs:
     - finalfit
     - survival

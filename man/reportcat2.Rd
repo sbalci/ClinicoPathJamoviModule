@@ -2,7 +2,7 @@
 % Please edit documentation in R/reportcat2.h.R
 \name{reportcat2}
 \alias{reportcat2}
-\title{Summary of Categorical Variables}
+\title{Enhanced Frequencies}
 \usage{
 reportcat2(
   data,

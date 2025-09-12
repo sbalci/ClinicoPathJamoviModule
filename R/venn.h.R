@@ -144,9 +144,13 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         summary = function() private$.items[["summary"]],
         plot = function() private$.items[["plot"]],
-        plot2 = function() private$.items[["plot2"]]),
+        plot2 = function() private$.items[["plot2"]],
+        reportSentences = function() private$.items[["reportSentences"]],
+        assumptions = function() private$.items[["assumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -169,6 +173,16 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 title="Summary of True Counts",
@@ -215,7 +229,17 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".plot2",
                 requiresData=TRUE,
                 refs=list(
-                    "upset")))}))
+                    "upset")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentences",
+                title="Copy-Ready Clinical Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Interpretation Guide & Assumptions",
+                visible=TRUE))}))
 
 vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vennBase",
@@ -268,9 +292,13 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

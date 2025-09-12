@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarydata2.h.R
 \name{summarydata2}
 \alias{summarydata2}
-\title{Summary of Continuous Variables}
+\title{Enhanced Descriptives}
 \usage{
 summarydata2(
   data,

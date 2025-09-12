@@ -1,37 +1,317 @@
+# Ensure internationalization function is available
+if (!exists(".")) {
+  . <- function(x) x  # Fallback identity function for testing
+}
+
+# Helper function to escape variable names with special characters for formulas
+.escapeVariableNames <- function(var_names) {
+    # Check if variable names contain special characters that need escaping
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    return(var_names)
+}
+
+# Helper function to restore original variable names in output tables
+.restoreOriginalNamesInMultiSurvivalTable <- function(table_data, name_mapping) {
+    if (is.null(table_data) || nrow(table_data) == 0 || is.null(name_mapping)) {
+        return(table_data)
+    }
+
+    # Restore names in the first column (which typically contains variable names)
+    if (ncol(table_data) > 0) {
+        first_col <- table_data[, 1]
+
+        # For each entry in the first column, check if it needs name restoration
+        for (i in seq_along(first_col)) {
+            original_name <- first_col[i]
+
+            # Handle factor levels (like "variablename1" vs "variablename0")
+            for (clean_name in names(name_mapping)) {
+                if (grepl(paste0("^", clean_name), original_name)) {
+                    # Replace the clean name part with the original name
+                    table_data[i, 1] <- sub(clean_name, name_mapping[[clean_name]], original_name)
+                    break
+                }
+            }
+        }
+    }
+
+    return(table_data)
+}
+
+
+
+# Helper function for package dependency checking with graceful fallbacks
+.checkPackageDependency <- function(package_name, method_name, alternative_method = "Cox regression") {
+  if (!requireNamespace(package_name, quietly = TRUE)) {
+    fallback_info <- list(
+      available = FALSE,
+      message = paste0("
+        <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+          <h4 style='color: #856404; margin-top: 0;'>⚠️ ", method_name, " ", .("Package Not Available"), "</h4>
+          <p><strong>", .("Issue:"), "</strong> ", .("The"), " '", package_name, "' ", .("package is required but not installed."), "</p>
+          <p><strong>", .("Solution:"), "</strong> ", .("Install the package using:"), " <code>install.packages('", package_name, "')</code></p>
+          <p><strong>", .("Alternative:"), "</strong> ", .("Automatically switching to"), " ", alternative_method, " ", .("analysis."), "</p>
+        </div>
+      ")
+    )
+  } else {
+    fallback_info <- list(available = TRUE, message = "")
+  }
+  return(fallback_info)
+}
+
+# Helper function for comprehensive data validation
+.validateSurvivalData <- function(data, time_var = "mytime", outcome_var = "myoutcome") {
+  issues <- list()
+  warnings <- list()
+
+  # Check for negative survival times
+  if (time_var %in% names(data)) {
+    negative_times <- sum(data[[time_var]] < 0, na.rm = TRUE)
+    if (negative_times > 0) {
+      issues <- append(issues, paste(.("Negative survival times detected:"), negative_times, .("observations")))
+    }
+
+    # Check for zero survival times
+    zero_times <- sum(data[[time_var]] == 0, na.rm = TRUE)
+    if (zero_times > 0) {
+      warnings <- append(warnings, paste(.("Zero survival times detected:"), zero_times, .("observations. Consider adding small constant (0.5 days).")))
+    }
+  }
+
+  # Check outcome coding
+  if (outcome_var %in% names(data)) {
+    unique_outcomes <- unique(data[[outcome_var]][!is.na(data[[outcome_var]])])
+    if (!all(unique_outcomes %in% c(0, 1, TRUE, FALSE))) {
+      issues <- append(issues, .("Outcome should be binary (0/1 or TRUE/FALSE)"))
+    }
+
+    # Check event rate
+    event_rate <- mean(data[[outcome_var]], na.rm = TRUE)
+    if (event_rate < 0.05) {
+      warnings <- append(warnings, paste(.("Low event rate:"), round(event_rate * 100, 1), "%. ", .("Consider longer follow-up or different endpoint.")))
+    }
+  }
+
+  # Check sample size adequacy
+  n_complete <- sum(complete.cases(data))
+  n_events <- sum(data[[outcome_var]], na.rm = TRUE)
+  if (n_events < 10) {
+    issues <- append(issues, paste(.("Insufficient events for analysis:"), n_events, "events. ", .("Minimum 10 events recommended.")))
+  }
+
+  return(list(issues = issues, warnings = warnings))
+}
+
+# Helper function for generating clinical interpretation summaries
+.generateClinicalSummary <- function(results, analysis_type = "cox", n_vars = 0, n_events = 0) {
+
+  # Extract key statistics based on analysis type
+  if (analysis_type == "cox" && !is.null(results)) {
+
+    # Count significant variables if results is a table/data.frame
+    sig_count <- 0
+    strongest_var <- NULL
+    strongest_hr <- 1
+    strongest_effect <- NULL
+
+    tryCatch({
+      if (is.data.frame(results) && "p" %in% names(results)) {
+        p_values <- as.numeric(results$p)
+        sig_indices <- which(p_values < 0.05 & !is.na(p_values))
+        sig_count <- length(sig_indices)
+
+        if (sig_count > 0) {
+          # Find strongest effect (furthest from HR = 1)
+          if ("HR (95% CI, p-value)" %in% names(results)) {
+            hr_column <- results[["HR (95% CI, p-value)"]]
+            for (i in sig_indices) {
+              hr_text <- hr_column[i]
+              hr_match <- regmatches(hr_text, regexpr("[0-9]+\\.?[0-9]*", hr_text))
+              if (length(hr_match) > 0) {
+                hr_val <- as.numeric(hr_match[1])
+                if (!is.na(hr_val) && abs(log(hr_val)) > abs(log(strongest_hr))) {
+                  strongest_hr <- hr_val
+                  strongest_var <- results[i, 1]  # First column usually contains variable names
+                  strongest_effect <- if (hr_val > 1) .("increased risk") else .("decreased risk")
+                }
+              }
+            }
+          }
+        }
+      }
+    }, error = function(e) {
+      # Silent error handling for robust operation
+    })
+
+    # Generate clinical summary
+    summary_parts <- list()
+
+    # Analysis overview
+    summary_parts$overview <- paste0(
+      .("This multivariable Cox regression analysis examined"), " ", n_vars, " ",
+      .("potential risk factors in"), " ", .("patients with"), " ", n_events, " ",
+      .("events observed during follow-up.")
+    )
+
+    # Key findings
+    if (sig_count > 0) {
+      summary_parts$findings <- paste0(
+        .("Key Finding:"), " ", sig_count, " ", .("out of"), " ", n_vars, " ",
+        .("factors showed statistically significant associations with the outcome"), " (p < 0.05)."
+      )
+
+      if (!is.null(strongest_var) && !is.null(strongest_effect)) {
+        summary_parts$strongest <- paste0(
+          .("Strongest predictor:"), " ", strongest_var, " ", .("was associated with"), " ",
+          strongest_effect, " (", .("hazard ratio"), " = ", round(strongest_hr, 2), ")."
+        )
+      }
+    } else {
+      summary_parts$findings <- paste0(
+        .("No statistically significant associations were identified among the"), " ",
+        n_vars, " ", .("factors examined"), " (", .("all p-values ≥ 0.05"), ")."
+      )
+    }
+
+    # Clinical interpretation
+    if (sig_count > 0 && !is.null(strongest_hr)) {
+      risk_interpretation <- ""
+      if (strongest_hr > 2) {
+        risk_interpretation <- .("This represents a substantial clinical effect.")
+      } else if (strongest_hr > 1.5 || strongest_hr < 0.67) {
+        risk_interpretation <- .("This represents a moderate clinical effect.")
+      } else if (strongest_hr != 1) {
+        risk_interpretation <- .("This represents a mild clinical effect.")
+      }
+
+      summary_parts$interpretation <- paste0(
+        .("Clinical Significance:"), " ", risk_interpretation, " ",
+        .("Consider this factor in clinical decision-making and patient counseling.")
+      )
+    }
+
+    # Combine all parts
+    full_summary <- paste(summary_parts, collapse = " ")
+
+    return(list(
+      summary = full_summary,
+      sig_count = sig_count,
+      strongest_var = strongest_var,
+      strongest_hr = strongest_hr
+    ))
+  }
+
+  # Default return for other analysis types
+  return(list(
+    summary = .("Analysis completed. Review detailed results below."),
+    sig_count = 0,
+    strongest_var = NULL,
+    strongest_hr = 1
+  ))
+}
+
+# Helper function to assess clinical significance of hazard ratios
+.assessClinicalSignificance <- function(hr) {
+  if (is.null(hr) || !is.numeric(hr) || hr <= 0) {
+    return(.("Unable to assess clinical significance."))
+  }
+
+  if (hr > 3 || hr < 0.33) {
+    return(.("Large clinical effect - high priority for clinical consideration."))
+  } else if (hr > 2 || hr < 0.5) {
+    return(.("Moderate clinical effect - clinically meaningful."))
+  } else if (hr > 1.5 || hr < 0.67) {
+    return(.("Small to moderate clinical effect - may be clinically relevant."))
+  } else if (hr != 1) {
+    return(.("Small clinical effect - limited clinical impact."))
+  } else {
+    return(.("No clinical effect detected."))
+  }
+}
+
+# Consolidated function for building survival formulas
+.buildSurvivalFormula <- function(time_var, outcome_var, predictors, survival_type = "standard", start_var = NULL, stop_var = NULL, strata_vars = NULL) {
+  # Escape all variable names for safe formula construction
+  escaped_time <- .escapeVariableNames(time_var)
+  escaped_outcome <- .escapeVariableNames(outcome_var)
+  escaped_predictors <- .escapeVariableNames(predictors)
+
+  # Build left-hand side based on survival type
+  lhs <- switch(survival_type,
+    "standard" = paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ")"),
+    "counting" = {
+      if (is.null(start_var) || is.null(stop_var)) {
+        stop("Start and stop variables required for counting process format")
+      }
+      escaped_start <- .escapeVariableNames(start_var)
+      escaped_stop <- .escapeVariableNames(stop_var)
+      paste0("survival::Surv(", escaped_start, ", ", escaped_stop, ", ", escaped_outcome, ")")
+    },
+    "interval" = {
+      if (is.null(stop_var)) {
+        stop("Stop time variable required for interval censoring")
+      }
+      escaped_stop <- .escapeVariableNames(stop_var)
+      paste0("survival::Surv(", escaped_time, ", ", escaped_stop, ", ", escaped_outcome, ")")
+    },
+    stop("Unknown survival type: ", survival_type)
+  )
+
+  # Build right-hand side
+  if (length(escaped_predictors) == 0) {
+    rhs <- "1"  # Null model
+  } else {
+    rhs <- paste(escaped_predictors, collapse = " + ")
+
+    # Add stratification if specified
+    if (!is.null(strata_vars) && length(strata_vars) > 0) {
+      escaped_strata <- .escapeVariableNames(strata_vars)
+      strata_term <- paste0("strata(", paste(escaped_strata, collapse = ", "), ")")
+      rhs <- paste(rhs, strata_term, sep = " + ")
+    }
+  }
+
+  # Combine and return formula
+  formula_string <- paste0(lhs, " ~ ", rhs)
+  return(as.formula(formula_string))
+}
+
 #' @title Multivariable Survival Analysis Implementation
 #' @description
 #' Backend implementation class for comprehensive multivariable survival analysis.
 #' This R6 class provides the core functionality for the multisurvival jamovi module,
 #' handling Cox proportional hazards regression, risk stratification, machine learning
 #' survival methods, and advanced survival modeling techniques.
-#' 
+#'
 #' @details
 #' The multisurvivalClass implements a modular architecture with the following components:
-#' 
+#'
 #' \strong{Core Analysis Engine:}
 #' - Input validation and data preparation
 #' - Cox proportional hazards modeling
 #' - Competing risks and cause-specific survival
 #' - Time-dependent covariate handling
-#' 
+#'
 #' \strong{Advanced Methods:}
 #' - Stratified analysis for non-proportional hazards
 #' - Frailty models for clustered data
 #' - Spline-based time-varying effects
 #' - Machine learning survival algorithms
-#' 
+#'
 #' \strong{Risk Assessment:}
 #' - Prognostic risk score calculation
 #' - Risk group stratification
 #' - Nomogram generation
 #' - Decision tree analysis
-#' 
+#'
 #' \strong{Visualization & Output:}
 #' - Forest plots and survival curves
 #' - Person-time analysis
 #' - Natural language summaries
 #' - Educational explanations
-#' 
+#'
 #' @seealso \code{\link{multisurvival}} for the main user interface function
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -42,19 +322,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     "multisurvivalClass",
     inherit = multisurvivalBase,
     private = list(
-      
+
       # Constants for plot sizing
       PLOT_WIDTH_FACTOR = 400,
       PLOT_HEIGHT_FACTOR = 300,
       DEFAULT_PLOT_WIDTH = 600,
       DEFAULT_PLOT_HEIGHT = 450,
-      
+
       # Constants for analysis parameters
       DEFAULT_MIN_NODE = 20,
       DEFAULT_COMPLEXITY = 0.01,
       DEFAULT_MAX_DEPTH = 5,
       DEFAULT_SPLINE_DF = 3,
-      
+
       # Constants for time intervals
       DEFAULT_TIME_INTERVALS = "12, 36, 60",
       DEFAULT_RATE_MULTIPLIER = 100,
@@ -65,19 +345,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .perf_timers = NULL,
 
       # Validation Helper Functions ----
-      
+
       # Comprehensive Survival Analysis Input Validation
-      # 
+      #
       # Validates all required inputs for survival analysis including outcome variables,
       # time variables, and predictor variables. This is the main validation function
       # that orchestrates all validation checks.
-      # 
+      #
       # Returns a list containing:
       #   - valid: Boolean indicating if all inputs are valid
       #   - has_outcome: Boolean indicating if outcome variable is specified
       #   - has_time: Boolean indicating if time variables are properly specified
       #   - has_predictors: Boolean indicating if predictor variables are specified
-      # 
+      #
       # This function performs comprehensive validation by checking:
       # - Outcome variable presence
       # - Time variable configuration (either direct elapsed time or date-based calculation)
@@ -86,7 +366,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         has_outcome <- !is.null(self$options$outcome)
         has_time <- private$.validateTimeInputs()
         has_predictors <- private$.validatePredictorInputs()
-        
+
         return(list(
           valid = has_outcome && has_time && has_predictors,
           has_outcome = has_outcome,
@@ -94,14 +374,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           has_predictors = has_predictors
         ))
       },
-      
+
       # Time Variable Validation
-      # 
+      #
       # Validates time variable configuration for survival analysis. Supports both
       # direct elapsed time input and automatic calculation from diagnosis/follow-up dates.
-      # 
+      #
       # Returns: Boolean indicating if time variables are properly configured
-      # 
+      #
       # Checks two possible time configuration scenarios:
       # 1. Calculated time (tint = TRUE): Requires both dxdate and fudate
       # 2. Direct time (tint = FALSE): Requires elapsedtime variable
@@ -110,14 +390,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         has_time_direct <- !self$options$tint && !is.null(self$options$elapsedtime)
         return(has_time_calc || has_time_direct)
       },
-      
+
       # Predictor Variable Validation
-      # 
+      #
       # Validates that at least one predictor variable is specified for the Cox model.
       # Accepts either categorical explanatory variables or continuous explanatory variables.
-      # 
+      #
       # Returns: Boolean indicating if predictor variables are specified
-      # 
+      #
       # Checks for the presence of either:
       # - Categorical explanatory variables (explanatory option)
       # - Continuous explanatory variables (contexpl option)
@@ -125,19 +405,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .validatePredictorInputs = function() {
         return(length(self$options$explanatory) > 0 || length(self$options$contexpl) > 0)
       },
-      
+
       # Standardized Error Message Formatting
-      # 
+      #
       # Creates standardized, user-friendly HTML error messages with consistent styling
       # and optional suggestions for troubleshooting.
-      # 
+      #
       # Parameters:
       #   title - Character string for the error message title
       #   message - Character string for the main error message
       #   suggestions - Optional character string with HTML list items for suggestions
-      # 
+      #
       # Returns: Formatted HTML string for display in the jamovi interface
-      # 
+      #
       # Generates styled HTML error messages with:
       # - Consistent warning color scheme (yellow background, brown text)
       # - Professional typography and spacing
@@ -149,7 +429,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           "<h4 style='color: #856404; margin-top: 0;'>⚠️ ", title, "</h4>",
           "<p style='color: #856404; margin: 10px 0;'>", message, "</p>"
         )
-        
+
         if (!is.null(suggestions)) {
           error_html <- paste0(error_html,
             "<div style='margin-top: 10px;'>",
@@ -160,114 +440,114 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             "</div>"
           )
         }
-        
+
         error_html <- paste0(error_html, "</div>")
         return(error_html)
       },
-      
+
       # Input Sanitization for String Parameters
-      # 
+      #
       # Sanitizes string inputs to prevent XSS attacks and validate format compliance.
       # Removes potentially harmful characters and applies pattern validation.
-      # 
+      #
       # Parameters:
       #   input - Character string to sanitize
       #   default_value - Default value to return if input is invalid/empty
       #   pattern - Optional regex pattern for validation
-      # 
+      #
       # Returns: Sanitized character string or default value if input is invalid
-      # 
+      #
       # Security measures applied:
       # - Removes HTML/XML characters: < > " ' &
       # - Validates against optional regex patterns
       # - Returns safe defaults for empty/null inputs
       # - Prevents code injection in user-provided strings
-      # 
+      #
       # Examples:
       # # Sanitize time intervals input
       # clean_intervals <- private$.sanitizeStringInput("12, 24, 36", "12, 36, 60")
-      # 
+      #
       # # Validate numeric pattern
       # clean_number <- private$.sanitizeStringInput("123", "100", "^[0-9]+$")
       .sanitizeStringInput = function(input, default_value, pattern = NULL) {
         if (is.null(input) || input == "" || is.na(input)) {
           return(default_value)
         }
-        
+
         # Remove potentially harmful characters
         cleaned <- gsub("[<>\"'&]", "", input)
-        
+
         # Apply pattern validation if provided
         if (!is.null(pattern) && !grepl(pattern, cleaned)) {
           return(default_value)
         }
-        
+
         return(cleaned)
       },
-      
+
       # Performance Monitoring - Start Timer
-      # 
+      #
       # Starts a performance timer for a specific operation to measure execution time.
       # Used for monitoring long-running operations and optimizing performance bottlenecks.
-      # 
+      #
       # Parameters:
       #   operation_name - String identifier for the operation being timed
-      # 
+      #
       # Note: Stores the start time in private$.perf_timers list for later retrieval
       .startPerformanceTimer = function(operation_name) {
         private$.perf_timers <- list()
         private$.perf_timers[[operation_name]] <- Sys.time()
       },
-      
+
       # Performance Monitoring - Stop Timer
-      # 
+      #
       # Stops a performance timer and calculates elapsed time for the operation.
       # Returns the execution time in seconds for performance analysis.
-      # 
+      #
       # Parameters:
       #   operation_name - String identifier for the operation being timed
-      # 
+      #
       # Returns: Numeric value representing elapsed time in seconds, or NULL if timer not found
       .stopPerformanceTimer = function(operation_name) {
         if (is.null(private$.perf_timers) || is.null(private$.perf_timers[[operation_name]])) {
           return(NULL)
         }
-        
+
         elapsed <- difftime(Sys.time(), private$.perf_timers[[operation_name]], units = "secs")
         private$.perf_timers[[operation_name]] <- NULL
-        
+
         return(as.numeric(elapsed))
       },
-      
+
       # Memory-Efficient Data Processing
-      # 
+      #
       # Processes large datasets in manageable chunks to prevent memory overflow.
       # Automatically handles datasets larger than the specified chunk size by
       # splitting into smaller portions and combining results.
-      # 
+      #
       # Parameters:
       #   data - Data frame to process
       #   chunk_function - Function to apply to each chunk
       #   chunk_size - Maximum number of rows per chunk (default: 1000)
-      # 
+      #
       # Returns: Combined results from all chunks (typically rbind of chunk results)
       .processDataInChunks = function(data, chunk_function, chunk_size = 1000) {
         if (nrow(data) <= chunk_size) {
           return(chunk_function(data))
         }
-        
+
         # Process data in chunks to manage memory
         n_chunks <- ceiling(nrow(data) / chunk_size)
         results <- list()
-        
+
         for (i in 1:n_chunks) {
           start_row <- (i - 1) * chunk_size + 1
           end_row <- min(i * chunk_size, nrow(data))
           chunk_data <- data[start_row:end_row, , drop = FALSE]
-          
+
           results[[i]] <- chunk_function(chunk_data)
         }
-        
+
         # Combine results (implementation depends on chunk_function output)
         return(do.call(rbind, results))
       },
@@ -276,7 +556,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .init = function() {
         # Validate inputs using helper functions
         validation <- private$.validateSurvivalInputs()
-        
+
         # Early exit if essential variables are missing - show welcome message
         if (!validation$valid) {
           # Initialize all outputs to FALSE first
@@ -288,7 +568,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$plot_adj$setVisible(FALSE)
           self$results$plot_nomogram$setVisible(FALSE)
           self$results$plot8$setVisible(FALSE)
-          
+
           # Hide all summary and explanation outputs
           self$results$multivariableCoxSummaryHeading$setVisible(FALSE)
           self$results$multivariableCoxSummary$setVisible(FALSE)
@@ -301,15 +581,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$riskScoreSummaryHeading$setVisible(FALSE)
           self$results$riskScoreTable$setVisible(FALSE)
           self$results$riskScoreSummary$setVisible(FALSE)
-          
+
           # Show welcome/todo message
           self$results$todo$setVisible(TRUE)
           return()
         }
-        
+
         # Hide todo if we have sufficient variables
         self$results$todo$setVisible(FALSE)
-        
+
         # Initialize all main outputs to FALSE first
         self$results$text$setVisible(FALSE)
         self$results$text2$setVisible(FALSE)
@@ -318,7 +598,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         self$results$plotKM$setVisible(FALSE)
         self$results$plot_adj$setVisible(FALSE)
         self$results$plot_nomogram$setVisible(FALSE)
-        
+
         # Initialize all summary outputs and headings to FALSE first
         self$results$multivariableCoxSummaryHeading$setVisible(FALSE)
         self$results$multivariableCoxSummary$setVisible(FALSE)
@@ -334,7 +614,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         self$results$treeSummaryHeading$setVisible(FALSE)
         self$results$tree_summary$setVisible(FALSE)
         self$results$ml_ensemble_summary$setVisible(FALSE)
-        
+
         # Initialize all explanation outputs and headings to FALSE first
         self$results$multivariableCoxHeading3$setVisible(FALSE)
         self$results$multivariableCoxExplanation$setVisible(FALSE)
@@ -351,7 +631,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # Main multivariable cox summary
             self$results$multivariableCoxSummaryHeading$setVisible(TRUE)
             self$results$multivariableCoxSummary$setVisible(TRUE)
-            
+
             # Conditional summaries - require both showSummaries AND their specific option
             if (self$options$person_time) {
                 self$results$personTimeSummaryHeading$setVisible(TRUE)
@@ -384,7 +664,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # Main explanation section
             self$results$multivariableCoxHeading3$setVisible(TRUE)
             self$results$multivariableCoxExplanation$setVisible(TRUE)
-            
+
             # Conditional explanations - require both showExplanations AND their specific option
             if (self$options$ac) {
                 self$results$adjustedSurvivalExplanation$setVisible(TRUE)
@@ -401,7 +681,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             if (self$options$use_stratify) {
                 self$results$stratifiedAnalysisExplanation$setVisible(TRUE)
             }
-            
+
             # Survival plots explanation requires showExplanations AND at least one plot
             if (self$options$ac || self$options$hr || self$options$km) {
                 self$results$survivalPlotsHeading3$setVisible(TRUE)
@@ -419,7 +699,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         } else {
           self$results$plot8$setVisible(FALSE)
         }
-        
+
         # Note: Main analysis outputs (text, text2, plots) will be set visible in .run() after validation
       }
 
@@ -452,7 +732,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Check if original names exist
         if (length(original_names) == 0) {
-          stop('Data must have column names')
+          stop(paste0(
+            .("Data must have column names."), "\n\n",
+            .("Possible solutions:"), "\n",
+            "• ", .("Ensure your dataset has proper column headers"), "\n",
+            "• ", .("Check that the data was imported correctly"), "\n",
+            "• ", .("Verify the data is not empty"), "\n",
+            "• ", .("Column names should describe your variables (e.g., 'Age', 'Survival_Time', 'Event_Status')")
+          ))
         }
 
         # Create labels vector
@@ -467,7 +754,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
         if (inherits(mydata_cleaned, "try-error")) {
-          stop('Error cleaning variable names. Please check column names.')
+          stop(paste0(
+            .("Error cleaning variable names."), "\n\n",
+            .("Possible solutions:"), "\n",
+            "• ", .("Check for special characters or spaces in column names"), "\n",
+            "• ", .("Ensure column names don't start with numbers"), "\n",
+            "• ", .("Remove any duplicate column names"), "\n",
+            "• ", .("Avoid reserved R keywords as column names (e.g., 'if', 'else', 'for')")
+          ))
         }
 
 
@@ -486,7 +780,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
         if (inherits(mydata_labelled, "try-error")) {
-          stop('Error setting variable labels')
+          stop(paste0(
+            .("Error setting variable labels."), "\n\n",
+            .("Possible solutions:"), "\n",
+            "• ", .("Check that all variables have valid names after cleaning"), "\n",
+            "• ", .("Ensure no variables have completely missing data"), "\n",
+            "• ", .("Verify the dataset is not corrupted"), "\n",
+            "• ", .("Try reloading your data file")
+          ))
         }
 
 
@@ -558,14 +859,58 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
 
-        # Check if required variables were found
-        if (length(mytime) == 0 &&
-            !is.null(self$options$elapsedtime)) {
-          stop('Could not find elapsed time variable')
+        # Check if required variables were found with helpful error messages
+        if (length(mytime) == 0 && !is.null(self$options$elapsedtime)) {
+          stop(paste0(
+            .("Could not find the elapsed time variable."), "\n\n",
+            .("Possible solutions:"), "\n",
+            "• ", .("Check that the variable name is correct in your dataset"), "\n",
+            "• ", .("Ensure the variable contains numeric time values (days, months, years)"), "\n",
+            "• ", .("Verify there are no special characters in the variable name"), "\n",
+            "• ", .("The time variable should represent time from study entry to event or last follow-up")
+          ))
         }
-        if (length(myoutcome) == 0 &&
-            !is.null(self$options$outcome)) {
-          stop('Could not find outcome variable')
+        if (length(myoutcome) == 0 && !is.null(self$options$outcome)) {
+          stop(paste0(
+            .("Could not find the outcome variable."), "\n\n",
+            .("Possible solutions:"), "\n",
+            "• ", .("Check that the variable name is correct in your dataset"), "\n",
+            "• ", .("Ensure the variable is coded as 0/1 or FALSE/TRUE (0=censored, 1=event)"), "\n",
+            "• ", .("Verify there are no missing values in the outcome variable"), "\n",
+            "• ", .("The outcome should indicate whether the event of interest occurred")
+          ))
+        }
+
+        # Perform comprehensive data validation
+        validation_results <- .validateSurvivalData(mydata_labelled, mytime, myoutcome)
+
+        # Handle validation issues and warnings
+        if (length(validation_results$issues) > 0) {
+          issue_message <- paste0(
+            "<div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+            "<h4 style='color: #721c24; margin-top: 0;'>🚨 ", .("Data Validation Issues"), "</h4>",
+            "<ul style='margin: 5px 0; padding-left: 20px;'>",
+            paste(lapply(validation_results$issues, function(x) paste0("<li>", x, "</li>")), collapse = ""),
+            "</ul>",
+            "<p><strong>", .("Action Required:"), "</strong> ", .("Please correct these issues before proceeding with analysis."), "</p>",
+            "</div>"
+          )
+          stop(issue_message)
+        }
+
+        # Display warnings if any
+        if (length(validation_results$warnings) > 0) {
+          warning_message <- paste0(
+            "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+            "<h4 style='color: #856404; margin-top: 0;'>⚠️ ", .("Data Validation Warnings"), "</h4>",
+            "<ul style='margin: 5px 0; padding-left: 20px;'>",
+            paste(lapply(validation_results$warnings, function(x) paste0("<li>", x, "</li>")), collapse = ""),
+            "</ul>",
+            "<p><strong>", .("Note:"), "</strong> ", .("Analysis will proceed, but consider these recommendations for optimal results."), "</p>",
+            "</div>"
+          )
+          # Store warning to display later
+          private$.validation_warnings <- warning_message
         }
 
         # Return results
@@ -579,8 +924,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             "mycontexpl_labelled" = mycontexpl,
             "myexplanatory_labelled" = myexplanatory,
             "adjexplanatory_labelled" = adjexplanatory,
-            "mystratvar_labelled" = mystratvar_labelled
-
+            "mystratvar_labelled" = mystratvar_labelled,
+            "validation_warnings" = private$.validation_warnings
 
           )
         )
@@ -656,7 +1001,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         if (!tint) {
           ### Precalculated Time ----
-          
+
           # Check if time variable is selected
           if (is.null(mytime_labelled) || length(mytime_labelled) == 0) {
             # Return empty data frame with proper structure
@@ -1056,14 +1401,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # run  ----
       ,
       # Modular Run Function Components ----
-      
+
       # Input Validation and UI Preparation
-      # 
+      #
       # Validates all user inputs and prepares the jamovi interface for analysis.
       # Displays appropriate error messages or welcome content based on validation results.
-      # 
+      #
       # Returns: TRUE if all inputs are valid and analysis can proceed, FALSE otherwise
-      # 
+      #
       # Validation Steps:
       # - Check for required outcome, time, and predictor variables
       # - Validate multievent configuration if selected
@@ -1073,10 +1418,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .validateAndPrepare = function() {
         # Start performance timer
         private$.startPerformanceTimer("validation")
-        
+
         # Validate inputs using our helper functions
         validation <- private$.validateSurvivalInputs()
-        
+
         if (!validation$valid) {
           private$.todo()
           self$results$text$setVisible(FALSE)
@@ -1087,7 +1432,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$todo$setVisible(TRUE)
           return(FALSE)
         }
-        
+
         # Additional specific validations for multievent scenarios
         if (self$options$multievent) {
           if (is.null(self$options$dod) && is.null(self$options$dooc)) {
@@ -1100,24 +1445,24 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             return(FALSE)
           }
         }
-        
+
         self$results$todo$setVisible(FALSE)
         self$results$text$setVisible(TRUE)
         self$results$text2$setVisible(TRUE)
-        
+
         validation_time <- private$.stopPerformanceTimer("validation")
         private$.validation_time <- validation_time
-        
+
         return(TRUE)
       }
-      
+
       # Main Analysis Execution
-      # 
+      #
       # Executes the complete survival analysis with performance monitoring.
       # Orchestrates data preparation, survival modeling, and timing collection.
-      # 
+      #
       # Returns: TRUE if analysis completes successfully, NULL on error
-      # 
+      #
       # Features:
       # - Performance monitoring for each analysis phase
       # - Error handling with detailed logging
@@ -1127,48 +1472,69 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       ,.executeAnalysis = function() {
         # Start performance timer for main analysis
         private$.startPerformanceTimer("analysis")
-        
+
         tryCatch({
           # Data preparation
           private$.startPerformanceTimer("data_prep")
           cleaneddata <- private$.cleandata()
           data_prep_time <- private$.stopPerformanceTimer("data_prep")
-          
+
           # Main survival analysis
           private$.startPerformanceTimer("survival_analysis")
           analysis_results <- private$.performSurvivalAnalysis(cleaneddata)
           survival_time <- private$.stopPerformanceTimer("survival_analysis")
-          
+
+          # Machine learning analysis (if requested)
+          if (self$options$ml_method != "none") {
+            private$.startPerformanceTimer("ml_analysis")
+            private$.runMLAnalysis()
+            ml_time <- private$.stopPerformanceTimer("ml_analysis")
+          } else {
+            ml_time <- 0
+          }
+
+          # Generate clinical interpretation summary
+          private$.generateAndDisplayClinicalSummary(cleaneddata)
+
           # Store timing information
           private$.analysis_times <- list(
             data_prep = data_prep_time,
             survival_analysis = survival_time,
+            ml_analysis = ml_time,
             validation = private$.validation_time
           )
-          
+
           return(analysis_results)
-          
+
         }, error = function(e) {
           error_msg <- private$.formatErrorMessage(
-            "Analysis Execution Error",
-            paste("An error occurred during the survival analysis:", e$message),
-            "<li>Check your data for missing or invalid values</li><li>Ensure all selected variables contain appropriate data types</li><li>Try with a smaller dataset first</li>"
+            .("Survival Analysis Error"),
+            paste(.("An error occurred during the survival analysis:"), e$message),
+            paste0(
+              "<li>", .("Check your data for missing or invalid values in time and outcome variables"), "</li>",
+              "<li>", .("Ensure the time variable contains positive numeric values"), "</li>",
+              "<li>", .("Verify the outcome variable is binary (0/1 or FALSE/TRUE)"), "</li>",
+              "<li>", .("Check that you have sufficient events (at least 10 recommended)"), "</li>",
+              "<li>", .("Ensure explanatory variables have appropriate data types"), "</li>",
+              "<li>", .("Try running the analysis with fewer variables"), "</li>",
+              "<li>", .("Consider checking for outliers or extreme values"), "</li>"
+            )
           )
           self$results$text$setContent(error_msg)
           return(NULL)
         })
       },
-      
+
       # Core Survival Analysis Implementation
-      # 
+      #
       # Performs the main survival analysis including Cox regression and all
       # optional analysis modules based on user selections.
-      # 
+      #
       # Parameters:
       #   cleaneddata - Processed and validated dataset
-      # 
+      #
       # Returns: TRUE if analysis completes successfully
-      # 
+      #
       # Analysis Components:
       # - Core Cox proportional hazards modeling
       # - Person-time analysis (if requested)
@@ -1176,40 +1542,40 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # - Adjusted survival curves (if requested)
       # - Nomogram generation (if requested)
       # - Decision tree analysis (if requested)
-      # 
+      #
       # Each component is conditionally executed based on user options
       .performSurvivalAnalysis = function(cleaneddata) {
-        
+
         # Stop if Empty Data
         if (nrow(self$data) == 0) {
           stop('Data contains no (complete) rows')
         }
-        
+
         # Execute the main analysis components
         private$.checkpoint()
         private$.final_fit()
-        
+
         # Additional analysis modules
         if (self$options$person_time) {
           private$.calculate_persontime()
         }
-        
+
         if (self$options$calculateRiskScore) {
           private$.calculate_riskscore()
         }
-        
+
         if (self$options$ac) {
           private$.calculate_adjustedstats()
         }
-        
+
         if (self$options$showNomogram) {
           private$.calculate_nomogram()
         }
-        
+
         if (self$options$use_tree) {
           private$.calculate_survivaldecisiontree()
         }
-        
+
         # Return success indicator
         return(TRUE)
       },
@@ -1219,13 +1585,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (!private$.validateAndPrepare()) {
           return()
         }
-        
+
         # Execute main analysis
         analysis_results <- private$.executeAnalysis()
         if (is.null(analysis_results)) {
           return()
         }
-        
+
         # Analysis completed successfully
         return(TRUE)
       }
@@ -1292,15 +1658,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
 
-        LHT <- "survival::Surv(mytime, myoutcome)"
-
-        # RHT <- formula2
-
-        RHT <- paste(formula_parts, collapse = " + ")
-
-        coxformula <- paste0(LHT, " ~ ", RHT)
-
-        coxformula <- as.formula(coxformula)
+        # Build Cox regression formula using consolidated function
+        coxformula <- .buildSurvivalFormula(
+          time_var = mytime,
+          outcome_var = myoutcome,
+          predictors = formula_parts,
+          survival_type = "standard",
+          strata_vars = if (!is.null(mystratvar) && mystratvar != "") mystratvar else NULL
+        )
 
 
         # Remove any rows with NA in stratification variables
@@ -1327,35 +1692,41 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Handle Time-Dependent Covariates
         if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
-          
+
           # Get time-dependent variable names
           time_dep_vars <- names(all_labels)[match(self$options$time_dep_vars, all_labels)]
-          
+
           if (self$options$td_format == "wide") {
             # Handle wide format data - convert to long format
             mydata <- private$.convertWideToLong(mydata, time_dep_vars, all_labels)
-            
+
             # Update formula for time-dependent covariates (long format)
-            LHT <- "survival::Surv(tstart, tstop, myoutcome)"
-            
-            # Add time-dependent variables to formula
-            formula_parts <- c(formula_parts, time_dep_vars)
-            RHT <- paste(formula_parts, collapse = " + ")
-            coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
-            
+            td_predictors <- c(formula_parts, time_dep_vars)
+            coxformula <- .buildSurvivalFormula(
+              time_var = "tstart",
+              outcome_var = myoutcome,
+              predictors = td_predictors,
+              survival_type = "counting",
+              start_var = "tstart",
+              stop_var = "tstop"
+            )
+
           } else if (self$options$td_format == "long") {
             # Handle long format data
             if (!is.null(self$options$start_time_var) && !is.null(self$options$stop_time_var)) {
               start_time_var <- names(all_labels)[all_labels == self$options$start_time_var]
               stop_time_var <- names(all_labels)[all_labels == self$options$stop_time_var]
-              
+
               # Update formula for time-dependent covariates
-              LHT <- paste0("survival::Surv(", start_time_var, ", ", stop_time_var, ", myoutcome)")
-              
-              # Add time-dependent variables to formula
-              formula_parts <- c(formula_parts, time_dep_vars)
-              RHT <- paste(formula_parts, collapse = " + ")
-              coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+              long_predictors <- c(formula_parts, time_dep_vars)
+              coxformula <- .buildSurvivalFormula(
+                time_var = start_time_var,
+                outcome_var = myoutcome,
+                predictors = long_predictors,
+                survival_type = "counting",
+                start_var = start_time_var,
+                stop_var = stop_time_var
+              )
             }
           }
         }
@@ -1363,14 +1734,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Handle Frailty Models
         if (self$options$use_frailty && !is.null(self$options$frailty_var)) {
           frailty_var <- names(all_labels)[all_labels == self$options$frailty_var]
-          
+
           # Add frailty term based on distribution
           frailty_term <- switch(self$options$frailty_distribution,
             "gamma" = paste0("frailty(", frailty_var, ", distribution='gamma')"),
             "gaussian" = paste0("frailty(", frailty_var, ", distribution='gaussian')"),
             "logt" = paste0("frailty(", frailty_var, ", distribution='logt')")
           )
-          
+
           formula_parts <- c(formula_parts, frailty_term)
           RHT <- paste(formula_parts, collapse = " + ")
           coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
@@ -1379,7 +1750,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Handle Splines for Non-Proportional Hazards
         if (self$options$use_splines && !is.null(self$options$spline_vars)) {
           spline_vars <- names(all_labels)[match(self$options$spline_vars, all_labels)]
-          
+
           # Create spline terms
           for (var in spline_vars) {
             spline_term <- switch(self$options$spline_type,
@@ -1387,15 +1758,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               "ns" = paste0("ns(", var, ", df=", self$options$spline_df, ")"),
               "bs" = paste0("bs(", var, ", df=", self$options$spline_df, ")")
             )
-            
+
             # Replace the linear term with spline term
             formula_parts <- formula_parts[formula_parts != var]
             formula_parts <- c(formula_parts, spline_term)
           }
-          
+
           RHT <- paste(formula_parts, collapse = " + ")
           coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
-          
+
           # Load splines package if needed
           if (self$options$spline_type %in% c("ns", "bs")) {
             requireNamespace("splines", quietly = TRUE)
@@ -1631,12 +2002,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Set datadist globally
         options(datadist = dd)
 
-        # Create formula and fit model
-        coxformula <- paste0("survival::Surv(mytime, myoutcome) ~ ",
-                             paste(var_names, collapse = " + "))
+        # Create formula and fit model using consolidated function
+        coxformula <- .buildSurvivalFormula(
+          time_var = "mytime",
+          outcome_var = "myoutcome",
+          predictors = var_names,
+          survival_type = "standard"
+        )
 
         # Fit the model
-        f <- rms::cph(formula = as.formula(coxformula),
+        f <- rms::cph(formula = coxformula,
                       data = mydata,
                       x = TRUE,
                       y = TRUE,
@@ -2073,7 +2448,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
         myformula <-
-          paste0('Surv( mytime, myoutcome )')
+          paste0('Surv( ', .escapeVariableNames("mytime"), ', ', .escapeVariableNames("myoutcome"), ' )')
 
 
         # hr_plot ----
@@ -2162,13 +2537,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
 
-        myformula <-
-          paste("survival::Surv(mytime, myoutcome) ~ ",
-                paste(formula2, collapse = " + "))
-
-
-
-        myformula <- as.formula(myformula)
+        myformula <- .buildSurvivalFormula(
+          time_var = "mytime",
+          outcome_var = "myoutcome",
+          predictors = formula2,
+          survival_type = "standard"
+        )
 
         mod <-
           survival::coxph(formula = myformula, data = mydata)
@@ -2332,7 +2706,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         plotKM <- mydata %>%
           finalfit::surv_plot(
             .data = .,
-            dependent = 'survival::Surv(mytime, myoutcome)',
+            dependent = paste0('survival::Surv(', .escapeVariableNames("mytime"), ', ', .escapeVariableNames("myoutcome"), ')'),
             explanatory = thefactor,
             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
             pval = self$options$pplot,
@@ -2427,7 +2801,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
             #### Verify we have at least one observation per group ----
             if(any(table(groups) == 0)) {
-              stop("Some groups have zero observations")
+              stop(.("Some groups have zero observations"))
             }
 
             return(list(success = TRUE, groups = groups))
@@ -3120,7 +3494,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         }, error = function(e) {
           # If marginal method fails, try average method instead
           if (method == "marginal") {
-            warning("Marginal method failed, falling back to average method")
+            warning(.("Marginal method failed, falling back to average method"))
             survminer::ggadjustedcurves(
               fit = cox_model,
               data = mydata,
@@ -3353,14 +3727,14 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
       # Error checking
       if (is.null(mydata) || is.null(cox_model)) {
-        warning("Missing data or model for pairwise comparisons")
+        warning(.("Missing data or model for pairwise comparisons"))
         return(NULL)
       }
 
       # Get levels
       levels <- sort(unique(mydata[[adj_var]]))
       if (length(levels) < 2) {
-        warning("Need at least 2 levels for pairwise comparisons")
+        warning(.("Need at least 2 levels for pairwise comparisons"))
         return(NULL)
       }
 
@@ -3931,12 +4305,12 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
     # Validation checks
     if (self$options$pEntry >= self$options$pRemoval) {
-      stop("Entry significance must be less than removal significance")
+      stop(.("Entry significance must be less than removal significance"))
     }
 
     if (self$options$modelSelection != "enter" &&
         length(c(self$options$explanatory, self$options$contexpl)) < 2) {
-      stop("Variable selection requires at least 2 predictor variables")
+      stop(.("Variable selection requires at least 2 predictor variables"))
     }
 
     private$.checkpoint()
@@ -4076,20 +4450,20 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
         # Try adding each remaining variable
         remaining_vars <- setdiff(pred_part, selected_vars)
-        
+
         for (var in remaining_vars) {
           test_vars <- c(selected_vars, var)
           test_formula <- as.formula(paste(deparse(surv_part), "~",
                                            paste(test_vars, collapse = " + ")))
-          
+
           tryCatch({
             test_model <- survival::coxph(test_formula, data = data)
             test_summary <- summary(test_model)
-            
+
             if (!is.null(test_summary$coefficients)) {
               # Get p-value for the new variable
               var_p <- test_summary$coefficients[var, "Pr(>|z|)"]
-              
+
               if (var_p < best_p) {
                 best_p <- var_p
                 best_var <- var
@@ -4112,7 +4486,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           status_msg <- paste0("Adding variable: ", best_var,
                                " (p=", format.pval(best_p, digits=3), ")")
           self$results$text2_model_selection$setContent(status_msg)
-          
+
           private$.checkpoint()
         } else {
           # No more variables meet criteria
@@ -4141,11 +4515,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Set status
         self$results$text_model_selection$setStatus('running')
         self$results$text2_model_selection$setStatus('running')
-        
+
         private$.checkpoint()
 
         # Use stepwise selection with AIC
-        step_model <- MASS::stepAIC(full_model, 
+        step_model <- MASS::stepAIC(full_model,
                                     scope = list(lower = null_model, upper = full_model),
                                     direction = "both",
                                     trace = 0)  # Silent operation
@@ -4168,8 +4542,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
   }, error = function(e) {
     # Set error status
     self$results$text_model_selection$setStatus('error')
-    self$results$text2_model_selection$setContent(paste("Model selection error:", e$message))
-    
+    self$results$text2_model_selection$setContent(paste(.("Model selection error:"), e$message))
+
     # Return full model as fallback
     return(survival::coxph(formula, data = data))
   })
@@ -4445,7 +4819,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           # Use the standardized column names that actually exist in cleanData
           mytime <- "mytime"
           myoutcome <- "myoutcome"
-          
+
 
 
 
@@ -4465,16 +4839,16 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             )
             return(NULL)
           }
-          
+
           # Check if standardized columns exist
           if (!"mytime" %in% names(cleanData) || !"myoutcome" %in% names(cleanData)) {
             self$results$tree_summary$setContent(
-              paste0("<p>Error: Required columns not found in cleaned data. Available columns: ", 
+              paste0("<p>Error: Required columns not found in cleaned data. Available columns: ",
                      paste(names(cleanData), collapse = ", "), "</p>")
             )
             return(NULL)
           }
-          
+
           # Get explanatory variables
           expl_vars <- NULL
           if (!is.null(self$options$explanatory)) {
@@ -4483,7 +4857,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           if (!is.null(self$options$contexpl)) {
             expl_vars <- c(expl_vars, as.vector(results$mycontexpl_labelled))
           }
-          
+
           # Check for explanatory variables
           if (length(expl_vars) == 0) {
             self$results$tree_summary$setContent(
@@ -4502,12 +4876,12 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           }
 
           private$.checkpoint()
-          
+
           # Create formula for rpart using the actual column names from results
-          formula_string <- paste("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", 
+          formula_string <- paste("survival::Surv(", mytime, ", ", myoutcome, ") ~ ",
                                    paste(expl_vars, collapse = " + "))
           formula <- as.formula(formula_string)
-          
+
           # Validate minimum parameters
           min_node <- max(1, self$options$min_node)
           complexity <- max(0.001, self$options$complexity)
@@ -4520,7 +4894,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
               data = cleanData,
               method = "exp",  # exponential survival model
               control = rpart::rpart.control(
-                minsplit = 2 * min_node, 
+                minsplit = 2 * min_node,
                 minbucket = min_node,
                 cp = complexity,
                 maxdepth = max_depth
@@ -4529,7 +4903,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           }, error = function(e) {
             NULL
           })
-          
+
           # Create summary text
           if (is.null(tree) || nrow(tree$frame) == 0) {
             tree_text <- paste0(
@@ -4558,15 +4932,15 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 stringsAsFactors = FALSE
               )
               var_imp_df <- var_imp_df[order(-var_imp_df$Importance), ]
-              
+
               var_imp_html <- paste(
                 "<tr>",
                 "<td>", var_imp_df$Variable, "</td>",
                 "<td>", round(var_imp_df$Importance, 2), "</td>",
-                "</tr>", 
+                "</tr>",
                 collapse = ""
               )
-              
+
               var_imp_table <- paste0(
                 "<table class='jmv-results-table'>",
                 "<thead><tr><th>Variable</th><th>Importance</th></tr></thead>",
@@ -4576,11 +4950,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             } else {
               var_imp_table <- "<p>No variable importance measures available.</p>"
             }
-            
+
             # Get tree statistics
             n_terminal <- sum(tree$frame$var == "<leaf>")
             n_splits <- nrow(tree$frame) - 1
-            
+
             tree_text <- paste0(
               "<h3>Survival Decision Tree Results</h3>",
               "<p>The decision tree was successfully built with the following characteristics:</p>",
@@ -4600,12 +4974,12 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
               "<p><i>Note: The decision tree plot visualizes how the variables split the data into groups with different survival outcomes.</i></p>"
             )
           }
-          
+
           self$results$tree_summary$setContent(tree_text)
-          
+
           # Store tree for plotting
           return(tree)
-          
+
         }, error = function(e) {
           error_msg <- private$.formatErrorMessage(
             "Survival Decision Tree Error",
@@ -4625,20 +4999,20 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           if (!self$options$use_tree) {
             return(FALSE)
           }
-          
+
           # Check required packages
           if (!requireNamespace("rpart.plot", quietly = TRUE)) {
             return(FALSE)
           }
-          
+
           # Get results and tree
           results <- private$.cleandata()
           tree <- private$.survivalTree(results)
-          
+
           if (is.null(tree) || nrow(tree$frame) == 0) {
             return(FALSE)
           }
-          
+
             self$results$mydataview_survivaldecisiontree$setContent(
     list(
       results = results,
@@ -4649,7 +5023,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
           # Add checkpoint before plotting
           private$.checkpoint()
-          
+
           # Plot tree with error handling
           rpart.plot::rpart.plot(
             tree,
@@ -4663,9 +5037,9 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             cex = 0.8,  # text size
             clip.right.labs = FALSE  # don't clip labels
           )
-          
+
           return(TRUE)
-          
+
         }, error = function(e) {
           # Report tree plotting error for debugging
           self$results$tree_summary$setContent(
@@ -4683,49 +5057,49 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           if (!self$options$use_tree || !self$options$show_terminal_nodes) {
             return(FALSE)
           }
-          
+
           # Check required packages
           if (!requireNamespace("survminer", quietly = TRUE)) {
             return(FALSE)
           }
-          
+
           # Get results and tree
           results <- private$.cleandata()
           message("Node survival: results obtained, cleanData columns: ", paste(names(results$cleanData), collapse = ", "))
           tree <- private$.survivalTree(results)
           message("Node survival: tree obtained")
-          
+
           if (is.null(tree) || nrow(tree$frame) == 0) {
             return(FALSE)
           }
-          
+
           # Get cleaned data
           cleanData <- results$cleanData
           # Use the standardized column names that actually exist in cleanData
           mytime <- "mytime"
           myoutcome <- "myoutcome"
-          
+
           # Validate data
           if (is.null(cleanData) || nrow(cleanData) == 0) {
             return(FALSE)
           }
-          
+
           # Add checkpoint before plotting
           private$.checkpoint()
-          
+
           # Get terminal node assignments for each observation
           message("Node survival: getting node assignments")
           node_assignments <- tree$where
           cleanData$node <- paste("Node", node_assignments)
           message("Node survival: node assignments created, unique nodes: ", length(unique(cleanData$node)))
-          
+
           # Check if we have at least 2 nodes
           unique_nodes <- unique(cleanData$node)
           if (length(unique_nodes) < 2) {
             message("Node survival: insufficient nodes (", length(unique_nodes), ")")
             return(FALSE)
           }
-          
+
           # Plot survival curves for each terminal node
           # Check that required columns exist
           if (!"mytime" %in% names(cleanData)) {
@@ -4736,29 +5110,29 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             message("Error: myoutcome column not found in cleanData")
             return(FALSE)
           }
-          
+
           # Create formula properly
           message("Node survival: creating formula with proper syntax")
           formula <- as.formula("Surv(mytime, myoutcome) ~ node")
           message("Node survival: formula created: ", deparse(formula))
-          
+
           message("Node survival: calling survfit")
           fit <- survival::survfit(formula, data = cleanData)
           message("Node survival: survfit completed")
-          
+
           message("Node survival: trying minimal ggsurvplot call")
-          
+
           # Try the most minimal ggsurvplot call possible
           plot <- survminer::ggsurvplot(
             fit,
             data = cleanData
           )
-          
+
           message("Node survival: minimal ggsurvplot completed, printing")
           print(plot)
           message("Node survival: plot printed successfully")
           return(TRUE)
-          
+
         }, error = function(e) {
           # Report node survival plotting error for debugging
           message("Node survival plotting error: ", e$message)
@@ -4774,14 +5148,14 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       # Convert Wide Format to Long Format for Time-Dependent Covariates ----
       ,
       .convertWideToLong = function(mydata, time_dep_vars, all_labels) {
-        
+
         # Get change time points with input sanitization
         change_times <- private$.sanitizeStringInput(
-          self$options$change_times, 
+          self$options$change_times,
           private$DEFAULT_CHANGE_TIMES,
           "^[0-9., ]+$"  # Only numbers, commas, periods, spaces
         )
-        
+
         # Parse change times
         time_points <- tryCatch({
           as.numeric(trimws(strsplit(change_times, ",")[[1]]))
@@ -4789,49 +5163,49 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           as.numeric(trimws(strsplit(private$DEFAULT_CHANGE_TIMES, ",")[[1]]))
         })
         time_points <- sort(time_points[!is.na(time_points)])
-        
+
         # Get suffix pattern with input sanitization
         suffix_pattern <- private$.sanitizeStringInput(
           self$options$td_suffix_pattern,
           private$DEFAULT_TD_SUFFIX,
           "^[a-zA-Z0-9_{}]+$"  # Only alphanumeric, underscore, braces
         )
-        
+
         # Initialize long format data
         long_data <- data.frame()
-        
+
         for (i in 1:nrow(mydata)) {
           subject_data <- mydata[i, ]
-          
+
           # Get subject's total follow-up time
           total_time <- subject_data$mytime
-          
+
           # Create time intervals: 0, change_times, total_time
           intervals <- c(0, time_points[time_points < total_time], total_time)
           intervals <- unique(sort(intervals))
-          
+
           # If subject has very short follow-up, create just one interval
           if (length(intervals) < 2) {
             intervals <- c(0, total_time)
           }
-          
+
           # Create rows for each interval
           for (j in 1:(length(intervals)-1)) {
             tstart <- intervals[j]
             tstop <- intervals[j+1]
-            
+
             # Status is 1 only in the last interval if subject has event
             status <- ifelse(j == (length(intervals)-1), subject_data$myoutcome, 0)
-            
+
             # Create new row
             new_row <- subject_data
             new_row$tstart <- tstart
             new_row$tstop <- tstop
             new_row$myoutcome <- status
-            
+
             # Update time-dependent variables for this interval
             for (var in time_dep_vars) {
-              
+
               # Determine which time-dependent version to use
               if (tstart == 0) {
                 # Use baseline version for first interval
@@ -4849,7 +5223,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                   use_time <- max(applicable_times)
                   td_var_name <- gsub("\\{time\\}", use_time, suffix_pattern)
                   full_var_name <- paste0(var, td_var_name)
-                  
+
                   if (full_var_name %in% names(mydata)) {
                     new_row[[var]] <- subject_data[[full_var_name]]
                   } else {
@@ -4862,11 +5236,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 }
               }
             }
-            
+
             long_data <- rbind(long_data, new_row)
           }
         }
-        
+
         return(long_data)
       }
 
@@ -4881,21 +5255,21 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             # Silently ignore if result doesn't exist
           })
         }
-        
+
         # Multivariable Cox Regression Explanation
         private$.setExplanationContent("multivariableCoxExplanation", '
         <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
             <h3 style="color: #2c5282; margin-top: 0;">🔬 Understanding Multivariable Cox Regression</h3>
-            
+
             <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #2d3748; margin-top: 0;">What is Multivariable Survival Analysis?</h4>
                 <p style="margin: 8px 0;">Multivariable Cox regression analyzes <strong>multiple risk factors simultaneously</strong> to identify which factors independently affect survival when all others are held constant.</p>
-                
+
                 <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>🎯 Key Advantage:</strong> Separates the <strong>independent effect</strong> of each variable from the effects of other variables
                 </div>
             </div>
-            
+
             <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #d68910; margin-top: 0;">📊 Adjusted vs Unadjusted Hazard Ratios</h4>
                 <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
@@ -4916,10 +5290,10 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     </tr>
                 </table>
             </div>
-            
+
             <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #2e7d32; margin-top: 0;">💡 Clinical Examples</h4>
-                
+
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Example: Cancer Survival Model</strong>
                     <p style="margin: 8px 0;"><strong>Variables:</strong> Age, Stage, Grade, Treatment</p>
@@ -4931,7 +5305,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     </table>
                     <p style="margin: 8px 0;"><strong>Interpretation:</strong> Stage is the strongest independent predictor, even after accounting for age, grade, and treatment.</p>
                 </div>
-                
+
                 <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>🔍 Confounding Example:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
@@ -4941,7 +5315,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     </ul>
                 </div>
             </div>
-            
+
             <div style="background-color: #e3f2fd; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #1976d2; margin-top: 0;">🎯 Model Building Strategy</h4>
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -4951,7 +5325,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                         <li>Consider statistical significance (p<0.05 or p<0.1)</li>
                         <li>Check for multicollinearity</li>
                     </ul>
-                    
+
                     <strong>2. Model Assessment:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li>Concordance index (C-index): >0.7 indicates good discrimination</li>
@@ -4960,7 +5334,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     </ul>
                 </div>
             </div>
-            
+
             <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
                 <strong>💡 Clinical Applications:</strong>
                 <ul style="margin: 5px 0; padding-left: 20px;">
@@ -4972,7 +5346,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             </div>
         </div>
         ')
-        
+
         # Adjusted Survival Curves Explanation
         private$.setExplanationContent("adjustedSurvivalExplanation", '
         <div style="margin-bottom: 20px; padding: 15px; background-color: #d1ecf1; border-left: 4px solid #bee5eb;">
@@ -4987,7 +5361,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             <p><em>When to use:</em> Essential when comparing groups that differ in important prognostic factors.</p>
         </div>
         ')
-        
+
         # Risk Score Analysis Explanation
         private$.setExplanationContent("riskScoreExplanation", '
         <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
@@ -5002,7 +5376,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             <p><em>Advantage:</em> Simplifies complex multivariable models into an easily interpretable risk score.</p>
         </div>
         ')
-        
+
         # Nomogram Explanation
         private$.setExplanationContent("nomogramExplanation", '
         <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
@@ -5017,7 +5391,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             <p><em>Clinical application:</em> Allows clinicians to quickly estimate individual patient survival probabilities.</p>
         </div>
         ')
-        
+
         # Person-Time Analysis Explanation
         private$.setExplanationContent("personTimeExplanation", '
         <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
@@ -5032,7 +5406,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             <p><em>Clinical insight:</em> Reveals patterns of risk over time and identifies periods of highest event rates.</p>
         </div>
         ')
-        
+
         # Stratified Analysis Explanation
         private$.setExplanationContent("stratifiedAnalysisExplanation", '
         <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
@@ -5047,16 +5421,16 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             <p><em>When to use:</em> When proportional hazards assumption is violated due to different baseline hazards between groups.</p>
         </div>
         ')
-        
+
         # Survival Plots Explanation
         private$.setExplanationContent("survivalPlotsExplanation", '
         <div class="explanation-box" style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 10px 0;">
             <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Adjusted Survival Curves and Hazard Ratio Plots</h3>
-            
+
             <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #2e7d32; margin-top: 0;">🎯 Adjusted Survival Curves</h4>
                 <p style="margin: 8px 0;">Adjusted survival curves show survival probabilities after <strong>controlling for confounding variables</strong>, providing a fair comparison between groups.</p>
-                
+
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Key Features:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
@@ -5066,7 +5440,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                         <li><strong>Clinical relevance:</strong> Provides realistic survival estimates for clinical decision-making</li>
                     </ul>
                 </div>
-                
+
                 <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>📈 Interpretation Guide:</strong>
                     <table style="width: 100%; border-collapse: collapse; margin: 5px 0;">
@@ -5089,11 +5463,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     </table>
                 </div>
             </div>
-            
+
             <div style="background-color: #fff3e0; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #d68910; margin-top: 0;">🎯 Hazard Ratio (Forest) Plots</h4>
                 <p style="margin: 8px 0;">Forest plots visualize <strong>hazard ratios and confidence intervals</strong> for multiple variables simultaneously, enabling quick assessment of relative risk factors.</p>
-                
+
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Reading Forest Plots:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
@@ -5104,7 +5478,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                         <li><strong>Crossing HR=1:</strong> Non-significant effect (p>0.05)</li>
                     </ul>
                 </div>
-                
+
                 <div style="background-color: #fef5e7; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>🔍 Clinical Example - Cancer Study:</strong>
                     <table style="width: 100%; margin: 5px 0;">
@@ -5114,10 +5488,10 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     </table>
                 </div>
             </div>
-            
+
             <div style="background-color: #e6f7ff; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #1976d2; margin-top: 0;">⚕️ Clinical Applications</h4>
-                
+
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>1. Treatment Comparison:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
@@ -5125,14 +5499,14 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                         <li>Shows true treatment effect independent of baseline differences</li>
                         <li>Critical for observational studies with treatment selection bias</li>
                     </ul>
-                    
+
                     <strong>2. Prognostic Modeling:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li>Identifies independent risk factors from forest plots</li>
                         <li>Quantifies relative importance of different predictors</li>
                         <li>Builds comprehensive prognostic models</li>
                     </ul>
-                    
+
                     <strong>3. Risk Stratification:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li>Combines multiple risk factors for patient classification</li>
@@ -5141,7 +5515,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     </ul>
                 </div>
             </div>
-            
+
             <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #9c27b0;">
                 <strong>💡 Best Practices:</strong>
                 <ul style="margin: 5px 0; padding-left: 20px;">
@@ -5157,45 +5531,79 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
       # Machine Learning Methods ----
 
-      ,.runMLAnalysis = function() {
+      ,
+
+.runMLAnalysis = function() {
         tryCatch({
           cleaneddata <- private$.cleandata()
-          
+
           # Check for required packages
-          if (self$options$ml_method == "randomForest" && !requireNamespace("randomForestSRC", quietly = TRUE)) {
-            self$results$ml_performance_metrics$setContent("randomForestSRC package not available. Please install it to use Random Forest.")
+          if (self$options$ml_method == "rsf" && !requireNamespace("randomForestSRC", quietly = TRUE)) {
+            self$results$ml_performance_metrics$setContent(.("randomForestSRC package not available. Please install it to use Random Survival Forest."))
             return()
           }
-          
+
           if (self$options$ml_method == "glmnet" && !requireNamespace("glmnet", quietly = TRUE)) {
-            self$results$ml_performance_metrics$setContent("glmnet package not available. Please install it to use regularized regression.")
+            self$results$ml_performance_metrics$setContent(.("glmnet package not available. Please install it to use regularized regression."))
             return()
           }
-          
+
+          if (self$options$ml_method == "xgboost" && !requireNamespace("xgboost", quietly = TRUE)) {
+            self$results$ml_performance_metrics$setContent(.("xgboost package not available. Please install it to use XGBoost survival models."))
+            return()
+          }
+
+          if (self$options$ml_method == "svm" && !requireNamespace("survivalsvm", quietly = TRUE)) {
+            self$results$ml_performance_metrics$setContent(.("survivalsvm package not available. Please install it to use SVM survival analysis."))
+            return()
+          }
+
           # Select ML method
-          if (self$options$ml_method == "randomForest") {
+          if (self$options$ml_method == "rsf") {
             private$.performRandomForest(cleaneddata)
           } else if (self$options$ml_method == "glmnet") {
             private$.performGlmnet(cleaneddata)
+          } else if (self$options$ml_method == "xgboost") {
+            private$.performXGBoost(cleaneddata)
+          } else if (self$options$ml_method == "svm") {
+            private$.performSVM(cleaneddata)
+          } else if (self$options$ml_method == "deepsurv") {
+            private$.performDeepSurvival(cleaneddata)
           } else if (self$options$ml_method == "ensemble") {
             private$.performEnsemble(cleaneddata)
           }
-          
+
           # Feature selection if requested
           if (self$options$ml_feature_selection) {
             private$.performFeatureSelection(cleaneddata)
           }
-          
+
+          # Cross-validation if requested
+          if (self$options$ml_validation == "cv" && self$options$ml_method != "none") {
+            private$.performCrossValidation(cleaneddata)
+          }
+
+          # SHAP values if requested
+          if (self$options$ml_shap && self$options$ml_method %in% c("rsf", "xgboost")) {
+            private$.calculateSHAPValues(cleaneddata)
+          }
+
+          # Performance metrics if requested
+          if (self$options$ml_performance) {
+            private$.calculateMLPerformanceMetrics(cleaneddata)
+          }
+
         }, error = function(e) {
           error_msg <- glue::glue("Error in ML analysis: {e$message}")
           self$results$ml_performance_metrics$setContent(error_msg)
         })
       }
 
-      ,.performRandomForest = function(cleaneddata) {
+      ,
+.performRandomForest = function(cleaneddata) {
         # Random Forest survival analysis
         formula_vars <- private$.prepareMLFormula(cleaneddata)
-        
+
         tryCatch({
           # Fit Random Forest
           rf_model <- randomForestSRC::rfsrc(
@@ -5205,67 +5613,68 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             importance = TRUE,
             proximity = TRUE
           )
-          
+
           # Variable importance
           var_imp <- rf_model$importance
           private$.populateVariableImportance(var_imp)
-          
+
           # Performance metrics
           oob_error <- rf_model$err.rate[length(rf_model$err.rate)]
           c_index <- 1 - oob_error
-          
-          metrics_html <- glue::glue("
-            <h4>Random Forest Survival Model Results</h4>
-            <p><strong>Out-of-Bag Error Rate:</strong> {round(oob_error, 4)}</p>
-            <p><strong>Concordance Index:</strong> {round(c_index, 4)}</p>
-            <p><strong>Number of Trees:</strong> {rf_model$ntree}</p>
-            <p><strong>Variables Used:</strong> {length(formula_vars$variables)}</p>
-          ")
-          
+
+          metrics_html <- paste0(
+            "<h4>", .("Random Forest Survival Model Results"), "</h4>",
+            "<p><strong>", .("Out-of-Bag Error Rate:"), "</strong> ", round(oob_error, 4), "</p>",
+            "<p><strong>", .("Concordance Index:"), "</strong> ", round(c_index, 4), "</p>",
+            "<p><strong>", .("Number of Trees:"), "</strong> ", rf_model$ntree, "</p>",
+            "<p><strong>", .("Variables Used:"), "</strong> ", length(formula_vars$variables), "</p>"
+          )
+
           self$results$ml_performance_metrics$setContent(metrics_html)
-          
+
           # Prediction intervals
           predictions <- predict(rf_model, newdata = cleaneddata)
           private$.populatePredictionIntervals(predictions, cleaneddata)
-          
+
         }, error = function(e) {
           error_msg <- glue::glue("Random Forest error: {e$message}")
           self$results$ml_performance_metrics$setContent(error_msg)
         })
       }
 
-      ,.performGlmnet = function(cleaneddata) {
+      ,
+.performGlmnet = function(cleaneddata) {
         # Regularized Cox regression with cross-validation
         formula_vars <- private$.prepareMLFormula(cleaneddata)
-        
+
         tryCatch({
           # Prepare data for glmnet
           x <- model.matrix(formula_vars$formula, data = cleaneddata)[,-1]
           y <- survival::Surv(cleaneddata$mytime, cleaneddata$myoutcome)
-          
+
           # Cross-validated glmnet
           cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", alpha = 0.5, nfolds = self$options$ml_cv_folds)
-          
+
           # Best lambda
           best_lambda <- cv_fit$lambda.min
-          
+
           # Final model coefficients
           coefs <- coef(cv_fit, s = "lambda.min")
           selected_vars <- which(coefs != 0)
-          
+
           # Performance metrics
           c_index <- max(cv_fit$glmnet.fit$dev.ratio)
-          
-          metrics_html <- glue::glue("
-            <h4>Regularized Cox Regression Results</h4>
-            <p><strong>Best Lambda:</strong> {round(best_lambda, 6)}</p>
-            <p><strong>Selected Variables:</strong> {length(selected_vars)} out of {ncol(x)}</p>
-            <p><strong>Deviance Explained:</strong> {round(c_index * 100, 2)}%</p>
-            <p><strong>Cross-Validation Folds:</strong> {self$options$ml_cv_folds}</p>
-          ")
-          
+
+          metrics_html <- paste0(
+            "<h4>", .("Regularized Cox Regression Results"), "</h4>",
+            "<p><strong>", .("Best Lambda:"), "</strong> ", round(best_lambda, 6), "</p>",
+            "<p><strong>", .("Selected Variables:"), "</strong> ", length(selected_vars), " out of ", ncol(x), "</p>",
+            "<p><strong>", .("Deviance Explained:"), "</strong> ", round(c_index * 100, 2), "%</p>",
+            "<p><strong>", .("Cross-Validation Folds:"), "</strong> ", self$options$ml_cv_folds, "</p>"
+          )
+
           self$results$ml_performance_metrics$setContent(metrics_html)
-          
+
           # Variable importance from coefficients
           if (length(selected_vars) > 0) {
             var_names <- rownames(coefs)[selected_vars]
@@ -5274,18 +5683,19 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             names(var_imp) <- var_names
             private$.populateVariableImportance(var_imp)
           }
-          
+
         }, error = function(e) {
           error_msg <- glue::glue("Glmnet error: {e$message}")
           self$results$ml_performance_metrics$setContent(error_msg)
         })
       }
 
-      ,.performEnsemble = function(cleaneddata) {
+      ,
+.performEnsemble = function(cleaneddata) {
         # Ensemble of multiple methods
         tryCatch({
           ensemble_results <- list()
-          
+
           # Random Forest component
           if (requireNamespace("randomForestSRC", quietly = TRUE)) {
             formula_vars <- private$.prepareMLFormula(cleaneddata)
@@ -5297,11 +5707,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             )
             ensemble_results$rf <- rf_model
           }
-          
-          # Cox regression component  
+
+          # Cox regression component
           cox_model <- private$.cox_model()
           ensemble_results$cox <- cox_model
-          
+
           # Glmnet component
           if (requireNamespace("glmnet", quietly = TRUE)) {
             formula_vars <- private$.prepareMLFormula(cleaneddata)
@@ -5310,11 +5720,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             glmnet_model <- glmnet::cv.glmnet(x, y, family = "cox", alpha = 0.5)
             ensemble_results$glmnet <- glmnet_model
           }
-          
+
           # Ensemble summary
           n_models <- length(ensemble_results)
           model_names <- paste(names(ensemble_results), collapse = ", ")
-          
+
           ensemble_html <- glue::glue("
             <h4>Ensemble Model Summary</h4>
             <p><strong>Component Models:</strong> {model_names}</p>
@@ -5322,32 +5732,33 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             <p><strong>Ensemble Method:</strong> {self$options$ml_ensemble_weights}</p>
             <p>Ensemble predictions combine multiple modeling approaches for robust predictions.</p>
           ")
-          
+
           self$results$ml_ensemble_summary$setContent(ensemble_html)
-          
+
         }, error = function(e) {
           error_msg <- glue::glue("Ensemble error: {e$message}")
           self$results$ml_performance_metrics$setContent(error_msg)
         })
       }
 
-      ,.performFeatureSelection = function(cleaneddata) {
+      ,
+.performFeatureSelection = function(cleaneddata) {
         # Cross-validated feature selection
         tryCatch({
           formula_vars <- private$.prepareMLFormula(cleaneddata)
           all_vars <- formula_vars$variables
-          
+
           # Stability selection simulation
           n_bootstrap <- 50
           selected_vars <- character(0)
           selection_freq <- rep(0, length(all_vars))
           names(selection_freq) <- all_vars
-          
+
           for (i in 1:n_bootstrap) {
             # Bootstrap sample
             boot_indices <- sample(nrow(cleaneddata), replace = TRUE)
             boot_data <- cleaneddata[boot_indices, ]
-            
+
             # Fit model and select variables (simplified)
             if (requireNamespace("glmnet", quietly = TRUE)) {
               x <- model.matrix(formula_vars$formula, data = boot_data)[,-1]
@@ -5355,7 +5766,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
               cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", alpha = 1)
               coefs <- coef(cv_fit, s = "lambda.min")
               selected <- which(coefs != 0)
-              
+
               if (length(selected) > 0) {
                 var_names <- rownames(coefs)[selected]
                 for (var in var_names) {
@@ -5366,10 +5777,10 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
               }
             }
           }
-          
+
           # Normalize frequencies
           selection_freq <- selection_freq / n_bootstrap
-          
+
           # Populate results table
           feature_results <- data.frame(
             variable = names(selection_freq),
@@ -5378,10 +5789,10 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             importance_score = selection_freq,
             stringsAsFactors = FALSE
           )
-          
+
           # Sort by frequency
           feature_results <- feature_results[order(-feature_results$selection_frequency), ]
-          
+
           table <- self$results$ml_feature_selection_results
           for (i in 1:nrow(feature_results)) {
             table$addRow(rowKey = i, values = list(
@@ -5391,36 +5802,298 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
               importance_score = round(feature_results$importance_score[i], 3)
             ))
           }
-          
+
         }, error = function(e) {
           error_msg <- glue::glue("Feature selection error: {e$message}")
           self$results$ml_performance_metrics$setContent(error_msg)
         })
       }
 
-      ,.prepareMLFormula = function(cleaneddata) {
+      ,
+.performXGBoost = function(cleaneddata) {
+        # XGBoost survival analysis
+        formula_vars <- private$.prepareMLFormula(cleaneddata)
+
+        tryCatch({
+          # Check for required packages with graceful fallback
+          pkg_check <- .checkPackageDependency("xgboost", "XGBoost Survival", "Random Survival Forest")
+          if (!pkg_check$available) {
+            self$results$ml_performance_metrics$setContent(pkg_check$message)
+            # Fallback to Random Forest if available, or Cox regression
+            if (requireNamespace("randomForestSRC", quietly = TRUE)) {
+              private$.performRandomForest(cleaneddata)
+            } else {
+              private$.performCoxRegression(cleaneddata)
+            }
+            return()
+          }
+
+          # Prepare data for xgboost
+          x <- model.matrix(formula_vars$formula, data = cleaneddata)[,-1]
+          y <- survival::Surv(cleaneddata$mytime, cleaneddata$myoutcome)
+
+          # XGBoost survival model
+          dtrain <- xgboost::xgb.DMatrix(data = x, label = cleaneddata$mytime)
+
+          # Set survival-specific parameters
+          params <- list(
+            objective = "survival:cox",
+            eta = 0.1,
+            max_depth = 6,
+            subsample = 0.8,
+            colsample_bytree = 0.8
+          )
+
+          # Train model
+          xgb_model <- xgboost::xgb.train(
+            params = params,
+            data = dtrain,
+            nrounds = 100,
+            verbose = 0
+          )
+
+          # Variable importance
+          var_imp <- xgboost::xgb.importance(model = xgb_model)
+          importance_scores <- setNames(var_imp$Gain, var_imp$Feature)
+          private$.populateVariableImportance(importance_scores)
+
+          # Performance metrics (simplified)
+          metrics_html <- paste0(
+            "<h4>", .("XGBoost Survival Model Results"), "</h4>",
+            "<p><strong>", .("Model Type:"), "</strong> ", .("Cox Proportional Hazards with Gradient Boosting"), "</p>",
+            "<p><strong>", .("Number of Rounds:"), "</strong> 100</p>",
+            "<p><strong>", .("Variables Used:"), "</strong> ", length(formula_vars$variables), "</p>",
+            "<p><strong>", .("Learning Rate:"), "</strong> ", params$eta, "</p>",
+            "<p><strong>", .("Max Depth:"), "</strong> ", params$max_depth, "</p>"
+          )
+
+          self$results$ml_performance_metrics$setContent(metrics_html)
+
+        }, error = function(e) {
+          error_msg <- glue::glue("XGBoost error: {e$message}")
+          self$results$ml_performance_metrics$setContent(error_msg)
+        })
+      }
+
+      ,
+.performSVM = function(cleaneddata) {
+        # Support Vector Survival analysis
+        formula_vars <- private$.prepareMLFormula(cleaneddata)
+
+        tryCatch({
+          # Check for required packages with graceful fallback
+          pkg_check <- .checkPackageDependency("survivalsvm", "SVM Survival", "Random Survival Forest")
+          if (!pkg_check$available) {
+            self$results$ml_performance_metrics$setContent(pkg_check$message)
+            # Fallback to Random Forest if available, or Cox regression
+            if (requireNamespace("randomForestSRC", quietly = TRUE)) {
+              private$.performRandomForest(cleaneddata)
+            } else {
+              private$.performCoxRegression(cleaneddata)
+            }
+            return()
+          }
+
+          # Prepare data for SVM
+          x <- model.matrix(formula_vars$formula, data = cleaneddata)[,-1]
+          y <- survival::Surv(cleaneddata$mytime, cleaneddata$myoutcome)
+
+          # Fit SVM survival model
+          svm_model <- survivalsvm::survivalsvm(
+            formula = formula_vars$formula,
+            data = cleaneddata,
+            gamma.mu = 1
+          )
+
+          # Performance metrics
+          metrics_html <- paste0(
+            "<h4>", .("Support Vector Survival Model Results"), "</h4>",
+            "<p><strong>", .("Model Type:"), "</strong> ", .("Support Vector Machines for Survival Analysis"), "</p>",
+            "<p><strong>", .("Variables Used:"), "</strong> ", length(formula_vars$variables), "</p>",
+            "<p><strong>", .("Kernel:"), "</strong> ", .("RBF (Radial Basis Function)"), "</p>",
+            "<p><strong>", .("Note:"), "</strong> ", .("SVM survival analysis provides non-parametric survival predictions"), "</p>"
+          )
+
+          self$results$ml_performance_metrics$setContent(metrics_html)
+
+        }, error = function(e) {
+          error_msg <- paste(.("SVM Survival error:"), e$message, .("Note: This method requires the 'survivalsvm' package."))
+          self$results$ml_performance_metrics$setContent(error_msg)
+        })
+      }
+
+      ,
+.performDeepSurvival = function(cleaneddata) {
+        # Deep Learning Survival analysis
+        tryCatch({
+          # Note: Deep survival is complex and would typically require Python integration
+          # For now, provide informative message about implementation status
+
+          metrics_html <- paste0(
+            "<h4>", .("Deep Survival Learning"), "</h4>",
+            "<p><strong>", .("Status:"), "</strong> ", .("Deep survival methods are computationally intensive and typically require specialized Python packages (DeepSurv, DeepHit)."), "</p>",
+            "<p><strong>", .("Alternative:"), "</strong> ", .("Consider using Random Survival Forest or XGBoost for advanced non-linear survival modeling."), "</p>",
+            "<p><strong>", .("Implementation Note:"), "</strong> ", .("Full deep learning integration would require:"), "</p>",
+            "<ul>",
+              "<li>", .("Python environment with TensorFlow/PyTorch"), "</li>",
+              "<li>", .("Deep survival libraries (pycox, scikit-survival)"), "</li>",
+              "<li>", .("GPU acceleration for optimal performance"), "</li>",
+            "</ul>",
+            "<p><strong>", .("Recommendation:"), "</strong> ", .("Use ensemble methods or XGBoost for similar performance with easier implementation."), "</p>"
+          )
+
+          self$results$ml_performance_metrics$setContent(metrics_html)
+
+        }, error = function(e) {
+          error_msg <- glue::glue("Deep Survival: {e$message}")
+          self$results$ml_performance_metrics$setContent(error_msg)
+        })
+      }
+
+      ,
+.performCrossValidation = function(cleaneddata) {
+        # Cross-validation for ML methods
+        tryCatch({
+          formula_vars <- private$.prepareMLFormula(cleaneddata)
+          n_folds <- self$options$ml_cv_folds
+
+          # Create folds
+          folds <- sample(rep(1:n_folds, length.out = nrow(cleaneddata)))
+          cv_results <- numeric(n_folds)
+
+          for (i in 1:n_folds) {
+            train_data <- cleaneddata[folds != i, ]
+            test_data <- cleaneddata[folds == i, ]
+
+            # Simple C-index calculation for cross-validation
+            if (self$options$ml_method == "rsf" && requireNamespace("randomForestSRC", quietly = TRUE)) {
+              model <- randomForestSRC::rfsrc(
+                formula = formula_vars$formula,
+                data = train_data,
+                ntree = 500
+              )
+              pred <- predict(model, newdata = test_data)
+              cv_results[i] <- 1 - pred$err.rate[length(pred$err.rate)]
+            }
+          }
+
+          mean_cv_score <- mean(cv_results, na.rm = TRUE)
+          sd_cv_score <- sd(cv_results, na.rm = TRUE)
+
+          cv_html <- glue::glue("
+            <h4>Cross-Validation Results</h4>
+            <p><strong>Method:</strong> {n_folds}-fold cross-validation</p>
+            <p><strong>Mean CV Score:</strong> {round(mean_cv_score, 4)} ± {round(sd_cv_score, 4)}</p>
+            <p><strong>Individual Fold Scores:</strong> {paste(round(cv_results, 3), collapse = ', ')}</p>
+          ")
+
+          self$results$ml_cross_validation_summary$setContent(cv_html)
+
+        }, error = function(e) {
+          error_msg <- glue::glue(.("Cross-validation error: {e$message}"))
+          self$results$ml_cross_validation_summary$setContent(error_msg)
+        })
+      }
+
+      ,
+.calculateSHAPValues = function(cleaneddata) {
+        # SHAP values for interpretability
+        tryCatch({
+          shap_html <- paste0("
+            <h4>", .("SHAP Values (SHapley Additive exPlanations)"), "</h4>
+            <p><strong>", .("Status:"), "</strong> ", .("SHAP values provide model-agnostic interpretability by showing how each feature contributes to individual predictions."), "</p>
+            <p><strong>", .("Implementation Note:"), "</strong> ", .("Full SHAP implementation requires specialized packages and significant computation time."), "</p>
+            <p><strong>", .("Alternatives available in this module:"), "</strong></p>
+            <ul>
+              <li>", .("Variable importance scores (available in Random Forest and XGBoost methods)"), "</li>
+              <li>", .("Hazard ratios from Cox regression (traditional interpretability)"), "</li>
+              <li>", .("Decision tree visualization (rule-based interpretability)"), "</li>
+            </ul>
+            <p><strong>", .("For advanced SHAP analysis:"), "</strong> ", .("Consider using Python packages like 'shap' with 'scikit-survival' for comprehensive survival SHAP values."), "</p>
+          ")
+
+          # Note: Full SHAP implementation would require significant development
+          # This provides informative guidance instead
+          self$results$ml_performance_metrics$setContent(shap_html)
+
+        }, error = function(e) {
+          error_msg <- glue::glue(.("SHAP calculation error: {e$message}"))
+          self$results$ml_performance_metrics$setContent(error_msg)
+        })
+      }
+
+      ,
+.calculateMLPerformanceMetrics = function(cleaneddata) {
+        # Comprehensive performance metrics
+        tryCatch({
+          formula_vars <- private$.prepareMLFormula(cleaneddata)
+
+          performance_html <- paste0("
+            <h4>", .("Machine Learning Performance Metrics"), "</h4>
+            <p><strong>", .("Available Metrics:"), "</strong></p>
+            <table style='border-collapse: collapse; width: 100%;'>
+              <tr style='border-bottom: 1px solid #ddd;'>
+                <th style='text-align: left; padding: 8px;'>", .("Metric"), "</th>
+                <th style='text-align: left; padding: 8px;'>", .("Description"), "</th>
+                <th style='text-align: left; padding: 8px;'>", .("Status"), "</th>
+              </tr>
+              <tr style='border-bottom: 1px solid #ddd;'>
+                <td style='padding: 8px;'>", .("Concordance Index (C-index)"), "</td>
+                <td style='padding: 8px;'>", .("Discrimination ability"), "</td>
+                <td style='padding: 8px;'>", .("Available in model outputs"), "</td>
+              </tr>
+              <tr style='border-bottom: 1px solid #ddd;'>
+                <td style='padding: 8px;'>", .("Integrated Brier Score (IBS)"), "</td>
+                <td style='padding: 8px;'>", .("Time-dependent prediction error"), "</td>
+                <td style='padding: 8px;'>", .("Requires pec package"), "</td>
+              </tr>
+              <tr style='border-bottom: 1px solid #ddd;'>
+                <td style='padding: 8px;'>", .("Time-dependent AUC"), "</td>
+                <td style='padding: 8px;'>", .("Dynamic discrimination"), "</td>
+                <td style='padding: 8px;'>", .("Available via survivalROC"), "</td>
+              </tr>
+              <tr>
+                <td style='padding: 8px;'>", .("Calibration Plot"), "</td>
+                <td style='padding: 8px;'>", .("Prediction reliability"), "</td>
+                <td style='padding: 8px;'>", .("Requires specialized implementation"), "</td>
+              </tr>
+            </table>
+            <p><strong>", .("Note:"), "</strong> ", .("Detailed performance metrics require additional computational resources and specialized packages. Use the cross-validation option for robust performance assessment."), "</p>
+          ")
+
+          self$results$ml_performance_metrics$setContent(performance_html)
+
+        }, error = function(e) {
+          error_msg <- glue::glue(.("Performance metrics error: {e$message}"))
+          self$results$ml_performance_metrics$setContent(error_msg)
+        })
+      }
+
+      ,
+.prepareMLFormula = function(cleaneddata) {
         # Prepare formula and variables for ML methods
         myexplanatory_labelled <- private$.getData()$myexplanatory_labelled
         mycontexpl_labelled <- private$.getData()$mycontexpl_labelled
-        
+
         # Combine all explanatory variables
         all_vars <- c(myexplanatory_labelled, mycontexpl_labelled)
-        
+
         # Create survival formula
         formula_str <- paste("Surv(mytime, myoutcome) ~", paste(all_vars, collapse = " + "))
         formula_obj <- as.formula(formula_str)
-        
+
         return(list(
           formula = formula_obj,
           variables = all_vars
         ))
       }
 
-      ,.populateVariableImportance = function(var_imp) {
+      ,
+.populateVariableImportance = function(var_imp) {
         # Populate variable importance table
         if (length(var_imp) > 0) {
           var_imp_sorted <- sort(var_imp, decreasing = TRUE)
-          
+
           table <- self$results$ml_variable_importance
           for (i in seq_along(var_imp_sorted)) {
             table$addRow(rowKey = i, values = list(
@@ -5432,16 +6105,17 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         }
       }
 
-      ,.populatePredictionIntervals = function(predictions, cleaneddata) {
+      ,
+.populatePredictionIntervals = function(predictions, cleaneddata) {
         # Populate prediction intervals table (simplified)
         if (!is.null(predictions)) {
           n_show <- min(10, nrow(cleaneddata))  # Show first 10 observations
-          
+
           table <- self$results$ml_prediction_intervals
           for (i in 1:n_show) {
             # Simplified prediction intervals (would need proper implementation)
             pred_value <- if (is.list(predictions)) predictions$predicted[i] else predictions[i]
-            
+
             table$addRow(rowKey = i, values = list(
               observation = i,
               prediction = round(pred_value, 4),
@@ -5460,59 +6134,59 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 # Extract the results table and metrics
                 cox_table <- tMultivariable[[1]]
                 metrics <- tMultivariable[[2]]
-                
-                # Generate summary components  
+
+                # Generate summary components
                 sig_data <- private$.generateSignificantPredictorsSummary(cox_table)
                 model_performance <- private$.generateModelPerformanceSummary(metrics)
                 clinical_interpretation <- private$.generateClinicalInterpretation(cox_table, outcome_var)
-                
+
                 # Generate main summary text
                 summary_html <- paste0(
                     '<div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
-                    '<h4 style="color: #2c5282; margin-top: 0;">📊 Multivariable Cox Regression Summary</h4>',
-                    '<p style="margin: 10px 0;"><strong>Analysis Overview:</strong> Multivariable Cox proportional hazards regression was performed to examine the relationship between ',
-                    length(explanatory_vars), ' explanatory variable(s) and the time-to-event outcome <em>', outcome_var, '</em>.</p>'
+                    '<h4 style="color: #2c5282; margin-top: 0;">📊 ', .("Multivariable Cox Regression Summary"), '</h4>',
+                    '<p style="margin: 10px 0;"><strong>', .("Analysis Overview:"), '</strong> ', .("Multivariable Cox proportional hazards regression was performed to examine the relationship between"), ' ',
+                    length(explanatory_vars), ' ', .("explanatory variable(s) and the time-to-event outcome"), ' <em>', outcome_var, '</em>.</p>'
                 )
-                
+
                 # Add findings summary
                 if (sig_data$significant_count > 0) {
                     summary_html <- paste0(summary_html,
-                        '<p style="margin: 10px 0;"><strong>Key Findings:</strong></p>',
+                        '<p style="margin: 10px 0;"><strong>', .("Key Findings:"), '</strong></p>',
                         '<ul style="margin: 5px 0; padding-left: 20px;">',
-                        '<li>', sig_data$significant_count, ' out of ', sig_data$total_predictors, ' predictor(s) showed statistically significant associations (p < 0.05)</li>'
+                        '<li>', sig_data$significant_count, ' ', .("out of"), ' ', sig_data$total_predictors, ' ', .("predictor(s) showed statistically significant associations (p < 0.05)"), '</li>'
                     )
-                    
+
                     if (!is.null(sig_data$strongest_predictor)) {
                         summary_html <- paste0(summary_html,
-                            '<li>Strongest association: <em>', sig_data$strongest_predictor, '</em> with ', sig_data$strongest_effect, ' (HR = ', round(sig_data$strongest_hr, 2), ')</li>'
+                            '<li>', .("Strongest association:"), ' <em>', sig_data$strongest_predictor, '</em> ', .("with"), ' ', sig_data$strongest_effect, ' (HR = ', round(sig_data$strongest_hr, 2), ')</li>'
                         )
                     }
-                    
+
                     summary_html <- paste0(summary_html, '</ul>')
                 } else if (sig_data$total_predictors > 0) {
                     summary_html <- paste0(summary_html,
-                        '<p style="margin: 10px 0;"><strong>Key Findings:</strong> None of the ', sig_data$total_predictors, 
-                        ' predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05).</p>'
+                        '<p style="margin: 10px 0;"><strong>', .("Key Findings:"), '</strong> ', .("None of the"), ' ', sig_data$total_predictors,
+                        ' ', .("predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05)."), '</p>'
                     )
                 } else {
                     summary_html <- paste0(summary_html,
-                        '<p style="margin: 10px 0;"><strong>Note:</strong> Unable to extract predictor information from the analysis.</p>'
+                        '<p style="margin: 10px 0;"><strong>', .("Note:"), '</strong> ', .("Unable to extract predictor information from the analysis."), '</p>'
                     )
                 }
-                
+
                 # Add model performance
                 summary_html <- paste0(summary_html, model_performance)
-                
+
                 # Add clinical interpretation
                 summary_html <- paste0(summary_html, clinical_interpretation, '</div>')
-                
+
                 return(summary_html)
-                
+
             }, error = function(e) {
-                return("<p>Summary generation encountered an error.</p>")
+                return(paste0("<p>", .("Summary generation encountered an error."), "</p>"))
             })
         }
-        
+
         # Helper Functions for Summary Generation ----
         ,
         .generateSignificantPredictorsSummary = function(cox_table) {
@@ -5523,7 +6197,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 strongest_predictor <- NULL
                 strongest_hr <- 0
                 strongest_effect <- ""
-                
+
                 # Parse the table to identify significant predictors
                 if (!is.null(cox_table) && nrow(cox_table) > 0) {
                     for (i in 1:nrow(cox_table)) {
@@ -5546,7 +6220,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                                                 if (effect_size > abs(log(strongest_hr + 0.001))) {
                                                     strongest_hr <- hr_numeric
                                                     strongest_predictor <- cox_table[i, 1]
-                                                    strongest_effect <- if (hr_numeric > 1) "increased hazard" else "decreased hazard"
+                                                    strongest_effect <- if (hr_numeric > 1) .("increased hazard") else .("decreased hazard")
                                                 }
                                             }
                                         }
@@ -5556,7 +6230,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                         }
                     }
                 }
-                
+
                 # Return the significant predictors data
                 return(list(
                     significant_count = significant_count,
@@ -5575,37 +6249,191 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 ))
             })
         }
-        
+
         ,
         .generateModelPerformanceSummary = function(metrics) {
             if (!is.null(metrics)) {
-                return(paste0('<p style="margin: 10px 0;"><strong>Model Performance:</strong> ', metrics, '</p>'))
+                return(paste0('<p style="margin: 10px 0;"><strong>', .("Model Performance:"), '</strong> ', metrics, '</p>'))
             }
             return("")
         }
-        
+
         ,
         .generateClinicalInterpretation = function(cox_table, outcome_var) {
             # Generate interpretation guide
             summary_html <- paste0(
                 '<div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-top: 10px;">',
-                '<strong>💡 Interpretation Guide:</strong>',
+                '<strong>💡 ', .("Interpretation Guide:"), '</strong>',
                 '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
-                '<li>HR > 1: Factor increases the hazard (risk) of the event</li>',
-                '<li>HR < 1: Factor decreases the hazard (risk) of the event</li>',
-                '<li>HR = 1: No association between factor and event timing</li>',
-                '<li>95% CI not crossing 1.0 indicates statistical significance</li>',
+                '<li>', .("HR > 1: Factor increases the hazard (risk) of the event"), '</li>',
+                '<li>', .("HR < 1: Factor decreases the hazard (risk) of the event"), '</li>',
+                '<li>', .("HR = 1: No association between factor and event timing"), '</li>',
+                '<li>', .("95% CI not crossing 1.0 indicates statistical significance"), '</li>',
                 '</ul>',
                 '</div>'
             )
-            
+
             return(summary_html)
         }
 
+        ,
+        .calculate_nomogram = function() {
+            # Nomogram calculation function
+            tryCatch({
+                if (!requireNamespace("rms", quietly = TRUE)) {
+                    self$results$nomogramSummary$setContent(paste0("
+                        <p><strong>", .("Nomogram Analysis"), "</strong></p>
+                        <p>", .("The 'rms' package is required for nomogram generation but is not available."), "</p>
+                        <p>", .("Please install it using:"), " <code>install.packages('rms')</code></p>
+                        <p>", .("Nomograms provide visual tools for calculating individual risk predictions from multivariable models."), "</p>
+                    "))
+                    return()
+                }
 
+                # Get cleaned data
+                cleaneddata <- private$.cleandata()
+                mydata <- cleaneddata$cleanData
 
+                # Get Cox model results
+                cox_results <- private$.performCoxRegression(cleaneddata)
 
+                if (!is.null(cox_results)) {
+                    nomogram_html <- paste0("
+                        <h4>", .("Nomogram for Risk Prediction"), "</h4>
+                        <p><strong>", .("Status:"), "</strong> ", .("Nomogram generation requires specialized implementation with the 'rms' package."), "</p>
+                        <p><strong>", .("Purpose:"), "</strong> ", .("Nomograms provide a visual calculator for individual risk prediction based on the multivariable Cox model."), "</p>
+                        <p><strong>", .("Implementation Note:"), "</strong> ", .("Full nomogram generation requires:"), "</p>
+                        <ul>
+                            <li>", .("Model fitting using rms::cph() instead of survival::coxph()"), "</li>
+                            <li>", .("Calibration and validation procedures"), "</li>
+                            <li>", .("Time-specific risk calculations"), "</li>
+                            <li>", .("Graphical nomogram construction"), "</li>
+                        </ul>
+                        <p><strong>", .("Alternative:"), "</strong> ", .("Use the risk score functionality for individual risk stratification."), "</p>
+                    ")
 
+                    self$results$nomogramSummary$setContent(nomogram_html)
+                } else {
+                    self$results$nomogramSummary$setContent(.("Unable to generate nomogram: Cox model results not available."))
+                }
 
+            }, error = function(e) {
+                error_msg <- paste(.("Nomogram calculation error:"), e$message)
+                self$results$nomogramSummary$setContent(error_msg)
+            })
+        }
+
+        ,
+        .calculate_survivaldecisiontree = function() {
+            # Decision tree calculation function
+            tryCatch({
+                # Get cleaned data
+                cleaneddata <- private$.cleandata()
+
+                # Use the existing decision tree analysis
+                tree_results <- private$.survivalTree(list(cleanData = cleaneddata$cleanData))
+
+                if (!is.null(tree_results)) {
+                    # Tree analysis completed successfully
+                    # Results are populated in .survivalTree function
+                } else {
+                    self$results$tree_summary$setContent(.("Decision tree analysis could not be completed."))
+                }
+
+            }, error = function(e) {
+                error_msg <- paste(.("Decision tree calculation error:"), e$message)
+                self$results$tree_summary$setContent(error_msg)
+            })
+        }
+
+        ,
+        .generateAndDisplayClinicalSummary = function(cleaneddata) {
+          # Generate clinical interpretation summary for display
+          tryCatch({
+            # Get basic data information
+            mydata <- cleaneddata$cleanData
+            n_total <- nrow(mydata)
+            n_events <- sum(mydata$myoutcome, na.rm = TRUE)
+            n_vars <- length(c(cleaneddata$myexplanatory_labelled, cleaneddata$mycontexpl_labelled))
+
+            # Try to get Cox regression results for summary
+            cox_results <- NULL
+            tryCatch({
+              cox_model <- private$.performCoxRegression(cleaneddata)
+              if (!is.null(cox_model)) {
+                cox_summary <- summary(cox_model)
+                cox_results <- cox_summary$coefficients
+              }
+            }, error = function(e) {
+              # Silent error handling
+            })
+
+            # Generate clinical summary
+            clinical_summary <- .generateClinicalSummary(
+              results = cox_results,
+              analysis_type = "cox",
+              n_vars = n_vars,
+              n_events = n_events
+            )
+
+            # Format for display
+            summary_html <- paste0(
+              "<div style='background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 20px; border-radius: 8px; margin: 15px 0;'>",
+              "<h3 style='color: #0056b3; margin-top: 0; margin-bottom: 15px;'>📊 ", .("Clinical Summary"), "</h3>",
+              "<div style='background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #0056b3;'>",
+              "<p style='font-size: 16px; line-height: 1.6; margin: 0;'>", clinical_summary$summary, "</p>",
+              "</div>"
+            )
+
+            # Add study details
+            if (n_vars > 0) {
+              summary_html <- paste0(summary_html,
+                "<div style='margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;'>",
+                "<p style='margin: 5px 0; font-size: 14px;'><strong>", .("Study Details:"), "</strong></p>",
+                "<ul style='margin: 5px 0; padding-left: 20px; font-size: 14px;'>",
+                "<li>", .("Total patients:"), " ", n_total, "</li>",
+                "<li>", .("Events observed:"), " ", n_events, " (", round(n_events/n_total*100, 1), "%)</li>",
+                "<li>", .("Variables analyzed:"), " ", n_vars, "</li>",
+                "</ul>",
+                "</div>"
+              )
+            }
+
+            # Add recommendations if there are issues
+            if (n_events < 10) {
+              summary_html <- paste0(summary_html,
+                "<div style='margin-top: 15px; padding: 10px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;'>",
+                "<p style='margin: 0; color: #856404;'><strong>⚠️ ", .("Recommendation:"), "</strong> ",
+                .("With fewer than 10 events, results should be interpreted cautiously. Consider longer follow-up or pooled analysis."),
+                "</p>",
+                "</div>"
+              )
+            }
+
+            summary_html <- paste0(summary_html, "</div>")
+
+            # Display in a dedicated result area (prepend to existing text if possible)
+            if (!is.null(self$results$text)) {
+              current_content <- ""
+              tryCatch({
+                # Try to get existing content
+                current_content <- self$results$text$content
+                if (is.null(current_content)) current_content <- ""
+              }, error = function(e) {
+                current_content <- ""
+              })
+
+              # Prepend clinical summary
+              new_content <- paste0(summary_html, current_content)
+              self$results$text$setContent(new_content)
+            }
+
+          }, error = function(e) {
+            # Silent error handling - don't break analysis if summary fails
+            warning(paste("Clinical summary generation failed:", e$message))
+          })
+        }
+
+    )  # Close private list
 )
-  )
+

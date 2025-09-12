@@ -10,6 +10,11 @@ items:
       title: To Do
       type:  Html
 
+    - name:  clinicalWarnings
+      title: Clinical Assumptions and Warnings
+      type:  Html
+      visible: false
+
     # - name:  mydataview2
     #   title: mydataview2
     #   type:  Preformatted
@@ -35,7 +40,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -71,7 +76,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -91,7 +96,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -371,7 +376,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -425,7 +430,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -449,7 +454,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -470,7 +475,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -527,7 +532,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -549,7 +554,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -599,7 +604,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -623,7 +628,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -647,7 +652,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -671,7 +676,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -783,7 +788,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -807,7 +812,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -833,7 +838,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - contexpl
           - fudate
@@ -875,7 +880,7 @@ items:
           - contexpl
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - sc
           - endplot
@@ -921,7 +926,7 @@ items:
           - contexpl
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - sc
           - endplot
@@ -985,7 +990,7 @@ items:
           - contexpl
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - sc
           - endplot
@@ -1013,7 +1018,7 @@ items:
           - contexpl
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - sc
           - endplot
@@ -1041,7 +1046,7 @@ items:
           - contexpl
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - findcut
           - sc
           - endplot
@@ -1075,7 +1080,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint

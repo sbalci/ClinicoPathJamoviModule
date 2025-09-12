@@ -27,23 +27,28 @@ decisioncompare(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{gold}{.}
+\item{gold}{The gold standard reference variable representing true disease
+status.}
 
-\item{goldPositive}{.}
+\item{goldPositive}{The level indicating presence of disease in the gold
+standard variable.}
 
-\item{test1}{.}
+\item{test1}{The first diagnostic test variable being evaluated for
+performance.}
 
-\item{test1Positive}{.}
+\item{test1Positive}{The level representing a positive result for Test 1.}
 
-\item{test2}{.}
+\item{test2}{The second diagnostic test variable for comparison analysis.}
 
-\item{test2Positive}{.}
+\item{test2Positive}{The level representing a positive result for Test 2.}
 
-\item{test3}{.}
+\item{test3}{Optional third diagnostic test variable for extended
+comparison analysis.}
 
-\item{test3Positive}{.}
+\item{test3Positive}{The level representing a positive result for Test 3.}
 
-\item{pp}{.}
+\item{pp}{Enable custom prior probability (prevalence) for predictive value
+calculations.}
 
 \item{pprob}{Prior probability (disease prevalence in the community).
 Requires a value between 0.001 and 0.999, default 0.300.}
@@ -55,9 +60,10 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 
 \item{ci}{.}
 
-\item{plot}{.}
+\item{plot}{Generate comparison plot showing test performance metrics.}
 
-\item{radarplot}{.}
+\item{radarplot}{Generate radar plot for comprehensive test comparison
+visualization.}
 
 \item{statComp}{Perform statistical comparison between tests (McNemar's
 test and confidence intervals for differences).}
@@ -78,6 +84,8 @@ A results object containing:
 \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -94,7 +102,50 @@ standard. Includes statistical comparison using McNemar's test and
 confidence intervals for differences.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Basic comparison of two diagnostic tests
+library(ClinicoPath)
+data('histopathology')
+
+# Example 1: Compare imaging vs blood test performance
+result1 <- decisioncompare(
+    data = histopathology,
+    gold = "Golden Standart",
+    goldPositive = "1",
+    test1 = "New Test",
+    test1Positive = "1",
+    test2 = "Rater 1",
+    test2Positive = "1",
+    ci = TRUE,
+    plot = TRUE
+)
+
+# Example 2: Three-test comparison with statistical analysis
+result2 <- decisioncompare(
+    data = histopathology,
+    gold = "Golden Standart",
+    goldPositive = "1",
+    test1 = "New Test",
+    test1Positive = "1",
+    test2 = "Rater 1",
+    test2Positive = "1",
+    test3 = "Rater 2",
+    test3Positive = "1",
+    statComp = TRUE,
+    radarplot = TRUE
+)
+
+# Example 3: Using custom prevalence for clinical setting
+result3 <- decisioncompare(
+    data = histopathology,
+    gold = "Golden Standart",
+    goldPositive = "1",
+    test1 = "New Test",
+    test1Positive = "1",
+    test2 = "Rater 1",
+    test2Positive = "1",
+    pp = TRUE,
+    pprob = 0.15,  # 15\\% prevalence in screening population
+    od = TRUE      # Show original frequency tables
+)
+
 }

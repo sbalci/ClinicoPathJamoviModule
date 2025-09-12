@@ -54,8 +54,11 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: upsetType
+      - type: Label
+        label: "Visualization Options"
+        children:
+          - type: ComboBox
+            name: upsetType
   - type: LayoutBox
     margin: large
     children:
@@ -72,3 +75,23 @@ children:
     children:
       - type: CheckBox
         name: showAnnotations
+
+#   - type: LayoutBox
+#     margin: large
+#     children:
+#       - type: CheckBox
+#         name: showAnnotations
+
+
+
+# deneme
+...
+
+# deneme
+
+#   - type: LayoutBox
+#     margin: large
+#     children:
+#       - type: CheckBox
+#         name: showAnnotations
+

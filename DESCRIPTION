@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.31.62
-Date: 2025-09-09
+Version: 0.0.31.63
+Date: 2025-09-12
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -292,7 +292,7 @@ Remotes:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests:
     quarto,
     rmarkdown,

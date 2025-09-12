@@ -33,132 +33,56 @@
 #' @importFrom purrr partial
 #' @import magrittr
 
-# Helper function for intelligent test selection with clinical rationale
-.selectAppropriateTest <- function(contingency_table, test_preference = "auto", min_expected = 5) {
-    # Calculate expected frequencies
-    tryCatch({
-        chi_test <- chisq.test(contingency_table)
-        expected_min <- min(chi_test$expected)
-        
-        if (test_preference == "auto") {
-            if (expected_min < min_expected) {
-                return(list(
-                    test = "fisher", 
-                    reason = .("Expected counts < {min}. Fisher's exact test recommended.", min = min_expected),
-                    warning = TRUE,
-                    expected_min = expected_min
-                ))
-            } else {
-                return(list(
-                    test = "chisq", 
-                    reason = .("All expected counts ≥ {min}. Chi-square test appropriate.", min = min_expected),
-                    warning = FALSE,
-                    expected_min = expected_min
-                ))
-            }
-        }
-        
-        # User specified test - check if appropriate
-        if (test_preference == "chisq" && expected_min < min_expected) {
-            return(list(
-                test = test_preference,
-                reason = .("Chi-square test as requested (Note: Expected counts < {min})", min = min_expected),
-                warning = TRUE,
-                expected_min = expected_min
-            ))
-        }
-        
-        return(list(
-            test = test_preference, 
-            reason = .("Test selected as requested"),
-            warning = FALSE,
-            expected_min = expected_min
-        ))
-    }, error = function(e) {
-        return(list(
-            test = "fisher", 
-            reason = .("Cannot calculate expected frequencies. Using Fisher's exact test."),
-            warning = TRUE,
-            expected_min = NA
-        ))
-    })
+# Helper function to escape variable names with special characters for formulas
+.escapeVariableNames <- function(var_names) {
+    # Check if variable names contain special characters that need escaping
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    return(var_names)
 }
 
-# Helper function to validate sample size and data quality
-.validateAnalysisAssumptions <- function(mydata, myvars, mygroup) {
-    issues <- list()
-    warnings <- list()
-    
-    # Check overall sample size
-    n_total <- nrow(mydata)
-    if (n_total < 20) {
-        issues <- append(issues, .("Very small sample size (n = {n}). Results may be unreliable.", n = n_total))
+# Helper function to get display name from mapping
+.getDisplayName <- function(cleaned_name, name_mapping) {
+    # Get original display name from mapping
+    original_name <- name_mapping[[cleaned_name]]
+    if (is.null(original_name)) {
+        return(cleaned_name)  # Fallback to cleaned name
     }
-    
-    # Check group sizes
-    if (!is.null(mygroup) && mygroup %in% names(mydata)) {
-        group_sizes <- table(mydata[[mygroup]])
-        min_group_size <- min(group_sizes)
-        
-        if (min_group_size < 5) {
-            warnings <- append(warnings, .("Small group detected (n = {min}). Consider combining categories or using exact tests.", min = min_group_size))
-        }
-        
-        # Check for empty cells in cross-tabulations
-        for (var in myvars) {
-            if (var %in% names(mydata)) {
-                cont_table <- table(mydata[[var]], mydata[[mygroup]])
-                if (any(cont_table == 0)) {
-                    warnings <- append(warnings, .("Empty cells detected in {var} × {group} table. Results may be unstable.", var = var, group = mygroup))
-                }
-            }
-        }
-    }
-    
-    # Check for excessive missing data
-    for (var in c(myvars, mygroup)) {
-        if (var %in% names(mydata)) {
-            missing_pct <- mean(is.na(mydata[[var]])) * 100
-            if (missing_pct > 20) {
-                warnings <- append(warnings, .("High missing data in {var} ({pct}%). Consider imputation or sensitivity analysis.", var = var, pct = round(missing_pct, 1)))
-            }
-        }
-    }
-    
-    return(list(
-        critical_issues = issues,
-        warnings = warnings,
-        sample_size = n_total
-    ))
+    return(original_name)
 }
 
-# Helper function to generate clinical interpretation
-.generateClinicalSummary <- function(results, myvars, mygroup, test_type = "crosstable") {
-    if (is.null(results) || length(results) == 0) {
-        return(.("No results available for interpretation."))
+# Helper function to restore original names in table outputs
+.restoreOriginalNamesInTable <- function(table_data, name_mapping) {
+    if (is.null(table_data) || is.null(name_mapping)) {
+        return(table_data)
     }
     
-    # Count significant associations (assuming p-value column exists)
-    significant_count <- 0
-    total_tests <- length(myvars)
-    
-    if (test_type == "crosstable") {
-        summary <- .("Cross-table analysis comparing {n_vars} variable(s) across {group} groups.", 
-                    n_vars = total_tests, group = mygroup)
+    # Handle different table formats
+    if (is.data.frame(table_data)) {
+        # Check for common variable name columns and restore them
+        var_columns <- c("variable", "Variable", "term", "Term", "characteristic")
         
-        if (significant_count > 0) {
-            summary <- paste0(summary, " ", 
-                .("Found {n_sig} significant association(s) (p < 0.05).", n_sig = significant_count))
-        } else {
-            summary <- paste0(summary, " ", 
-                .("No significant associations detected (all p ≥ 0.05)."))
+        for (col in var_columns) {
+            if (col %in% names(table_data)) {
+                table_data[[col]] <- ifelse(
+                    table_data[[col]] %in% names(name_mapping),
+                    name_mapping[table_data[[col]]],
+                    table_data[[col]]
+                )
+            }
         }
         
-        summary <- paste0(summary, " ", 
-            .("Review individual test results below for detailed findings."))
+        # Also check row names
+        if (!is.null(rownames(table_data))) {
+            rownames(table_data) <- ifelse(
+                rownames(table_data) %in% names(name_mapping),
+                name_mapping[rownames(table_data)],
+                rownames(table_data)
+            )
+        }
     }
     
-    return(summary)
+    return(table_data)
 }
 
 crosstableClass <- if (requireNamespace('jmvcore'))
@@ -167,25 +91,45 @@ crosstableClass <- if (requireNamespace('jmvcore'))
         inherit = crosstableBase,
         private = list(
             # .labelData ----
-            # Prepare data by cleaning names and setting original labels.
+            # Prepare data by cleaning names and setting original labels with enhanced mapping.
             .labelData = function() {
                 mydata <- self$data
                 original_names <- names(mydata)
-                # Save original names as labels.
-                labels <- setNames(original_names, original_names)
-                # Clean variable names.
+                
+                # Create bidirectional mapping before cleaning
+                display_labels <- setNames(original_names, original_names)
+                
+                # Clean variable names for safe processing
                 mydata <- mydata %>% janitor::clean_names()
-                # Create a mapping of cleaned names to original names.
-                corrected_labels <- setNames(original_names, names(mydata))
-                # Apply the labels.
+                cleaned_names <- names(mydata)
+                
+                # Create bidirectional name mappings
+                original_to_cleaned <- setNames(cleaned_names, original_names)
+                cleaned_to_original <- setNames(original_names, cleaned_names)
+                
+                # Apply labels to cleaned data (ensures gtsummary/finalfit display properly)
+                corrected_labels <- setNames(original_names, cleaned_names)
                 mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
-                # Retrieve all labels.
+                
+                # Retrieve all labels for matching user selections
                 all_labels <- labelled::var_label(mydata)
-                # Match the user-specified variables and grouping variable.
+                
+                # Match the user-specified variables to cleaned names
                 myvars <- self$options$vars
-                myvars <- names(all_labels)[match(myvars, all_labels)]
-                mygroup <- names(all_labels)[all_labels == self$options$group]
-                return(list("mydata" = mydata, "myvars" = myvars, "mygroup" = mygroup))
+                myvars_cleaned <- names(all_labels)[match(myvars, all_labels)]
+                
+                # Match the grouping variable to cleaned name
+                mygroup <- self$options$group
+                mygroup_cleaned <- names(all_labels)[all_labels == mygroup]
+                
+                return(list(
+                    "mydata" = mydata, 
+                    "myvars" = myvars_cleaned, 
+                    "mygroup" = mygroup_cleaned,
+                    "original_names_mapping" = cleaned_to_original,  # For display restoration
+                    "cleaned_names_mapping" = original_to_cleaned,   # For processing
+                    "all_labels" = all_labels  # For reference
+                ))
             },
 
 
@@ -193,24 +137,22 @@ crosstableClass <- if (requireNamespace('jmvcore'))
             .showTestInformation = function() {
                 test_info <- paste0(
                     "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
-                    "<h4 style='margin-top: 0; color: #1976D2;'>Q-values and Multiple Testing Correction</h4>",
+                    ."<h4 style='margin-top: 0; color: #1976D2;'>Q-values and Multiple Testing Correction</h4>",
                     
-                    "<p><strong>What are Q-values?</strong><br>",
-                    "Q-values represent the False Discovery Rate (FDR) - the expected proportion of false positives among rejected hypotheses when testing multiple variables simultaneously.</p>",
+                    ."<p><strong>What are Q-values?</strong><br>Q-values represent the False Discovery Rate (FDR) - the expected proportion of false positives among rejected hypotheses when testing multiple variables simultaneously.</p>",
                     
-                    "<p><strong>Why use Q-values in this table?</strong><br>",
-                    "When comparing multiple variables across groups (as in this cross-table), the chance of finding at least one false positive increases. Q-values control this family-wise error rate.</p>",
+                    ."<p><strong>Why use Q-values in this table?</strong><br>When comparing multiple variables across groups (as in this cross-table), the chance of finding at least one false positive increases. Q-values control this family-wise error rate.</p>",
                     
-                    "<p><strong>Interpretation Guidelines:</strong></p>",
+                    ."<p><strong>Interpretation Guidelines:</strong></p>",
                     "<ul>",
-                    "<li><strong>Q < 0.05:</strong> Strong evidence against null hypothesis (5% FDR)</li>",
-                    "<li><strong>Q < 0.10:</strong> Moderate evidence (10% FDR) - often acceptable in exploratory research</li>",
-                    "<li><strong>Q < 0.20:</strong> Suggestive evidence - warrants further investigation</li>",
+                    ."<li><strong>Q < 0.05:</strong> Strong evidence against null hypothesis (5% FDR)</li>",
+                    ."<li><strong>Q < 0.10:</strong> Moderate evidence (10% FDR) - often acceptable in exploratory research</li>",
+                    ."<li><strong>Q < 0.20:</strong> Suggestive evidence - warrants further investigation</li>",
                     "</ul>",
                     
-                    "<p><strong>Method:</strong> Benjamini-Hochberg FDR correction applied to p-values from gtsummary's automatic test selection (chi-square/Fisher for categorical, t-test/ANOVA for continuous).</p>",
+                    ."<p><strong>Method:</strong> Benjamini-Hochberg FDR correction applied to p-values from gtsummary's automatic test selection (chi-square/Fisher for categorical, t-test/ANOVA for continuous).</p>",
                     
-                    "<p><em>💡 Focus on q-values when interpreting results from tables with multiple comparisons to reduce false discoveries.</em></p>",
+                    ."<p><em>💡 Focus on q-values when interpreting results from tables with multiple comparisons to reduce false discoveries.</em></p>",
                     "</div>"
                 )
                 
@@ -254,39 +196,38 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (nrow(self$data) == 0)
                     stop(.("The dataset contains no complete rows. Please check your data."))
                 
-                # Performance safeguards for large datasets
-                n_rows <- nrow(self$data)
-                n_vars <- length(self$options$vars)
-                n_combinations <- n_vars * length(unique(self$data[[self$options$group]]))
-                
-                if (n_rows > 50000) {
-                    warning(paste(.("Large dataset detected:"), n_rows, .("rows. Analysis may take longer.")))
+                # Validate parameter bounds
+                if (self$options$confidence_level < 0.80 || self$options$confidence_level > 0.99) {
+                    stop(.("Confidence level must be between 0.80 and 0.99"))
                 }
                 
-                if (n_combinations > 100) {
-                    warning(paste(.("Large number of variable combinations:"), n_combinations, .("Consider reducing variables.")))
+                if (self$options$monte_carlo_replicates < 1000 || self$options$monte_carlo_replicates > 100000) {
+                    stop(.("Monte Carlo replicates must be between 1,000 and 100,000"))
                 }
 
-                # Read and label data.
+                # Read and label data with enhanced mapping.
                 cleaneddata <- private$.labelData()
                 mydata <- cleaneddata$mydata
                 myvars <- cleaneddata$myvars
                 mygroup <- cleaneddata$mygroup
+                original_names_mapping <- cleaneddata$original_names_mapping
+                cleaned_names_mapping <- cleaneddata$cleaned_names_mapping
 
-                # Build formula using the cleaned variables.
-                formula <- jmvcore::constructFormula(terms = myvars, dep = mygroup)
+                # Build formula using escaped variable names for safety
+                escaped_myvars <- .escapeVariableNames(myvars)
+                escaped_mygroup <- .escapeVariableNames(mygroup)
+                formula <- jmvcore::constructFormula(terms = escaped_myvars, dep = escaped_mygroup)
                 formula <- as.formula(formula)
 
                 # Exclude missing data if requested.
                 if (self$options$excl)
                     mydata <- jmvcore::naOmit(mydata)
-                
-                # Validate analysis assumptions and data quality
-                validation_results <- private$.validateAnalysisAssumptions(mydata, myvars, mygroup)
-                if (length(validation_results$warnings) > 0) {
-                    warning_text <- paste("<strong>Data Quality Warnings:</strong><br>",
-                                        paste(validation_results$warnings, collapse = "<br>"))
-                    self$results$assumptions$setContent(warning_text)
+
+                # Set subtitle with original grouping variable name
+                if (!is.null(mygroup) && length(mygroup) > 0) {
+                    display_group_name <- .getDisplayName(mygroup, original_names_mapping)
+                    subtitle_text <- ."Cross Table Analysis - Grouped by: {group}", list(group = display_group_name)
+                    self$results$subtitle$setContent(subtitle_text)
                 }
 
                 # Generate table based on selected style.
@@ -403,34 +344,32 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Add q-value explanation
                 qvalue_explanation <- paste0(
                     "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
-                    "<h4 style='margin-top: 0;'>Understanding Q-values (False Discovery Rate)</h4>",
-                    "<p><strong>What is a q-value?</strong><br>",
-                    "The q-value is the False Discovery Rate (FDR) adjusted p-value. It estimates the proportion of false positives ",
-                    "among all significant results when conducting multiple comparisons.</p>",
+                    ."<h4 style='margin-top: 0;'>Understanding Q-values (False Discovery Rate)</h4>",
+                    ."<p><strong>What is a q-value?</strong><br>The q-value is the False Discovery Rate (FDR) adjusted p-value. It estimates the proportion of false positives among all significant results when conducting multiple comparisons.</p>",
                     
-                    "<p><strong>How to interpret:</strong></p>",
+                    ."<p><strong>How to interpret:</strong></p>",
                     "<ul>",
-                    "<li>A q-value of 0.05 means that 5% of significant results are expected to be false positives</li>",
-                    "<li>Q-values are typically larger than p-values</li>",
-                    "<li>Use q < 0.05 (or q < 0.10) as significance threshold for multiple testing</li>",
+                    ."<li>A q-value of 0.05 means that 5% of significant results are expected to be false positives</li>",
+                    ."<li>Q-values are typically larger than p-values</li>",
+                    ."<li>Use q < 0.05 (or q < 0.10) as significance threshold for multiple testing</li>",
                     "</ul>",
                     
-                    "<p><strong>When to use q-values:</strong></p>",
+                    ."<p><strong>When to use q-values:</strong></p>",
                     "<ul>",
-                    "<li>✅ When testing multiple variables simultaneously (like in this table)</li>",
-                    "<li>✅ In exploratory analyses with many comparisons</li>",
-                    "<li>✅ In genomic/proteomic studies with thousands of tests</li>",
+                    ."<li>✅ When testing multiple variables simultaneously (like in this table)</li>",
+                    ."<li>✅ In exploratory analyses with many comparisons</li>",
+                    ."<li>✅ In genomic/proteomic studies with thousands of tests</li>",
                     "</ul>",
                     
-                    "<p><strong>Important limitations:</strong></p>",
+                    ."<p><strong>Important limitations:</strong></p>",
                     "<ul>",
-                    "<li>⚠️ Q-values assume all tests are independent (may not be true for correlated variables)</li>",
-                    "<li>⚠️ FDR control doesn't guarantee control of Type I error for individual tests</li>",
-                    "<li>⚠️ With few tests (<10), q-values may be overly conservative</li>",
-                    "<li>⚠️ Should not replace careful hypothesis planning and clinical judgment</li>",
+                    ."<li>⚠️ Q-values assume all tests are independent (may not be true for correlated variables)</li>",
+                    ."<li>⚠️ FDR control doesn't guarantee control of Type I error for individual tests</li>",
+                    ."<li>⚠️ With few tests (<10), q-values may be overly conservative</li>",
+                    ."<li>⚠️ Should not replace careful hypothesis planning and clinical judgment</li>",
                     "</ul>",
                     
-                    "<p><small><em>Method: Benjamini-Hochberg FDR correction as implemented in gtsummary::add_q()</em></small></p>",
+                    ."<p><small><em>Method: Benjamini-Hochberg FDR correction as implemented in gtsummary::add_q()</em></small></p>",
                     "</div>"
                 )
                 
@@ -454,7 +393,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         ),
                         fragment = TRUE,
                         style = sty_term,
-                        caption = paste0("Cross Table for Dependent ", mygroup),
+                        caption = ."Cross Table for Dependent {dep}", list(dep = mygroup),
                         id = "tbl3"
                     )
                     self$results$tablestyle4$setContent(tabletangram)
@@ -470,49 +409,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$options$residual_analysis || self$options$correspondence_analysis) {
                     private$.performAdvancedPosthoc()
                 }
-                
-                # Generate clinical summary with natural language interpretation
-                tryCatch({
-                    clinical_summary <- private$.generateClinicalSummary(
-                        results = list(data = mydata, vars = myvars, group = mygroup),
-                        myvars = myvars,
-                        mygroup = mygroup,
-                        test_type = "crosstable"
-                    )
-                    
-                    # Add clinical summary to results
-                    if (!is.null(clinical_summary)) {
-                        summary_html <- paste0(
-                            "<div style='background-color: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #28a745;'>",
-                            "<h4 style='margin-top: 0; color: #28a745;'>Clinical Summary</h4>",
-                            clinical_summary,
-                            "</div>"
-                        )
-                        self$results$clinicalSummary$setContent(summary_html)
-                        
-                        # Also populate the copy-ready sentences
-                        copy_ready <- paste0(
-                            "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                            "<h4 style='margin-top: 0; color: #856404;'>Copy-Ready Clinical Interpretation</h4>",
-                            "<p>", gsub("<[^>]*>", "", clinical_summary), "</p>",
-                            "</div>"
-                        )
-                        self$results$reportSentences$setContent(copy_ready)
-                    }
-                }, error = function(e) {
-                    # Handle clinical summary generation errors gracefully
-                    detailed_error <- paste(.("Clinical summary generation failed:"), e$message)
-                    warning(detailed_error)
-                    
-                    # Provide fallback guidance
-                    fallback_msg <- paste0(
-                        "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>", .("Manual Interpretation Required"), "</h4>",
-                        "<p>", .("Automatic clinical summary could not be generated. Please review results manually."), "</p>",
-                        "</div>"
-                    )
-                    self$results$reportSentences$setContent(fallback_msg)
-                })
 
             },
             
@@ -523,6 +419,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 mydata <- labelData$mydata
                 myvars <- labelData$myvars
                 mygroup <- labelData$mygroup
+                original_names_mapping <- labelData$original_names_mapping
                 
                 # Check if we have a valid group variable
                 if (length(mygroup) == 0 || !(mygroup %in% names(mydata))) {
@@ -543,8 +440,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (n_groups <= 2) {
                     note <- paste0(
                         "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<strong>Note:</strong> Pairwise comparisons are only performed when the grouping variable has more than 2 levels. ",
-                        "Your grouping variable has ", n_groups, " level(s).",
+                        ."<strong>Note:</strong> Pairwise comparisons are only performed when the grouping variable has more than 2 levels. Your grouping variable has {n_groups} level(s).", list(n_groups = n_groups),
                         "</div>"
                     )
                     self$results$pairwiseNote$setContent(note)
@@ -580,48 +476,41 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         
                         # Perform test
                         test_result <- NULL
-                        # Use intelligent test selection with clinical rationale
-                        test_selection <- private$.selectAppropriateTest(
-                            cont_table,
-                            test_preference = if (test_type == "fisher") "fisher" else "auto",
-                            min_expected = 5
-                        )
+                        test_name <- ""
                         
-                        test_name <- test_selection$test
-                        test_rationale <- test_selection$reason
-                        
-                        # Perform the selected test
-                        if (test_selection$test == "fisher") {
+                        if (test_type == "fisher" || any(cont_table < 5)) {
+                            # Use Fisher's exact test
                             tryCatch({
                                 test_result <- fisher.test(cont_table)
-                                test_name <- .("Fisher's Exact")
+                                test_name <- "Fisher's exact"
                             }, error = function(e) {
                                 test_result <- NULL
                             })
                         } else {
+                            # Use Chi-square test
                             tryCatch({
-                                test_result <- chisq.test(cont_table)
-                                test_name <- .("Chi-square")
+                                if (self$options$simulation_based && any(cont_table < 10)) {
+                                    # Use Monte Carlo simulation for sparse tables
+                                    test_result <- chisq.test(cont_table, simulate.p.value = TRUE, 
+                                                            B = self$options$monte_carlo_replicates)
+                                    test_name <- "Chi-square (Monte Carlo)"
+                                } else {
+                                    test_result <- chisq.test(cont_table)
+                                    test_name <- "Chi-square"
+                                }
                             }, error = function(e) {
                                 test_result <- NULL
                             })
                         }
                         
-                        # Add warning if test selection was based on assumption violations
-                        if (test_selection$warning) {
-                            warning_msg <- paste(.("Test selection warning:"), test_rationale)
-                            # Store warning for later display
-                            if (is.null(self$results$assumptions$content)) {
-                                assumption_warnings <- warning_msg
-                            } else {
-                                assumption_warnings <- paste(self$results$assumptions$content, "<br>", warning_msg)
-                            }
-                        }
-                        
                         if (!is.null(test_result)) {
+                            # Get original display names for results
+                            var_display <- .getDisplayName(var, original_names_mapping)
+                            group_display <- .getDisplayName(mygroup, original_names_mapping)
+                            
                             results_list <- append(results_list, list(list(
-                                variable = var,
-                                comparison = paste0(var, ": ", group1, " vs ", group2),
+                                variable = var_display,
+                                comparison = ."{variable}: {group1} vs {group2}", list(variable = var_display, group1 = group1, group2 = group2),
                                 group1 = group1,
                                 group2 = group2,
                                 test = test_name,
@@ -668,12 +557,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     # Add explanatory note
                     note <- paste0(
                         "<div style='background-color: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
-                        "<strong>Pairwise Comparisons:</strong> All possible pairs of groups have been compared. ",
-                        "Total comparisons: ", length(results_list), ". ",
+                        ."<strong>Pairwise Comparisons:</strong> All possible pairs of groups have been compared. Total comparisons: {comparisons}. ", list(comparisons = length(results_list)),
                         if (self$options$p_adjust != "none") {
-                            paste0("P-values have been adjusted using the ", self$options$p_adjust, " method to control for multiple testing.")
+                            ."P-values have been adjusted using the {method} method to control for multiple testing.", list(method = self$options$p_adjust)
                         } else {
-                            "P-values are not adjusted for multiple comparisons."
+                            ."P-values are not adjusted for multiple comparisons."
                         },
                         "</div>"
                     )
@@ -688,6 +576,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 mydata <- labelData$mydata
                 myvars <- labelData$myvars
                 mygroup <- labelData$mygroup
+                original_names_mapping <- labelData$original_names_mapping
                 
                 # Perform analyses for each variable
                 for (var in myvars) {
@@ -732,25 +621,43 @@ crosstableClass <- if (requireNamespace('jmvcore'))
             
             .calculateEffectSizes = function(var, contingency_table) {
                 # Calculate various effect size measures
-                n <- sum(contingency_table)
-                
-                # Cramér's V
-                chi_square <- chisq.test(contingency_table)$statistic
-                k <- min(nrow(contingency_table), ncol(contingency_table))
-                cramers_v <- sqrt(chi_square / (n * (k - 1)))
-                
-                # Phi coefficient (for 2x2 tables)
-                phi <- sqrt(chi_square / n)
+                tryCatch({
+                    # Validate contingency table
+                    if (length(dim(contingency_table)) != 2 || any(dim(contingency_table) < 2)) {
+                        return() # Skip if invalid table dimensions
+                    }
+                    
+                    n <- sum(contingency_table)
+                    if (n == 0) return() # Skip if empty table
+                    
+                    # Cramér's V
+                    chi_result <- NULL
+                    if (self$options$simulation_based && any(contingency_table < 5)) {
+                        chi_result <- chisq.test(contingency_table, simulate.p.value = TRUE, 
+                                               B = self$options$monte_carlo_replicates)
+                    } else {
+                        chi_result <- chisq.test(contingency_table)
+                    }
+                    
+                    if (is.null(chi_result) || is.na(chi_result$statistic)) return()
+                    
+                    chi_square <- chi_result$statistic
+                    k <- min(nrow(contingency_table), ncol(contingency_table))
+                    cramers_v <- sqrt(chi_square / (n * (k - 1)))
+                    
+                    # Phi coefficient (for 2x2 tables)
+                    phi <- sqrt(chi_square / n)
                 
                 # Calculate confidence intervals (using bootstrap approximation)
                 conf_level <- self$options$confidence_level
                 
                 # Add Cramér's V
+                var_display <- .getDisplayName(var, original_names_mapping)
                 self$results$effectsizes$addRow(
                     rowKey = paste0(var, "_cramers_v"),
                     values = list(
-                        variable = var,
-                        measure = .("Cramér's V"),
+                        variable = var_display,
+                        measure = ."Cramér's V",
                         value = cramers_v,
                         ci_lower = max(0, cramers_v - 1.96 * sqrt(cramers_v / n)),
                         ci_upper = min(1, cramers_v + 1.96 * sqrt(cramers_v / n)),
@@ -763,8 +670,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$effectsizes$addRow(
                         rowKey = paste0(var, "_phi"),
                         values = list(
-                            variable = var,
-                            measure = .("Phi Coefficient"),
+                            variable = var_display,
+                            measure = ."Phi Coefficient",
                             value = phi,
                             ci_lower = max(-1, phi - 1.96 * sqrt(phi / n)),
                             ci_upper = min(1, phi + 1.96 * sqrt(phi / n)),
@@ -772,13 +679,32 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         )
                     )
                 }
+                }, error = function(e) {
+                    # Silently handle effect size calculation errors
+                    warning(."Effect size calculation failed for variable: {var} - {error}", list(var = var, error = e$message))
+                })
             },
             
             .performResidualAnalysis = function(var, contingency_table) {
                 # Calculate standardized and adjusted residuals
-                chi_test <- chisq.test(contingency_table)
-                expected <- chi_test$expected
-                observed <- contingency_table
+                tryCatch({
+                    # Validate contingency table
+                    if (length(dim(contingency_table)) != 2 || any(dim(contingency_table) < 1)) {
+                        return() # Skip if invalid table dimensions
+                    }
+                    
+                    if (sum(contingency_table) == 0) return() # Skip if empty table
+                    
+                    # Get enhanced data to access name mapping
+                    labelData <- private$.labelData()
+                    original_names_mapping <- labelData$original_names_mapping
+                    var_display <- .getDisplayName(var, original_names_mapping)
+                    
+                    chi_test <- chisq.test(contingency_table)
+                    if (is.null(chi_test) || is.na(chi_test$statistic)) return()
+                    
+                    expected <- chi_test$expected
+                    observed <- contingency_table
                 
                 # Standardized residuals
                 std_residuals <- (observed - expected) / sqrt(expected)
@@ -801,7 +727,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         self$results$residuals$addRow(
                             rowKey = paste0(var, "_", i, "_", j),
                             values = list(
-                                variable = var,
+                                variable = var_display,
                                 group_level = colnames(contingency_table)[j],
                                 var_level = rownames(contingency_table)[i],
                                 observed = observed[i,j],
@@ -813,10 +739,19 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         )
                     }
                 }
+                }, error = function(e) {
+                    # Silently handle residual analysis errors
+                    warning(."Residual analysis failed for variable: {var} - {error}", list(var = var, error = e$message))
+                })
             },
             
             .performPosthocTests = function(var, contingency_table) {
                 method <- self$options$posthoc_method
+                
+                # Get enhanced data to access name mapping
+                labelData <- private$.labelData()
+                original_names_mapping <- labelData$original_names_mapping
+                var_display <- .getDisplayName(var, original_names_mapping)
                 
                 if (method == "standardized_residuals") {
                     # Test for significant standardized residuals
@@ -825,8 +760,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$posthocstats$addRow(
                         rowKey = paste0(var, "_std_residuals"),
                         values = list(
-                            variable = var,
-                            method = .("Standardized Residuals"),
+                            variable = var_display,
+                            method = ."Standardized Residuals",
                             statistic = chi_test$statistic,
                             df = chi_test$parameter,
                             p_value = chi_test$p.value,
@@ -838,7 +773,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     
                 } else if (method == "cramers_v") {
                     # Test significance of Cramér's V
-                    chi_test <- chisq.test(contingency_table)
+                    if (self$options$simulation_based && any(contingency_table < 5)) {
+                        chi_test <- chisq.test(contingency_table, simulate.p.value = TRUE, 
+                                             B = self$options$monte_carlo_replicates)
+                    } else {
+                        chi_test <- chisq.test(contingency_table)
+                    }
                     n <- sum(contingency_table)
                     k <- min(nrow(contingency_table), ncol(contingency_table))
                     cramers_v <- sqrt(chi_test$statistic / (n * (k - 1)))
@@ -847,7 +787,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         rowKey = paste0(var, "_cramers_v_test"),
                         values = list(
                             variable = var,
-                            method = .("Cramér's V Test"),
+                            method = ."Cramér's V Test",
                             statistic = cramers_v,
                             df = chi_test$parameter,
                             p_value = chi_test$p.value,
@@ -866,7 +806,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                                     rowKey = paste0(var, "_freeman_halton"),
                                     values = list(
                                         variable = var,
-                                        method = .("Freeman-Halton Extension"),
+                                        method = ."Freeman-Halton Extension",
                                         statistic = NA,
                                         df = NA,
                                         p_value = fh_test$p.value,
@@ -883,7 +823,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                                 rowKey = paste0(var, "_fisher_simulated"),
                                 values = list(
                                     variable = var,
-                                    method = .("Fisher's Exact (Simulated)"),
+                                    method = ."Fisher's Exact (Simulated)",
                                     statistic = NA,
                                     df = NA,
                                     p_value = fisher_test$p.value,
@@ -913,7 +853,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                             self$results$correspondenceanalysis$addRow(
                                 rowKey = paste0(var, "_dim", i),
                                 values = list(
-                                    dimension = paste(.("Dimension"), i),
+                                    dimension = ."Dimension {number}", list(number = i),
                                     eigenvalue = eigenvalues[i],
                                     variance_explained = variance_explained[i],
                                     cumulative_variance = cumulative_variance[i],
@@ -984,7 +924,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         
                         # Generate mosaic plot
                         vcd::mosaic(tbl, 
-                               main = paste(.("Mosaic Plot:"), var, .("by"), group),
+                               main = ."Mosaic Plot: {var} by {group}", list(var = var, group = group),
                                shade = TRUE,
                                legend = TRUE)
                         return(TRUE)
@@ -995,7 +935,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         var <- vars[1]
                         tbl <- table(plot_data[[var]], plot_data[[group]])
                         barplot(tbl, 
-                               main = paste(.("Association:"), var, .("by"), group),
+                               main = ."Association: {var} by {group}", list(var = var, group = group),
                                beside = TRUE,
                                legend = TRUE,
                                col = rainbow(nrow(tbl)))
@@ -1025,7 +965,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         
                         # Create biplot
                         plot(ca_result, 
-                             main = paste(.("Correspondence Analysis:"), var, .("by"), group))
+                             main = ."Correspondence Analysis: {var} by {group}", list(var = var, group = group))
                         return(TRUE)
                     }
                 }, error = function(e) {
