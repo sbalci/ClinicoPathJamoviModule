@@ -56,13 +56,6 @@ run devtools::document() to see if there are any errors
 
 
 
-- waterfall - Treatment Response Analysis
-echo "/check-function waterfall" | claude
-
-echo "/prepare-translation waterfall" | claude
-echo "/review-function waterfall" | claude
-echo "/fix-function waterfall" | claude
-
 
 - swimmerplot - Swimmer Plot
 echo "/check-function swimmerplot" | claude

@@ -87,7 +87,8 @@ coloring.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$todo2} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr

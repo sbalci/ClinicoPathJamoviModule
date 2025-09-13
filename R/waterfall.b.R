@@ -56,20 +56,19 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
 
-      .validateData = function(df, patientID, inputType, responseVar, timeVar = NULL) {
-        validation_messages <- character()
-        data_valid <- TRUE
-
-        # Basic data validation
+      # Basic data existence check
+      .validateBasicData = function(df) {
         if (is.null(df) || nrow(df) == 0) {
-          validation_messages <- c(validation_messages, "<br>Error: No data provided or data is empty.")
-          data_valid <- FALSE
-          attr(df, "validation_messages") <- validation_messages
-          attr(df, "data_valid") <- data_valid
-          return(df)
+          return(list(
+            valid = FALSE,
+            message = paste0("<br>", .("Error: No data provided or data is empty."))
+          ))
         }
-
-        # Check required columns exist
+        return(list(valid = TRUE, message = ""))
+      },
+      
+      # Column existence validation
+      .validateColumns = function(df, patientID, responseVar, timeVar = NULL) {
         required_columns <- c(patientID, responseVar)
         if (!is.null(timeVar)) {
           required_columns <- c(required_columns, timeVar)
@@ -77,20 +76,45 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         missing_columns <- required_columns[!required_columns %in% names(df)]
         if (length(missing_columns) > 0) {
-          validation_messages <- c(validation_messages, paste0(
-            "<br>Error: Missing required columns: ", paste(missing_columns, collapse = ", "),
-            "<br>Available columns: ", paste(names(df), collapse = ", ")
+          return(list(
+            valid = FALSE,
+            message = paste0(
+              "<br>", .("Error: Missing required columns:"), " ", paste(missing_columns, collapse = ", "),
+              "<br>", .("Available columns:"), " ", paste(names(df), collapse = ", ")
+            )
           ))
+        }
+        return(list(valid = TRUE, message = ""))
+      },
+      
+      # Main validation coordinator
+      .validateData = function(df, patientID, inputType, responseVar, timeVar = NULL) {
+        validation_messages <- character()
+        data_valid <- TRUE
+
+        # Basic data validation
+        basic_check <- private$.validateBasicData(df)
+        if (!basic_check$valid) {
+          attr(df, "validation_messages") <- basic_check$message
+          attr(df, "data_valid") <- FALSE
+          return(df)
+        }
+
+        # Column validation
+        column_check <- private$.validateColumns(df, patientID, responseVar, timeVar)
+        if (!column_check$valid) {
+          validation_messages <- c(validation_messages, column_check$message)
           data_valid <- FALSE
         }
+
 
         # Check minimum number of patients
         if (patientID %in% names(df)) {
           n_patients <- length(unique(df[[patientID]]))
           if (n_patients < 2) {
             validation_messages <- c(validation_messages, paste0(
-              "<br>Warning: Only ", n_patients, " patient found. ",
-              "Waterfall plots are more meaningful with multiple patients."
+              "<br>", .("Warning: Only"), " ", n_patients, " ", .("patient found."), " ",
+              .("Waterfall plots are more meaningful with multiple patients.")
             ))
           }
         }
@@ -100,8 +124,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           missing_responses <- sum(is.na(df[[responseVar]]))
           if (missing_responses > 0) {
             validation_messages <- c(validation_messages, paste0(
-              "<br>Warning: ", missing_responses, " missing response values found. ",
-              "These will be excluded from analysis."
+              "<br>", .("Warning:"), " ", missing_responses, " ", .("missing response values found."), " ",
+              .("These will be excluded from analysis.")
             ))
           }
         }
@@ -110,24 +134,25 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (inputType == "raw") {
           if (is.null(timeVar)) {
             validation_messages <- c(validation_messages, paste0(
-              "<br>Time Variable Required for Raw Measurements:",
-              "<br>When using raw tumor measurements, a time variable is essential to:",
-              "<br>- Identify baseline measurements (time = 0)",
-              "<br>- Calculate accurate percentage changes",
-              "<br>- Track response progression over time",
-              "<br><br>Recommended Data Format:",
+              "<br>", .("Time Variable Required for Raw Measurements:"),
+              "<br>", .("When using raw tumor measurements, a time variable is essential to:"),
+              "<br>- ", .("Identify baseline measurements (time = 0)"),
+              "<br>- ", .("Calculate accurate percentage changes"),
+              "<br>- ", .("Track response progression over time"),
+              "<br><br>", .("Recommended Data Format:"),
               "<br>PatientID  Time  Measurement",
-              "<br>PT1        0     50          (baseline)",
-              "<br>PT1        2     25          (2 months)",
-              "<br>PT1        4     10          (4 months)"
+              "<br>PT1        0     50          (", .("baseline"), ")",
+              "<br>PT1        2     25          (2 ", .("months"), ")",
+              "<br>PT1        4     10          (4 ", .("months"), ")"
             ))
             data_valid <- FALSE
           } else {
             # Check time variable exists
             if (!timeVar %in% names(df)) {
               validation_messages <- c(validation_messages, sprintf(
-                "<br>Time variable '%s' not found in the data. Please ensure the time variable is correctly specified.",
-                timeVar
+                "<br>%s '%s' %s %s",
+                .("Time variable"), timeVar, .("not found in the data."), 
+                .("Please ensure the time variable is correctly specified.")
               ))
               data_valid <- FALSE
             } else {
@@ -145,13 +170,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::pull(!!patientID)
               if (length(patients_without_baseline) > 0) {
                 validation_messages <- c(validation_messages, paste0(
-                  "<br>Missing Baseline Measurements:",
-                  sprintf("<br>The following patients lack baseline (time = 0) measurements: %s",
+                  "<br>", .("Missing Baseline Measurements:"),
+                  sprintf("<br>%s %s",
+                          .("The following patients lack baseline (time = 0) measurements:"),
                           paste(patients_without_baseline, collapse = ", ")),
-                  "<br><br>Why this matters:",
-                  "<br>- Baseline measurements are the reference point for calculating changes",
-                  "<br>- Without baseline values, percentage changes cannot be calculated accurately",
-                  "<br>- Please ensure each patient has a measurement at time = 0"
+                  "<br><br>", .("Why this matters:"),
+                  "<br>- ", .("Baseline measurements are the reference point for calculating changes"),
+                  "<br>- ", .("Without baseline values, percentage changes cannot be calculated accurately"),
+                  "<br>- ", .("Please ensure each patient has a measurement at time = 0")
                 ))
                 data_valid <- FALSE
               }
@@ -300,7 +326,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .processData = function(df, patientID, inputType, responseVar, timeVar = NULL, groupVar = NULL) {
         # Validate input parameters first
         if (is.null(patientID) || is.null(responseVar)) {
-          stop("Patient ID and response variables are required")
+          return(list(
+            error = TRUE,
+            message = .("Patient ID and response variables are required")
+          ))
         }
 
         # For raw measurements, calculate percentage change from baseline
@@ -347,7 +376,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           
           # Validate processed data
           if (nrow(processed_df) == 0) {
-            stop("No data remaining after processing. Check baseline measurements and data format.")
+            return(list(
+              error = TRUE,
+              message = .("No data remaining after processing. Check baseline measurements and data format.")
+            ))
           }
         } else {
           # Data is already in percentage format
@@ -368,7 +400,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Validate waterfall data
         if (nrow(df_waterfall) == 0) {
-          stop("No patients with valid response data found.")
+          return(list(
+            error = TRUE,
+            message = .("No patients with valid response data found.")
+          ))
         }
         
         df_waterfall <- df_waterfall %>%
@@ -376,9 +411,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             category = factor(
               cut(response,
                   breaks = c(-Inf, -30, 20, Inf),
-                  labels = c("Response", "Stable", "Progression"),
+                  labels = c(.("Response"), .("Stable"), .("Progression")),
                   right = FALSE),
-              levels = c("Response", "Stable", "Progression")
+              levels = c(.("Response"), .("Stable"), .("Progression"))
             ),
             # Also create detailed RECIST categories
             recist_category = factor(
@@ -389,7 +424,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 response > 20 ~ "PD",     # Progressive Disease
                 TRUE ~ "Unknown"
               ),
-              levels = c("CR", "PR", "SD", "PD", "Unknown")
+              levels = c("CR", "PR", "SD", "PD", .("Unknown"))
             )
           )
         
@@ -600,45 +635,52 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         todo <- paste0(
-          "<br>Welcome to ClinicoPath Treatment Response Analysis",
+          "<br>", .("Welcome to ClinicoPath Treatment Response Analysis"),
           "<br><br>",
-          "
-        <br><br>
-        This tool creates two types of visualizations for tumor response data:
-        <br><br>
-        <b>1. Waterfall Plot</b>
-        <br>- Shows best response for each patient
-        <br>- Requires one measurement per patient (for single timepoint data)
-        <br>- Shows percentage change from baseline
-        <br><br>
-        <b>2. Spider Plot</b>
-        <br>- Shows response trajectories over time
-        <br>- Requires multiple measurements per patient (one for each timepoint)
-        <br>- Shows change over time
-        <br><br>
-        <b>Data Input Options:</b>
-        <br>1. <b>Percentage Changes:</b>
-        <br>- Values already calculated as percent change from baseline
-        <br>- Negative values = decrease (improvement)
-        <br>- Example: -30 means 30% decrease from baseline
-        <br><br>
-        2. <b>Raw Measurements:</b>
-        <br>- Actual tumor measurements (e.g., mm, cm, sum of diameters)
-        <br>- Tool will automatically calculate percent change from baseline
-        <br>- Baseline is assumed to be first measurement (Time = 0)
-        <br><br>
-        <b>Required Variables:</b>
-        <br>- <b>Patient ID:</b> Unique identifier for each patient
-        <br>- <b>Response Value:</b> Either percentage change or raw measurements
-        <br>- <b>Time Variable:</b> Required only for Spider Plot (e.g., months from baseline)
-        <br><br>
-        <b>RECIST Response Categories:</b>
-        <br>- Complete Response (CR): -100% (complete disappearance)
-        <br>- Partial Response (PR): ≥30% decrease
-        <br>- Stable Disease (SD): Between -30% and +20% change
-        <br>- Progressive Disease (PD): ≥20% increase
-        <br><br>
-        <b>Data Format Examples:</b>
+          .("This tool creates waterfall and spider plots for tumor response analysis following RECIST criteria."),
+          "<br><br>",
+          "<b>📊 ", .("Visualization Types:"), "</b>",
+          "<br><br>",
+          "<b>1. ", .("Waterfall Plot"), "</b>",
+          "<br>- ", .("Shows best response for each patient as vertical bars"),
+          "<br>- ", .("Requires one measurement per patient (for single timepoint data)"),
+          "<br>- ", .("Colors bars by RECIST categories (CR/PR/SD/PD) or patient groups"),
+          "<br><br>",
+          "<b>2. ", .("Spider Plot"), "</b>",
+          "<br>- ", .("Shows response trajectories over time as connected lines"),
+          "<br>- ", .("Requires multiple measurements per patient with time variable"),
+          "<br>- ", .("Best for longitudinal follow-up data"),
+          "<br><br>",
+          "<b>📝 ", .("Data Input Options:"), "</b>",
+          "<br><br>",
+          "<b>", .("Percentage Changes:"), "</b>",
+          "<br>- ", .("Pre-calculated percent changes from baseline"),
+          "<br>- ", .("Negative values = tumor shrinkage (improvement)"),
+          "<br>- ", .("Example: -30 means 30% decrease from baseline"),
+          "<br><br>",
+          "<b>", .("Raw Measurements:"), "</b>",
+          "<br>- ", .("Actual tumor measurements (mm, cm, sum of diameters)"),
+          "<br>- ", .("Tool automatically calculates percent changes"),
+          "<br>- ", .("Baseline assumed at Time = 0"),
+          "<br><br>",
+          "<b>🎯 ", .("RECIST v1.1 Categories:"), "</b>",
+          "<br>- <b>", .("Complete Response (CR):"), "</b> ≤ -100% (", .("complete disappearance"), ")",
+          "<br>- <b>", .("Partial Response (PR):"), "</b> ≤ -30% ", .("decrease"),
+          "<br>- <b>", .("Stable Disease (SD):"), "</b> -30% ", .("to"), " +20% ", .("change"),
+          "<br>- <b>", .("Progressive Disease (PD):"), "</b> > +20% ", .("increase"),
+          "<br><br>",
+          "<b>", .("Required Variables:"), "</b>",
+          "<br>- <b>", .("Patient ID:"), "</b> ", .("Unique identifier for each patient"),
+          "<br>- <b>", .("Response Value:"), "</b> ", .("Either percentage change or raw measurements"),
+          "<br>- <b>", .("Time Variable:"), "</b> ", .("Required only for Spider Plot (e.g., months from baseline)"),
+          "<br><br>",
+          "<b>", .("RECIST Response Categories:"), "</b>",
+          "<br>- ", .("Complete Response (CR):"), " -100% (", .("complete disappearance"), ")",
+          "<br>- ", .("Partial Response (PR):"), " ≥30% ", .("decrease"),
+          "<br>- ", .("Stable Disease (SD):"), " ", .("Between -30% and +20% change"),
+          "<br>- ", .("Progressive Disease (PD):"), " ≥20% ", .("increase"),
+          "<br><br>",
+          "<b>", .("Data Format Examples:"), "</b>
         <pre>
         1. Using Percentage Changes:        2. Using Raw Measurements:
         PatientID Time Response            PatientID Time Measurement
@@ -657,8 +699,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ## Validate inputs ----
         if (is.null(self$options$patientID) || is.null(self$options$responseVar)) {
          todo <- paste0(todo,
-                        "<br><br>
-                        To start analysis select <b>Patient ID</b> and <b>Response Value</b>"
+                        paste0("<br><br>",
+                        .("To start analysis select <b>Patient ID</b> and <b>Response Value</b>"))
          )
 
          self$results$todo$setContent(todo)
@@ -669,8 +711,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         if (nrow(self$data) == 0) {
           todo <- paste0(todo,
-                         "<br><br>
-                         Data contains no complete rows. Check the data.")
+                         paste0("<br><br>",
+                         .("Data contains no complete rows. Check the data.")))
 
           self$results$todo$setContent(todo)
 
@@ -699,10 +741,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (length(validation_messages) > 0) {
           # Display validation messages in an informative format
           message_text <- paste0(
-            "Data Validation Results:",
+            .("Data Validation Results:"),
             "<br>======================",
             paste(validation_messages, collapse = "<br>"),
-            "<br><br>Please address these items to ensure accurate analysis.",
+            "<br><br>", .("Please address these items to ensure accurate analysis."),
             sep = ""
           )
 
@@ -730,6 +772,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$options$timeVar,
             self$options$groupVar
           )
+          
+          # Check for processing errors
+          if (!is.null(processed_data$error) && processed_data$error) {
+            error_message <- paste0(
+              "<br><br>", .("Data Processing Error:"),
+              "<br>", processed_data$message,
+              "<br><br>", .("Please check your data and try again.")
+            )
+            
+            self$results$todo2$setVisible(TRUE)
+            self$results$todo2$setContent(error_message)
+            self$results$todo$setVisible(FALSE)
+            
+            return()
+          }
         }
 
 
@@ -753,30 +810,30 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$summaryTable$addFootnote(
               rowNo = 1,
               col = "category",
-              "Complete Response (CR): Complete disappearance of all target lesions."
+              .("Complete Response (CR): Complete disappearance of all target lesions.")
             )
 
             self$results$summaryTable$addFootnote(
               rowNo = 2,
               col = "category",
-              "Partial Response (PR): At least 30% decrease in sum of target lesions."
+              .("Partial Response (PR): At least 30% decrease in sum of target lesions.")
             )
 
             self$results$summaryTable$addFootnote(
               rowNo = 3,
               col = "category",
-              "Stable Disease (SD): Neither PR nor PD criteria met."
+              .("Stable Disease (SD): Neither PR nor PD criteria met.")
             )
 
             self$results$summaryTable$addFootnote(
               rowNo = 4,
               col = "category",
-              "Progressive Disease (PD): At least 20% increase in sum of target lesions."
+              .("Progressive Disease (PD): At least 20% increase in sum of target lesions.")
             )
 
 
         self$results$clinicalMetrics$addRow(rowKey = 1, values = list(
-          metric = "Objective Response Rate (CR+PR)",
+          metric = .("Objective Response Rate (CR+PR)"),
           value = paste0(metrics$ORR, "%")
         ))
 
@@ -861,6 +918,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
           }
         }
+
+        # Generate clinical summary ----
+        private$.generateClinicalSummary(processed_data, metrics, person_time_metrics)
+        
+        # Generate about analysis panel ----
+        private$.generateAboutAnalysis()
 
         # mydataview ----
 
@@ -947,6 +1010,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         #### Spider plot ----
         if (self$options$showSpiderPlot && !is.null(self$options$timeVar)) {
+          # Validate spider plot requirements
+          if (self$options$inputType == "percentage") {
+            # For percentage data, warn that spider plot may not be meaningful
+            message("Note: Spider plot with percentage data shows static values over time. Consider using raw measurements for meaningful trajectories.")
+          }
+          
           plotData$timeVar <- self$options$timeVar
           # Add spider-specific color options
           plotData$options$spiderColorBy <- self$options$spiderColorBy
@@ -983,21 +1052,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           df <- df[order(df[[plotData$options$patientID]], na.last = TRUE),]
         }
 
-        # Define color schemes
+        # Define colorblind-safe color schemes
         recistColors <- c(
-          "CR" = "#0000FF",
-          "PR" = "#4169E1",
-          "SD" = "#FFA500",
-          "PD" = "#FF0000",
-          "NA" = "#808080"
+          "CR" = "#1b9e77",  # teal - colorblind safe
+          "PR" = "#7570b3",  # purple - colorblind safe
+          "SD" = "#e7298a",  # magenta - colorblind safe
+          "PD" = "#e66101",  # orange - colorblind safe
+          "NA" = "#666666"   # gray
         )
 
         simpleColors <- c(
-          "CR" = "#00AA00",
-          "PR" = "#00AA00",
-          "SD" = "#808080",
-          "PD" = "#FF0000",
-          "NA" = "#808080"
+          "CR" = "#1b9e77",  # teal for positive response
+          "PR" = "#1b9e77",  # same teal for positive response
+          "SD" = "#666666",  # gray for stable
+          "PD" = "#e66101",  # orange for progression
+          "NA" = "#999999"   # lighter gray
         )
 
         # Check if group-based coloring is requested and group variable exists
@@ -1010,13 +1079,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           group_levels <- unique(df$patient_group)
           colors <- private$.generateGroupColors(group_levels, plotData$options$colorScheme)
           fill_var <- "patient_group"
-          legend_name <- "Patient Group"
+          legend_name <- .("Patient Group")
         } else {
           # Use RECIST coloring
           colors <- if (plotData$options$colorScheme == "simple")
             simpleColors else recistColors
           fill_var <- "recist_category"
-          legend_name <- "RECIST Response"
+          legend_name <- .("RECIST Response")
         }
 
         # Create base plot
@@ -1037,8 +1106,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             drop = FALSE
           ) +
           ggplot2::labs(
-            x = "Patients",
-            y = "Change in Tumor Size (%)"
+            x = .("Patients"),
+            y = .("Change in Tumor Size (%)")
           )
 
         # Add RECIST thresholds
@@ -1159,47 +1228,47 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (is.null(self$options$timeVar) || !self$options$showSpiderPlot) {
           # Create an informative message with improved formatting for readability
           text_warning <- paste0(
-            "Spider Plot Requirements and Guidelines",
+            .("Spider Plot Requirements and Guidelines"),
             "\n\n",
-            "This visualization requires two key elements:",
+            .("This visualization requires two key elements:"),
             "\n",
-            "1. A time variable to show response trajectories",
+            .("1. A time variable to show response trajectories"),
             "\n",
-            "2. The 'Show Spider Plot' option to be enabled",
+            .("2. The 'Show Spider Plot' option to be enabled"),
             "\n\n",
-            "Understanding Spider Plots:",
+            .("Understanding Spider Plots:"),
             "\n",
-            "A spider plot helps visualize how each patient's response changes over time. \n",
-            "Each line represents one patient's treatment journey, making it easy to see \n",
-            "patterns in response and identify different types of outcomes.",
+            .("A spider plot helps visualize how each patient's response changes over time. \n"),
+            .("Each line represents one patient's treatment journey, making it easy to see \n"),
+            .("patterns in response and identify different types of outcomes."),
             "\n\n",
-            "To Generate the Plot:",
+            .("To Generate the Plot:"),
             "\n",
-            "- Add a time variable (such as months from baseline)",
+            .("- Add a time variable (such as months from baseline)"),
             "\n",
-            "- Enable 'Show Spider Plot' in the options panel",
+            .("- Enable 'Show Spider Plot' in the options panel"),
             "\n\n",
-            "The resulting visualization will help you track response patterns \n",
-            "and compare outcomes across different patients over time.\n\n",
+            .("The resulting visualization will help you track response patterns \n"),
+            .("and compare outcomes across different patients over time.\n\n"),
             sep = ""
           )
 
           text_warning <- paste0(text_warning,
-                                "Time Variable Requirement:",
-                                "\n\nA time variable is required to create visualizations when using raw measurements.",
-                                "\n\nWhy is this important?",
-                                "\n- Baseline identification: Marks the starting point (time = 0)",
-                                "\n- Response calculation: Computes changes from baseline",
-                                "\n- Progression tracking: Shows how response changes over time",
-                                "\n\nHow to proceed:",
-                                "\n1. Add a time variable to your data",
-                                "\n2. Time should start at 0 (baseline)",
-                                "\n3. Use consistent time units (e.g., months or weeks)",
-                                "\n\nExample time variable format:",
-                                "\nPatientID.         Time          Measurement",
-                                "\nPT1                0             50              (baseline)",
-                                "\nPT1                2             25              (2 months)",
-                                "\nPT1                4             10              (4 months)",
+                                .("Time Variable Requirement:"),
+                                .("\n\nA time variable is required to create visualizations when using raw measurements."),
+                                .("\n\nWhy is this important?"),
+                                .("\n- Baseline identification: Marks the starting point (time = 0)"),
+                                .("\n- Response calculation: Computes changes from baseline"),
+                                .("\n- Progression tracking: Shows how response changes over time"),
+                                .("\n\nHow to proceed:"),
+                                .("\n1. Add a time variable to your data"),
+                                .("\n2. Time should start at 0 (baseline)"),
+                                .("\n3. Use consistent time units (e.g., months or weeks)"),
+                                .("\n\nExample time variable format:"),
+                                .("\nPatientID.         Time          Measurement"),
+                                .("\nPT1                0             50              (baseline)"),
+                                .("\nPT1                2             25              (2 months)"),
+                                .("\nPT1                4             10              (4 months)"),
                                 sep = ""
           )
 
@@ -1251,7 +1320,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Debug: Check if df exists and has data
         if (is.null(df) || nrow(df) == 0) {
-          warning("Spider plot data is empty or null")
+          warning(.("Spider plot data is empty or null"))
           return()
         }
 
@@ -1259,7 +1328,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         required_vars <- c(options$timeVar, options$patientID)
         missing_vars <- required_vars[!required_vars %in% names(df)]
         if (length(missing_vars) > 0) {
-          warning(sprintf("Missing required variables: %s",
+          warning(sprintf(.("Missing required variables: %s"),
                           paste(missing_vars, collapse = ", ")))
           return()
         }
@@ -1281,7 +1350,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if ("time" %in% names(df) && "response" %in% names(df)) {
           df <- df[complete.cases(df[c("time", "response")]), ]
         } else {
-          warning("Required columns 'time' or 'response' not found in spider plot data")
+          warning(.("Required columns 'time' or 'response' not found in spider plot data"))
           return()
         }
 
@@ -1327,23 +1396,24 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ) +
             # Define colors
             ggplot2::scale_color_manual(
-              name = "Patient Group",
+              name = .("Patient Group"),
               values = line_colors,
               na.value = "#808080"
             ) +
             ggplot2::scale_fill_manual(
-              name = "Patient Group",
+              name = .("Patient Group"),
               values = point_colors,
               na.value = "#808080"
             )
         } else {
           # Response-based coloring (default for backward compatibility)
+          # Colorblind-safe responder colors
           responder_colors <- if (spiderColorScheme == "classic") {
-            c("FALSE" = "#CC0000", "TRUE" = "#0066CC")
+            c("FALSE" = "#e66101", "TRUE" = "#1b9e77")  # orange vs teal
           } else if (spiderColorScheme == "jamovi") {
-            c("FALSE" = "#E64B35", "TRUE" = "#4DBBD5")
+            c("FALSE" = "#d95f02", "TRUE" = "#7570b3")  # orange vs purple
           } else {
-            c("FALSE" = "#FF6B6B", "TRUE" = "#4ECDC4")
+            c("FALSE" = "#e66101", "TRUE" = "#1b9e77")  # default colorblind safe
           }
           
           # Create the spider plot with response coloring
@@ -1371,9 +1441,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ) +
             # Define colors for response categories
             ggplot2::scale_fill_manual(
-              name = "Response",
+              name = .("Response"),
               values = responder_colors,
-              labels = c("Non-responder", "Responder")
+              labels = c(.("Non-responder"), .("Responder"))
             )
         }
         
@@ -1388,9 +1458,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ) +
           # Add labels
           ggplot2::labs(
-            x = paste("Time", "(", options$timeVar, ")"),
-            y = "Change in Tumor Size (%)",
-            title = "Spider Plot of Tumor Response"
+            x = paste(.("Time"), "(", options$timeVar, ")"),
+            y = .("Change in Tumor Size (%)"),
+            title = .("Spider Plot of Tumor Response")
           )
 
         # Add theme
@@ -1411,7 +1481,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               "text",
               x = min(df$time),
               y = c(-30, 20),
-              label = c("PR threshold (-30%)", "PD threshold (+20%)"),
+              label = c(.("PR threshold (-30%)"), .("PD threshold (+20%)")),
               hjust = 0,
               vjust = c(1.5, -0.5),
               size = 3,
@@ -1447,18 +1517,123 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           print(p)
           TRUE
         }, error = function(e) {
-          warning(sprintf("Error creating spider plot: %s", e$message))
+          warning(sprintf(.("Error creating spider plot: %s"), e$message))
           FALSE
         })
       }
 
+      ,
+      # Generate clinical summary ----
+      .generateClinicalSummary = function(processed_data, metrics, person_time_metrics = NULL) {
+        
+        # Extract key metrics
+        n_patients <- nrow(processed_data$waterfall)
+        orr <- metrics$ORR
+        dcr <- metrics$DCR
+        
+        # Count responses by category
+        response_counts <- processed_data$waterfall %>%
+          dplyr::count(recist_category) %>%
+          dplyr::mutate(percent = round(n / sum(n) * 100, 1))
+        
+        # Get counts for each category
+        cr_count <- response_counts$n[response_counts$recist_category == "CR"] %||% 0
+        pr_count <- response_counts$n[response_counts$recist_category == "PR"] %||% 0
+        sd_count <- response_counts$n[response_counts$recist_category == "SD"] %||% 0
+        pd_count <- response_counts$n[response_counts$recist_category == "PD"] %||% 0
+        
+        # Generate natural language summary
+        summary_text <- paste0(
+          "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #1b9e77; margin: 10px 0;'>",
+          "<h4 style='color: #1b9e77; margin-top: 0;'>", .("📊 Treatment Response Summary"), "</h4>",
+          
+          "<p><strong>", .("Analysis Overview:"), "</strong> ",
+          sprintf(.("Response analysis of %d patients using RECIST v1.1 criteria."), n_patients), "</p>",
+          
+          "<p><strong>", .("Key Findings:"), "</strong></p>",
+          "<ul>",
+          "<li><strong>", .("Objective Response Rate (ORR):"), "</strong> ", orr, "% ",
+          sprintf(.("(%d patients achieved complete or partial response)"), cr_count + pr_count), "</li>",
+          "<li><strong>", .("Disease Control Rate (DCR):"), "</strong> ", dcr, "% ",
+          sprintf(.("(%d patients achieved response or stable disease)"), cr_count + pr_count + sd_count), "</li>",
+          "</ul>",
+          
+          "<p><strong>", .("Response Distribution:"), "</strong></p>",
+          "<ul>",
+          if (cr_count > 0) paste0("<li>", .("Complete Response:"), " ", cr_count, " ", .("patients"), " (", 
+                                   round(cr_count/n_patients*100, 1), "%)</li>") else "",
+          if (pr_count > 0) paste0("<li>", .("Partial Response:"), " ", pr_count, " ", .("patients"), " (", 
+                                   round(pr_count/n_patients*100, 1), "%)</li>") else "",
+          if (sd_count > 0) paste0("<li>", .("Stable Disease:"), " ", sd_count, " ", .("patients"), " (", 
+                                   round(sd_count/n_patients*100, 1), "%)</li>") else "",
+          if (pd_count > 0) paste0("<li>", .("Progressive Disease:"), " ", pd_count, " ", .("patients"), " (", 
+                                   round(pd_count/n_patients*100, 1), "%)</li>") else "",
+          "</ul>"
+        )
+        
+        # Add clinical interpretation
+        if (orr >= 30) {
+          interpretation <- .("This represents a promising response rate for oncology studies.")
+        } else if (orr >= 15) {
+          interpretation <- .("This represents a moderate response rate.")
+        } else {
+          interpretation <- .("This represents a lower response rate that may require further investigation.")
+        }
+        
+        summary_text <- paste0(summary_text,
+          "<p><strong>", .("Clinical Interpretation:"), "</strong> ", interpretation, "</p>",
+          "</div>"
+        )
+        
+        # Set the content
+        self$results$clinicalSummary$setContent(summary_text)
+      }
 
-
-
-
-
-
-
+      ,
+      # Generate about analysis panel ----
+      .generateAboutAnalysis = function() {
+        about_text <- paste0(
+          "<div style='background-color: #f0f8ff; padding: 15px; border: 1px solid #d1ecf1; border-radius: 5px; margin: 10px 0;'>",
+          "<h4 style='color: #0c5460; margin-top: 0;'>", .("🔬 What This Analysis Does"), "</h4>",
+          
+          "<p>", .("The Treatment Response Analysis creates waterfall and spider plots to visualize tumor response data according to RECIST v1.1 criteria."), "</p>",
+          
+          "<h5>", .("📊 Visualization Types:"), "</h5>",
+          "<ul>",
+          "<li><strong>", .("Waterfall Plot:"), "</strong> ", .("Shows best response for each patient as vertical bars, ideal for single timepoint or best response data."), "</li>",
+          "<li><strong>", .("Spider Plot:"), "</strong> ", .("Shows response trajectories over time as connected lines, requires time variable for longitudinal data."), "</li>",
+          "</ul>",
+          
+          "<h5>", .("🎯 When to Use This Analysis:"), "</h5>",
+          "<ul>",
+          "<li>", .("Oncology clinical trials and treatment response studies"), "</li>",
+          "<li>", .("Drug efficacy evaluation"), "</li>",
+          "<li>", .("Tumor response monitoring"), "</li>",
+          "<li>", .("Biomarker correlation studies"), "</li>",
+          "</ul>",
+          
+          "<h5>", .("📋 Data Requirements:"), "</h5>",
+          "<ul>",
+          "<li><strong>", .("Patient ID:"), "</strong> ", .("Unique identifier for each patient"), "</li>",
+          "<li><strong>", .("Response Data:"), "</strong> ", .("Either percentage changes from baseline or raw tumor measurements"), "</li>",
+          "<li><strong>", .("Time Variable:"), "</strong> ", .("Required for spider plots (e.g., months from baseline)"), "</li>",
+          "</ul>",
+          
+          "<h5>", .("⚠️ Key Assumptions & Limitations:"), "</h5>",
+          "<ul>",
+          "<li>", .("RECIST v1.1 thresholds: CR ≤-100%, PR ≤-30%, PD >+20%"), "</li>",
+          "<li>", .("For raw measurements, baseline assumed at time = 0"), "</li>",
+          "<li>", .("Waterfall plot shows best (most negative) response per patient"), "</li>",
+          "<li>", .("Missing values are excluded from analysis"), "</li>",
+          "</ul>",
+          
+          "<p><em>", .("💡 Tip: Start with percentage data if available, or use raw measurements with proper time variables for automatic calculation."), "</em></p>",
+          
+          "</div>"
+        )
+        
+        self$results$aboutAnalysis$setContent(about_text)
+      }
 
     )
 )

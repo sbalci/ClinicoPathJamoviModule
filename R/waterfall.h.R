@@ -226,7 +226,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        todo2 = function() private$.items[["todo2"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
         summaryTable = function() private$.items[["summaryTable"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
         clinicalMetrics = function() private$.items[["clinicalMetrics"]],
@@ -246,7 +247,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do",
+                title="Treatment Response Analysis Guide",
                 clearWith=list(
                     "patientID",
                     "responseVar",
@@ -254,8 +255,21 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "inputType")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="todo2",
-                title="To Do",
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible="(patientID && responseVar)",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "timeVar",
+                    "inputType",
+                    "colorScheme",
+                    "groupVar")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(patientID)",
                 clearWith=list(
                     "patientID",
                     "responseVar",
@@ -319,7 +333,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="median_duration", 
                         `title`="Median Duration", 
                         `type`="text")),
-                visible="(!is.null(timeVar) && inputType == \"raw\")"))
+                visible="(timeVar && inputType == \"raw\")"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clinicalMetrics",
@@ -368,7 +382,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".spiderplot",
                 requiresData=TRUE,
-                visible="(showSpiderPlot)",
+                visible="(showSpiderPlot && timeVar)",
                 clearWith=list(
                     "patientID",
                     "responseVar",
@@ -492,7 +506,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
