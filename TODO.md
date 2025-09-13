@@ -54,16 +54,9 @@ run devtools::document() to see if there are any errors
 
 ***
 
-- stagemigration - Advanced TNM Stage Migration Analysis
-
-/check-function stagemigration
-
-/review-function stagemigration
-/fix-function stagemigration
-
 
 - ggoncoplot - Genomic Landscape Visualization
-/check-function ggoncoplot
+
 
 /review-function ggoncoplot
 /fix-function ggoncoplot

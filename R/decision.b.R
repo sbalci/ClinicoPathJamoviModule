@@ -69,8 +69,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 
                 # Validate prior probability if specified
                 if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
-                    stop(.("Population prevalence must be between 0 and 1 (exclusive). Current value: {value}. Please enter a value like 0.05 for 5% prevalence.", 
-                         value = self$options$pprob))
+                    stop(paste0("Population prevalence must be between 0 and 1 (exclusive). Current value: ", self$options$pprob, ". Please enter a value like 0.05 for 5% prevalence."))
                 }
                 
                 # Enforce UI business logic - mutual exclusion
@@ -85,8 +84,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 mydata <- jmvcore::naOmit(self$data)
                 
                 if (nrow(mydata) < nrow(self$data)) {
-                    warning(.("Removed {count} rows with missing values", 
-                             count = nrow(self$data) - nrow(mydata)))
+                    warning(paste0("Removed ", nrow(self$data) - nrow(mydata), " rows with missing values"))
                 }
                 
                 # Get variable names efficiently
@@ -179,8 +177,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 missing_count <- nrow(original_data) - nrow(processed_data)
                 missing_percent <- round((missing_count / nrow(original_data)) * 100, 1)
                 
-                analysis <- .("Missing data summary: {count} cases ({percent}%) with missing values removed. Complete case analysis performed.",
-                             count = missing_count, percent = missing_percent)
+                analysis <- paste0("Missing data summary: ", missing_count, " cases (", missing_percent, "%) with missing values removed. Complete case analysis performed.")
                 
                 return(analysis)
             },
@@ -474,8 +471,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         stop(.("Invalid contingency table values detected"))
                     }
                 }, error = function(e) {
-                    stop(.("Error extracting confusion matrix values: {message}. Please check your data formatting.",
-                          message = e$message))
+                    stop(paste0("Error extracting confusion matrix values: ", e$message, ". Please check your data formatting."))
                 })
 
 
@@ -797,8 +793,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     tryCatch({
                         epirresult <- epiR::epi.tests(dat = conf_table)
                     }, error = function(e) {
-                        stop(.("Error calculating confidence intervals: {message}. This may be due to insufficient data or extreme values.",
-                              message = e$message))
+                        stop(paste0("Error calculating confidence intervals: ", e$message, ". This may be due to insufficient data or extreme values."))
                     })
 
 

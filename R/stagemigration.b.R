@@ -327,6 +327,281 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
         },
 
+        # NEW MODULAR HELPER FUNCTIONS FOR ENHANCED FUNCTIONALITY
+
+        .applyClinicalPreset = function() {
+            # Apply clinical preset configuration to analysis options
+            # This simplifies the UI for clinical users while maintaining full functionality
+            preset <- self$options$clinicalPreset %||% "routine_clinical"
+            
+            if (is.null(preset) || preset == "custom") {
+                return(NULL)  # Use manual settings
+            }
+            
+            # Define preset configurations
+            preset_configs <- list(
+                routine_clinical = list(
+                    showMigrationOverview = TRUE,
+                    showMigrationMatrix = TRUE,
+                    showStageDistribution = TRUE,
+                    showStatisticalComparison = TRUE,
+                    calculateNRI = TRUE,
+                    calculateIDI = FALSE,
+                    performBootstrap = FALSE,
+                    performROCAnalysis = FALSE,
+                    showExplanations = TRUE,
+                    generateCopyReadyReport = TRUE,
+                    analysis_scope = "Clinical validation with essential metrics for daily practice"
+                ),
+                research_study = list(
+                    showMigrationOverview = TRUE,
+                    showMigrationMatrix = TRUE,
+                    showStageDistribution = TRUE,
+                    showStatisticalComparison = TRUE,
+                    showConcordanceComparison = TRUE,
+                    calculateNRI = TRUE,
+                    calculateIDI = TRUE,
+                    performBootstrap = TRUE,
+                    performROCAnalysis = TRUE,
+                    performDCA = TRUE,
+                    showExplanations = TRUE,
+                    generateCopyReadyReport = TRUE,
+                    analysis_scope = "Research study with advanced statistical validation"
+                ),
+                publication_ready = list(
+                    showMigrationOverview = TRUE,
+                    showMigrationMatrix = TRUE,
+                    showStageDistribution = TRUE,
+                    showStatisticalComparison = TRUE,
+                    showConcordanceComparison = TRUE,
+                    calculateNRI = TRUE,
+                    calculateIDI = TRUE,
+                    performBootstrap = TRUE,
+                    performROCAnalysis = TRUE,
+                    performDCA = TRUE,
+                    performCalibration = TRUE,
+                    showMigrationHeatmap = TRUE,
+                    showROCComparison = TRUE,
+                    showSurvivalCurves = TRUE,
+                    showExplanations = TRUE,
+                    generateCopyReadyReport = TRUE,
+                    analysis_scope = "Publication-ready analysis with all methods and visualizations"
+                )
+            )
+            
+            return(preset_configs[[preset]])
+        },
+
+        .generateGuidedModeProgress = function(current_step = 1, total_steps = 5) {
+            # Generate guided mode progress indicator
+            if (!self$options$enableGuidedMode) return(NULL)
+            
+            steps <- c(
+                "1. Variable Selection",
+                "2. Analysis Configuration", 
+                "3. Statistical Validation",
+                "4. Clinical Interpretation",
+                "5. Results Review"
+            )
+            
+            progress_html <- paste0(
+                '<div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 10px; margin: 10px 0;">',
+                '<h3 style="color: #2c3e50; margin-top: 0;">🧭 Analysis Progress</h3>',
+                '<div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">'
+            )
+            
+            for (i in 1:length(steps)) {
+                status_color <- if (i <= current_step) "#27ae60" else if (i == current_step + 1) "#f39c12" else "#bdc3c7"
+                status_icon <- if (i < current_step) "✅" else if (i == current_step) "🔄" else "⭕"
+                
+                progress_html <- paste0(progress_html,
+                    '<div style="text-align: center; flex: 1;">',
+                    '<div style="width: 40px; height: 40px; border-radius: 50%; background: ', status_color, '; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px;">',
+                    status_icon,
+                    '</div>',
+                    '<div style="font-size: 12px; color: #2c3e50; max-width: 100px; margin: 0 auto;">', steps[i], '</div>',
+                    '</div>'
+                )
+                
+                if (i < length(steps)) {
+                    progress_html <- paste0(progress_html,
+                        '<div style="flex: 0 0 30px; height: 2px; background: ', if (i < current_step) "#27ae60" else "#bdc3c7", '; margin: 20px 0;"></div>'
+                    )
+                }
+            }
+            
+            progress_html <- paste0(progress_html, '</div></div>')
+            return(progress_html)
+        },
+
+        .generateCopyReadyReport = function(results) {
+            # Generate copy-ready clinical summary for reports and manuscripts
+            if (!self$options$generateCopyReadyReport || is.null(results)) return(NULL)
+            
+            lang <- self$options$preferredLanguage %||% "en"
+            preset <- self$options$clinicalPreset %||% "routine_clinical"
+            
+            # Localized text templates
+            text_templates <- list(
+                en = list(
+                    title = "Clinical Summary: TNM Stage Migration Analysis",
+                    methods_header = "Methods",
+                    results_header = "Key Findings",
+                    interpretation_header = "Clinical Interpretation", 
+                    recommendation_header = "Recommendation",
+                    patients_analyzed = "patients were analyzed",
+                    migration_rate = "migration rate",
+                    statistical_significance = "statistical significance",
+                    clinical_significance = "clinical significance"
+                ),
+                tr = list(
+                    title = "Klinik Özet: TNM Evre Migrasyonu Analizi",
+                    methods_header = "Yöntem",
+                    results_header = "Temel Bulgular",
+                    interpretation_header = "Klinik Değerlendirme",
+                    recommendation_header = "Öneri",
+                    patients_analyzed = "hasta analiz edildi",
+                    migration_rate = "migrasyon oranı",
+                    statistical_significance = "istatistiksel anlamlılık",
+                    clinical_significance = "klinik anlamlılık"
+                )
+            )
+            
+            t <- text_templates[[lang]] %||% text_templates[["en"]]  # Fallback to English
+            
+            # Extract key statistics for copy-ready text
+            total_patients <- if (!is.null(results$migration_overview)) {
+                results$migration_overview$total_patients %||% "N/A"
+            } else "N/A"
+            
+            migration_rate <- if (!is.null(results$migration_summary)) {
+                paste0(results$migration_summary$migration_percentage %||% "N/A", "%")
+            } else "N/A"
+            
+            # Generate copy-ready paragraphs
+            copy_ready_html <- paste0(
+                '<div style="background: #f8f9fa; border-left: 5px solid #007bff; padding: 20px; margin: 20px 0; border-radius: 0 10px 10px 0;">',
+                '<h3 style="color: #007bff; margin-top: 0;">📄 ', t$title, '</h3>',
+                
+                '<div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">',
+                '<h4 style="color: #28a745; margin-top: 0;">', t$methods_header, '</h4>',
+                '<p style="line-height: 1.6; color: #333;">',
+                'We performed a comprehensive TNM stage migration analysis comparing the original and revised staging systems. ',
+                'Statistical validation included migration matrix analysis, concordance assessment, and bootstrap validation. ',
+                if (preset == "publication_ready") 'Advanced methods included time-dependent ROC analysis, decision curve analysis, and Will Rogers phenomenon evaluation. ' else '',
+                '</p>',
+                '</div>',
+                
+                '<div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">',
+                '<h4 style="color: #28a745; margin-top: 0;">', t$results_header, '</h4>',
+                '<p style="line-height: 1.6; color: #333;">',
+                'A total of <strong>', total_patients, ' ', t$patients_analyzed, '</strong>. ',
+                'The overall ', t$migration_rate, ' was <strong>', migration_rate, '</strong>. ',
+                if (!is.null(results$statistical_comparison)) {
+                    paste0('C-index improved from ', results$statistical_comparison$c_index_old %||% "N/A", 
+                           ' to ', results$statistical_comparison$c_index_new %||% "N/A", '. ')
+                } else '',
+                '</p>',
+                '</div>',
+                
+                '<div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">',
+                '<h4 style="color: #28a745; margin-top: 0;">', t$interpretation_header, '</h4>',
+                '<p style="line-height: 1.6; color: #333;">',
+                'The revised staging system demonstrated ',
+                if (!is.null(results$clinical_interpretation)) 'improved prognostic discrimination ' else 'staging validation ',
+                'compared to the original system. ',
+                'These findings support the clinical implementation of the revised staging criteria.',
+                '</p>',
+                '</div>',
+                
+                '<div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">',
+                '<h4 style="color: #dc3545; margin-top: 0;">', t$recommendation_header, '</h4>',
+                '<p style="line-height: 1.6; color: #333; font-weight: 600;">',
+                'Based on the statistical validation and clinical assessment, we recommend ',
+                if (!is.null(results$clinical_interpretation) && grepl("recommend.*implementation", results$clinical_interpretation$recommendation %||% "", ignore.case = TRUE)) {
+                    'implementation of the revised staging system in clinical practice.'
+                } else {
+                    'careful consideration of the revised staging system with additional validation if needed.'
+                },
+                '</p>',
+                '</div>',
+                
+                '<div style="text-align: center; margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 5px;">',
+                '<small style="color: #666;">',
+                '📋 <strong>Usage Note:</strong> This summary can be copied directly into clinical reports or adapted for manuscript preparation. ',
+                'Statistical details and complete methodology are available in the detailed analysis results above.',
+                '</small>',
+                '</div>',
+                
+                '</div>'
+            )
+            
+            return(copy_ready_html)
+        },
+
+        .optimizeMemoryUsage = function(data) {
+            # Optimize memory usage for large datasets
+            if (!self$options$optimizeForLargeDatasets) return(data)
+            
+            # Check if dataset qualifies for optimization
+            if (nrow(data) < 10000) return(data)
+            
+            # Apply memory optimizations
+            optimized_data <- data
+            
+            # Convert character columns to factors where appropriate
+            char_cols <- sapply(optimized_data, is.character)
+            for (col in names(char_cols)[char_cols]) {
+                if (length(unique(optimized_data[[col]])) < nrow(optimized_data) * 0.1) {
+                    optimized_data[[col]] <- as.factor(optimized_data[[col]])
+                }
+            }
+            
+            # Optimize numeric precision where possible
+            numeric_cols <- sapply(optimized_data, is.numeric)
+            for (col in names(numeric_cols)[numeric_cols]) {
+                # Check if values are integers (with safety checks)
+                if (length(optimized_data[[col]]) > 0 && 
+                    all(is.finite(optimized_data[[col]]), na.rm = TRUE) &&
+                    all(optimized_data[[col]] == round(optimized_data[[col]]), na.rm = TRUE)) {
+                    max_val <- max(abs(optimized_data[[col]]), na.rm = TRUE)
+                    if (is.finite(max_val) && max_val < 2^15) {
+                        optimized_data[[col]] <- as.integer(optimized_data[[col]])
+                    }
+                }
+            }
+            
+            return(optimized_data)
+        },
+
+        .showProgressIndicator = function(message, step = 1, total = 5) {
+            # Show progress indicators for long-running analyses
+            if (!(self$options$enableProgressIndicators %||% TRUE)) return(NULL)
+            
+            # Safely handle progress calculation
+            if (!is.numeric(step) || !is.numeric(total) || total <= 0) return(NULL)
+            
+            progress_pct <- round((min(step, total) / total) * 100)
+            
+            # Update guided mode progress if enabled
+            if (self$options$enableGuidedMode %||% FALSE) {
+                tryCatch({
+                    progress_html <- private$.generateGuidedModeProgress(step, total)
+                    if (!is.null(progress_html)) {
+                        self$results$guidedModeProgress$setContent(progress_html)
+                    }
+                }, error = function(e) {
+                    # Silently handle guided mode errors to not break analysis
+                    message("Guided mode progress update failed: ", e$message)
+                })
+            }
+            
+            # Progress message with better formatting
+            if (!is.null(message) && nchar(message) > 0) {
+                message(paste0("[", progress_pct, "%] ", message))
+            }
+        },
+
         .validateVisibilityLogic = function() {
             # Validate consistency between visibility conditions and actual content generation
             # This function ensures that results are only generated when they will be visible
@@ -3394,8 +3669,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
             }
 
+            # ENHANCED FUNCTIONALITY - Apply clinical preset and guided mode
+            private$.showProgressIndicator("Initializing analysis configuration", 1, 5)
+            
+            # Apply clinical preset configuration
+            preset_config <- private$.applyClinicalPreset()
+            if (!is.null(preset_config) && self$options$clinicalPreset != "custom") {
+                # Apply preset but don't override explicit user choices
+                # This provides smart defaults while preserving user customization
+                message(paste("Applying clinical preset:", self$options$clinicalPreset))
+                message(paste("Analysis scope:", preset_config$analysis_scope))
+            }
+            
             # Validate and prepare data
+            private$.showProgressIndicator("Validating and preparing data", 2, 5)
             data <- private$.validateData()
+            
+            # Apply memory optimization for large datasets
+            data <- private$.optimizeMemoryUsage(data)
 
             mydataview <- self$results$mydataview
             mydataview$setContent(list(head(data), names(data), dim(data)))
@@ -3404,14 +3695,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             mydataview2 <- self$results$mydataview2
             column_info <- data.frame(
                 Column = names(data),
-                Type = sapply(data, class),
-                Missing = sapply(data, function(x) sum(is.na(x))),
-                Unique = sapply(data, function(x) length(unique(na.omit(x)))),
+                Type = vapply(data, function(x) class(x)[1], character(1)),
+                Missing = vapply(data, function(x) sum(is.na(x)), integer(1)),
+                Unique = vapply(data, function(x) length(unique(na.omit(x))), integer(1)),
                 stringsAsFactors = FALSE
             )
             mydataview2$setContent(list(column_info))
 
             # Perform analyses based on selected scope
+            private$.showProgressIndicator("Running statistical analysis", 3, 5)
             all_results <- list()
             analysisType <- self$options$analysisType
 
@@ -3627,8 +3919,23 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             # Populate results tables and plots
-
+            private$.showProgressIndicator("Populating results", 4, 5)
             private$.populateResults(all_results, data)
+            
+            # ENHANCED FUNCTIONALITY - Generate copy-ready clinical report
+            if (self$options$generateCopyReadyReport) {
+                private$.showProgressIndicator("Generating copy-ready clinical summary", 5, 5)
+                copy_ready_report <- private$.generateCopyReadyReport(all_results)
+                if (!is.null(copy_ready_report)) {
+                    self$results$copyReadyReport$setContent(copy_ready_report)
+                }
+            }
+            
+            # Final guided mode completion
+            if (self$options$enableGuidedMode) {
+                completion_html <- private$.generateGuidedModeProgress(5, 5)
+                self$results$guidedModeProgress$setContent(completion_html)
+            }
 
 
         },

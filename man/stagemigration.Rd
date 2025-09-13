@@ -11,6 +11,13 @@ stagemigration(
   survivalTime,
   event,
   eventLevel,
+  clinicalPreset = "routine_clinical",
+  enableGuidedMode = TRUE,
+  generateCopyReadyReport = TRUE,
+  enableAccessibilityFeatures = FALSE,
+  preferredLanguage = "en",
+  enableProgressIndicators = TRUE,
+  optimizeForLargeDatasets = FALSE,
   analysisType = "comprehensive",
   confidenceLevel = 0.95,
   calculateNRI = FALSE,
@@ -234,23 +241,71 @@ stagemigration(
 \item{data}{The dataset containing staging and survival information for TNM
 validation analysis.}
 
-\item{oldStage}{The original staging variable (e.g., TNM 7th edition, AJCC
-7th edition). Should be coded as ordered factor with appropriate stage
-levels.}
+\item{oldStage}{📋 CLINICAL EXAMPLE: Select your current staging variable
+such as 'TNM7_Stage'  containing values like: Stage I, Stage IIA, Stage
+IIB, Stage IIIA, Stage IIIB, Stage IV. 🔍 TECHNICAL DETAILS: The original
+staging variable (e.g., TNM 7th edition, AJCC 7th edition). Should be coded
+as ordered factor with appropriate stage levels for meaningful comparison.}
 
-\item{newStage}{The proposed new staging variable (e.g., TNM 8th edition,
-revised staging). Should use the same coding structure as the original
-staging system.}
+\item{newStage}{📋 CLINICAL EXAMPLE: Select your new staging variable such
+as 'TNM8_Stage'  containing the same patients but potentially different
+stage assignments based on  revised criteria (e.g., T descriptor changes,
+nodal assessment updates). 🔍 TECHNICAL DETAILS: The proposed new staging
+variable (e.g., TNM 8th edition, revised staging). Should use the same
+coding structure as the original staging system for valid comparison.}
 
-\item{survivalTime}{Time to event or censoring in consistent units (months
+\item{survivalTime}{📋 CLINICAL EXAMPLE: Select your follow-up time
+variable such as 'OS_months'  containing values like: 12.5, 24.8, 36.2,
+45.0 (months from diagnosis to death or last contact). 🔍 TECHNICAL
+DETAILS: Time to event or censoring in consistent units (months
 recommended). For overall survival analysis, use time from diagnosis to
-death or last follow-up.}
+death or last follow-up. For disease-free survival, use time from treatment
+to recurrence or last follow-up.}
 
-\item{event}{Event indicator (1 = event occurred, 0 = censored) or factor
-with event levels. For overall survival, event = death from any cause.}
+\item{event}{📋 CLINICAL EXAMPLE: Select your event variable such as
+'Death_Status'  containing values like: 0 (alive/censored), 1 (dead/event
+occurred) OR  "Alive", "Dead" OR "No Event", "Death", "Disease
+Progression". 🔍 TECHNICAL DETAILS: Event indicator (1 = event occurred, 0
+= censored) or factor with event levels. For overall survival, event =
+death from any cause. For disease-specific survival,  event = death from
+the specific disease being studied.}
 
 \item{eventLevel}{The level indicating event occurrence when using factor
 variables.}
+
+\item{clinicalPreset}{Choose a preset tailored to your clinical workflow.
+'Routine Clinical' provides essential  validation metrics for daily
+practice. 'Research Study' adds advanced statistics for  academic research.
+'Publication Ready' includes all methods and visualizations for
+manuscripts. Choose 'Custom' to manually configure all options.}
+
+\item{enableGuidedMode}{Enable step-by-step guidance for clinical users.
+Provides contextual help,  assumption checking, and clinical interpretation
+assistance throughout the analysis. Highly recommended for users new to
+staging validation methods.}
+
+\item{generateCopyReadyReport}{Generate plain-language clinical summary
+paragraphs that can be copied directly  into reports or manuscripts.
+Includes key findings, statistical significance,  clinical interpretation,
+and implementation recommendations.}
+
+\item{enableAccessibilityFeatures}{Enable accessibility features including
+color-blind safe palettes,  high contrast visualizations, larger font
+sizes, and enhanced table readability. Ensures outputs are accessible to
+users with visual impairments.}
+
+\item{preferredLanguage}{Choose the language for explanations, labels, and
+clinical interpretations. Scientific terminology and statistical results
+remain standardized.}
+
+\item{enableProgressIndicators}{Show progress bars and status updates for
+long-running analyses such as  bootstrap validation and cross-validation.
+Helps users track analysis progress.}
+
+\item{optimizeForLargeDatasets}{Enable memory-efficient processing for
+large datasets (>10,000 patients).  Uses chunked processing and optimized
+algorithms to reduce memory usage  and improve performance while
+maintaining statistical accuracy.}
 
 \item{analysisType}{Determines the scope of statistical analysis performed.
 Comprehensive analysis includes all available methods for thorough staging
@@ -1192,6 +1247,8 @@ horizon and identify  optimal decision timing.}
 A results object containing:
 \tabular{llllll}{
 \code{results$welcomeMessage} \tab \tab \tab \tab \tab a html \cr
+\code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$guidedModeProgress} \tab \tab \tab \tab \tab a html \cr
 \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$mydataview2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$migrationOverviewExplanation} \tab \tab \tab \tab \tab a html \cr

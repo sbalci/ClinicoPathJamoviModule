@@ -2,9 +2,9 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import mlr3
-#' @import mlr3measures  
+#' @import mlr3measures
 #' @import mlr3learners
-#' @import mlr3extralearners
+# @import mlr3extralearners
 #' @import mlr3viz
 #' @importFrom caret sensitivity specificity posPredValue negPredValue
 #' @importFrom pROC roc auc ci.auc
@@ -50,7 +50,7 @@ private = list(
             return()
         }
 
-        if (nrow(self$data) == 0) 
+        if (nrow(self$data) == 0)
             stop('Data contains no (complete) rows')
 
         data <- as.data.table(self$data)
@@ -81,11 +81,11 @@ private = list(
             target_col <- task$target_names
             minority_class <- names(sort(table(task_data[[target_col]])))[1]
             majority_count <- max(table(task_data[[target_col]]))
-            
+
             # Simple upsampling by replication
             minority_indices <- which(task_data[[target_col]] == minority_class)
             n_replicate <- majority_count - length(minority_indices)
-            
+
             if (n_replicate > 0) {
                 replicated_indices <- sample(minority_indices, n_replicate, replace = TRUE)
                 upsampled_data <- rbind(task_data, task_data[replicated_indices, ])
@@ -96,7 +96,7 @@ private = list(
             task_data <- task$data()
             target_col <- task$target_names
             minority_count <- min(table(task_data[[target_col]]))
-            
+
             balanced_data <- data.table()
             for (class in unique(task_data[[target_col]])) {
                 class_data <- task_data[task_data[[target_col]] == class, ]
@@ -119,29 +119,29 @@ private = list(
         # Convert to factors if needed
         pred_response <- as.factor(predictions)
         truth_factor <- as.factor(truth)
-        
+
         # Ensure binary classification for clinical metrics
         if (length(levels(truth_factor)) != 2) {
             return(list())
         }
-        
+
         # Calculate clinical metrics using caret functions
         tryCatch({
             sens <- caret::sensitivity(pred_response, truth_factor, positive = levels(truth_factor)[2])
             spec <- caret::specificity(pred_response, truth_factor, negative = levels(truth_factor)[1])
             ppv <- caret::posPredValue(pred_response, truth_factor, positive = levels(truth_factor)[2])
             npv <- caret::negPredValue(pred_response, truth_factor, negative = levels(truth_factor)[1])
-            
+
             # Calculate likelihood ratios
             pos_lr <- sens / (1 - spec)
             neg_lr <- (1 - sens) / spec
-            
+
             # Calculate prevalence
             prevalence <- sum(truth_factor == levels(truth_factor)[2]) / length(truth_factor)
-            
+
             # Calculate Number Needed to Treat (if applicable)
             nnt <- if (ppv > prevalence) 1 / (ppv - prevalence) else NA
-            
+
             metrics <- list(
                 sensitivity = sens,
                 specificity = spec,
@@ -152,12 +152,12 @@ private = list(
                 prevalence = prevalence,
                 nnt = nnt
             )
-            
+
             # Add bootstrap confidence intervals if requested
             if (self$options$reportConfidenceIntervals) {
                 # Add checkpoint before bootstrap operation
                 private$.checkpoint()
-                
+
                 boot_func <- function(data, indices) {
                     boot_pred <- pred_response[indices]
                     boot_truth <- truth_factor[indices]
@@ -168,9 +168,9 @@ private = list(
                         caret::negPredValue(boot_pred, boot_truth, negative = levels(truth_factor)[1])
                     ))
                 }
-                
+
                 boot_results <- boot::boot(data = 1:length(predictions), statistic = boot_func, R = self$options$bootstrapSamples)
-                
+
                 # Extract confidence intervals
                 for (i in 1:4) {
                     ci <- boot::boot.ci(boot_results, index = i, type = "perc")
@@ -179,7 +179,7 @@ private = list(
                     metrics[[paste0(metric_name, "_ci_upper")]] <- ci$percent[5]
                 }
             }
-            
+
             return(metrics)
         }, error = function(e) {
             return(list())
@@ -197,7 +197,7 @@ private = list(
             # Holdout validation
             resampling <- rsmp("holdout", ratio = 1 - self$options$testSize)
         }
-        
+
         resampling$instantiate(task)
         return(resample(task, learner, resampling))
     },
@@ -207,7 +207,7 @@ private = list(
             # Clinical metrics table
             clinical_names <- c("sensitivity", "specificity", "ppv", "npv", "positive_lr", "negative_lr", "prevalence", "nnt")
             clinical_labels <- c("Sensitivity", "Specificity", "PPV", "NPV", "LR+", "LR-", "Prevalence", "NNT")
-            
+
             for (i in seq_along(clinical_names)) {
                 metric_name <- clinical_names[i]
                 if (!is.null(clinical_metrics[[metric_name]]) && !is.na(clinical_metrics[[metric_name]])) {
@@ -215,7 +215,7 @@ private = list(
                         metric = clinical_labels[i],
                         value = clinical_metrics[[metric_name]]
                     )
-                    
+
                     # Add confidence intervals if available
                     if (self$options$reportConfidenceIntervals) {
                         ci_lower_key <- paste0(metric_name, "_ci_lower")
@@ -223,16 +223,16 @@ private = list(
                         row_data$ci_lower <- clinical_metrics[[ci_lower_key]]
                         row_data$ci_upper <- clinical_metrics[[ci_upper_key]]
                     }
-                    
+
                     key <- paste0("clinical_", metric_name)
                     self$results$classificationMetrics$clinicalMetrics$addRow(rowKey = key, values = row_data)
                 }
             }
-            
+
             # Add overall accuracy
             if (!is.null(clinical_metrics$accuracy)) {
                 self$results$classificationMetrics$clinicalMetrics$addRow(
-                    rowKey = "accuracy", 
+                    rowKey = "accuracy",
                     values = list(metric = "Accuracy", value = clinical_metrics$accuracy)
                 )
             }
@@ -289,7 +289,7 @@ private = list(
                 options$gamma <- self$options$svmGamma
             }
         }
-        
+
         # Check if the learner is available, fallback to decision tree if not
         tryCatch({
             learner <- lrn(classifier_type, predict_type = 'prob')
@@ -384,7 +384,7 @@ private = list(
 
     .populateConfusionMatrix = function(confusionMatrix) {
         levels <- dimnames(confusionMatrix)$response
-        
+
         for (level in levels) {
             self$results$confusion$matrix$addColumn(
                 name = paste0('pred_', level),
@@ -479,17 +479,17 @@ private = list(
         # Populate per-class metrics table
         table <- self$results$classificationMetrics$class
         unique_classes <- unique(prediction$truth)
-        
+
         for (class_name in unique_classes) {
             row_data <- list(class = as.character(class_name))
-            
+
             # Calculate per-class metrics
             for (measure in classMeasures) {
                 if (measure$id == "classif.auc" && length(unique_classes) > 2) {
                     # Skip AUC for multi-class
                     next
                 }
-                
+
                 tryCatch({
                     score <- prediction$score(measure, task = NULL)
                     if (measure$id %in% c("classif.precision", "classif.recall", "classif.fbeta")) {
@@ -504,7 +504,7 @@ private = list(
                     row_data[[measure$id]] <- NA
                 })
             }
-            
+
             table$addRow(rowKey = class_name, values = row_data)
         }
 
@@ -517,9 +517,9 @@ private = list(
 
     .populateRandomForestResults = function(model) {
         if (is.null(model)) return()
-        
+
         table <- self$results$printRandForest$randomForestModel
-        
+
         # Add basic random forest information
         table$addRow(rowKey = "type", values = list(type = "Type", classif = "Classification"))
         table$addRow(rowKey = "trees", values = list(type = "Number of trees", classif = model$num.trees))
@@ -532,19 +532,19 @@ private = list(
             return(FALSE)
 
         prediction <- image$state
-        
+
         library(pROC)
         library(ggplot2)
-        
+
         # Create ROC curve
         roc_obj <- roc(prediction$truth, prediction$prob[, 2])
-        
+
         # Create data frame for ggplot
         roc_data <- data.frame(
             specificity = roc_obj$specificities,
             sensitivity = roc_obj$sensitivities
         )
-        
+
         # Create the plot
         p <- ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
             geom_line(color = "steelblue", size = 1) +
@@ -556,9 +556,9 @@ private = list(
             ) +
             theme_minimal() +
             coord_equal()
-        
+
         print(p)
-        
+
         return(TRUE)
     },
 
@@ -568,7 +568,7 @@ private = list(
 
         predictions <- image$state$predictions
         model <- image$state$model
-        
+
         if (is.null(model)) {
             # Try to extract model from prediction object
             if (!is.null(predictions$learner) && !is.null(predictions$learner$model)) {
@@ -577,7 +577,7 @@ private = list(
                 return(FALSE)
             }
         }
-        
+
         library(rpart.plot)
         tryCatch({
             rpart.plot(model, type = 2, extra = 101, cex = 0.8)
@@ -592,15 +592,15 @@ private = list(
             return(FALSE)
 
         prediction <- image$state
-        
+
         library(ggplot2)
-        
+
         # Create frequency table
         freq_table <- table(Actual = prediction$truth, Predicted = prediction$response)
-        
+
         # Convert to data frame for plotting
         freq_df <- as.data.frame(freq_table)
-        
+
         # Create the plot
         p <- ggplot(freq_df, aes(x = Actual, y = Freq, fill = Predicted)) +
             geom_bar(stat = "identity", position = "dodge") +
@@ -611,9 +611,9 @@ private = list(
                 fill = "Predicted Class"
             ) +
             theme_minimal()
-        
+
         print(p)
-        
+
         return(TRUE)
     }
 )

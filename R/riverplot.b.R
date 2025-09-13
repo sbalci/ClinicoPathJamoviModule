@@ -512,7 +512,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             warnings <- c(warnings, private$.detect_misuse())
             
             if (length(errors) > 0) {
-                stop(.("Validation failed: {errors}", errors = paste(errors, collapse = "; ")))
+                stop(paste0("Validation failed: ", paste(errors, collapse = "; ")))
             }
             
             # Display warnings if any
