@@ -42,7 +42,13 @@ riverplot(
   curveGranularity = 100,
   backgroundLabels = FALSE,
   exportRiverplotObject = FALSE,
-  clinicalPreset = "none"
+  clinicalPreset = "none",
+  smart_detection = TRUE,
+  enhanced_validation = TRUE,
+  multi_format_support = FALSE,
+  adaptive_styling = TRUE,
+  quality_optimization = FALSE,
+  cross_reference_mode = FALSE
 )
 }
 \arguments{
@@ -180,6 +186,24 @@ object structure for use with the CRAN riverplot package.}
 \item{clinicalPreset}{Apply predefined configurations optimized for common
 clinical scenarios. Each preset automatically configures plot type,
 styling, and display options for the selected clinical use case.}
+
+\item{smart_detection}{Automatically detect optimal data format and
+analysis approach based on provided variables.}
+
+\item{enhanced_validation}{Apply comprehensive data validation with
+user-friendly error messages and suggestions.}
+
+\item{multi_format_support}{Enable experimental support for additional data
+formats (source-target, multi-node).}
+
+\item{adaptive_styling}{Automatically adapt plot styling based on data
+characteristics and size.}
+
+\item{quality_optimization}{Apply advanced algorithms to optimize flow
+layout, reduce crossings, and improve readability.}
+
+\item{cross_reference_mode}{Show suggestions for when alluvial function
+might be more appropriate for the data.}
 }
 \value{
 A results object containing:
@@ -194,6 +218,9 @@ A results object containing:
 \code{results$transitionMatrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$riverplotObject} \tab \tab \tab \tab \tab a html \cr
 \code{results$riverplotCode} \tab \tab \tab \tab \tab a html \cr
+\code{results$validation_report} \tab \tab \tab \tab \tab a html \cr
+\code{results$cross_reference_suggestions} \tab \tab \tab \tab \tab a html \cr
+\code{results$optimization_report} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

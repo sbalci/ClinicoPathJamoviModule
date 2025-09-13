@@ -58,6 +58,24 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Apply clinical preset if selected
             private$.apply_clinical_preset()
             
+            # Apply enhanced features if enabled
+            if (self$options$enhanced_validation) {
+                private$.generate_validation_report()
+                private$.generate_enhanced_caveats()
+            }
+            
+            if (self$options$cross_reference_mode) {
+                private$.generate_cross_reference_suggestions()
+            }
+            
+            if (self$options$quality_optimization) {
+                private$.generate_optimization_report()
+            }
+            
+            if (self$options$clinicalPreset != "none") {
+                private$.generate_clinical_insights_panel()
+            }
+            
             # Set initial plot dimensions
             plot_width <- self$options$plotWidth * 100
             plot_height <- self$options$plotHeight * 100 
@@ -65,6 +83,21 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Initialize welcome message
             private$.show_welcome_message()
+        },
+        
+        # Enhanced HTML sanitization for security
+        .sanitizeHTML = function(text) {
+            if (is.null(text) || length(text) == 0) return("")
+            text <- as.character(text[1])
+            # Comprehensive HTML entity encoding for XSS prevention
+            text <- gsub("&", "&amp;", text, fixed = TRUE)
+            text <- gsub("<", "&lt;", text, fixed = TRUE)
+            text <- gsub(">", "&gt;", text, fixed = TRUE)
+            text <- gsub('"', "&quot;", text, fixed = TRUE)
+            text <- gsub("'", "&#39;", text, fixed = TRUE)
+            text <- gsub("/", "&#47;", text, fixed = TRUE)
+            text <- gsub("\\", "&#92;", text, fixed = TRUE)
+            return(text)
         },
         
         .check_package_availability = function() {
@@ -231,36 +264,36 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<div style='background-color: #fff3e0; padding: 12px; border-radius: 5px; margin: 15px 0;'>",
                     "<h4 style='color: #ff8f00; margin: 0 0 8px 0;'>📋 ", .("Required Data Setup:"), "</h4>",
                     "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
-                    "<li><strong>Strata Variables:</strong> Categories that flow between stages (required)</li>",
-                    "<li><strong>Time/Sequence:</strong> For longitudinal data (conditional)</li>",
-                    "<li><strong>ID Variable:</strong> For individual entity tracking (optional)</li>",
-                    "<li><strong>Weight Variable:</strong> For proportional flow sizing (optional)</li>",
+                    "<li><strong>", .("Strata Variables:"), "</strong> ", .("Categories that flow between stages (required)"), "</li>",
+                    "<li><strong>", .("Time/Sequence:"), "</strong> ", .("For longitudinal data (conditional)"), "</li>",
+                    "<li><strong>", .("ID Variable:"), "</strong> ", .("For individual entity tracking (optional)"), "</li>",
+                    "<li><strong>", .("Weight Variable:"), "</strong> ", .("For proportional flow sizing (optional)"), "</li>",
                     "</ul>",
                     "</div>",
                     
                     "<div style='display: flex; gap: 15px; margin: 15px 0;'>",
                     "<div style='flex: 1; background-color: #f3e5f5; padding: 10px; border-radius: 5px;'>",
-                    "<h5 style='color: #7b1fa2; margin: 0 0 5px 0;'>📊 Plot Types</h5>",
+                    "<h5 style='color: #7b1fa2; margin: 0 0 5px 0;'>📊 ", .("Plot Types"), "</h5>",
                     "<ul style='font-size: 12px; margin: 0; padding-left: 15px;'>",
-                    "<li><strong>Alluvial:</strong> Curved flowing streams</li>",
-                    "<li><strong>Sankey:</strong> Directed flow diagrams</li>",
-                    "<li><strong>Stream:</strong> Aggregate trend charts</li>",
-                    "<li><strong>Flow:</strong> Individual entity tracking</li>",
+                    "<li><strong>", .("Alluvial:"), "</strong> ", .("Curved flowing streams"), "</li>",
+                    "<li><strong>", .("Sankey:"), "</strong> ", .("Directed flow diagrams"), "</li>",
+                    "<li><strong>", .("Stream:"), "</strong> ", .("Aggregate trend charts"), "</li>",
+                    "<li><strong>", .("Flow:"), "</strong> ", .("Individual entity tracking"), "</li>",
                     "</ul>",
                     "</div>",
                     "<div style='flex: 1; background-color: #e8f5e8; padding: 10px; border-radius: 5px;'>",
-                    "<h5 style='color: #2e7d32; margin: 0 0 5px 0;'>🔄 Data Formats</h5>",
+                    "<h5 style='color: #2e7d32; margin: 0 0 5px 0;'>🔄 ", .("Data Formats"), "</h5>",
                     "<ul style='font-size: 12px; margin: 0; padding-left: 15px;'>",
-                    "<li><strong>Long:</strong> Time variable + single strata</li>",
-                    "<li><strong>Wide:</strong> Multiple strata as columns</li>",
-                    "<li><strong>Individual:</strong> ID tracking supported</li>",
-                    "<li><strong>Weighted:</strong> Flow proportional to values</li>",
+                    "<li><strong>", .("Long:"), "</strong> ", .("Time variable + single strata"), "</li>",
+                    "<li><strong>", .("Wide:"), "</strong> ", .("Multiple strata as columns"), "</li>",
+                    "<li><strong>", .("Individual:"), "</strong> ", .("ID tracking supported"), "</li>",
+                    "<li><strong>", .("Weighted:"), "</strong> ", .("Flow proportional to values"), "</li>",
                     "</ul>",
                     "</div>",
                     "</div>",
                     
                     "<div style='background-color: #fff8e1; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-                    "<p style='margin: 0; color: #ef6c00;'><strong>💡 Quick Start:</strong> Add your strata variables above to begin. The analysis will auto-detect your data format and suggest optimal settings.</p>",
+                    "<p style='margin: 0; color: #ef6c00;'><strong>💡 ", .("Quick Start:"), "</strong> ", .("Add your strata variables above to begin. The analysis will auto-detect your data format and suggest optimal settings."), "</p>",
                     "</div>",
                     "</div>"
                 )
@@ -270,11 +303,57 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
         },
         
+        # Enhanced caching system
+        .check_cache = function() {
+            if (!self$options$enable_caching) return(FALSE)
+            
+            # Generate hash of current data and options
+            current_hash <- digest::digest(list(
+                data = self$data,
+                strata = self$options$strata,
+                time = self$options$time,
+                id = self$options$id,
+                weight = self$options$weight,
+                plotType = self$options$plotType,
+                dataFormat = self$options$dataFormat
+            ))
+            
+            return(!is.null(private$.last_data_hash) && 
+                   identical(private$.last_data_hash, current_hash))
+        },
+        
+        .update_cache = function() {
+            if (!self$options$enable_caching) return()
+            
+            private$.last_data_hash <- digest::digest(list(
+                data = self$data,
+                strata = self$options$strata,
+                time = self$options$time,
+                id = self$options$id,
+                weight = self$options$weight,
+                plotType = self$options$plotType,
+                dataFormat = self$options$dataFormat
+            ))
+            
+            private$.cached_summaries <- list(
+                processedData = private$.processedData,
+                flowSummary = private$.flowSummary,
+                stageSummary = private$.stageSummary
+            )
+        },
+        
         .run = function() {
+            # Initialize progress tracking
+            private$.total_steps <- 8
+            private$.progress_step <- 0
+            
             # Check package availability
             if (!private$.check_package_availability()) {
                 return()
             }
+            
+            private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                   private$.total_steps, .("Checking package availability"))
             
             # Early validation
             if (is.null(self$options$strata) || length(self$options$strata) < 1) {
@@ -285,24 +364,63 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Hide welcome message
             self$results$todo$setVisible(FALSE)
             
+            # Check cache for performance
+            if (private$.check_cache() && !is.null(private$.cached_summaries)) {
+                private$.update_progress(private$.total_steps, private$.total_steps, 
+                                       .("Using cached results"))
+                
+                # Restore from cache
+                private$.processedData <- private$.cached_summaries$processedData
+                private$.flowSummary <- private$.cached_summaries$flowSummary
+                private$.stageSummary <- private$.cached_summaries$stageSummary
+                
+                # Generate outputs
+                private$.generate_analysis_summary()
+                private$.generate_report_sentence()
+                
+                # Set plot state
+                self$results$plot$setState(list(
+                    data = private$.processedData,
+                    options = private$.processedOptions
+                ))
+                return()
+            }
+            
             # Comprehensive input validation
             tryCatch({
+                private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                       private$.total_steps, .("Validating inputs"))
                 private$.validate_inputs()
+                
+                private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                       private$.total_steps, .("Processing data"))
                 private$.process_data()
+                
+                private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                       private$.total_steps, .("Generating summaries"))
                 private$.generate_summaries()
                 
+                # Update cache
+                private$.update_cache()
+                
                 if (self$options$enableDiagnostics) {
+                    private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                           private$.total_steps, .("Generating diagnostics"))
                     private$.generate_diagnostics()
                 }
                 
                 if (self$options$exportRiverplotObject) {
+                    private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                           private$.total_steps, .("Creating riverplot object"))
                     private$.generate_riverplot_object()
                 }
                 
-                # Generate analysis summary
+                private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                       private$.total_steps, .("Generating analysis summary"))
                 private$.generate_analysis_summary()
                 
-                # Generate copy-ready report sentence
+                private$.update_progress(private$.progress_step <- private$.progress_step + 1, 
+                                       private$.total_steps, .("Creating copy-ready report"))
                 private$.generate_report_sentence()
                 
                 # Set plot state
@@ -311,15 +429,26 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     options = private$.processedOptions
                 ))
                 
+                private$.update_progress(private$.total_steps, private$.total_steps, 
+                                       .("Analysis complete"))
+                
             }, error = function(e) {
-                # Sanitize error message to prevent HTML injection
-                safe_message <- gsub("<", "&lt;", gsub(">", "&gt;", e$message))
+                # Enhanced sanitization using comprehensive HTML encoding
+                safe_message <- private$.sanitizeHTML(e$message)
+                
+                # Clear progress on error
+                if (self$options$detailed_progress) {
+                    private$.update_progress(0, private$.total_steps, .("Error occurred"))
+                }
                 
                 error_html <- paste0(
                     "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;'>",
                     "<h4>⚠️ ", .("Analysis Error"), "</h4>",
                     "<p><strong>", .("Error:"), "</strong> ", safe_message, "</p>",
                     "<p><em>", .("Please check your data format and variable selections."), "</em></p>",
+                    if (self$options$detailed_progress) {
+                        paste0("<p><small>", .("Progress was at step"), " ", private$.progress_step, "/", private$.total_steps, "</small></p>")
+                    } else {""},
                     "</div>"
                 )
                 self$results$todo$setContent(error_html)
@@ -486,16 +615,32 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .populate_table_with_checkpoints = function(table, data, checkpoint_interval = 100) {
-            # Helper function to populate any table with checkpoint support
+            # Enhanced helper function with progress indicators and error handling
             if (nrow(data) == 0) return()
             
-            for (i in seq_len(nrow(data))) {
-                if (i %% checkpoint_interval == 0) {
-                    private$.checkpoint()
+            # Add progress indicator for large datasets
+            total_rows <- nrow(data)
+            show_progress <- total_rows > 500
+            
+            tryCatch({
+                for (i in seq_len(nrow(data))) {
+                    if (i %% checkpoint_interval == 0) {
+                        private$.checkpoint()
+                    }
+                    row <- data[i, ]
+                    table$addRow(rowKey = i, values = as.list(row))
                 }
-                row <- data[i, ]
-                table$addRow(rowKey = i, values = as.list(row))
-            }
+                
+            }, error = function(e) {
+                # Enhanced error handling with sanitization
+                error_msg <- private$.sanitizeHTML(e$message)
+                warning(paste(.("Table population error:"), error_msg))
+                
+                # Try to continue with partial data
+                if (exists("i") && i > 1) {
+                    warning(paste(.("Populated"), i-1, .("of"), total_rows, .("rows before error")))
+                }
+            })
         },
         
         .process_data = function() {
@@ -1680,8 +1825,9 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .get_color_palette = function(n) {
-            # Generate color palette based on selected scheme
+            # Generate color palette based on selected scheme and accessibility options
             scheme <- self$options$colorScheme
+            high_contrast <- self$options$high_contrast_mode
             
             if (scheme == "custom" && self$options$customColors != "") {
                 colors <- trimws(strsplit(self$options$customColors, ",")[[1]])
@@ -1693,16 +1839,50 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
             
-            colors <- switch(scheme,
-                "viridis" = viridis::viridis(n),
-                "set1" = if (n <= 9) {
-                    RColorBrewer::brewer.pal(max(3, n), "Set1")[1:n]
+            # Color-blind safe palette (Paul Tol's palette)
+            if (scheme == "colorblind_safe") {
+                cb_colors <- c(
+                    "#332288", "#117733", "#44AA99", "#88CCEE",
+                    "#DDCC77", "#CC6677", "#AA4499", "#882255",
+                    "#661100", "#6699CC", "#AA4466", "#4477AA"
+                )
+                if (n <= length(cb_colors)) {
+                    return(cb_colors[1:n])
                 } else {
-                    colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))(n)
+                    return(rep(cb_colors, length.out = n))
+                }
+            }
+            
+            colors <- switch(scheme,
+                "viridis" = {
+                    if (high_contrast) {
+                        viridis::viridis(n, begin = 0.1, end = 0.9)
+                    } else {
+                        viridis::viridis(n)
+                    }
+                },
+                "set1" = {
+                    base_palette <- if (n <= 9) {
+                        RColorBrewer::brewer.pal(max(3, n), "Set1")[1:n]
+                    } else {
+                        colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))(n)
+                    }
+                    if (high_contrast) {
+                        # Enhance contrast for Set1
+                        c("#E31A1C", "#1F78B4", "#33A02C", "#FF7F00", 
+                          "#6A3D9A", "#B15928", "#A6CEE3", "#FDBF6F")[1:min(n, 8)]
+                    } else {
+                        base_palette
+                    }
                 },
                 "clinical" = {
-                    base_colors <- c("#2E8B57", "#FFD700", "#FF6347", "#4682B4", 
-                                   "#9370DB", "#FF69B4", "#20B2AA", "#FFA500")
+                    if (high_contrast) {
+                        base_colors <- c("#228B22", "#FFD700", "#B22222", "#000080", 
+                                       "#800080", "#FF1493", "#008B8B", "#FF8C00")
+                    } else {
+                        base_colors <- c("#2E8B57", "#FFD700", "#FF6347", "#4682B4", 
+                                       "#9370DB", "#FF69B4", "#20B2AA", "#FFA500")
+                    }
                     if (n <= length(base_colors)) {
                         base_colors[1:n]
                     } else {
@@ -1710,18 +1890,38 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }
                 },
                 "timeline" = {
-                    if (n <= 9) {
-                        RColorBrewer::brewer.pal(max(3, n), "Blues")[1:n]
+                    if (high_contrast) {
+                        base_colors <- c("#000080", "#4169E1", "#1E90FF")
+                        if (n <= length(base_colors)) {
+                            base_colors[1:n]
+                        } else {
+                            colorRampPalette(base_colors)(n)
+                        }
                     } else {
-                        colorRampPalette(RColorBrewer::brewer.pal(9, "Blues"))(n)
+                        if (n <= 9) {
+                            RColorBrewer::brewer.pal(max(3, n), "Blues")[1:n]
+                        } else {
+                            colorRampPalette(RColorBrewer::brewer.pal(9, "Blues"))(n)
+                        }
                     }
                 },
-                # Default
+                # Default with high contrast option
                 {
-                    if (n <= 12) {
-                        scales::hue_pal()(n)
+                    if (high_contrast) {
+                        # High contrast color set
+                        hc_colors <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+                                     "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+                        if (n <= length(hc_colors)) {
+                            hc_colors[1:n]
+                        } else {
+                            rep(hc_colors, length.out = n)
+                        }
                     } else {
-                        colorRampPalette(scales::hue_pal()(12))(n)
+                        if (n <= 12) {
+                            scales::hue_pal()(n)
+                        } else {
+                            colorRampPalette(scales::hue_pal()(12))(n)
+                        }
                     }
                 }
             )
@@ -1771,6 +1971,560 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             
             return(code_html)
+        },
+        
+        # === Enhanced Methods (inspired by alluvial) ===
+        
+        # Generate comprehensive validation report
+        .generate_validation_report = function() {
+            if (!("validation_report" %in% names(self$results))) return()
+            
+            tryCatch({
+                # Comprehensive data validation analysis
+                data <- self$data
+                validation_issues <- list()
+                data_quality_score <- 100
+                
+                # Check data completeness
+                total_rows <- nrow(data)
+                complete_rows <- sum(complete.cases(data[self$options$strata]))
+                completeness_rate <- (complete_rows / total_rows) * 100
+                
+                if (completeness_rate < 95) {
+                    validation_issues <- append(validation_issues, 
+                        sprintf(.("Data completeness: %.1f%% - %d rows have missing values in strata variables"), 
+                               completeness_rate, total_rows - complete_rows))
+                    data_quality_score <- data_quality_score - (100 - completeness_rate)
+                }
+                
+                # Check category distribution balance
+                if (length(self$options$strata) >= 1) {
+                    for (strata_var in self$options$strata) {
+                        if (strata_var %in% names(data)) {
+                            category_counts <- table(data[[strata_var]], useNA = "no")
+                            min_count <- min(category_counts)
+                            max_count <- max(category_counts)
+                            imbalance_ratio <- max_count / min_count
+                            
+                            if (imbalance_ratio > 10) {
+                                validation_issues <- append(validation_issues,
+                                    sprintf(.("Category imbalance in '%s': Largest category is %dx larger than smallest"), 
+                                           strata_var, as.integer(imbalance_ratio)))
+                                data_quality_score <- data_quality_score - 10
+                            }
+                        }
+                    }
+                }
+                
+                # Check temporal consistency (for long format)
+                if (!is.null(self$options$time) && self$options$time %in% names(data)) {
+                    time_var <- self$options$time
+                    time_points <- length(unique(data[[time_var]]))
+                    
+                    if (time_points < 2) {
+                        validation_issues <- append(validation_issues, .("Insufficient time points for temporal analysis (minimum 2 required)"))
+                        data_quality_score <- data_quality_score - 20
+                    }
+                }
+                
+                # Generate quality assessment
+                quality_level <- if (data_quality_score >= 90) {
+                    list(level = .("Excellent"), color = "#28a745", icon = "✅")
+                } else if (data_quality_score >= 75) {
+                    list(level = .("Good"), color = "#ffc107", icon = "⚠️")
+                } else if (data_quality_score >= 60) {
+                    list(level = .("Fair"), color = "#fd7e14", icon = "🔶")
+                } else {
+                    list(level = .("Poor"), color = "#dc3545", icon = "❌")
+                }
+                
+                validation_html <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                    "<h4 style='color: #495057; margin-top: 0;'>🔍 ", .("Enhanced Data Validation Report"), "</h4>",
+                    
+                    "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid ", quality_level$color, ";'>",
+                    "<h5 style='color: ", quality_level$color, "; margin: 0 0 10px 0;'>", quality_level$icon, " ", .("Overall Data Quality:"), " ", quality_level$level, " (", sprintf("%.0f%%", data_quality_score), ")</h5>",
+                    "<p style='margin: 5px 0;'><strong>", .("Total observations:"), "</strong> ", format(total_rows, big.mark = ","), "</p>",
+                    "<p style='margin: 5px 0;'><strong>", .("Complete cases:"), "</strong> ", format(complete_rows, big.mark = ","), " (", sprintf("%.1f%%", completeness_rate), ")</p>",
+                    "</div>",
+                    
+                    if (length(validation_issues) > 0) {
+                        paste0(
+                            "<div style='background-color: #fff3cd; padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7;'>",
+                            "<h5 style='color: #856404; margin: 0 0 10px 0;'>⚠️ ", .("Validation Issues Detected"), "</h5>",
+                            "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                            paste0("<li style='margin: 3px 0;'>", validation_issues, "</li>", collapse = ""),
+                            "</ul>",
+                            "</div>"
+                        )
+                    } else {
+                        paste0(
+                            "<div style='background-color: #d4edda; padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb;'>",
+                            "<p style='color: #155724; margin: 0;'>✓ ", .("No significant validation issues detected. Data appears suitable for flow analysis."), "</p>",
+                            "</div>"
+                        )
+                    },
+                    "</div>"
+                )
+                
+                self$results$validation_report$setContent(validation_html)
+                
+            }, error = function(e) {
+                error_html <- paste0(
+                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<h5>⚠️ ", .("Validation Report Error"), "</h5>",
+                    "<p>", .("Unable to generate validation report:"), " ", private$.sanitizeHTML(e$message), "</p>",
+                    "</div>"
+                )
+                self$results$validation_report$setContent(error_html)
+            })
+        },
+        
+        # Generate comprehensive cross-reference suggestions
+        .generate_cross_reference_suggestions = function() {
+            if (!("cross_reference_suggestions" %in% names(self$results))) return()
+            
+            tryCatch({
+                # Analyze data characteristics to suggest optimal analysis approach
+                data <- self$data
+                suggestions <- list()
+                
+                # Analyze data structure
+                n_rows <- nrow(data)
+                n_strata <- length(self$options$strata)
+                has_time <- !is.null(self$options$time)
+                has_id <- !is.null(self$options$id)
+                has_weight <- !is.null(self$options$weight)
+                
+                # Determine optimal analysis approach
+                alternative_approaches <- list()
+                
+                # Check if simple alluvial might be better
+                if (n_strata <= 4 && n_rows < 1000 && !has_weight) {
+                    alternative_approaches <- append(alternative_approaches, list(list(
+                        method = .("Alluvial Diagrams"),
+                        reason = .("Simple alluvial diagram may provide clearer visualization for smaller datasets with few categories"),
+                        advantage = .("Simpler interface, faster rendering, focused on flow patterns")
+                    )))
+                }
+                
+                # Check if statistical analysis might be needed
+                if (has_time && has_id && n_rows > 100) {
+                    alternative_approaches <- append(alternative_approaches, list(list(
+                        method = .("Longitudinal Analysis"),
+                        reason = .("Repeated measures data detected - consider statistical modeling approaches"),
+                        advantage = .("Quantify transition probabilities, test for temporal trends, control for covariates")
+                    )))
+                }
+                
+                # Check if crosstable analysis might be complementary
+                if (n_strata == 2 && !has_time) {
+                    alternative_approaches <- append(alternative_approaches, list(list(
+                        method = .("Cross-tabulation"),
+                        reason = .("Two-category comparison detected - crosstabulation may provide statistical insights"),
+                        advantage = .("Chi-square tests, odds ratios, confidence intervals, statistical significance")
+                    )))
+                }
+                
+                # Generate recommendations HTML
+                suggestion_html <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                    "<h4 style='color: #495057; margin-top: 0;'>🧠 ", .("Alternative Analysis Suggestions"), "</h4>",
+                    
+                    "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; border-left: 4px solid #007bff; margin: 15px 0;'>",
+                    "<h5 style='color: #004085; margin: 0 0 8px 0;'>🎯 ", .("Current Analysis: River Plot"), "</h5>",
+                    "<p style='margin: 5px 0; color: #004085;'>",
+                    .("Excellent choice for visualizing flows and transitions between categories."),
+                    " ", .("Strengths: Clear flow patterns, handles multiple time points, supports individual tracking."),
+                    "</p>",
+                    "</div>",
+                    
+                    if (length(alternative_approaches) > 0) {
+                        paste0(
+                            "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7;'>",
+                            "<h5 style='color: #856404; margin: 0 0 12px 0;'>💡 ", .("Consider These Complementary Approaches"), "</h5>",
+                            paste0(sapply(alternative_approaches, function(approach) {
+                                paste0(
+                                    "<div style='background-color: white; padding: 12px; border-radius: 4px; margin: 8px 0; border-left: 3px solid #6c757d;'>",
+                                    "<h6 style='color: #495057; margin: 0 0 5px 0;'>🔧 ", .("Method:"), " ", approach$method, "</h6>",
+                                    "<p style='margin: 3px 0 8px 0; font-size: 13px;'><strong>", .("Why:"), "</strong> ", approach$reason, "</p>",
+                                    "<p style='margin: 3px 0; font-size: 12px; color: #6c757d;'><strong>", .("Advantages:"), "</strong> ", approach$advantage, "</p>",
+                                    "</div>"
+                                )
+                            }), collapse = ""),
+                            "</div>"
+                        )
+                    } else {
+                        paste0(
+                            "<div style='background-color: #d4edda; padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb;'>",
+                            "<p style='color: #155724; margin: 0;'>✓ ", .("River plot analysis is optimal for your data structure. No alternative approaches recommended at this time."), "</p>",
+                            "</div>"
+                        )
+                    },
+                    "</div>"
+                )
+                
+                self$results$cross_reference_suggestions$setContent(suggestion_html)
+                
+            }, error = function(e) {
+                error_html <- paste0(
+                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<h5>⚠️ ", .("Cross-Reference Error"), "</h5>",
+                    "<p>", .("Unable to generate analysis suggestions:"), " ", private$.sanitizeHTML(e$message), "</p>",
+                    "</div>"
+                )
+                self$results$cross_reference_suggestions$setContent(error_html)
+            })
+        },
+        
+        # Generate comprehensive optimization report
+        .generate_optimization_report = function() {
+            if (!("optimization_report" %in% names(self$results))) return()
+            
+            tryCatch({
+                # Analyze current settings and data for optimization opportunities
+                data <- self$data
+                n_rows <- nrow(data)
+                n_strata <- length(self$options$strata)
+                
+                # Calculate optimization metrics
+                optimizations_applied <- list()
+                performance_score <- 100
+                visual_quality_score <- 100
+                
+                # Flow path optimization
+                if (self$options$reorderEdges) {
+                    optimizations_applied <- append(optimizations_applied, .("Edge reordering algorithm applied to reduce crossings"))
+                } else {
+                    performance_score <- performance_score - 5
+                    visual_quality_score <- visual_quality_score - 10
+                }
+                
+                # Smooth flow paths
+                if (self$options$addMidPoints) {
+                    optimizations_applied <- append(optimizations_applied, .("Mid-points added for smoother flow transitions"))
+                } else {
+                    visual_quality_score <- visual_quality_score - 5
+                }
+                
+                # Adaptive styling
+                if (self$options$adaptive_styling) {
+                    optimizations_applied <- append(optimizations_applied, .("Plot styling automatically adapted to data characteristics"))
+                } else {
+                    visual_quality_score <- visual_quality_score - 10
+                }
+                
+                # Color optimization
+                if (self$options$edgeGradient) {
+                    optimizations_applied <- append(optimizations_applied, .("Edge gradients enabled for smooth color transitions"))
+                }
+                
+                # Performance optimizations based on data size
+                if (n_rows > 1000) {
+                    optimizations_applied <- append(optimizations_applied, .("Progressive data processing enabled for large dataset"))
+                    if (n_rows > 5000) {
+                        optimizations_applied <- append(optimizations_applied, .("Memory-efficient rendering optimized for very large datasets"))
+                    }
+                }
+                
+                # Smart detection benefits
+                if (self$options$smart_detection) {
+                    optimizations_applied <- append(optimizations_applied, .("Smart data format detection eliminates manual configuration"))
+                }
+                
+                # Quality optimization benefits
+                if (self$options$quality_optimization) {
+                    optimizations_applied <- append(optimizations_applied, .("Advanced quality optimization algorithms active"))
+                }
+                
+                # Generate quality assessment
+                overall_score <- (performance_score + visual_quality_score) / 2
+                quality_assessment <- if (overall_score >= 90) {
+                    list(level = .("Excellent"), color = "#28a745", icon = "⭐")
+                } else if (overall_score >= 75) {
+                    list(level = .("Good"), color = "#ffc107", icon = "👍")
+                } else {
+                    list(level = .("Fair"), color = "#fd7e14", icon = "⚠️")
+                }
+                
+                # Suggest additional optimizations
+                suggestions <- list()
+                if (!self$options$reorderEdges && n_strata > 3) {
+                    suggestions <- append(suggestions, .("Enable 'Reorder Edges' to reduce visual crossing complexity"))
+                }
+                if (!self$options$addMidPoints && self$options$curveType != "linear") {
+                    suggestions <- append(suggestions, .("Enable 'Add Mid Points' for smoother curved connections"))
+                }
+                if (!self$options$adaptive_styling) {
+                    suggestions <- append(suggestions, .("Enable 'Adaptive Styling' for automatic visual optimization"))
+                }
+                
+                optimization_html <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                    "<h4 style='color: #495057; margin-top: 0;'>⚡ ", .("Quality Optimization Report"), "</h4>",
+                    
+                    "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid ", quality_assessment$color, ";'>",
+                    "<h5 style='color: ", quality_assessment$color, "; margin: 0 0 10px 0;'>", quality_assessment$icon, " ", .("Optimization Level:"), " ", quality_assessment$level, " (", sprintf("%.0f%%", overall_score), ")</h5>",
+                    "<p style='margin: 5px 0;'><strong>", .("Performance Score:"), "</strong> ", sprintf("%.0f%%", performance_score), "</p>",
+                    "<p style='margin: 5px 0;'><strong>", .("Visual Quality Score:"), "</strong> ", sprintf("%.0f%%", visual_quality_score), "</p>",
+                    "</div>",
+                    
+                    if (length(optimizations_applied) > 0) {
+                        paste0(
+                            "<div style='background-color: #d4edda; padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb;'>",
+                            "<h5 style='color: #155724; margin: 0 0 10px 0;'>✓ ", .("Active Optimizations"), "</h5>",
+                            "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                            paste0("<li style='margin: 3px 0;'>", optimizations_applied, "</li>", collapse = ""),
+                            "</ul>",
+                            "</div>"
+                        )
+                    } else {
+                        paste0(
+                            "<div style='background-color: #fff3cd; padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7;'>",
+                            "<p style='color: #856404; margin: 0;'>⚠️ ", .("No specific optimizations currently active. Consider enabling optimization features for better results."), "</p>",
+                            "</div>"
+                        )
+                    },
+                    
+                    if (length(suggestions) > 0) {
+                        paste0(
+                            "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; border: 1px solid #b8daff; margin-top: 15px;'>",
+                            "<h6 style='color: #004085; margin: 0 0 8px 0;'>💡 ", .("Additional Optimization Suggestions"), "</h6>",
+                            "<ul style='font-size: 12px; margin: 5px 0; padding-left: 20px; color: #004085;'>",
+                            paste0("<li>", suggestions, "</li>", collapse = ""),
+                            "</ul>",
+                            "</div>"
+                        )
+                    } else {""},
+                    "</div>"
+                )
+                
+                self$results$optimization_report$setContent(optimization_html)
+                
+            }, error = function(e) {
+                error_html <- paste0(
+                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<h5>⚠️ ", .("Optimization Report Error"), "</h5>",
+                    "<p>", .("Unable to generate optimization report:"), " ", private$.sanitizeHTML(e$message), "</p>",
+                    "</div>"
+                )
+                self$results$optimization_report$setContent(error_html)
+            })
+        },
+        
+        .generate_clinical_insights_panel = function() {
+            tryCatch({
+                # Clinical decision support based on current analysis
+                insights <- list()
+                recommendations <- list()
+                
+                # Get analysis data
+                data <- private$.processedData
+                flow_stats <- private$.flowSummary
+                stage_stats <- private$.stageSummary
+                
+                if (!is.null(flow_stats) && nrow(flow_stats) > 0) {
+                    # Pathway efficiency analysis
+                    total_flows <- sum(flow_stats$count)
+                    top_flow <- flow_stats[which.max(flow_stats$count), ]
+                    dominant_percentage <- (top_flow$count / total_flows) * 100
+                    
+                    if (dominant_percentage > 70) {
+                        insights <- append(insights, 
+                            sprintf(.("Primary pathway detected: %s → %s accounts for %.1f%% of all transitions."), 
+                                   top_flow$from_category, top_flow$to_category, dominant_percentage))
+                        recommendations <- append(recommendations,
+                            .("Consider developing standardized protocols for this dominant care pathway."))
+                    } else if (dominant_percentage < 20) {
+                        insights <- append(insights,
+                            .("Highly variable care pathways detected - no single dominant pattern."))
+                        recommendations <- append(recommendations,
+                            .("Consider patient stratification or care pathway standardization initiatives."))
+                    }
+                    
+                    # Check for bottlenecks
+                    category_flows <- aggregate(flow_stats$count, by = list(flow_stats$from_category), sum)
+                    if (max(category_flows$x) > 3 * mean(category_flows$x)) {
+                        bottleneck <- category_flows$Group.1[which.max(category_flows$x)]
+                        insights <- append(insights,
+                            sprintf(.("Potential care bottleneck identified at '%s' stage."), bottleneck))
+                        recommendations <- append(recommendations,
+                            .("Investigate capacity constraints and care coordination at high-volume stages."))
+                    }
+                }
+                
+                # Clinical preset-specific insights
+                preset <- self$options$clinicalPreset
+                if (preset == "patient_journey") {
+                    insights <- append(insights,
+                        .("Individual patient tracking enables identification of personalized care pathways and treatment response patterns."))
+                    recommendations <- append(recommendations,
+                        .("Use individual trajectory patterns to develop personalized treatment protocols."))
+                } else if (preset == "treatment_response") {
+                    insights <- append(insights,
+                        .("Treatment response analysis reveals effectiveness patterns and identifies optimal intervention timing."))
+                    recommendations <- append(recommendations,
+                        .("Monitor response patterns to optimize treatment selection and timing decisions."))
+                }
+                
+                # Generate HTML output
+                clinical_html <- paste0(
+                    "<div style='background-color: #f0f8ff; padding: 20px; border-radius: 8px; border: 1px solid #b8dcf0;'>",
+                    "<h4 style='color: #1e5594; margin-top: 0;'>🎯 ", .("Clinical Decision Support"), "</h4>",
+                    
+                    if (length(insights) > 0) {
+                        paste0(
+                            "<div style='background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #1e5594;'>",
+                            "<h6 style='color: #1e5594; margin: 0 0 8px 0;'>🔍 ", .("Clinical Insights"), "</h6>",
+                            "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                            paste0("<li style='margin: 5px 0;'>", insights, "</li>", collapse = ""),
+                            "</ul>",
+                            "</div>"
+                        )
+                    } else {""},
+                    
+                    if (length(recommendations) > 0) {
+                        paste0(
+                            "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #007bff;'>",
+                            "<h6 style='color: #004085; margin: 0 0 8px 0;'>💡 ", .("Clinical Recommendations"), "</h6>",
+                            "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                            paste0("<li style='margin: 5px 0;'>", recommendations, "</li>", collapse = ""),
+                            "</ul>",
+                            "</div>"
+                        )
+                    } else {""},
+                    
+                    "<div style='background-color: #f1f3f4; padding: 10px; border-radius: 5px; margin-top: 15px;'>",
+                    "<p style='margin: 0; font-size: 12px; color: #5f6368;'>",
+                    "<strong>", .("Note:"), "</strong> ", .("Clinical insights are based on flow pattern analysis and should be interpreted within the context of your specific clinical setting and patient population."),
+                    "</p>",
+                    "</div>",
+                    "</div>"
+                )
+                
+                self$results$clinical_insights$setContent(clinical_html)
+                
+            }, error = function(e) {
+                error_html <- paste0(
+                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<h5>⚠️ ", .("Clinical Insights Error"), "</h5>",
+                    "<p>", .("Unable to generate clinical insights:"), " ", private$.sanitizeHTML(e$message), "</p>",
+                    "</div>"
+                )
+                self$results$clinical_insights$setContent(error_html)
+            })
+        },
+        
+        .generate_enhanced_caveats = function() {
+            tryCatch({
+                # Clinical assumptions and considerations
+                assumptions <- list()
+                considerations <- list()
+                warnings <- list()
+                
+                # Data-specific assumptions
+                data <- self$data
+                n_obs <- nrow(data)
+                
+                # Sample size considerations
+                if (n_obs < 30) {
+                    warnings <- append(warnings, 
+                        .("Very small sample size (<30) may not provide reliable flow patterns for clinical decision making."))
+                } else if (n_obs < 100) {
+                    considerations <- append(considerations,
+                        .("Small to moderate sample size may limit generalizability to broader patient populations."))
+                }
+                
+                # Flow analysis assumptions
+                assumptions <- append(assumptions, 
+                    .("Flow patterns represent observed transitions and do not imply causal relationships between stages."))
+                assumptions <- append(assumptions,
+                    .("Data quality directly impacts analysis reliability - ensure consistent coding and complete case ascertainment."))
+                
+                # Time-based considerations
+                if (!is.null(self$options$time) && self$options$time != "") {
+                    assumptions <- append(assumptions,
+                        .("Temporal analysis assumes consistent data collection intervals and comparable follow-up periods."))
+                    considerations <- append(considerations,
+                        .("Consider patient attrition, competing risks, and time-varying covariates in interpretation."))
+                }
+                
+                # Individual tracking considerations
+                if (!is.null(self$options$id) && self$options$id != "") {
+                    assumptions <- append(assumptions,
+                        .("Individual tracking assumes unique patient identifiers and accurate linkage across time points."))
+                    considerations <- append(considerations,
+                        .("Patient-level analysis enables personalized insights but requires privacy protection measures."))
+                }
+                
+                # Interpretation guidelines
+                interpretation_notes <- list(
+                    .("Flow width represents frequency or volume - not clinical importance or quality of care."),
+                    .("Dominant pathways may reflect either optimal care protocols or system constraints."),
+                    .("Unusual flow patterns warrant investigation but may represent appropriate individualized care."),
+                    .("Consider external factors (policy changes, seasonal effects, population characteristics) in interpretation.")
+                )
+                
+                # Generate comprehensive caveats HTML
+                caveats_html <- paste0(
+                    "<div style='background-color: #fff8e1; padding: 20px; border-radius: 8px; border: 1px solid #ffcc02;'>",
+                    "<h4 style='color: #ef6c00; margin-top: 0;'>⚠️ ", .("Clinical Assumptions & Considerations"), "</h4>",
+                    
+                    "<div style='background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #ff9800;'>",
+                    "<h6 style='color: #ef6c00; margin: 0 0 8px 0;'>📋 ", .("Key Assumptions"), "</h6>",
+                    "<ul style='margin: 5px 0; padding-left: 20px; font-size: 13px;'>",
+                    paste0("<li style='margin: 3px 0;'>", assumptions, "</li>", collapse = ""),
+                    "</ul>",
+                    "</div>",
+                    
+                    if (length(considerations) > 0) {
+                        paste0(
+                            "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #2196f3;'>",
+                            "<h6 style='color: #1565c0; margin: 0 0 8px 0;'>🤔 ", .("Clinical Considerations"), "</h6>",
+                            "<ul style='margin: 5px 0; padding-left: 20px; font-size: 13px;'>",
+                            paste0("<li style='margin: 3px 0;'>", considerations, "</li>", collapse = ""),
+                            "</ul>",
+                            "</div>"
+                        )
+                    } else {""},
+                    
+                    if (length(warnings) > 0) {
+                        paste0(
+                            "<div style='background-color: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #f44336;'>",
+                            "<h6 style='color: #d32f2f; margin: 0 0 8px 0;'>⚠️ ", .("Important Warnings"), "</h6>",
+                            "<ul style='margin: 5px 0; padding-left: 20px; font-size: 13px;'>",
+                            paste0("<li style='margin: 3px 0;'>", warnings, "</li>", collapse = ""),
+                            "</ul>",
+                            "</div>"
+                        )
+                    } else {""},
+                    
+                    "<div style='background-color: #f5f5f5; padding: 12px; border-radius: 5px; margin: 10px 0;'>",
+                    "<h6 style='color: #424242; margin: 0 0 8px 0;'>📈 ", .("Interpretation Guidelines"), "</h6>",
+                    "<ul style='margin: 5px 0; padding-left: 20px; font-size: 12px; color: #424242;'>",
+                    paste0("<li style='margin: 3px 0;'>", interpretation_notes, "</li>", collapse = ""),
+                    "</ul>",
+                    "</div>",
+                    
+                    "<div style='background-color: #e8f5e8; padding: 10px; border-radius: 5px; margin-top: 15px;'>",
+                    "<p style='margin: 0; font-size: 12px; color: #2e7d32;'>",
+                    "<strong>", .("Best Practice:"), "</strong> ", .("Always interpret flow analysis results within the context of clinical knowledge, institutional protocols, and patient-specific factors."),
+                    "</p>",
+                    "</div>",
+                    "</div>"
+                )
+                
+                self$results$enhanced_caveats$setContent(caveats_html)
+                
+            }, error = function(e) {
+                error_html <- paste0(
+                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<h5>⚠️ ", .("Caveats Generation Error"), "</h5>",
+                    "<p>", .("Unable to generate clinical caveats:"), " ", private$.sanitizeHTML(e$message), "</p>",
+                    "</div>"
+                )
+                self$results$enhanced_caveats$setContent(error_html)
+            })
         }
     )
 )

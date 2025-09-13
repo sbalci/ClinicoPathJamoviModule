@@ -232,3 +232,4 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 - README.md is overwritten. make changes in README.Rmd
 - errors or warnings with jmvtools::prepare() means that the module cannot function in jamovi. there should be no errors.
 - private$.checkpoint() is internal jamovi function we do not define it
+- jmvtools::check() does not evaluate functions. it checks the presence of jamovi program. To evaluate functions use jmvtools::prepare and devtools::document()

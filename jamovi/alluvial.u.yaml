@@ -22,7 +22,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Optional Variables
+        label: Optional Variables (Traditional Format)
         children:
           - type: VariablesListBox
             name: time
@@ -39,6 +39,38 @@ children:
             maxItemCount: 1
             isTarget: true
             label: "Weight Variable"
+      - type: TargetLayoutBox
+        label: Advanced Data Formats
+        children:
+          - type: VariablesListBox
+            name: value_var
+            maxItemCount: 1
+            isTarget: true
+            label: "Value Variable"
+          - type: VariablesListBox
+            name: source_var
+            maxItemCount: 1
+            isTarget: true
+            label: "Source Variable"
+          - type: VariablesListBox
+            name: target_var
+            maxItemCount: 1
+            isTarget: true
+            label: "Target Variable"
+          - type: VariablesListBox
+            name: node_vars
+            isTarget: true
+            label: "Node Variables (2+ for multi-node format)"
+          - type: VariablesListBox
+            name: grouping_var
+            maxItemCount: 1
+            isTarget: true
+            label: "Grouping Variable"
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+            label: "Time Variable (Advanced)"
   - type: CollapseBox
     label: Options
     stretchFactor: 1
@@ -100,12 +132,15 @@ children:
                         width: large
                         enable: (usetitle)
   - type: CollapseBox
-    label: Sankey & Advanced Options
+    label: Diagram Type & Styling
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
+          - type: ComboBox
+            name: diagram_type
+            label: "Diagram Type"
           - type: ComboBox
             name: engine
             label: "Plot Engine"
@@ -115,10 +150,113 @@ children:
           - type: ComboBox
             name: curveType
             label: "Curve Type"
+          - type: ComboBox
+            name: color_palette
+            label: "Color Palette"
+          - type: ComboBox
+            name: theme_style
+            label: "Theme Style"
+          - type: ComboBox
+            name: flow_direction
+            label: "Flow Direction"
+  - type: CollapseBox
+    label: Node & Edge Styling
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: node_width
+            format: number
+            label: "Node Width"
+          - type: TextBox
+            name: node_spacing
+            format: number
+            label: "Node Spacing"
+          - type: TextBox
+            name: edge_alpha
+            format: number
+            label: "Edge Transparency"
           - type: CheckBox
             name: labelNodes
-            label: "Show Node Labels"
+            label: "Show Node Labels (Basic)"
+          - type: CheckBox
+            name: show_labels
+            label: "Enhanced Label Styling"
+          - type: TextBox
+            name: label_size
+            format: number
+            label: "Label Size"
           - type: CheckBox
             name: showCounts
             label: "Show Count Values"
+          - type: CheckBox
+            name: show_values
+            label: "Show Flow Values"
+          - type: ComboBox
+            name: value_format
+            label: "Value Format"
+          - type: ComboBox
+            name: sort_nodes
+            label: "Sort Nodes"
+          - type: TextBox
+            name: iterations
+            format: number
+            label: "Layout Iterations"
+  - type: CollapseBox
+    label: Titles & Output
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plot_title
+            format: string
+            label: "Plot Title (Advanced)"
+            width: large
+          - type: TextBox
+            name: plot_subtitle
+            format: string
+            label: "Plot Subtitle"
+            width: large
+          - type: CheckBox
+            name: verbose
+            label: "Show Plot Summary"
+          - type: ComboBox
+            name: output_format
+            label: "Output Format"
+          - type: CheckBox
+            name: show_statistics
+            label: "Show Flow Statistics"
+          - type: CheckBox
+            name: show_interpretation
+            label: "Show Interpretation"
+  - type: CollapseBox
+    label: Clinical & Advanced Features
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: clinical_mode
+            label: "Clinical Analysis Mode"
+          - type: ComboBox
+            name: clinical_preset
+            label: "Clinical Preset"
+            enable: (clinical_mode)
+          - type: CheckBox
+            name: enhanced_gradients
+            label: "Enhanced Edge Gradients"
+          - type: CheckBox
+            name: flow_optimization
+            label: "Optimize Flow Layout"
+          - type: CheckBox
+            name: advanced_diagnostics
+            label: "Advanced Diagnostics"
+          - type: ComboBox
+            name: export_compatibility
+            label: "Export Compatibility"
 

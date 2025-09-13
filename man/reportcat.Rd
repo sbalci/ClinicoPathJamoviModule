@@ -17,8 +17,13 @@ allowed.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$error} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

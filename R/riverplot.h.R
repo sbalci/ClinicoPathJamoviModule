@@ -42,7 +42,13 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             curveGranularity = 100,
             backgroundLabels = FALSE,
             exportRiverplotObject = FALSE,
-            clinicalPreset = "none", ...) {
+            clinicalPreset = "none",
+            smart_detection = TRUE,
+            enhanced_validation = TRUE,
+            multi_format_support = FALSE,
+            adaptive_styling = TRUE,
+            quality_optimization = FALSE,
+            cross_reference_mode = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -281,6 +287,30 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "clinical_pathway",
                     "population_trends"),
                 default="none")
+            private$..smart_detection <- jmvcore::OptionBool$new(
+                "smart_detection",
+                smart_detection,
+                default=TRUE)
+            private$..enhanced_validation <- jmvcore::OptionBool$new(
+                "enhanced_validation",
+                enhanced_validation,
+                default=TRUE)
+            private$..multi_format_support <- jmvcore::OptionBool$new(
+                "multi_format_support",
+                multi_format_support,
+                default=FALSE)
+            private$..adaptive_styling <- jmvcore::OptionBool$new(
+                "adaptive_styling",
+                adaptive_styling,
+                default=TRUE)
+            private$..quality_optimization <- jmvcore::OptionBool$new(
+                "quality_optimization",
+                quality_optimization,
+                default=FALSE)
+            private$..cross_reference_mode <- jmvcore::OptionBool$new(
+                "cross_reference_mode",
+                cross_reference_mode,
+                default=FALSE)
 
             self$.addOption(private$..id)
             self$.addOption(private$..time)
@@ -319,6 +349,12 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..backgroundLabels)
             self$.addOption(private$..exportRiverplotObject)
             self$.addOption(private$..clinicalPreset)
+            self$.addOption(private$..smart_detection)
+            self$.addOption(private$..enhanced_validation)
+            self$.addOption(private$..multi_format_support)
+            self$.addOption(private$..adaptive_styling)
+            self$.addOption(private$..quality_optimization)
+            self$.addOption(private$..cross_reference_mode)
         }),
     active = list(
         id = function() private$..id$value,
@@ -357,7 +393,13 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         curveGranularity = function() private$..curveGranularity$value,
         backgroundLabels = function() private$..backgroundLabels$value,
         exportRiverplotObject = function() private$..exportRiverplotObject$value,
-        clinicalPreset = function() private$..clinicalPreset$value),
+        clinicalPreset = function() private$..clinicalPreset$value,
+        smart_detection = function() private$..smart_detection$value,
+        enhanced_validation = function() private$..enhanced_validation$value,
+        multi_format_support = function() private$..multi_format_support$value,
+        adaptive_styling = function() private$..adaptive_styling$value,
+        quality_optimization = function() private$..quality_optimization$value,
+        cross_reference_mode = function() private$..cross_reference_mode$value),
     private = list(
         ..id = NA,
         ..time = NA,
@@ -395,7 +437,13 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..curveGranularity = NA,
         ..backgroundLabels = NA,
         ..exportRiverplotObject = NA,
-        ..clinicalPreset = NA)
+        ..clinicalPreset = NA,
+        ..smart_detection = NA,
+        ..enhanced_validation = NA,
+        ..multi_format_support = NA,
+        ..adaptive_styling = NA,
+        ..quality_optimization = NA,
+        ..cross_reference_mode = NA)
 )
 
 riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -411,7 +459,10 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         stageTable = function() private$.items[["stageTable"]],
         transitionMatrix = function() private$.items[["transitionMatrix"]],
         riverplotObject = function() private$.items[["riverplotObject"]],
-        riverplotCode = function() private$.items[["riverplotCode"]]),
+        riverplotCode = function() private$.items[["riverplotCode"]],
+        validation_report = function() private$.items[["validation_report"]],
+        cross_reference_suggestions = function() private$.items[["cross_reference_suggestions"]],
+        optimization_report = function() private$.items[["optimization_report"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -549,7 +600,22 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="riverplotCode",
                 title="CRAN Riverplot Compatible Code",
-                visible="(exportRiverplotObject)"))}))
+                visible="(exportRiverplotObject)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="validation_report",
+                title="Enhanced Validation Report",
+                visible="(enhanced_validation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="cross_reference_suggestions",
+                title="Alternative Analysis Suggestions",
+                visible="(cross_reference_mode)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="optimization_report",
+                title="Quality Optimization Report",
+                visible="(quality_optimization)"))}))
 
 riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "riverplotBase",
@@ -722,6 +788,18 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clinicalPreset Apply predefined configurations optimized for common
 #'   clinical scenarios. Each preset automatically configures plot type,
 #'   styling, and display options for the selected clinical use case.
+#' @param smart_detection Automatically detect optimal data format and
+#'   analysis approach based on provided variables.
+#' @param enhanced_validation Apply comprehensive data validation with
+#'   user-friendly error messages and suggestions.
+#' @param multi_format_support Enable experimental support for additional data
+#'   formats (source-target, multi-node).
+#' @param adaptive_styling Automatically adapt plot styling based on data
+#'   characteristics and size.
+#' @param quality_optimization Apply advanced algorithms to optimize flow
+#'   layout, reduce crossings, and improve readability.
+#' @param cross_reference_mode Show suggestions for when alluvial function
+#'   might be more appropriate for the data.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -734,6 +812,9 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$transitionMatrix} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$riverplotObject} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riverplotCode} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$validation_report} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$cross_reference_suggestions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$optimization_report} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -781,7 +862,13 @@ riverplot <- function(
     curveGranularity = 100,
     backgroundLabels = FALSE,
     exportRiverplotObject = FALSE,
-    clinicalPreset = "none") {
+    clinicalPreset = "none",
+    smart_detection = TRUE,
+    enhanced_validation = TRUE,
+    multi_format_support = FALSE,
+    adaptive_styling = TRUE,
+    quality_optimization = FALSE,
+    cross_reference_mode = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("riverplot requires jmvcore to be installed (restart may be required)")
@@ -839,7 +926,13 @@ riverplot <- function(
         curveGranularity = curveGranularity,
         backgroundLabels = backgroundLabels,
         exportRiverplotObject = exportRiverplotObject,
-        clinicalPreset = clinicalPreset)
+        clinicalPreset = clinicalPreset,
+        smart_detection = smart_detection,
+        enhanced_validation = enhanced_validation,
+        multi_format_support = multi_format_support,
+        adaptive_styling = adaptive_styling,
+        quality_optimization = quality_optimization,
+        cross_reference_mode = cross_reference_mode)
 
     analysis <- riverplotClass$new(
         options = options,

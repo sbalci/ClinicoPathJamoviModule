@@ -56,13 +56,6 @@ run devtools::document() to see if there are any errors
 
 
 
-- alluvial - Alluvial Diagrams
-echo "/check-function alluvial" | claude
-add jjsankeyfier features as additional options and plots to alluvial function
-add riverplot features as additional options and plots to alluvial function
-echo "/prepare-translation alluvial" | claude
-echo "/review-function alluvial" | claude
-echo "/fix-function alluvial" | claude
 
 
 - chisqposttest - Chi-Square Post-Hoc Tests

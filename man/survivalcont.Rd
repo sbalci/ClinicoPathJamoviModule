@@ -229,6 +229,7 @@ not needed.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr

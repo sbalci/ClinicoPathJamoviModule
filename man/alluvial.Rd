@@ -24,7 +24,38 @@ alluvial(
   curveType = "cubic",
   engine = "easyalluvial",
   labelNodes = TRUE,
-  showCounts = FALSE
+  showCounts = FALSE,
+  verbose = TRUE,
+  diagram_type = "alluvial",
+  value_var,
+  source_var,
+  target_var,
+  node_vars,
+  grouping_var,
+  time_var,
+  node_width = 0.5,
+  node_spacing = 0.1,
+  edge_alpha = 0.6,
+  color_palette = "default",
+  show_labels = TRUE,
+  label_size = 10,
+  iterations = 32,
+  show_values = TRUE,
+  value_format = "raw",
+  sort_nodes = "original",
+  flow_direction = "left_right",
+  plot_title = "",
+  plot_subtitle = "",
+  theme_style = "default",
+  show_statistics = FALSE,
+  show_interpretation = TRUE,
+  output_format = "plot_only",
+  clinical_mode = FALSE,
+  clinical_preset = "none",
+  enhanced_gradients = FALSE,
+  flow_optimization = FALSE,
+  advanced_diagnostics = FALSE,
+  export_compatibility = "standard"
 )
 }
 \arguments{
@@ -70,9 +101,82 @@ appearance.}
 \item{engine}{Choose plotting engine: easyalluvial for automatic plots,
 ggalluvial for manual control.}
 
-\item{labelNodes}{Add labels to nodes.}
+\item{labelNodes}{Show basic node labels. This is the primary label control
+that works with all plot engines.}
 
 \item{showCounts}{Display count values on nodes.}
+
+\item{verbose}{Show detailed information about the plot generation process.}
+
+\item{diagram_type}{Type of flow diagram to generate.}
+
+\item{value_var}{Variable containing flow values/weights for source-target
+format.}
+
+\item{source_var}{Variable defining source nodes for source-target format.}
+
+\item{target_var}{Variable defining target nodes for source-target format.}
+
+\item{node_vars}{Variables for multi-level node definitions in
+source-target format.}
+
+\item{grouping_var}{Variable for grouping flows.}
+
+\item{time_var}{Variable for temporal flow analysis in source-target
+format.}
+
+\item{node_width}{Width of nodes in the diagram.}
+
+\item{node_spacing}{Spacing between nodes.}
+
+\item{edge_alpha}{Transparency level for edges.}
+
+\item{color_palette}{Color palette for the diagram.}
+
+\item{show_labels}{Enable enhanced label styling with custom fonts and
+positioning. Complements basic labeling.}
+
+\item{label_size}{Size of node labels.}
+
+\item{iterations}{Number of iterations for layout optimization.}
+
+\item{show_values}{Display flow values on diagram.}
+
+\item{value_format}{Format for displaying flow values.}
+
+\item{sort_nodes}{Method for sorting nodes.}
+
+\item{flow_direction}{Direction of flow in the diagram.}
+
+\item{plot_title}{Advanced plot title (overrides basic title when set).}
+
+\item{plot_subtitle}{Subtitle for the plot.}
+
+\item{theme_style}{Theme style for the plot.}
+
+\item{show_statistics}{Display statistical summary of flows.}
+
+\item{show_interpretation}{Display interpretation of the diagram.}
+
+\item{output_format}{Format for output display.}
+
+\item{clinical_mode}{Enable clinical-specific features and interpretations
+for medical data analysis.}
+
+\item{clinical_preset}{Apply predefined settings optimized for common
+clinical scenarios.}
+
+\item{enhanced_gradients}{Apply sophisticated color gradients to flow edges
+for better visual appeal.}
+
+\item{flow_optimization}{Automatically optimize flow paths to reduce
+crossings and improve readability.}
+
+\item{advanced_diagnostics}{Display detailed flow analysis, transition
+patterns, and data quality metrics.}
+
+\item{export_compatibility}{Choose output format compatibility for
+integration with other tools.}
 }
 \value{
 A results object containing:
@@ -80,7 +184,20 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$datatab} \tab \tab \tab \tab \tab a table \cr
+\code{results$stats} \tab \tab \tab \tab \tab a table \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$diagnostics_report} \tab \tab \tab \tab \tab a html \cr
+\code{results$flow_metrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$transition_analysis} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$datatab$asDF}
+
+\code{as.data.frame(results$datatab)}
 }
 \description{
 Alluvial & Sankey Diagrams
