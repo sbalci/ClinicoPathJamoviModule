@@ -1,5 +1,5 @@
 ---
-name: ggoncoplot
+name: jjoncoplot
 title: Genomic Landscape Visualization
 menuGroup: OncoPathologyT
 menuSubgroup: 'Molecular Pathology Plots'
@@ -18,7 +18,7 @@ description:
                 KRAS = c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0),
                 PIK3CA = c(1, 1, 0, 0, 1, 0, 1, 1, 0, 0)
             )
-            ggoncoplot(
+            jjoncoplot(
                 data = data,
                 sampleVar = "SampleID",
                 geneVars = c("TP53", "KRAS", "PIK3CA")
@@ -36,7 +36,7 @@ options:
     - name: sampleVar
       title: Sample ID Variable
       type: Variable
-      suggested: [nominal]
+      suggested: [nominal, id]
       permitted: [numeric, factor, id]
       description:
           R: >
@@ -67,6 +67,18 @@ options:
           jamovi: >
             Optional clinical variables to display as annotations (e.g., age, stage, treatment response).
 
+    - name: mutationTypeVar
+      title: Mutation Type Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Variable containing mutation type information (e.g., SNV, CNV, Fusion).
+          jamovi: >
+            Select variable with mutation types to enable colored mutation coding.
+
     - name: plotType
       title: Plot Type
       type: List
@@ -84,17 +96,37 @@ options:
           jamovi: >
             Select the type of genomic visualization to create.
 
-    - name: maxGenes
-      title: Maximum Genes to Display
+    - name: topn
+      title: Top N Genes
       type: Number
-      default: 20
-      min: 5
-      max: 100
+      default: 10
+      min: 3
+      max: 50
       description:
           R: >
-            Maximum number of genes to display (most frequently mutated).
+            Number of most frequently mutated genes to display.
           jamovi: >
-            Maximum number of genes to display (ranked by mutation frequency).
+            Select top N genes ranked by mutation frequency (ggoncoplot style).
+
+    - name: genesToInclude
+      title: Specific Genes to Include
+      type: String
+      default: ""
+      description:
+          R: >
+            Comma-separated list of specific genes to include (overrides topn).
+          jamovi: >
+            Comma-separated gene names to specifically include (e.g., "TP53,KRAS,PIK3CA").
+
+    - name: genesToIgnore
+      title: Genes to Exclude
+      type: String
+      default: ""
+      description:
+          R: >
+            Comma-separated list of genes to exclude from analysis.
+          jamovi: >
+            Comma-separated gene names to exclude from the oncoplot.
 
     - name: maxSamples
       title: Maximum Samples to Display
@@ -112,18 +144,20 @@ options:
       title: Sort Samples By
       type: List
       options:
+        - title: Hierarchical (ggoncoplot)
+          name: hierarchical
         - title: Mutation Count
           name: mutation_count
         - title: Sample ID
           name: sample_id
         - title: Clinical Variable
           name: clinical
-      default: mutation_count
+      default: hierarchical
       description:
           R: >
             Method for sorting samples in the plot.
           jamovi: >
-            Choose how to sort samples in the visualization.
+            Choose sample sorting method. Hierarchical uses ggoncoplot's base-2 scoring algorithm.
 
     - name: colorScheme
       title: Color Scheme
@@ -147,7 +181,7 @@ options:
     - name: showMutationLoad
       title: Show Mutation Load
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display mutation load bar plot alongside oncoplot.
@@ -157,12 +191,22 @@ options:
     - name: showGeneFreq
       title: Show Gene Frequency
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display gene mutation frequency alongside oncoplot.
           jamovi: >
-            Display mutation frequency for each gene as a side bar plot.
+            Display mutation frequency for each gene as a side bar plot (ggoncoplot style).
+
+    - name: showTMB
+      title: Show Tumor Mutation Burden
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display tumor mutation burden (TMB) bar plot.
+          jamovi: >
+            Show total mutation burden per sample as marginal barplot.
 
     - name: showClinicalAnnotation
       title: Show Clinical Annotations
@@ -213,7 +257,7 @@ options:
     - name: showLegend
       title: Show Legend
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display plot legend.

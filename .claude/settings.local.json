@@ -43,7 +43,8 @@
       "Bash(awk:*)",
       "Read(///**)",
       "Bash(cut:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "WebFetch(domain:selkamand.github.io)"
     ],
     "deny": [],
     "ask": [],
