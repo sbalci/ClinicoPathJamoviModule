@@ -34,12 +34,32 @@ items:
           - cols
           - excl
 
-    - name:  educationalOverview
-      title: 'Analysis Guide'
+    - name:  assumptionsCheck
+      title: 'Assumptions Validation'
       type:  Html
+      visible: (showAssumptionsCheck)
       clearWith:
           - rows
           - cols
+          - showAssumptionsCheck
+          
+    - name:  clinicalSummary
+      title: 'Clinical Summary'
+      type:  Html
+      visible: (showClinicalSummary)
+      clearWith:
+          - rows
+          - cols
+          - showClinicalSummary
+          
+    - name:  educationalOverview
+      title: 'Analysis Guide'
+      type:  Html
+      visible: (showEducational)
+      clearWith:
+          - rows
+          - cols
+          - showEducational
 
     - name:  weightedDataInfo
       title: 'Weighted Data Information'
@@ -62,10 +82,13 @@ items:
     - name:  residualsAnalysis
       title: 'Standardized Residuals Analysis'
       type:  Html
+      visible: (showResiduals)
       clearWith:
           - rows
           - cols
           - excl
+          - showResiduals
+          - residualsCutoff
 
     - name:  multipleTestingInfo
       title: 'Multiple Testing Information'
@@ -112,12 +135,15 @@ items:
     - name:  detailedComparisons
       title: 'Detailed Pairwise Comparison Tables'
       type:  Html
+      visible: (showDetailedTables)
       clearWith:
           - rows
           - cols
           - posthoc
           - sig
           - excl
+          - showDetailedTables
+          - testSelection
 
     - name:  exportTable
       title: 'Exported Results'
@@ -140,6 +166,31 @@ items:
           - rows
           - cols
           - exportResults
+
+    - name:  exampleInterpretations
+      title: 'Example Interpretations'
+      type:  Html
+      visible: (showExampleInterpretations)
+      clearWith:
+          - rows
+          - cols
+          - showExampleInterpretations
+          
+    - name:  reportSentences
+      title: 'Report-Ready Sentences'
+      type:  Html
+      visible: (copyReadySentences)
+      clearWith:
+          - rows
+          - cols
+          - copyReadySentences
+          
+    - name:  glossaryPanel
+      title: 'Statistical Glossary'
+      type:  Html
+      visible: (showGlossary)
+      clearWith:
+          - showGlossary
 
     - name:  plot
       title: 'Standardized Residuals'

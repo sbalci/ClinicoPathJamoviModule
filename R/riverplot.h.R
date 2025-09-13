@@ -48,7 +48,11 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             multi_format_support = FALSE,
             adaptive_styling = TRUE,
             quality_optimization = FALSE,
-            cross_reference_mode = FALSE, ...) {
+            cross_reference_mode = FALSE,
+            high_contrast_mode = FALSE,
+            large_dataset_mode = FALSE,
+            enable_caching = TRUE,
+            detailed_progress = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -164,6 +168,7 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "set1",
                     "clinical",
                     "timeline",
+                    "colorblind_safe",
                     "custom"),
                 default="default")
             private$..customColors <- jmvcore::OptionString$new(
@@ -311,6 +316,22 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "cross_reference_mode",
                 cross_reference_mode,
                 default=FALSE)
+            private$..high_contrast_mode <- jmvcore::OptionBool$new(
+                "high_contrast_mode",
+                high_contrast_mode,
+                default=FALSE)
+            private$..large_dataset_mode <- jmvcore::OptionBool$new(
+                "large_dataset_mode",
+                large_dataset_mode,
+                default=FALSE)
+            private$..enable_caching <- jmvcore::OptionBool$new(
+                "enable_caching",
+                enable_caching,
+                default=TRUE)
+            private$..detailed_progress <- jmvcore::OptionBool$new(
+                "detailed_progress",
+                detailed_progress,
+                default=FALSE)
 
             self$.addOption(private$..id)
             self$.addOption(private$..time)
@@ -355,6 +376,10 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..adaptive_styling)
             self$.addOption(private$..quality_optimization)
             self$.addOption(private$..cross_reference_mode)
+            self$.addOption(private$..high_contrast_mode)
+            self$.addOption(private$..large_dataset_mode)
+            self$.addOption(private$..enable_caching)
+            self$.addOption(private$..detailed_progress)
         }),
     active = list(
         id = function() private$..id$value,
@@ -399,7 +424,11 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         multi_format_support = function() private$..multi_format_support$value,
         adaptive_styling = function() private$..adaptive_styling$value,
         quality_optimization = function() private$..quality_optimization$value,
-        cross_reference_mode = function() private$..cross_reference_mode$value),
+        cross_reference_mode = function() private$..cross_reference_mode$value,
+        high_contrast_mode = function() private$..high_contrast_mode$value,
+        large_dataset_mode = function() private$..large_dataset_mode$value,
+        enable_caching = function() private$..enable_caching$value,
+        detailed_progress = function() private$..detailed_progress$value),
     private = list(
         ..id = NA,
         ..time = NA,
@@ -443,7 +472,11 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..multi_format_support = NA,
         ..adaptive_styling = NA,
         ..quality_optimization = NA,
-        ..cross_reference_mode = NA)
+        ..cross_reference_mode = NA,
+        ..high_contrast_mode = NA,
+        ..large_dataset_mode = NA,
+        ..enable_caching = NA,
+        ..detailed_progress = NA)
 )
 
 riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -462,7 +495,9 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         riverplotCode = function() private$.items[["riverplotCode"]],
         validation_report = function() private$.items[["validation_report"]],
         cross_reference_suggestions = function() private$.items[["cross_reference_suggestions"]],
-        optimization_report = function() private$.items[["optimization_report"]]),
+        optimization_report = function() private$.items[["optimization_report"]],
+        clinical_insights = function() private$.items[["clinical_insights"]],
+        enhanced_caveats = function() private$.items[["enhanced_caveats"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -615,7 +650,17 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="optimization_report",
                 title="Quality Optimization Report",
-                visible="(quality_optimization)"))}))
+                visible="(quality_optimization)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_insights",
+                title="Clinical Decision Support",
+                visible="(clinicalPreset != 'none')"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="enhanced_caveats",
+                title="Clinical Assumptions & Considerations",
+                visible="(enhanced_validation)"))}))
 
 riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "riverplotBase",
@@ -800,6 +845,14 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   layout, reduce crossings, and improve readability.
 #' @param cross_reference_mode Show suggestions for when alluvial function
 #'   might be more appropriate for the data.
+#' @param high_contrast_mode Enable high contrast colors and larger fonts for
+#'   better accessibility and readability.
+#' @param large_dataset_mode Enable memory-efficient processing for datasets
+#'   with >10,000 observations. May reduce rendering detail for performance.
+#' @param enable_caching Cache computation results to improve performance with
+#'   repeated analysis of the same data.
+#' @param detailed_progress Show detailed progress information during
+#'   long-running operations. Useful for very large datasets.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -815,6 +868,8 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$validation_report} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cross_reference_suggestions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$optimization_report} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinical_insights} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$enhanced_caveats} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -868,7 +923,11 @@ riverplot <- function(
     multi_format_support = FALSE,
     adaptive_styling = TRUE,
     quality_optimization = FALSE,
-    cross_reference_mode = FALSE) {
+    cross_reference_mode = FALSE,
+    high_contrast_mode = FALSE,
+    large_dataset_mode = FALSE,
+    enable_caching = TRUE,
+    detailed_progress = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("riverplot requires jmvcore to be installed (restart may be required)")
@@ -932,7 +991,11 @@ riverplot <- function(
         multi_format_support = multi_format_support,
         adaptive_styling = adaptive_styling,
         quality_optimization = quality_optimization,
-        cross_reference_mode = cross_reference_mode)
+        cross_reference_mode = cross_reference_mode,
+        high_contrast_mode = high_contrast_mode,
+        large_dataset_mode = large_dataset_mode,
+        enable_caching = enable_caching,
+        detailed_progress = detailed_progress)
 
     analysis <- riverplotClass$new(
         options = options,

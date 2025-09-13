@@ -53,6 +53,27 @@ children:
           - type: CheckBox
             name: exp
   - type: CollapseBox
+    label: Clinical Interpretation
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: clinicalPreset
+          - type: CheckBox
+            name: showClinicalSummary
+          - type: CheckBox
+            name: showExampleInterpretations
+          - type: CheckBox
+            name: copyReadySentences
+          - type: CheckBox
+            name: showAssumptionsCheck
+          - type: CheckBox
+            name: showGlossary
+          - type: CheckBox
+            name: colorBlindSafe
+  - type: CollapseBox
     label: Display Options
     collapsed: false
     children:

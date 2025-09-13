@@ -48,7 +48,11 @@ riverplot(
   multi_format_support = FALSE,
   adaptive_styling = TRUE,
   quality_optimization = FALSE,
-  cross_reference_mode = FALSE
+  cross_reference_mode = FALSE,
+  high_contrast_mode = FALSE,
+  large_dataset_mode = FALSE,
+  enable_caching = TRUE,
+  detailed_progress = FALSE
 )
 }
 \arguments{
@@ -204,6 +208,18 @@ layout, reduce crossings, and improve readability.}
 
 \item{cross_reference_mode}{Show suggestions for when alluvial function
 might be more appropriate for the data.}
+
+\item{high_contrast_mode}{Enable high contrast colors and larger fonts for
+better accessibility and readability.}
+
+\item{large_dataset_mode}{Enable memory-efficient processing for datasets
+with >10,000 observations. May reduce rendering detail for performance.}
+
+\item{enable_caching}{Cache computation results to improve performance with
+repeated analysis of the same data.}
+
+\item{detailed_progress}{Show detailed progress information during
+long-running operations. Useful for very large datasets.}
 }
 \value{
 A results object containing:
@@ -221,6 +237,8 @@ A results object containing:
 \code{results$validation_report} \tab \tab \tab \tab \tab a html \cr
 \code{results$cross_reference_suggestions} \tab \tab \tab \tab \tab a html \cr
 \code{results$optimization_report} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinical_insights} \tab \tab \tab \tab \tab a html \cr
+\code{results$enhanced_caveats} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

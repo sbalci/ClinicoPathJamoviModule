@@ -56,15 +56,6 @@ run devtools::document() to see if there are any errors
 
 
 
-
-
-- chisqposttest - Chi-Square Post-Hoc Tests
-echo "/check-function chisqposttest" | claude
-echo "/prepare-translation chisqposttest" | claude
-echo "/review-function chisqposttest" | claude
-echo "/fix-function chisqposttest" | claude
-
-
 - waterfall - Treatment Response Analysis
 echo "/check-function waterfall" | claude
 
