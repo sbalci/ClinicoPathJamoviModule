@@ -6,6 +6,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            clinicalPreset = "none",
+            guidedMode = FALSE,
             patientID = NULL,
             startTime = NULL,
             endTime = NULL,
@@ -48,6 +50,21 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 requiresData=TRUE,
                 ...)
 
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "none",
+                    "oncology_immunotherapy",
+                    "oncology_chemotherapy",
+                    "surgery_outcomes",
+                    "clinical_trial",
+                    "longitudinal_followup"),
+                default="none")
+            private$..guidedMode <- jmvcore::OptionBool$new(
+                "guidedMode",
+                guidedMode,
+                default=FALSE)
             private$..patientID <- jmvcore::OptionVariable$new(
                 "patientID",
                 patientID,
@@ -285,6 +302,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 exportSummary,
                 default=FALSE)
 
+            self$.addOption(private$..clinicalPreset)
+            self$.addOption(private$..guidedMode)
             self$.addOption(private$..patientID)
             self$.addOption(private$..startTime)
             self$.addOption(private$..endTime)
@@ -322,6 +341,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..exportSummary)
         }),
     active = list(
+        clinicalPreset = function() private$..clinicalPreset$value,
+        guidedMode = function() private$..guidedMode$value,
         patientID = function() private$..patientID$value,
         startTime = function() private$..startTime$value,
         endTime = function() private$..endTime$value,
@@ -358,6 +379,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         exportTimeline = function() private$..exportTimeline$value,
         exportSummary = function() private$..exportSummary$value),
     private = list(
+        ..clinicalPreset = NA,
+        ..guidedMode = NA,
         ..patientID = NA,
         ..startTime = NA,
         ..endTime = NA,
@@ -728,6 +751,11 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     showInterpretation = TRUE
 #' )
 #'}
+#' @param clinicalPreset Pre-configured analysis templates for common clinical
+#'   scenarios.  Selecting a preset automatically configures appropriate options
+#'   for typical research use cases.
+#' @param guidedMode Enable step-by-step guidance through the analysis process
+#'   with contextual help and recommendations.
 #' @param data The data as a data frame containing patient timeline
 #'   information.
 #' @param patientID Variable containing unique patient identifiers.
@@ -802,6 +830,8 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 swimmerplot <- function(
+    clinicalPreset = "none",
+    guidedMode = FALSE,
     data,
     patientID,
     startTime,
@@ -874,6 +904,8 @@ swimmerplot <- function(
     for (v in eventVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- swimmerplotOptions$new(
+        clinicalPreset = clinicalPreset,
+        guidedMode = guidedMode,
         patientID = patientID,
         startTime = startTime,
         endTime = endTime,

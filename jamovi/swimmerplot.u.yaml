@@ -4,12 +4,28 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Clinical Presets & Quick Setup
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: clinicalPreset
+            label: Clinical Analysis Preset
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: guidedMode
+            label: Use Guided Analysis Mode
   - type: VariableSupplier
     persistentItems: true
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Patient ID
+        label: Patient ID (Required)
         children:
           - type: VariablesListBox
             name: patientID
@@ -54,21 +70,21 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Start Time
+        label: Start Time (Required)
         children:
           - type: VariablesListBox
             name: startTime
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: End Time
+        label: End Time (Required)
         children:
           - type: VariablesListBox
             name: endTime
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Response/Status Variable
+        label: Response/Status Variable (Optional)
         children:
           - type: VariablesListBox
             name: responseVar

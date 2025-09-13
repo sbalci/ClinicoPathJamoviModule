@@ -54,208 +54,172 @@ run devtools::document() to see if there are any errors
 
 ***
 
-
-
-
-- swimmerplot - Swimmer Plot
-echo "/check-function swimmerplot" | claude
-
-echo "/prepare-translation swimmerplot" | claude
-echo "/review-function swimmerplot" | claude
-echo "/fix-function swimmerplot" | claude
-
-
 - stagemigration - Advanced TNM Stage Migration Analysis
-echo "/check-function stagemigration" | claude
 
-echo "/prepare-translation stagemigration" | claude
-echo "/review-function stagemigration" | claude
-echo "/fix-function stagemigration" | claude
+/check-function stagemigration
+
+/review-function stagemigration
+/fix-function stagemigration
 
 
 - ggoncoplot - Genomic Landscape Visualization
-echo "/check-function ggoncoplot" | claude
+/check-function ggoncoplot
 
-echo "/prepare-translation ggoncoplot" | claude
-echo "/review-function ggoncoplot" | claude
-echo "/fix-function ggoncoplot" | claude
+/review-function ggoncoplot
+/fix-function ggoncoplot
 
 
 - flexparametricadv - Advanced Flexible Parametric Survival Models
-echo "/check-function flexparametricadv" | claude
+/check-function flexparametricadv
 
-echo "/prepare-translation flexparametricadv" | claude
-echo "/review-function flexparametricadv" | claude
-echo "/fix-function flexparametricadv" | claude
+/review-function flexparametricadv
+/fix-function flexparametricadv
 
 
 - haralicktexture - Haralick Texture Analysis
-echo "/check-function haralicktexture" | claude
+/check-function haralicktexture
 
-echo "/prepare-translation haralicktexture" | claude
-echo "/review-function haralicktexture" | claude
-echo "/fix-function haralicktexture" | claude
+/review-function haralicktexture
+/fix-function haralicktexture
 
 
 - ihcstats - IHC Expression Analysis
-echo "/check-function ihcstats" | claude
+/check-function ihcstats
 
-echo "/prepare-translation ihcstats" | claude
-echo "/review-function ihcstats" | claude
-echo "/fix-function ihcstats" | claude
+/review-function ihcstats
+/fix-function ihcstats
 
 
 - spatialanalysis - Spatial Statistics from Coordinates
-echo "/check-function spatialanalysis" | claude
+/check-function spatialanalysis
 
-echo "/prepare-translation spatialanalysis" | claude
-echo "/review-function spatialanalysis" | claude
-echo "/fix-function spatialanalysis" | claude
+/review-function spatialanalysis
+/fix-function spatialanalysis
 
 
 - hierarchicalpathology - Hierarchical Mixed-Effects Models
-echo "/check-function hierarchicalpathology" | claude
+/check-function hierarchicalpathology
 
-echo "/prepare-translation hierarchicalpathology" | claude
-echo "/review-function hierarchicalpathology" | claude
-echo "/fix-function hierarchicalpathology" | claude
+/review-function hierarchicalpathology
+/fix-function hierarchicalpathology
 
 
 - consort - CONSORT Flowchart
-echo "/check-function consort" | claude
+/check-function consort
 
-echo "/prepare-translation consort" | claude
-echo "/review-function consort" | claude
-echo "/fix-function consort" | claude
+/review-function consort
+/fix-function consort
 
 
 - flowchart - Study Flowchart
-echo "/check-function flowchart" | claude
+/check-function flowchart
 
-echo "/prepare-translation flowchart" | claude
-echo "/review-function flowchart" | claude
-echo "/fix-function flowchart" | claude
+/review-function flowchart
+/fix-function flowchart
 
 
 - clinmon - Clinical Hemodynamic Monitoring
-echo "/check-function clinmon" | claude
+/check-function clinmon
 
-echo "/prepare-translation clinmon" | claude
-echo "/review-function clinmon" | claude
-echo "/fix-function clinmon" | claude
+/review-function clinmon
+/fix-function clinmon
 
 
 - pathologyagreement - Pathology Agreement Analysis
-echo "/check-function pathologyagreement" | claude
+/check-function pathologyagreement
 
-echo "/prepare-translation pathologyagreement" | claude
-echo "/review-function pathologyagreement" | claude
-echo "/fix-function pathologyagreement" | claude
+/review-function pathologyagreement
+/fix-function pathologyagreement
 
 
 - digitalvalidation - Digital Pathology Validation
-echo "/check-function digitalvalidation" | claude
+/check-function digitalvalidation
 
-echo "/prepare-translation digitalvalidation" | claude
-echo "/review-function digitalvalidation" | claude
-echo "/fix-function digitalvalidation" | claude
+/review-function digitalvalidation
+/fix-function digitalvalidation
 
 
 - mlpathology - Classification Performance Metrics for Digital Pathology
-echo "/check-function mlpathology" | claude
+/check-function mlpathology
 
-echo "/prepare-translation mlpathology" | claude
-echo "/review-function mlpathology" | claude
-echo "/fix-function mlpathology" | claude
+/review-function mlpathology
+/fix-function mlpathology
 
 
 - ihccluster - IHC Clustering Analysis
-echo "/check-function ihccluster" | claude
+/check-function ihccluster
 
-echo "/prepare-translation ihccluster" | claude
-echo "/review-function ihccluster" | claude
-echo "/fix-function ihccluster" | claude
+/review-function ihccluster
+/fix-function ihccluster
 
 
 - biopsysimulation - Biopsy Simulation Analysis
-echo "/check-function biopsysimulation" | claude
+/check-function biopsysimulation
 
-echo "/prepare-translation biopsysimulation" | claude
-echo "/review-function biopsysimulation" | claude
-echo "/fix-function biopsysimulation" | claude
+/review-function biopsysimulation
+/fix-function biopsysimulation
 
 
 - ihcscoring - IHC Scoring Standardization
-echo "/check-function ihcscoring" | claude
+/check-function ihcscoring
 
-echo "/prepare-translation ihcscoring" | claude
-echo "/review-function ihcscoring" | claude
-echo "/fix-function ihcscoring" | claude
+/review-function ihcscoring
+/fix-function ihcscoring
 
 
 - diagnosticmeta - Diagnostic Test Meta-Analysis for Pathology
-echo "/check-function diagnosticmeta" | claude
+/check-function diagnosticmeta
 
-echo "/prepare-translation diagnosticmeta" | claude
-echo "/review-function diagnosticmeta" | claude
-echo "/fix-function diagnosticmeta" | claude
+/review-function diagnosticmeta
+/fix-function diagnosticmeta
 
 
 - biomarkerresponse - Biomarker Response Association
-echo "/check-function biomarkerresponse" | claude
+/check-function biomarkerresponse
 
-echo "/prepare-translation biomarkerresponse" | claude
-echo "/review-function biomarkerresponse" | claude
-echo "/fix-function biomarkerresponse" | claude
+/review-function biomarkerresponse
+/fix-function biomarkerresponse
 
 
 - qualitycontrol - Laboratory Quality Control Statistics
-echo "/check-function qualitycontrol" | claude
+/check-function qualitycontrol
 
-echo "/prepare-translation qualitycontrol" | claude
-echo "/review-function qualitycontrol" | claude
-echo "/fix-function qualitycontrol" | claude
+/review-function qualitycontrol
+/fix-function qualitycontrol
 
 
 - metaanalysis - Meta-Analysis & Evidence Synthesis
-echo "/check-function metaanalysis" | claude
+/check-function metaanalysis
 
-echo "/prepare-translation metaanalysis" | claude
-echo "/review-function metaanalysis" | claude
-echo "/fix-function metaanalysis" | claude
+/review-function metaanalysis
+/fix-function metaanalysis
 
 
 
 
 - multiplexanalysis - Multiplex Immunofluorescence Analysis
-echo "/check-function multiplexanalysis" | claude
+/check-function multiplexanalysis
 
-echo "/prepare-translation multiplexanalysis" | claude
-echo "/review-function multiplexanalysis" | claude
-echo "/fix-function multiplexanalysis" | claude
+/review-function multiplexanalysis
+/fix-function multiplexanalysis
 
 
 - condsurvival - Conditional Survival Analysis
-echo "/check-function condsurvival" | claude
+/check-function condsurvival
 
-echo "/prepare-translation condsurvival" | claude
-echo "/review-function condsurvival" | claude
-echo "/fix-function condsurvival" | claude
+/review-function condsurvival
+/fix-function condsurvival
 
 
 - pathologycomposition - Pathology Composition Analysis
-echo "/check-function pathologycomposition" | claude
+/check-function pathologycomposition
 
-echo "/prepare-translation pathologycomposition" | claude
-echo "/review-function pathologycomposition" | claude
-echo "/fix-function pathologycomposition" | claude
+/review-function pathologycomposition
+/fix-function pathologycomposition
 
 
 - timeupdatesurvival - Time-Updated Survival Estimates
-echo "/check-function timeupdatesurvival" | claude
+/check-function timeupdatesurvival
 
-echo "/prepare-translation timeupdatesurvival" | claude
-echo "/review-function timeupdatesurvival" | claude
-echo "/fix-function timeupdatesurvival" | claude
-
-
+/review-function timeupdatesurvival
+/fix-function timeupdatesurvival
