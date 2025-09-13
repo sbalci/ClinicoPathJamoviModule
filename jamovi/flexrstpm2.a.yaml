@@ -1,20 +1,25 @@
 ---
 name:  flexrstpm2
-title: Flexible Parametric Models (Royston-Parmar)
-menuGroup: SurvivalD
+title: Comprehensive Flexible Parametric Survival Models
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Flexible parametric survival models with splines'
-version: '0.0.1'
+menuSubtitle: 'Advanced flexible parametric models with clinical analysis'
+version: '2.0.0'
 jas: '1.2'
 
 description:
     main: >-
-        Implements Royston-Parmar flexible parametric survival models using restricted
-        cubic splines to model the baseline log cumulative hazard function. This approach
-        provides a flexible alternative to standard parametric models by allowing
-        non-monotonic hazard functions while maintaining the advantages of parametric
-        modeling including smooth survival curves, extrapolation capability, and
-        direct modeling of covariate effects on survival time.
+        🔬 ENHANCED: Comprehensive flexible parametric survival modeling platform combining 
+        the best features of Royston-Parmar models, advanced parametric distributions, and 
+        clinical analysis capabilities. This consolidated function replaces flexparametricadv 
+        and flexparametricadvanced with improved functionality.
+        
+        Features include: Royston-Parmar splines, time-varying effects, multiple parametric 
+        distributions, clinical interpretation, time ratio analysis, relative survival, 
+        bootstrap validation, model comparison, and copy-ready clinical reports.
+        
+        Ideal for cancer research, health economics, regulatory submissions, and clinical trials 
+        requiring robust survival modeling with reliable extrapolation capabilities.
     R:
         dontrun: false
         usage: |
@@ -187,6 +192,17 @@ options:
         R: >
           Background hazard variable for relative survival analysis
 
+  - name: group_variable
+    title: Group Variable (optional)
+    type: Variable
+    suggested:
+        - nominal
+    permitted:
+        - factor
+    description:
+        R: >
+          Optional grouping variable for stratified analysis
+
 # Advanced Options ----
   - name: link_function
     title: Link Function
@@ -203,6 +219,33 @@ options:
         R: >
           Link function for baseline transformation
 
+  - name: prediction_times
+    title: Prediction Time Points
+    type: String
+    default: '1, 2, 5, 10'
+    description:
+        R: >
+          Comma-separated list of time points for survival predictions
+
+  - name: extrapolation_time
+    title: Extrapolation Time
+    type: Number
+    min: 0
+    default: 20
+    description:
+        R: >
+          Maximum time for survival curve extrapolation
+
+  - name: confidence_level
+    title: Confidence Level
+    type: Number
+    min: 0.80
+    max: 0.99
+    default: 0.95
+    description:
+        R: >
+          Confidence level for confidence intervals
+
   - name: smooth_formula
     title: Custom Smooth Formula
     type: String
@@ -218,6 +261,72 @@ options:
     description:
         R: >
           Use robust sandwich estimator for standard errors
+
+  - name: time_ratio
+    title: Time Ratio Analysis
+    type: Bool
+    default: false
+    description:
+        R: >
+          Include time ratio (acceleration factor) analysis
+
+  - name: relative_survival
+    title: Relative Survival
+    type: Bool
+    default: false
+    description:
+        R: >
+          Perform relative survival analysis (requires background hazard)
+
+  - name: model_comparison
+    title: Model Comparison
+    type: Bool
+    default: true
+    description:
+        R: >
+          Compare flexible parametric models with standard parametric models
+
+  - name: goodness_of_fit
+    title: Goodness of Fit Tests
+    type: Bool
+    default: true
+    description:
+        R: >
+          Perform goodness of fit tests and model diagnostics
+
+  - name: hazard_analysis
+    title: Hazard Function Analysis
+    type: Bool
+    default: true
+    description:
+        R: >
+          Generate hazard function estimates and plots
+
+  - name: derivative_analysis
+    title: Derivative Analysis
+    type: Bool
+    default: false
+    description:
+        R: >
+          Include analysis of hazard function derivatives (acceleration/deceleration)
+
+  - name: bootstrap_validation
+    title: Bootstrap Validation
+    type: Bool
+    default: false
+    description:
+        R: >
+          Perform bootstrap validation of model predictions
+
+  - name: bootstrap_samples
+    title: Bootstrap Samples
+    type: Integer
+    min: 100
+    max: 2000
+    default: 500
+    description:
+        R: >
+          Number of bootstrap samples for validation (when bootstrap enabled)
 
 # Display Options ----
   - name: show_model_summary

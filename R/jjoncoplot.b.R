@@ -5,9 +5,9 @@
 #' @import dplyr
 #' @importFrom magrittr %>%
 #' @import ggplot2
-# @import ggoncoplot
 #' @import tidyr
 #' @import scales
+#' @import patchwork
 #' @param data Data frame containing mutation and clinical data
 #' @param sampleVar Column name for sample identifiers
 #' @param geneVars Column names for gene mutation variables
@@ -230,6 +230,9 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             colorScheme <- self$options$colorScheme %||% "default"
             showMutationLoad <- self$options$showMutationLoad %||% TRUE
             showGeneFreq <- self$options$showGeneFreq %||% TRUE
+            showTMB <- self$options$showTMB %||% FALSE
+            log10TransformTMB <- self$options$log10TransformTMB %||% TRUE
+            drawMarginalPlots <- self$options$drawMarginalPlots %||% FALSE
             showClinicalAnnotation <- self$options$showClinicalAnnotation %||% FALSE
             fontSize <- self$options$fontSize %||% 10
             showLegend <- self$options$showLegend %||% TRUE
@@ -258,20 +261,53 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         fill = "Mutation Status"
                     )
 
-                # Apply color schemes
+                # Apply clinical color schemes (color-blind safe options)
                 if (colorScheme == "default") {
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f0f0f0", "Mutation" = "#d62728"))
+                    # Color-blind safe default (blue-orange)
+                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f0f0f0", "Mutation" = "#1f77b4"))
                 } else if (colorScheme == "clinical") {
+                    # Clinical blue-green scale
                     p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#e5f5f9", "Mutation" = "#2ca02c"))
+                } else if (colorScheme == "viridis") {
+                    # Viridis color-blind safe palette
+                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f0f0f0", "Mutation" = "#440154"))
+                } else if (colorScheme == "high_contrast") {
+                    # High contrast for accessibility
+                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#ffffff", "Mutation" = "#000000"))
                 } else if (colorScheme == "mutation_type") {
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f7f7f7", "Mutation" = "#d95f02"))
+                    # Create dynamic color palette for mutation types (color-blind considerations)
+                    unique_types <- unique(mutation_matrix$mutation_type)
+                    mutation_colors <- c(
+                        "Wild-type" = "#f7f7f7",
+                        "Missense" = "#1f77b4",      # Blue (color-blind safe)
+                        "Nonsense" = "#d62728",      # Red
+                        "Frame_Shift" = "#ff7f0e",   # Orange (color-blind safe)
+                        "Splice_Site" = "#2ca02c",   # Green
+                        "In_Frame" = "#9467bd",      # Purple
+                        "SNV" = "#17becf",           # Cyan
+                        "CNV" = "#8c564b",           # Brown
+                        "Fusion" = "#e377c2",        # Pink
+                        "Mutation" = "#1f77b4"       # Blue fallback
+                    )
+                    # Filter colors to only those present in data
+                    available_colors <- mutation_colors[names(mutation_colors) %in% unique_types]
+                    p <- p + ggplot2::scale_fill_manual(values = available_colors)
                 }
                 
             } else if (plotType == "frequency") {
-                # Create gene frequency plot
+                # Create gene frequency plot with color scheme support
+                freq_color <- switch(colorScheme,
+                    "default" = "#1f77b4",
+                    "clinical" = "#2ca02c", 
+                    "viridis" = "#440154",
+                    "high_contrast" = "#000000",
+                    "mutation_type" = "#1f77b4",
+                    "#1f77b4"  # fallback
+                )
+                
                 p <- prepared_data$gene_frequencies %>%
                     ggplot2::ggplot(ggplot2::aes(x = reorder(gene, frequency), y = frequency)) +
-                    ggplot2::geom_col(fill = "#1f77b4", alpha = 0.7) +
+                    ggplot2::geom_col(fill = freq_color, alpha = 0.7) +
                     ggplot2::coord_flip() +
                     ggplot2::theme_minimal() +
                     ggplot2::theme(
@@ -290,39 +326,173 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 genes <- prepared_data$selected_genes
                 data <- prepared_data$data
 
-                cooccurrence_matrix <- matrix(0, nrow = length(genes), ncol = length(genes))
-                rownames(cooccurrence_matrix) <- genes
-                colnames(cooccurrence_matrix) <- genes
-
-                for (i in 1:length(genes)) {
-                    for (j in 1:length(genes)) {
-                        if (i != j) {
-                            cooccurrence_matrix[i, j] <- cor(data[[genes[i]]], data[[genes[j]]], use = "complete.obs")
-                        }
-                    }
+                # Ensure we have numeric data for correlation
+                gene_data <- data[genes]
+                gene_data <- lapply(gene_data, function(x) as.numeric(as.character(x)))
+                gene_data <- as.data.frame(gene_data)
+                names(gene_data) <- genes
+                
+                # Calculate correlation matrix (handle edge cases)
+                if (ncol(gene_data) < 2) {
+                    # If only one gene, create a simple single-cell matrix
+                    cooccurrence_matrix <- matrix(1, nrow = 1, ncol = 1)
+                    rownames(cooccurrence_matrix) <- genes[1]
+                    colnames(cooccurrence_matrix) <- genes[1]
+                } else {
+                    # Calculate correlation matrix
+                    cooccurrence_matrix <- stats::cor(gene_data, use = "pairwise.complete.obs", method = "pearson")
+                    
+                    # Handle NAs and ensure proper data types
+                    cooccurrence_matrix[is.na(cooccurrence_matrix)] <- 0
+                    diag(cooccurrence_matrix) <- 1  # Set diagonal to 1 for clarity
                 }
-
-                cooccurrence_df <- as.data.frame(as.table(cooccurrence_matrix))
-                names(cooccurrence_df) <- c("Gene1", "Gene2", "Correlation")
+                
+                # Convert to long format for ggplot
+                cooccurrence_df <- expand.grid(
+                    Gene1 = factor(rownames(cooccurrence_matrix), levels = rownames(cooccurrence_matrix)),
+                    Gene2 = factor(colnames(cooccurrence_matrix), levels = colnames(cooccurrence_matrix)),
+                    stringsAsFactors = FALSE
+                )
+                cooccurrence_df$Correlation <- as.numeric(as.vector(cooccurrence_matrix))
+                
+                # Ensure Correlation is properly numeric and bounded
+                cooccurrence_df$Correlation[is.na(cooccurrence_df$Correlation)] <- 0
+                cooccurrence_df$Correlation[cooccurrence_df$Correlation > 1] <- 1
+                cooccurrence_df$Correlation[cooccurrence_df$Correlation < -1] <- -1
+                
+                # Apply color scheme to co-occurrence plot
+                color_scheme_gradient <- switch(colorScheme,
+                    "default" = list(low = "#3182bd", mid = "#f0f0f0", high = "#d62728"),
+                    "clinical" = list(low = "#2ca02c", mid = "#f0f0f0", high = "#d62728"), 
+                    "viridis" = list(low = "#440154", mid = "#21908c", high = "#fde725"),
+                    "high_contrast" = list(low = "#000000", mid = "#808080", high = "#ffffff"),
+                    "mutation_type" = list(low = "#1f77b4", mid = "#f0f0f0", high = "#ff7f0e"),
+                    list(low = "#3182bd", mid = "#f0f0f0", high = "#d62728")  # fallback
+                )
 
                 p <- cooccurrence_df %>%
                     ggplot2::ggplot(ggplot2::aes(x = Gene1, y = Gene2, fill = Correlation)) +
-                    ggplot2::geom_tile() +
-                    ggplot2::scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
-                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
-                    ggplot2::labs(title = "Gene Co-occurrence Matrix")
+                    ggplot2::geom_tile(color = "white", size = 0.1) +
+                    ggplot2::scale_fill_gradient2(
+                        low = color_scheme_gradient$low, 
+                        mid = color_scheme_gradient$mid, 
+                        high = color_scheme_gradient$high, 
+                        midpoint = 0,
+                        limits = c(-1, 1),
+                        na.value = "grey90",
+                        name = "Correlation"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = fontSize),
+                        axis.text.y = ggplot2::element_text(size = fontSize),
+                        axis.title = ggplot2::element_blank(),
+                        panel.grid = ggplot2::element_blank(),
+                        legend.position = if(showLegend) "bottom" else "none"
+                    ) +
+                    ggplot2::labs(
+                        title = "Gene Co-occurrence Analysis",
+                        fill = "Correlation"
+                    )
 
             } else {
-                # Default to frequency plot
+                # Default to frequency plot with color scheme support
+                freq_color <- switch(colorScheme,
+                    "default" = "#1f77b4",
+                    "clinical" = "#2ca02c", 
+                    "viridis" = "#440154",
+                    "high_contrast" = "#000000",
+                    "mutation_type" = "#1f77b4",
+                    "#1f77b4"  # fallback
+                )
+                
                 p <- prepared_data$gene_frequencies %>%
                     ggplot2::ggplot(ggplot2::aes(x = reorder(gene, frequency), y = frequency)) +
-                    ggplot2::geom_col(fill = "#1f77b4", alpha = 0.7) +
+                    ggplot2::geom_col(fill = freq_color, alpha = 0.7) +
                     ggplot2::coord_flip() +
                     ggplot2::labs(
                         title = "Gene Mutation Frequencies",
                         x = "Gene",
                         y = "Mutation Frequency"
                     )
+            }
+            
+            # Create marginal plots if requested (ggoncoplot style)
+            if (drawMarginalPlots && plotType == "oncoplot") {
+                # Get color for marginal plots
+                marginal_color <- switch(colorScheme,
+                    "default" = "#1f77b4",
+                    "clinical" = "#2ca02c", 
+                    "viridis" = "#440154",
+                    "high_contrast" = "#000000",
+                    "mutation_type" = "#1f77b4",
+                    "#1f77b4"  # fallback
+                )
+                
+                # Create gene frequency marginal plot (right side)
+                gene_plot <- prepared_data$gene_frequencies %>%
+                    ggplot2::ggplot(ggplot2::aes(x = frequency, y = reorder(gene, frequency))) +
+                    ggplot2::geom_col(fill = marginal_color, alpha = 0.7) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        axis.text.y = ggplot2::element_blank(),
+                        axis.title.y = ggplot2::element_blank(),
+                        axis.text.x = ggplot2::element_text(size = fontSize - 2),
+                        axis.title.x = ggplot2::element_text(size = fontSize - 1),
+                        panel.grid = ggplot2::element_blank(),
+                        plot.margin = ggplot2::margin(0, 5, 0, 0)
+                    ) +
+                    ggplot2::labs(x = "Frequency") +
+                    ggplot2::scale_x_continuous(labels = scales::percent_format())
+                
+                # Create TMB plot if enabled (top)
+                if (showTMB) {
+                    # Calculate TMB per sample
+                    sample_tmb <- prepared_data$data %>%
+                        dplyr::mutate(
+                            total_mutations = rowSums(dplyr::select(., dplyr::all_of(selected_genes)), na.rm = TRUE)
+                        ) %>%
+                        dplyr::select(!!rlang::sym(self$options$sampleVar), total_mutations)
+                    
+                    # Apply log transformation if requested
+                    if (log10TransformTMB) {
+                        sample_tmb$total_mutations <- log10(sample_tmb$total_mutations + 1)  # +1 to handle zeros
+                        y_label <- "Log10(TMB + 1)"
+                    } else {
+                        y_label <- "Total Mutations"
+                    }
+                    
+                    # Get TMB color (use a complementary color or same scheme)
+                    tmb_color <- switch(colorScheme,
+                        "default" = "#ff7f0e",
+                        "clinical" = "#27ae60", 
+                        "viridis" = "#21908c",
+                        "high_contrast" = "#333333",
+                        "mutation_type" = "#ff7f0e",
+                        "#ff7f0e"  # fallback
+                    )
+                    
+                    tmb_plot <- sample_tmb %>%
+                        ggplot2::ggplot(ggplot2::aes(x = reorder(!!rlang::sym(self$options$sampleVar), total_mutations), y = total_mutations)) +
+                        ggplot2::geom_col(fill = tmb_color, alpha = 0.7) +
+                        ggplot2::theme_minimal() +
+                        ggplot2::theme(
+                            axis.text.x = ggplot2::element_blank(),
+                            axis.title.x = ggplot2::element_blank(),
+                            axis.text.y = ggplot2::element_text(size = fontSize - 2),
+                            axis.title.y = ggplot2::element_text(size = fontSize - 1),
+                            panel.grid = ggplot2::element_blank(),
+                            plot.margin = ggplot2::margin(0, 0, 5, 0)
+                        ) +
+                        ggplot2::labs(y = y_label)
+                    
+                    # Combine plots with patchwork (ggoncoplot style layout)
+                    p <- tmb_plot / (p | gene_plot) + 
+                        patchwork::plot_layout(heights = c(1, 4), widths = c(4, 1))
+                } else {
+                    # Just combine main plot with gene frequency
+                    p <- p | gene_plot + patchwork::plot_layout(widths = c(4, 1))
+                }
             }
             
             # Apply jamovi theme
@@ -501,143 +671,56 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
-        .createPlot = function(prepared_data) {
-            plotType <- self$options$plotType %||% "oncoplot"
-            colorScheme <- self$options$colorScheme %||% "default"
-            showMutationLoad <- self$options$showMutationLoad %||% TRUE
-            showGeneFreq <- self$options$showGeneFreq %||% TRUE
-            showClinicalAnnotation <- self$options$showClinicalAnnotation %||% FALSE
-            fontSize <- self$options$fontSize %||% 10
-            showLegend <- self$options$showLegend %||% TRUE
-
-            mutation_matrix <- prepared_data$mutation_matrix
-            selected_genes <- prepared_data$selected_genes
-            clinical_data <- prepared_data$clinical_data
-
-            if (plotType == "oncoplot") {
-                # Create classic oncoplot
-                p <- mutation_matrix %>%
-                    ggplot2::ggplot(ggplot2::aes(x = gene, y = !!rlang::sym(self$options$sampleVar), fill = mutation_type)) +
-                    ggplot2::geom_tile(color = "white", size = 0.1) +
-                    ggplot2::scale_x_discrete(position = "top") +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 0, size = fontSize),
-                        axis.text.y = ggplot2::element_text(size = fontSize - 2),
-                        axis.title = ggplot2::element_blank(),
-                        panel.grid = ggplot2::element_blank(),
-                        legend.position = if(showLegend) "bottom" else "none"
-                    ) +
-                    ggplot2::labs(
-                        title = "Genomic Landscape (Oncoplot)",
-                        fill = "Mutation Status"
-                    )
-
-                # Apply all color schemes
-                if (colorScheme == "default") {
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f0f0f0", "Mutation" = "#d62728"))
-                } else if (colorScheme == "clinical") {
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#e5f5f9", "Mutation" = "#2ca02c"))
-                } else if (colorScheme == "mutation_type") {
-                    # Use different colors for different mutation types if available
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f7f7f7", "Mutation" = "#d95f02"))
-                } else if (colorScheme == "custom") {
-                    # Use custom colors if provided
-                    customColors <- self$options$customColors
-                    if (!is.null(customColors) && nchar(customColors) > 0) {
-                        colors <- strsplit(customColors, ",")[[1]]
-                        if (length(colors) >= 2) {
-                            p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = colors[1], "Mutation" = colors[2]))
-                        }
-                    }
-                }
-                
-                # Add clinical annotations if enabled and data available
-                if (showClinicalAnnotation && !is.null(clinical_data) && ncol(clinical_data) > 1) {
-                    # This would require more complex implementation with cowplot or patchwork
-                    # For now, add a note that clinical annotations are available
-                    p <- p + ggplot2::labs(subtitle = "Clinical data available - see Clinical Summary table")
-                }
-
-            } else if (plotType == "frequency") {
-                # Create gene frequency plot
-                p <- prepared_data$gene_frequencies %>%
-                    ggplot2::ggplot(ggplot2::aes(x = reorder(gene, frequency), y = frequency)) +
-                    ggplot2::geom_col(fill = "#1f77b4", alpha = 0.7) +
-                    ggplot2::coord_flip() +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        axis.text = ggplot2::element_text(size = fontSize),
-                        axis.title = ggplot2::element_text(size = fontSize + 1)
-                    ) +
-                    ggplot2::labs(
-                        title = "Gene Mutation Frequencies",
-                        x = "Gene",
-                        y = "Mutation Frequency"
-                    ) +
-                    ggplot2::scale_y_continuous(labels = scales::percent_format())
-
-            } else if (plotType == "cooccurrence") {
-                # Create co-occurrence heatmap
-                genes <- prepared_data$selected_genes
-                data <- prepared_data$data
-
-                cooccurrence_matrix <- matrix(0, nrow = length(genes), ncol = length(genes))
-                rownames(cooccurrence_matrix) <- genes
-                colnames(cooccurrence_matrix) <- genes
-
-                for (i in 1:length(genes)) {
-                    for (j in 1:length(genes)) {
-                        if (i != j) {
-                            cooccurrence_matrix[i, j] <- cor(data[[genes[i]]], data[[genes[j]]], use = "complete.obs")
-                        }
-                    }
-                }
-
-                cooccurrence_df <- as.data.frame(as.table(cooccurrence_matrix))
-                names(cooccurrence_df) <- c("Gene1", "Gene2", "Correlation")
-
-                p <- cooccurrence_df %>%
-                    ggplot2::ggplot(ggplot2::aes(x = Gene1, y = Gene2, fill = Correlation)) +
-                    ggplot2::geom_tile() +
-                    ggplot2::scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = fontSize),
-                        axis.text.y = ggplot2::element_text(size = fontSize),
-                        axis.title = ggplot2::element_blank()
-                    ) +
-                    ggplot2::labs(
-                        title = "Gene Co-occurrence Analysis",
-                        fill = "Correlation"
-                    )
-            }
-
-            return(p)
-        },
 
         .init = function() {
-            # Set up instructions without validation (validation happens in .run)
+            # Set up clinical context and instructions
             instructions_html <- "
-            <h3>Genomic Landscape Visualization</h3>
-            <p>This analysis creates oncoplots to visualize mutation patterns across genes and samples.</p>
-            <h4>Data Requirements:</h4>
-            <ul>
-            <li><strong>Sample ID Variable:</strong> Unique identifier for each sample</li>
-            <li><strong>Gene Variables:</strong> Binary variables (0/1) indicating mutation status</li>
-            <li><strong>Clinical Variables:</strong> Optional variables for clinical annotations</li>
+            <div style='background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 10px 0;'>
+            <h3 style='color: #2c3e50; margin-top: 0;'>🧬 Genomic Landscape Visualization for Clinical Research</h3>
+            
+            <div style='background-color: #e8f4fd; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0;'>
+            <h4 style='color: #2980b9; margin-top: 0;'>📋 Clinical Applications</h4>
+            <p><strong>Oncoplots</strong> help pathologists and oncologists visualize mutation landscapes across cancer samples to:</p>
+            <ul style='margin-bottom: 5px;'>
+            <li><strong>Identify Driver Mutations:</strong> Frequently mutated genes (e.g., TP53, KRAS) driving cancer progression</li>
+            <li><strong>Discover Therapeutic Targets:</strong> Actionable mutations for precision medicine and targeted therapy</li>
+            <li><strong>Analyze Mutation Patterns:</strong> Co-occurring vs mutually exclusive alterations indicating pathway dependencies</li>
+            <li><strong>Assess Tumor Mutation Burden (TMB):</strong> High TMB may predict immunotherapy response</li>
+            <li><strong>Stratify Patients:</strong> Group patients by molecular profiles for clinical trials</li>
             </ul>
-            <h4>Plot Types:</h4>
-            <ul>
-            <li><strong>Classic Oncoplot:</strong> Matrix showing mutations across genes and samples</li>
-            <li><strong>Gene Frequency Plot:</strong> Bar chart of mutation frequencies by gene</li>
-            <li><strong>Co-occurrence Plot:</strong> Heatmap showing gene mutation correlations</li>
+            </div>
+
+            <div style='background-color: #fff3cd; border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0;'>
+            <h4 style='color: #e67e22; margin-top: 0;'>🔬 When to Use This Analysis</h4>
+            <ul style='margin-bottom: 5px;'>
+            <li><strong>Tumor Profiling:</strong> Characterizing mutation landscapes in cancer cohorts</li>
+            <li><strong>Biomarker Discovery:</strong> Identifying prognostic or predictive molecular markers</li>
+            <li><strong>Clinical Trial Design:</strong> Patient stratification based on genomic profiles</li>
+            <li><strong>Pathway Analysis:</strong> Understanding oncogenic pathway alterations</li>
+            <li><strong>Therapeutic Planning:</strong> Matching patients to targeted therapies</li>
             </ul>
-            <h4>Minimum Requirements:</h4>
-            <ul>
-            <li>✅ <strong>Sample ID Variable:</strong> Select a variable containing unique sample identifiers</li>
-            <li>✅ <strong>At least one Gene Variable:</strong> Select binary mutation variables (0 = wild-type, 1 = mutated)</li>
+            </div>
+
+            <div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 10px; margin: 10px 0;'>
+            <h4 style='color: #27ae60; margin-top: 0;'>📊 Data Requirements</h4>
+            <ul style='margin-bottom: 5px;'>
+            <li><strong>Sample ID:</strong> Patient/tumor identifiers (e.g., TCGA-AA-3818, P001)</li>
+            <li><strong>Gene Variables:</strong> Binary mutation status (0 = wild-type, 1 = mutated)</li>
+            <li><strong>Clinical Data:</strong> Age, stage, grade, treatment response (optional)</li>
+            <li><strong>Mutation Types:</strong> SNV, CNV, Indel classifications (optional)</li>
             </ul>
+            </div>
+
+            <div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0;'>
+            <h4 style='color: #c0392b; margin-top: 0;'>⚠️ Important Considerations</h4>
+            <ul style='margin-bottom: 5px;'>
+            <li><strong>Sample Size:</strong> Minimum 10 samples recommended for meaningful patterns</li>
+            <li><strong>Data Quality:</strong> Ensure consistent mutation calling and annotation</li>
+            <li><strong>Clinical Context:</strong> Consider tumor type, stage, and treatment history</li>
+            <li><strong>Statistical Power:</strong> Larger cohorts needed for rare mutation analysis</li>
+            </ul>
+            </div>
+            </div>
             "
 
             self$results$instructions$setContent(instructions_html)
@@ -769,6 +852,238 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (i in seq_len(nrow(plot_info))) {
                 self$results$plotInfo$addRow(rowKey = i, values = plot_info[i, ])
             }
+            
+            # Generate clinical interpretation
+            private$.generateClinicalInterpretation(prepared_data)
+        },
+        
+        .generateClinicalInterpretation = function(prepared_data) {
+            # Generate automated clinical summary based on mutation patterns
+            mutation_summary <- prepared_data$data %>%
+                dplyr::select(dplyr::all_of(prepared_data$selected_genes)) %>%
+                dplyr::summarise(dplyr::across(everything(), ~sum(.x > 0, na.rm = TRUE))) %>%
+                tidyr::pivot_longer(everything(), names_to = "gene", values_to = "mutated_samples") %>%
+                dplyr::mutate(
+                    frequency = mutated_samples / nrow(prepared_data$data),
+                    frequency_pct = round(frequency * 100, 1)
+                ) %>%
+                dplyr::arrange(dplyr::desc(frequency))
+            
+            total_samples <- nrow(prepared_data$data)
+            top_genes <- head(mutation_summary, 5)
+            
+            # Generate clinical interpretation text
+            clinical_text <- ""
+            
+            # Overall summary
+            clinical_text <- paste0(clinical_text, 
+                "<div style='background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 15px 0;'>\n",
+                "<h3 style='color: #2c3e50; margin-top: 0;'>🧬 Clinical Interpretation</h3>\n")
+            
+            # Most frequently mutated genes
+            if (nrow(top_genes) > 0) {
+                clinical_text <- paste0(clinical_text,
+                    "<div style='background-color: #e8f4fd; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0;'>\n",
+                    "<h4 style='color: #2980b9; margin-top: 0;'>📊 Most Frequently Mutated Genes</h4>\n",
+                    "<ul style='margin-bottom: 5px;'>\n")
+                
+                for (i in 1:min(3, nrow(top_genes))) {
+                    gene <- top_genes$gene[i]
+                    freq_pct <- top_genes$frequency_pct[i]
+                    count <- top_genes$mutated_samples[i]
+                    
+                    clinical_significance <- private$.getGeneSignificance(gene)
+                    
+                    clinical_text <- paste0(clinical_text,
+                        "<li><strong>", gene, "</strong>: ", count, "/", total_samples, " samples (", freq_pct, 
+                        "%) - ", clinical_significance, "</li>\n")
+                }
+                clinical_text <- paste0(clinical_text, "</ul>\n</div>\n")
+            }
+            
+            # TMB analysis if available
+            if (self$options$showTMB) {
+                tmb_data <- prepared_data$data %>%
+                    dplyr::mutate(
+                        total_mutations = rowSums(dplyr::select(., dplyr::all_of(prepared_data$selected_genes)), na.rm = TRUE)
+                    )
+                
+                avg_tmb <- mean(tmb_data$total_mutations, na.rm = TRUE)
+                high_tmb_samples <- sum(tmb_data$total_mutations >= 10, na.rm = TRUE)  # 10+ mutations threshold
+                
+                clinical_text <- paste0(clinical_text,
+                    "<div style='background-color: #e8f5e8; border-left: 4px solid #27ae60; padding: 10px; margin: 10px 0;'>\n",
+                    "<h4 style='color: #27ae60; margin-top: 0;'>🧬 Tumor Mutation Burden (TMB) Analysis</h4>\n",
+                    "<p><strong>Average TMB:</strong> ", round(avg_tmb, 2), " mutations per sample</p>\n",
+                    "<p><strong>High TMB samples (≥10 mutations):</strong> ", high_tmb_samples, "/", total_samples, 
+                    " (", round((high_tmb_samples/total_samples)*100, 1), "%)</p>\n",
+                    "<p style='font-style: italic; color: #666;'>💡 High TMB (>10-20 mutations) may predict immunotherapy response in many cancer types.</p>\n",
+                    "</div>\n")
+            }
+            
+            # Clinical recommendations based on mutation patterns
+            clinical_text <- paste0(clinical_text,
+                "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0;'>\n",
+                "<h4 style='color: #856404; margin-top: 0;'>🎯 Clinical Recommendations</h4>\n")
+            
+            # Check for actionable mutations
+            actionable_genes <- c("EGFR", "KRAS", "BRAF", "ALK", "ROS1", "NTRK1", "NTRK2", "NTRK3", "PIK3CA", "ERBB2", "MET")
+            present_actionable <- intersect(top_genes$gene[top_genes$frequency > 0], actionable_genes)
+            
+            if (length(present_actionable) > 0) {
+                clinical_text <- paste0(clinical_text,
+                    "<p><strong>Actionable mutations detected:</strong> ", paste(present_actionable, collapse = ", "), "</p>\n",
+                    "<p>• Consider targeted therapy options and clinical trial eligibility</p>\n",
+                    "<p>• Review FDA-approved drugs and companion diagnostics</p>\n")
+            }
+            
+            # Co-occurrence patterns
+            if (nrow(top_genes) >= 2) {
+                clinical_text <- paste0(clinical_text,
+                    "<p><strong>Mutation co-occurrence analysis recommended:</strong></p>\n",
+                    "<p>• Use co-occurrence plot to identify mutually exclusive or concurrent mutations</p>\n",
+                    "<p>• Consider pathway analysis for therapeutic strategy</p>\n")
+            }
+            
+            clinical_text <- paste0(clinical_text, "</div>\n")
+            
+            # Sample stratification insights
+            if (total_samples >= 10) {
+                clinical_text <- paste0(clinical_text,
+                    "<div style='background-color: #f3e5f5; border-left: 4px solid #9c27b0; padding: 10px; margin: 10px 0;'>\n",
+                    "<h4 style='color: #7b1fa2; margin-top: 0;'>👥 Sample Stratification Insights</h4>\n",
+                    "<p><strong>Sample size:</strong> ", total_samples, " samples analyzed</p>\n")
+                
+                if (total_samples >= 50) {
+                    clinical_text <- paste0(clinical_text,
+                        "<p>✅ <strong>Adequate power</strong> for mutation frequency analysis and biomarker discovery</p>\n")
+                } else if (total_samples >= 20) {
+                    clinical_text <- paste0(clinical_text,
+                        "<p>⚠️ <strong>Moderate power</strong> - consider pooling with additional cohorts for robust statistics</p>\n")
+                } else {
+                    clinical_text <- paste0(clinical_text,
+                        "<p>⚠️ <strong>Limited power</strong> - findings should be validated in larger cohorts</p>\n")
+                }
+                
+                clinical_text <- paste0(clinical_text, "</div>\n")
+            }
+            
+            clinical_text <- paste0(clinical_text, "</div>")
+            
+            # Update clinical interpretation in results
+            self$results$instructions$setContent(clinical_text)
+            
+            # Generate copy-ready clinical summary
+            private$.generateClinicalSummaryText(prepared_data, mutation_summary)
+        },
+        
+        .getGeneSignificance = function(gene) {
+            # Return clinical significance for common cancer genes
+            significance_map <- list(
+                "TP53" = "Guardian of genome, tumor suppressor frequently mutated in cancer",
+                "KRAS" = "Oncogene driving cell proliferation, therapeutic target in multiple cancers",
+                "PIK3CA" = "PI3K pathway activation, targetable with PI3K inhibitors",
+                "EGFR" = "Growth factor receptor, FDA-approved targeted therapies available",
+                "BRAF" = "MAPK pathway driver, targeted therapy available (vemurafenib, dabrafenib)",
+                "ALK" = "Fusion oncogene, targetable with ALK inhibitors (crizotinib, alectinib)",
+                "ROS1" = "Fusion oncogene, crizotinib and other ROS1 inhibitors available",
+                "NTRK1" = "Neurotrophic receptor kinase, larotrectinib/entrectinib approved",
+                "NTRK2" = "Neurotrophic receptor kinase, larotrectinib/entrectinib approved",
+                "NTRK3" = "Neurotrophic receptor kinase, larotrectinib/entrectinib approved",
+                "ERBB2" = "HER2 amplification/mutation, targeted therapy available",
+                "MET" = "Hepatocyte growth factor receptor, MET inhibitors in development",
+                "BRCA1" = "DNA repair gene, PARP inhibitor sensitivity",
+                "BRCA2" = "DNA repair gene, PARP inhibitor sensitivity",
+                "PTEN" = "Tumor suppressor, PI3K pathway regulation",
+                "APC" = "Tumor suppressor, Wnt pathway regulation",
+                "VHL" = "Tumor suppressor, angiogenesis regulation",
+                "RB1" = "Cell cycle regulation, retinoblastoma protein",
+                "CDKN2A" = "Cell cycle inhibitor, p16 tumor suppressor"
+            )
+            
+            return(significance_map[[gene]] %||% "Potential cancer-associated gene, clinical significance under investigation")
+        },
+        
+        .generateClinicalSummaryText = function(prepared_data, mutation_summary) {
+            # Generate concise, copy-ready clinical summary for reports/publications
+            total_samples <- nrow(prepared_data$data)
+            top_genes <- head(mutation_summary, 3)
+            
+            summary_text <- paste0(
+                "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0;'>\n",
+                "<h3 style='color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
+                "📄 Clinical Summary for Reports</h3>\n",
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745;'>\n",
+                "<p style='margin-bottom: 15px; font-weight: bold; color: #28a745;'>Copy-Ready Summary Text:</p>\n",
+                "<div style='font-family: Georgia, serif; line-height: 1.6; padding: 10px; background-color: #f8f9fa; border-radius: 3px;'>\n"
+            )
+            
+            # Generate publication-ready text
+            if (nrow(top_genes) > 0) {
+                summary_text <- paste0(summary_text, 
+                    "<p><strong>Genomic Analysis Summary:</strong> Analysis of ", total_samples, 
+                    " samples revealed mutation frequencies in key cancer-associated genes. ")
+                
+                # Top 3 genes summary
+                gene_summaries <- c()
+                for (i in 1:min(3, nrow(top_genes))) {
+                    gene <- top_genes$gene[i]
+                    freq_pct <- top_genes$frequency_pct[i]
+                    count <- top_genes$mutated_samples[i]
+                    
+                    gene_summaries <- c(gene_summaries, 
+                        paste0(gene, " was mutated in ", count, " samples (", freq_pct, "%)"))
+                }
+                
+                summary_text <- paste0(summary_text, 
+                    paste(gene_summaries, collapse = ", "), ". ")
+            }
+            
+            # TMB summary if available
+            if (self$options$showTMB) {
+                tmb_data <- prepared_data$data %>%
+                    dplyr::mutate(
+                        total_mutations = rowSums(dplyr::select(., dplyr::all_of(prepared_data$selected_genes)), na.rm = TRUE)
+                    )
+                avg_tmb <- round(mean(tmb_data$total_mutations, na.rm = TRUE), 1)
+                high_tmb_samples <- sum(tmb_data$total_mutations >= 10, na.rm = TRUE)
+                high_tmb_pct <- round((high_tmb_samples/total_samples)*100, 1)
+                
+                summary_text <- paste0(summary_text,
+                    "The average tumor mutation burden was ", avg_tmb, " mutations per sample, with ", 
+                    high_tmb_samples, " samples (", high_tmb_pct, "%) showing high mutation burden (≥10 mutations). ")
+            }
+            
+            # Clinical significance
+            actionable_genes <- c("EGFR", "KRAS", "BRAF", "ALK", "ROS1", "NTRK1", "NTRK2", "NTRK3", "PIK3CA", "ERBB2", "MET")
+            present_actionable <- intersect(top_genes$gene[top_genes$frequency > 0], actionable_genes)
+            
+            if (length(present_actionable) > 0) {
+                summary_text <- paste0(summary_text,
+                    "Notably, actionable mutations were identified in ", paste(present_actionable, collapse = ", "), 
+                    ", which may inform targeted therapy selection. ")
+            }
+            
+            summary_text <- paste0(summary_text,
+                "These findings contribute to understanding the genomic landscape and may inform precision medicine approaches.</p>\n")
+            
+            # Add methodology note
+            summary_text <- paste0(summary_text,
+                "</div>\n",
+                "<div style='margin-top: 15px; padding: 10px; background-color: #e9ecef; border-radius: 3px;'>\n",
+                "<p style='margin: 0; font-size: 0.9em; color: #6c757d;'><strong>Methods Note:</strong> ",
+                "Genomic landscape visualization was performed using oncoplot analysis with ", 
+                ifelse(self$options$plotType == "oncoplot", "mutation matrix visualization", 
+                ifelse(self$options$plotType == "frequency", "frequency-based analysis", "co-occurrence analysis")), 
+                ". Analysis included ", length(prepared_data$selected_genes), " genes across ", 
+                total_samples, " samples.</p>\n",
+                "</div>\n",
+                "</div>\n",
+                "</div>"
+            )
+            
+            # Set the clinical summary text in results
+            self$results$clinicalSummaryText$setContent(summary_text)
         }
     )
 )

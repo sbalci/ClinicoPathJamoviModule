@@ -10,6 +10,7 @@ jjoncoplot(
   geneVars,
   clinicalVars = NULL,
   mutationTypeVar = NULL,
+  clinicalPreset = "custom",
   plotType = "oncoplot",
   topn = 10,
   genesToInclude = "",
@@ -17,14 +18,16 @@ jjoncoplot(
   maxSamples = 50,
   sortBy = "hierarchical",
   colorScheme = "default",
-  showMutationLoad = TRUE,
-  showGeneFreq = TRUE,
+  showMutationLoad = FALSE,
+  showGeneFreq = FALSE,
+  drawMarginalPlots = FALSE,
   showTMB = FALSE,
+  log10TransformTMB = TRUE,
   showClinicalAnnotation = FALSE,
   plotWidth = 800,
   plotHeight = 600,
   fontSize = 10,
-  showLegend = TRUE
+  showLegend = FALSE
 )
 }
 \arguments{
@@ -41,7 +44,10 @@ stage, treatment).}
 \item{mutationTypeVar}{Variable containing mutation type information (e.g.,
 SNV, CNV, Fusion).}
 
-\item{plotType}{Type of plot to generate.}
+\item{clinicalPreset}{Predefined clinical analysis configurations optimized
+for specific research goals.}
+
+\item{plotType}{Type of genomic visualization to generate.}
 
 \item{topn}{Number of most frequently mutated genes to display.}
 
@@ -55,13 +61,19 @@ analysis.}
 
 \item{sortBy}{Method for sorting samples in the plot.}
 
-\item{colorScheme}{Color scheme for the oncoplot.}
+\item{colorScheme}{Color scheme for the oncoplot visualization.}
 
 \item{showMutationLoad}{Display mutation load bar plot alongside oncoplot.}
 
 \item{showGeneFreq}{Display gene mutation frequency alongside oncoplot.}
 
+\item{drawMarginalPlots}{Integrate gene frequency and TMB plots as margins
+of the main oncoplot.}
+
 \item{showTMB}{Display tumor mutation burden (TMB) bar plot.}
+
+\item{log10TransformTMB}{Apply log10 transformation to TMB values for
+better visualization.}
 
 \item{showClinicalAnnotation}{Display clinical annotations as heatmap.}
 
@@ -77,12 +89,14 @@ analysis.}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$setupGuidance} \tab \tab \tab \tab \tab a html \cr
 \code{results$main} \tab \tab \tab \tab \tab an image \cr
 \code{results$mutationSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$sampleSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$cooccurrence} \tab \tab \tab \tab \tab a table \cr
 \code{results$plotInfo} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalSummaryText} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

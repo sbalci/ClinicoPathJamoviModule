@@ -46,105 +46,163 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Label
-        label: Event Variable Options
-        style: list-inline
+      - type: TargetLayoutBox
+        label: Group Variable (Optional)
         children:
-          - type: TextBox
-            name: outcomeLevel
-            format: string
-            label: Event Level
+          - type: VariablesListBox
+            name: group_variable
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: tvc_df
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Label
-        label: Model Specifications
-        style: list-inline
+      - type: CollapseBox
+        label: Model Specification
+        collapsed: false
+        stretchFactor: 1
         children:
-          - type: ComboBox
-            name: scale
-            label: Model Scale
-          - type: ComboBox
-            name: link_function
-            label: Link Function
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Label
-        label: Spline Configuration
-        style: list-inline
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: outcomeLevel
+                format: string
+                label: Event Level
+              - type: ComboBox
+                name: scale
+                label: Model Scale
+              - type: TextBox
+                name: df
+                format: number
+                label: Degrees of Freedom
+              - type: ComboBox
+                name: link_function
+                label: Link Function
+              - type: TextBox
+                name: knots
+                format: string
+                label: Knot Positions
+              - type: TextBox
+                name: boundary_knots
+                format: string
+                label: Boundary Knots
+      - type: CollapseBox
+        label: Time-Varying Effects
+        collapsed: true
+        stretchFactor: 1
         children:
-          - type: TextBox
-            name: knots
-            format: string
-            label: Knot Positions
-          - type: TextBox
-            name: boundary_knots
-            format: string
-            label: Boundary Knots
-          - type: TextBox
-            name: smooth_formula
-            format: string
-            label: Custom Formula
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: df
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Label
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: tvc_df
+                format: number
+                label: Time-Varying Effect DF
+              - type: TextBox
+                name: smooth_formula
+                format: string
+                label: Custom Smooth Formula
+      - type: CollapseBox
+        label: Clinical Analysis Options
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: prediction_times
+                format: string
+                label: Prediction Time Points
+              - type: TextBox
+                name: extrapolation_time
+                format: number
+                label: Extrapolation Time
+              - type: TextBox
+                name: confidence_level
+                format: number
+                label: Confidence Level
+              - type: CheckBox
+                name: time_ratio
+                label: Time Ratio Analysis
+              - type: CheckBox
+                name: relative_survival
+                label: Relative Survival Analysis
+              - type: CheckBox
+                name: hazard_analysis
+                label: Hazard Function Analysis
+              - type: CheckBox
+                name: derivative_analysis
+                label: Derivative Analysis
+      - type: CollapseBox
+        label: Model Validation
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: model_comparison
+                label: Model Comparison
+              - type: CheckBox
+                name: goodness_of_fit
+                label: Goodness of Fit Tests
+              - type: CheckBox
+                name: bootstrap_validation
+                label: Bootstrap Validation
+              - type: TextBox
+                name: bootstrap_samples
+                format: number
+                label: Bootstrap Samples
+      - type: CollapseBox
         label: Advanced Options
-        style: list-inline
+        collapsed: true
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: cure_fraction
-            label: Include Cure Fraction
-          - type: CheckBox
-            name: robust_se
-            label: Robust Standard Errors
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Label
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: cure_fraction
+                label: Include Cure Fraction
+              - type: CheckBox
+                name: robust_se
+                label: Robust Standard Errors
+      - type: CollapseBox
         label: Display Options
-        style: list-inline
+        collapsed: true
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: show_model_summary
-            label: Show Model Summary
-          - type: CheckBox
-            name: show_coefficients_table
-            label: Show Coefficients Table
-          - type: CheckBox
-            name: show_survival_curves
-            label: Show Survival Curves
-          - type: CheckBox
-            name: show_hazard_curves
-            label: Show Hazard Curves
-          - type: CheckBox
-            name: show_time_varying_plots
-            label: Show Time-Varying Plots
-          - type: CheckBox
-            name: show_model_diagnostics
-            label: Show Model Diagnostics
-          - type: CheckBox
-            name: show_residuals
-            label: Show Residual Plots
-          - type: CheckBox
-            name: showSummaries
-            label: Analysis Summaries
-          - type: CheckBox
-            name: showExplanations
-            label: Method Explanations
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_model_summary
+                label: Show Model Summary
+              - type: CheckBox
+                name: show_coefficients_table
+                label: Show Coefficients Table
+              - type: CheckBox
+                name: show_survival_curves
+                label: Show Survival Curves
+              - type: CheckBox
+                name: show_hazard_curves
+                label: Show Hazard Curves
+              - type: CheckBox
+                name: show_time_varying_plots
+                label: Show Time-Varying Plots
+              - type: CheckBox
+                name: show_model_diagnostics
+                label: Show Model Diagnostics
+              - type: CheckBox
+                name: show_residuals
+                label: Show Residual Plots
+              - type: CheckBox
+                name: showSummaries
+                label: Analysis Summaries
+              - type: CheckBox
+                name: showExplanations
+                label: Method Explanations

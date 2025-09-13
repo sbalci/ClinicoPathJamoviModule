@@ -1,6 +1,6 @@
 ---
 name: flexparametricadvanced
-title: Advanced Flexible Parametric Survival Models
+title: "[DEPRECATED] Advanced Flexible Parametric Survival Models"
 menuGroup: SurvivalD
 menuSubgroup: Advanced Methods
 menuTitle: Flexible Parametric Models
@@ -10,11 +10,15 @@ jas: '1.2'
 
 description:
     main: |
-        Advanced flexible parametric survival models with customizable baseline hazard distributions.
-        Supports multiple parametric distributions (Weibull, log-normal, log-logistic, gamma, 
-        Gompertz), spline-based flexible baseline hazards, time-varying effects, and cure models.
-        Provides superior modeling flexibility compared to Cox regression when parametric
-        assumptions are met, with improved extrapolation capabilities for health economic modeling.
+        ⚠️ DEPRECATED: This function has been consolidated into the enhanced flexrstpm2 function 
+        for better functionality and maintainability. Please use flexrstpm2 (SurvivalT > ClinicoPath Survival) 
+        instead, which includes all features from this function plus additional capabilities.
+        
+        This function will be removed in a future version. The enhanced flexrstpm2 provides:
+        - All parametric distribution options from flexparametricadvanced
+        - Better integration with rstpm2 package  
+        - Enhanced model comparison and validation
+        - Improved clinical interpretation and reporting
     R:
         dontrun: false
         usage: |

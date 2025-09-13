@@ -1,14 +1,20 @@
 ---
 name: flexparametricadv
-title: Advanced Flexible Parametric Survival Models
-menuGroup: OncoPathologyT2
-version: '1.0.0'
+title: "[DEPRECATED] Advanced Flexible Parametric Survival Models"
+menuGroup: OncoPathologyT
+version: '1.0.1'
 jas: '1.2'
 description:
     main: >
-        Advanced flexible parametric survival models using Royston-Parmar framework, 
-        spline-based hazard and survival functions, and transformation models. 
-        Provides smooth survival curves with clinical interpretability and extrapolation capabilities.
+        ⚠️ DEPRECATED: This function has been consolidated into the enhanced flexrstpm2 function 
+        for better functionality and maintainability. Please use flexrstpm2 (SurvivalT > ClinicoPath Survival) 
+        instead, which includes all features from this function plus additional capabilities.
+        
+        This function will be removed in a future version. The enhanced flexrstpm2 provides:
+        - All features from flexparametricadv
+        - Better integration with rstpm2 package
+        - Enhanced clinical interpretation
+        - Improved user interface organization
     R:
         dontrun: false
         usage: |

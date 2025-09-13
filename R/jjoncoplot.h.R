@@ -10,6 +10,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             geneVars = NULL,
             clinicalVars = NULL,
             mutationTypeVar = NULL,
+            clinicalPreset = "custom",
             plotType = "oncoplot",
             topn = 10,
             genesToInclude = "",
@@ -17,14 +18,16 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             maxSamples = 50,
             sortBy = "hierarchical",
             colorScheme = "default",
-            showMutationLoad = TRUE,
-            showGeneFreq = TRUE,
+            showMutationLoad = FALSE,
+            showGeneFreq = FALSE,
+            drawMarginalPlots = FALSE,
             showTMB = FALSE,
+            log10TransformTMB = TRUE,
             showClinicalAnnotation = FALSE,
             plotWidth = 800,
             plotHeight = 600,
             fontSize = 10,
-            showLegend = TRUE, ...) {
+            showLegend = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -70,6 +73,16 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "custom",
+                    "tumor_profiling",
+                    "biomarker_discovery",
+                    "therapeutic_targets",
+                    "pathway_analysis"),
+                default="custom")
             private$..plotType <- jmvcore::OptionList$new(
                 "plotType",
                 plotType,
@@ -114,20 +127,29 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "default",
                     "mutation_type",
                     "clinical",
-                    "custom"),
+                    "viridis",
+                    "high_contrast"),
                 default="default")
             private$..showMutationLoad <- jmvcore::OptionBool$new(
                 "showMutationLoad",
                 showMutationLoad,
-                default=TRUE)
+                default=FALSE)
             private$..showGeneFreq <- jmvcore::OptionBool$new(
                 "showGeneFreq",
                 showGeneFreq,
-                default=TRUE)
+                default=FALSE)
+            private$..drawMarginalPlots <- jmvcore::OptionBool$new(
+                "drawMarginalPlots",
+                drawMarginalPlots,
+                default=FALSE)
             private$..showTMB <- jmvcore::OptionBool$new(
                 "showTMB",
                 showTMB,
                 default=FALSE)
+            private$..log10TransformTMB <- jmvcore::OptionBool$new(
+                "log10TransformTMB",
+                log10TransformTMB,
+                default=TRUE)
             private$..showClinicalAnnotation <- jmvcore::OptionBool$new(
                 "showClinicalAnnotation",
                 showClinicalAnnotation,
@@ -153,12 +175,13 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showLegend <- jmvcore::OptionBool$new(
                 "showLegend",
                 showLegend,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..sampleVar)
             self$.addOption(private$..geneVars)
             self$.addOption(private$..clinicalVars)
             self$.addOption(private$..mutationTypeVar)
+            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..plotType)
             self$.addOption(private$..topn)
             self$.addOption(private$..genesToInclude)
@@ -168,7 +191,9 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..colorScheme)
             self$.addOption(private$..showMutationLoad)
             self$.addOption(private$..showGeneFreq)
+            self$.addOption(private$..drawMarginalPlots)
             self$.addOption(private$..showTMB)
+            self$.addOption(private$..log10TransformTMB)
             self$.addOption(private$..showClinicalAnnotation)
             self$.addOption(private$..plotWidth)
             self$.addOption(private$..plotHeight)
@@ -180,6 +205,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         geneVars = function() private$..geneVars$value,
         clinicalVars = function() private$..clinicalVars$value,
         mutationTypeVar = function() private$..mutationTypeVar$value,
+        clinicalPreset = function() private$..clinicalPreset$value,
         plotType = function() private$..plotType$value,
         topn = function() private$..topn$value,
         genesToInclude = function() private$..genesToInclude$value,
@@ -189,7 +215,9 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         colorScheme = function() private$..colorScheme$value,
         showMutationLoad = function() private$..showMutationLoad$value,
         showGeneFreq = function() private$..showGeneFreq$value,
+        drawMarginalPlots = function() private$..drawMarginalPlots$value,
         showTMB = function() private$..showTMB$value,
+        log10TransformTMB = function() private$..log10TransformTMB$value,
         showClinicalAnnotation = function() private$..showClinicalAnnotation$value,
         plotWidth = function() private$..plotWidth$value,
         plotHeight = function() private$..plotHeight$value,
@@ -200,6 +228,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..geneVars = NA,
         ..clinicalVars = NA,
         ..mutationTypeVar = NA,
+        ..clinicalPreset = NA,
         ..plotType = NA,
         ..topn = NA,
         ..genesToInclude = NA,
@@ -209,7 +238,9 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..colorScheme = NA,
         ..showMutationLoad = NA,
         ..showGeneFreq = NA,
+        ..drawMarginalPlots = NA,
         ..showTMB = NA,
+        ..log10TransformTMB = NA,
         ..showClinicalAnnotation = NA,
         ..plotWidth = NA,
         ..plotHeight = NA,
@@ -228,7 +259,8 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sampleSummary = function() private$.items[["sampleSummary"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
         cooccurrence = function() private$.items[["cooccurrence"]],
-        plotInfo = function() private$.items[["plotInfo"]]),
+        plotInfo = function() private$.items[["plotInfo"]],
+        clinicalSummaryText = function() private$.items[["clinicalSummaryText"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -237,8 +269,7 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Genomic Landscape Visualization",
                 refs=list(
-                    "ClinicoPathJamoviModule",
-                    "ggoncoplot"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -257,7 +288,23 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=600,
                 requiresData=TRUE,
                 renderFun=".plotMain",
-                refs="jjoncoplot"))
+                refs="jjoncoplot",
+                clearWith=list(
+                    "geneVars",
+                    "sampleVar",
+                    "clinicalVars",
+                    "mutationTypeVar",
+                    "plotType",
+                    "topn",
+                    "genesToInclude",
+                    "genesToIgnore",
+                    "maxSamples",
+                    "sortBy",
+                    "colorScheme",
+                    "drawMarginalPlots",
+                    "showTMB",
+                    "log10TransformTMB",
+                    "showGeneFreq")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="mutationSummary",
@@ -265,7 +312,12 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 clearWith=list(
                     "geneVars",
-                    "sampleVar"),
+                    "sampleVar",
+                    "mutationTypeVar",
+                    "topn",
+                    "genesToInclude",
+                    "genesToIgnore",
+                    "maxSamples"),
                 columns=list(
                     list(
                         `name`="gene", 
@@ -295,7 +347,12 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 clearWith=list(
                     "geneVars",
-                    "sampleVar"),
+                    "sampleVar",
+                    "topn",
+                    "genesToInclude",
+                    "genesToIgnore",
+                    "maxSamples",
+                    "sortBy"),
                 columns=list(
                     list(
                         `name`="sample", 
@@ -347,7 +404,11 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "geneVars",
                     "sampleVar",
-                    "plotType"),
+                    "plotType",
+                    "topn",
+                    "genesToInclude",
+                    "genesToIgnore",
+                    "maxSamples"),
                 columns=list(
                     list(
                         `name`="gene1", 
@@ -387,7 +448,12 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="text"))))}))
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummaryText",
+                title="Clinical Summary for Reports",
+                visible=TRUE))}))
 
 jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjoncoplotBase",
@@ -437,7 +503,9 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   stage, treatment).
 #' @param mutationTypeVar Variable containing mutation type information (e.g.,
 #'   SNV, CNV, Fusion).
-#' @param plotType Type of plot to generate.
+#' @param clinicalPreset Predefined clinical analysis configurations optimized
+#'   for specific research goals.
+#' @param plotType Type of genomic visualization to generate.
 #' @param topn Number of most frequently mutated genes to display.
 #' @param genesToInclude Comma-separated list of specific genes to include
 #'   (overrides topn).
@@ -445,10 +513,14 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis.
 #' @param maxSamples Maximum number of samples to display.
 #' @param sortBy Method for sorting samples in the plot.
-#' @param colorScheme Color scheme for the oncoplot.
+#' @param colorScheme Color scheme for the oncoplot visualization.
 #' @param showMutationLoad Display mutation load bar plot alongside oncoplot.
 #' @param showGeneFreq Display gene mutation frequency alongside oncoplot.
+#' @param drawMarginalPlots Integrate gene frequency and TMB plots as margins
+#'   of the main oncoplot.
 #' @param showTMB Display tumor mutation burden (TMB) bar plot.
+#' @param log10TransformTMB Apply log10 transformation to TMB values for
+#'   better visualization.
 #' @param showClinicalAnnotation Display clinical annotations as heatmap.
 #' @param plotWidth Width of the plot in pixels.
 #' @param plotHeight Height of the plot in pixels.
@@ -464,6 +536,7 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cooccurrence} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plotInfo} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalSummaryText} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -479,6 +552,7 @@ jjoncoplot <- function(
     geneVars,
     clinicalVars = NULL,
     mutationTypeVar = NULL,
+    clinicalPreset = "custom",
     plotType = "oncoplot",
     topn = 10,
     genesToInclude = "",
@@ -486,14 +560,16 @@ jjoncoplot <- function(
     maxSamples = 50,
     sortBy = "hierarchical",
     colorScheme = "default",
-    showMutationLoad = TRUE,
-    showGeneFreq = TRUE,
+    showMutationLoad = FALSE,
+    showGeneFreq = FALSE,
+    drawMarginalPlots = FALSE,
     showTMB = FALSE,
+    log10TransformTMB = TRUE,
     showClinicalAnnotation = FALSE,
     plotWidth = 800,
     plotHeight = 600,
     fontSize = 10,
-    showLegend = TRUE) {
+    showLegend = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjoncoplot requires jmvcore to be installed (restart may be required)")
@@ -517,6 +593,7 @@ jjoncoplot <- function(
         geneVars = geneVars,
         clinicalVars = clinicalVars,
         mutationTypeVar = mutationTypeVar,
+        clinicalPreset = clinicalPreset,
         plotType = plotType,
         topn = topn,
         genesToInclude = genesToInclude,
@@ -526,7 +603,9 @@ jjoncoplot <- function(
         colorScheme = colorScheme,
         showMutationLoad = showMutationLoad,
         showGeneFreq = showGeneFreq,
+        drawMarginalPlots = drawMarginalPlots,
         showTMB = showTMB,
+        log10TransformTMB = log10TransformTMB,
         showClinicalAnnotation = showClinicalAnnotation,
         plotWidth = plotWidth,
         plotHeight = plotHeight,
