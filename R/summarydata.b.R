@@ -365,11 +365,11 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50; margin: 10px 0; border-radius: 4px;'>",
                 "<h4 style='margin-top: 0; color: #2e7d32;'>", .("Clinical Interpretation Guide"), "</h4>",
                 "<p><strong>", .("Dataset Overview"), ":</strong> ", 
-                .("Analysis of {n} continuous variable(s) from {total} patient records", n = n_vars, total = total_obs), "</p>",
+                paste0("Analysis of ", n_vars, " continuous variable(s) from ", total_obs, " patient records"), "</p>",
                 
                 "<p><strong>", .("Data Quality Assessment"), ":</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
-                "<li>", .("Average missing data: {pct}%", pct = avg_missing), "</li>",
+                "<li>", paste0("Average missing data: ", avg_missing, "%"), "</li>",
                 if (avg_missing > 20) paste0("<li style='color: #d32f2f;'>", .("⚠️ High missing data rate may affect interpretation"), "</li>") else "",
                 if (avg_missing <= 5) paste0("<li style='color: #388e3c;'>", .("✓ Excellent data completeness"), "</li>") else "",
                 "</ul>",
@@ -525,9 +525,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 
                 # Basic descriptive sentence
                 sentence <- paste0(
-                    .("For {var}, analysis of {n} observations showed mean {mean} ± {sd} (median {median}, range {min}-{max})",
-                      var = var, n = n, mean = mean_val, sd = sd_val, 
-                      median = median_val, min = min_val, max = max_val)
+                    "For ", var, ", analysis of ", n, " observations showed mean ", 
+                    mean_val, " ± ", sd_val, " (median ", median_val, 
+                    ", range ", min_val, "-", max_val, ")"
                 )
                 
                 # Add distribution information if enabled
@@ -539,12 +539,12 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     if (!is.null(sw_test)) {
                         if (sw_test$p.value > 0.05) {
                             sentence <- paste0(sentence, ". ", 
-                                .("Data showed normal distribution (Shapiro-Wilk p = {p})", 
-                                  p = round(sw_test$p.value, 3)))
+                                "Data showed normal distribution (Shapiro-Wilk p = ", 
+                                round(sw_test$p.value, 3), ")")
                         } else {
                             sentence <- paste0(sentence, ". ", 
-                                .("Data showed non-normal distribution (Shapiro-Wilk p = {p})", 
-                                  p = round(sw_test$p.value, 3)))
+                                "Data showed non-normal distribution (Shapiro-Wilk p = ", 
+                                round(sw_test$p.value, 3), ")")
                         }
                     }
                 }

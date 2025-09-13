@@ -51,6 +51,40 @@ children:
             name: categoricalCovariates
             isTarget: true
   - type: CollapseBox
+    label: 🏥 Clinical Analysis Setup
+    collapsed: false
+    children:
+      - type: Label
+        label: Choose Your Clinical Workflow
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clinicalPreset
+                label: Clinical Analysis Preset
+              - type: CheckBox
+                name: enableGuidedMode
+                label: 🧭 Guided Analysis Mode
+              - type: CheckBox
+                name: generateCopyReadyReport
+                label: 📄 Generate Copy-Ready Clinical Summary
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: enableAccessibilityFeatures
+                label: ♿ Accessibility Features
+              - type: ComboBox
+                name: preferredLanguage
+                label: 🌐 Output Language
+              - type: CheckBox
+                name: enableProgressIndicators
+                label: ⏱️ Show Progress Indicators
+              - type: CheckBox
+                name: optimizeForLargeDatasets
+                label: 🚀 Large Dataset Optimization
+  - type: CollapseBox
     label: Main Analysis
     collapsed: false
     children:

@@ -44,14 +44,14 @@
             if (expected_min < min_expected) {
                 return(list(
                     test = "fisher", 
-                    reason = .("Expected counts < {min}. Fisher's exact test recommended.", min = min_expected),
+                    reason = paste0("Expected counts < ", min_expected, ". Fisher's exact test recommended."),
                     warning = TRUE,
                     expected_min = expected_min
                 ))
             } else {
                 return(list(
                     test = "chisq", 
-                    reason = .("All expected counts ≥ {min}. Chi-square test appropriate.", min = min_expected),
+                    reason = paste0("All expected counts ≥ ", min_expected, ". Chi-square test appropriate."),
                     warning = FALSE,
                     expected_min = expected_min
                 ))
@@ -62,7 +62,7 @@
         if (test_preference == "chisq" && expected_min < min_expected) {
             return(list(
                 test = test_preference,
-                reason = .("Chi-square test as requested (Note: Expected counts < {min})", min = min_expected),
+                reason = paste0("Chi-square test as requested (Note: Expected counts < ", min_expected, ")"),
                 warning = TRUE,
                 expected_min = expected_min
             ))
@@ -101,7 +101,7 @@
         min_group_size <- min(group_sizes)
         
         if (min_group_size < 5) {
-            warnings <- append(warnings, .("Small group detected (n = {min}). Consider combining categories or using exact tests.", min = min_group_size))
+            warnings <- append(warnings, paste0("Small group detected (n = ", min_group_size, "). Consider combining categories or using exact tests."))
         }
         
         # Check for empty cells in cross-tabulations
@@ -109,7 +109,7 @@
             if (var %in% names(mydata)) {
                 cont_table <- table(mydata[[var]], mydata[[mygroup]])
                 if (any(cont_table == 0)) {
-                    warnings <- append(warnings, .("Empty cells detected in {var} × {group} table. Results may be unstable.", var = var, group = mygroup))
+                    warnings <- append(warnings, paste0("Empty cells detected in ", var, " × ", mygroup, " table. Results may be unstable."))
                 }
             }
         }
@@ -120,7 +120,7 @@
         if (var %in% names(mydata)) {
             missing_pct <- mean(is.na(mydata[[var]])) * 100
             if (missing_pct > 20) {
-                warnings <- append(warnings, .("High missing data in {var} ({pct}%). Consider imputation or sensitivity analysis.", var = var, pct = round(missing_pct, 1)))
+                warnings <- append(warnings, paste0("High missing data in ", var, " (", round(missing_pct, 1), "%). Consider imputation or sensitivity analysis."))
             }
         }
     }

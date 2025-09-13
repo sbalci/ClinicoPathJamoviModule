@@ -15,6 +15,32 @@ items:
           - event
           - eventLevel
 
+    # Copy-Ready Clinical Report (New Feature)
+    - name: copyReadyReport
+      title: 📄 Copy-Ready Clinical Summary
+      type: Html
+      visible: (generateCopyReadyReport)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - clinicalPreset
+          - analysisType
+
+    # Guided Mode Progress Indicator (New Feature)
+    - name: guidedModeProgress
+      title: 🧭 Analysis Progress
+      type: Html
+      visible: (enableGuidedMode)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+
     # Debugging Information
     - name: mydataview
       title: mydataview

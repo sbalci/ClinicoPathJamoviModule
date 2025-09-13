@@ -1,7 +1,7 @@
 ---
 name:  riverplot
 title: River Plots & Alluvial Diagrams
-menuGroup: ExplorationT
+menuGroup: ExplorationT2
 menuSubgroup: 'Categorical Over Time'
 menuSubtitle: 'Flow, Stream, and Transition Visualization'
 version: '0.0.31'

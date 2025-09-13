@@ -156,8 +156,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 mydata <- jmvcore::naOmit(self$data)
                 
                 if (nrow(mydata) < nrow(self$data)) {
-                    warning(jmvcore::.("Removed {count} rows with missing values", 
-                                      count = nrow(self$data) - nrow(mydata)))
+                    warning(paste0("Removed ", nrow(self$data) - nrow(mydata), " rows with missing values"))
                 }
                 
                 if (nrow(mydata) == 0) {
