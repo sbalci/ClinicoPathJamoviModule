@@ -103,6 +103,10 @@ msgstr ""
 msgid " observations. "
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid " Post-hoc analysis revealed %d significant pairwise difference(s) out of %d comparisons after %s correction."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid " subjects with repeated measures."
 msgstr ""
@@ -127,12 +131,20 @@ msgstr ""
 msgid "_t{time}"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "- Add a time variable (such as months from baseline)"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "- Consider combining with other markers"
 msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "- Consider NPV for screening adequacy"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "- Enable 'Show Spider Plot' in the options panel"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -203,6 +215,14 @@ msgstr ""
 msgid ". The hazard ratio of"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "'"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "' and '"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "' not found in complete data. Available groups: "
 msgstr ""
@@ -265,6 +285,14 @@ msgstr ""
 msgid "'Wrapper Function for ggstatsplot::ggpiestats and\n"
 "ggstatsplot::grouped_ggpiestats to generate Pie Charts with\n"
 "statistical analysis.'"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "(%d patients achieved complete or partial response)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "(%d patients achieved response or stable disease)"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -383,12 +411,68 @@ msgstr ""
 msgid "/"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "\n- Baseline identification: Marks the starting point (time = 0)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n- Progression tracking: Shows how response changes over time"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n- Response calculation: Computes changes from baseline"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n\nA time variable is required to create visualizations when using raw measurements."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n\nExample time variable format:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n\nHow to proceed:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n\nWhy is this important?"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "\n=== Bootstrap Analysis ==="
 msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "\n=== Bootstrap Complete ==="
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n1. Add a time variable to your data"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n2. Time should start at 0 (baseline)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\n3. Use consistent time units (e.g., months or weeks)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\nPatientID.         Time          Measurement"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\nPT1                0             50              (baseline)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\nPT1                2             25              (2 months)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "\nPT1                4             10              (4 months)"
 msgstr ""
 
 #: ppv/options/alpha.title
@@ -1613,6 +1697,10 @@ msgstr ""
 msgid "⚠️ Assumptions & Caveats"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "⚠ Assumptions Check: Review required"
+msgstr ""
+
 #: R/summarydata.b.R
 msgid "⚠️ Data Quality Alert"
 msgstr ""
@@ -1627,6 +1715,10 @@ msgstr ""
 
 #: decision/ui[5].label
 msgid "⚠️ Important Notes"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "⚠️ Key Assumptions & Limitations:"
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -1683,6 +1775,10 @@ msgstr ""
 
 #: decisionpanel/ui[2][0][2].label
 msgid "✅ Specificity: Prioritize avoiding false positives (confirmatory)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "✓ Assumptions Check: All conditions met"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -1787,6 +1883,10 @@ msgstr ""
 
 #: agreement/ui[6][0]/consensus_method/unanimous.title
 msgid "🎯 Unanimous Agreement (100%)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "🎯 When to Use This Analysis:"
 msgstr ""
 
 #: decision/ui[1][0].label
@@ -1899,6 +1999,10 @@ msgstr ""
 
 #: decisionpanel/ui[0][0][0].label
 msgid "💡 Tip: Choose 2-5 complementary tests for optimal performance"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "💡 Tip: Start with percentage data if available, or use raw measurements with proper time variables for automatic calculation."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -2030,6 +2134,10 @@ msgstr ""
 msgid "📊 Tables & Performance"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "📊 Treatment Response Summary"
+msgstr ""
+
 #: decision/ui[3]/pp.label
 msgid "📊 Use Known Population Prevalence"
 msgstr ""
@@ -2042,6 +2150,10 @@ msgstr ""
 msgid "📊 Variable Selection"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "📊 Visualization Types:"
+msgstr ""
+
 #: modelbuilder/results/clinicalSummary.title
 msgid "📋 Clinical Interpretation Summary"
 msgstr ""
@@ -2052,6 +2164,10 @@ msgstr ""
 
 #: agreement/ui[3][0]/showClinicalSummary.label
 msgid "📋 Clinical Summary (recommended)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "📋 Data Requirements:"
 msgstr ""
 
 #: modelbuilder/ui[8].label
@@ -2269,6 +2385,10 @@ msgstr ""
 
 #: agreement/ui[2][2]/exct.label
 msgid "🔬 Use Exact Method (more accurate, slower)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "🔬 What This Analysis Does"
 msgstr ""
 
 #: agreement/ui[4][0]/heatmapTheme/bwr.title
@@ -2656,6 +2776,10 @@ msgstr ""
 msgid "1:5 Matching"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "1. A time variable to show response trajectories"
+msgstr ""
+
 #: advancedbarplot/options/chart_approach/basic.title
 msgid "1. Basic ggplot2"
 msgstr ""
@@ -2853,6 +2977,10 @@ msgstr ""
 msgid "2. Polished Presentation"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "2. The 'Show Spider Plot' option to be enabled"
+msgstr ""
+
 #: referenceintervals/options/reference_percentiles.default
 msgid "2.5,97.5"
 msgstr ""
@@ -2873,6 +3001,10 @@ msgstr ""
 
 #: likelihoodratio/ui[6]/showCrosstabulation.label
 msgid "2×2 contingency table"
+msgstr ""
+
+#: chisqposttest/options/clinicalPreset/diagnostic2x2.title
+msgid "2×2 Diagnostic Test"
 msgstr ""
 
 #: ihcscoring/options/classification_cutoffs.default
@@ -3497,6 +3629,10 @@ msgstr ""
 msgid "A 3% discount rate means $100 next year is worth $97 today"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "A chi-square test of independence was performed to examine the relationship between %s categorical variables. %s"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "A distinct condition that describes a patient's health status in a Markov model (e.g., Healthy, Sick, Dead)."
 msgstr ""
@@ -3540,6 +3676,10 @@ msgstr ""
 
 #: contTablesPaired/results/freqs.description
 msgid "a proportions table"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "A spider plot helps visualize how each patient's response changes over time. \n"
 msgstr ""
 
 #: agepyramid/options/female.description.jamovi
@@ -3651,6 +3791,7 @@ msgstr ""
 #: summarydata/results/aboutAnalysis.title
 #: tableone/results/about.title
 #: venn/results/aboutAnalysis.title
+#: waterfall/results/aboutAnalysis.title
 msgid "About This Analysis"
 msgstr ""
 
@@ -4014,6 +4155,10 @@ msgstr ""
 #: treatmentswitching/options/actualTreatment.title
 #: treatmentswitching/ui[0][4].label
 msgid "Actual Treatment Received"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Actual tumor measurements (mm, cm, sum of diameters)"
 msgstr ""
 
 #: hierarchicalbayes/options/adapt_delta.title
@@ -4829,6 +4974,10 @@ msgstr ""
 msgid "Adjusted P-value"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Adjusted p: "
+msgstr ""
+
 #: epidemiosurvival/options/par_method/adjusted.title
 msgid "Adjusted PAR"
 msgstr ""
@@ -4901,6 +5050,10 @@ msgstr ""
 #: stagemigration/ui[78][0].label
 #: stagemigration/ui[97][0].label
 msgid "Adjustment Variables"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Adjusts p-values when multiple comparisons are made to control false positive rate. Divides significance level by number of tests."
 msgstr ""
 
 #: progressionsurvival/options/censoring_mechanism/administrative.title
@@ -6627,6 +6780,10 @@ msgstr ""
 msgid "Alternative Tests"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Alternative to chi-square when expected counts are low. Provides exact p-values rather than approximations."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "Alternative Tool:"
 msgstr ""
@@ -7063,6 +7220,7 @@ msgid "Analysis Overview and Clinical Context"
 msgstr ""
 
 #: R/multisurvival.b.R
+#: R/waterfall.b.R
 msgid "Analysis Overview:"
 msgstr ""
 
@@ -7539,6 +7697,10 @@ msgstr ""
 #: R/linechart.b.R
 #: R/reportcat.b.R
 msgid "and"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "and compare outcomes across different patients over time.\n\n"
 msgstr ""
 
 #: recurrentsurvival/options/model_type/ag_model.title
@@ -8285,6 +8447,10 @@ msgstr ""
 msgid "Assumptions & Considerations"
 msgstr ""
 
+#: chisqposttest/results/assumptionsCheck.title
+msgid "Assumptions Validation"
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "Assumptions:"
 msgstr ""
@@ -8843,6 +9009,10 @@ msgstr ""
 msgid "Auxiliary Variables"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Available columns:"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Available in model outputs"
 msgstr ""
@@ -9288,12 +9458,20 @@ msgstr ""
 msgid "Based on Kaplan-Meier estimates"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "baseline"
+msgstr ""
+
 #: decisionpanel/results/panelBuilding.columns.title
 msgid "Baseline Accuracy"
 msgstr ""
 
 #: qualityoflife/options/baseline_adjustment.title
 msgid "Baseline Adjustment"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Baseline assumed at Time = 0"
 msgstr ""
 
 #: netreclassification/results/reclassification.columns.title
@@ -9409,6 +9587,10 @@ msgstr ""
 
 #: qualityoflife/results/change_analysis_results.columns.title
 msgid "Baseline Mean"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Baseline measurements are the reference point for calculating changes"
 msgstr ""
 
 #: stagemigration/options/baselineModel.title
@@ -10211,6 +10393,10 @@ msgstr ""
 msgid "Best for"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Best for longitudinal follow-up data"
+msgstr ""
+
 #: R/vartree.b.R
 msgid "Best for:"
 msgstr ""
@@ -10359,6 +10545,10 @@ msgstr ""
 
 #: survivalbart/options/cure_fraction_prior/symmetric.title
 msgid "Beta(2,2) - Symmetric"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Between -30% and +20% change"
 msgstr ""
 
 #: jextractggstats/options/analysis_type/between_stats.title
@@ -10811,6 +11001,10 @@ msgstr ""
 
 #: haralicktexture/options/biomarker_context.title
 msgid "Biomarker Context"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Biomarker correlation studies"
 msgstr ""
 
 #: jjcorrmat/options/clinicalpreset/biomarker.title
@@ -11346,6 +11540,7 @@ msgstr ""
 msgid "bonferroni"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: clinicaltrialdesign/options/multiple_comparisons/bonferroni.title
 #: outbreakanalysis/options/multiple_testing_correction/bonferroni.title
 msgid "Bonferroni Correction"
@@ -12404,6 +12599,10 @@ msgstr ""
 #: clinicaltrialdesign/options/calculation_type.title
 #: powersurvival/options/calc_type.title
 msgid "Calculate"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Calculate accurate percentage changes"
 msgstr ""
 
 #: relativesurvival/options/age_standardized.description.ui
@@ -14261,6 +14460,10 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "change"
+msgstr ""
+
 #: advancedimputation/results/mnar_analysis.columns.title
 #: treatmentmeta/results/sensitivity.columns.title
 #: treatmentmeta/results/trim_fill_results.columns.title
@@ -14300,6 +14503,10 @@ msgstr ""
 
 #: stagemigration/results/winRatioSensitivityResults.columns.title
 msgid "Change from Primary"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Change in Tumor Size (%)"
 msgstr ""
 
 #: labinterpret/results/trendAnalysisTable.columns.title
@@ -14612,8 +14819,16 @@ msgstr ""
 msgid "Chi-Square Test (Categorical Associations)"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Chi-square test (χ²)"
+msgstr ""
+
 #: R/crosstable.b.R
 msgid "Chi-square test as requested (Note: Expected counts < {min})"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Chi-square test is not valid. Use Fisher's exact test instead."
 msgstr ""
 
 #: enhancedtwowayfrequency/options/chiSquareTest.title
@@ -16016,6 +16231,7 @@ msgstr ""
 #: benford/results/summary.columns.title
 #: biomarkerdiscovery/results/optimal_cutpoints.columns.title
 #: biopsysimulation/results/reproducibilitytable.columns.title
+#: chisqposttest/ui[2].label
 #: clinicalprediction/results/risk_stratification.columns.title
 #: clinicalvalidation/results/performancetable.columns.title
 #: clinicalvalidationinteractive/results/modelSummary.columns.title
@@ -16253,6 +16469,10 @@ msgstr ""
 msgid "Clinical interpretation:"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Clinical Interpretation:"
+msgstr ""
+
 #: clinicalnomograms/options/model_selection/clinical_judgment.title
 msgid "Clinical Judgment Based"
 msgstr ""
@@ -16365,6 +16585,7 @@ msgstr ""
 
 #: alluvial/options/clinical_preset.title
 #: alluvial/ui[5][0]/clinical_preset.label
+#: chisqposttest/options/clinicalPreset.title
 #: jjcorrmat/options/clinicalpreset.title
 #: modelbuilder/options/clinicalPreset.title
 #: riverplot/options/clinicalPreset.title
@@ -16695,6 +16916,7 @@ msgid "Clinical Standards"
 msgstr ""
 
 #: R/benford.b.R
+#: R/chisqposttest.b.R
 #: R/jjridges.b.R
 #: R/jjsegmentedtotalbar.b.R
 #: R/lollipop.b.R
@@ -16705,11 +16927,13 @@ msgstr ""
 #: R/venn.b.R
 #: agreement/options/showClinicalSummary.title
 #: agreement/results/clinicalSummary.title
+#: chisqposttest/results/clinicalSummary.title
 #: decisionpanel/results/clinicalSummary.title
 #: jjridges/results/clinicalSummary.title
 #: jjsegmentedtotalbar/results/clinical_summary.title
 #: nogoldstandard/results/clinical_summary.title
 #: venn/results/clinicalSummary.title
+#: waterfall/results/clinicalSummary.title
 msgid "Clinical Summary"
 msgstr ""
 
@@ -18296,6 +18520,10 @@ msgstr ""
 msgid "Colors aid visualization but ensure accessibility for color-blind users"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Colors bars by RECIST categories (CR/PR/SD/PD) or patient groups"
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "Colors represent the value of"
 msgstr ""
@@ -19333,6 +19561,10 @@ msgstr ""
 msgid "Complete cases:"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "complete disappearance"
+msgstr ""
+
 #: package/analyses/effectsize.menuSubtitle
 #: effectsize/options.menuSubtitle
 msgid "Complete effect size toolkit with BlueSky integration"
@@ -19345,6 +19577,18 @@ msgstr ""
 
 #: assayoptimization/options/randomization/complete.title
 msgid "Complete Randomization"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Complete Response (CR):"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Complete Response (CR): Complete disappearance of all target lesions."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Complete Response:"
 msgstr ""
 
 #: digitalvalidation/results/validationreport.description
@@ -20422,6 +20666,10 @@ msgstr ""
 msgid "Conclusion"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Conclusion:"
+msgstr ""
+
 #: imagingcorrelation/results/stagingCorrelationTable.columns.title
 #: modalitycomparison/results/lowEndAnalysisTable.columns.title
 #: stagemigration/results/concordanceProbabilityEstimates.columns.title
@@ -21444,6 +21692,10 @@ msgstr ""
 msgid "Consider using data sampling or chunking for very large datasets"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Consider using Fisher's exact test for more reliable results."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Consider using Python packages like 'shap' with 'scikit-survival' for comprehensive survival SHAP values."
 msgstr ""
@@ -22092,6 +22344,10 @@ msgstr ""
 
 #: jointfrailty/options/association_type/copula.title
 msgid "Copula Association"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Copy"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -23318,6 +23574,7 @@ msgstr ""
 msgid "Cramer's V"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/crosstable.b.R
 #: crosstable/options/posthoc_method/cramers_v.title
 #: effectsize/options/measures_cramers_v.title
@@ -23789,6 +24046,10 @@ msgstr ""
 
 #: labinterpret/results/criticalValuesTable.title
 msgid "Critical Values Alert"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Critical: %.0f%% of cells have expected counts < 1"
 msgstr ""
 
 #: basegraphics/options/point_type/4.title
@@ -25180,6 +25441,10 @@ msgstr ""
 msgid "Custom Sequence"
 msgstr ""
 
+#: chisqposttest/options/clinicalPreset/custom.title
+msgid "Custom Settings"
+msgstr ""
+
 #: jjdotplotstats/options/clinicalPreset/custom.title
 msgid "Custom Settings (advanced users)"
 msgstr ""
@@ -25831,6 +26096,10 @@ msgstr ""
 msgid "Data contains no complete rows after removing missing values"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Data contains no complete rows. Check the data."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Data contains no rows"
 msgstr ""
@@ -25873,6 +26142,10 @@ msgstr ""
 msgid "Data Format"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Data Format Examples:"
+msgstr ""
+
 #: multisurvival/ui[13][1].label
 msgid "Data Format Settings"
 msgstr ""
@@ -25899,6 +26172,7 @@ msgid "Data Handling"
 msgstr ""
 
 #: R/chisqposttest.b.R
+#: R/waterfall.b.R
 msgid "Data Input Options:"
 msgstr ""
 
@@ -25986,6 +26260,10 @@ msgstr ""
 
 #: riverplot/results/diagnostics.title
 msgid "Data Processing Diagnostics"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Data Processing Error:"
 msgstr ""
 
 #: R/singlearm.b.R
@@ -26204,6 +26482,10 @@ msgstr ""
 
 #: swimmerplot/results/validationReport.title
 msgid "Data Validation Report"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Data Validation Results:"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -26862,6 +27144,10 @@ msgstr ""
 
 #: netreclassification/options/decompose_nri.title
 msgid "Decompose NRI"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "decrease"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -27552,6 +27838,10 @@ msgstr ""
 
 #: decisioncurve/options/plotStyle/detailed.title
 msgid "Detailed (with annotations)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Detailed 2×2 Comparison Tables"
 msgstr ""
 
 #: clinicalalerts/results/detailedAlerts.title
@@ -28805,6 +29095,10 @@ msgstr ""
 msgid "Disease Co-occurrence Network (🏥 Epidemiology)"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Disease Control Rate (DCR):"
+msgstr ""
+
 #: relativesurvival/results/crudeProbTable.columns.title
 msgid "Disease Death"
 msgstr ""
@@ -29371,6 +29665,10 @@ msgstr ""
 msgid "Display estimated transition rates and parameters"
 msgstr ""
 
+#: chisqposttest/options/showExampleInterpretations.description
+msgid "Display example interpretations for significant findings"
+msgstr ""
+
 #: relativesurvival/options/plot_excess.description.ui
 msgid "Display excess mortality rates over time"
 msgstr ""
@@ -29421,6 +29719,10 @@ msgstr ""
 
 #: semimarkov/options/showPredictions.description
 msgid "Display future state predictions"
+msgstr ""
+
+#: chisqposttest/options/showGlossary.description
+msgid "Display glossary of statistical terms with clinical interpretations"
 msgstr ""
 
 #: desctools/options/show_goodness_tests.description
@@ -29599,6 +29901,10 @@ msgstr ""
 msgid "Display natural language summaries alongside tables and plots. These summaries provide plain-language interpretations of the statistical results. Turn off to reduce visual clutter when summaries are not needed."
 msgstr ""
 
+#: chisqposttest/options/showClinicalSummary.description
+msgid "Display natural-language summary of results for clinical interpretation"
+msgstr ""
+
 #: competingsurvival/options/showrisksets.description.ui
 msgid "Display number at risk table below cumulative incidence plot"
 msgstr ""
@@ -29625,7 +29931,7 @@ msgstr ""
 
 #: aalenhazard/ui[4][0].label
 #: advancedbarplot/ui[6].label
-#: chisqposttest/ui[2].label
+#: chisqposttest/ui[3].label
 #: clinicaldashboard/ui[1][1].label
 #: competingsurvival/ui[3][0].label
 #: conditionalsurvival/ui[1][1].label
@@ -30111,6 +30417,10 @@ msgstr ""
 
 #: flexcomprisk/options/plotValidation.description
 msgid "Display validation and calibration plots"
+msgstr ""
+
+#: chisqposttest/options/showAssumptionsCheck.description
+msgid "Display validation of chi-square test assumptions"
 msgstr ""
 
 #: jjsegmentedtotalbar/options/ggsegmented_labels.description.jamovi
@@ -30783,6 +31093,10 @@ msgstr ""
 msgid "Drug Development"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Drug efficacy evaluation"
+msgstr ""
+
 #: treatmentoptim/results/drugInteractions.title
 msgid "Drug Interaction Analysis"
 msgstr ""
@@ -30992,6 +31306,10 @@ msgstr ""
 
 #: R/reportcat.b.R
 msgid "Each category should have sufficient sample size for reliable percentages"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Each line represents one patient's treatment journey, making it easy to see \n"
 msgstr ""
 
 #: R/vartree.b.R
@@ -31400,12 +31718,20 @@ msgstr ""
 msgid "Effect Size Interpretation:"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Effect Size Interpretation: "
+msgstr ""
+
 #: R/nonparametric.b.R
 #: crosstable/results/effectsizes.columns.title
 #: jjdotplotstats/options/effsizetype.title
 #: nonparametric/ui[2][0]/effect_size_method.label
 #: nonparametric/results/effectsizes.columns.title
 msgid "Effect Size Measure"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Effect size measure for chi-square tests. Ranges from 0 (no association) to 1 (perfect association). Values: 0.1=small, 0.3=medium, 0.5=large effect."
 msgstr ""
 
 #: cochranq/options/effect_size.title
@@ -31620,6 +31946,14 @@ msgstr ""
 
 #: factoranalysis/options/eigenvalues.title
 msgid "Eigenvalues Table"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Either percentage change or raw measurements"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Either percentage changes from baseline or raw tumor measurements"
 msgstr ""
 
 #: aivalidation/options/modelSelection/elastic.title
@@ -33017,6 +33351,10 @@ msgstr ""
 msgid "Error creating residuals plot:"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Error creating spider plot: %s"
+msgstr ""
+
 #: survivalbart/options/prior_distribution.title
 #: transformationmodels/options/distribution.title
 msgid "Error Distribution"
@@ -33131,9 +33469,17 @@ msgstr ""
 msgid "Error: Insufficient data for Benford's Law analysis. This test requires at least 30-50 valid observations. Consider combining data or using a different variable."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Error: Missing required columns:"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 #: R/raincloud.b.R
 msgid "Error: No complete cases found for the selected variables."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Error: No data provided or data is empty."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -34222,8 +34568,17 @@ msgstr ""
 msgid "Example data for ROC analysis."
 msgstr ""
 
+#: R/chisqposttest.b.R
+#: chisqposttest/results/exampleInterpretations.title
+msgid "Example Interpretations"
+msgstr ""
+
 #: package/datasets/histopathology including analysis.description
 msgid "Example survival analysis for histopathology data"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Example: -30 means 30% decrease from baseline"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -34534,6 +34889,10 @@ msgstr ""
 
 #: contTables/options/exp.title
 msgid "Expected counts"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Expected Counts"
 msgstr ""
 
 #: R/crosstable.b.R
@@ -36748,6 +37107,7 @@ msgstr ""
 msgid "Fisher's Exact (Simulated)"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: categoricaladvanced/options/fisher_exact.title
 #: categoricaladvanced/results/fishertest.title
 #: enhancedtwowayfrequency/options/fisherTest.title
@@ -37390,6 +37750,10 @@ msgstr ""
 msgid "Follow-up Score"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Follow-up tests performed after a significant overall result to identify which specific group pairs differ significantly."
+msgstr ""
+
 #: epidemiosurvival/options/time_var.title
 #: epidemiosurvival/ui[0][0].label
 #: powercomprisk/options/followUpTime.title
@@ -37540,6 +37904,10 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "For proportional flow sizing (optional)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "For raw measurements, baseline assumed at time = 0"
 msgstr ""
 
 #: ihccluster/options/seed.description
@@ -38925,6 +39293,10 @@ msgstr ""
 msgid "Generate Contour Plots"
 msgstr ""
 
+#: chisqposttest/options/copyReadySentences.description
+msgid "Generate copy-ready sentences for clinical reports"
+msgstr ""
+
 #: recurrentsurvival/options/cumulative_hazard.description.ui
 msgid "Generate cumulative hazard function plots"
 msgstr ""
@@ -39106,6 +39478,7 @@ msgstr ""
 msgid "Generate regression diagnostic plots and statistics"
 msgstr ""
 
+#: chisqposttest/options/copyReadySentences.title
 #: summarydata/options/report_sentences.title
 msgid "Generate Report Sentences"
 msgstr ""
@@ -42009,6 +42382,10 @@ msgstr ""
 msgid "highly connected"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "highly significant"
+msgstr ""
+
 #: R/raincloud.b.R
 msgid "Highly significant (***)"
 msgstr ""
@@ -42949,6 +43326,10 @@ msgstr ""
 
 #: jextractggstats/options/outlier_tagging.description
 msgid "Identify and tag outliers"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Identify baseline measurements (time = 0)"
 msgstr ""
 
 #: agreement/options/identifyDiscordantCases.title
@@ -44363,6 +44744,10 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Incorporates prior knowledge about test performance using Bayesian methods."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "increase"
 msgstr ""
 
 #: adaptivetrialdesign/results/sampleSizeEvolution.columns.title
@@ -46267,6 +46652,10 @@ msgstr ""
 msgid "Issues Found"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Issues identified:"
+msgstr ""
+
 #: relativesurvival/options/ratetable/it.title
 msgid "Italian Population (survexp.it)"
 msgstr ""
@@ -46994,6 +47383,7 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 #: R/multisurvival.b.R
+#: R/waterfall.b.R
 msgid "Key Findings:"
 msgstr ""
 
@@ -47674,6 +48064,10 @@ msgstr ""
 
 #: tinytable/options/font_size/large.title
 msgid "Large"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "large"
 msgstr ""
 
 #: enhancedtables/options/font_size/large.title
@@ -52133,6 +52527,10 @@ msgstr ""
 msgid "Medication Variables"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "medium"
+msgstr ""
+
 #: jforester/options/point_size_range/medium.title
 msgid "Medium (3-6)"
 msgstr ""
@@ -52840,6 +53238,10 @@ msgstr ""
 
 #: treatmentmeta/results/methods_section.title
 msgid "Methods Section Template"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Methods:"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -53697,6 +54099,10 @@ msgstr ""
 msgid "Missing as Category"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Missing Baseline Measurements:"
+msgstr ""
+
 #: featurequality/results/missing_data_analysis.columns.title
 msgid "Missing Count"
 msgstr ""
@@ -53898,6 +54304,14 @@ msgstr ""
 msgid "Missing Patterns (vis_miss)"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Missing required variables: %s"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "missing response values found."
+msgstr ""
+
 #: intervalsurvival/options/imputation_method.title
 msgid "Missing Time Imputation"
 msgstr ""
@@ -53939,6 +54353,10 @@ msgstr ""
 #: R/reportcat.b.R
 #: gtsummary/options/statistics/missing.title
 msgid "Missing values"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Missing values are excluded from analysis"
 msgstr ""
 
 #: R/alluvial.b.R
@@ -55456,6 +55874,7 @@ msgstr ""
 msgid "Months"
 msgstr ""
 
+#: R/waterfall.b.R
 #: mixedcox/options/timetypeoutput/months.title
 #: multisurvival/options/timetypeoutput/months.title
 #: penalizedcox/options/timetypeoutput/months.title
@@ -56690,6 +57109,10 @@ msgstr ""
 msgid "Negative Predictive Value: Probability of being healthy given negative test. Depends on prevalence and sensitivity."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Negative residuals (blue cells) indicate combinations that occur less frequently than expected under independence."
+msgstr ""
+
 #: cochranq/results/marginalFrequencies.columns.title
 msgid "Negative Responses"
 msgstr ""
@@ -56707,6 +57130,11 @@ msgstr ""
 msgid "Negative trend: "
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Negative values = tumor shrinkage (improvement)"
+msgstr ""
+
+#: R/chisqposttest.b.R
 #: R/linechart.b.R
 msgid "negligible"
 msgstr ""
@@ -57307,6 +57735,10 @@ msgstr ""
 msgid "No data provided for analysis. Please ensure your dataset contains data."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "No data remaining after processing. Check baseline measurements and data format."
+msgstr ""
+
 #: jjsegmentedtotalbar/options/percentage_format/integer.title
 msgid "No Decimals (80%)"
 msgstr ""
@@ -57375,6 +57807,10 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "No paired observations found for change analysis in complete data."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "No patients with valid response data found."
 msgstr ""
 
 #: jsummarytools/options/cross_proportions/none.title
@@ -57926,6 +58362,10 @@ msgstr ""
 msgid "Non-proportional hazards with additive effects"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Non-responder"
+msgstr ""
+
 #: jjbarstats/options/pairwisedisplay/non-significant.title
 #: jjbetweenstats/options/pairwisedisplay/non-significant.title
 #: jjwithinstats/options/pairwisedisplay/non-significant.title
@@ -58282,6 +58722,10 @@ msgstr ""
 msgid "not found in grouping variable. Highlight will be ignored."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "not found in the data."
+msgstr ""
+
 #: R/survival.b.R
 msgid "not found. Using standard Cox regression."
 msgstr ""
@@ -58310,6 +58754,7 @@ msgstr ""
 msgid "Not specified"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/linechart.b.R
 #: R/survival.b.R
 msgid "not statistically significant"
@@ -58335,6 +58780,10 @@ msgstr ""
 #: R/riverplot.b.R
 #: R/vartree.b.R
 msgid "Note:"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Note: %d cell(s) have expected counts < 5"
 msgstr ""
 
 #: treeadvanced/ui[3][1][1].label
@@ -59394,8 +59843,16 @@ msgstr ""
 msgid "O'Brien-Fleming Type"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Objective Response Rate (CR+PR)"
+msgstr ""
+
 #: advancedtrials/options/primary_endpoint/objective_response_rate.title
 msgid "Objective Response Rate (ORR)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Objective Response Rate (ORR):"
 msgstr ""
 
 #: factoranalysis/options/rotation/oblimin.title
@@ -59751,6 +60208,10 @@ msgstr ""
 
 #: treatmentmeta/results/sensitivity.columns.title
 msgid "Omitted Study"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Oncology clinical trials and treatment response studies"
 msgstr ""
 
 #: adaptivetrialdesign/options/clinical_context/oncology.title
@@ -61740,6 +62201,7 @@ msgstr ""
 msgid "P-trend"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: aalenhazard/results/constantEffectsTest.columns.title
 #: aalenhazard/results/goodnessOfFit.columns.title
 #: adaptivelasso/results/modelDiagnostics.columns.title
@@ -62094,6 +62556,10 @@ msgstr ""
 
 #: timeupdatesurvival/results/modelComparison.columns.title
 msgid "p-value vs Cox"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "p-value: "
 msgstr ""
 
 #: bayesiandiagnostic/results/covariateEffects.columns.title
@@ -63129,6 +63595,18 @@ msgstr ""
 msgid "Partial r"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Partial Response (PR):"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Partial Response (PR): At least 30% decrease in sum of target lesions."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Partial Response:"
+msgstr ""
+
 #: screeningevaluation/options/participant_id.title
 #: screeningevaluation/ui[0][2].label
 msgid "Participant ID"
@@ -63236,6 +63714,10 @@ msgstr ""
 msgid "Pathology Composition Analysis"
 msgstr ""
 
+#: chisqposttest/options/clinicalPreset/grade_distribution.title
+msgid "Pathology Grade Distribution"
+msgstr ""
+
 #: imagingcorrelation/options/pathologyData.title
 msgid "Pathology Results"
 msgstr ""
@@ -63341,6 +63823,14 @@ msgstr ""
 msgid "Patient Follow-Up Plots"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "patient found."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Patient Group"
+msgstr ""
+
 #: waterfall/options/colorBy/group.title
 #: waterfall/options/spiderColorBy/group.title
 msgid "Patient Groups"
@@ -63392,6 +63882,10 @@ msgstr ""
 msgid "Patient ID (Optional)"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Patient ID and response variables are required"
+msgstr ""
+
 #: bayesiandiagnostic/options/patient_id.title
 #: bayesiandiagnostic/ui[3][1].label
 msgid "Patient ID Variable"
@@ -63400,6 +63894,10 @@ msgstr ""
 #: clinicaldashboard/options/patientId.title
 #: clinicaldataintegration/options/patientIdVar.title
 msgid "Patient ID variable"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Patient ID:"
 msgstr ""
 
 #: patientdashboard/options/patientID.title
@@ -63519,10 +64017,12 @@ msgstr ""
 msgid "patient/subject"
 msgstr ""
 
+#: R/waterfall.b.R
 #: clinicalprediction/ui[5][0]/n_explanations.suffix
 msgid "patients"
 msgstr ""
 
+#: R/waterfall.b.R
 #: swimmerplot/results/personTimeTable.columns.title
 #: waterfall/results/personTimeTable.columns.title
 msgid "Patients"
@@ -63604,6 +64104,10 @@ msgstr ""
 
 #: missingdataexplorer/options/pattern_plot.title
 msgid "Pattern Visualization"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "patterns in response and identify different types of outcomes."
 msgstr ""
 
 #: betabinomialdiagnostic/options/tau_squared_method/paule_mandel.title
@@ -63716,6 +64220,10 @@ msgstr ""
 
 #: explainableai/results/partialdependence/pdptable.columns.title
 msgid "PD Effect"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "PD threshold (+20%)"
 msgstr ""
 
 #: ihcscoring/options/pd1_marker.title
@@ -64029,6 +64537,10 @@ msgstr ""
 
 #: waterfall/options/inputType/percentage.title
 msgid "Percentage Changes"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Percentage Changes:"
 msgstr ""
 
 #: jjbarstats/options/digitsperc.title
@@ -65348,6 +65860,14 @@ msgstr ""
 msgid "Plausibility Score"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Please address these items to ensure accurate analysis."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Please check your data and try again."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Please check your data format and variable selections."
 msgstr ""
@@ -65366,6 +65886,14 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Please correct these issues before proceeding with analysis."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Please ensure each patient has a measurement at time = 0"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Please ensure the time variable is correctly specified."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -67001,6 +67529,10 @@ msgstr ""
 msgid "Positive Rate (%)"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Positive residuals (red cells) indicate combinations that occur more frequently than expected under independence."
+msgstr ""
+
 #: cochranq/results/marginalFrequencies.columns.title
 msgid "Positive Responses"
 msgstr ""
@@ -67140,6 +67672,7 @@ msgstr ""
 msgid "Post-hoc testing recommended to identify specific group differences."
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: groupedbar/options/posthoc.title
 msgid "Post-hoc Tests"
 msgstr ""
@@ -67723,6 +68256,10 @@ msgstr ""
 msgid "PPV Upper"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "PR threshold (-30%)"
+msgstr ""
+
 #: stagemigration/results/effectSizes.columns.title
 msgid "Practical Significance"
 msgstr ""
@@ -67735,10 +68272,15 @@ msgstr ""
 msgid "Pre-calculated Effects"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Pre-calculated percent changes from baseline"
+msgstr ""
+
 #: decisiongraph/options/clinicalPreset.description.ui
 msgid "Pre-configured analysis templates for common clinical decision analysis scenarios."
 msgstr ""
 
+#: chisqposttest/options/clinicalPreset.description
 #: enhancedROC/options/clinicalPresets.description
 msgid "Pre-configured settings for common clinical scenarios"
 msgstr ""
@@ -69504,6 +70046,7 @@ msgstr ""
 msgid "Progress was at step"
 msgstr ""
 
+#: R/waterfall.b.R
 #: swimmerplot/options/milestone4Name.default
 msgid "Progression"
 msgstr ""
@@ -69577,6 +70120,18 @@ msgstr ""
 
 #: illnessdeath/options/model_structure/progressive.title
 msgid "Progressive Disease"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Progressive Disease (PD):"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Progressive Disease (PD): At least 20% increase in sum of target lesions."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Progressive Disease:"
 msgstr ""
 
 #: flexmultistate/options/model_type/progressive.title
@@ -71621,6 +72176,10 @@ msgstr ""
 msgid "Raw Measurements"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Raw Measurements:"
+msgstr ""
+
 #: alluvial/options/value_format/raw.title
 msgid "Raw Numbers"
 msgstr ""
@@ -71761,6 +72320,22 @@ msgstr ""
 msgid "RECIST Criteria"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "RECIST Response"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "RECIST Response Categories:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "RECIST v1.1 Categories:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "RECIST v1.1 thresholds: CR ≤-100%, PR ≤-30%, PD >+20%"
+msgstr ""
+
 #: netreclassification/results/reclassification.title
 msgid "Reclassification Cross-Tabulation"
 msgstr ""
@@ -71872,6 +72447,10 @@ msgstr ""
 msgid "Recommendations & Interpretation"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Recommendations:"
+msgstr ""
+
 #: clinicalalerts/results/detailedAlerts.columns.title
 #: clinicalalerts/results/patientAnalysis.columns.title
 #: labcontrolcharts/results/correctiveActions.columns.title
@@ -71882,6 +72461,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "Recommended approach: Start with residuals analysis for pattern identification, then use pairwise tests for formal hypothesis testing."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Recommended Data Format:"
 msgstr ""
 
 #: treatmentoptim/results/doseOptimization.columns.title
@@ -72993,6 +73576,11 @@ msgstr ""
 msgid "Report text copied to clipboard!"
 msgstr ""
 
+#: R/chisqposttest.b.R
+#: chisqposttest/results/reportSentences.title
+msgid "Report-Ready Sentences"
+msgstr ""
+
 #: classification/options/reporting.title
 #: classification/ui[1][1][0].label
 msgid "Reporting"
@@ -73053,6 +73641,10 @@ msgstr ""
 msgid "Required Action"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Required columns 'time' or 'response' not found in spider plot data"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Required Data Setup:"
 msgstr ""
@@ -73063,6 +73655,10 @@ msgstr ""
 
 #: poweranalysis/results/competing_risks_table.columns.title
 msgid "Required Events"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Required for spider plots (e.g., months from baseline)"
 msgstr ""
 
 #: R/lollipop.b.R
@@ -73076,6 +73672,10 @@ msgstr ""
 
 #: nonparametric/results/powerAnalysis.columns.title
 msgid "Required N (80% power)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Required only for Spider Plot (e.g., months from baseline)"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -73094,6 +73694,10 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Required Steps:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Required Variables:"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -73128,6 +73732,14 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "requires careful evaluation"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Requires multiple measurements per patient with time variable"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Requires one measurement per patient (for single timepoint data)"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -73308,6 +73920,10 @@ msgstr ""
 msgid "Resource Category"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Responder"
+msgstr ""
+
 #: patientreported/options/responder_analysis.title
 msgid "Responder Analysis"
 msgstr ""
@@ -73336,6 +73952,14 @@ msgstr ""
 msgid "response"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Response"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Response analysis of %d patients using RECIST v1.1 criteria."
+msgstr ""
+
 #: swimmerplot/options/milestone3Name.default
 msgid "Response Assessment"
 msgstr ""
@@ -73352,6 +73976,14 @@ msgstr ""
 #: patientreported/results/responder_analysis_results.columns.title
 #: waterfall/results/personTimeTable.columns.title
 msgid "Response Category"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Response Data:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Response Distribution:"
 msgstr ""
 
 #: biomarkerresponse/results/groupComparison.columns.title
@@ -73434,6 +74066,10 @@ msgstr ""
 
 #: waterfall/ui[0][1].label
 msgid "Response Value (Raw or Percentage Measurement)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Response Value:"
 msgstr ""
 
 #: assayoptimization/options/response_var.title
@@ -73591,6 +74227,10 @@ msgstr ""
 msgid "Results Interpretation"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Results may be unreliable with small samples."
+msgstr ""
+
 #: partialcorrelation/results/assumptionResults.description
 msgid "Results of statistical assumption testing"
 msgstr ""
@@ -73611,6 +74251,10 @@ msgstr ""
 msgid "Results should be interpreted cautiously due to the small number of events."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Results should be interpreted with caution."
+msgstr ""
+
 #: retracted/results/summary.title
 msgid "Results Summary"
 msgstr ""
@@ -73618,6 +74262,10 @@ msgstr ""
 #: distributionfit/ui[4][0].label
 #: simonmakuch/ui[8][0][0].label
 msgid "Results Tables"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Results:"
 msgstr ""
 
 #: factoranalysis/results/results/parallelAnalysis.columns.title
@@ -75329,6 +75977,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Sample size:"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Sample size: %d | Expected counts < 5: %d/%d cells | Expected counts < 1: %d cells"
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -77862,6 +78514,10 @@ msgstr ""
 msgid "Show Assumption Tests"
 msgstr ""
 
+#: chisqposttest/options/showAssumptionsCheck.title
+msgid "Show Assumptions Check"
+msgstr ""
+
 #: timedependent/options/plot_auc_trajectory.description.ui
 msgid "Show AUC values over time"
 msgstr ""
@@ -78040,6 +78696,10 @@ msgstr ""
 
 #: treecompare/options/show_clinical_recommendations.title
 msgid "Show Clinical Recommendations"
+msgstr ""
+
+#: chisqposttest/options/showClinicalSummary.title
+msgid "Show Clinical Summary"
 msgstr ""
 
 #: mixedcox/options/show_cluster_summary.title
@@ -78645,6 +79305,10 @@ msgstr ""
 
 #: swimmerplot/options/showEventMarkers.title
 msgid "Show Event Markers"
+msgstr ""
+
+#: chisqposttest/options/showExampleInterpretations.title
+msgid "Show Example Interpretations"
 msgstr ""
 
 #: outlierdetection/options/show_exclusion_summary.title
@@ -80118,6 +80782,10 @@ msgstr ""
 msgid "Show Statistical Footnotes"
 msgstr ""
 
+#: chisqposttest/options/showGlossary.title
+msgid "Show Statistical Glossary"
+msgstr ""
+
 #: enhancedcrosstable/options/show_interpretation.title
 #: nonparametricregression/options/show_interpretation.title
 msgid "Show Statistical Interpretation"
@@ -80541,9 +81209,21 @@ msgstr ""
 msgid "Show Weight Plots"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Show which specific cell combinations contribute to significance. Values > 2 or < -2 indicate cells that differ significantly from expected."
+msgstr ""
+
 #: partialcorrelation/options/showZeroOrder.title
 #: partialcorrelation/ui[1][2]/showZeroOrder.label
 msgid "Show zero-order correlations"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Shows best response for each patient as vertical bars"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Shows best response for each patient as vertical bars, ideal for single timepoint or best response data."
 msgstr ""
 
 #: R/venn.b.R
@@ -80552,6 +81232,14 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "Shows how robust the conclusions are to uncertainty in the data"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Shows response trajectories over time as connected lines"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Shows response trajectories over time as connected lines, requires time variable for longitudinal data."
 msgstr ""
 
 #: R/jjridges.b.R
@@ -80804,6 +81492,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Significant differences between groups detected (p < 0.05). "
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Significant: "
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -81206,6 +81898,10 @@ msgstr ""
 msgid "Small"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "small"
+msgstr ""
+
 #: enhancedtables/options/font_size/small.title
 msgid "Small (10pt)"
 msgstr ""
@@ -81257,6 +81953,10 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "Small sample size (n = {n}). Consider larger sample for more reliable cut-off analysis."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Small sample size (n=%d)"
 msgstr ""
 
 #: R/benford.b.R
@@ -82344,6 +83044,10 @@ msgstr ""
 msgid "Spending Function Parameter"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Spider Plot"
+msgstr ""
+
 #: waterfall/results/spiderplot.title
 msgid "Spider Plot - Response Over Time"
 msgstr ""
@@ -82356,12 +83060,28 @@ msgstr ""
 msgid "Spider Plot Color Scheme"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Spider plot data is empty or null"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Spider Plot of Tumor Response"
+msgstr ""
+
 #: waterfall/ui[2].label
 msgid "Spider Plot Options"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Spider Plot Requirements and Guidelines"
+msgstr ""
+
 #: waterfall/ui[2][1][0].label
 msgid "Spider Plot Visualization"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Spider Plot:"
 msgstr ""
 
 #: spikeslabpriors/options/spike_variance.title
@@ -82723,6 +83443,22 @@ msgstr ""
 
 #: treatmenteffects/options/stabilized_weights.title
 msgid "Stabilized Weights"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Stable"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Stable Disease (SD):"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Stable Disease (SD): Neither PR nor PD criteria met."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Stable Disease:"
 msgstr ""
 
 #: emfrailty/options/frailty_distribution/stable.title
@@ -83184,6 +83920,7 @@ msgstr ""
 msgid "Standardized Residual"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/crosstable.b.R
 #: categoricaladvanced/results/residuals.title
 #: chisqposttest/results/plot.title
@@ -83721,6 +84458,7 @@ msgstr ""
 msgid "Statistical function to apply to y-variable."
 msgstr ""
 
+#: chisqposttest/results/glossaryPanel.title
 #: summarydata/results/glossary.title
 msgid "Statistical Glossary"
 msgstr ""
@@ -83995,6 +84733,7 @@ msgstr ""
 msgid "Statistical Terminology"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: agreement/options/showStatisticalGlossary.title
 #: agreement/results/statisticalGlossary.title
 msgid "Statistical Terms Glossary"
@@ -84124,6 +84863,7 @@ msgstr ""
 msgid "Statistical Visualization"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/linechart.b.R
 #: R/survival.b.R
 msgid "statistically significant"
@@ -88360,6 +89100,10 @@ msgstr ""
 msgid "Test Used:"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Test used: "
+msgstr ""
+
 #: effectsize/options/testValue.title
 #: effectsize/results/results/testDetails.columns.title
 #: jjhistostats/options/test.value.title
@@ -88498,6 +89242,10 @@ msgstr ""
 msgid "Tests Used"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Tests whether two categorical variables are independent. Used when you want to know if categories of one variable are associated with categories of another."
+msgstr ""
+
 #: conditionalinference/options/testtype/Teststatistic.title
 msgid "Teststatistic"
 msgstr ""
@@ -88577,6 +89325,10 @@ msgstr ""
 msgid "The annual rate of loss to follow-up (attrition). Only used for complex designs."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "The association between %s was %s (χ²(%d) = %.2f, p %s, n = %d). The effect size was %s (Cramér's V = %.3f)."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The average outcome that would be obtained if the decision were repeated many times under identical circumstances."
 msgstr ""
@@ -88587,6 +89339,18 @@ msgstr ""
 
 #: ggprism/options/prism_palette/the_blues.title
 msgid "The Blues (9 colors)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "The combination of '%s' and '%s' occurred %.1f times less often than expected by chance (observed: %d, expected: %.1f)."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "The combination of '%s' and '%s' occurred %.1f times more often than expected by chance (observed: %d, expected: %.1f)."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "The contingency table consisted of %d rows and %d columns with a total sample size of %d."
 msgstr ""
 
 #: survivalcont/options/contexpl.description
@@ -88692,6 +89456,10 @@ msgstr ""
 msgid "The diagnostic test being evaluated for performance. This is typically a new, faster, or less expensive test compared to the gold standard."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "The effect size is %s (Cramér's V = %.3f)"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The endpoint of a decision path where final outcomes (costs, utilities) are specified. Represented by triangles in decision trees."
 msgstr ""
@@ -88702,6 +89470,10 @@ msgstr ""
 
 #: oddsratio/options/explanatory.description.main
 msgid "The explanatory variables to be used in the analysis."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "The following patients lack baseline (time = 0) measurements:"
 msgstr ""
 
 #: eurostatmap/options/geo_level.description.jamovi
@@ -88797,8 +89569,20 @@ msgstr ""
 msgid "The monetary value of health benefits minus the costs"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "The null hypothesis of independence could not be rejected at the α = %.2f significance level."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "The null hypothesis of independence was rejected at the α = %.2f significance level."
+msgstr ""
+
 #: kappaSizeCI/options/kappa0.description.ui
 msgid "The null hypothesis value of kappa."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "The number of observations expected in each cell if the variables were independent. Chi-square test requires most cells to have expected counts ≥ 5."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -88855,6 +89639,10 @@ msgstr ""
 msgid "The probability of detecting an effect if one exists (1 minus the Type II error rate). Conventional values are 0.8 or 0.9."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "The probability of observing results at least as extreme as what was found, assuming no real association exists. p < 0.05 typically indicates statistical significance."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The probability that a patient will move from one health state to another during a specific time period."
 msgstr ""
@@ -88875,8 +89663,16 @@ msgstr ""
 msgid "The ratio of control group size to treatment group size. 1 indicates equal allocation. Values > 1 mean more subjects in the control group; values < 1 mean more in the treatment group."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "The resulting visualization will help you track response patterns \n"
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "The ridge plot displays the distribution of"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "the row and column variables"
 msgstr ""
 
 #: ppv/options/alpha.description
@@ -88921,6 +89717,10 @@ msgstr ""
 
 #: powersurvival/options/sample_size.description
 msgid "The total number of subjects across all groups. For sample size calculation, this is a starting value for the search algorithm."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "The Treatment Response Analysis creates waterfall and spider plots to visualize tumor response data according to RECIST v1.1 criteria."
 msgstr ""
 
 #: R/vartree.b.R
@@ -89038,6 +89838,7 @@ msgid "These summaries are suitable for baseline characteristics tables, data qu
 msgstr ""
 
 #: R/reportcat.b.R
+#: R/waterfall.b.R
 msgid "These will be excluded from analysis."
 msgstr ""
 
@@ -89237,12 +90038,24 @@ msgstr ""
 msgid "This represents a clinically significant increase in risk"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "This represents a lower response rate that may require further investigation."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "This represents a mild clinical effect."
 msgstr ""
 
 #: R/multisurvival.b.R
 msgid "This represents a moderate clinical effect."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "This represents a moderate response rate."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "This represents a promising response rate for oncology studies."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -89285,6 +90098,10 @@ msgstr ""
 msgid "This tool creates hierarchical visualizations of categorical variables to identify patient subgroups and clinical patterns."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "This tool creates waterfall and spider plots for tumor response analysis following RECIST criteria."
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "This tool generates a summary of your selected categorical variables."
 msgstr ""
@@ -89307,6 +90124,10 @@ msgstr ""
 
 #: R/singlearm.b.R
 msgid "This treatment effectiveness study"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "This visualization requires two key elements:"
 msgstr ""
 
 #: screeningcalculator/results/repeatTest3Table.title
@@ -89538,6 +90359,7 @@ msgid "TIL Signature Characterization"
 msgstr ""
 
 #: R/survival.b.R
+#: R/waterfall.b.R
 #: causespecifichazards/results/cumulative_incidence_table.columns.title
 #: comparingSurvival/options/times.title
 #: comparingSurvival/ui[0][0].label
@@ -90277,6 +91099,7 @@ msgstr ""
 msgid "Time Variable"
 msgstr ""
 
+#: R/waterfall.b.R
 #: excessmortality/options/timeVar.title
 #: flexiblerelativesurvival/options/timeVar.title
 msgid "Time variable"
@@ -90375,6 +91198,15 @@ msgstr ""
 msgid "Time variable is required for long format data"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Time Variable Required for Raw Measurements:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Time Variable Requirement:"
+msgstr ""
+
+#: R/waterfall.b.R
 #: causespecifichazards/ui/elapsedtime[0].label
 #: parametricfrailty/ui/elapsedtime[0].label
 msgid "Time Variable:"
@@ -90879,6 +91711,7 @@ msgstr ""
 #: R/linechart.b.R
 #: R/nogoldstandard.b.R
 #: R/survival.b.R
+#: R/waterfall.b.R
 msgid "to"
 msgstr ""
 
@@ -90937,9 +91770,11 @@ msgstr ""
 #: tumorgrowth/results/todo.title
 #: vartree/results/todo.title
 #: venn/results/todo.title
-#: waterfall/results/todo.title
-#: waterfall/results/todo2.title
 msgid "To Do"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "To Generate the Plot:"
 msgstr ""
 
 #: ggflowchart/options/to_var.title
@@ -90953,6 +91788,10 @@ msgstr ""
 
 #: riverplot/results/flowTable.columns.title
 msgid "To Stage"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "To start analysis select <b>Patient ID</b> and <b>Response Value</b>"
 msgstr ""
 
 #: continuousmarkov/results/transitionMatrix.columns.title
@@ -90996,6 +91835,10 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "Too many groups ("
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Tool automatically calculates percent changes"
 msgstr ""
 
 #: package/analyses/toolssummary.title
@@ -91370,6 +92213,10 @@ msgstr ""
 
 #: decisioncalculator/options/tp2.title
 msgid "TP (Cut-off 2)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Track response progression over time"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -92104,6 +92951,10 @@ msgstr ""
 msgid "Treatment Response"
 msgstr ""
 
+#: chisqposttest/options/clinicalPreset/treatment_response.title
+msgid "Treatment Response (3+ groups)"
+msgstr ""
+
 #: jjbarstats/options/clinicalpreset/treatment.title
 #: jjpiestats/options/clinicalpreset/treatment.title
 msgid "Treatment Response (multiple groups)"
@@ -92122,6 +92973,10 @@ msgstr ""
 #: waterfall/ui.title
 #: waterfall/results.title
 msgid "Treatment Response Analysis"
+msgstr ""
+
+#: waterfall/results/todo.title
+msgid "Treatment Response Analysis Guide"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -92686,6 +93541,10 @@ msgstr ""
 
 #: multiplexanalysis/options/biomarker_panel/tumor.title
 msgid "Tumor Markers"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Tumor response monitoring"
 msgstr ""
 
 #: tumorgrowth/options/tumorSize.title
@@ -93555,6 +94414,10 @@ msgstr ""
 msgid "Understanding Simon-Makuch Analysis"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Understanding Spider Plots:"
+msgstr ""
+
 #: stagemigration/results/stageDistributionExplanation.title
 msgid "Understanding Stage Distribution Changes"
 msgstr ""
@@ -93719,6 +94582,10 @@ msgstr ""
 msgid "Unique"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Unique identifier for each patient"
+msgstr ""
+
 #: recurrentsurvival/options/subject_id.description.ui
 msgid "Unique identifier for each subject"
 msgstr ""
@@ -93806,6 +94673,10 @@ msgstr ""
 
 #: sparsegrouplasso/options/weight_type/univariate_based.title
 msgid "Univariate-Based Weights"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Unknown"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -94269,6 +95140,14 @@ msgstr ""
 
 #: clinicalalerts/options/use_clinical_defaults.title
 msgid "Use Clinical Default Thresholds"
+msgstr ""
+
+#: chisqposttest/options/colorBlindSafe.description
+msgid "Use color-blind friendly visualization options"
+msgstr ""
+
+#: chisqposttest/options/colorBlindSafe.title
+msgid "Use Color-Blind Safe Palette"
 msgstr ""
 
 #: jjbetweenstats/options/colorblindSafe.title
@@ -96817,6 +97696,10 @@ msgstr ""
 msgid "Very High Risk"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "very significant"
+msgstr ""
+
 #: R/raincloud.b.R
 msgid "Very significant (**)"
 msgstr ""
@@ -97135,6 +98018,10 @@ msgstr ""
 msgid "Visualization Type:"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Visualization Types:"
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "Visualization:"
 msgstr ""
@@ -97300,7 +98187,12 @@ msgid "Warning Messages"
 msgstr ""
 
 #: R/benford.b.R
+#: R/waterfall.b.R
 msgid "Warning:"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Warning: %.0f%% of cells have expected counts < 5"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -97321,6 +98213,10 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "WARNING: No valid bootstrap results obtained. Returning NA."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Warning: Only"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -97350,6 +98246,7 @@ msgstr ""
 msgid "was associated with"
 msgstr ""
 
+#: R/waterfall.b.R
 #: explainableai/options/plot_type/waterfall.title
 #: waterfall/results/waterfallplot.title
 msgid "Waterfall Plot"
@@ -97359,9 +98256,21 @@ msgstr ""
 msgid "Waterfall Plot Options"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Waterfall plot shows best (most negative) response per patient"
+msgstr ""
+
 #: package/analyses/waterfall.menuSubtitle
 #: waterfall/options.menuSubtitle
 msgid "Waterfall Plot, Spider Plot"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Waterfall Plot:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Waterfall plots are more meaningful with multiple patients."
 msgstr ""
 
 #: ihcscoring/options/segmentation_method/watershed.title
@@ -97783,6 +98692,10 @@ msgstr ""
 msgid "Welcome to ClinicoPath Chi-Square Post-Hoc Tests"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Welcome to ClinicoPath Treatment Response Analysis"
+msgstr ""
+
 #: R/venn.b.R
 msgid "Welcome to ClinicoPath Venn Diagram Tool"
 msgstr ""
@@ -97930,6 +98843,10 @@ msgstr ""
 msgid "When using multiple event levels, at least one event type (Dead of Disease or Dead of Other) must be specified."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "When using raw tumor measurements, a time variable is essential to:"
+msgstr ""
+
 #: advancedbarplot/options/legend_position.description.jamovi
 #: jjsegmentedtotalbar/options/legend_position.description.jamovi
 msgid "Where to place the legend."
@@ -97974,6 +98891,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "Why correction is needed:"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Why this matters:"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -98316,6 +99237,10 @@ msgstr ""
 #: friedmantest/options/within.title
 #: pagetrendtest/options/within.title
 msgid "Within-Subjects Factor"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Without baseline values, percentage changes cannot be calculated accurately"
 msgstr ""
 
 #: advancedanova/options/wls.title

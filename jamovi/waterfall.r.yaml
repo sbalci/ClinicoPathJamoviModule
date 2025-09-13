@@ -5,7 +5,7 @@ jrs:   '1.1'
 
 items:
     - name: todo
-      title: To Do
+      title: Treatment Response Analysis Guide
       type: Html
       clearWith:
          - patientID
@@ -13,10 +13,22 @@ items:
          - timeVar
          - inputType
 
-
-    - name: todo2
-      title: To Do
+    - name: clinicalSummary
+      title: Clinical Summary
       type: Html
+      visible: (patientID && responseVar)
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - colorScheme
+         - groupVar
+
+    - name: aboutAnalysis
+      title: About This Analysis
+      type: Html
+      visible: (patientID)
       clearWith:
          - patientID
          - responseVar
@@ -82,7 +94,7 @@ items:
         - name: median_duration
           title: "Median Duration"
           type: text
-      visible: (!is.null(timeVar) && inputType == "raw")
+      visible: (timeVar && inputType == "raw")
 
 
     - name: clinicalMetrics
@@ -130,7 +142,7 @@ items:
       height: 500
       renderFun: .spiderplot
       requiresData: true
-      visible: (showSpiderPlot)
+      visible: (showSpiderPlot && timeVar)
       clearWith:
         - patientID
         - responseVar
