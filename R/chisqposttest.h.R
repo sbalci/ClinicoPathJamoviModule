@@ -19,7 +19,14 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showDetailedTables = FALSE,
             residualsCutoff = 2,
             testSelection = "auto",
-            exportResults = FALSE, ...) {
+            exportResults = FALSE,
+            clinicalPreset = "custom",
+            showClinicalSummary = TRUE,
+            showExampleInterpretations = FALSE,
+            copyReadySentences = FALSE,
+            showAssumptionsCheck = TRUE,
+            showGlossary = FALSE,
+            colorBlindSafe = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -107,6 +114,39 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "exportResults",
                 exportResults,
                 default=FALSE)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "custom",
+                    "diagnostic2x2",
+                    "treatment_response",
+                    "grade_distribution"),
+                default="custom")
+            private$..showClinicalSummary <- jmvcore::OptionBool$new(
+                "showClinicalSummary",
+                showClinicalSummary,
+                default=TRUE)
+            private$..showExampleInterpretations <- jmvcore::OptionBool$new(
+                "showExampleInterpretations",
+                showExampleInterpretations,
+                default=FALSE)
+            private$..copyReadySentences <- jmvcore::OptionBool$new(
+                "copyReadySentences",
+                copyReadySentences,
+                default=FALSE)
+            private$..showAssumptionsCheck <- jmvcore::OptionBool$new(
+                "showAssumptionsCheck",
+                showAssumptionsCheck,
+                default=TRUE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
+            private$..colorBlindSafe <- jmvcore::OptionBool$new(
+                "colorBlindSafe",
+                colorBlindSafe,
+                default=FALSE)
 
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
@@ -122,6 +162,13 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..residualsCutoff)
             self$.addOption(private$..testSelection)
             self$.addOption(private$..exportResults)
+            self$.addOption(private$..clinicalPreset)
+            self$.addOption(private$..showClinicalSummary)
+            self$.addOption(private$..showExampleInterpretations)
+            self$.addOption(private$..copyReadySentences)
+            self$.addOption(private$..showAssumptionsCheck)
+            self$.addOption(private$..showGlossary)
+            self$.addOption(private$..colorBlindSafe)
         }),
     active = list(
         rows = function() private$..rows$value,
@@ -137,7 +184,14 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showDetailedTables = function() private$..showDetailedTables$value,
         residualsCutoff = function() private$..residualsCutoff$value,
         testSelection = function() private$..testSelection$value,
-        exportResults = function() private$..exportResults$value),
+        exportResults = function() private$..exportResults$value,
+        clinicalPreset = function() private$..clinicalPreset$value,
+        showClinicalSummary = function() private$..showClinicalSummary$value,
+        showExampleInterpretations = function() private$..showExampleInterpretations$value,
+        copyReadySentences = function() private$..copyReadySentences$value,
+        showAssumptionsCheck = function() private$..showAssumptionsCheck$value,
+        showGlossary = function() private$..showGlossary$value,
+        colorBlindSafe = function() private$..colorBlindSafe$value),
     private = list(
         ..rows = NA,
         ..cols = NA,
@@ -152,7 +206,14 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showDetailedTables = NA,
         ..residualsCutoff = NA,
         ..testSelection = NA,
-        ..exportResults = NA)
+        ..exportResults = NA,
+        ..clinicalPreset = NA,
+        ..showClinicalSummary = NA,
+        ..showExampleInterpretations = NA,
+        ..copyReadySentences = NA,
+        ..showAssumptionsCheck = NA,
+        ..showGlossary = NA,
+        ..colorBlindSafe = NA)
 )
 
 chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -161,6 +222,8 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         todo = function() private$.items[["todo"]],
         chisqTable = function() private$.items[["chisqTable"]],
+        assumptionsCheck = function() private$.items[["assumptionsCheck"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         educationalOverview = function() private$.items[["educationalOverview"]],
         weightedDataInfo = function() private$.items[["weightedDataInfo"]],
         contingencyTable = function() private$.items[["contingencyTable"]],
@@ -169,6 +232,9 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         posthocTable = function() private$.items[["posthocTable"]],
         detailedComparisons = function() private$.items[["detailedComparisons"]],
         exportTable = function() private$.items[["exportTable"]],
+        exampleInterpretations = function() private$.items[["exampleInterpretations"]],
+        reportSentences = function() private$.items[["reportSentences"]],
+        glossaryPanel = function() private$.items[["glossaryPanel"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -217,11 +283,31 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="educationalOverview",
-                title="Analysis Guide",
+                name="assumptionsCheck",
+                title="Assumptions Validation",
+                visible="(showAssumptionsCheck)",
                 clearWith=list(
                     "rows",
-                    "cols")))
+                    "cols",
+                    "showAssumptionsCheck")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible="(showClinicalSummary)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "showClinicalSummary")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="educationalOverview",
+                title="Analysis Guide",
+                visible="(showEducational)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "showEducational")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="weightedDataInfo",
@@ -244,10 +330,13 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="residualsAnalysis",
                 title="Standardized Residuals Analysis",
+                visible="(showResiduals)",
                 clearWith=list(
                     "rows",
                     "cols",
-                    "excl")))
+                    "excl",
+                    "showResiduals",
+                    "residualsCutoff")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="multipleTestingInfo",
@@ -301,12 +390,15 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="detailedComparisons",
                 title="Detailed Pairwise Comparison Tables",
+                visible="(showDetailedTables)",
                 clearWith=list(
                     "rows",
                     "cols",
                     "posthoc",
                     "sig",
-                    "excl")))
+                    "excl",
+                    "showDetailedTables",
+                    "testSelection")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="exportTable",
@@ -333,6 +425,31 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "rows",
                     "cols",
                     "exportResults")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="exampleInterpretations",
+                title="Example Interpretations",
+                visible="(showExampleInterpretations)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "showExampleInterpretations")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentences",
+                title="Report-Ready Sentences",
+                visible="(copyReadySentences)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "copyReadySentences")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossaryPanel",
+                title="Statistical Glossary",
+                visible="(showGlossary)",
+                clearWith=list(
+                    "showGlossary")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -398,10 +515,24 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   comparisons
 #' @param exportResults Export comprehensive analysis results to downloadable
 #'   format for further analysis
+#' @param clinicalPreset Pre-configured settings for common clinical scenarios
+#' @param showClinicalSummary Display natural-language summary of results for
+#'   clinical interpretation
+#' @param showExampleInterpretations Display example interpretations for
+#'   significant findings
+#' @param copyReadySentences Generate copy-ready sentences for clinical
+#'   reports
+#' @param showAssumptionsCheck Display validation of chi-square test
+#'   assumptions
+#' @param showGlossary Display glossary of statistical terms with clinical
+#'   interpretations
+#' @param colorBlindSafe Use color-blind friendly visualization options
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$assumptionsCheck} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
@@ -410,6 +541,9 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$exportTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$exampleInterpretations} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -435,7 +569,14 @@ chisqposttest <- function(
     showDetailedTables = FALSE,
     residualsCutoff = 2,
     testSelection = "auto",
-    exportResults = FALSE) {
+    exportResults = FALSE,
+    clinicalPreset = "custom",
+    showClinicalSummary = TRUE,
+    showExampleInterpretations = FALSE,
+    copyReadySentences = FALSE,
+    showAssumptionsCheck = TRUE,
+    showGlossary = FALSE,
+    colorBlindSafe = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("chisqposttest requires jmvcore to be installed (restart may be required)")
@@ -467,7 +608,14 @@ chisqposttest <- function(
         showDetailedTables = showDetailedTables,
         residualsCutoff = residualsCutoff,
         testSelection = testSelection,
-        exportResults = exportResults)
+        exportResults = exportResults,
+        clinicalPreset = clinicalPreset,
+        showClinicalSummary = showClinicalSummary,
+        showExampleInterpretations = showExampleInterpretations,
+        copyReadySentences = copyReadySentences,
+        showAssumptionsCheck = showAssumptionsCheck,
+        showGlossary = showGlossary,
+        colorBlindSafe = colorBlindSafe)
 
     analysis <- chisqposttestClass$new(
         options = options,

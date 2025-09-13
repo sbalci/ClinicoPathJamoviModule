@@ -141,4 +141,62 @@ options:
       default: false
       description: >
                   Export comprehensive analysis results to downloadable format for further analysis
+
+    - name: clinicalPreset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: Custom Settings
+          name: custom
+        - title: 2×2 Diagnostic Test
+          name: diagnostic2x2
+        - title: Treatment Response (3+ groups)
+          name: treatment_response
+        - title: Pathology Grade Distribution
+          name: grade_distribution
+      default: custom
+      description: >
+                  Pre-configured settings for common clinical scenarios
+
+    - name: showClinicalSummary
+      title: Show Clinical Summary
+      type: Bool
+      default: true
+      description: >
+                  Display natural-language summary of results for clinical interpretation
+
+    - name: showExampleInterpretations
+      title: Show Example Interpretations
+      type: Bool
+      default: false
+      description: >
+                  Display example interpretations for significant findings
+
+    - name: copyReadySentences
+      title: Generate Report Sentences
+      type: Bool
+      default: false
+      description: >
+                  Generate copy-ready sentences for clinical reports
+
+    - name: showAssumptionsCheck
+      title: Show Assumptions Check
+      type: Bool
+      default: true
+      description: >
+                  Display validation of chi-square test assumptions
+
+    - name: showGlossary
+      title: Show Statistical Glossary
+      type: Bool
+      default: false
+      description: >
+                  Display glossary of statistical terms with clinical interpretations
+
+    - name: colorBlindSafe
+      title: Use Color-Blind Safe Palette
+      type: Bool
+      default: false
+      description: >
+                  Use color-blind friendly visualization options
 ...

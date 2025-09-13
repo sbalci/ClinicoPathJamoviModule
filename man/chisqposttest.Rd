@@ -19,7 +19,14 @@ chisqposttest(
   showDetailedTables = FALSE,
   residualsCutoff = 2,
   testSelection = "auto",
-  exportResults = FALSE
+  exportResults = FALSE,
+  clinicalPreset = "custom",
+  showClinicalSummary = TRUE,
+  showExampleInterpretations = FALSE,
+  copyReadySentences = FALSE,
+  showAssumptionsCheck = TRUE,
+  showGlossary = FALSE,
+  colorBlindSafe = FALSE
 )
 }
 \arguments{
@@ -59,12 +66,33 @@ comparisons}
 
 \item{exportResults}{Export comprehensive analysis results to downloadable
 format for further analysis}
+
+\item{clinicalPreset}{Pre-configured settings for common clinical scenarios}
+
+\item{showClinicalSummary}{Display natural-language summary of results for
+clinical interpretation}
+
+\item{showExampleInterpretations}{Display example interpretations for
+significant findings}
+
+\item{copyReadySentences}{Generate copy-ready sentences for clinical
+reports}
+
+\item{showAssumptionsCheck}{Display validation of chi-square test
+assumptions}
+
+\item{showGlossary}{Display glossary of statistical terms with clinical
+interpretations}
+
+\item{colorBlindSafe}{Use color-blind friendly visualization options}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$assumptionsCheck} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
@@ -73,6 +101,9 @@ A results object containing:
 \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
 \code{results$exportTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$exampleInterpretations} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 
