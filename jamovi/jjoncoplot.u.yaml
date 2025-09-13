@@ -1,5 +1,5 @@
 title: Genomic Landscape Visualization
-name: ggoncoplot
+name: jjoncoplot
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -27,6 +27,13 @@ children:
           - type: VariablesListBox
             name: clinicalVars
             isTarget: true
+      - type: TargetLayoutBox
+        label: Mutation Type Variable
+        children:
+          - type: VariablesListBox
+            name: mutationTypeVar
+            maxItemCount: 1
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:
@@ -36,8 +43,20 @@ children:
     margin: large
     children:
       - type: TextBox
-        name: maxGenes
+        name: topn
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: genesToInclude
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: genesToIgnore
+        format: string
   - type: LayoutBox
     margin: large
     children:
@@ -61,6 +80,8 @@ children:
         name: showMutationLoad
       - type: CheckBox
         name: showGeneFreq
+      - type: CheckBox
+        name: showTMB
       - type: CheckBox
         name: showClinicalAnnotation
   - type: LayoutBox

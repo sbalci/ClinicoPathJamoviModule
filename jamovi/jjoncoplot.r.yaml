@@ -1,5 +1,5 @@
 ---
-name: ggoncoplot
+name: jjoncoplot
 title: Genomic Landscape Visualization
 jrs: '1.1'
 
@@ -9,18 +9,24 @@ items:
       type: Html
       visible: true
 
+    - name: setupGuidance
+      title: Setup Guidance
+      type: Html
+      visible: true
+
     - name: main
       title: Genomic Landscape Plot
       type: Image
       width: 800
       height: 600
       requiresData: true
-      refs: ggoncoplot
+      renderFun: .plotMain
+      refs: jjoncoplot
 
     - name: mutationSummary
       title: Mutation Summary
       type: Table
-      rows: (geneVars)
+      rows: 0
       clearWith:
         - geneVars
         - sampleVar
@@ -45,7 +51,7 @@ items:
     - name: sampleSummary
       title: Sample Summary
       type: Table
-      visible: (showMutationLoad)
+      rows: 0
       clearWith:
         - geneVars
         - sampleVar
@@ -67,7 +73,7 @@ items:
     - name: clinicalSummary
       title: Clinical Annotation Summary
       type: Table
-      visible: (clinicalVars)
+      rows: 0
       clearWith:
         - clinicalVars
         - sampleVar
@@ -88,7 +94,7 @@ items:
     - name: cooccurrence
       title: Gene Co-occurrence Analysis
       type: Table
-      visible: (plotType:cooccurrence)
+      rows: 0
       clearWith:
         - geneVars
         - sampleVar
@@ -117,6 +123,7 @@ items:
     - name: plotInfo
       title: Plot Information
       type: Table
+      rows: 0
       columns:
         - name: parameter
           title: Parameter

@@ -58,8 +58,8 @@ run devtools::document() to see if there are any errors
 - ggoncoplot - Genomic Landscape Visualization
 
 
-/review-function ggoncoplot
-/fix-function ggoncoplot
+/review-function jjoncoplot
+/fix-function jjoncoplot
 
 
 - flexparametricadv - Advanced Flexible Parametric Survival Models

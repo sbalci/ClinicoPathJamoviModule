@@ -1,0 +1,11 @@
+"SampleID","TP53","KRAS","PIK3CA","PTEN","EGFR","BRAF","APC","BRCA1","BRCA2","ATM","CDH1","CTNNB1","IDH1","MYC","RB1","MutationType","Age","Gender","Stage","Response","Grade","MSI_Status","ECOG_PS","OS_months","PFS_months"
+"TCGA-01",1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,"SNV",56,"Male","II","Complete","High","MSS","3",18,13
+"TCGA-02",1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,"Indel",53,"Female","I","Partial","Intermediate","MSS","0",32,18
+"TCGA-03",0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,"SNV",33,"Male","II","Partial","Intermediate","MSI-L","0",2,9
+"TCGA-04",1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Indel",72,"Female","I","Partial","High","MSI-L","0",23,1
+"TCGA-05",1,1,0,1,1,0,NA,0,0,0,0,0,0,0,0,"SNV",52,"Female","IV","Partial","Low","MSS","0",0,33
+"TCGA-06",1,1,0,1,0,1,0,0,0,1,0,0,0,0,0,"CNV",78,"Female","II","Partial","Intermediate","MSS","0",NA,1
+"TCGA-07",1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,"SNV",69,"Male","III","Partial","Low","MSI-H","0",21,1
+"TCGA-08",0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,"SNV",38,"Male","II","Stable","Low","MSI-L","0",52,3
+"TCGA-09",1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,"SNV",51,"Male","IV","Partial","Low","MSS","0",98,13
+"TCGA-10",1,0,1,0,0,0,0,0,NA,0,0,0,0,0,0,"SNV",78,"Female","I","Stable","Intermediate","MSI-H","2",10,11
