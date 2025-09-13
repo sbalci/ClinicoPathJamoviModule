@@ -22,6 +22,22 @@ items:
       requiresData: true
       renderFun: .plotMain
       refs: jjoncoplot
+      clearWith:
+        - geneVars
+        - sampleVar
+        - clinicalVars
+        - mutationTypeVar
+        - plotType
+        - topn
+        - genesToInclude
+        - genesToIgnore
+        - maxSamples
+        - sortBy
+        - colorScheme
+        - drawMarginalPlots
+        - showTMB
+        - log10TransformTMB
+        - showGeneFreq
 
     - name: mutationSummary
       title: Mutation Summary
@@ -30,6 +46,11 @@ items:
       clearWith:
         - geneVars
         - sampleVar
+        - mutationTypeVar
+        - topn
+        - genesToInclude
+        - genesToIgnore
+        - maxSamples
       columns:
         - name: gene
           title: Gene
@@ -55,6 +76,11 @@ items:
       clearWith:
         - geneVars
         - sampleVar
+        - topn
+        - genesToInclude
+        - genesToIgnore
+        - maxSamples
+        - sortBy
       columns:
         - name: sample
           title: Sample ID
@@ -99,6 +125,10 @@ items:
         - geneVars
         - sampleVar
         - plotType
+        - topn
+        - genesToInclude
+        - genesToIgnore
+        - maxSamples
       columns:
         - name: gene1
           title: Gene 1
@@ -132,9 +162,13 @@ items:
           title: Value
           type: text
 
+    - name: clinicalSummaryText
+      title: Clinical Summary for Reports
+      type: Html
+      visible: true
+
 refs:
   - ClinicoPathJamoviModule
-  - ggoncoplot
 
 
 ...

@@ -2,7 +2,7 @@ title: Genomic Landscape Visualization
 name: jjoncoplot
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -34,6 +34,11 @@ children:
             name: mutationTypeVar
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinicalPreset
   - type: LayoutBox
     margin: large
     children:
@@ -81,7 +86,11 @@ children:
       - type: CheckBox
         name: showGeneFreq
       - type: CheckBox
+        name: drawMarginalPlots
+      - type: CheckBox
         name: showTMB
+      - type: CheckBox
+        name: log10TransformTMB
       - type: CheckBox
         name: showClinicalAnnotation
   - type: LayoutBox

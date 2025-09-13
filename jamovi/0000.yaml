@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.63
+version: 0.0.31.64
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-12'
+date: '2025-09-13'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -56,7 +56,7 @@ analyses:
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -72,7 +72,7 @@ analyses:
   - title: Alluvial & Sankey Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial & Sankey Diagrams
     ribbon: analyses
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -1194,7 +1194,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: >
@@ -3735,7 +3735,7 @@ analyses:
     name: flexparametricadv
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuTitle: Advanced Flexible Parametric Survival Models
     description: >
       Advanced flexible parametric survival models using Royston-Parmar

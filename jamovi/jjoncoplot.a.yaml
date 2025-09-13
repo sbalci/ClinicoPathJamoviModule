@@ -79,25 +79,48 @@ options:
           jamovi: >
             Select variable with mutation types to enable colored mutation coding.
 
+    - name: clinicalPreset
+      title: Clinical Analysis Type
+      type: List
+      options:
+        - title: Custom Analysis
+          name: custom
+        - title: Tumor Profiling (Top genes, TMB)
+          name: tumor_profiling
+        - title: Biomarker Discovery (All genes, co-occurrence)
+          name: biomarker_discovery
+        - title: Therapeutic Targets (Actionable genes)
+          name: therapeutic_targets
+        - title: Pathway Analysis (Co-occurrence patterns)
+          name: pathway_analysis
+      default: custom
+      description:
+          R: >
+            Predefined clinical analysis configurations optimized for specific research goals.
+          jamovi: >
+            Choose a clinical analysis preset optimized for your research question, or select Custom for manual configuration.
+
     - name: plotType
       title: Plot Type
       type: List
       options:
-        - title: Classic Oncoplot
+        - title: Classic Oncoplot (Mutation matrix)
           name: oncoplot
-        - title: Gene Frequency Plot
+        - title: Gene Frequency Plot (Mutation rates)
           name: frequency
-        - title: Co-occurrence Plot
+        - title: Co-occurrence Plot (Gene interactions)
           name: cooccurrence
       default: oncoplot
       description:
           R: >
-            Type of plot to generate.
+            Type of genomic visualization to generate.
           jamovi: >
-            Select the type of genomic visualization to create.
+            • Oncoplot: Visual mutation matrix showing which genes are mutated in which samples
+            • Frequency: Bar chart of mutation rates per gene (identifies most frequently altered genes)  
+            • Co-occurrence: Heatmap showing which genes tend to be mutated together or exclusively
 
     - name: topn
-      title: Top N Genes
+      title: Top N Genes to Display  
       type: Number
       default: 10
       min: 3
@@ -106,7 +129,8 @@ options:
           R: >
             Number of most frequently mutated genes to display.
           jamovi: >
-            Select top N genes ranked by mutation frequency (ggoncoplot style).
+            📊 Number of most frequently mutated genes to include in analysis. 
+            Clinical guidance: 10-20 genes typical for tumor profiling, 3-5 for focused therapeutic targets.
 
     - name: genesToInclude
       title: Specific Genes to Include
@@ -116,7 +140,8 @@ options:
           R: >
             Comma-separated list of specific genes to include (overrides topn).
           jamovi: >
-            Comma-separated gene names to specifically include (e.g., "TP53,KRAS,PIK3CA").
+            🎯 Focus on specific genes of clinical interest (e.g., "TP53,KRAS,PIK3CA,EGFR").
+            Example therapeutic targets: BRAF, EGFR, ALK, ROS1, NTRK, IDH1, IDH2.
 
     - name: genesToIgnore
       title: Genes to Exclude
@@ -163,20 +188,22 @@ options:
       title: Color Scheme
       type: List
       options:
-        - title: Default
+        - title: Default (Color-blind safe)
           name: default
-        - title: Mutation Type
+        - title: Mutation Type (Multi-color)
           name: mutation_type
-        - title: Clinical
+        - title: Clinical (Blue-green scale)
           name: clinical
-        - title: Custom
-          name: custom
+        - title: Viridis (Color-blind safe)
+          name: viridis
+        - title: High Contrast (Accessibility)
+          name: high_contrast
       default: default
       description:
           R: >
-            Color scheme for the oncoplot.
+            Color scheme for the oncoplot visualization.
           jamovi: >
-            Select the color scheme for mutation visualization.
+            🎨 Choose color scheme for mutations. Color-blind safe options recommended for publications and presentations.
 
     - name: showMutationLoad
       title: Show Mutation Load
@@ -198,15 +225,35 @@ options:
           jamovi: >
             Display mutation frequency for each gene as a side bar plot (ggoncoplot style).
 
+    - name: drawMarginalPlots
+      title: Draw Integrated Marginal Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Integrate gene frequency and TMB plots as margins of the main oncoplot.
+          jamovi: >
+            Create ggoncoplot-style integrated marginal plots (gene frequencies + TMB) alongside main oncoplot.
+
     - name: showTMB
-      title: Show Tumor Mutation Burden
+      title: Show Tumor Mutation Burden (TMB)
       type: Bool
       default: false
       description:
           R: >
             Display tumor mutation burden (TMB) bar plot.
           jamovi: >
-            Show total mutation burden per sample as marginal barplot.
+            🧬 Display total mutations per sample. High TMB (>10-20 mutations/Mb) may predict immunotherapy response in many cancer types.
+
+    - name: log10TransformTMB
+      title: Log10 Transform TMB
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply log10 transformation to TMB values for better visualization.
+          jamovi: >
+            Apply log10 transformation to TMB values (recommended for datasets with hypermutators).
 
     - name: showClinicalAnnotation
       title: Show Clinical Annotations

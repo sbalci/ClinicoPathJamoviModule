@@ -54,19 +54,18 @@ run devtools::document() to see if there are any errors
 
 ***
 
-
-- ggoncoplot - Genomic Landscape Visualization
-
-
-/review-function jjoncoplot
-/fix-function jjoncoplot
+/review-function flexrstpm2
+/fix-function flexrstpm2
 
 
-- flexparametricadv - Advanced Flexible Parametric Survival Models
-/check-function flexparametricadv
+MERGE: flexparametric + flexiblebaseline → Single Enhanced flexparametric
+Action: Keep flexparametric as primary, integrate spline features
+Remove others after implementation
 
-/review-function flexparametricadv
-/fix-function flexparametricadv
+
+/check-function flexparametric
+/review-function flexparametric
+/fix-function flexparametric
 
 
 - haralicktexture - Haralick Texture Analysis

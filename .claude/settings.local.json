@@ -44,7 +44,9 @@
       "Read(///**)",
       "Bash(cut:*)",
       "Bash(git checkout:*)",
-      "WebFetch(domain:selkamand.github.io)"
+      "WebFetch(domain:selkamand.github.io)",
+      "WebFetch(domain:www.serdarbalci.com)",
+      "Bash(do echo \"=== $param ===\")"
     ],
     "deny": [],
     "ask": [],

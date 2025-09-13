@@ -15,20 +15,24 @@ children:
             name: time
             maxItemCount: 1
             isTarget: true
+            label: Time Variable
           - type: VariablesListBox
             name: status
             maxItemCount: 1
             isTarget: true
+            label: Event Status
       - type: TargetLayoutBox
         label: Covariates
         children:
           - type: VariablesListBox
             name: covariates
             isTarget: true
+            label: Covariates (optional)
           - type: VariablesListBox
             name: group
             maxItemCount: 1
             isTarget: true
+            label: Group Variable (optional)
       - type: TargetLayoutBox
         label: Expected Rates (Relative Survival)
         children:
@@ -36,6 +40,7 @@ children:
             name: expected_rates
             maxItemCount: 1
             isTarget: true
+            label: Expected Survival Rates Variable
   - type: LayoutBox
     margin: large
     stretchFactor: 1
@@ -50,18 +55,24 @@ children:
             children:
               - type: ComboBox
                 name: model_type
+                label: Model Type
               - type: ComboBox
                 name: spline_function
+                label: Spline Function
               - type: TextBox
                 name: spline_df
                 format: number
+                label: Degrees of Freedom
               - type: ComboBox
                 name: knot_placement
+                label: Knot Placement Method
               - type: TextBox
                 name: custom_knots
                 format: string
+                label: Custom Knot Positions
               - type: ComboBox
                 name: boundary_knots
+                label: Boundary Knots
       - type: CollapseBox
         label: Analysis Options
         collapsed: true
@@ -72,12 +83,16 @@ children:
             children:
               - type: CheckBox
                 name: time_ratio
+                label: Time Ratio Analysis
               - type: CheckBox
                 name: relative_survival
+                label: Relative Survival Analysis
               - type: CheckBox
                 name: hazard_analysis
+                label: Hazard Function Analysis
               - type: CheckBox
                 name: derivative_analysis
+                label: Derivative Analysis
       - type: CollapseBox
         label: Prediction Settings
         collapsed: true
@@ -89,12 +104,15 @@ children:
               - type: TextBox
                 name: prediction_times
                 format: string
+                label: Prediction Time Points
               - type: TextBox
                 name: extrapolation_time
                 format: number
+                label: Extrapolation Time
               - type: TextBox
                 name: confidence_level
                 format: number
+                label: Confidence Level
       - type: CollapseBox
         label: Model Validation
         collapsed: true
@@ -105,10 +123,14 @@ children:
             children:
               - type: CheckBox
                 name: model_comparison
+                label: Model Comparison
               - type: CheckBox
                 name: goodness_of_fit
+                label: Goodness of Fit Tests
               - type: CheckBox
                 name: bootstrap_validation
+                label: Bootstrap Validation
               - type: TextBox
                 name: bootstrap_samples
                 format: number
+                label: Bootstrap Samples
