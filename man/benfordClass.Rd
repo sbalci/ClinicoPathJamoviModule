@@ -4,18 +4,18 @@
 \alias{benfordClass}
 \title{Benford's Law Analysis}
 \value{
-A list with the Benford's Law distribution and a list of potential suspects.
+A comprehensive analysis with clinical interpretation and actionable recommendations.
 
-A list with the Benford's Law distribution and a list of potential suspects.
+A comprehensive Benford's Law analysis with clinical interpretation.
 }
 \description{
-This function performs a Benford's Law analysis on a numeric variable.
-It returns the Benford's Law distribution and a list of potential suspects.
+This function performs a Benford's Law analysis on a numeric variable to detect unusual digit patterns that may indicate data quality issues.
+It returns the Benford's Law distribution and a list of potential suspects with clinical interpretation.
 }
 \details{
-The Benford's Law analysis is a test to determine if the distribution of the first digits of a numeric variable follows Benford's Law.
-The Benford's Law distribution is compared to the observed distribution of the first digits of the variable.
-The analysis returns a list of potential suspects that deviate significantly from Benford's Law.
+The Benford's Law analysis is a statistical test to determine if the distribution of the first digits of a numeric variable follows Benford's Law.
+This is commonly used in clinical research to detect data entry errors, fraud, or other quality issues.
+The analysis returns structured results with clinical interpretation and actionable guidance.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::benfordBase} -> \code{benfordClass}

@@ -1,7 +1,7 @@
 ---
 name:  riverplot
 title: River Plots & Alluvial Diagrams
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: 'Categorical Over Time'
 menuSubtitle: 'Flow, Stream, and Transition Visualization'
 version: '0.0.31'
@@ -269,6 +269,8 @@ options:
           name: clinical
         - title: Timeline (blue gradient)
           name: timeline
+        - title: Color-Blind Safe
+          name: colorblind_safe
         - title: Custom
           name: custom
       default: default
@@ -516,5 +518,107 @@ options:
             Apply predefined configurations optimized for common clinical scenarios.
             Each preset automatically configures plot type, styling, and display options
             for the selected clinical use case.
+
+    # === Enhanced Features (inspired by alluvial) ===
+    - name: smart_detection
+      title: Smart Data Format Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatically detect optimal data format and analysis approach based on provided variables.
+          jamovi: >
+            Automatically detect optimal data format and analysis approach based on provided variables.
+
+    - name: enhanced_validation
+      title: Enhanced Input Validation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply comprehensive data validation with user-friendly error messages and suggestions.
+          jamovi: >
+            Apply comprehensive data validation with user-friendly error messages and suggestions.
+
+    - name: multi_format_support
+      title: Multi-Format Data Support
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable experimental support for additional data formats (source-target, multi-node).
+          jamovi: >
+            Enable experimental support for additional data formats (source-target, multi-node).
+
+    - name: adaptive_styling
+      title: Adaptive Plot Styling
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatically adapt plot styling based on data characteristics and size.
+          jamovi: >
+            Automatically adapt plot styling based on data characteristics and size.
+
+    - name: quality_optimization
+      title: Flow Quality Optimization
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply advanced algorithms to optimize flow layout, reduce crossings, and improve readability.
+          jamovi: >
+            Apply advanced algorithms to optimize flow layout, reduce crossings, and improve readability.
+
+    - name: cross_reference_mode
+      title: Cross-Reference with Alluvial
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show suggestions for when alluvial function might be more appropriate for the data.
+          jamovi: >
+            Show suggestions for when alluvial function might be more appropriate for the data.
+
+    # === Accessibility & Performance Options ===
+    - name: high_contrast_mode
+      title: High Contrast Mode
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable high contrast colors and larger fonts for better accessibility and readability.
+          jamovi: >
+            Enable high contrast colors and larger fonts for better accessibility and readability.
+
+    - name: large_dataset_mode
+      title: Large Dataset Optimization
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable memory-efficient processing for datasets with >10,000 observations. May reduce rendering detail for performance.
+          jamovi: >
+            Enable memory-efficient processing for datasets with >10,000 observations. May reduce rendering detail for performance.
+
+    - name: enable_caching
+      title: Enable Result Caching
+      type: Bool
+      default: true
+      description:
+          R: >
+            Cache computation results to improve performance with repeated analysis of the same data.
+          jamovi: >
+            Cache computation results to improve performance with repeated analysis of the same data.
+
+    - name: detailed_progress
+      title: Detailed Progress Reporting
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed progress information during long-running operations. Useful for very large datasets.
+          jamovi: >
+            Show detailed progress information during long-running operations. Useful for very large datasets.
 
 ...

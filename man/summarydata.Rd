@@ -4,7 +4,14 @@
 \alias{summarydata}
 \title{Summary of Continuous Variables}
 \usage{
-summarydata(data, vars, distr = FALSE, decimal_places = 1)
+summarydata(
+  data,
+  vars,
+  distr = FALSE,
+  decimal_places = 1,
+  outliers = FALSE,
+  report_sentences = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -17,6 +24,12 @@ test, skewness, and kurtosis) will be computed and explained.}
 
 \item{decimal_places}{Number of decimal places to display for statistical
 measures.}
+
+\item{outliers}{If TRUE, detect and report potential outliers using IQR
+method. Helpful for quality control and identifying data entry errors.}
+
+\item{report_sentences}{If TRUE, generate copy-ready clinical report
+sentences for direct use in medical documentation.}
 }
 \value{
 A results object containing:
@@ -24,6 +37,11 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$outlierReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

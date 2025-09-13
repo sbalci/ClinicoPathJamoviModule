@@ -119,5 +119,29 @@ items:
       type: Html
       visible: (exportRiverplotObject)
 
+    - name: validation_report
+      title: Enhanced Validation Report
+      type: Html
+      visible: (enhanced_validation)
+
+    - name: cross_reference_suggestions
+      title: Alternative Analysis Suggestions
+      type: Html
+      visible: (cross_reference_mode)
+
+    - name: optimization_report
+      title: Quality Optimization Report  
+      type: Html
+      visible: (quality_optimization)
+
+    - name: clinical_insights
+      title: Clinical Decision Support
+      type: Html
+      visible: (clinicalPreset != 'none')
+
+    - name: enhanced_caveats
+      title: Clinical Assumptions & Considerations  
+      type: Html
+      visible: (enhanced_validation)
 
 ...

@@ -4,22 +4,33 @@
 \alias{benford}
 \title{Benford Analysis}
 \usage{
-benford(data, var)
+benford(data, var, digits = 2)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{var}{a string naming the variable from \code{data} that contains the
 continuous values used for the report}
+
+\item{digits}{Number of first digits to analyze (default: 2)}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
 Benford Analysis

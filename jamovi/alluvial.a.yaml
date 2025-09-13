@@ -1,7 +1,7 @@
 ---
 name:  alluvial
 title: Alluvial & Sankey Diagrams
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Descriptive Plots
 version: '0.0.31'
 jas: '1.2'
@@ -255,14 +255,14 @@ options:
             Choose plotting engine: easyalluvial for automatic plots, ggalluvial for manual control.
 
     - name: labelNodes
-      title: Label Nodes
+      title: Label Nodes (Basic)
       type: Bool
       default: true
       description:
           R: >
-            Add labels to nodes.
+            Show basic node labels. This is the primary label control that works with all plot engines.
           jamovi: >
-            Add labels to nodes.
+            Show basic node labels. This is the primary label control that works with all plot engines.
 
     - name: showCounts
       title: Show Counts
@@ -274,6 +274,397 @@ options:
           jamovi: >
             Display count values on nodes.
 
+    - name: verbose
+      title: Show plot summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed information about the plot generation process.
+          jamovi: >
+            Show detailed information about the plot generation process.
+
+    # === Data Format Options (from jjsankeyfier) ===
+    - name: diagram_type
+      title: Diagram Type
+      type: List
+      options:
+        - title: Sankey Diagram
+          name: sankey
+        - title: Alluvial Diagram
+          name: alluvial
+        - title: Parallel Sets
+          name: parallel_sets
+      default: alluvial
+      description:
+          R: >
+            Type of flow diagram to generate.
+          jamovi: >
+            Type of flow diagram to generate.
+
+    - name: value_var
+      title: Value Variable
+      type: Variable
+      description:
+          R: >
+            Variable containing flow values/weights for source-target format.
+          jamovi: >
+            Variable containing flow values/weights for source-target format.
+
+    - name: source_var
+      title: Source Variable
+      type: Variable
+      description:
+          R: >
+            Variable defining source nodes for source-target format.
+          jamovi: >
+            Variable defining source nodes for source-target format.
+
+    - name: target_var
+      title: Target Variable
+      type: Variable
+      description:
+          R: >
+            Variable defining target nodes for source-target format.
+          jamovi: >
+            Variable defining target nodes for source-target format.
+
+    - name: node_vars
+      title: Node Variables
+      type: Variables
+      description:
+          R: >
+            Variables for multi-level node definitions in source-target format.
+          jamovi: >
+            Variables for multi-level node definitions in source-target format.
+
+    - name: grouping_var
+      title: Grouping Variable
+      type: Variable
+      description:
+          R: >
+            Variable for grouping flows.
+          jamovi: >
+            Variable for grouping flows.
+
+    - name: time_var
+      title: Time Variable (advanced)
+      type: Variable
+      description:
+          R: >
+            Variable for temporal flow analysis in source-target format.
+          jamovi: >
+            Variable for temporal flow analysis in source-target format.
+
+    # === Advanced Styling Options (from jjsankeyfier) ===
+    - name: node_width
+      title: Node Width
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.5
+      description:
+          R: >
+            Width of nodes in the diagram.
+          jamovi: >
+            Width of nodes in the diagram.
+
+    - name: node_spacing
+      title: Node Spacing
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.1
+      description:
+          R: >
+            Spacing between nodes.
+          jamovi: >
+            Spacing between nodes.
+
+    - name: edge_alpha
+      title: Edge Transparency
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.6
+      description:
+          R: >
+            Transparency level for edges.
+          jamovi: >
+            Transparency level for edges.
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: Set3
+          name: set3
+        - title: Pastel1
+          name: pastel1
+        - title: Dark2
+          name: dark2
+      default: default
+      description:
+          R: >
+            Color palette for the diagram.
+          jamovi: >
+            Color palette for the diagram.
+
+    - name: show_labels
+      title: Enhanced Label Styling
+      type: Bool
+      default: true
+      description:
+          R: >
+            Enable enhanced label styling with custom fonts and positioning. Complements basic labeling.
+          jamovi: >
+            Enable enhanced label styling with custom fonts and positioning. Complements basic labeling.
+
+    - name: label_size
+      title: Label Size
+      type: Number
+      min: 6
+      max: 20
+      default: 10
+      description:
+          R: >
+            Size of node labels.
+          jamovi: >
+            Size of node labels.
+
+    - name: iterations
+      title: Layout Iterations
+      type: Number
+      min: 1
+      max: 100
+      default: 32
+      description:
+          R: >
+            Number of iterations for layout optimization.
+          jamovi: >
+            Number of iterations for layout optimization.
+
+    - name: show_values
+      title: Show Flow Values
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display flow values on diagram.
+          jamovi: >
+            Display flow values on diagram.
+
+    - name: value_format
+      title: Value Format
+      type: List
+      options:
+        - title: Raw Numbers
+          name: raw
+        - title: Percentages
+          name: percent
+        - title: Rounded
+          name: rounded
+      default: raw
+      description:
+          R: >
+            Format for displaying flow values.
+          jamovi: >
+            Format for displaying flow values.
+
+    - name: sort_nodes
+      title: Sort Nodes
+      type: List
+      options:
+        - title: Alphabetical
+          name: alphabetical
+        - title: By Value
+          name: by_value
+        - title: Original Order
+          name: original
+      default: original
+      description:
+          R: >
+            Method for sorting nodes.
+          jamovi: >
+            Method for sorting nodes.
+
+    - name: flow_direction
+      title: Flow Direction
+      type: List
+      options:
+        - title: Left to Right
+          name: left_right
+        - title: Top to Bottom
+          name: top_bottom
+        - title: Right to Left
+          name: right_left
+        - title: Bottom to Top
+          name: bottom_top
+      default: left_right
+      description:
+          R: >
+            Direction of flow in the diagram.
+          jamovi: >
+            Direction of flow in the diagram.
+
+    - name: plot_title
+      title: Plot Title (advanced)
+      type: String
+      default: ""
+      description:
+          R: >
+            Advanced plot title (overrides basic title when set).
+          jamovi: >
+            Advanced plot title (overrides basic title when set).
+
+    - name: plot_subtitle
+      title: Plot Subtitle
+      type: String
+      default: ""
+      description:
+          R: >
+            Subtitle for the plot.
+          jamovi: >
+            Subtitle for the plot.
+
+    - name: theme_style
+      title: Theme Style
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Void
+          name: void
+      default: default
+      description:
+          R: >
+            Theme style for the plot.
+          jamovi: >
+            Theme style for the plot.
+
+    - name: show_statistics
+      title: Show Flow Statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display statistical summary of flows.
+          jamovi: >
+            Display statistical summary of flows.
+
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display interpretation of the diagram.
+          jamovi: >
+            Display interpretation of the diagram.
+
+    - name: output_format
+      title: Output Format
+      type: List
+      options:
+        - title: Plot Only
+          name: plot_only
+        - title: Data Table
+          name: data_table
+        - title: Both
+          name: both
+      default: plot_only
+      description:
+          R: >
+            Format for output display.
+          jamovi: >
+            Format for output display.
+
+    # === Enhanced Features (inspired by riverplot) ===
+    - name: clinical_mode
+      title: Clinical Analysis Mode
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable clinical-specific features and interpretations for medical data analysis.
+          jamovi: >
+            Enable clinical-specific features and interpretations for medical data analysis.
+
+    - name: clinical_preset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: None (Custom Settings)
+          name: none
+        - title: Patient Journey
+          name: patient_journey
+        - title: Treatment Response
+          name: treatment_response
+        - title: Disease Progression
+          name: disease_progression
+      default: none
+      description:
+          R: >
+            Apply predefined settings optimized for common clinical scenarios.
+          jamovi: >
+            Apply predefined settings optimized for common clinical scenarios.
+
+    - name: enhanced_gradients
+      title: Enhanced Edge Gradients
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply sophisticated color gradients to flow edges for better visual appeal.
+          jamovi: >
+            Apply sophisticated color gradients to flow edges for better visual appeal.
+
+    - name: flow_optimization
+      title: Optimize Flow Layout
+      type: Bool
+      default: false
+      description:
+          R: >
+            Automatically optimize flow paths to reduce crossings and improve readability.
+          jamovi: >
+            Automatically optimize flow paths to reduce crossings and improve readability.
+
+    - name: advanced_diagnostics
+      title: Show Advanced Diagnostics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed flow analysis, transition patterns, and data quality metrics.
+          jamovi: >
+            Display detailed flow analysis, transition patterns, and data quality metrics.
+
+    - name: export_compatibility
+      title: Export Compatibility Mode
+      type: List
+      options:
+        - title: Standard
+          name: standard
+        - title: Riverplot Compatible
+          name: riverplot
+        - title: Both
+          name: both
+      default: standard
+      description:
+          R: >
+            Choose output format compatibility for integration with other tools.
+          jamovi: >
+            Choose output format compatibility for integration with other tools.
 
     # - name: originaltheme
     #   title: Easy Alluvial Theme

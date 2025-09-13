@@ -72,7 +72,7 @@ analyses:
   - title: Alluvial & Sankey Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial & Sankey Diagrams
     ribbon: analyses
@@ -1786,7 +1786,7 @@ analyses:
   - title: River Plots & Alluvial Diagrams
     name: riverplot
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots & Alluvial Diagrams
     menuSubtitle: Flow, Stream, and Transition Visualization
