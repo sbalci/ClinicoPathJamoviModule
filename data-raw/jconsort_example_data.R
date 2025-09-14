@@ -161,7 +161,7 @@ consort_pilot_trial <- tibble(
 )
 
 # Combine all examples into a comprehensive dataset
-consort_examples_data <- bind_rows(
+jconsort_examples_data <- bind_rows(
     consort_cv_trial,
     consort_cancer_trial,
     consort_diabetes_trial,
@@ -170,7 +170,7 @@ consort_examples_data <- bind_rows(
 )
 
 # Add study characteristics
-consort_examples_data <- consort_examples_data %>%
+jconsort_examples_data <- jconsort_examples_data %>%
     mutate(
         study_id = paste0("STUDY_", sprintf("%03d", row_number())),
         duration_months = c(36, 24, 48, 18, 12),
@@ -191,7 +191,7 @@ consort_examples_data <- consort_examples_data %>%
     )
 
 # Save the dataset
-usethis::use_data(consort_examples_data, overwrite = TRUE)
+usethis::use_data(jconsort_examples_data, overwrite = TRUE)
 
 # Documentation for the dataset
 # This will be added to the data.R file

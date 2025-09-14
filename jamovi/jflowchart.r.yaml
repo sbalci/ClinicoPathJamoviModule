@@ -1,0 +1,151 @@
+---
+name: jflowchart
+title: Study Flowchart
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+
+    - name: plot
+      title: 'Flowchart Plot'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      clearWith:
+        - input_mode
+        - nodes
+        - counts
+        - from_var
+        - to_var
+        - group_var
+        - render_engine
+        - direction
+        - nodeWidth
+        - nodeHeight
+        - fontSize
+        - showPercentages
+        - showExclusions
+        - nodeColor
+        - enhancedStyling
+        - showCounts
+        - arrowColor
+        - fontFamily
+        - nodeSpacing
+        - nodeTyping
+        - nodeAlpha
+        - decisionNodeColor
+        - outcomeNodeColor
+        - customNodeSizing
+        - nodeTextSize
+        - advancedPositioning
+        - ggplotIntegration
+        - layoutAlgorithm
+        - layoutOrientation
+        - intelligentLayout
+        - nodeSpreadFactor
+        - includeTitle
+        - plot_title
+        - gg_text_size
+        - gg_text_colour
+        - gg_arrow_colour
+        - gg_arrow_size
+        - gg_x_nudge
+        - gg_y_nudge
+        - gg_horizontal
+        - gg_node_fill
+        - gg_node_colour
+        - gg_font_family
+        - gg_arrow_linetype
+        - gg_arrow_linewidth
+        - gg_arrow_label_fill
+        - gg_parse
+        - gg_linewidth
+        - gg_alpha
+        - gg_layout_algorithm
+
+    - name: diagram
+      title: 'Flowchart Diagram'
+      type: Html
+      clearWith:
+        - input_mode
+        - nodes
+        - counts
+        - from_var
+        - to_var
+        - group_var
+        - render_engine
+        - direction
+        - nodeWidth
+        - nodeHeight
+        - fontSize
+        - showPercentages
+        - showExclusions
+        - nodeColor
+        - enhancedStyling
+        - showCounts
+        - arrowColor
+        - fontFamily
+        - nodeSpacing
+        - nodeTyping
+        - nodeAlpha
+        - decisionNodeColor
+        - outcomeNodeColor
+        - customNodeSizing
+        - nodeTextSize
+        - advancedPositioning
+        - ggplotIntegration
+        - layoutAlgorithm
+        - layoutOrientation
+        - intelligentLayout
+        - nodeSpreadFactor
+        - includeTitle
+        - plot_title
+        - gg_text_size
+        - gg_text_colour
+        - gg_arrow_colour
+        - gg_arrow_size
+        - gg_x_nudge
+        - gg_y_nudge
+        - gg_horizontal
+        - gg_node_fill
+        - gg_node_colour
+        - gg_font_family
+        - gg_arrow_linetype
+        - gg_arrow_linewidth
+        - gg_arrow_label_fill
+        - gg_parse
+        - gg_linewidth
+        - gg_alpha
+        - gg_layout_algorithm
+
+    - name: nodeData
+      title: Node Data Summary
+      type: Table
+      columns:
+        - name: node
+          title: "Node"
+          type: text
+        - name: count
+          title: "Count" 
+          type: integer
+      clearWith:
+        - input_mode
+        - nodes
+        - counts
+        - from_var
+        - to_var
+
+    - name: interpretation
+      title: Analysis Guide
+      type: Html
+      clearWith:
+        - input_mode
+        - render_engine
+        - show_interpretation
+
+refs:
+    - ClinicoPathJamoviModule
+...

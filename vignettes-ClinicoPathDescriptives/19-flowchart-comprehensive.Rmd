@@ -1,5 +1,5 @@
 ---
-title: "Creating Study Flowcharts with the flowchart Function"
+title: "Creating Study Flowcharts with the jflowchart Function"
 subtitle: "Comprehensive Guide to Visualizing Research Workflows and Clinical Pathways"
 author: "ClinicoPath Module"
 date: "`r Sys.Date()`"
@@ -565,7 +565,7 @@ The flowchart function integrates seamlessly with jamovi:
 ## Data Preparation for jamovi
 
 ```{r jamovi-data-prep, eval=FALSE}
-# Example of preparing data for jamovi flowchart
+# Example of preparing data for jamovi jflowchart
 jamovi_ready_data <- data.frame(
   study_step_1 = "Patients Screened",
   participants_1 = 2000,
@@ -580,7 +580,7 @@ jamovi_ready_data <- data.frame(
 )
 
 knitr::kable(jamovi_ready_data,
-             caption = "Data Structure Ready for jamovi Flowchart Analysis")
+             caption = "Data Structure Ready for jamovi jFlowchart Analysis")
 ```
 
 # Best Practices and Guidelines

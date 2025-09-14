@@ -2,9 +2,9 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 
-consortClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "consortClass",
-    inherit = consortBase,
+jconsortClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "jconsortClass",
+    inherit = jconsortBase,
     private = list(
         .init = function() {
             private$.consortValidation <- NULL
@@ -324,18 +324,26 @@ consortClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Randomized"
                 }
                 
-                fc_obj <- fc_obj %>% 
+                fc_obj <- fc_obj %>%
                     flowchart::fc_filter(
                         !is.na(!!rlang::sym(flow_data$randomization_var)) & !!rlang::sym(flow_data$randomization_var) == 1,
                         label = randomized_label,
-                        show_exc = flow_data$show_reasons
+                        show_exc = self$options$fc_show_exclusions,
+                        round_digits = self$options$fc_round_digits,
+                        offset = self$options$fc_offset,
+                        offset_exc = self$options$fc_offset_exc
                     )
             }
             
             # CONSORT Step 2: Allocation/Assignment by treatment group
             if (!is.null(flow_data$trial_group_var) && flow_data$trial_group_var != "") {
-                fc_obj <- fc_obj %>% 
-                    flowchart::fc_split(!!rlang::sym(flow_data$trial_group_var))
+                fc_obj <- fc_obj %>%
+                    flowchart::fc_split(
+                        !!rlang::sym(flow_data$trial_group_var),
+                        show_zero = self$options$fc_show_zero,
+                        round_digits = self$options$fc_round_digits,
+                        offset = self$options$fc_offset
+                    )
             }
             
             # CONSORT Step 3: Analysis/Completion filter
@@ -346,14 +354,49 @@ consortClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Analyzed"
                 }
                 
-                fc_obj <- fc_obj %>% 
+                fc_obj <- fc_obj %>%
                     flowchart::fc_filter(
                         !is.na(!!rlang::sym(flow_data$completion_var)) & !!rlang::sym(flow_data$completion_var) == 1,
                         label = analysis_label,
-                        show_exc = flow_data$show_reasons
+                        show_exc = self$options$fc_show_exclusions,
+                        round_digits = self$options$fc_round_digits,
+                        offset = self$options$fc_offset,
+                        offset_exc = self$options$fc_offset_exc
                     )
             }
-            
+
+            # Apply additional filter conditions if specified
+            if (!is.null(self$options$fc_filter_condition) && self$options$fc_filter_condition != "") {
+                tryCatch({
+                    expr <- rlang::parse_expr(self$options$fc_filter_condition)
+                    fc_obj <- fc_obj %>%
+                        flowchart::fc_filter(
+                            !!expr,
+                            label = "Custom Filter",
+                            show_exc = self$options$fc_show_exclusions,
+                            round_digits = self$options$fc_round_digits,
+                            offset = self$options$fc_offset,
+                            offset_exc = self$options$fc_offset_exc
+                        )
+                }, error = function(e) {
+                    warning(paste("Invalid filter condition:", self$options$fc_filter_condition))
+                })
+            }
+
+            # Apply additional split variable if specified
+            if (!is.null(self$options$fc_split_variable) && self$options$fc_split_variable != "") {
+                fc_obj <- fc_obj %>%
+                    flowchart::fc_split(
+                        !!rlang::sym(self$options$fc_split_variable),
+                        show_zero = self$options$fc_show_zero,
+                        round_digits = self$options$fc_round_digits,
+                        offset = self$options$fc_offset
+                    )
+            }
+
+            # Apply enhanced theming with font customization
+            fc_obj <- private$.applyFlowchartTheme(fc_obj)
+
             return(fc_obj)
         },
         
@@ -893,6 +936,66 @@ consortClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             DiagrammeR::render_graph(graph)
             TRUE
+        },
+
+        .applyFlowchartTheme = function(fc_obj) {
+            # Apply enhanced theming and font customization to flowchart object
+
+            # Check if flowchart package supports theming
+            if (requireNamespace("flowchart", quietly = TRUE)) {
+
+                tryCatch({
+                    # Apply custom title if specified
+                    if (!is.null(self$options$fc_title) && self$options$fc_title != "") {
+                        # Set title using flowchart package capabilities
+                        attr(fc_obj, "title") <- self$options$fc_title
+                    }
+
+                    # Apply font customization through theme modifications
+                    theme_options <- list(
+                        text_fface = self$options$fc_text_fface,
+                        text_ffamily = self$options$fc_text_ffamily,
+                        text_padding = self$options$fc_text_padding
+                    )
+
+                    # Store theme options as attributes for later use in plotting
+                    attr(fc_obj, "theme_options") <- theme_options
+
+                }, error = function(e) {
+                    warning("Could not apply flowchart theme: ", e$message)
+                })
+            }
+
+            return(fc_obj)
+        },
+
+        .exportFlowchartPackage = function(fc_obj) {
+            # Export flowchart using flowchart package export capabilities
+
+            if (requireNamespace("flowchart", quietly = TRUE)) {
+                tryCatch({
+                    # Use flowchart package export function if available
+                    export_params <- list(
+                        format = self$options$fc_export_format,
+                        width = self$options$fc_export_width,
+                        height = self$options$fc_export_height
+                    )
+
+                    # Apply export settings
+                    if (exists("fc_export", where = asNamespace("flowchart"))) {
+                        fc_obj %>% flowchart::fc_export(
+                            format = export_params$format,
+                            width = export_params$width,
+                            height = export_params$height
+                        )
+                    }
+
+                }, error = function(e) {
+                    warning("Could not export flowchart: ", e$message)
+                })
+            }
+
+            return(fc_obj)
         }
     )
 )

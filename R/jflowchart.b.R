@@ -9,11 +9,11 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom viridis viridis
 #' @importFrom htmltools as.tags
-#' @description Creates professional flowcharts using DiagrammeR, ggplot2, or flowchart package, supporting node-count, edge-list, and clinical trial flow formats
+#' @description Creates professional flowcharts using DiagrammeR or ggplot2, supporting node-count and edge-list formats
 
-flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "flowchartClass",
-    inherit = flowchartBase,
+jflowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "jflowchartClass",
+    inherit = jflowchartBase,
     private = list(
         .nodeData = NULL,
         .dataMode = NULL,
@@ -30,7 +30,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check requirements based on input mode
             variables_missing <- FALSE
             
-            if (input_mode == "node_count") {
+            if (input_mode == "node_count_long" || input_mode == "ggflowchart_auto") {
                 cat("nodes length:", length(self$options$nodes), "\n")
                 cat("counts length:", length(self$options$counts), "\n")
                 if (is.null(self$options$nodes) || is.null(self$options$counts) ||
@@ -63,16 +63,43 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent("")
             }
 
-            # Validate data availability
-            if (nrow(self$data) == 0) {
-                stop("The provided dataset contains no rows. Please check your data and try again.")
+            # Comprehensive input validation
+            validation_result <- private$.validateInputs(input_mode)
+
+            # Handle validation errors
+            if (!validation_result$valid) {
+                error_messages <- paste(validation_result$errors, collapse = "\n")
+                warning_message <- if (length(validation_result$warnings) > 0) {
+                    paste("\n\nWarnings:\n", paste(validation_result$warnings, collapse = "\n"))
+                } else {
+                    ""
+                }
+                stop(paste("Input validation failed:\n", error_messages, warning_message))
+            }
+
+            # Show warnings if any
+            if (length(validation_result$warnings) > 0) {
+                warning_html <- paste0(
+                    "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<h4 style='color: #856404; margin-top: 0;'>⚠️ Validation Warnings</h4>",
+                    "<ul style='margin-bottom: 0;'>",
+                    paste0("<li>", validation_result$warnings, "</li>", collapse = ""),
+                    "</ul>",
+                    "</div>"
+                )
+                self$results$todo$setContent(warning_html)
             }
 
             # Process data based on input mode
-            if (input_mode == "node_count") {
-                private$.processNodeCountData()
+            if (input_mode == "node_count_long") {
+                private$.processNodeCountData(input_mode)
+            } else if (input_mode == "ggflowchart_auto") {
+                private$.processGgflowchartAuto()
             } else if (input_mode == "edge_list") {
                 private$.processEdgeListData()
+            } else if (input_mode == "node_count") {
+                # Backward compatibility - default to long format
+                private$.processNodeCountData("node_count_long")
             }
             
             # Generate interpretation if requested
@@ -82,65 +109,27 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
-        .processNodeCountData = function() {
-            # Original flowchart logic for node-count mode
+        .processNodeCountData = function(input_mode = "node_count_long") {
+            # Classic flowchart logic for sequential steps
             data <- self$data
-            
+
             # Get node labels and counts
             nodeVars <- self$options$nodes
             countVars <- self$options$counts
-            
+
             # Enhanced validation
             if (length(nodeVars) == 0 && length(countVars) == 0) {
                 self$results$todo$setContent("Please select both Node Data and Node Counts variables.")
                 return()
             }
-            
-            if (length(nodeVars) != length(countVars)) {
-                stop("Number of node variables must match number of count variables. Please ensure each node has a corresponding count.")
+
+            # Sequential Steps requires single variables with multiple rows
+            if (length(nodeVars) != 1 || length(countVars) != 1) {
+                stop("Sequential Steps requires exactly one Node Data variable and one Node Counts variable. Please select single variables for each.")
             }
 
-            # Enhanced data processing
-            nodeData <- data.frame(
-                id = seq_along(nodeVars),
-                label = character(length(nodeVars)),
-                count = numeric(length(nodeVars)),
-                valid = logical(length(nodeVars)),
-                stringsAsFactors = FALSE
-            )
-
-            # Process each node with better error handling
-            for (i in seq_along(nodeVars)) {
-                tryCatch({
-                    # Get node label - use first non-NA value or handle different data types
-                    node_data <- data[[nodeVars[i]]]
-                    if (is.factor(node_data) || is.character(node_data)) {
-                        valid_labels <- node_data[!is.na(node_data) & node_data != ""]
-                        nodeData$label[i] <- if (length(valid_labels) > 0) as.character(valid_labels[1]) else paste("Node", i)
-                    } else {
-                        nodeData$label[i] <- paste("Node", i)
-                    }
-                    
-                    # Get count - use first non-NA numeric value
-                    count_data <- data[[countVars[i]]]
-                    if (is.numeric(count_data)) {
-                        valid_counts <- count_data[!is.na(count_data)]
-                        nodeData$count[i] <- if (length(valid_counts) > 0) valid_counts[1] else 0
-                    } else {
-                        # Try to convert to numeric
-                        numeric_count <- as.numeric(as.character(count_data))
-                        valid_counts <- numeric_count[!is.na(numeric_count)]
-                        nodeData$count[i] <- if (length(valid_counts) > 0) valid_counts[1] else 0
-                    }
-                    
-                    nodeData$valid[i] <- TRUE
-                    
-                }, error = function(e) {
-                    nodeData$label[i] <<- paste("Node", i, "(Error)")
-                    nodeData$count[i] <<- 0
-                    nodeData$valid[i] <<- FALSE
-                })
-            }
+            cat("Processing sequential steps (long format data)\n")
+            nodeData <- private$.processLongFormat(data, nodeVars[1], countVars[1])
 
             # Filter out invalid nodes
             validNodes <- nodeData[nodeData$valid, ]
@@ -162,10 +151,19 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.dataMode <- "node_count"
             
             # Set plot state for jamovi
+            # Set plot state for Image result
+            plot <- self$results$plot
+            plot$setState(list(
+                mode = "node_count",
+                nodeData = validNodes,
+                analysis_complete = TRUE
+            ))
+
             # Generate DiagrammeR HTML content
             html_content <- private$.generateDiagrammeRHtml("node_count", validNodes)
             self$results$diagram$setContent(html_content)
             cat("Set diagram HTML content with mode: node_count and", nrow(validNodes), "nodes\n")
+            cat("Set plot state for node_count mode with", nrow(validNodes), "nodes\n")
         },
         
         .processEdgeListData = function() {
@@ -215,14 +213,23 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.edgeData <- analysis_data
             private$.dataMode <- "edge_list"
             
-            # Set plot state for jamovi
-            # Generate DiagrammeR HTML content for edge list mode
-            html_content <- "<p>Edge list mode not fully implemented yet.</p>"
+            # Set plot state for Image result
+            plot <- self$results$plot
+            plot$setState(list(
+                mode = "edge_list",
+                edgeData = analysis_data,
+                analysis_complete = TRUE
+            ))
+
+            # Generate enhanced HTML content for edge list mode
+            html_content <- private$.createEdgeListHtml(analysis_data, all_nodes)
             self$results$diagram$setContent(html_content)
+
+            cat("Set plot state for edge_list mode with", nrow(analysis_data), "edges\n")
         },
         
         .generateWelcomeMessage = function(input_mode) {
-            if (input_mode == "node_count") {
+            if (input_mode == "node_count_long" || input_mode == "ggflowchart_auto") {
                 return(paste0(
                     "<div style='background-color: #e7f3ff; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #007bff;'>",
                     "<h3 style='color: #007bff; margin-top: 0;'>🏥 Patient Flow Diagram</h3>",
@@ -247,7 +254,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0; border: 1px solid #bee5eb;'>",
                     "<h4 style='color: #0c5460; margin-top: 0;'>🎯 Perfect for Clinical Research:</h4>",
                     "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'>",
-                    "<div>✓ CONSORT flowcharts</div><div>✓ Screening cascades</div>",
+                    "<div>✓ Professional flowcharts</div><div>✓ Screening cascades</div>",
                     "<div>✓ Enrollment tracking</div><div>✓ Treatment pathways</div>",
                     "<div>✓ Quality metrics</div><div>✓ Patient journeys</div>",
                     "</div>",
@@ -315,7 +322,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Multi-arm Trials:</strong> Split flows by treatment group</li>
                   </ul>
                   
-                  <p><em>💡 Uses the flowchart R package for data-driven flow diagrams!</em></p>
+                  <p><em>💡 Uses advanced algorithms for data-driven flow diagrams!</em></p>
                   <hr>
                 </div>")
             }
@@ -323,8 +330,18 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateInterpretation = function(input_mode) {
             render_engine <- self$options$render_engine
-            
+
+            # Start with natural language summary if data is available
+            summary_html <- ""
+            if (!is.null(private$.nodeData) || !is.null(private$.edgeData)) {
+                summary_html <- private$.generateNaturalLanguageSummary()
+            }
+
             interpretation <- paste0(
+                # Add natural language summary first
+                summary_html,
+
+                # Then add the existing interpretation guide
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;'>",
                 "<h3 style='color: #28a745; margin-top: 0;'>📊 About This Analysis</h3>",
                 
@@ -342,7 +359,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (input_mode == "edge_list") {
                     "Process Flow (Edge-List) - Shows connected processes"
                 } else {
-                    "Clinical Trial (CONSORT-style) - Detailed participant tracking"
+                    "Professional Style - Detailed participant tracking"
                 },
                 "</li>",
                 "<li><strong>Visualization:</strong> ", 
@@ -351,7 +368,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (render_engine == "ggplot2") {
                     "Modern graphics (ggplot2) - Contemporary design with advanced styling"
                 } else {
-                    "Clinical Flow (Specialized) - CONSORT-compliant formatting"
+                    "Modern Flow (Specialized) - Advanced formatting"
                 },
                 "</li>",
                 "</ul>",
@@ -365,7 +382,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<div><strong>👥 Patient Studies:</strong><br>Track enrollment, randomization, completion rates</div>",
                         "<div><strong>📋 Screening:</strong><br>Show eligibility assessment and selection process</div>",
                         "<div><strong>📊 Quality Metrics:</strong><br>Monitor process efficiency and bottlenecks</div>",
-                        "<div><strong>📑 Publications:</strong><br>Create CONSORT-compliant flow diagrams</div>"
+                        "<div><strong>📑 Publications:</strong><br>Create professional flow diagrams</div>"
                     )
                 } else if (input_mode == "edge_list") {
                     paste0(
@@ -399,6 +416,284 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             return(interpretation)
+        },
+
+        .processLongFormat = function(data, node_var, count_var) {
+            # Process long format data (single variables with multiple rows)
+
+            # Get all rows where both node_var and count_var have valid data
+            node_data <- data[[node_var]]
+            count_data <- data[[count_var]]
+
+            # Remove rows with missing data
+            valid_rows <- !is.na(node_data) & !is.na(count_data) &
+                         node_data != "" & count_data != ""
+
+            if (sum(valid_rows) == 0) {
+                stop("No valid rows found with both node labels and counts.")
+            }
+
+            # Filter to valid rows
+            valid_node_data <- node_data[valid_rows]
+            valid_count_data <- count_data[valid_rows]
+
+            # Convert counts to numeric if needed
+            if (!is.numeric(valid_count_data)) {
+                valid_count_data <- as.numeric(as.character(valid_count_data))
+                if (any(is.na(valid_count_data))) {
+                    stop("Count data contains non-numeric values that cannot be converted.")
+                }
+            }
+
+            # Create nodeData structure
+            nodeData <- data.frame(
+                id = seq_along(valid_node_data),
+                label = as.character(valid_node_data),
+                count = as.numeric(valid_count_data),
+                valid = TRUE,
+                stringsAsFactors = FALSE
+            )
+
+            cat("Processed long format:", nrow(nodeData), "nodes\n")
+            return(nodeData)
+        },
+
+        .processWideFormat = function(data, nodeVars, countVars) {
+            # Process wide format data (multiple variables)
+
+            # Enhanced data processing
+            nodeData <- data.frame(
+                id = seq_along(nodeVars),
+                label = character(length(nodeVars)),
+                count = numeric(length(nodeVars)),
+                valid = logical(length(nodeVars)),
+                stringsAsFactors = FALSE
+            )
+
+            # Process each node with better error handling
+            for (i in seq_along(nodeVars)) {
+                tryCatch({
+                    # Get node label - use first non-NA value or handle different data types
+                    node_data <- data[[nodeVars[i]]]
+                    if (is.factor(node_data) || is.character(node_data)) {
+                        valid_labels <- node_data[!is.na(node_data) & node_data != ""]
+                        nodeData$label[i] <- if (length(valid_labels) > 0) as.character(valid_labels[1]) else paste("Node", i)
+                    } else {
+                        nodeData$label[i] <- paste("Node", i)
+                    }
+
+                    # Get count - use first non-NA numeric value
+                    count_data <- data[[countVars[i]]]
+                    if (is.numeric(count_data)) {
+                        valid_counts <- count_data[!is.na(count_data)]
+                        nodeData$count[i] <- if (length(valid_counts) > 0) valid_counts[1] else 0
+                    } else {
+                        # Try to convert to numeric
+                        numeric_count <- as.numeric(as.character(count_data))
+                        valid_counts <- numeric_count[!is.na(numeric_count)]
+                        nodeData$count[i] <- if (length(valid_counts) > 0) valid_counts[1] else 0
+                    }
+
+                    nodeData$valid[i] <- TRUE
+
+                }, error = function(e) {
+                    nodeData$label[i] <<- paste("Node", i, "(Error)")
+                    nodeData$count[i] <<- 0
+                    nodeData$valid[i] <<- FALSE
+                })
+            }
+
+            cat("Processed wide format:", nrow(nodeData), "nodes\n")
+            return(nodeData)
+        },
+
+        .processGgflowchartAuto = function() {
+            # Auto-convert long format data to ggflowchart edge format
+            data <- self$data
+
+            # Get node labels and counts
+            nodeVars <- self$options$nodes
+            countVars <- self$options$counts
+
+            # Enhanced validation
+            if (length(nodeVars) == 0 && length(countVars) == 0) {
+                self$results$todo$setContent("Please select both Node Data and Node Counts variables for ggflowchart mode.")
+                return()
+            }
+
+            # ggflowchart auto requires single variables with multiple rows
+            if (length(nodeVars) != 1 || length(countVars) != 1) {
+                stop("ggflowchart mode requires exactly one Node Data variable and one Node Counts variable. Please select single variables for each.")
+            }
+
+            cat("Processing ggflowchart auto-conversion (long format to edge format)\n")
+
+            # Process the long format data first
+            nodeData <- private$.processLongFormat(data, nodeVars[1], countVars[1])
+            validNodes <- nodeData[nodeData$valid, ]
+
+            if (nrow(validNodes) < 2) {
+                stop("ggflowchart mode requires at least 2 nodes to create connections. Please ensure your data has multiple steps.")
+            }
+
+            # Convert to edge format (sequential connections)
+            edgeData <- data.frame(
+                from = validNodes$label[-nrow(validNodes)],  # All except last
+                to = validNodes$label[-1],                   # All except first
+                stringsAsFactors = FALSE
+            )
+
+            # Create node_data for ggflowchart
+            node_data <- data.frame(
+                name = validNodes$label,
+                label = paste0(validNodes$label, "\n(n = ", validNodes$count, ")"),
+                count = validNodes$count,
+                stringsAsFactors = FALSE
+            )
+
+            cat("Created", nrow(edgeData), "edges and", nrow(node_data), "nodes for ggflowchart\n")
+
+            # Populate node data table
+            for (i in 1:nrow(validNodes)) {
+                self$results$nodeData$addRow(rowKey = i, values = list(
+                    node = validNodes$label[i],
+                    count = validNodes$count[i]
+                ))
+            }
+
+            # Store processed data for plotting
+            private$.edgeData <- edgeData
+            private$.nodeData <- node_data
+            private$.dataMode <- "ggflowchart_auto"
+
+            # Set plot state for Image result
+            plot <- self$results$plot
+            plot$setState(list(
+                mode = "ggflowchart_auto",
+                edgeData = edgeData,
+                nodeData = node_data,
+                analysis_complete = TRUE
+            ))
+
+            # Generate DiagrammeR HTML content as fallback
+            html_content <- private$.createGgflowchartHtml(validNodes, edgeData)
+            self$results$diagram$setContent(html_content)
+
+            cat("Set plot state for ggflowchart_auto mode with", nrow(edgeData), "edges\n")
+        },
+
+        .createGgflowchartHtml = function(nodeData, edgeData) {
+            # Create enhanced HTML for ggflowchart preview
+            html_parts <- c(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;'>",
+                "<h3 style='color: #2c3e50; text-align: center; margin-bottom: 30px;'>ggflowchart Auto-Conversion Preview</h3>",
+                "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                "<h4 style='color: #007bff; margin-top: 0;'>📊 Converted Data Structure</h4>",
+                "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 20px;'>",
+                "<div>",
+                "<h5 style='color: #28a745;'>Node Data:</h5>",
+                "<div style='font-family: monospace; background: white; padding: 10px; border-radius: 4px; font-size: 12px;'>"
+            )
+
+            # Add node data preview
+            for (i in 1:min(5, nrow(nodeData))) {
+                html_parts <- c(html_parts, paste0(nodeData$label[i], " (", nodeData$count[i], ")<br>"))
+            }
+            if (nrow(nodeData) > 5) {
+                html_parts <- c(html_parts, paste0("... and ", nrow(nodeData) - 5, " more nodes"))
+            }
+
+            html_parts <- c(html_parts,
+                "</div>",
+                "</div>",
+                "<div>",
+                "<h5 style='color: #6f42c1;'>Edge Connections:</h5>",
+                "<div style='font-family: monospace; background: white; padding: 10px; border-radius: 4px; font-size: 12px;'>"
+            )
+
+            # Add edge data preview
+            for (i in 1:min(5, nrow(edgeData))) {
+                html_parts <- c(html_parts, paste0(edgeData$from[i], " → ", edgeData$to[i], "<br>"))
+            }
+            if (nrow(edgeData) > 5) {
+                html_parts <- c(html_parts, paste0("... and ", nrow(edgeData) - 5, " more connections"))
+            }
+
+            html_parts <- c(html_parts,
+                "</div>",
+                "</div>",
+                "</div>",
+                "<p style='text-align: center; color: #6c757d; font-style: italic; margin-top: 20px;'>",
+                "✨ Your data has been automatically converted to ggflowchart format!<br>",
+                "The plot will render using modern ggflowchart styling with your sequential flow.",
+                "</p>",
+                "</div>",
+                "</div>"
+            )
+
+            return(paste(html_parts, collapse = ""))
+        },
+
+        .createEdgeListHtml = function(edgeData, allNodes) {
+            # Create enhanced HTML for edge list mode
+            html_parts <- c(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;'>",
+                "<h3 style='color: #2c3e50; text-align: center; margin-bottom: 30px;'>📊 Network Flowchart Analysis</h3>",
+                "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                "<h4 style='color: #007bff; margin-top: 0;'>🔗 Network Structure</h4>",
+                "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 20px;'>",
+                "<div>",
+                "<h5 style='color: #28a745;'>Node Summary:</h5>",
+                "<div style='font-family: monospace; background: white; padding: 10px; border-radius: 4px; font-size: 12px;'>"
+            )
+
+            # Add node summary
+            for (i in 1:min(8, length(allNodes))) {
+                from_count <- sum(edgeData$from == allNodes[i], na.rm = TRUE)
+                to_count <- sum(edgeData$to == allNodes[i], na.rm = TRUE)
+                html_parts <- c(html_parts, paste0(allNodes[i], " (", from_count, "→", to_count, ")<br>"))
+            }
+            if (length(allNodes) > 8) {
+                html_parts <- c(html_parts, paste0("... and ", length(allNodes) - 8, " more nodes"))
+            }
+
+            html_parts <- c(html_parts,
+                "</div>",
+                "</div>",
+                "<div>",
+                "<h5 style='color: #6f42c1;'>Edge Connections:</h5>",
+                "<div style='font-family: monospace; background: white; padding: 10px; border-radius: 4px; font-size: 12px;'>"
+            )
+
+            # Add edge connections preview
+            for (i in 1:min(10, nrow(edgeData))) {
+                html_parts <- c(html_parts, paste0(edgeData$from[i], " → ", edgeData$to[i], "<br>"))
+            }
+            if (nrow(edgeData) > 10) {
+                html_parts <- c(html_parts, paste0("... and ", nrow(edgeData) - 10, " more connections"))
+            }
+
+            html_parts <- c(html_parts,
+                "</div>",
+                "</div>",
+                "</div>",
+                "<div style='background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 15px 0; border: 1px solid #b3d7ff;'>",
+                "<h4 style='color: #0066cc; margin-top: 0;'>📈 Network Statistics:</h4>",
+                "<ul style='line-height: 1.6; margin: 10px 0; padding-left: 20px;'>",
+                paste0("<li><strong>Total Nodes:</strong> ", length(allNodes), "</li>"),
+                paste0("<li><strong>Total Connections:</strong> ", nrow(edgeData), "</li>"),
+                paste0("<li><strong>Network Density:</strong> ", round(nrow(edgeData) / (length(allNodes) * (length(allNodes) - 1)), 3), "</li>"),
+                "</ul>",
+                "</div>",
+                "<p style='text-align: center; color: #6c757d; font-style: italic; margin-top: 20px;'>",
+                "🎯 Your network data is ready for visualization!<br>",
+                "Use the rendering options to customize the appearance.",
+                "</p>",
+                "</div>",
+                "</div>"
+            )
+
+            return(paste(html_parts, collapse = ""))
         },
 
         .generateDiagrammeRHtml = function(mode, nodeData) {
@@ -527,7 +822,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     
                     graph <- graph %>%
-                        DiagrammeR::add_edges_from_table(edges_df)
+                        DiagrammeR::add_edge_df(edges_df)
                 }
                 
                 # Add title if requested
@@ -784,8 +1079,6 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (render_engine == "ggplot2") {
                 result <- private$.plotGgplot2(image, ggtheme, theme, ...)
-            } else if (render_engine == "flowchart_pkg") {
-                result <- private$.plotFlowchartPkg(image, ggtheme, theme, ...)
             } else {
                 result <- private$.plotDiagrammeR(image, ggtheme, theme, ...)
             }
@@ -954,7 +1247,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     
                     graph <- graph %>%
-                        DiagrammeR::add_edges_from_table(edges_df)
+                        DiagrammeR::add_edge_df(edges_df)
                 }
             } else {
                 # Edge-list mode edges
@@ -974,7 +1267,7 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 
                 graph <- graph %>%
-                    DiagrammeR::add_edges_from_table(edges_df)
+                    DiagrammeR::add_edge_df(edges_df)
             }
             
             # Add title if requested
@@ -1015,14 +1308,19 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .plotGgplot2 = function(image, ggtheme, theme, ...) {
-            
+
             # Require ggflowchart
             if (!requireNamespace("ggflowchart")) {
                 stop("The ggflowchart package is required for ggplot2 rendering. Please install it using: install.packages('ggflowchart') or from GitHub: remotes::install_github('nrennie/ggflowchart')")
             }
-            
-            if (private$.dataMode == "edge_list") {
+
+            data_mode <- private$.dataMode
+            cat("ggplot2 render mode:", data_mode, "\n")
+
+            if (data_mode == "edge_list") {
                 return(private$.plotGgplot2EdgeList(image, ggtheme, theme, ...))
+            } else if (data_mode == "ggflowchart_auto") {
+                return(private$.plotGgflowchartAuto(image, ggtheme, theme, ...))
             } else {
                 return(private$.plotGgplot2NodeCount(image, ggtheme, theme, ...))
             }
@@ -1084,47 +1382,19 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create decision tree with typed nodes
                 node_data <- private$.createDecisionTreeAesthetics(layout_data, edgeData, group_var)
                 
-                p <- ggflowchart::ggflowchart(
-                    layout_data, 
-                    node_data = node_data,
-                    arrow_colour = arrow_color,
-                    family = font_family,
-                    x_nudge = x_nudge,
-                    horizontal = private$.getLayoutOrientation()
-                )
-                
-                # Add transparency if specified
-                if (node_alpha < 1.0) {
-                    p <- p + ggplot2::geom_rect(alpha = node_alpha)
-                }
+                p <- private$.createGgflowchartPlot(layout_data, node_data = node_data)
                 
             } else if (!is.null(group_var) && group_var != "") {
                 # Traditional grouping approach
                 node_data <- private$.createNodeAesthetics(layout_data, edgeData, group_var)
                 
-                p <- ggflowchart::ggflowchart(
-                    layout_data, 
-                    node_data = node_data,
-                    colour = node_data$fill[1],
-                    arrow_colour = arrow_color,
-                    family = font_family,
-                    x_nudge = x_nudge,
-                    horizontal = private$.getLayoutOrientation()
-                )
+                p <- private$.createGgflowchartPlot(layout_data, node_data = node_data)
             } else {
                 # Basic flowchart with enhanced options
                 colors <- private$.getColorPalette()
                 node_color <- colors[1]
                 
-                p <- ggflowchart::ggflowchart(
-                    layout_data,
-                    colour = node_color,
-                    text_colour = private$.getTextColor(node_color),
-                    arrow_colour = arrow_color,
-                    family = font_family,
-                    x_nudge = x_nudge,
-                    horizontal = private$.getLayoutOrientation()
-                )
+                p <- private$.createGgflowchartPlot(layout_data)
             }
             
             # Apply enhanced theming
@@ -1227,15 +1497,8 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply layout strategy to node-count data
             layout_data <- private$.applyLayoutStrategy(flowchart_data, private$.edgeData, NULL)
             
-            # Create flowchart with enhanced node data - following minimal example pattern
-            p <- ggflowchart::ggflowchart(
-                layout_data, 
-                node_data = node_data,
-                arrow_colour = arrow_color,
-                family = font_family,
-                x_nudge = x_nudge,
-                horizontal = private$.getLayoutOrientation()
-            )
+            # Create flowchart with enhanced node data using unified helper method
+            p <- private$.createGgflowchartPlot(layout_data, node_data = node_data)
             
             # Add transparency if specified
             if (node_alpha < 1.0) {
@@ -1245,6 +1508,35 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply enhanced theming
             p <- private$.applyGgplot2Theme(p)
             
+            print(p)
+            return(TRUE)
+        },
+
+        .plotGgflowchartAuto = function(image, ggtheme, theme, ...) {
+            # Native ggflowchart rendering with auto-converted data
+            cat("ggflowchart auto plotting function called\n")
+
+            # Get the converted data from state
+            edgeData <- image$state$edgeData
+            nodeData <- image$state$nodeData
+
+            cat("Edge data rows:", nrow(edgeData), "\n")
+            cat("Node data rows:", nrow(nodeData), "\n")
+
+            # Create the ggflowchart plot using unified helper method
+            p <- private$.createGgflowchartPlot(edgeData, node_data = nodeData)
+
+            # Add title if requested
+            if (self$options$includeTitle && !is.null(self$options$plot_title) && self$options$plot_title != "") {
+                p <- p + ggplot2::labs(title = self$options$plot_title)
+            }
+
+            # Apply additional theming if enhanced styling is enabled
+            if (self$options$enhancedStyling) {
+                p <- private$.applyGgplot2Theme(p)
+            }
+
+            cat("ggflowchart plot created successfully\n")
             print(p)
             return(TRUE)
         },
@@ -1760,8 +2052,8 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check if intelligent layout selection is enabled
             intelligent_layout <- self$options$intelligentLayout
-            layout_algorithm <- self$options$layoutAlgorithm
-            
+            layout_algorithm <- self$options$gg_layout_algorithm
+
             if (intelligent_layout) {
                 # Analyze flowchart structure for optimal layout selection
                 layout_algorithm <- private$.selectOptimalLayout(flowchart_data, edgeData)
@@ -1923,96 +2215,305 @@ flowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(orientation == "horizontal")
         },
 
-        .plotFlowchartPkg = function(image, ggtheme, theme, ...) {
-            # Clinical trial flow mode using flowchart package
-            
-            # Check if flowchart package is available
-            if (!requireNamespace("flowchart")) {
-                stop("flowchart package is required for Clinical Flow mode. Please install it using: install.packages('flowchart')")
+        .validateInputs = function(input_mode) {
+            # Comprehensive input validation for all flowchart modes
+            cat("Starting comprehensive input validation...\n")
+
+            validation_errors <- c()
+            validation_warnings <- c()
+
+            # Basic data validation
+            if (nrow(self$data) == 0) {
+                validation_errors <- c(validation_errors, "The dataset contains no rows. Please load data before creating a flowchart.")
             }
-            
-            if (private$.dataMode == "clinical_flow") {
-                    flow_data <- private$.clinicalFlowData
-                    
-                    # Convert data to flowchart format
-                    fc_data <- flow_data$data
-                    
-                    # Standard clinical flow creation
-                    initial_label <- paste("Participants assessed for eligibility (N =", flow_data$total_participants, ")")
-                    fc_obj <- fc_data %>% flowchart::as_fc(label = initial_label)
-                    
-                    # Apply standard filters and splits
-                    fc_obj <- private$.applyStandardFilters(fc_obj, flow_data)
-                    
-                    # Draw the flowchart
-                    plot_obj <- fc_obj %>% flowchart::fc_draw()
-                    
-                    # Add title if requested
-                    if (self$options$includeTitle && nchar(self$options$plot_title) > 0) {
-                        plot_obj <- plot_obj + 
-                            ggplot2::labs(title = self$options$plot_title)
-                    }
-                    
-                    print(plot_obj)
-                    
-                } else {
-                    # For other data modes, create basic flowchart from available data
-                    warning("Clinical Flow mode works best with clinical_flow data mode.")
-                    
-                    # Create a simple flowchart from available data
-                    if (private$.dataMode == "node_count") {
-                        node_data <- private$.nodeData
-                        total_count <- sum(node_data$count, na.rm = TRUE)
-                        
-                        # Create simple flowchart
-                        simple_data <- data.frame(id = 1:total_count)
-                        fc_obj <- simple_data %>% 
-                            flowchart::as_fc(label = paste("Total Cases (N =", total_count, ")")) %>%
-                            flowchart::fc_draw()
-                        
-                        print(fc_obj)
+
+            # Mode-specific validation
+            if (input_mode == "node_count_long" || input_mode == "ggflowchart_auto") {
+                # Sequential steps validation
+                nodeVars <- self$options$nodes
+                countVars <- self$options$counts
+
+                if (length(nodeVars) == 0) {
+                    validation_errors <- c(validation_errors, "Please select at least one 'Step Names' variable for flowchart nodes.")
+                }
+
+                if (length(countVars) == 0) {
+                    validation_errors <- c(validation_errors, "Please select at least one 'Participant Counts' variable.")
+                }
+
+                if (length(nodeVars) != length(countVars)) {
+                    validation_warnings <- c(validation_warnings, "Number of node variables should match number of count variables for best results.")
+                }
+
+                # Check if variables exist in data
+                if (length(nodeVars) > 0) {
+                    missing_node_vars <- nodeVars[!nodeVars %in% names(self$data)]
+                    if (length(missing_node_vars) > 0) {
+                        validation_errors <- c(validation_errors, paste("Node variables not found in data:", paste(missing_node_vars, collapse = ", ")))
                     }
                 }
-                
-                return(TRUE)
-        },
 
-        .applyStandardFilters = function(fc_obj, flow_data) {
-            # Apply standard filters and splits
-            filter_exprs <- flow_data$filter_expressions
-            filter_labels <- flow_data$filter_labels
-            
-            if (nchar(filter_exprs) > 0 && nchar(filter_labels) > 0) {
-                expr_list <- strsplit(filter_exprs, ",")[[1]]
-                label_list <- strsplit(filter_labels, ",")[[1]]
-                
-                # Apply each filter
-                for (i in seq_along(expr_list)) {
-                    if (i <= length(label_list)) {
-                        expr <- trimws(expr_list[i])
-                        label <- trimws(label_list[i])
-                        
-                        # Parse and apply filter expression
-                        if (nchar(expr) > 0) {
-                            fc_obj <- fc_obj %>% 
-                                flowchart::fc_filter(
-                                    !!rlang::parse_expr(expr),
-                                    label = label, 
-                                    show_exc = self$options$show_exclusions_flow
-                                )
+                if (length(countVars) > 0) {
+                    missing_count_vars <- countVars[!countVars %in% names(self$data)]
+                    if (length(missing_count_vars) > 0) {
+                        validation_errors <- c(validation_errors, paste("Count variables not found in data:", paste(missing_count_vars, collapse = ", ")))
+                    }
+                }
+
+                # Validate count variables are numeric
+                if (length(countVars) > 0 && length(validation_errors) == 0) {
+                    for (count_var in countVars) {
+                        if (count_var %in% names(self$data)) {
+                            if (!is.numeric(self$data[[count_var]])) {
+                                validation_errors <- c(validation_errors, paste("Count variable", count_var, "must be numeric."))
+                            } else if (any(self$data[[count_var]] < 0, na.rm = TRUE)) {
+                                validation_warnings <- c(validation_warnings, paste("Count variable", count_var, "contains negative values."))
+                            }
                         }
                     }
                 }
-            }
-            
-            # Split by trial groups if specified
-            if (!is.null(flow_data$trial_group_var) && flow_data$trial_group_var != "") {
-                fc_obj <- fc_obj %>% 
-                    flowchart::fc_split(!!rlang::sym(flow_data$trial_group_var))
-            }
-            
-            return(fc_obj)
-        }
 
+            } else if (input_mode == "edge_list") {
+                # Edge list validation
+                from_var <- self$options$from_var
+                to_var <- self$options$to_var
+                group_var <- self$options$group_var
+
+                if (is.null(from_var) || from_var == "") {
+                    validation_errors <- c(validation_errors, "Please select a 'From Step' variable for edge list mode.")
+                }
+
+                if (is.null(to_var) || to_var == "") {
+                    validation_errors <- c(validation_errors, "Please select a 'To Step' variable for edge list mode.")
+                }
+
+                # Check if variables exist in data
+                if (!is.null(from_var) && from_var != "" && !from_var %in% names(self$data)) {
+                    validation_errors <- c(validation_errors, paste("From variable", from_var, "not found in data."))
+                }
+
+                if (!is.null(to_var) && to_var != "" && !to_var %in% names(self$data)) {
+                    validation_errors <- c(validation_errors, paste("To variable", to_var, "not found in data."))
+                }
+
+                if (!is.null(group_var) && group_var != "" && !group_var %in% names(self$data)) {
+                    validation_warnings <- c(validation_warnings, paste("Grouping variable", group_var, "not found in data - will be ignored."))
+                }
+
+                # Check for circular references if we can access the data
+                if (length(validation_errors) == 0 && !is.null(from_var) && !is.null(to_var) &&
+                    from_var != "" && to_var != "" && from_var %in% names(self$data) && to_var %in% names(self$data)) {
+
+                    # Simple circular reference check
+                    from_values <- as.character(self$data[[from_var]])
+                    to_values <- as.character(self$data[[to_var]])
+
+                    # Check for self-loops
+                    self_loops <- sum(from_values == to_values, na.rm = TRUE)
+                    if (self_loops > 0) {
+                        validation_warnings <- c(validation_warnings, paste("Found", self_loops, "self-loops (nodes connecting to themselves)."))
+                    }
+                }
+            }
+
+            # Technical validation for plotting
+            render_engine <- self$options$render_engine
+            if (render_engine == "ggplot2" && !requireNamespace("ggflowchart", quietly = TRUE)) {
+                validation_errors <- c(validation_errors, "ggflowchart package is required for ggplot2 rendering. Install with: install.packages('ggflowchart')")
+            }
+
+            # Configuration validation
+            if (self$options$nodeWidth < 1 || self$options$nodeWidth > 5) {
+                validation_warnings <- c(validation_warnings, "Node width should be between 1 and 5 for optimal display.")
+            }
+
+            if (self$options$nodeHeight < 0.5 || self$options$nodeHeight > 3) {
+                validation_warnings <- c(validation_warnings, "Node height should be between 0.5 and 3 for optimal display.")
+            }
+
+            if (self$options$fontSize < 8 || self$options$fontSize > 16) {
+                validation_warnings <- c(validation_warnings, "Font size should be between 8 and 16 for optimal readability.")
+            }
+
+            # Return validation results
+            result <- list(
+                valid = length(validation_errors) == 0,
+                errors = validation_errors,
+                warnings = validation_warnings
+            )
+
+            cat("Validation complete:", length(validation_errors), "errors,", length(validation_warnings), "warnings\n")
+
+            return(result)
+        },
+
+        .createGgflowchartPlot = function(flowchart_data, node_data = NULL, layout_algorithm = NULL) {
+            # Unified ggflowchart creation method to reduce code duplication
+
+            # Use provided layout algorithm or fall back to option
+            layout <- if (!is.null(layout_algorithm)) {
+                layout_algorithm
+            } else if (self$options$gg_layout_algorithm == "tree") {
+                "tree"
+            } else {
+                "custom"
+            }
+
+            # Create base ggflowchart plot with all common parameters
+            plot_args <- list(
+                data = flowchart_data,
+                layout = layout,
+                fill = self$options$gg_node_fill,
+                colour = self$options$gg_node_colour,
+                linewidth = self$options$gg_linewidth,
+                alpha = self$options$gg_alpha,
+                text_colour = self$options$gg_text_colour,
+                text_size = self$options$gg_text_size,
+                family = self$options$gg_font_family,
+                parse = self$options$gg_parse,
+                arrow_colour = self$options$gg_arrow_colour,
+                arrow_size = self$options$gg_arrow_size,
+                arrow_linewidth = self$options$gg_arrow_linewidth,
+                arrow_linetype = self$options$gg_arrow_linetype,
+                arrow_label_fill = self$options$gg_arrow_label_fill,
+                x_nudge = self$options$gg_x_nudge,
+                y_nudge = self$options$gg_y_nudge,
+                horizontal = self$options$gg_horizontal
+            )
+
+            # Add node_data if provided
+            if (!is.null(node_data)) {
+                plot_args$node_data <- node_data
+            }
+
+            # Create plot using do.call to handle dynamic arguments
+            p <- do.call(ggflowchart::ggflowchart, plot_args)
+
+            # Add transparency if specified
+            if (self$options$gg_alpha < 1.0) {
+                p <- p + ggplot2::geom_rect(alpha = self$options$gg_alpha)
+            }
+
+            return(p)
+        },
+
+        .generateNaturalLanguageSummary = function() {
+            input_mode <- self$options$input_mode
+
+            # Initialize summary components
+            summary_parts <- c()
+            interpretation_parts <- c()
+            copy_ready_parts <- c()
+
+            if (input_mode == "node_count_long" || input_mode == "ggflowchart_auto") {
+                # Generate summary for sequential steps
+                if (exists("private$.nodeData") && !is.null(private$.nodeData)) {
+                    nodeData <- private$.nodeData
+                    total_nodes <- nrow(nodeData)
+
+                    if (total_nodes > 1) {
+                        initial_count <- max(nodeData$count, na.rm = TRUE)
+                        final_count <- min(nodeData$count, na.rm = TRUE)
+                        retention_rate <- round((final_count / initial_count) * 100, 1)
+                        total_exclusions <- initial_count - final_count
+
+                        # Natural language summary
+                        summary_parts <- c(summary_parts,
+                            paste0("📊 <strong>Study Flow Summary:</strong> This flowchart represents a ", total_nodes, "-step process "),
+                            paste0("starting with ", initial_count, " participants and ending with ", final_count, " participants. "),
+                            paste0("Overall retention rate is ", retention_rate, "% with ", total_exclusions, " total exclusions.")
+                        )
+
+                        # Copy-ready interpretation
+                        copy_ready_parts <- c(copy_ready_parts,
+                            paste0("Of the ", initial_count, " participants initially considered, "),
+                            paste0(final_count, " (", retention_rate, "%) completed the full process. "),
+                            paste0("A total of ", total_exclusions, " participants were excluded during the ", total_nodes, "-step workflow.")
+                        )
+
+                        # Clinical interpretation
+                        if (retention_rate >= 80) {
+                            interpretation_parts <- c(interpretation_parts,
+                                "✅ <strong>Excellent retention:</strong> >80% participant retention indicates robust study design and good protocol adherence."
+                            )
+                        } else if (retention_rate >= 60) {
+                            interpretation_parts <- c(interpretation_parts,
+                                "⚠️ <strong>Moderate retention:</strong> 60-80% retention is acceptable but consider reviewing exclusion criteria."
+                            )
+                        } else {
+                            interpretation_parts <- c(interpretation_parts,
+                                "⚠️ <strong>Low retention:</strong> <60% retention may indicate issues with study design or eligibility criteria."
+                            )
+                        }
+                    }
+                }
+            } else if (input_mode == "edge_list") {
+                # Generate summary for edge list mode
+                if (exists("private$.edgeData") && !is.null(private$.edgeData)) {
+                    edgeData <- private$.edgeData
+                    total_edges <- nrow(edgeData)
+                    unique_nodes <- length(unique(c(edgeData$from, edgeData$to)))
+
+                    summary_parts <- c(summary_parts,
+                        paste0("🔗 <strong>Network Flow Summary:</strong> This flowchart contains ", unique_nodes, " unique nodes "),
+                        paste0("connected by ", total_edges, " pathways, representing a complex workflow with multiple decision points.")
+                    )
+
+                    copy_ready_parts <- c(copy_ready_parts,
+                        paste0("The workflow network consists of ", unique_nodes, " decision points connected by ", total_edges, " pathways, "),
+                        "illustrating the complexity of the decision-making process."
+                    )
+                }
+            }
+
+            # Combine all parts into HTML
+            html_content <- c(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;'>",
+                "<h3 style='color: #2c3e50; text-align: center; margin-bottom: 30px;'>📝 Flowchart Analysis Summary</h3>"
+            )
+
+            if (length(summary_parts) > 0) {
+                html_content <- c(html_content,
+                    "<div style='background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'>📊 Natural Language Summary</h4>",
+                    "<p style='margin-bottom: 0; line-height: 1.6;'>", paste(summary_parts, collapse = ""), "</p>",
+                    "</div>"
+                )
+            }
+
+            if (length(interpretation_parts) > 0) {
+                html_content <- c(html_content,
+                    "<div style='background: #f3e5f5; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                    "<h4 style='color: #7b1fa2; margin-top: 0;'>🔍 Clinical Interpretation</h4>",
+                    "<p style='margin-bottom: 0; line-height: 1.6;'>", paste(interpretation_parts, collapse = " "), "</p>",
+                    "</div>"
+                )
+            }
+
+            if (length(copy_ready_parts) > 0) {
+                html_content <- c(html_content,
+                    "<div style='background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                    "<h4 style='color: #2e7d32; margin-top: 0;'>📋 Copy-Ready Text</h4>",
+                    "<p style='font-style: italic; color: #555; font-size: 14px; margin-bottom: 10px;'>Ready to copy into your manuscript or report:</p>",
+                    "<div style='background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #4caf50;'>",
+                    "<p style='margin: 0; line-height: 1.6;'>", paste(copy_ready_parts, collapse = ""), "</p>",
+                    "</div>",
+                    "</div>"
+                )
+            }
+
+            # Add usage guide
+            html_content <- c(html_content,
+                "<div style='background: #fff3e0; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                "<h4 style='color: #f57c00; margin-top: 0;'>💡 Usage Guide</h4>",
+                "<p><strong>Sequential Steps Mode:</strong> Best for CONSORT diagrams and linear patient flows</p>",
+                "<p><strong>Network Connections Mode:</strong> Ideal for complex decision trees and branching workflows</p>",
+                "<p><strong>Interpretation Tips:</strong> Look for retention rates >80% for robust studies, review major dropout points, and ensure protocol compliance.</p>",
+                "</div>",
+                "</div>"
+            )
+
+            return(paste(html_content, collapse = ""))
+        }
     )
 )

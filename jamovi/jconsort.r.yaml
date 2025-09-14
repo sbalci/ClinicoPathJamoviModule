@@ -1,5 +1,5 @@
 ---
-name: consort
+name: jconsort
 title: CONSORT Flowchart
 jrs: '1.1'
 
@@ -67,6 +67,21 @@ items:
         - node_height
         - font_size
         - export_format
+        - fc_show_exclusions
+        - fc_round_digits
+        - fc_show_zero
+        - fc_perc_total
+        - fc_title
+        - fc_filter_condition
+        - fc_split_variable
+        - fc_offset
+        - fc_offset_exc
+        - fc_export_format
+        - fc_export_width
+        - fc_export_height
+        - fc_text_fface
+        - fc_text_ffamily
+        - fc_text_padding
 
     - name: consortDiagram
       title: 'Enhanced CONSORT Diagram'
@@ -107,6 +122,21 @@ items:
         - node_height
         - font_size
         - export_format
+        - fc_show_exclusions
+        - fc_round_digits
+        - fc_show_zero
+        - fc_perc_total
+        - fc_title
+        - fc_filter_condition
+        - fc_split_variable
+        - fc_offset
+        - fc_offset_exc
+        - fc_export_format
+        - fc_export_width
+        - fc_export_height
+        - fc_text_fface
+        - fc_text_ffamily
+        - fc_text_padding
 
     - name: text
       title: 'Text Summary'
