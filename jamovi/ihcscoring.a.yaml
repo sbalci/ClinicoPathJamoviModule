@@ -1,7 +1,7 @@
 ---
 name: ihcscoring
 title: IHC Scoring Standardization
-menuGroup: OncoPathologyT2
+menuGroup: OncoPathologyT
 version: '1.0.0'
 jas: '1.2'
 

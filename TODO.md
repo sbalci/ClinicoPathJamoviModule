@@ -55,14 +55,8 @@ run devtools::document() to see if there are any errors
 ***
 
 
-
-
-
-/review-function flexparametric
-/fix-function flexparametric
-
-
 - haralicktexture - Haralick Texture Analysis
+
 /check-function haralicktexture
 
 /review-function haralicktexture

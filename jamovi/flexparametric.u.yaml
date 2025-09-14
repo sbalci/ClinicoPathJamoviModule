@@ -9,27 +9,27 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: "Time Variable (survival time)"
+        label: "Time Variable (e.g., months to death, years follow-up)"
         children:
           - type: VariablesListBox
             name: elapsedtime
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: "Event Variable (0=censored, 1=event)"
+        label: "Event Variable (1=death/event occurred, 0=alive/censored)"
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: "Covariates (predictors)"
+        label: "Covariates (age, stage, treatment - need ≥5 events per variable)"
         children:
           - type: VariablesListBox
             name: covariates
             isTarget: true
       - type: TargetLayoutBox
-        label: "Grouping Variable (optional)"
+        label: "Grouping Variable (compare survival curves, optional)"
         children:
           - type: VariablesListBox
             name: grouping_variable
@@ -51,35 +51,35 @@ children:
               - type: TextBox
                 name: outcomeLevel
                 format: string
-                label: "Event Level (value indicating event)"
+                label: "Event Code (usually '1' for death/event, '0' for censored)"
               - type: ComboBox
                 name: model_approach
-                label: "Modeling Approach"
+                label: "Analysis Type (Traditional=standard, Flexible=complex patterns, Auto=best fit)"
               - type: ComboBox
                 name: distribution
-                label: "Distribution (Traditional Models)"
+                label: "Distribution (Weibull=common, Gamma=flexible, Generalized Gamma=very flexible)"
               - type: ComboBox
                 name: spline_type
-                label: "Spline Type (Flexible Models)"
+                label: "Spline Scale (Hazard=standard, Odds=proportional odds, Normal=probit)"
               - type: TextBox
                 name: spline_df
                 format: number
-                label: "Degrees of Freedom (3-4 typical)"
+                label: "Model Complexity (3=simple smooth curves, 5=complex patterns, need 10+ events per DF)"
               - type: ComboBox
                 name: knot_placement
-                label: "Knot Placement Method"
+                label: "Knot Placement (Quantiles=recommended, Equal=uniform spacing)"
               - type: TextBox
                 name: manual_knots
                 format: string
-                label: "Manual Knot Positions (comma-separated)"
+                label: "Custom Knot Times (comma-separated, e.g., 6,12,24 for months)"
               - type: TextBox
                 name: confidence_level
                 format: number
-                label: "Confidence Level (0.95 = 95% CI)"
+                label: "Confidence Level (0.95 = 95% confidence intervals)"
               - type: TextBox
                 name: plot_time_max
                 format: number
-                label: "Plot Time Range (max)"
+                label: "Plot Maximum Time (0 = automatic, or specify max follow-up time)"
 
       - type: CollapseBox
         label: Advanced Options
@@ -91,10 +91,10 @@ children:
             children:
               - type: CheckBox
                 name: model_comparison
-                label: Compare Multiple Models
+                label: "Compare Multiple Models (finds best-fitting distribution automatically)"
               - type: CheckBox
                 name: time_varying_effects
-                label: Allow Time-Varying Effects
+                label: "Time-Varying Effects (covariate effects change over time - advanced option)"
 
       - type: CollapseBox
         label: Display Options
@@ -106,16 +106,16 @@ children:
             children:
               - type: CheckBox
                 name: show_parameters
-                label: Parameter Estimates with Clinical Interpretation
+                label: "Parameter Estimates (hazard ratios with clinical interpretation)"
               - type: CheckBox
                 name: show_aic_bic
-                label: Model Fit Statistics
+                label: "Model Fit Statistics (AIC/BIC for comparing models)"
               - type: CheckBox
                 name: show_clinical_summary
-                label: Clinical Summary and Report
+                label: "Clinical Summary (copy-ready report for publications)"
               - type: CheckBox
                 name: show_diagnostics
-                label: Model Diagnostics
+                label: "Model Diagnostics (check model assumptions and fit quality)"
 
       - type: CollapseBox
         label: Plots
@@ -127,16 +127,16 @@ children:
             children:
               - type: CheckBox
                 name: show_survival_plot
-                label: Survival Curves
+                label: "Survival Curves (probability of survival over time)"
               - type: CheckBox
                 name: show_hazard_plot
-                label: Hazard Functions
+                label: "Hazard Functions (instantaneous risk over time)"
               - type: CheckBox
                 name: show_density_plot
-                label: Density Functions
+                label: "Density Functions (timing distribution of events)"
               - type: CheckBox
                 name: show_spline_plot
-                label: Spline Components (Flexible Models)
+                label: "Spline Components (flexible model basis functions - technical)"
 
       - type: CollapseBox
         label: Output Options
