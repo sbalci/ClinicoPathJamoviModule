@@ -1,4 +1,4 @@
-title: Flexible Parametric Survival Models
+title: Flexible Parametric Survival Models (Enhanced)
 name: flexparametric
 jus: '3.0'
 stage: 0
@@ -9,31 +9,41 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Time Variable
+        label: "Time Variable (survival time)"
         children:
           - type: VariablesListBox
             name: elapsedtime
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Event Indicator
+        label: "Event Variable (0=censored, 1=event)"
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Covariates
+        label: "Covariates (predictors)"
         children:
           - type: VariablesListBox
             name: covariates
             isTarget: true
+      - type: TargetLayoutBox
+        label: "Grouping Variable (optional)"
+        children:
+          - type: VariablesListBox
+            name: grouping_variable
+            maxItemCount: 1
+            isTarget: true
 
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - type: Label
-        label: Model Options
+      - type: CollapseBox
+        label: Model Configuration
+        collapsed: false
+        stretchFactor: 1
         children:
           - type: LayoutBox
             margin: large
@@ -41,60 +51,104 @@ children:
               - type: TextBox
                 name: outcomeLevel
                 format: string
-                label: Event Level
+                label: "Event Level (value indicating event)"
+              - type: ComboBox
+                name: model_approach
+                label: "Modeling Approach"
               - type: ComboBox
                 name: distribution
-                label: Distribution
+                label: "Distribution (Traditional Models)"
+              - type: ComboBox
+                name: spline_type
+                label: "Spline Type (Flexible Models)"
+              - type: TextBox
+                name: spline_df
+                format: number
+                label: "Degrees of Freedom (3-4 typical)"
+              - type: ComboBox
+                name: knot_placement
+                label: "Knot Placement Method"
+              - type: TextBox
+                name: manual_knots
+                format: string
+                label: "Manual Knot Positions (comma-separated)"
               - type: TextBox
                 name: confidence_level
                 format: number
-                label: Confidence Level
+                label: "Confidence Level (0.95 = 95% CI)"
               - type: TextBox
                 name: plot_time_max
                 format: number
-                label: Plot Time Range
+                label: "Plot Time Range (max)"
 
-  - type: CollapseBox
-    label: Display Options
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
+      - type: CollapseBox
+        label: Advanced Options
+        collapsed: true
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: show_parameters
-            label: Parameter Estimates
-          - type: CheckBox
-            name: show_aic_bic
-            label: Model Fit Statistics
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: model_comparison
+                label: Compare Multiple Models
+              - type: CheckBox
+                name: time_varying_effects
+                label: Allow Time-Varying Effects
 
-  - type: CollapseBox
-    label: Plots
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
+      - type: CollapseBox
+        label: Display Options
+        collapsed: true
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: show_survival_plot
-            label: Survival Curves
-          - type: CheckBox
-            name: show_hazard_plot
-            label: Hazard Functions
-          - type: CheckBox
-            name: show_density_plot
-            label: Density Functions
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_parameters
+                label: Parameter Estimates with Clinical Interpretation
+              - type: CheckBox
+                name: show_aic_bic
+                label: Model Fit Statistics
+              - type: CheckBox
+                name: show_clinical_summary
+                label: Clinical Summary and Report
+              - type: CheckBox
+                name: show_diagnostics
+                label: Model Diagnostics
 
-  - type: CollapseBox
-    label: Output Options
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
+      - type: CollapseBox
+        label: Plots
+        collapsed: true
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: showSummaries
-            label: Analysis Summaries
-          - type: CheckBox
-            name: showExplanations
-            label: Explanations
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_survival_plot
+                label: Survival Curves
+              - type: CheckBox
+                name: show_hazard_plot
+                label: Hazard Functions
+              - type: CheckBox
+                name: show_density_plot
+                label: Density Functions
+              - type: CheckBox
+                name: show_spline_plot
+                label: Spline Components (Flexible Models)
+
+      - type: CollapseBox
+        label: Output Options
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummaries
+                label: Analysis Summaries
+              - type: CheckBox
+                name: showExplanations
+                label: About This Analysis

@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Time Variable
+        label: Time Variable (e.g., survival time, follow-up duration)
         children:
           - type: VariablesListBox
             name: elapsedtime
@@ -17,7 +17,7 @@ children:
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
-        label: Event Variable
+        label: Event Variable (0=censored, 1=event occurred)
         children:
           - type: VariablesListBox
             name: outcome
@@ -25,7 +25,7 @@ children:
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
-        label: Covariates
+        label: "Covariates (predictors: age, stage, treatment, etc.)"
         children:
           - type: VariablesListBox
             name: covariates
@@ -69,25 +69,25 @@ children:
               - type: TextBox
                 name: outcomeLevel
                 format: string
-                label: Event Level
+                label: "Event Level (value indicating event occurred, usually '1')"
               - type: ComboBox
                 name: scale
-                label: Model Scale
+                label: "Model Scale (hazard=like Cox model, odds/normal=alternative scales)"
               - type: TextBox
                 name: df
                 format: number
-                label: Degrees of Freedom
+                label: "Degrees of Freedom (3-4 typical, 5-6 for complex patterns, need ≥30 events)"
               - type: ComboBox
                 name: link_function
-                label: Link Function
+                label: "Link Function (log=standard, identity/sqrt=special cases)"
               - type: TextBox
                 name: knots
                 format: string
-                label: Knot Positions
+                label: "Knot Positions (advanced: manually set time points for splines)"
               - type: TextBox
                 name: boundary_knots
                 format: string
-                label: Boundary Knots
+                label: "Boundary Knots (advanced: min/max time range for splines)"
       - type: CollapseBox
         label: Time-Varying Effects
         collapsed: true
@@ -99,7 +99,7 @@ children:
               - type: TextBox
                 name: tvc_df
                 format: number
-                label: Time-Varying Effect DF
+                label: "Time-Varying Effect DF (flexibility for changing effects over time, 2-3 typical)"
               - type: TextBox
                 name: smooth_formula
                 format: string
@@ -115,7 +115,7 @@ children:
               - type: TextBox
                 name: prediction_times
                 format: string
-                label: Prediction Time Points
+                label: "Prediction Time Points (e.g., '1, 2, 5' for 1-year, 2-year, 5-year survival)"
               - type: TextBox
                 name: extrapolation_time
                 format: number
@@ -123,7 +123,7 @@ children:
               - type: TextBox
                 name: confidence_level
                 format: number
-                label: Confidence Level
+                label: "Confidence Level (0.95 = 95% CI, standard for medical research)"
               - type: CheckBox
                 name: time_ratio
                 label: Time Ratio Analysis

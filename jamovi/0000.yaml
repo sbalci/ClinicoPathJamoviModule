@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -43,7 +43,7 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -102,7 +102,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
@@ -2723,19 +2723,28 @@ analyses:
       Performs statistical comparisons of median survival times between groups.
       Provides confidence intervals, hypothesis tests, and robust estimators
       for  median survival with handling of censored data and group comparisons.
-  - title: Flexible Parametric Survival Models
+  - title: Flexible Parametric Survival Models (Enhanced)
     name: flexparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: SurvivalT
     menuSubgroup: Survival Analysis
-    menuTitle: Flexible Parametric Survival Models
+    menuTitle: Flexible Parametric Survival Models (Enhanced)
     description: >-
-      Fits flexible parametric survival models including generalized gamma, 
-      generalized F, and other advanced parametric distributions. These models 
-      provide greater flexibility in modeling complex hazard shapes compared to 
-      standard parametric models, with applications in oncology, reliability, 
-      and comparative effectiveness research.
+      🔬 ENHANCED: Comprehensive flexible parametric survival modeling
+      combining  traditional parametric distributions (Generalized Gamma,
+      Weibull, etc.) with  advanced spline-based approaches (Royston-Parmar,
+      B-splines). Provides maximum  flexibility for modeling complex hazard
+      shapes, time-varying effects, and  non-proportional hazards.
+
+      ⚕️ CLINICAL USE: Model survival data when standard Cox models are
+      inadequate.  Ideal for cancer research, health economics, and comparative
+      effectiveness studies.
+
+      📊 KEY FEATURES: • Traditional parametric and spline-based models in one
+      function • Automatic model comparison and selection • Clinical
+      interpretation of parameters • Comprehensive diagnostic plots • Copy-ready
+      report templates
   - title: Spline-based Hazard Functions
     name: splinehazard
     ns: ClinicoPath
@@ -2796,22 +2805,33 @@ analyses:
       is violated, allowing for time-varying covariate effects and
       non-proportional hazards. The model estimates cumulative regression
       functions that can reveal how covariate effects change over time.
-  - title: Flexible Parametric Models (Royston-Parmar)
+  - title: Comprehensive Flexible Parametric Survival Models
     name: flexrstpm2
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
-    menuTitle: Flexible Parametric Models (Royston-Parmar)
-    menuSubtitle: Flexible parametric survival models with splines
+    menuTitle: Comprehensive Flexible Parametric Survival Models
+    menuSubtitle: Advanced flexible parametric models with clinical analysis
     description: >-
-      Implements Royston-Parmar flexible parametric survival models using
-      restricted cubic splines to model the baseline log cumulative hazard
-      function. This approach provides a flexible alternative to standard
-      parametric models by allowing non-monotonic hazard functions while
-      maintaining the advantages of parametric modeling including smooth
-      survival curves, extrapolation capability, and direct modeling of
-      covariate effects on survival time.
+      🔬 FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
+
+      ⚕️ CLINICAL USE: Model survival data with smooth, flexible hazard
+      functions that can capture  complex patterns (increasing, decreasing, or
+      bathtub-shaped hazards). Better than Cox models  when you need to
+      extrapolate beyond observed data or estimate absolute risks.
+
+      📊 WHEN TO USE: • Cancer survival with complex hazard patterns • Health
+      economic evaluations requiring extrapolation • Time-varying treatment
+      effects • Relative survival analysis with population mortality
+
+      ⚠️ REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering
+      the period of interest • For df>4: need ≥100 events to avoid overfitting
+
+      📈 KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
+      predictions at specific time points • Model fit statistics (AIC,
+      concordance) • Time-varying effect plots • Copy-ready clinical report
+      sentences
   - title: Smoothly Time-Varying Effects
     name: smoothtimevary
     ns: ClinicoPath
@@ -3731,17 +3751,22 @@ analyses:
       Time-updated survival estimates using time-varying regression coefficients
       and  dynamic hazard functions. Incorporates real-time patient information
       updates  for precision medicine and personalized survival prediction.
-  - title: Advanced Flexible Parametric Survival Models
+  - title: '[DEPRECATED] Advanced Flexible Parametric Survival Models'
     name: flexparametricadv
     ns: ClinicoPath
     category: analyses
     menuGroup: OncoPathologyT
-    menuTitle: Advanced Flexible Parametric Survival Models
+    menuTitle: '[DEPRECATED] Advanced Flexible Parametric Survival Models'
     description: >
-      Advanced flexible parametric survival models using Royston-Parmar
-      framework,  spline-based hazard and survival functions, and transformation
-      models.  Provides smooth survival curves with clinical interpretability
-      and extrapolation capabilities.
+      ⚠️ DEPRECATED: This function has been consolidated into the enhanced
+      flexrstpm2 function  for better functionality and maintainability. Please
+      use flexrstpm2 (SurvivalT > ClinicoPath Survival)  instead, which includes
+      all features from this function plus additional capabilities.
+
+      This function will be removed in a future version. The enhanced flexrstpm2
+      provides: - All features from flexparametricadv - Better integration with
+      rstpm2 package - Enhanced clinical interpretation - Improved user
+      interface organization
   - title: Cochran's Q Test for Paired Categorical Data
     name: cochranq
     ns: ClinicoPath
@@ -4099,7 +4124,7 @@ analyses:
 
       Particularly effective for genomics data where many features are
       correlated.
-  - title: Advanced Flexible Parametric Survival Models
+  - title: '[DEPRECATED] Advanced Flexible Parametric Survival Models'
     name: flexparametricadvanced
     ns: ClinicoPath
     category: analyses
@@ -4107,21 +4132,15 @@ analyses:
     menuSubgroup: Advanced Methods
     menuTitle: Flexible Parametric Models
     menuSubtitle: Advanced parametric survival modeling with flexible baseline hazards
-    description: >
-      Advanced flexible parametric survival models with customizable baseline
-      hazard distributions.
+    description: >-
+      ⚠️ DEPRECATED: This function has been consolidated into the enhanced
+      flexrstpm2 function 
 
-      Supports multiple parametric distributions (Weibull, log-normal,
-      log-logistic, gamma, 
+      for better functionality and maintainability. Please use flexrstpm2
+      (SurvivalT > ClinicoPath Survival) 
 
-      Gompertz), spline-based flexible baseline hazards, time-varying effects,
-      and cure models.
-
-      Provides superior modeling flexibility compared to Cox regression when
-      parametric
-
-      assumptions are met, with improved extrapolation capabilities for health
-      economic modeling.
+      instead, which includes all features from this function plus additional
+      capabilities.
   - title: Enhanced Correlation Analysis
     name: enhancedcorrelation
     ns: ClinicoPath

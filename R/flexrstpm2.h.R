@@ -18,9 +18,21 @@ flexrstpm2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             tvc_df = 3,
             cure_fraction = FALSE,
             bhazard = NULL,
+            group_variable = NULL,
             link_function = "log",
+            prediction_times = "1, 2, 5, 10",
+            extrapolation_time = 20,
+            confidence_level = 0.95,
             smooth_formula = "",
             robust_se = FALSE,
+            time_ratio = FALSE,
+            relative_survival = FALSE,
+            model_comparison = TRUE,
+            goodness_of_fit = TRUE,
+            hazard_analysis = TRUE,
+            derivative_analysis = FALSE,
+            bootstrap_validation = FALSE,
+            bootstrap_samples = 500,
             show_model_summary = TRUE,
             show_coefficients_table = TRUE,
             show_survival_curves = TRUE,
@@ -116,6 +128,13 @@ flexrstpm2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..group_variable <- jmvcore::OptionVariable$new(
+                "group_variable",
+                group_variable,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..link_function <- jmvcore::OptionList$new(
                 "link_function",
                 link_function,
@@ -124,6 +143,21 @@ flexrstpm2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "identity",
                     "sqrt"),
                 default="log")
+            private$..prediction_times <- jmvcore::OptionString$new(
+                "prediction_times",
+                prediction_times,
+                default="1, 2, 5, 10")
+            private$..extrapolation_time <- jmvcore::OptionNumber$new(
+                "extrapolation_time",
+                extrapolation_time,
+                min=0,
+                default=20)
+            private$..confidence_level <- jmvcore::OptionNumber$new(
+                "confidence_level",
+                confidence_level,
+                min=0.8,
+                max=0.99,
+                default=0.95)
             private$..smooth_formula <- jmvcore::OptionString$new(
                 "smooth_formula",
                 smooth_formula,
@@ -132,6 +166,40 @@ flexrstpm2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "robust_se",
                 robust_se,
                 default=FALSE)
+            private$..time_ratio <- jmvcore::OptionBool$new(
+                "time_ratio",
+                time_ratio,
+                default=FALSE)
+            private$..relative_survival <- jmvcore::OptionBool$new(
+                "relative_survival",
+                relative_survival,
+                default=FALSE)
+            private$..model_comparison <- jmvcore::OptionBool$new(
+                "model_comparison",
+                model_comparison,
+                default=TRUE)
+            private$..goodness_of_fit <- jmvcore::OptionBool$new(
+                "goodness_of_fit",
+                goodness_of_fit,
+                default=TRUE)
+            private$..hazard_analysis <- jmvcore::OptionBool$new(
+                "hazard_analysis",
+                hazard_analysis,
+                default=TRUE)
+            private$..derivative_analysis <- jmvcore::OptionBool$new(
+                "derivative_analysis",
+                derivative_analysis,
+                default=FALSE)
+            private$..bootstrap_validation <- jmvcore::OptionBool$new(
+                "bootstrap_validation",
+                bootstrap_validation,
+                default=FALSE)
+            private$..bootstrap_samples <- jmvcore::OptionInteger$new(
+                "bootstrap_samples",
+                bootstrap_samples,
+                min=100,
+                max=2000,
+                default=500)
             private$..show_model_summary <- jmvcore::OptionBool$new(
                 "show_model_summary",
                 show_model_summary,
@@ -181,9 +249,21 @@ flexrstpm2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..tvc_df)
             self$.addOption(private$..cure_fraction)
             self$.addOption(private$..bhazard)
+            self$.addOption(private$..group_variable)
             self$.addOption(private$..link_function)
+            self$.addOption(private$..prediction_times)
+            self$.addOption(private$..extrapolation_time)
+            self$.addOption(private$..confidence_level)
             self$.addOption(private$..smooth_formula)
             self$.addOption(private$..robust_se)
+            self$.addOption(private$..time_ratio)
+            self$.addOption(private$..relative_survival)
+            self$.addOption(private$..model_comparison)
+            self$.addOption(private$..goodness_of_fit)
+            self$.addOption(private$..hazard_analysis)
+            self$.addOption(private$..derivative_analysis)
+            self$.addOption(private$..bootstrap_validation)
+            self$.addOption(private$..bootstrap_samples)
             self$.addOption(private$..show_model_summary)
             self$.addOption(private$..show_coefficients_table)
             self$.addOption(private$..show_survival_curves)
@@ -207,9 +287,21 @@ flexrstpm2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tvc_df = function() private$..tvc_df$value,
         cure_fraction = function() private$..cure_fraction$value,
         bhazard = function() private$..bhazard$value,
+        group_variable = function() private$..group_variable$value,
         link_function = function() private$..link_function$value,
+        prediction_times = function() private$..prediction_times$value,
+        extrapolation_time = function() private$..extrapolation_time$value,
+        confidence_level = function() private$..confidence_level$value,
         smooth_formula = function() private$..smooth_formula$value,
         robust_se = function() private$..robust_se$value,
+        time_ratio = function() private$..time_ratio$value,
+        relative_survival = function() private$..relative_survival$value,
+        model_comparison = function() private$..model_comparison$value,
+        goodness_of_fit = function() private$..goodness_of_fit$value,
+        hazard_analysis = function() private$..hazard_analysis$value,
+        derivative_analysis = function() private$..derivative_analysis$value,
+        bootstrap_validation = function() private$..bootstrap_validation$value,
+        bootstrap_samples = function() private$..bootstrap_samples$value,
         show_model_summary = function() private$..show_model_summary$value,
         show_coefficients_table = function() private$..show_coefficients_table$value,
         show_survival_curves = function() private$..show_survival_curves$value,
@@ -232,9 +324,21 @@ flexrstpm2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..tvc_df = NA,
         ..cure_fraction = NA,
         ..bhazard = NA,
+        ..group_variable = NA,
         ..link_function = NA,
+        ..prediction_times = NA,
+        ..extrapolation_time = NA,
+        ..confidence_level = NA,
         ..smooth_formula = NA,
         ..robust_se = NA,
+        ..time_ratio = NA,
+        ..relative_survival = NA,
+        ..model_comparison = NA,
+        ..goodness_of_fit = NA,
+        ..hazard_analysis = NA,
+        ..derivative_analysis = NA,
+        ..bootstrap_validation = NA,
+        ..bootstrap_samples = NA,
         ..show_model_summary = NA,
         ..show_coefficients_table = NA,
         ..show_survival_curves = NA,
@@ -256,12 +360,26 @@ flexrstpm2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         timeVaryingTable = function() private$.items[["timeVaryingTable"]],
         modelFit = function() private$.items[["modelFit"]],
         splineInfo = function() private$.items[["splineInfo"]],
+        parameterEstimates = function() private$.items[["parameterEstimates"]],
+        survivalPredictions = function() private$.items[["survivalPredictions"]],
+        timeRatioAnalysis = function() private$.items[["timeRatioAnalysis"]],
+        relativeSurvivalAnalysis = function() private$.items[["relativeSurvivalAnalysis"]],
+        modelComparison = function() private$.items[["modelComparison"]],
+        goodnessOfFitTests = function() private$.items[["goodnessOfFitTests"]],
+        hazardAnalysis = function() private$.items[["hazardAnalysis"]],
+        derivativeAnalysis = function() private$.items[["derivativeAnalysis"]],
+        bootstrapValidation = function() private$.items[["bootstrapValidation"]],
         survivalCurves = function() private$.items[["survivalCurves"]],
         hazardCurves = function() private$.items[["hazardCurves"]],
         timeVaryingPlots = function() private$.items[["timeVaryingPlots"]],
         modelDiagnostics = function() private$.items[["modelDiagnostics"]],
         residualPlots = function() private$.items[["residualPlots"]],
         splineComponents = function() private$.items[["splineComponents"]],
+        hazardFunctionPlot = function() private$.items[["hazardFunctionPlot"]],
+        splineBasisPlot = function() private$.items[["splineBasisPlot"]],
+        modelComparisonPlot = function() private$.items[["modelComparisonPlot"]],
+        derivativePlot = function() private$.items[["derivativePlot"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         analysisSummary = function() private$.items[["analysisSummary"]],
         methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
@@ -387,6 +505,317 @@ flexrstpm2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="boundary_knots", 
                         `title`="Boundary Knots", 
                         `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="parameterEstimates",
+                title="Parameter Estimates with Clinical Interpretation",
+                visible="(show_coefficients_table)",
+                rows=1,
+                clearWith=list(
+                    "covariates",
+                    "scale",
+                    "df"),
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="standard_error", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="confidence_interval", 
+                        `title`="Confidence Interval", 
+                        `type`="text"),
+                    list(
+                        `name`="z_value", 
+                        `title`="z-value", 
+                        `type`="number", 
+                        `format`="zto:3"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="hazard_ratio", 
+                        `title`="Hazard Ratio", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="survivalPredictions",
+                title="Survival Predictions",
+                visible=TRUE,
+                rows=1,
+                clearWith=list(
+                    "prediction_times",
+                    "scale"),
+                columns=list(
+                    list(
+                        `name`="time_point", 
+                        `title`="Time Point", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="survival_probability", 
+                        `title`="Survival Probability", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="confidence_interval", 
+                        `title`="Confidence Interval", 
+                        `type`="text"),
+                    list(
+                        `name`="hazard_rate", 
+                        `title`="Hazard Rate", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="hazard_ratio", 
+                        `title`="Hazard Ratio", 
+                        `type`="number", 
+                        `format`="zto:4", 
+                        `visible`="(covariates)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="timeRatioAnalysis",
+                title="Time Ratio Analysis",
+                visible="(time_ratio)",
+                rows=1,
+                clearWith=list(
+                    "time_ratio",
+                    "covariates"),
+                columns=list(
+                    list(
+                        `name`="covariate", 
+                        `title`="Covariate", 
+                        `type`="text"),
+                    list(
+                        `name`="time_ratio", 
+                        `title`="Time Ratio", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="confidence_interval", 
+                        `title`="Confidence Interval", 
+                        `type`="text"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="relativeSurvivalAnalysis",
+                title="Relative Survival Analysis",
+                visible="(relative_survival)",
+                rows=1,
+                clearWith=list(
+                    "relative_survival",
+                    "bhazard"),
+                columns=list(
+                    list(
+                        `name`="time_point", 
+                        `title`="Time Point", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="observed_survival", 
+                        `title`="Observed Survival", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="expected_survival", 
+                        `title`="Expected Survival", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="relative_survival", 
+                        `title`="Relative Survival", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="excess_mortality", 
+                        `title`="Excess Mortality Rate", 
+                        `type`="number", 
+                        `format`="zto:4"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparison",
+                title="Model Comparison",
+                visible="(model_comparison)",
+                rows=1,
+                clearWith=list(
+                    "model_comparison",
+                    "df"),
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="parameters", 
+                        `title`="Parameters", 
+                        `type`="integer"),
+                    list(
+                        `name`="log_likelihood", 
+                        `title`="Log-Likelihood", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="bic", 
+                        `title`="BIC", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="likelihood_ratio_test", 
+                        `title`="LR Test p-value", 
+                        `type`="number", 
+                        `format`="zto:4"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="goodnessOfFitTests",
+                title="Goodness of Fit Tests",
+                visible="(goodness_of_fit)",
+                rows=1,
+                clearWith=list(
+                    "goodness_of_fit",
+                    "scale"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Test Statistic", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="conclusion", 
+                        `title`="Conclusion", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="hazardAnalysis",
+                title="Hazard Function Analysis",
+                visible="(hazard_analysis)",
+                rows=1,
+                clearWith=list(
+                    "hazard_analysis",
+                    "prediction_times"),
+                columns=list(
+                    list(
+                        `name`="time_point", 
+                        `title`="Time Point", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="hazard_rate", 
+                        `title`="Hazard Rate", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="hazard_confidence_interval", 
+                        `title`="Hazard CI", 
+                        `type`="text"),
+                    list(
+                        `name`="hazard_pattern", 
+                        `title`="Hazard Pattern", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="derivativeAnalysis",
+                title="Hazard Derivative Analysis",
+                visible="(derivative_analysis)",
+                rows=1,
+                clearWith=list(
+                    "derivative_analysis",
+                    "prediction_times"),
+                columns=list(
+                    list(
+                        `name`="time_point", 
+                        `title`="Time Point", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="first_derivative", 
+                        `title`="First Derivative", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="second_derivative", 
+                        `title`="Second Derivative", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="acceleration_pattern", 
+                        `title`="Acceleration Pattern", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="bootstrapValidation",
+                title="Bootstrap Validation Results",
+                visible="(bootstrap_validation)",
+                rows=1,
+                clearWith=list(
+                    "bootstrap_validation",
+                    "bootstrap_samples"),
+                columns=list(
+                    list(
+                        `name`="validation_metric", 
+                        `title`="Validation Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="original_estimate", 
+                        `title`="Original", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="bootstrap_mean", 
+                        `title`="Bootstrap Mean", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="bootstrap_se", 
+                        `title`="Bootstrap SE", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="bias", 
+                        `title`="Bias", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="percentile_ci", 
+                        `title`="Percentile CI", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalCurves",
@@ -417,6 +846,61 @@ flexrstpm2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="splineComponents",
                 title="Spline Components",
                 visible="(show_model_diagnostics)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="hazardFunctionPlot",
+                title="Hazard Function Plot",
+                visible="(hazard_analysis)",
+                requiresData=TRUE,
+                width=800,
+                height=600,
+                renderFun=".plotHazardFunction",
+                clearWith=list(
+                    "hazard_analysis",
+                    "scale",
+                    "df")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="splineBasisPlot",
+                title="Spline Basis Functions Plot",
+                visible="(show_model_diagnostics)",
+                requiresData=TRUE,
+                width=800,
+                height=600,
+                renderFun=".plotSplineBasis",
+                clearWith=list(
+                    "df",
+                    "knots",
+                    "scale")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="modelComparisonPlot",
+                title="Model Comparison Plot",
+                visible="(model_comparison)",
+                requiresData=TRUE,
+                width=800,
+                height=600,
+                renderFun=".plotModelComparison",
+                clearWith=list(
+                    "model_comparison",
+                    "df")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="derivativePlot",
+                title="Hazard Derivative Plot",
+                visible="(derivative_analysis)",
+                requiresData=TRUE,
+                width=800,
+                height=600,
+                renderFun=".plotDerivatives",
+                clearWith=list(
+                    "derivative_analysis",
+                    "scale")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary and Report Templates",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -436,7 +920,7 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "flexrstpm2",
-                version = c(0,0,1),
+                version = c(2,0,0),
                 options = options,
                 results = flexrstpm2Results$new(options=options),
                 data = data,
@@ -449,15 +933,22 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Flexible Parametric Models (Royston-Parmar)
+#' Comprehensive Flexible Parametric Survival Models
 #'
-#' Implements Royston-Parmar flexible parametric survival models using 
-#' restricted cubic splines to model the baseline log cumulative hazard 
-#' function. This approach provides a flexible alternative to standard 
-#' parametric models by allowing non-monotonic hazard functions while 
-#' maintaining the advantages of parametric modeling including smooth survival 
-#' curves, extrapolation capability, and direct modeling of covariate effects 
-#' on survival time.
+#' 🔬 FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
+#' ⚕️ CLINICAL USE: Model survival data with smooth, flexible hazard functions 
+#' that can capture  complex patterns (increasing, decreasing, or 
+#' bathtub-shaped hazards). Better than Cox models  when you need to 
+#' extrapolate beyond observed data or estimate absolute risks.
+#' 📊 WHEN TO USE: • Cancer survival with complex hazard patterns • Health 
+#' economic evaluations requiring extrapolation • Time-varying treatment 
+#' effects • Relative survival analysis with population mortality
+#' ⚠️ REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering 
+#' the period of interest • For df>4: need ≥100 events to avoid overfitting
+#' 📈 KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival 
+#' predictions at specific time points • Model fit statistics (AIC, 
+#' concordance) • Time-varying effect plots • Copy-ready clinical report 
+#' sentences
 #'
 #' @examples
 #' # Example 1: Basic flexible parametric model
@@ -494,7 +985,9 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param covariates Covariate variables for flexible parametric modeling
 #' @param outcomeLevel Level of outcome variable indicating event occurrence
 #' @param scale Scale for the flexible parametric model
-#' @param df Degrees of freedom for baseline spline function
+#' @param df Degrees of freedom for baseline spline function (complexity of
+#'   hazard curve). Clinical guide: df=3-4 for most analyses, df=5-6 for complex
+#'   patterns. Need ≥30 events per df for reliable results.
 #' @param knots Comma-separated knot positions (optional, overrides df)
 #' @param boundary_knots Comma-separated boundary knot positions (optional)
 #' @param time_varying_covariates Covariates with time-varying effects (spline
@@ -502,9 +995,27 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param tvc_df Degrees of freedom for time-varying covariate effects
 #' @param cure_fraction Include cure fraction in the model
 #' @param bhazard Background hazard variable for relative survival analysis
+#' @param group_variable Optional grouping variable for stratified analysis
 #' @param link_function Link function for baseline transformation
+#' @param prediction_times Comma-separated list of time points for survival
+#'   predictions
+#' @param extrapolation_time Maximum time for survival curve extrapolation
+#' @param confidence_level Confidence level for confidence intervals
 #' @param smooth_formula Custom smoothing formula for advanced specifications
 #' @param robust_se Use robust sandwich estimator for standard errors
+#' @param time_ratio Include time ratio (acceleration factor) analysis
+#' @param relative_survival Perform relative survival analysis (requires
+#'   background hazard)
+#' @param model_comparison Compare flexible parametric models with standard
+#'   parametric models
+#' @param goodness_of_fit Perform goodness of fit tests and model diagnostics
+#' @param hazard_analysis Generate hazard function estimates and plots
+#' @param derivative_analysis Include analysis of hazard function derivatives
+#'   (acceleration/deceleration)
+#' @param bootstrap_validation Perform bootstrap validation of model
+#'   predictions
+#' @param bootstrap_samples Number of bootstrap samples for validation (when
+#'   bootstrap enabled)
 #' @param show_model_summary Display comprehensive model summary
 #' @param show_coefficients_table Display table of model coefficients
 #' @param show_survival_curves Display fitted survival curves
@@ -522,12 +1033,26 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$timeVaryingTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelFit} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$splineInfo} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$parameterEstimates} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survivalPredictions} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$timeRatioAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$relativeSurvivalAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$goodnessOfFitTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hazardAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$derivativeAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bootstrapValidation} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$hazardCurves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$timeVaryingPlots} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$modelDiagnostics} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$residualPlots} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$splineComponents} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$hazardFunctionPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$splineBasisPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$modelComparisonPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$derivativePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -553,9 +1078,21 @@ flexrstpm2 <- function(
     tvc_df = 3,
     cure_fraction = FALSE,
     bhazard,
+    group_variable,
     link_function = "log",
+    prediction_times = "1, 2, 5, 10",
+    extrapolation_time = 20,
+    confidence_level = 0.95,
     smooth_formula = "",
     robust_se = FALSE,
+    time_ratio = FALSE,
+    relative_survival = FALSE,
+    model_comparison = TRUE,
+    goodness_of_fit = TRUE,
+    hazard_analysis = TRUE,
+    derivative_analysis = FALSE,
+    bootstrap_validation = FALSE,
+    bootstrap_samples = 500,
     show_model_summary = TRUE,
     show_coefficients_table = TRUE,
     show_survival_curves = TRUE,
@@ -574,6 +1111,7 @@ flexrstpm2 <- function(
     if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
     if ( ! missing(time_varying_covariates)) time_varying_covariates <- jmvcore::resolveQuo(jmvcore::enquo(time_varying_covariates))
     if ( ! missing(bhazard)) bhazard <- jmvcore::resolveQuo(jmvcore::enquo(bhazard))
+    if ( ! missing(group_variable)) group_variable <- jmvcore::resolveQuo(jmvcore::enquo(group_variable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -581,8 +1119,10 @@ flexrstpm2 <- function(
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(covariates), covariates, NULL),
             `if`( ! missing(time_varying_covariates), time_varying_covariates, NULL),
-            `if`( ! missing(bhazard), bhazard, NULL))
+            `if`( ! missing(bhazard), bhazard, NULL),
+            `if`( ! missing(group_variable), group_variable, NULL))
 
+    for (v in group_variable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- flexrstpm2Options$new(
         elapsedtime = elapsedtime,
@@ -597,9 +1137,21 @@ flexrstpm2 <- function(
         tvc_df = tvc_df,
         cure_fraction = cure_fraction,
         bhazard = bhazard,
+        group_variable = group_variable,
         link_function = link_function,
+        prediction_times = prediction_times,
+        extrapolation_time = extrapolation_time,
+        confidence_level = confidence_level,
         smooth_formula = smooth_formula,
         robust_se = robust_se,
+        time_ratio = time_ratio,
+        relative_survival = relative_survival,
+        model_comparison = model_comparison,
+        goodness_of_fit = goodness_of_fit,
+        hazard_analysis = hazard_analysis,
+        derivative_analysis = derivative_analysis,
+        bootstrap_validation = bootstrap_validation,
+        bootstrap_samples = bootstrap_samples,
         show_model_summary = show_model_summary,
         show_coefficients_table = show_coefficients_table,
         show_survival_curves = show_survival_curves,
