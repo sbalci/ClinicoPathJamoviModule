@@ -1,6 +1,6 @@
 ---
 name: flexparametric
-title: Flexible Parametric Survival Models
+title: Flexible Parametric Survival Models (Enhanced)
 jrs: '1.1'
 
 items:
@@ -9,8 +9,13 @@ items:
       type: Html
       visible: true
 
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: true
+
     - name: parametersTable
-      title: Parameter Estimates
+      title: Parameter Estimates with Clinical Interpretation
       type: Table
       visible: (show_parameters)
       columns:
@@ -35,9 +40,57 @@ items:
         - name: p_value
           title: p
           type: number
+        - name: hazard_ratio
+          title: HR
+          type: number
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+
+    - name: splineDetails
+      title: Spline Configuration
+      type: Table
+      visible: (model_approach == 'spline_based' && show_parameters)
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: df
+          title: DF
+          type: integer
+        - name: knots
+          title: Knot Positions
+          type: text
+        - name: basis_type
+          title: Basis Type
+          type: text
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (model_comparison)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: parameters
+          title: Parameters
+          type: integer
+        - name: log_likelihood
+          title: Log-Likelihood
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: best
+          title: Best Model
+          type: text
 
     - name: fitStatistics
-      title: Model Fit Statistics
+      title: Goodness of Fit
       type: Table
       visible: (show_aic_bic)
       columns:
@@ -47,6 +100,9 @@ items:
         - name: value
           title: Value
           type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
 
     - name: survivalPlot
       title: Parametric Survival Curves
@@ -63,13 +119,28 @@ items:
       type: Image
       visible: (show_density_plot)
 
+    - name: splinePlot
+      title: Spline Components
+      type: Image
+      visible: (model_approach == 'spline_based' && show_spline_plot)
+
+    - name: diagnosticsPlot
+      title: Model Diagnostics
+      type: Image
+      visible: (show_diagnostics)
+
+    - name: clinicalSummary
+      title: Clinical Summary and Report
+      type: Html
+      visible: (show_clinical_summary)
+
     - name: analysisSummary
       title: Analysis Summary
       type: Html
       visible: (showSummaries)
 
     - name: methodExplanation
-      title: Methodology
+      title: About This Analysis
       type: Html
       visible: (showExplanations)
 

@@ -9,17 +9,29 @@ jas: '1.2'
 
 description:
     main: >-
-        🔬 ENHANCED: Comprehensive flexible parametric survival modeling platform combining 
-        the best features of Royston-Parmar models, advanced parametric distributions, and 
-        clinical analysis capabilities. This consolidated function replaces flexparametricadv 
-        and flexparametricadvanced with improved functionality.
+        🔬 FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
         
-        Features include: Royston-Parmar splines, time-varying effects, multiple parametric 
-        distributions, clinical interpretation, time ratio analysis, relative survival, 
-        bootstrap validation, model comparison, and copy-ready clinical reports.
+        ⚕️ CLINICAL USE: Model survival data with smooth, flexible hazard functions that can capture 
+        complex patterns (increasing, decreasing, or bathtub-shaped hazards). Better than Cox models 
+        when you need to extrapolate beyond observed data or estimate absolute risks.
         
-        Ideal for cancer research, health economics, regulatory submissions, and clinical trials 
-        requiring robust survival modeling with reliable extrapolation capabilities.
+        📊 WHEN TO USE:
+        • Cancer survival with complex hazard patterns
+        • Health economic evaluations requiring extrapolation
+        • Time-varying treatment effects
+        • Relative survival analysis with population mortality
+        
+        ⚠️ REQUIREMENTS:
+        • Minimum 30 events (preferably ≥50)
+        • Follow-up covering the period of interest
+        • For df>4: need ≥100 events to avoid overfitting
+        
+        📈 KEY OUTPUTS:
+        • Hazard ratios with clinical interpretation
+        • Survival predictions at specific time points
+        • Model fit statistics (AIC, concordance)
+        • Time-varying effect plots
+        • Copy-ready clinical report sentences
     R:
         dontrun: false
         usage: |
@@ -130,7 +142,9 @@ options:
     default: 4
     description:
         R: >
-          Degrees of freedom for baseline spline function
+          Degrees of freedom for baseline spline function (complexity of hazard curve).
+          Clinical guide: df=3-4 for most analyses, df=5-6 for complex patterns.
+          Need ≥30 events per df for reliable results.
 
   - name: knots
     title: Knot Positions

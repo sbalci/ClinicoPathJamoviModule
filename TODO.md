@@ -54,16 +54,10 @@ run devtools::document() to see if there are any errors
 
 ***
 
-/review-function flexrstpm2
-/fix-function flexrstpm2
 
 
-MERGE: flexparametric + flexiblebaseline → Single Enhanced flexparametric
-Action: Keep flexparametric as primary, integrate spline features
-Remove others after implementation
 
 
-/check-function flexparametric
 /review-function flexparametric
 /fix-function flexparametric
 

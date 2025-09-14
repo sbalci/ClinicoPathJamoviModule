@@ -1,18 +1,28 @@
 ---
 name: flexparametric
-title: Flexible Parametric Survival Models
+title: Flexible Parametric Survival Models (Enhanced)
 menuGroup: SurvivalT
 menuSubgroup: Survival Analysis
-version: '1.0.0'
+version: '2.0.0'
 jas: '1.2'
 
 description:
     main: >-
-        Fits flexible parametric survival models including generalized gamma, 
-        generalized F, and other advanced parametric distributions. These models 
-        provide greater flexibility in modeling complex hazard shapes compared to 
-        standard parametric models, with applications in oncology, reliability, 
-        and comparative effectiveness research.
+        🔬 ENHANCED: Comprehensive flexible parametric survival modeling combining 
+        traditional parametric distributions (Generalized Gamma, Weibull, etc.) with 
+        advanced spline-based approaches (Royston-Parmar, B-splines). Provides maximum 
+        flexibility for modeling complex hazard shapes, time-varying effects, and 
+        non-proportional hazards.
+        
+        ⚕️ CLINICAL USE: Model survival data when standard Cox models are inadequate. 
+        Ideal for cancer research, health economics, and comparative effectiveness studies.
+        
+        📊 KEY FEATURES:
+        • Traditional parametric and spline-based models in one function
+        • Automatic model comparison and selection
+        • Clinical interpretation of parameters
+        • Comprehensive diagnostic plots
+        • Copy-ready report templates
     R:
         dontrun: false
         usage: |
@@ -60,8 +70,24 @@ options:
           R: >
             Level of outcome variable indicating event.
 
+    - name: model_approach
+      title: Modeling Approach
+      type: List
+      options:
+        - name: traditional
+          title: "Traditional Parametric"
+        - name: spline_based
+          title: "Spline-Based Flexible"
+        - name: automatic
+          title: "Automatic Selection"
+      default: automatic
+      description:
+          R: >
+            Choose modeling approach: Traditional uses standard distributions, 
+            Spline-based uses flexible baseline, Automatic selects best fit.
+
     - name: distribution
-      title: Distribution
+      title: Distribution (Traditional)
       type: List
       options:
         - name: gengamma
@@ -78,10 +104,60 @@ options:
           title: Log-Normal
         - name: gamma
           title: Gamma
+        - name: exponential
+          title: Exponential
       default: gengamma
       description:
           R: >
-            Parametric distribution to fit.
+            Parametric distribution for traditional approach.
+
+    - name: spline_type
+      title: Spline Type (Flexible)
+      type: List
+      options:
+        - name: hazard
+          title: "Spline on Hazard (Royston-Parmar PH)"
+        - name: odds
+          title: "Spline on Odds (PO model)"
+        - name: normal
+          title: "Spline on Normal (Probit model)"
+      default: hazard
+      description:
+          R: >
+            Type of spline transformation for flexible approach.
+
+    - name: spline_df
+      title: Degrees of Freedom (Splines)
+      type: Integer
+      default: 4
+      min: 1
+      max: 10
+      description:
+          R: >
+            Degrees of freedom for spline flexibility (3-4 typical, 5-6 complex).
+
+    - name: knot_placement
+      title: Knot Placement
+      type: List
+      options:
+        - name: quantiles
+          title: "Quantiles of Event Times"
+        - name: equal
+          title: "Equally Spaced"
+        - name: manual
+          title: "Manual Specification"
+      default: quantiles
+      description:
+          R: >
+            Method for placing spline knots.
+
+    - name: manual_knots
+      title: Manual Knot Positions
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated knot positions (when manual placement selected).
 
     - name: confidence_level
       title: Confidence Level
@@ -92,6 +168,31 @@ options:
       description:
           R: >
             Confidence level for parameter estimates and survival curves.
+
+    - name: grouping_variable
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Optional grouping variable for stratified analysis.
+
+    - name: model_comparison
+      title: Compare Models
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare multiple models and select best based on AIC/BIC.
+
+    - name: time_varying_effects
+      title: Time-Varying Effects
+      type: Bool
+      default: false
+      description:
+          R: >
+            Allow covariate effects to vary over time (spline models only).
 
     - name: show_parameters
       title: Show Parameters
@@ -124,6 +225,30 @@ options:
       description:
           R: >
             Display parametric hazard functions.
+
+    - name: show_spline_plot
+      title: Show Spline Components
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display spline basis functions and knot positions (spline models only).
+
+    - name: show_diagnostics
+      title: Show Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display residual plots and goodness-of-fit diagnostics.
+
+    - name: show_clinical_summary
+      title: Show Clinical Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display clinical interpretation and copy-ready report.
 
     - name: show_density_plot
       title: Show Density Plot

@@ -10,12 +10,23 @@ flexparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             outcome = NULL,
             covariates = NULL,
             outcomeLevel = "1",
+            model_approach = "automatic",
             distribution = "gengamma",
+            spline_type = "hazard",
+            spline_df = 4,
+            knot_placement = "quantiles",
+            manual_knots = "",
             confidence_level = 0.95,
+            grouping_variable = NULL,
+            model_comparison = TRUE,
+            time_varying_effects = FALSE,
             show_parameters = TRUE,
             show_aic_bic = TRUE,
             show_survival_plot = TRUE,
             show_hazard_plot = FALSE,
+            show_spline_plot = FALSE,
+            show_diagnostics = TRUE,
+            show_clinical_summary = TRUE,
             show_density_plot = FALSE,
             plot_time_max = 0,
             showSummaries = FALSE,
@@ -57,6 +68,14 @@ flexparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "outcomeLevel",
                 outcomeLevel,
                 default="1")
+            private$..model_approach <- jmvcore::OptionList$new(
+                "model_approach",
+                model_approach,
+                options=list(
+                    "traditional",
+                    "spline_based",
+                    "automatic"),
+                default="automatic")
             private$..distribution <- jmvcore::OptionList$new(
                 "distribution",
                 distribution,
@@ -67,14 +86,57 @@ flexparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "genf_orig",
                     "weibull",
                     "lognormal",
-                    "gamma"),
+                    "gamma",
+                    "exponential"),
                 default="gengamma")
+            private$..spline_type <- jmvcore::OptionList$new(
+                "spline_type",
+                spline_type,
+                options=list(
+                    "hazard",
+                    "odds",
+                    "normal"),
+                default="hazard")
+            private$..spline_df <- jmvcore::OptionInteger$new(
+                "spline_df",
+                spline_df,
+                default=4,
+                min=1,
+                max=10)
+            private$..knot_placement <- jmvcore::OptionList$new(
+                "knot_placement",
+                knot_placement,
+                options=list(
+                    "quantiles",
+                    "equal",
+                    "manual"),
+                default="quantiles")
+            private$..manual_knots <- jmvcore::OptionString$new(
+                "manual_knots",
+                manual_knots,
+                default="")
             private$..confidence_level <- jmvcore::OptionNumber$new(
                 "confidence_level",
                 confidence_level,
                 min=0.5,
                 max=0.99,
                 default=0.95)
+            private$..grouping_variable <- jmvcore::OptionVariable$new(
+                "grouping_variable",
+                grouping_variable,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..model_comparison <- jmvcore::OptionBool$new(
+                "model_comparison",
+                model_comparison,
+                default=TRUE)
+            private$..time_varying_effects <- jmvcore::OptionBool$new(
+                "time_varying_effects",
+                time_varying_effects,
+                default=FALSE)
             private$..show_parameters <- jmvcore::OptionBool$new(
                 "show_parameters",
                 show_parameters,
@@ -91,6 +153,18 @@ flexparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "show_hazard_plot",
                 show_hazard_plot,
                 default=FALSE)
+            private$..show_spline_plot <- jmvcore::OptionBool$new(
+                "show_spline_plot",
+                show_spline_plot,
+                default=FALSE)
+            private$..show_diagnostics <- jmvcore::OptionBool$new(
+                "show_diagnostics",
+                show_diagnostics,
+                default=TRUE)
+            private$..show_clinical_summary <- jmvcore::OptionBool$new(
+                "show_clinical_summary",
+                show_clinical_summary,
+                default=TRUE)
             private$..show_density_plot <- jmvcore::OptionBool$new(
                 "show_density_plot",
                 show_density_plot,
@@ -113,12 +187,23 @@ flexparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..outcome)
             self$.addOption(private$..covariates)
             self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..model_approach)
             self$.addOption(private$..distribution)
+            self$.addOption(private$..spline_type)
+            self$.addOption(private$..spline_df)
+            self$.addOption(private$..knot_placement)
+            self$.addOption(private$..manual_knots)
             self$.addOption(private$..confidence_level)
+            self$.addOption(private$..grouping_variable)
+            self$.addOption(private$..model_comparison)
+            self$.addOption(private$..time_varying_effects)
             self$.addOption(private$..show_parameters)
             self$.addOption(private$..show_aic_bic)
             self$.addOption(private$..show_survival_plot)
             self$.addOption(private$..show_hazard_plot)
+            self$.addOption(private$..show_spline_plot)
+            self$.addOption(private$..show_diagnostics)
+            self$.addOption(private$..show_clinical_summary)
             self$.addOption(private$..show_density_plot)
             self$.addOption(private$..plot_time_max)
             self$.addOption(private$..showSummaries)
@@ -129,12 +214,23 @@ flexparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         outcome = function() private$..outcome$value,
         covariates = function() private$..covariates$value,
         outcomeLevel = function() private$..outcomeLevel$value,
+        model_approach = function() private$..model_approach$value,
         distribution = function() private$..distribution$value,
+        spline_type = function() private$..spline_type$value,
+        spline_df = function() private$..spline_df$value,
+        knot_placement = function() private$..knot_placement$value,
+        manual_knots = function() private$..manual_knots$value,
         confidence_level = function() private$..confidence_level$value,
+        grouping_variable = function() private$..grouping_variable$value,
+        model_comparison = function() private$..model_comparison$value,
+        time_varying_effects = function() private$..time_varying_effects$value,
         show_parameters = function() private$..show_parameters$value,
         show_aic_bic = function() private$..show_aic_bic$value,
         show_survival_plot = function() private$..show_survival_plot$value,
         show_hazard_plot = function() private$..show_hazard_plot$value,
+        show_spline_plot = function() private$..show_spline_plot$value,
+        show_diagnostics = function() private$..show_diagnostics$value,
+        show_clinical_summary = function() private$..show_clinical_summary$value,
         show_density_plot = function() private$..show_density_plot$value,
         plot_time_max = function() private$..plot_time_max$value,
         showSummaries = function() private$..showSummaries$value,
@@ -144,12 +240,23 @@ flexparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..outcome = NA,
         ..covariates = NA,
         ..outcomeLevel = NA,
+        ..model_approach = NA,
         ..distribution = NA,
+        ..spline_type = NA,
+        ..spline_df = NA,
+        ..knot_placement = NA,
+        ..manual_knots = NA,
         ..confidence_level = NA,
+        ..grouping_variable = NA,
+        ..model_comparison = NA,
+        ..time_varying_effects = NA,
         ..show_parameters = NA,
         ..show_aic_bic = NA,
         ..show_survival_plot = NA,
         ..show_hazard_plot = NA,
+        ..show_spline_plot = NA,
+        ..show_diagnostics = NA,
+        ..show_clinical_summary = NA,
         ..show_density_plot = NA,
         ..plot_time_max = NA,
         ..showSummaries = NA,
@@ -161,11 +268,17 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        modelSummary = function() private$.items[["modelSummary"]],
         parametersTable = function() private$.items[["parametersTable"]],
+        splineDetails = function() private$.items[["splineDetails"]],
+        modelComparison = function() private$.items[["modelComparison"]],
         fitStatistics = function() private$.items[["fitStatistics"]],
         survivalPlot = function() private$.items[["survivalPlot"]],
         hazardPlot = function() private$.items[["hazardPlot"]],
         densityPlot = function() private$.items[["densityPlot"]],
+        splinePlot = function() private$.items[["splinePlot"]],
+        diagnosticsPlot = function() private$.items[["diagnosticsPlot"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         analysisSummary = function() private$.items[["analysisSummary"]],
         methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
@@ -174,7 +287,7 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Flexible Parametric Survival Models",
+                title="Flexible Parametric Survival Models (Enhanced)",
                 refs=list(
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
@@ -182,10 +295,15 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="todo",
                 title="Analysis",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="modelSummary",
+                title="Model Summary",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="parametersTable",
-                title="Parameter Estimates",
+                title="Parameter Estimates with Clinical Interpretation",
                 visible="(show_parameters)",
                 columns=list(
                     list(
@@ -215,11 +333,71 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="p_value", 
                         `title`="p", 
-                        `type`="number"))))
+                        `type`="number"),
+                    list(
+                        `name`="hazard_ratio", 
+                        `title`="HR", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="splineDetails",
+                title="Spline Configuration",
+                visible="(model_approach == 'spline_based' && show_parameters)",
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Component", 
+                        `type`="text"),
+                    list(
+                        `name`="df", 
+                        `title`="DF", 
+                        `type`="integer"),
+                    list(
+                        `name`="knots", 
+                        `title`="Knot Positions", 
+                        `type`="text"),
+                    list(
+                        `name`="basis_type", 
+                        `title`="Basis Type", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparison",
+                title="Model Comparison",
+                visible="(model_comparison)",
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="parameters", 
+                        `title`="Parameters", 
+                        `type`="integer"),
+                    list(
+                        `name`="log_likelihood", 
+                        `title`="Log-Likelihood", 
+                        `type`="number"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number"),
+                    list(
+                        `name`="bic", 
+                        `title`="BIC", 
+                        `type`="number"),
+                    list(
+                        `name`="best", 
+                        `title`="Best Model", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="fitStatistics",
-                title="Model Fit Statistics",
+                title="Goodness of Fit",
                 visible="(show_aic_bic)",
                 columns=list(
                     list(
@@ -229,7 +407,11 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="number"))))
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
@@ -245,6 +427,21 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="densityPlot",
                 title="Parametric Density Functions",
                 visible="(show_density_plot)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="splinePlot",
+                title="Spline Components",
+                visible="(model_approach == 'spline_based' && show_spline_plot)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="diagnosticsPlot",
+                title="Model Diagnostics",
+                visible="(show_diagnostics)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary and Report",
+                visible="(show_clinical_summary)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -253,7 +450,7 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodExplanation",
-                title="Methodology",
+                title="About This Analysis",
                 visible="(showExplanations)"))}))
 
 flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -264,7 +461,7 @@ flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "flexparametric",
-                version = c(1,0,0),
+                version = c(2,0,0),
                 options = options,
                 results = flexparametricResults$new(options=options),
                 data = data,
@@ -277,13 +474,20 @@ flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 weightsSupport = 'auto')
         }))
 
-#' Flexible Parametric Survival Models
+#' Flexible Parametric Survival Models (Enhanced)
 #'
-#' Fits flexible parametric survival models including generalized gamma,  
-#' generalized F, and other advanced parametric distributions. These models  
-#' provide greater flexibility in modeling complex hazard shapes compared to  
-#' standard parametric models, with applications in oncology, reliability,  
-#' and comparative effectiveness research.
+#' 🔬 ENHANCED: Comprehensive flexible parametric survival modeling combining  
+#' traditional parametric distributions (Generalized Gamma, Weibull, etc.) 
+#' with  advanced spline-based approaches (Royston-Parmar, B-splines). 
+#' Provides maximum  flexibility for modeling complex hazard shapes, 
+#' time-varying effects, and  non-proportional hazards.
+#' ⚕️ CLINICAL USE: Model survival data when standard Cox models are 
+#' inadequate.  Ideal for cancer research, health economics, and comparative 
+#' effectiveness studies.
+#' 📊 KEY FEATURES: • Traditional parametric and spline-based models in one 
+#' function • Automatic model comparison and selection • Clinical 
+#' interpretation of parameters • Comprehensive diagnostic plots • Copy-ready 
+#' report templates
 #'
 #' @examples
 #' # Example usage will be added
@@ -293,13 +497,34 @@ flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param outcome Event indicator variable.
 #' @param covariates Covariates to include in the model.
 #' @param outcomeLevel Level of outcome variable indicating event.
-#' @param distribution Parametric distribution to fit.
+#' @param model_approach Choose modeling approach: Traditional uses standard
+#'   distributions,  Spline-based uses flexible baseline, Automatic selects best
+#'   fit.
+#' @param distribution Parametric distribution for traditional approach.
+#' @param spline_type Type of spline transformation for flexible approach.
+#' @param spline_df Degrees of freedom for spline flexibility (3-4 typical,
+#'   5-6 complex).
+#' @param knot_placement Method for placing spline knots.
+#' @param manual_knots Comma-separated knot positions (when manual placement
+#'   selected).
 #' @param confidence_level Confidence level for parameter estimates and
 #'   survival curves.
+#' @param grouping_variable Optional grouping variable for stratified
+#'   analysis.
+#' @param model_comparison Compare multiple models and select best based on
+#'   AIC/BIC.
+#' @param time_varying_effects Allow covariate effects to vary over time
+#'   (spline models only).
 #' @param show_parameters Display parameter estimates table.
 #' @param show_aic_bic Display AIC and BIC for model comparison.
 #' @param show_survival_plot Display parametric survival curves.
 #' @param show_hazard_plot Display parametric hazard functions.
+#' @param show_spline_plot Display spline basis functions and knot positions
+#'   (spline models only).
+#' @param show_diagnostics Display residual plots and goodness-of-fit
+#'   diagnostics.
+#' @param show_clinical_summary Display clinical interpretation and copy-ready
+#'   report.
 #' @param show_density_plot Display parametric density functions.
 #' @param plot_time_max Maximum time for plots (0 = automatic).
 #' @param showSummaries Generate natural language summaries.
@@ -307,11 +532,17 @@ flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$parametersTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$splineDetails} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fitStatistics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$hazardPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$densityPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$splinePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticsPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -329,12 +560,23 @@ flexparametric <- function(
     outcome,
     covariates,
     outcomeLevel = "1",
+    model_approach = "automatic",
     distribution = "gengamma",
+    spline_type = "hazard",
+    spline_df = 4,
+    knot_placement = "quantiles",
+    manual_knots = "",
     confidence_level = 0.95,
+    grouping_variable,
+    model_comparison = TRUE,
+    time_varying_effects = FALSE,
     show_parameters = TRUE,
     show_aic_bic = TRUE,
     show_survival_plot = TRUE,
     show_hazard_plot = FALSE,
+    show_spline_plot = FALSE,
+    show_diagnostics = TRUE,
+    show_clinical_summary = TRUE,
     show_density_plot = FALSE,
     plot_time_max = 0,
     showSummaries = FALSE,
@@ -346,25 +588,39 @@ flexparametric <- function(
     if ( ! missing(elapsedtime)) elapsedtime <- jmvcore::resolveQuo(jmvcore::enquo(elapsedtime))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
+    if ( ! missing(grouping_variable)) grouping_variable <- jmvcore::resolveQuo(jmvcore::enquo(grouping_variable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(elapsedtime), elapsedtime, NULL),
             `if`( ! missing(outcome), outcome, NULL),
-            `if`( ! missing(covariates), covariates, NULL))
+            `if`( ! missing(covariates), covariates, NULL),
+            `if`( ! missing(grouping_variable), grouping_variable, NULL))
 
+    for (v in grouping_variable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- flexparametricOptions$new(
         elapsedtime = elapsedtime,
         outcome = outcome,
         covariates = covariates,
         outcomeLevel = outcomeLevel,
+        model_approach = model_approach,
         distribution = distribution,
+        spline_type = spline_type,
+        spline_df = spline_df,
+        knot_placement = knot_placement,
+        manual_knots = manual_knots,
         confidence_level = confidence_level,
+        grouping_variable = grouping_variable,
+        model_comparison = model_comparison,
+        time_varying_effects = time_varying_effects,
         show_parameters = show_parameters,
         show_aic_bic = show_aic_bic,
         show_survival_plot = show_survival_plot,
         show_hazard_plot = show_hazard_plot,
+        show_spline_plot = show_spline_plot,
+        show_diagnostics = show_diagnostics,
+        show_clinical_summary = show_clinical_summary,
         show_density_plot = show_density_plot,
         plot_time_max = plot_time_max,
         showSummaries = showSummaries,
