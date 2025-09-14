@@ -1,5 +1,5 @@
 title: Study Flowchart
-name: flowchart
+name: jflowchart
 jus: '3.0'
 stage: 0
 compilerMode: tame
@@ -77,7 +77,7 @@ children:
             name: render_engine
             label: "Engine"
           - type: Label
-            label: "💡 DiagrammeR=Classic | ggplot2=Modern | Clinical Flow=CONSORT"
+            label: "💡 DiagrammeR=Classic | ggplot2=Modern"
             margin: small
           - type: ComboBox
             name: direction
@@ -184,3 +184,84 @@ children:
             name: nodeSpreadFactor
             label: "Spread factor"
             format: number
+
+  - type: CollapseBox
+    label: "🎨 ggflowchart Options (ggplot2 Mode)"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Text & Typography"
+            children:
+              - type: TextBox
+                name: gg_text_size
+                label: "Text size"
+                format: number
+              - type: TextBox
+                name: gg_text_colour
+                label: "Text color"
+                format: string
+              - type: ComboBox
+                name: gg_font_family
+                label: "Font family"
+          - type: Label
+            label: "Node Appearance"
+            children:
+              - type: TextBox
+                name: gg_node_fill
+                label: "Node fill color"
+                format: string
+              - type: TextBox
+                name: gg_node_colour
+                label: "Node border color"
+                format: string
+              - type: TextBox
+                name: gg_linewidth
+                label: "Node border width"
+                format: number
+              - type: TextBox
+                name: gg_alpha
+                label: "Node transparency"
+                format: number
+              - type: TextBox
+                name: gg_x_nudge
+                label: "Node width"
+                format: number
+              - type: TextBox
+                name: gg_y_nudge
+                label: "Node height"
+                format: number
+          - type: Label
+            label: "Arrows & Layout"
+            children:
+              - type: TextBox
+                name: gg_arrow_colour
+                label: "Arrow color"
+                format: string
+              - type: TextBox
+                name: gg_arrow_size
+                label: "Arrow size"
+                format: number
+              - type: ComboBox
+                name: gg_arrow_linetype
+                label: "Arrow line type"
+              - type: TextBox
+                name: gg_arrow_linewidth
+                label: "Arrow line width"
+                format: number
+              - type: TextBox
+                name: gg_arrow_label_fill
+                label: "Arrow label fill"
+                format: string
+              - type: CheckBox
+                name: gg_parse
+                label: "Parse math expressions"
+              - type: ComboBox
+                name: gg_layout_algorithm
+                label: "Layout algorithm"
+              - type: CheckBox
+                name: gg_horizontal
+                label: "Horizontal layout"
+

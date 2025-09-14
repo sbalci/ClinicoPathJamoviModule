@@ -84,16 +84,11 @@ move documantation files under vignettes folder.
 
 - flowchart - Study Flowchart
 
-/check-function flowchart
-
-check upstream flowchart and ggflowchart packages to get the relevant features, applicable arguments, and outputs. 
-
-/review-function flowchart
-/fix-function flowchart
+/fix-function jflowchart
 
 
 - consort - CONSORT Flowchart
-/check-function consort
+/check-function jconsort
 
 read this documentation and improve implementation:
 https://cran.r-project.org/web/packages/consort/vignettes/consort_diagram.html
@@ -111,10 +106,10 @@ https://tgerke.github.io/ggconsort/
 
 
 
-/review-function consort
-/fix-function consort
+/review-function jconsort
+/fix-function jconsort
 
-prepare a realistic data to test consort
+prepare a realistic data to test jconsort
 
 
 ***

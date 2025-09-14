@@ -1,5 +1,5 @@
 ---
-name: consort
+name: jconsort
 title: CONSORT Flowchart
 menuGroup: OncoPathologyT2
 menuSubgroup: Study Design
@@ -311,4 +311,155 @@ options:
       default: html
       description:
           R: Available export formats for the flowchart
+
+    # Flowchart Package Features
+    - name: fc_show_exclusions
+      title: Show Exclusions (flowchart pkg)
+      type: Bool
+      default: true
+      description:
+          R: Show exclusion counts in flowchart package mode
+
+    - name: fc_round_digits
+      title: Round Digits (flowchart pkg)
+      type: Number
+      min: 0
+      max: 5
+      default: 1
+      description:
+          R: Number of decimal places for percentages
+
+    - name: fc_show_zero
+      title: Show Zero Groups (flowchart pkg)
+      type: Bool
+      default: true
+      description:
+          R: Whether to show groups with zero participants
+
+    - name: fc_perc_total
+      title: Percentage Based on Total (flowchart pkg)
+      type: Bool
+      default: false
+      description:
+          R: Calculate percentages with respect to total number of rows instead of group
+
+    - name: fc_title
+      title: Flowchart Title (flowchart pkg)
+      type: String
+      default: "CONSORT Flow Diagram"
+      description:
+          R: Title to display on flowchart when using flowchart package
+
+    - name: fc_filter_condition
+      title: Filter Condition (flowchart pkg)
+      type: String
+      default: ""
+      description:
+          R: R expression for filtering data (e.g., 'age > 65')
+
+    - name: fc_split_variable
+      title: Split Variable (flowchart pkg)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: Variable to split flowchart by in flowchart package mode
+
+    - name: fc_offset
+      title: Box Spacing (flowchart pkg)
+      type: Number
+      min: 0
+      max: 5
+      default: 1
+      description:
+          R: Spacing between boxes in flowchart
+
+    - name: fc_offset_exc
+      title: Exclusion Box Spacing (flowchart pkg)
+      type: Number
+      min: 0
+      max: 5
+      default: 1
+      description:
+          R: Spacing for exclusion boxes in flowchart
+
+    - name: fc_export_format
+      title: Export Format (flowchart pkg)
+      type: List
+      options:
+        - title: PNG
+          name: png
+        - title: PDF
+          name: pdf
+        - title: SVG
+          name: svg
+        - title: JPEG
+          name: jpeg
+      default: png
+      description:
+          R: Export format for flowchart package diagrams
+
+    - name: fc_export_width
+      title: Export Width (flowchart pkg)
+      type: Number
+      min: 100
+      max: 5000
+      default: 800
+      description:
+          R: Width for exported flowchart in pixels
+
+    - name: fc_export_height
+      title: Export Height (flowchart pkg)
+      type: Number
+      min: 100
+      max: 5000
+      default: 600
+      description:
+          R: Height for exported flowchart in pixels
+
+    # Font Customization Features
+    - name: fc_text_fface
+      title: Font Face (flowchart pkg)
+      type: List
+      options:
+        - title: Plain
+          name: plain
+        - title: Bold
+          name: bold
+        - title: Italic
+          name: italic
+        - title: Bold Italic
+          name: bold.italic
+      default: plain
+      description:
+          R: Font face for text in flowchart boxes
+
+    - name: fc_text_ffamily
+      title: Font Family (flowchart pkg)
+      type: List
+      options:
+        - title: Sans Serif (Default)
+          name: sans
+        - title: Serif
+          name: serif
+        - title: Mono
+          name: mono
+        - title: Arial
+          name: Arial
+        - title: Times
+          name: Times
+        - title: Courier
+          name: Courier
+      default: sans
+      description:
+          R: Font family for text in flowchart boxes
+
+    - name: fc_text_padding
+      title: Text Padding (flowchart pkg)
+      type: Number
+      min: 1
+      max: 20
+      default: 5
+      description:
+          R: Padding around text inside flowchart boxes
 ...

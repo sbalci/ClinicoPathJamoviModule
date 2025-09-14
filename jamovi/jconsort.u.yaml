@@ -1,5 +1,5 @@
 title: CONSORT Flowchart
-name: consort
+name: jconsort
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -209,3 +209,89 @@ children:
     children:
       - type: ComboBox
         name: export_format
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: fc_show_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_round_digits
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: fc_show_zero
+      - type: CheckBox
+        name: fc_perc_total
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_title
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_filter_condition
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Split Variable (flowchart pkg)
+        children:
+          - type: VariablesListBox
+            name: fc_split_variable
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_offset
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_offset_exc
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: fc_export_format
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_export_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_export_height
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: fc_text_fface
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: fc_text_ffamily
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fc_text_padding
+        format: number

@@ -117,7 +117,7 @@ patient_journey_flow <- data.frame(
 )
 
 # Create a comprehensive dataset with multiple flow types
-flowchart_comprehensive_data <- rbind(
+jflowchart_comprehensive_data <- rbind(
   data.frame(
     flow_type = "Clinical Trial",
     step1 = "Assessed for Eligibility", count1 = 1500,
@@ -158,7 +158,7 @@ save(lab_workflow_flow, file = "data/lab_workflow_flow.rda")
 save(minimal_flow, file = "data/minimal_flow.rda")
 save(research_pipeline_flow, file = "data/research_pipeline_flow.rda")
 save(patient_journey_flow, file = "data/patient_journey_flow.rda")
-save(flowchart_comprehensive_data, file = "data/flowchart_comprehensive_data.rda")
+save(jflowchart_comprehensive_data, file = "data/jflowchart_comprehensive_data.rda")
 
 # Display summary
 cat("=== FLOWCHART TEST DATA CREATED ===\n\n")
@@ -180,7 +180,7 @@ print(minimal_flow)
 cat("\n")
 
 cat("5. Comprehensive Dataset Summary:\n")
-print(flowchart_comprehensive_data)
+print(jflowchart_comprehensive_data)
 
 cat("\n=== DATASETS SAVED SUCCESSFULLY ===\n")
 cat("Use these datasets to test the flowchart function with various configurations:\n")
@@ -194,4 +194,4 @@ cat("- lab_workflow_flow: Laboratory process workflow\n")
 cat("- minimal_flow: Minimal 2-step flow for edge case testing\n")
 cat("- research_pipeline_flow: 9-step research pipeline\n")
 cat("- patient_journey_flow: Real-world patient journey\n")
-cat("- flowchart_comprehensive_data: Combined dataset for multiple flow types\n")
+cat("- jflowchart_comprehensive_data: Combined dataset for multiple flow types\n")

@@ -733,7 +733,7 @@ analyses:
     ribbon: analyses
     category: analyses
   - title: CONSORT Flowchart
-    name: consort
+    name: jconsort
     ns: ClinicoPath
     menuGroup: OncoPathologyT2
     menuSubgroup: Study Design
@@ -741,7 +741,7 @@ analyses:
     ribbon: analyses
     category: analyses
   - title: Study Flowchart
-    name: flowchart
+    name: jflowchart
     ns: ClinicoPath
     menuGroup: OncoPathologyT
     menuSubgroup: Study Design

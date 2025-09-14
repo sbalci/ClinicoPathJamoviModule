@@ -477,7 +477,7 @@ The ggflowchart function integrates seamlessly with jamovi:
 ## Data Preparation for jamovi
 
 ```{r jamovi-data-prep, eval=FALSE}
-# Example of preparing data for jamovi ggflowchart
+# Example of preparing data for jamovi jflowchart ggflowchart mode
 jamovi_workflow_data <- data.frame(
   process_from = c("Data Import", "Data Cleaning", "Analysis", "Reporting"),
   process_to = c("Data Cleaning", "Analysis", "Reporting", "Publication"),
@@ -486,7 +486,7 @@ jamovi_workflow_data <- data.frame(
 )
 
 knitr::kable(jamovi_workflow_data,
-             caption = "Data Structure Ready for jamovi ggFlowchart")
+             caption = "Data Structure Ready for jamovi jFlowchart ggplot2 mode")
 ```
 
 # Comparison with Other Flowchart Methods
