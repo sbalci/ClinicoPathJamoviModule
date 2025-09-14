@@ -1,13 +1,13 @@
 ---
 name: flowchart
 title: Study Flowchart 
-menuGroup: OncoPathologyT2
-menuSubgroup: ClinicoPath Reports
-version: '1.0.0'
+menuGroup: OncoPathologyT
+menuSubgroup: Study Design
+version: '2.0.0'
 jas: '1.2'
 
 description:
-    main: Creates CONSORT-style flowcharts showing participant flow through studies
+    main: Creates professional flowcharts for research workflows using DiagrammeR or ggplot2
 
 options:
     - name: data
@@ -15,13 +15,29 @@ options:
       description:
           R: The data as a data frame.
 
+    # Data Input Mode Options
+    - name: input_mode
+      title: Data Input Mode
+      type: List
+      options:
+        - title: Node-Count (Traditional)
+          name: node_count
+        - title: Edge-List (From-To)
+          name: edge_list
+      default: node_count
+      description:
+          R: >
+            Choose data structure: Node-Count for sequential flowcharts with counts, 
+            Edge-List for network-style process connections (use CONSORT function for clinical trial diagrams)
+
+    # Node-Count Mode Variables
     - name: nodes
       title: Node Data
       type: Variables
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
-          R: Variables containing node descriptions/labels
+          R: Variables containing node descriptions/labels (for Node-Count mode)
 
     - name: counts 
       title: Node Counts
@@ -29,7 +45,50 @@ options:
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:
-          R: Variables containing counts for each node
+          R: Variables containing counts for each node (for Node-Count mode)
+    
+    # Edge-List Mode Variables
+    - name: from_var
+      title: From Node
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: Variable defining starting nodes (for Edge-List mode)
+    
+    - name: to_var
+      title: To Node
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: Variable defining ending nodes (for Edge-List mode)
+    
+    - name: group_var
+      title: Node Grouping (Optional)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: Optional variable for grouping nodes by categories
+    
+    
+    # Rendering Engine Options
+    - name: render_engine
+      title: Rendering Engine
+      type: List
+      options:
+        - title: DiagrammeR (Traditional)
+          name: diagrammer
+        - title: ggplot2 (Modern)
+          name: ggplot2
+        - title: Clinical Flow (flowchart package)
+          name: flowchart_pkg
+      default: diagrammer
+      description:
+          R: >
+            Choose rendering engine: DiagrammeR for traditional flowcharts, 
+            ggplot2 for modern aesthetics, Clinical Flow for participant flow diagrams
           
     - name: direction
       title: Direction
@@ -41,7 +100,7 @@ options:
           name: LR
       default: TB
       description:
-          R: Direction of flowchart flow
+          R: Direction of flowchart flow (DiagrammeR mode)
 
     - name: nodeWidth
       title: Node Width
@@ -80,20 +139,241 @@ options:
           R: >
             Show exclusion counts on edge labels
 
+    # Color and Styling Options (Combined from both functions)
     - name: nodeColor
       title: Node Color Scheme
       type: List
       options:
-        - title: Blue (Clinical)
+        - title: Clinical Blue
           name: blue
-        - title: Gray (Professional)
+        - title: Professional Gray
           name: gray
-        - title: Green (Success)
+        - title: Success Green
           name: green
+        - title: Modern Viridis
+          name: viridis
+        - title: Colorbrewer Set1
+          name: set1
+        - title: Pastel
+          name: pastel
+        - title: Gradient Blues
+          name: gradient_blue
+        - title: Clinical Warm
+          name: clinical_warm
       default: blue
       description:
           R: >
-            Color scheme for nodes
+            Color scheme for nodes (works with both rendering engines)
+
+    - name: enhancedStyling
+      title: Enhanced ggplot2 Styling
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply enhanced modern styling for ggplot2 rendering mode
+            
+    - name: showCounts
+      title: Show Counts in ggplot2 Mode
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include count information in node labels for ggplot2 rendering
+
+    - name: arrowColor
+      title: Arrow Color (ggplot2)
+      type: List
+      options:
+        - title: Dark Gray
+          name: darkgray
+        - title: Black
+          name: black
+        - title: Clinical Blue
+          name: clinical_blue
+        - title: Match Nodes
+          name: match_nodes
+      default: darkgray
+      description:
+          R: >
+            Color scheme for arrows in ggplot2 mode
+
+    - name: fontFamily
+      title: Font Family (ggplot2)
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Arial
+          name: Arial
+        - title: Times
+          name: Times
+        - title: Courier
+          name: Courier
+        - title: Helvetica
+          name: Helvetica
+      default: default
+      description:
+          R: >
+            Font family for node text in ggplot2 mode
+
+    - name: nodeSpacing
+      title: Node Spacing (ggplot2)
+      type: Number
+      min: 0.5
+      max: 3.0
+      default: 1.0
+      description:
+          R: >
+            Horizontal spacing adjustment for nodes in ggplot2 mode
+
+    - name: nodeTyping
+      title: Enable Node Typing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable automatic node type detection and styling for decision trees
+
+    - name: nodeAlpha
+      title: Node Transparency
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 1.0
+      description:
+          R: >
+            Transparency level for nodes in ggplot2 mode (1.0 = opaque)
+
+    - name: decisionNodeColor
+      title: Decision Node Color
+      type: List
+      options:
+        - title: Clinical Red
+          name: clinical_red
+        - title: Warning Orange
+          name: warning_orange
+        - title: Decision Blue
+          name: decision_blue
+        - title: Same as Primary
+          name: same_primary
+      default: clinical_red
+      description:
+          R: >
+            Special color scheme for decision/question nodes
+
+    - name: outcomeNodeColor
+      title: Outcome Node Color
+      type: List
+      options:
+        - title: Success Green
+          name: success_green
+        - title: Neutral Gray
+          name: neutral_gray
+        - title: Result Blue
+          name: result_blue
+        - title: Same as Primary
+          name: same_primary
+      default: success_green
+      description:
+          R: >
+            Special color scheme for outcome/result nodes
+
+    - name: customNodeSizing
+      title: Enable Custom Node Sizing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable automatic node sizing based on content length or data values
+
+    - name: nodeTextSize
+      title: Node Text Size Scaling
+      type: List
+      options:
+        - title: Fixed Size
+          name: fixed
+        - title: Scale by Content
+          name: content
+        - title: Scale by Value
+          name: value
+      default: fixed
+      description:
+          R: >
+            How to scale text size within nodes
+
+    - name: advancedPositioning
+      title: Advanced Node Positioning
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable fine-tuned node positioning with nudging capabilities
+
+    - name: ggplotIntegration
+      title: Full ggplot2 Integration
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use complete ggplot2 theming and scale integration
+
+    - name: layoutAlgorithm
+      title: Layout Algorithm (ggplot2)
+      type: List
+      options:
+        - title: Tree (Default)
+          name: tree
+        - title: Nicely
+          name: nicely
+        - title: Star
+          name: star
+        - title: Circle
+          name: circle
+        - title: Custom
+          name: custom
+      default: tree
+      description:
+          R: >
+            Layout algorithm for node positioning in ggplot2 mode
+
+    - name: layoutOrientation
+      title: Layout Orientation (ggplot2)
+      type: List
+      options:
+        - title: Vertical (Top-Down)
+          name: vertical
+        - title: Horizontal (Left-Right)
+          name: horizontal
+      default: vertical
+      description:
+          R: >
+            Primary orientation for flowchart layout
+
+    - name: intelligentLayout
+      title: Intelligent Layout Selection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatically choose optimal layout based on flowchart structure
+
+    - name: nodeSpreadFactor
+      title: Node Spread Factor
+      type: Number
+      min: 0.5
+      max: 2.5
+      default: 1.0
+      description:
+          R: >
+            Controls overall spacing between nodes (1.0 = standard spacing)
+    
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: "Study Flowchart"
+      description:
+          R: Title for the flowchart
 
     - name: includeTitle
       title: Include Title
@@ -102,3 +382,13 @@ options:
       description:
           R: >
             Include automatic title with flow statistics
+    
+    - name: show_interpretation
+      title: Show Interpretation Guide
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show interpretation and usage guide
+
+...

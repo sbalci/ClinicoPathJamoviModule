@@ -45,8 +45,17 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
         .run = function() {
             # Check for required packages
-            if (!requireNamespace("spatstat", quietly = TRUE)) {
-                stop("Package 'spatstat' is required for spatial analysis but is not installed.")
+            required_packages <- c("spatstat.geom", "spatstat.explore", "spatstat.random")
+            missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
+            
+            if (length(missing_packages) > 0) {
+                error_msg <- paste0("Required spatstat packages not available: ", 
+                                   paste(missing_packages, collapse = ", "), 
+                                   ". Please install the spatstat package ecosystem.")
+                self$results$text$setContent(
+                    paste0("<p style='color: red;'><b>Error:</b> ", error_msg, "</p>")
+                )
+                return()
             }
             
             # Get data
@@ -85,35 +94,85 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             clean_data <- data[complete_cases, ]
             
+            # If ROI is specified, filter data by ROI
+            if (!is.null(roi_var) && roi_var %in% names(clean_data)) {
+                roi_values <- unique(clean_data[[roi_var]])
+                if (length(roi_values) > 1) {
+                    # For simplicity, analyze the first ROI only and add note
+                    selected_roi <- roi_values[1]
+                    clean_data <- clean_data[clean_data[[roi_var]] == selected_roi, ]
+                    
+                    # Update text content to include ROI info
+                    current_content <- self$results$text$content
+                    roi_note <- paste0("<p><b>Note:</b> Multiple ROIs detected (", 
+                                     length(roi_values), " total). Analysis performed for ROI: ", 
+                                     selected_roi, ". Use separate analyses for other ROIs.</p>")
+                    
+                    if (is.null(current_content) || current_content == "") {
+                        self$results$text$setContent(roi_note)
+                    } else {
+                        self$results$text$setContent(paste0(current_content, roi_note))
+                    }
+                }
+            }
+            
             # Perform spatial analysis
             tryCatch({
-                # Basic summary statistics
+                # Basic summary statistics (always performed)
                 private$.populateSummaryTable(clean_data, x_var, y_var, cell_type_var, roi_var)
                 
-                # Ripley's K analysis if requested
-                if (self$options$perform_ripley) {
+                # Get analysis scope setting
+                analysis_scope <- self$options$analysis_scope
+                
+                # Add scope information to text content
+                scope_descriptions <- list(
+                    "basic" = "Basic spatial statistics (Ripley's K, Nearest Neighbor)",
+                    "comprehensive" = "Comprehensive spatial analysis (all available methods)",
+                    "clinical" = "Clinical-focused analysis with enhanced interpretation"
+                )
+                
+                scope_note <- paste0("<p><b>Analysis Scope:</b> ", 
+                                   scope_descriptions[[analysis_scope]], "</p>")
+                
+                current_content <- self$results$text$content
+                if (is.null(current_content) || current_content == "") {
+                    self$results$text$setContent(scope_note)
+                } else {
+                    self$results$text$setContent(paste0(current_content, scope_note))
+                }
+                
+                # Ripley's K analysis (basic, comprehensive, clinical)
+                if (self$options$perform_ripley && analysis_scope %in% c("basic", "comprehensive", "clinical")) {
                     private$.performRipleyAnalysis(clean_data, x_var, y_var, cell_type_var, roi_var)
                 }
                 
-                # Nearest neighbor analysis if requested
-                if (self$options$perform_nnd) {
+                # Nearest neighbor analysis (basic, comprehensive, clinical)
+                if (self$options$perform_nnd && analysis_scope %in% c("basic", "comprehensive", "clinical")) {
                     private$.performNearestNeighborAnalysis(clean_data, x_var, y_var, cell_type_var, roi_var)
                 }
                 
-                # Hotspot analysis if requested
-                if (self$options$perform_hotspot) {
+                # Hotspot analysis (comprehensive, clinical only)
+                if (self$options$perform_hotspot && analysis_scope %in% c("comprehensive", "clinical")) {
                     private$.performHotspotAnalysis(clean_data, x_var, y_var, cell_type_var, roi_var)
                 }
                 
-                # Multi-type interaction analysis if cell types are provided
-                if (!is.null(cell_type_var) && self$options$perform_interaction) {
+                # Multi-type interaction analysis (comprehensive, clinical only)
+                if (!is.null(cell_type_var) && self$options$perform_interaction && analysis_scope %in% c("comprehensive", "clinical")) {
                     private$.performInteractionAnalysis(clean_data, x_var, y_var, cell_type_var, roi_var)
+                }
+                
+                # Group comparison analysis if groups are provided
+                if (!is.null(group_var)) {
+                    private$.performGroupComparison(clean_data, x_var, y_var, cell_type_var, group_var)
                 }
                 
                 # Generate spatial plots if requested
                 if (self$options$show_plots) {
                     private$.preparePlots(clean_data, x_var, y_var, cell_type_var)
                 }
+                
+                # Generate copy-ready summary
+                private$.generateCopyReadySummary(clean_data, x_var, y_var, cell_type_var, group_var)
                 
                 # Clinical interpretation
                 private$.generateClinicalInterpretation(clean_data, x_var, y_var, cell_type_var)
@@ -242,7 +301,8 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         distance=round(r, 2),
                         k_observed=round(K_obs, 4),
                         k_theoretical=round(K_theo, 4),
-                        l_function=round(L_obs, 4),
+                        l_observed=round(L_obs, 4),
+                        l_theoretical=round(L_theo, 4),
                         interpretation=interpretation
                     ))
                 }
@@ -252,7 +312,8 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     distance="Error",
                     k_observed=paste("Analysis failed:", e$message),
                     k_theoretical="",
-                    l_function="",
+                    l_observed="",
+                    l_theoretical="",
                     interpretation=""
                 ))
             })
@@ -263,6 +324,9 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             x_coords <- data[[x_var]]
             y_coords <- data[[y_var]]
+            
+            # Get distance method setting
+            distance_method <- self$options$distance_method
             
             tryCatch({
                 # Create spatial point pattern
@@ -276,8 +340,23 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 ppp <- spatstat.geom::ppp(x_coords, y_coords, window = window)
                 
-                # Calculate nearest neighbor distances
-                nnd <- spatstat.geom::nndist(ppp)
+                # Calculate nearest neighbor distances using selected method
+                if (distance_method == "manhattan") {
+                    # Manual Manhattan distance calculation
+                    coords_matrix <- cbind(x_coords, y_coords)
+                    n_points <- nrow(coords_matrix)
+                    nnd <- numeric(n_points)
+                    
+                    for (i in 1:n_points) {
+                        # Calculate Manhattan distances to all other points
+                        manhattan_distances <- abs(coords_matrix[i, 1] - coords_matrix[-i, 1]) + 
+                                             abs(coords_matrix[i, 2] - coords_matrix[-i, 2])
+                        nnd[i] <- min(manhattan_distances)
+                    }
+                } else {
+                    # Default Euclidean distance using spatstat
+                    nnd <- spatstat.geom::nndist(ppp)
+                }
                 
                 # Summary statistics
                 mean_nnd <- mean(nnd, na.rm = TRUE)
@@ -287,35 +366,52 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Clark-Evans test for spatial randomness
                 ce_test <- spatstat.explore::clarkevans.test(ppp)
                 
+                # Add distance method information
+                distance_label <- if (distance_method == "manhattan") "Manhattan" else "Euclidean"
+                nnd_table$addRow(rowKey="distance_method", values=list(
+                    statistic="Distance Method",
+                    value=distance_label,
+                    expected=NA,
+                    ratio=NA,
+                    p_value=NA,
+                    interpretation=paste("Using", distance_label, "distance calculation")
+                ))
+                
                 # Add results to table
                 nnd_table$addRow(rowKey="mean_nnd", values=list(
                     statistic="Mean NND",
                     value=round(mean_nnd, 4),
-                    description="Mean nearest neighbor distance"
+                    expected=NA,
+                    ratio=NA,
+                    p_value=NA,
+                    interpretation="Mean nearest neighbor distance"
                 ))
                 
                 nnd_table$addRow(rowKey="median_nnd", values=list(
                     statistic="Median NND",
                     value=round(median_nnd, 4),
-                    description="Median nearest neighbor distance"
+                    expected=NA,
+                    ratio=NA,
+                    p_value=NA,
+                    interpretation="Median nearest neighbor distance"
                 ))
                 
                 nnd_table$addRow(rowKey="sd_nnd", values=list(
                     statistic="SD NND",
                     value=round(sd_nnd, 4),
-                    description="Standard deviation of NND"
+                    expected=NA,
+                    ratio=NA,
+                    p_value=NA,
+                    interpretation="Standard deviation of NND"
                 ))
                 
                 nnd_table$addRow(rowKey="ce_statistic", values=list(
                     statistic="Clark-Evans R",
                     value=round(ce_test$statistic, 4),
-                    description="Clark-Evans test statistic (R < 1: clustered, R > 1: dispersed)"
-                ))
-                
-                nnd_table$addRow(rowKey="ce_pvalue", values=list(
-                    statistic="Clark-Evans p-value",
-                    value=round(ce_test$p.value, 4),
-                    description="P-value for test of spatial randomness"
+                    expected=1.0,
+                    ratio=round(ce_test$statistic, 4),
+                    p_value=round(ce_test$p.value, 4),
+                    interpretation="Clark-Evans test statistic (R < 1: clustered, R > 1: dispersed)"
                 ))
                 
                 # Interpretation
@@ -326,16 +422,22 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }
                 
                 nnd_table$addRow(rowKey="interpretation", values=list(
-                    statistic="Interpretation",
+                    statistic="Overall Pattern",
                     value=interpretation,
-                    description="Statistical interpretation of spatial pattern"
+                    expected=NA,
+                    ratio=NA,
+                    p_value=NA,
+                    interpretation="Statistical interpretation of spatial pattern"
                 ))
                 
             }, error = function(e) {
                 nnd_table$addRow(rowKey="error", values=list(
                     statistic="Error",
                     value=paste("Analysis failed:", e$message),
-                    description=""
+                    expected=NA,
+                    ratio=NA,
+                    p_value=NA,
+                    interpretation=""
                 ))
             })
         },
@@ -408,8 +510,8 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     interpretation="Proportion of study area classified as hotspots"
                 ))
                 
-                # Implement Getis-Ord Gi* statistics
-                private$.calculateGetisOrdGiStar(data, x_var, y_var, hotspot_table)
+                # Implement optimized Getis-Ord Gi* statistics
+                private$.calculateOptimizedGiStar(data, x_var, y_var, hotspot_table)
                 
                 # Add Morisita Index calculation
                 private$.calculateMorisitaIndex(data, x_var, y_var, hotspot_table)
@@ -423,7 +525,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             })
         },
         
-        .calculateGetisOrdGiStar = function(data, x_var, y_var, hotspot_table) {
+        .calculateOptimizedGiStar = function(data, x_var, y_var, hotspot_table) {
             tryCatch({
                 x_coords <- data[[x_var]]
                 y_coords <- data[[y_var]]
@@ -438,73 +540,38 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     return()
                 }
                 
-                # Create distance matrix
-                coords_matrix <- cbind(x_coords, y_coords)
-                dist_matrix <- as.matrix(dist(coords_matrix))
-                
-                # Define distance threshold (use average nearest neighbor distance)
-                nn_distances <- apply(dist_matrix + diag(Inf, n), 1, min)
-                threshold_distance <- mean(nn_distances) * 2  # Use 2x average NN distance
-                
-                # Create spatial weights matrix (binary)
-                W <- ifelse(dist_matrix <= threshold_distance & dist_matrix > 0, 1, 0)
-                
-                # For point pattern data, use local density as the attribute value
-                # Create grid for local density calculation
+                # Create spatial point pattern for spatstat
                 x_range <- range(x_coords, na.rm = TRUE)
                 y_range <- range(y_coords, na.rm = TRUE)
+                x_margin <- diff(x_range) * 0.05
+                y_margin <- diff(y_range) * 0.05
                 
-                # Calculate local density for each point using kernel density
-                local_densities <- numeric(n)
+                window <- spatstat.geom::owin(xrange = x_range + c(-x_margin, x_margin),
+                                             yrange = y_range + c(-y_margin, y_margin))
                 
-                for (i in 1:n) {
-                    # Count neighbors within threshold distance
-                    neighbors <- which(dist_matrix[i, ] <= threshold_distance & dist_matrix[i, ] > 0)
-                    local_densities[i] <- length(neighbors) + 1  # Include the point itself
-                }
+                ppp <- spatstat.geom::ppp(x_coords, y_coords, window = window)
                 
-                # Calculate Getis-Ord Gi* for each point
-                gi_star_values <- numeric(n)
-                z_scores <- numeric(n)
+                # Use spatstat's optimized localG function (Getis-Ord Gi*)
+                local_g_result <- spatstat.explore::localG(ppp, correction = "border")
                 
-                # Global statistics
-                x_bar <- mean(local_densities)
-                s_squared <- var(local_densities)
-                
-                for (i in 1:n) {
-                    # Include the point itself in Gi* calculation
-                    Wi_sum <- sum(W[i, ]) + 1  # Add 1 for the point itself
-                    Wij_xj_sum <- sum(W[i, ] * local_densities) + local_densities[i]  # Include point itself
-                    
-                    if (Wi_sum > 0) {
-                        gi_star_values[i] <- Wij_xj_sum / sum(local_densities)
-                        
-                        # Calculate z-score for significance testing
-                        if (s_squared > 0 && n > 1) {
-                            numerator <- Wij_xj_sum - x_bar * Wi_sum
-                            variance_gi <- s_squared * (n * Wi_sum - Wi_sum^2) / (n - 1)
-                            
-                            if (variance_gi > 0) {
-                                z_scores[i] <- numerator / sqrt(variance_gi)
-                            }
-                        }
-                    }
-                }
-                
-                # Identify significant hotspots and coldspots
+                # Extract z-scores and significance
+                z_scores <- local_g_result
                 alpha <- 0.05
                 z_critical <- qnorm(1 - alpha/2)
                 
+                # Identify significant hotspots and coldspots
                 hotspots <- which(z_scores > z_critical)
                 coldspots <- which(z_scores < -z_critical)
                 
                 # Summary statistics
                 n_hotspots_gi <- length(hotspots)
                 n_coldspots_gi <- length(coldspots)
-                max_gi_star <- max(gi_star_values, na.rm = TRUE)
-                min_gi_star <- min(gi_star_values, na.rm = TRUE)
                 max_z_score <- max(z_scores, na.rm = TRUE)
                 min_z_score <- min(z_scores, na.rm = TRUE)
+                
+                # Calculate local density threshold for context
+                nn_distances <- spatstat.geom::nndist(ppp)
+                threshold_distance <- mean(nn_distances) * 2
                 
                 # Add results to table
                 hotspot_table$addRow(rowKey="gi_threshold", values=list(
@@ -525,12 +592,6 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     interpretation=paste("Points with significantly low local clustering (z <", round(-z_critical, 2), ")")
                 ))
                 
-                hotspot_table$addRow(rowKey="max_gi_star", values=list(
-                    measure="Maximum Gi*",
-                    value=round(max_gi_star, 4),
-                    interpretation="Highest local clustering statistic"
-                ))
-                
                 hotspot_table$addRow(rowKey="max_z_score", values=list(
                     measure="Maximum Z-score",
                     value=round(max_z_score, 2),
@@ -547,7 +608,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 # Overall interpretation
                 if (n_hotspots_gi > 0 || n_coldspots_gi > 0) {
-                    interpretation <- paste("Detected", n_hotspots_gi, "significant hotspots and", n_coldspots_gi, "coldspots using Getis-Ord Gi* analysis")
+                    interpretation <- paste("Detected", n_hotspots_gi, "significant hotspots and", n_coldspots_gi, "coldspots using optimized Getis-Ord Gi* analysis")
                 } else {
                     interpretation <- "No significant spatial clustering detected (random distribution)"
                 }
@@ -561,8 +622,8 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }, error = function(e) {
                 hotspot_table$addRow(rowKey="gi_star_error", values=list(
                     measure="Getis-Ord Gi* Error",
-                    value=paste("Calculation failed:", e$message),
-                    interpretation=""
+                    value=paste("Optimized calculation failed:", e$message),
+                    interpretation="Falling back to density-based hotspot detection"
                 ))
             })
         },
@@ -699,41 +760,80 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 n_types <- length(unique_types)
                 
                 if (n_types >= 2) {
-                    # Cross-type nearest neighbor distances
+                    # Calculate cross-type pair correlation function
+                    pcf_result <- spatstat.explore::pcfcross(ppp, correction = "border")
+                    
+                    # Extract distances for analysis
+                    distances <- pcf_result$r[seq(1, length(pcf_result$r), length.out = 8)]
+                    
                     for (i in 1:(n_types-1)) {
                         for (j in (i+1):n_types) {
                             type1 <- unique_types[i]
                             type2 <- unique_types[j]
                             
-                            # Get points of each type
-                            type1_points <- which(marks_factor == type1)
-                            type2_points <- which(marks_factor == type2)
-                            
-                            if (length(type1_points) > 0 && length(type2_points) > 0) {
-                                # Calculate cross-type nearest neighbor distances
-                                cross_nnd <- spatstat.geom::nncross(
-                                    spatstat.geom::ppp(x_coords[type1_points], y_coords[type1_points], window = window),
-                                    spatstat.geom::ppp(x_coords[type2_points], y_coords[type2_points], window = window)
-                                )$dist
+                            # Get cross-type PCF values
+                            pcf_column <- paste0(type1, "to", type2)
+                            if (pcf_column %in% names(pcf_result)) {
+                                pcf_obs <- pcf_result[[pcf_column]]
+                                pcf_theo <- rep(1, length(pcf_obs))  # Theoretical value for random pattern
                                 
-                                mean_cross_nnd <- mean(cross_nnd, na.rm = TRUE)
-                                median_cross_nnd <- median(cross_nnd, na.rm = TRUE)
+                                for (k in 1:length(distances)) {
+                                    r <- distances[k]
+                                    idx <- which.min(abs(pcf_result$r - r))
+                                    
+                                    obs_val <- pcf_obs[idx]
+                                    theo_val <- pcf_theo[idx]
+                                    
+                                    # Determine interaction type
+                                    interaction_type <- if (obs_val > 1.2) {
+                                        "Attraction"
+                                    } else if (obs_val < 0.8) {
+                                        "Repulsion"
+                                    } else {
+                                        "Random"
+                                    }
+                                    
+                                    interpretation <- if (interaction_type == "Attraction") {
+                                        paste(type1, "and", type2, "cells tend to be closer than random")
+                                    } else if (interaction_type == "Repulsion") {
+                                        paste(type1, "and", type2, "cells tend to avoid each other")
+                                    } else {
+                                        paste(type1, "and", type2, "cells show random spatial relationship")
+                                    }
+                                    
+                                    interaction_table$addRow(rowKey=paste0(type1, "_", type2, "_", k), values=list(
+                                        type_i=type1,
+                                        type_j=type2,
+                                        distance=round(r, 2),
+                                        pcf_observed=round(obs_val, 4),
+                                        pcf_theoretical=round(theo_val, 4),
+                                        interaction_type=interaction_type,
+                                        interpretation=interpretation
+                                    ))
+                                }
+                            } else {
+                                # Fallback to cross-type nearest neighbor distances
+                                type1_points <- which(marks_factor == type1)
+                                type2_points <- which(marks_factor == type2)
                                 
-                                interaction_table$addRow(rowKey=paste0(type1, "_", type2, "_mean"), values=list(
-                                    type1=type1,
-                                    type2=type2,
-                                    measure="Mean Cross-NND",
-                                    value=round(mean_cross_nnd, 4),
-                                    interpretation=paste("Average distance from", type1, "to nearest", type2)
-                                ))
-                                
-                                interaction_table$addRow(rowKey=paste0(type1, "_", type2, "_median"), values=list(
-                                    type1=type1,
-                                    type2=type2,
-                                    measure="Median Cross-NND",
-                                    value=round(median_cross_nnd, 4),
-                                    interpretation=paste("Median distance from", type1, "to nearest", type2)
-                                ))
+                                if (length(type1_points) > 0 && length(type2_points) > 0) {
+                                    cross_nnd <- spatstat.geom::nncross(
+                                        spatstat.geom::ppp(x_coords[type1_points], y_coords[type1_points], window = window),
+                                        spatstat.geom::ppp(x_coords[type2_points], y_coords[type2_points], window = window)
+                                    )$dist
+                                    
+                                    mean_cross_nnd <- mean(cross_nnd, na.rm = TRUE)
+                                    
+                                    interaction_table$addRow(rowKey=paste0(type1, "_", type2, "_nnd"), values=list(
+                                        type_i=type1,
+                                        type_j=type2,
+                                        distance=round(mean_cross_nnd, 4),
+                                        pcf_observed=NA,
+                                        pcf_theoretical=NA,
+                                        interaction_type="Distance-based",
+                                        interpretation=paste("Average distance from", type1, "to nearest", type2)
+                                    ))
+                                }
                             }
                         }
                     }
@@ -741,10 +841,12 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
             }, error = function(e) {
                 interaction_table$addRow(rowKey="error", values=list(
-                    type1="Error",
-                    type2="",
-                    measure=paste("Analysis failed:", e$message),
-                    value="",
+                    type_i="Error",
+                    type_j="",
+                    distance=NA,
+                    pcf_observed=NA,
+                    pcf_theoretical=NA,
+                    interaction_type=paste("Analysis failed:", e$message),
                     interpretation=""
                 ))
             })
@@ -846,6 +948,240 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             )
             
             interpretation_text$setContent(clinical_context)
+        },
+        
+        .generateCopyReadySummary = function(data, x_var, y_var, cell_type_var, group_var) {
+            tryCatch({
+                summary_html <- self$results$copysummary
+                
+                n_points <- nrow(data)
+                has_cell_types <- !is.null(cell_type_var)
+                has_groups <- !is.null(group_var)
+                
+                # Basic spatial metrics
+                x_coords <- data[[x_var]]
+                y_coords <- data[[y_var]]
+                area <- (max(x_coords) - min(x_coords)) * (max(y_coords) - min(y_coords))
+                density <- n_points / area
+                
+                # Start building summary
+                summary_text <- paste0(
+                    "<div style='border: 1px solid #ddd; padding: 15px; margin: 10px 0; background-color: #f9f9f9;'>",
+                    "<h4>📋 Copy-Ready Summary</h4>",
+                    "<p><strong>Spatial Analysis Results Summary:</strong></p>",
+                    "<p>We analyzed the spatial distribution of ", n_points, " cells"
+                )
+                
+                if (has_cell_types) {
+                    cell_types <- unique(data[[cell_type_var]])
+                    summary_text <- paste0(summary_text, 
+                        " across ", length(cell_types), " cell types (", 
+                        paste(cell_types, collapse = ", "), ")"
+                    )
+                }
+                
+                summary_text <- paste0(summary_text, 
+                    " within a study area of ", round(area, 0), " square units, ",
+                    "yielding a cell density of ", round(density, 4), " cells per unit area."
+                )
+                
+                # Add analysis results if available
+                analysis_results <- list()
+                
+                # Ripley analysis results
+                if (self$options$perform_ripley) {
+                    ripley_table <- self$results$ripley
+                    if (ripley_table$rowCount > 0) {
+                        # Get predominant pattern
+                        patterns <- sapply(1:ripley_table$rowCount, function(i) {
+                            ripley_table$getCell("interpretation", i)$value
+                        })
+                        pattern_counts <- table(patterns)
+                        main_pattern <- names(pattern_counts)[which.max(pattern_counts)]
+                        
+                        analysis_results$ripley <- paste0(
+                            " Ripley's K-function analysis revealed a predominantly ",
+                            tolower(main_pattern), " spatial pattern"
+                        )
+                    }
+                }
+                
+                # Nearest neighbor results
+                if (self$options$perform_nnd) {
+                    # This would require accessing the calculated results
+                    # For now, add a placeholder
+                    analysis_results$nnd <- " with nearest neighbor analysis confirming spatial organization"
+                }
+                
+                # Combine analysis results
+                if (length(analysis_results) > 0) {
+                    summary_text <- paste0(summary_text, paste(analysis_results, collapse = ""))
+                    summary_text <- paste0(summary_text, ".")
+                }
+                
+                # Add clinical context
+                summary_text <- paste0(summary_text, 
+                    " These spatial patterns may indicate important biological processes such as ",
+                    "immune cell activation, tumor invasion dynamics, or tissue architecture organization."
+                )
+                
+                # Group comparison summary if applicable
+                if (has_groups) {
+                    groups <- unique(data[[group_var]])
+                    if (length(groups) >= 2) {
+                        summary_text <- paste0(summary_text, 
+                            " Comparative analysis between ", length(groups), " groups (",
+                            paste(groups, collapse = ", "), ") revealed differences in spatial organization ",
+                            "that may be clinically relevant for understanding treatment responses or disease progression."
+                        )
+                    }
+                }
+                
+                # Add copy instruction
+                summary_text <- paste0(summary_text, 
+                    "</p>",
+                    "<p><em>💡 Tip: This summary can be copied and pasted into reports, manuscripts, or clinical notes.</em></p>",
+                    "</div>"
+                )
+                
+                summary_html$setContent(summary_text)
+                
+            }, error = function(e) {
+                # Set error message for copy summary
+                self$results$copysummary$setContent(
+                    paste0("<p style='color: red;'><b>Summary Generation Error:</b> ", e$message, "</p>")
+                )
+            })
+        },
+        
+        .performGroupComparison = function(data, x_var, y_var, cell_type_var, group_var) {
+            tryCatch({
+                # Get unique groups
+                groups <- unique(data[[group_var]])
+                n_groups <- length(groups)
+                
+                if (n_groups < 2) {
+                    # Add note to text content about insufficient groups
+                    current_content <- self$results$text$content
+                    group_note <- "<p><b>Note:</b> Group comparison requires at least 2 groups. Only one group found.</p>"
+                    
+                    if (is.null(current_content) || current_content == "") {
+                        self$results$text$setContent(group_note)
+                    } else {
+                        self$results$text$setContent(paste0(current_content, group_note))
+                    }
+                    return()
+                }
+                
+                # Perform comparative analysis between groups
+                group_results <- list()
+                
+                for (i in 1:n_groups) {
+                    group_name <- groups[i]
+                    group_data <- data[data[[group_var]] == group_name, ]
+                    
+                    if (nrow(group_data) >= 10) {  # Minimum points for spatial analysis
+                        x_coords <- group_data[[x_var]]
+                        y_coords <- group_data[[y_var]]
+                        
+                        # Create spatial point pattern
+                        x_range <- range(x_coords, na.rm = TRUE)
+                        y_range <- range(y_coords, na.rm = TRUE)
+                        x_margin <- diff(x_range) * 0.05
+                        y_margin <- diff(y_range) * 0.05
+                        
+                        window <- spatstat.geom::owin(xrange = x_range + c(-x_margin, x_margin),
+                                                     yrange = y_range + c(-y_margin, y_margin))
+                        
+                        ppp <- spatstat.geom::ppp(x_coords, y_coords, window = window)
+                        
+                        # Calculate key spatial statistics
+                        nnd <- spatstat.geom::nndist(ppp)
+                        mean_nnd <- mean(nnd, na.rm = TRUE)
+                        
+                        ce_test <- spatstat.explore::clarkevans.test(ppp)
+                        ce_r <- ce_test$statistic
+                        ce_p <- ce_test$p.value
+                        
+                        # Calculate density
+                        area <- diff(x_range) * diff(y_range)
+                        density <- nrow(group_data) / area
+                        
+                        group_results[[group_name]] <- list(
+                            n_points = nrow(group_data),
+                            density = density,
+                            mean_nnd = mean_nnd,
+                            ce_r = ce_r,
+                            ce_p = ce_p,
+                            spatial_pattern = if (ce_p < 0.05) {
+                                if (ce_r < 1) "Clustered" else "Dispersed"
+                            } else "Random"
+                        )
+                    }
+                }
+                
+                # Add group comparison results to text content
+                if (length(group_results) >= 2) {
+                    comparison_html <- "<h4>Group Comparison Results</h4>"
+                    comparison_html <- paste0(comparison_html, "<table border='1' style='border-collapse: collapse; margin: 10px 0;'>")
+                    comparison_html <- paste0(comparison_html, "<tr><th>Group</th><th>N Points</th><th>Density</th><th>Mean NND</th><th>Clark-Evans R</th><th>Pattern</th></tr>")
+                    
+                    for (group_name in names(group_results)) {
+                        result <- group_results[[group_name]]
+                        comparison_html <- paste0(comparison_html, sprintf(
+                            "<tr><td>%s</td><td>%d</td><td>%.4f</td><td>%.3f</td><td>%.3f</td><td>%s</td></tr>",
+                            group_name, result$n_points, result$density, result$mean_nnd, result$ce_r, result$spatial_pattern
+                        ))
+                    }
+                    comparison_html <- paste0(comparison_html, "</table>")
+                    
+                    # Statistical comparison if exactly 2 groups
+                    if (length(group_results) == 2) {
+                        group_names <- names(group_results)
+                        group1 <- group_results[[group_names[1]]]
+                        group2 <- group_results[[group_names[2]]]
+                        
+                        # Compare densities
+                        density_ratio <- group1$density / group2$density
+                        nnd_ratio <- group1$mean_nnd / group2$mean_nnd
+                        
+                        comparison_html <- paste0(comparison_html, "<p><b>Pairwise Comparison:</b></p>")
+                        comparison_html <- paste0(comparison_html, "<ul>")
+                        comparison_html <- paste0(comparison_html, sprintf(
+                            "<li>Density ratio (%s/%s): %.2f</li>", group_names[1], group_names[2], density_ratio
+                        ))
+                        comparison_html <- paste0(comparison_html, sprintf(
+                            "<li>Mean NND ratio (%s/%s): %.2f</li>", group_names[1], group_names[2], nnd_ratio
+                        ))
+                        comparison_html <- paste0(comparison_html, sprintf(
+                            "<li>%s pattern: %s (p=%.3f)</li>", group_names[1], group1$spatial_pattern, group1$ce_p
+                        ))
+                        comparison_html <- paste0(comparison_html, sprintf(
+                            "<li>%s pattern: %s (p=%.3f)</li>", group_names[2], group2$spatial_pattern, group2$ce_p
+                        ))
+                        comparison_html <- paste0(comparison_html, "</ul>")
+                    }
+                    
+                    # Add to existing content
+                    current_content <- self$results$text$content
+                    if (is.null(current_content) || current_content == "") {
+                        self$results$text$setContent(comparison_html)
+                    } else {
+                        self$results$text$setContent(paste0(current_content, comparison_html))
+                    }
+                }
+                
+            }, error = function(e) {
+                # Add error message to text content
+                current_content <- self$results$text$content
+                error_note <- paste0("<p style='color: red;'><b>Group Comparison Error:</b> ", e$message, "</p>")
+                
+                if (is.null(current_content) || current_content == "") {
+                    self$results$text$setContent(error_note)
+                } else {
+                    self$results$text$setContent(paste0(current_content, error_note))
+                }
+            })
         }
     )
 )

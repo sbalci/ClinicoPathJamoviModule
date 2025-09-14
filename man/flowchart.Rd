@@ -6,8 +6,13 @@
 \usage{
 flowchart(
   data,
+  input_mode = "node_count",
   nodes,
   counts,
+  from_var,
+  to_var,
+  group_var,
+  render_engine = "diagrammer",
   direction = "TB",
   nodeWidth = 2.5,
   nodeHeight = 1,
@@ -15,17 +20,52 @@ flowchart(
   showPercentages = TRUE,
   showExclusions = TRUE,
   nodeColor = "blue",
-  includeTitle = TRUE
+  enhancedStyling = TRUE,
+  showCounts = TRUE,
+  arrowColor = "darkgray",
+  fontFamily = "default",
+  nodeSpacing = 1,
+  nodeTyping = FALSE,
+  nodeAlpha = 1,
+  decisionNodeColor = "clinical_red",
+  outcomeNodeColor = "success_green",
+  customNodeSizing = FALSE,
+  nodeTextSize = "fixed",
+  advancedPositioning = FALSE,
+  ggplotIntegration = TRUE,
+  layoutAlgorithm = "tree",
+  layoutOrientation = "vertical",
+  intelligentLayout = TRUE,
+  nodeSpreadFactor = 1,
+  plot_title = "Study Flowchart",
+  includeTitle = TRUE,
+  show_interpretation = TRUE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{nodes}{Variables containing node descriptions/labels}
+\item{input_mode}{Choose data structure: Node-Count for sequential
+flowcharts with counts,  Edge-List for network-style process connections
+(use CONSORT function for clinical trial diagrams)}
 
-\item{counts}{Variables containing counts for each node}
+\item{nodes}{Variables containing node descriptions/labels (for Node-Count
+mode)}
 
-\item{direction}{Direction of flowchart flow}
+\item{counts}{Variables containing counts for each node (for Node-Count
+mode)}
+
+\item{from_var}{Variable defining starting nodes (for Edge-List mode)}
+
+\item{to_var}{Variable defining ending nodes (for Edge-List mode)}
+
+\item{group_var}{Optional variable for grouping nodes by categories}
+
+\item{render_engine}{Choose rendering engine: DiagrammeR for traditional
+flowcharts,  ggplot2 for modern aesthetics, Clinical Flow for participant
+flow diagrams}
+
+\item{direction}{Direction of flowchart flow (DiagrammeR mode)}
 
 \item{nodeWidth}{.}
 
@@ -37,16 +77,64 @@ flowchart(
 
 \item{showExclusions}{Show exclusion counts on edge labels}
 
-\item{nodeColor}{Color scheme for nodes}
+\item{nodeColor}{Color scheme for nodes (works with both rendering engines)}
+
+\item{enhancedStyling}{Apply enhanced modern styling for ggplot2 rendering
+mode}
+
+\item{showCounts}{Include count information in node labels for ggplot2
+rendering}
+
+\item{arrowColor}{Color scheme for arrows in ggplot2 mode}
+
+\item{fontFamily}{Font family for node text in ggplot2 mode}
+
+\item{nodeSpacing}{Horizontal spacing adjustment for nodes in ggplot2 mode}
+
+\item{nodeTyping}{Enable automatic node type detection and styling for
+decision trees}
+
+\item{nodeAlpha}{Transparency level for nodes in ggplot2 mode (1.0 =
+opaque)}
+
+\item{decisionNodeColor}{Special color scheme for decision/question nodes}
+
+\item{outcomeNodeColor}{Special color scheme for outcome/result nodes}
+
+\item{customNodeSizing}{Enable automatic node sizing based on content
+length or data values}
+
+\item{nodeTextSize}{How to scale text size within nodes}
+
+\item{advancedPositioning}{Enable fine-tuned node positioning with nudging
+capabilities}
+
+\item{ggplotIntegration}{Use complete ggplot2 theming and scale integration}
+
+\item{layoutAlgorithm}{Layout algorithm for node positioning in ggplot2
+mode}
+
+\item{layoutOrientation}{Primary orientation for flowchart layout}
+
+\item{intelligentLayout}{Automatically choose optimal layout based on
+flowchart structure}
+
+\item{nodeSpreadFactor}{Controls overall spacing between nodes (1.0 =
+standard spacing)}
+
+\item{plot_title}{Title for the flowchart}
 
 \item{includeTitle}{Include automatic title with flow statistics}
+
+\item{show_interpretation}{Show interpretation and usage guide}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$diagram} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagram} \tab \tab \tab \tab \tab a html \cr
 \code{results$nodeData} \tab \tab \tab \tab \tab a table \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -56,5 +144,6 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$nodeData)}
 }
 \description{
-Creates CONSORT-style flowcharts showing participant flow through studies
+Creates professional flowcharts for research workflows using DiagrammeR or
+ggplot2
 }

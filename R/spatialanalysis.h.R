@@ -174,6 +174,7 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     inherit = jmvcore::Group,
     active = list(
         text = function() private$.items[["text"]],
+        copysummary = function() private$.items[["copysummary"]],
         summary = function() private$.items[["summary"]],
         ripley = function() private$.items[["ripley"]],
         nearestneighbor = function() private$.items[["nearestneighbor"]],
@@ -194,6 +195,11 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="text",
                 title="Getting Started",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="copysummary",
+                title="Copy-Ready Summary",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -439,6 +445,7 @@ spatialanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$copysummary} \tab \tab \tab \tab \tab Plain-language summary of spatial analysis results ready for copy-paste \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab Basic spatial metrics including point counts, density, and study area \cr
 #'   \code{results$ripley} \tab \tab \tab \tab \tab Spatial clustering analysis at multiple distance scales \cr
 #'   \code{results$nearestneighbor} \tab \tab \tab \tab \tab Nearest neighbor distances and Clark-Evans randomness test \cr

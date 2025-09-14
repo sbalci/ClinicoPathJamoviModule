@@ -2,9 +2,9 @@
 % Please edit documentation in R/flowchart.b.R
 \name{flowchartClass}
 \alias{flowchartClass}
-\title{Study Flowchart}
+\title{Study Flowchart (Enhanced)}
 \description{
-Creates CONSORT-style flowcharts for clinical studies and research workflows
+Creates professional flowcharts using DiagrammeR, ggplot2, or flowchart package, supporting node-count, edge-list, and clinical trial flow formats
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::flowchartBase} -> \code{flowchartClass}

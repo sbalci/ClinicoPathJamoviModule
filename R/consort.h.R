@@ -20,7 +20,27 @@ consortOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             arm2ReceivedN = 0,
             arm2LostN = 0,
             arm2AnalyzedN = 0,
-            excludedText = "", ...) {
+            excludedText = "",
+            participant_var = NULL,
+            randomization_var = NULL,
+            trial_group_var = NULL,
+            completion_var = NULL,
+            outcome_var = NULL,
+            exclusion_var = NULL,
+            consort_labels = "Assessed for eligibility,Randomized,Allocated,Analyzed",
+            show_reasons = TRUE,
+            validate_consort = FALSE,
+            render_engine = "diagrammer",
+            output_style = "publication",
+            include_title = TRUE,
+            flowchart_title = "CONSORT 2010 Flow Diagram",
+            show_percentages = TRUE,
+            show_statistics = TRUE,
+            color_scheme = "clinical",
+            node_width = 200,
+            node_height = 80,
+            font_size = 12,
+            export_format = "html", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -88,6 +108,138 @@ consortOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "excludedText",
                 excludedText,
                 default="")
+            private$..participant_var <- jmvcore::OptionVariable$new(
+                "participant_var",
+                participant_var,
+                suggested=list(
+                    "id",
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric",
+                    "id"))
+            private$..randomization_var <- jmvcore::OptionVariable$new(
+                "randomization_var",
+                randomization_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..trial_group_var <- jmvcore::OptionVariable$new(
+                "trial_group_var",
+                trial_group_var,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..completion_var <- jmvcore::OptionVariable$new(
+                "completion_var",
+                completion_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..outcome_var <- jmvcore::OptionVariable$new(
+                "outcome_var",
+                outcome_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..exclusion_var <- jmvcore::OptionVariable$new(
+                "exclusion_var",
+                exclusion_var,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..consort_labels <- jmvcore::OptionString$new(
+                "consort_labels",
+                consort_labels,
+                default="Assessed for eligibility,Randomized,Allocated,Analyzed")
+            private$..show_reasons <- jmvcore::OptionBool$new(
+                "show_reasons",
+                show_reasons,
+                default=TRUE)
+            private$..validate_consort <- jmvcore::OptionBool$new(
+                "validate_consort",
+                validate_consort,
+                default=FALSE)
+            private$..render_engine <- jmvcore::OptionList$new(
+                "render_engine",
+                render_engine,
+                options=list(
+                    "diagrammer",
+                    "html_css",
+                    "clinical_flow"),
+                default="diagrammer")
+            private$..output_style <- jmvcore::OptionList$new(
+                "output_style",
+                output_style,
+                options=list(
+                    "publication",
+                    "presentation",
+                    "clinical",
+                    "regulatory"),
+                default="publication")
+            private$..include_title <- jmvcore::OptionBool$new(
+                "include_title",
+                include_title,
+                default=TRUE)
+            private$..flowchart_title <- jmvcore::OptionString$new(
+                "flowchart_title",
+                flowchart_title,
+                default="CONSORT 2010 Flow Diagram")
+            private$..show_percentages <- jmvcore::OptionBool$new(
+                "show_percentages",
+                show_percentages,
+                default=TRUE)
+            private$..show_statistics <- jmvcore::OptionBool$new(
+                "show_statistics",
+                show_statistics,
+                default=TRUE)
+            private$..color_scheme <- jmvcore::OptionList$new(
+                "color_scheme",
+                color_scheme,
+                options=list(
+                    "clinical",
+                    "neutral",
+                    "accessible",
+                    "publication"),
+                default="clinical")
+            private$..node_width <- jmvcore::OptionNumber$new(
+                "node_width",
+                node_width,
+                min=100,
+                max=400,
+                default=200)
+            private$..node_height <- jmvcore::OptionNumber$new(
+                "node_height",
+                node_height,
+                min=50,
+                max=200,
+                default=80)
+            private$..font_size <- jmvcore::OptionNumber$new(
+                "font_size",
+                font_size,
+                min=8,
+                max=24,
+                default=12)
+            private$..export_format <- jmvcore::OptionList$new(
+                "export_format",
+                export_format,
+                options=list(
+                    "html",
+                    "svg",
+                    "png",
+                    "all"),
+                default="html")
 
             self$.addOption(private$..initialN)
             self$.addOption(private$..notEligibleN)
@@ -104,6 +256,26 @@ consortOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..arm2LostN)
             self$.addOption(private$..arm2AnalyzedN)
             self$.addOption(private$..excludedText)
+            self$.addOption(private$..participant_var)
+            self$.addOption(private$..randomization_var)
+            self$.addOption(private$..trial_group_var)
+            self$.addOption(private$..completion_var)
+            self$.addOption(private$..outcome_var)
+            self$.addOption(private$..exclusion_var)
+            self$.addOption(private$..consort_labels)
+            self$.addOption(private$..show_reasons)
+            self$.addOption(private$..validate_consort)
+            self$.addOption(private$..render_engine)
+            self$.addOption(private$..output_style)
+            self$.addOption(private$..include_title)
+            self$.addOption(private$..flowchart_title)
+            self$.addOption(private$..show_percentages)
+            self$.addOption(private$..show_statistics)
+            self$.addOption(private$..color_scheme)
+            self$.addOption(private$..node_width)
+            self$.addOption(private$..node_height)
+            self$.addOption(private$..font_size)
+            self$.addOption(private$..export_format)
         }),
     active = list(
         initialN = function() private$..initialN$value,
@@ -120,7 +292,27 @@ consortOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         arm2ReceivedN = function() private$..arm2ReceivedN$value,
         arm2LostN = function() private$..arm2LostN$value,
         arm2AnalyzedN = function() private$..arm2AnalyzedN$value,
-        excludedText = function() private$..excludedText$value),
+        excludedText = function() private$..excludedText$value,
+        participant_var = function() private$..participant_var$value,
+        randomization_var = function() private$..randomization_var$value,
+        trial_group_var = function() private$..trial_group_var$value,
+        completion_var = function() private$..completion_var$value,
+        outcome_var = function() private$..outcome_var$value,
+        exclusion_var = function() private$..exclusion_var$value,
+        consort_labels = function() private$..consort_labels$value,
+        show_reasons = function() private$..show_reasons$value,
+        validate_consort = function() private$..validate_consort$value,
+        render_engine = function() private$..render_engine$value,
+        output_style = function() private$..output_style$value,
+        include_title = function() private$..include_title$value,
+        flowchart_title = function() private$..flowchart_title$value,
+        show_percentages = function() private$..show_percentages$value,
+        show_statistics = function() private$..show_statistics$value,
+        color_scheme = function() private$..color_scheme$value,
+        node_width = function() private$..node_width$value,
+        node_height = function() private$..node_height$value,
+        font_size = function() private$..font_size$value,
+        export_format = function() private$..export_format$value),
     private = list(
         ..initialN = NA,
         ..notEligibleN = NA,
@@ -136,7 +328,27 @@ consortOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..arm2ReceivedN = NA,
         ..arm2LostN = NA,
         ..arm2AnalyzedN = NA,
-        ..excludedText = NA)
+        ..excludedText = NA,
+        ..participant_var = NA,
+        ..randomization_var = NA,
+        ..trial_group_var = NA,
+        ..completion_var = NA,
+        ..outcome_var = NA,
+        ..exclusion_var = NA,
+        ..consort_labels = NA,
+        ..show_reasons = NA,
+        ..validate_consort = NA,
+        ..render_engine = NA,
+        ..output_style = NA,
+        ..include_title = NA,
+        ..flowchart_title = NA,
+        ..show_percentages = NA,
+        ..show_statistics = NA,
+        ..color_scheme = NA,
+        ..node_width = NA,
+        ..node_height = NA,
+        ..font_size = NA,
+        ..export_format = NA)
 )
 
 consortResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -146,6 +358,7 @@ consortResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
         plot = function() private$.items[["plot"]],
+        consortDiagram = function() private$.items[["consortDiagram"]],
         text = function() private$.items[["text"]]),
     private = list(),
     public=list(
@@ -186,7 +399,83 @@ consortResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=800,
                 height=1000,
                 renderFun=".plot",
-                requiresData=FALSE))
+                requiresData=FALSE,
+                clearWith=list(
+                    "initialN",
+                    "notEligibleN",
+                    "notEligibleText",
+                    "randomizedN",
+                    "arm1Label",
+                    "arm1N",
+                    "arm1ReceivedN",
+                    "arm1LostN",
+                    "arm1AnalyzedN",
+                    "arm2Label",
+                    "arm2N",
+                    "arm2ReceivedN",
+                    "arm2LostN",
+                    "arm2AnalyzedN",
+                    "excludedText",
+                    "participant_var",
+                    "randomization_var",
+                    "trial_group_var",
+                    "completion_var",
+                    "outcome_var",
+                    "exclusion_var",
+                    "consort_labels",
+                    "show_reasons",
+                    "validate_consort",
+                    "render_engine",
+                    "output_style",
+                    "include_title",
+                    "flowchart_title",
+                    "show_percentages",
+                    "show_statistics",
+                    "color_scheme",
+                    "node_width",
+                    "node_height",
+                    "font_size",
+                    "export_format")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="consortDiagram",
+                title="Enhanced CONSORT Diagram",
+                clearWith=list(
+                    "initialN",
+                    "notEligibleN",
+                    "notEligibleText",
+                    "randomizedN",
+                    "arm1Label",
+                    "arm1N",
+                    "arm1ReceivedN",
+                    "arm1LostN",
+                    "arm1AnalyzedN",
+                    "arm2Label",
+                    "arm2N",
+                    "arm2ReceivedN",
+                    "arm2LostN",
+                    "arm2AnalyzedN",
+                    "excludedText",
+                    "participant_var",
+                    "randomization_var",
+                    "trial_group_var",
+                    "completion_var",
+                    "outcome_var",
+                    "exclusion_var",
+                    "consort_labels",
+                    "show_reasons",
+                    "validate_consort",
+                    "render_engine",
+                    "output_style",
+                    "include_title",
+                    "flowchart_title",
+                    "show_percentages",
+                    "show_statistics",
+                    "color_scheme",
+                    "node_width",
+                    "node_height",
+                    "font_size",
+                    "export_format")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -234,11 +523,34 @@ consortBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param arm2AnalyzedN .
 #' @param excludedText Reasons for post-randomization exclusions (comma
 #'   separated)
+#' @param participant_var Variable containing participant identifiers
+#' @param randomization_var Variable indicating randomization status (1 =
+#'   randomized, 0 = not randomized)
+#' @param trial_group_var Variable containing treatment group assignments
+#' @param completion_var Variable indicating study completion status (1 =
+#'   completed, 0 = not completed)
+#' @param outcome_var Variable containing primary outcome results
+#' @param exclusion_var Variable containing reasons for exclusion or dropout
+#' @param consort_labels Comma-separated labels for CONSORT stages
+#' @param show_reasons Display exclusion reasons in the flowchart
+#' @param validate_consort Perform CONSORT 2010 compliance validation
+#' @param render_engine Rendering engine for the flowchart visualization
+#' @param output_style Style template for the output format
+#' @param include_title Include a title in the flowchart
+#' @param flowchart_title Title to display above the flowchart
+#' @param show_percentages Display percentages in addition to counts
+#' @param show_statistics Include summary statistics below the flowchart
+#' @param color_scheme Color scheme for the flowchart elements
+#' @param node_width Width of flowchart nodes in pixels
+#' @param node_height Height of flowchart nodes in pixels
+#' @param font_size Font size for text in the flowchart
+#' @param export_format Available export formats for the flowchart
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$consortDiagram} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
@@ -265,15 +577,49 @@ consort <- function(
     arm2ReceivedN = 0,
     arm2LostN = 0,
     arm2AnalyzedN = 0,
-    excludedText = "") {
+    excludedText = "",
+    participant_var,
+    randomization_var,
+    trial_group_var,
+    completion_var,
+    outcome_var,
+    exclusion_var,
+    consort_labels = "Assessed for eligibility,Randomized,Allocated,Analyzed",
+    show_reasons = TRUE,
+    validate_consort = FALSE,
+    render_engine = "diagrammer",
+    output_style = "publication",
+    include_title = TRUE,
+    flowchart_title = "CONSORT 2010 Flow Diagram",
+    show_percentages = TRUE,
+    show_statistics = TRUE,
+    color_scheme = "clinical",
+    node_width = 200,
+    node_height = 80,
+    font_size = 12,
+    export_format = "html") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("consort requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(participant_var)) participant_var <- jmvcore::resolveQuo(jmvcore::enquo(participant_var))
+    if ( ! missing(randomization_var)) randomization_var <- jmvcore::resolveQuo(jmvcore::enquo(randomization_var))
+    if ( ! missing(trial_group_var)) trial_group_var <- jmvcore::resolveQuo(jmvcore::enquo(trial_group_var))
+    if ( ! missing(completion_var)) completion_var <- jmvcore::resolveQuo(jmvcore::enquo(completion_var))
+    if ( ! missing(outcome_var)) outcome_var <- jmvcore::resolveQuo(jmvcore::enquo(outcome_var))
+    if ( ! missing(exclusion_var)) exclusion_var <- jmvcore::resolveQuo(jmvcore::enquo(exclusion_var))
     if (missing(data))
         data <- jmvcore::marshalData(
-            parent.frame())
+            parent.frame(),
+            `if`( ! missing(participant_var), participant_var, NULL),
+            `if`( ! missing(randomization_var), randomization_var, NULL),
+            `if`( ! missing(trial_group_var), trial_group_var, NULL),
+            `if`( ! missing(completion_var), completion_var, NULL),
+            `if`( ! missing(outcome_var), outcome_var, NULL),
+            `if`( ! missing(exclusion_var), exclusion_var, NULL))
 
+    for (v in trial_group_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in exclusion_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- consortOptions$new(
         initialN = initialN,
@@ -290,7 +636,27 @@ consort <- function(
         arm2ReceivedN = arm2ReceivedN,
         arm2LostN = arm2LostN,
         arm2AnalyzedN = arm2AnalyzedN,
-        excludedText = excludedText)
+        excludedText = excludedText,
+        participant_var = participant_var,
+        randomization_var = randomization_var,
+        trial_group_var = trial_group_var,
+        completion_var = completion_var,
+        outcome_var = outcome_var,
+        exclusion_var = exclusion_var,
+        consort_labels = consort_labels,
+        show_reasons = show_reasons,
+        validate_consort = validate_consort,
+        render_engine = render_engine,
+        output_style = output_style,
+        include_title = include_title,
+        flowchart_title = flowchart_title,
+        show_percentages = show_percentages,
+        show_statistics = show_statistics,
+        color_scheme = color_scheme,
+        node_width = node_width,
+        node_height = node_height,
+        font_size = font_size,
+        export_format = export_format)
 
     analysis <- consortClass$new(
         options = options,

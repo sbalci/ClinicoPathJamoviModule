@@ -1,0 +1,20 @@
+from_node,to_node,connection_type,process_group,transition_count
+"Initial Assessment","Medical History Review",sequential,screening,485
+"Initial Assessment","Physical Examination",sequential,screening,485
+"Medical History Review","Eligibility Check",sequential,screening,460
+"Physical Examination","Eligibility Check",sequential,screening,445
+"Eligibility Check","Informed Consent",decision,enrollment,412
+"Eligibility Check","Screen Failure",decision,exclusion,73
+"Informed Consent","Baseline Testing",sequential,baseline,389
+"Baseline Testing","Randomization",sequential,randomization,365
+"Randomization","Drug A Group",split,treatment,182
+"Randomization","Drug B Group",split,treatment,183
+"Drug A Group","Week 4 Follow-up",sequential,monitoring,175
+"Drug B Group","Week 4 Follow-up",sequential,monitoring,178
+"Week 4 Follow-up","Week 8 Follow-up",sequential,monitoring,340
+"Week 8 Follow-up","Final Assessment",sequential,completion,325
+"Final Assessment","Study Completion",sequential,completion,318
+"Week 4 Follow-up","Early Discontinuation",decision,dropout,15
+"Week 8 Follow-up","Early Discontinuation",decision,dropout,7
+"Early Discontinuation","Safety Follow-up",sequential,safety,22
+"Study Completion","Data Analysis",sequential,analysis,318

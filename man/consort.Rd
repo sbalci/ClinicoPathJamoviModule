@@ -20,7 +20,27 @@ consort(
   arm2ReceivedN = 0,
   arm2LostN = 0,
   arm2AnalyzedN = 0,
-  excludedText = ""
+  excludedText = "",
+  participant_var,
+  randomization_var,
+  trial_group_var,
+  completion_var,
+  outcome_var,
+  exclusion_var,
+  consort_labels = "Assessed for eligibility,Randomized,Allocated,Analyzed",
+  show_reasons = TRUE,
+  validate_consort = FALSE,
+  render_engine = "diagrammer",
+  output_style = "publication",
+  include_title = TRUE,
+  flowchart_title = "CONSORT 2010 Flow Diagram",
+  show_percentages = TRUE,
+  show_statistics = TRUE,
+  color_scheme = "clinical",
+  node_width = 200,
+  node_height = 80,
+  font_size = 12,
+  export_format = "html"
 )
 }
 \arguments{
@@ -56,6 +76,48 @@ consort(
 
 \item{excludedText}{Reasons for post-randomization exclusions (comma
 separated)}
+
+\item{participant_var}{Variable containing participant identifiers}
+
+\item{randomization_var}{Variable indicating randomization status (1 =
+randomized, 0 = not randomized)}
+
+\item{trial_group_var}{Variable containing treatment group assignments}
+
+\item{completion_var}{Variable indicating study completion status (1 =
+completed, 0 = not completed)}
+
+\item{outcome_var}{Variable containing primary outcome results}
+
+\item{exclusion_var}{Variable containing reasons for exclusion or dropout}
+
+\item{consort_labels}{Comma-separated labels for CONSORT stages}
+
+\item{show_reasons}{Display exclusion reasons in the flowchart}
+
+\item{validate_consort}{Perform CONSORT 2010 compliance validation}
+
+\item{render_engine}{Rendering engine for the flowchart visualization}
+
+\item{output_style}{Style template for the output format}
+
+\item{include_title}{Include a title in the flowchart}
+
+\item{flowchart_title}{Title to display above the flowchart}
+
+\item{show_percentages}{Display percentages in addition to counts}
+
+\item{show_statistics}{Include summary statistics below the flowchart}
+
+\item{color_scheme}{Color scheme for the flowchart elements}
+
+\item{node_width}{Width of flowchart nodes in pixels}
+
+\item{node_height}{Height of flowchart nodes in pixels}
+
+\item{font_size}{Font size for text in the flowchart}
+
+\item{export_format}{Available export formats for the flowchart}
 }
 \value{
 A results object containing:
@@ -63,6 +125,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$consortDiagram} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 }
 

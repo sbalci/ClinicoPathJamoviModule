@@ -10,14 +10,15 @@ items:
 
     - name: diagram
       title: 'Flowchart Diagram'
-      type: Image
-      width: 800
-      height: 1000
-      renderFun: .plot
-      requiresData: true
+      type: Html
       clearWith:
+        - input_mode
         - nodes
         - counts
+        - from_var
+        - to_var
+        - group_var
+        - render_engine
         - direction
         - nodeWidth
         - nodeHeight
@@ -25,7 +26,25 @@ items:
         - showPercentages
         - showExclusions
         - nodeColor
+        - enhancedStyling
+        - showCounts
+        - arrowColor
+        - fontFamily
+        - nodeSpacing
+        - nodeTyping
+        - nodeAlpha
+        - decisionNodeColor
+        - outcomeNodeColor
+        - customNodeSizing
+        - nodeTextSize
+        - advancedPositioning
+        - ggplotIntegration
+        - layoutAlgorithm
+        - layoutOrientation
+        - intelligentLayout
+        - nodeSpreadFactor
         - includeTitle
+        - plot_title
 
     - name: nodeData
       title: Node Data Summary
@@ -38,8 +57,19 @@ items:
           title: "Count" 
           type: integer
       clearWith:
+        - input_mode
         - nodes
         - counts
+        - from_var
+        - to_var
+
+    - name: interpretation
+      title: Analysis Guide
+      type: Html
+      clearWith:
+        - input_mode
+        - render_engine
+        - show_interpretation
 
 refs:
     - ClinicoPathJamoviModule

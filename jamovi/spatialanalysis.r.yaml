@@ -9,6 +9,12 @@ items:
       type: Html
       visible: true
 
+    - name: copysummary
+      title: Copy-Ready Summary
+      type: Html
+      visible: true
+      description: Plain-language summary of spatial analysis results ready for copy-paste
+
     - name: summary
       title: Spatial Summary Statistics
       type: Table

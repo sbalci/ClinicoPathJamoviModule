@@ -192,7 +192,7 @@ analyses:
   - title: Clinical Hemodynamic Monitoring
     name: clinmon
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Clinical Hemodynamic Monitoring
     menuSubtitle: Hemodynamic Indices from Continuous Monitoring
@@ -584,7 +584,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -736,18 +736,20 @@ analyses:
     name: consort
     ns: ClinicoPath
     menuGroup: OncoPathologyT2
-    menuSubgroup: ClinicoPath Reports
+    menuSubgroup: Study Design
     menuTitle: CONSORT Flowchart
     ribbon: analyses
     category: analyses
   - title: Study Flowchart
     name: flowchart
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
-    menuSubgroup: ClinicoPath Reports
+    menuGroup: OncoPathologyT
+    menuSubgroup: Study Design
     menuTitle: Study Flowchart
     ribbon: analyses
-    description: Creates CONSORT-style flowcharts showing participant flow through studies
+    description: >-
+      Creates professional flowcharts for research workflows using DiagrammeR or
+      ggplot2
     category: analyses
   - title: ggFlowchart
     name: ggflowchart
@@ -2282,7 +2284,7 @@ analyses:
     name: digitalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyD
     menuTitle: Digital Pathology Validation
   - title: Haralick Texture Analysis
     name: haralicktexture
@@ -2312,7 +2314,7 @@ analyses:
     name: spatialanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyD
     menuTitle: Spatial Statistics from Coordinates
   - title: Enhanced Non-Parametric Tests
     name: enhancednonparametric
@@ -2347,7 +2349,7 @@ analyses:
     name: hierarchicalpathology
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyD
     menuSubgroup: Inferential
     menuTitle: Hierarchical Mixed-Effects Models
     menuSubtitle: Multi-level analysis for nested pathology data
@@ -2428,7 +2430,7 @@ analyses:
     name: mlpathology
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyD
     menuTitle: Classification Performance Metrics for Digital Pathology
     description: >
       Comprehensive evaluation of machine learning models and algorithms for 
@@ -2443,7 +2445,7 @@ analyses:
     name: pathologycomposition
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyD
     menuTitle: Pathology Composition Analysis
     description: >
       Semi-quantitative analysis of histologic components and their association
