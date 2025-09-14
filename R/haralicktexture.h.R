@@ -198,6 +198,8 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "haralicktextureResults",
     inherit = jmvcore::Group,
     active = list(
+        summary = function() private$.items[["summary"]],
+        about = function() private$.items[["about"]],
         interpretation = function() private$.items[["interpretation"]],
         texturetable = function() private$.items[["texturetable"]],
         correlationtable = function() private$.items[["correlationtable"]],
@@ -207,8 +209,10 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         distributionplot = function() private$.items[["distributionplot"]],
         heatmapplot = function() private$.items[["heatmapplot"]],
         boxplot = function() private$.items[["boxplot"]],
-        clinicalrelevance = function() private$.items[["clinicalrelevance"]],
-        qualityassessment = function() private$.items[["qualityassessment"]]),
+        clinicalinterpretation = function() private$.items[["clinicalinterpretation"]],
+        prognosticsummary = function() private$.items[["prognosticsummary"]],
+        missingdata = function() private$.items[["missingdata"]],
+        variability = function() private$.items[["variability"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -217,7 +221,17 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Haralick Texture Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPath"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About Haralick Texture Analysis",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -229,27 +243,27 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Texture Feature Statistics",
                 columns=list(),
                 clearWith=list(
-                    "texture_vars",
-                    "analysis_type")))
+                    "texture_features",
+                    "analysis_focus")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="correlationtable",
                 title="Feature Correlation Matrix",
                 columns=list(),
-                visible="(correlation_analysis)",
+                visible=TRUE,
                 clearWith=list(
-                    "texture_vars",
-                    "correlation_analysis")))
+                    "texture_features",
+                    "analysis_focus")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="groupcomparisontable",
                 title="Group Comparison Results",
                 columns=list(),
-                visible="(group_comparison && group_var)",
+                visible=TRUE,
                 clearWith=list(
-                    "texture_vars",
+                    "texture_features",
                     "group_var",
-                    "group_comparison")))
+                    "analysis_focus")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="normalitytable",
@@ -257,7 +271,7 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 columns=list(),
                 visible="(normality_testing)",
                 clearWith=list(
-                    "texture_vars",
+                    "texture_features",
                     "normality_testing")))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -266,7 +280,7 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 columns=list(),
                 visible="(outlier_detection)",
                 clearWith=list(
-                    "texture_vars",
+                    "texture_features",
                     "outlier_detection")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -274,78 +288,66 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Distribution Plots",
                 width=700,
                 height=500,
-                visible="(show_plots)",
+                visible="(show_distribution_plots)",
                 requiresData=TRUE,
                 clearWith=list(
-                    "texture_vars",
-                    "show_plots")))
+                    "texture_features",
+                    "show_distribution_plots")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="heatmapplot",
                 title="Feature Correlation Heatmap",
                 width=600,
                 height=600,
-                visible="(show_heatmaps && correlation_analysis)",
+                visible="(show_correlation_plot)",
                 requiresData=TRUE,
                 clearWith=list(
-                    "texture_vars",
-                    "show_heatmaps",
-                    "correlation_analysis")))
+                    "texture_features",
+                    "show_correlation_plot",
+                    "analysis_focus")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="boxplot",
                 title="Group Comparison Boxplots",
                 width=600,
                 height=400,
-                visible="(show_plots && group_comparison && group_var)",
+                visible="(show_distribution_plots)",
                 requiresData=TRUE,
                 clearWith=list(
-                    "texture_vars",
+                    "texture_features",
                     "group_var",
-                    "group_comparison")))
-            self$add(R6::R6Class(
-                inherit = jmvcore::Group,
-                active = list(
-                    clinicalinterpretation = function() private$.items[["clinicalinterpretation"]],
-                    prognosticsummary = function() private$.items[["prognosticsummary"]]),
-                private = list(),
-                public=list(
-                    initialize=function(options) {
-                        super$initialize(
-                            options=options,
-                            name="clinicalrelevance",
-                            title="Clinical Relevance Assessment")
-                        self$add(jmvcore::Html$new(
-                            options=options,
-                            name="clinicalinterpretation",
-                            title="Clinical Interpretation"))
-                        self$add(jmvcore::Table$new(
-                            options=options,
-                            name="prognosticsummary",
-                            title="Prognostic Summary",
-                            columns=list()))}))$new(options=options))
-            self$add(R6::R6Class(
-                inherit = jmvcore::Group,
-                active = list(
-                    missingdata = function() private$.items[["missingdata"]],
-                    variability = function() private$.items[["variability"]]),
-                private = list(),
-                public=list(
-                    initialize=function(options) {
-                        super$initialize(
-                            options=options,
-                            name="qualityassessment",
-                            title="Data Quality Assessment")
-                        self$add(jmvcore::Table$new(
-                            options=options,
-                            name="missingdata",
-                            title="Missing Data Summary",
-                            columns=list()))
-                        self$add(jmvcore::Table$new(
-                            options=options,
-                            name="variability",
-                            title="Variability Assessment",
-                            columns=list()))}))$new(options=options))}))
+                    "analysis_focus")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalinterpretation",
+                title="Clinical Interpretation",
+                visible="(!biomarker_context:general)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="prognosticsummary",
+                title="Prognostic Summary",
+                columns=list(),
+                visible="(!biomarker_context:general)",
+                clearWith=list(
+                    "texture_features",
+                    "biomarker_context",
+                    "biomarker_context")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="missingdata",
+                title="Missing Data Summary",
+                columns=list(),
+                visible=TRUE,
+                clearWith=list(
+                    "texture_features")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="variability",
+                title="Variability Assessment",
+                columns=list(),
+                visible=TRUE,
+                clearWith=list(
+                    "texture_features")))}))
 
 haralicktextureBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "haralicktextureBase",
@@ -394,6 +396,8 @@ haralicktextureBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param biomarker_context biomarker context for specialized interpretation
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$summary} \tab \tab \tab \tab \tab Copy-ready summary with key findings and clinical interpretation \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab What this analysis does, when to use it, and how to interpret results \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$texturetable} \tab \tab \tab \tab \tab Descriptive statistics for each texture feature \cr
 #'   \code{results$correlationtable} \tab \tab \tab \tab \tab Correlation between texture features \cr
@@ -403,10 +407,10 @@ haralicktextureBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$distributionplot} \tab \tab \tab \tab \tab Histogram and density plots for texture features \cr
 #'   \code{results$heatmapplot} \tab \tab \tab \tab \tab Visual correlation matrix between features \cr
 #'   \code{results$boxplot} \tab \tab \tab \tab \tab Boxplots comparing texture features across groups \cr
-#'   \code{results$clinicalrelevance$clinicalinterpretation} \tab \tab \tab \tab \tab Context-specific clinical interpretation \cr
-#'   \code{results$clinicalrelevance$prognosticsummary} \tab \tab \tab \tab \tab Prognostic relevance of texture features \cr
-#'   \code{results$qualityassessment$missingdata} \tab \tab \tab \tab \tab Missing data patterns and impact \cr
-#'   \code{results$qualityassessment$variability} \tab \tab \tab \tab \tab Coefficient of variation and reliability \cr
+#'   \code{results$clinicalinterpretation} \tab \tab \tab \tab \tab Context-specific clinical interpretation \cr
+#'   \code{results$prognosticsummary} \tab \tab \tab \tab \tab Prognostic relevance of texture features \cr
+#'   \code{results$missingdata} \tab \tab \tab \tab \tab Missing data patterns and impact \cr
+#'   \code{results$variability} \tab \tab \tab \tab \tab Coefficient of variation and reliability \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

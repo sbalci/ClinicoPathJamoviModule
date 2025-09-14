@@ -2,7 +2,7 @@
 % Please edit documentation in R/flexparametric.h.R
 \name{flexparametric}
 \alias{flexparametric}
-\title{Flexible Parametric Survival Models}
+\title{Flexible Parametric Survival Models (Enhanced)}
 \usage{
 flexparametric(
   data,
@@ -10,12 +10,23 @@ flexparametric(
   outcome,
   covariates,
   outcomeLevel = "1",
+  model_approach = "automatic",
   distribution = "gengamma",
+  spline_type = "hazard",
+  spline_df = 4,
+  knot_placement = "quantiles",
+  manual_knots = "",
   confidence_level = 0.95,
+  grouping_variable,
+  model_comparison = TRUE,
+  time_varying_effects = FALSE,
   show_parameters = TRUE,
   show_aic_bic = TRUE,
   show_survival_plot = TRUE,
   show_hazard_plot = FALSE,
+  show_spline_plot = FALSE,
+  show_diagnostics = TRUE,
+  show_clinical_summary = TRUE,
   show_density_plot = FALSE,
   plot_time_max = 0,
   showSummaries = FALSE,
@@ -33,10 +44,33 @@ flexparametric(
 
 \item{outcomeLevel}{Level of outcome variable indicating event.}
 
-\item{distribution}{Parametric distribution to fit.}
+\item{model_approach}{Choose modeling approach: Traditional uses standard
+distributions,  Spline-based uses flexible baseline, Automatic selects best
+fit.}
+
+\item{distribution}{Parametric distribution for traditional approach.}
+
+\item{spline_type}{Type of spline transformation for flexible approach.}
+
+\item{spline_df}{Degrees of freedom for spline flexibility (3-4 typical,
+5-6 complex).}
+
+\item{knot_placement}{Method for placing spline knots.}
+
+\item{manual_knots}{Comma-separated knot positions (when manual placement
+selected).}
 
 \item{confidence_level}{Confidence level for parameter estimates and
 survival curves.}
+
+\item{grouping_variable}{Optional grouping variable for stratified
+analysis.}
+
+\item{model_comparison}{Compare multiple models and select best based on
+AIC/BIC.}
+
+\item{time_varying_effects}{Allow covariate effects to vary over time
+(spline models only).}
 
 \item{show_parameters}{Display parameter estimates table.}
 
@@ -45,6 +79,15 @@ survival curves.}
 \item{show_survival_plot}{Display parametric survival curves.}
 
 \item{show_hazard_plot}{Display parametric hazard functions.}
+
+\item{show_spline_plot}{Display spline basis functions and knot positions
+(spline models only).}
+
+\item{show_diagnostics}{Display residual plots and goodness-of-fit
+diagnostics.}
+
+\item{show_clinical_summary}{Display clinical interpretation and copy-ready
+report.}
 
 \item{show_density_plot}{Display parametric density functions.}
 
@@ -58,11 +101,17 @@ survival curves.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$parametersTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$splineDetails} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$fitStatistics} \tab \tab \tab \tab \tab a table \cr
 \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$hazardPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$densityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$splinePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticsPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 }
@@ -74,11 +123,18 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$parametersTable)}
 }
 \description{
-Fits flexible parametric survival models including generalized gamma,
-generalized F, and other advanced parametric distributions. These models
-provide greater flexibility in modeling complex hazard shapes compared to
-standard parametric models, with applications in oncology, reliability,
-and comparative effectiveness research.
+🔬 ENHANCED: Comprehensive flexible parametric survival modeling combining
+traditional parametric distributions (Generalized Gamma, Weibull, etc.)
+with  advanced spline-based approaches (Royston-Parmar, B-splines).
+Provides maximum  flexibility for modeling complex hazard shapes,
+time-varying effects, and  non-proportional hazards.
+⚕️ CLINICAL USE: Model survival data when standard Cox models are
+inadequate.  Ideal for cancer research, health economics, and comparative
+effectiveness studies.
+📊 KEY FEATURES: • Traditional parametric and spline-based models in one
+function • Automatic model comparison and selection • Clinical
+interpretation of parameters • Comprehensive diagnostic plots • Copy-ready
+report templates
 }
 \examples{
 # Example usage will be added

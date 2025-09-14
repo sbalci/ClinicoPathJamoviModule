@@ -4,6 +4,18 @@ title: Haralick Texture Analysis
 jrs: '1.1'
 
 items:
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      description: Copy-ready summary with key findings and clinical interpretation
+      visible: true
+
+    - name: about
+      title: About Haralick Texture Analysis
+      type: Html
+      description: What this analysis does, when to use it, and how to interpret results
+      visible: true
+
     - name: interpretation
       title: Clinical Context and Interpretation
       type: Html
@@ -15,29 +27,29 @@ items:
       description: Descriptive statistics for each texture feature
       columns: []
       clearWith:
-          - texture_vars
-          - analysis_type
+          - texture_features
+          - analysis_focus
 
     - name: correlationtable
       title: Feature Correlation Matrix
       type: Table
       description: Correlation between texture features
       columns: []
-      visible: (correlation_analysis)
+      visible: true
       clearWith:
-          - texture_vars
-          - correlation_analysis
+          - texture_features
+          - analysis_focus
 
     - name: groupcomparisontable
       title: Group Comparison Results
       type: Table
       description: Statistical comparison across groups
       columns: []
-      visible: (group_comparison && group_var)
+      visible: true
       clearWith:
-          - texture_vars
+          - texture_features
           - group_var
-          - group_comparison
+          - analysis_focus
 
     - name: normalitytable
       title: Normality Testing Results
@@ -46,7 +58,7 @@ items:
       columns: []
       visible: (normality_testing)
       clearWith:
-          - texture_vars
+          - texture_features
           - normality_testing
 
     - name: outliertable
@@ -56,7 +68,7 @@ items:
       columns: []
       visible: (outlier_detection)
       clearWith:
-          - texture_vars
+          - texture_features
           - outlier_detection
 
     - name: distributionplot
@@ -65,11 +77,11 @@ items:
       description: Histogram and density plots for texture features
       width: 700
       height: 500
-      visible: (show_plots)
+      visible: (show_distribution_plots)
       requiresData: true
       clearWith:
-          - texture_vars
-          - show_plots
+          - texture_features
+          - show_distribution_plots
 
     - name: heatmapplot
       title: Feature Correlation Heatmap
@@ -77,12 +89,12 @@ items:
       description: Visual correlation matrix between features
       width: 600
       height: 600
-      visible: (show_heatmaps && correlation_analysis)
+      visible: (show_correlation_plot)
       requiresData: true
       clearWith:
-          - texture_vars
-          - show_heatmaps
-          - correlation_analysis
+          - texture_features
+          - show_correlation_plot
+          - analysis_focus
 
     - name: boxplot
       title: Group Comparison Boxplots
@@ -90,45 +102,47 @@ items:
       description: Boxplots comparing texture features across groups
       width: 600
       height: 400
-      visible: (show_plots && group_comparison && group_var)
+      visible: (show_distribution_plots)
       requiresData: true
       clearWith:
-          - texture_vars
+          - texture_features
           - group_var
-          - group_comparison
+          - analysis_focus
 
-    - name: clinicalrelevance
-      title: Clinical Relevance Assessment
-      type: Group
-      visible: (generate_interpretation)
-      items:
-          - name: clinicalinterpretation
-            title: Clinical Interpretation
-            type: Html
-            description: Context-specific clinical interpretation
+    - name: clinicalinterpretation
+      title: Clinical Interpretation
+      type: Html
+      description: Context-specific clinical interpretation
+      visible: (!biomarker_context:general)
 
-          - name: prognosticsummary
-            title: Prognostic Summary
-            type: Table
-            description: Prognostic relevance of texture features
-            columns: []
+    - name: prognosticsummary
+      title: Prognostic Summary
+      type: Table
+      description: Prognostic relevance of texture features
+      columns: []
+      visible: (!biomarker_context:general)
+      clearWith:
+          - texture_features
+          - biomarker_context
+          - biomarker_context
 
-    - name: qualityassessment
-      title: Data Quality Assessment
-      type: Group
+    - name: missingdata
+      title: Missing Data Summary
+      type: Table
+      description: Missing data patterns and impact
+      columns: []
       visible: true
-      items:
-          - name: missingdata
-            title: Missing Data Summary
-            type: Table
-            description: Missing data patterns and impact
-            columns: []
+      clearWith:
+          - texture_features
 
-          - name: variability
-            title: Variability Assessment
-            type: Table
-            description: Coefficient of variation and reliability
-            columns: []
+    - name: variability
+      title: Variability Assessment
+      type: Table
+      description: Coefficient of variation and reliability
+      columns: []
+      visible: true
+      clearWith:
+          - texture_features
 
 
 refs:

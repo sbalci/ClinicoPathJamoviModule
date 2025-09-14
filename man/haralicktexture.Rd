@@ -66,6 +66,8 @@ coordinates)}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$summary} \tab \tab \tab \tab \tab Copy-ready summary with key findings and clinical interpretation \cr
+\code{results$about} \tab \tab \tab \tab \tab What this analysis does, when to use it, and how to interpret results \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$texturetable} \tab \tab \tab \tab \tab Descriptive statistics for each texture feature \cr
 \code{results$correlationtable} \tab \tab \tab \tab \tab Correlation between texture features \cr
@@ -75,10 +77,10 @@ A results object containing:
 \code{results$distributionplot} \tab \tab \tab \tab \tab Histogram and density plots for texture features \cr
 \code{results$heatmapplot} \tab \tab \tab \tab \tab Visual correlation matrix between features \cr
 \code{results$boxplot} \tab \tab \tab \tab \tab Boxplots comparing texture features across groups \cr
-\code{results$clinicalrelevance$clinicalinterpretation} \tab \tab \tab \tab \tab Context-specific clinical interpretation \cr
-\code{results$clinicalrelevance$prognosticsummary} \tab \tab \tab \tab \tab Prognostic relevance of texture features \cr
-\code{results$qualityassessment$missingdata} \tab \tab \tab \tab \tab Missing data patterns and impact \cr
-\code{results$qualityassessment$variability} \tab \tab \tab \tab \tab Coefficient of variation and reliability \cr
+\code{results$clinicalinterpretation} \tab \tab \tab \tab \tab Context-specific clinical interpretation \cr
+\code{results$prognosticsummary} \tab \tab \tab \tab \tab Prognostic relevance of texture features \cr
+\code{results$missingdata} \tab \tab \tab \tab \tab Missing data patterns and impact \cr
+\code{results$variability} \tab \tab \tab \tab \tab Coefficient of variation and reliability \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

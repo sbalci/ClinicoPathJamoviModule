@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.64
+version: 0.0.31.65
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-13'
+date: '2025-09-14'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -618,7 +618,7 @@ analyses:
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Hull Plot
     menuSubtitle: Cluster Visualization with ggforce
@@ -872,7 +872,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -889,7 +889,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -906,7 +906,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -915,7 +915,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1060,7 +1060,7 @@ analyses:
   - title: Power Analysis for Survival Studies
     name: powersurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Power Analysis for Survival Studies
     menuSubgroup: Design and Analysis
     menuSubtitle: Power analysis for survival studies
@@ -1207,7 +1207,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1219,7 +1219,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1251,7 +1251,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1299,7 +1299,7 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -1311,7 +1311,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
@@ -1786,7 +1786,7 @@ analyses:
   - title: River Plots & Alluvial Diagrams
     name: riverplot
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots & Alluvial Diagrams
     menuSubtitle: Flow, Stream, and Transition Visualization
@@ -2288,13 +2288,13 @@ analyses:
     name: haralicktexture
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyD
     menuTitle: Haralick Texture Analysis
   - title: IHC Scoring Standardization
     name: ihcscoring
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuTitle: IHC Scoring Standardization
   - title: Multiplex Immunofluorescence Analysis
     name: multiplexanalysis
@@ -3555,7 +3555,7 @@ analyses:
     name: ihccluster
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuSubgroup: IHC Analysis
     menuTitle: IHC Clustering Analysis
     menuSubtitle: Cluster cases by IHC expression patterns

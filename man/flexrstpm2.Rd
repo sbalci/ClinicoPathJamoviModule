@@ -2,7 +2,7 @@
 % Please edit documentation in R/flexrstpm2.h.R
 \name{flexrstpm2}
 \alias{flexrstpm2}
-\title{Flexible Parametric Models (Royston-Parmar)}
+\title{Comprehensive Flexible Parametric Survival Models}
 \usage{
 flexrstpm2(
   data,
@@ -18,9 +18,21 @@ flexrstpm2(
   tvc_df = 3,
   cure_fraction = FALSE,
   bhazard,
+  group_variable,
   link_function = "log",
+  prediction_times = "1, 2, 5, 10",
+  extrapolation_time = 20,
+  confidence_level = 0.95,
   smooth_formula = "",
   robust_se = FALSE,
+  time_ratio = FALSE,
+  relative_survival = FALSE,
+  model_comparison = TRUE,
+  goodness_of_fit = TRUE,
+  hazard_analysis = TRUE,
+  derivative_analysis = FALSE,
+  bootstrap_validation = FALSE,
+  bootstrap_samples = 500,
   show_model_summary = TRUE,
   show_coefficients_table = TRUE,
   show_survival_curves = TRUE,
@@ -45,7 +57,9 @@ flexrstpm2(
 
 \item{scale}{Scale for the flexible parametric model}
 
-\item{df}{Degrees of freedom for baseline spline function}
+\item{df}{Degrees of freedom for baseline spline function (complexity of
+hazard curve). Clinical guide: df=3-4 for most analyses, df=5-6 for complex
+patterns. Need ≥30 events per df for reliable results.}
 
 \item{knots}{Comma-separated knot positions (optional, overrides df)}
 
@@ -60,11 +74,41 @@ interactions)}
 
 \item{bhazard}{Background hazard variable for relative survival analysis}
 
+\item{group_variable}{Optional grouping variable for stratified analysis}
+
 \item{link_function}{Link function for baseline transformation}
+
+\item{prediction_times}{Comma-separated list of time points for survival
+predictions}
+
+\item{extrapolation_time}{Maximum time for survival curve extrapolation}
+
+\item{confidence_level}{Confidence level for confidence intervals}
 
 \item{smooth_formula}{Custom smoothing formula for advanced specifications}
 
 \item{robust_se}{Use robust sandwich estimator for standard errors}
+
+\item{time_ratio}{Include time ratio (acceleration factor) analysis}
+
+\item{relative_survival}{Perform relative survival analysis (requires
+background hazard)}
+
+\item{model_comparison}{Compare flexible parametric models with standard
+parametric models}
+
+\item{goodness_of_fit}{Perform goodness of fit tests and model diagnostics}
+
+\item{hazard_analysis}{Generate hazard function estimates and plots}
+
+\item{derivative_analysis}{Include analysis of hazard function derivatives
+(acceleration/deceleration)}
+
+\item{bootstrap_validation}{Perform bootstrap validation of model
+predictions}
+
+\item{bootstrap_samples}{Number of bootstrap samples for validation (when
+bootstrap enabled)}
 
 \item{show_model_summary}{Display comprehensive model summary}
 
@@ -93,12 +137,26 @@ A results object containing:
 \code{results$timeVaryingTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelFit} \tab \tab \tab \tab \tab a table \cr
 \code{results$splineInfo} \tab \tab \tab \tab \tab a table \cr
+\code{results$parameterEstimates} \tab \tab \tab \tab \tab a table \cr
+\code{results$survivalPredictions} \tab \tab \tab \tab \tab a table \cr
+\code{results$timeRatioAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$relativeSurvivalAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$goodnessOfFitTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$hazardAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$derivativeAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapValidation} \tab \tab \tab \tab \tab a table \cr
 \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$hazardCurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$timeVaryingPlots} \tab \tab \tab \tab \tab an image \cr
 \code{results$modelDiagnostics} \tab \tab \tab \tab \tab an image \cr
 \code{results$residualPlots} \tab \tab \tab \tab \tab an image \cr
 \code{results$splineComponents} \tab \tab \tab \tab \tab an image \cr
+\code{results$hazardFunctionPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$splineBasisPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$modelComparisonPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$derivativePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 }
@@ -110,13 +168,20 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$coefficientsTable)}
 }
 \description{
-Implements Royston-Parmar flexible parametric survival models using
-restricted cubic splines to model the baseline log cumulative hazard
-function. This approach provides a flexible alternative to standard
-parametric models by allowing non-monotonic hazard functions while
-maintaining the advantages of parametric modeling including smooth survival
-curves, extrapolation capability, and direct modeling of covariate effects
-on survival time.
+🔬 FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
+⚕️ CLINICAL USE: Model survival data with smooth, flexible hazard functions
+that can capture  complex patterns (increasing, decreasing, or
+bathtub-shaped hazards). Better than Cox models  when you need to
+extrapolate beyond observed data or estimate absolute risks.
+📊 WHEN TO USE: • Cancer survival with complex hazard patterns • Health
+economic evaluations requiring extrapolation • Time-varying treatment
+effects • Relative survival analysis with population mortality
+⚠️ REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering
+the period of interest • For df>4: need ≥100 events to avoid overfitting
+📈 KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
+predictions at specific time points • Model fit statistics (AIC,
+concordance) • Time-varying effect plots • Copy-ready clinical report
+sentences
 }
 \examples{
 # Example 1: Basic flexible parametric model
