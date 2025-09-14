@@ -49,157 +49,126 @@ can we apply labelled logic as in oddsratio
 ! Rscript -e "devtools::document()"
 
 run jmvtools::prepare() to see if there are any errors
-
 run devtools::document() to see if there are any errors
+
+move csv files under data folder.
+move data generation files under data-raw folder.
+move documantation files under vignettes folder.
 
 ***
 
 
-- haralicktexture - Haralick Texture Analysis
-
-/check-function haralicktexture
-
-/review-function haralicktexture
-/fix-function haralicktexture
-
-
-- ihcstats - IHC Expression Analysis
-/check-function ihcstats
-
-/review-function ihcstats
-/fix-function ihcstats
-
 
 - spatialanalysis - Spatial Statistics from Coordinates
 /check-function spatialanalysis
-
 /review-function spatialanalysis
 /fix-function spatialanalysis
+
+- pathologycomposition - Pathology Composition Analysis
+/check-function pathologycomposition
+/review-function pathologycomposition
+/fix-function pathologycomposition
+
+- ihcstats - IHC Expression Analysis
+/check-function ihcstats
+/review-function ihcstats
+/fix-function ihcstats
+
+- ihccluster - IHC Clustering Analysis
+/check-function ihccluster
+/review-function ihccluster
+/fix-function ihccluster
+
+- ihcscoring - IHC Scoring Standardization
+/check-function ihcscoring
+/review-function ihcscoring
+/fix-function ihcscoring
+
+- multiplexanalysis - Multiplex Immunofluorescence Analysis
+/check-function multiplexanalysis
+/review-function multiplexanalysis
+/fix-function multiplexanalysis
 
 
 - hierarchicalpathology - Hierarchical Mixed-Effects Models
 /check-function hierarchicalpathology
-
 /review-function hierarchicalpathology
 /fix-function hierarchicalpathology
 
 
+
 - consort - CONSORT Flowchart
 /check-function consort
-
 /review-function consort
 /fix-function consort
 
-
 - flowchart - Study Flowchart
 /check-function flowchart
-
 /review-function flowchart
 /fix-function flowchart
 
 
 - clinmon - Clinical Hemodynamic Monitoring
 /check-function clinmon
-
 /review-function clinmon
 /fix-function clinmon
 
 
 - pathologyagreement - Pathology Agreement Analysis
 /check-function pathologyagreement
-
 /review-function pathologyagreement
 /fix-function pathologyagreement
 
 
 - digitalvalidation - Digital Pathology Validation
 /check-function digitalvalidation
-
 /review-function digitalvalidation
 /fix-function digitalvalidation
 
 
 - mlpathology - Classification Performance Metrics for Digital Pathology
 /check-function mlpathology
-
 /review-function mlpathology
 /fix-function mlpathology
 
 
-- ihccluster - IHC Clustering Analysis
-/check-function ihccluster
-
-/review-function ihccluster
-/fix-function ihccluster
-
-
 - biopsysimulation - Biopsy Simulation Analysis
 /check-function biopsysimulation
-
 /review-function biopsysimulation
 /fix-function biopsysimulation
 
 
-- ihcscoring - IHC Scoring Standardization
-/check-function ihcscoring
-
-/review-function ihcscoring
-/fix-function ihcscoring
-
-
 - diagnosticmeta - Diagnostic Test Meta-Analysis for Pathology
 /check-function diagnosticmeta
-
 /review-function diagnosticmeta
 /fix-function diagnosticmeta
+
+- metaanalysis - Meta-Analysis & Evidence Synthesis
+/check-function metaanalysis
+/review-function metaanalysis
+/fix-function metaanalysis
 
 
 - biomarkerresponse - Biomarker Response Association
 /check-function biomarkerresponse
-
 /review-function biomarkerresponse
 /fix-function biomarkerresponse
 
 
 - qualitycontrol - Laboratory Quality Control Statistics
 /check-function qualitycontrol
-
 /review-function qualitycontrol
 /fix-function qualitycontrol
 
 
-- metaanalysis - Meta-Analysis & Evidence Synthesis
-/check-function metaanalysis
-
-/review-function metaanalysis
-/fix-function metaanalysis
-
-
-
-
-- multiplexanalysis - Multiplex Immunofluorescence Analysis
-/check-function multiplexanalysis
-
-/review-function multiplexanalysis
-/fix-function multiplexanalysis
-
 
 - condsurvival - Conditional Survival Analysis
 /check-function condsurvival
-
 /review-function condsurvival
 /fix-function condsurvival
 
 
-- pathologycomposition - Pathology Composition Analysis
-/check-function pathologycomposition
-
-/review-function pathologycomposition
-/fix-function pathologycomposition
-
-
 - timeupdatesurvival - Time-Updated Survival Estimates
 /check-function timeupdatesurvival
-
 /review-function timeupdatesurvival
 /fix-function timeupdatesurvival

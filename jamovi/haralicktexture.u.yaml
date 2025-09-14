@@ -9,13 +9,40 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Optional Variables
+        label: Haralick Texture Features
+        children:
+          - type: VariablesListBox
+            name: texture_features
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable (Optional)
         children:
           - type: VariablesListBox
             name: group_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Clinical Outcome (Optional)
+        children:
+          - type: VariablesListBox
+            name: outcome_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: X Coordinate (Spatial Analysis)
+        children:
+          - type: VariablesListBox
+            name: x_coord
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Y Coordinate (Spatial Analysis)
+        children:
+          - type: VariablesListBox
+            name: y_coord
+            maxItemCount: 1
+            isTarget: true
   - type: LayoutBox
     margin: large
     stretchFactor: 1
@@ -26,7 +53,7 @@ children:
           - type: Label
             label: Analysis Configuration
       - type: CollapseBox
-        label: Statistical Analysis
+        label: Statistical Analysis Options
         collapsed: false
         children:
           - type: LayoutBox
@@ -36,78 +63,43 @@ children:
                 name: normality_testing
               - type: CheckBox
                 name: outlier_detection
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
+  - type: CollapseBox
+    label: Visualization Options
+    collapsed: true
     children:
-      - type: TargetLayoutBox
-        label: Outcome Variable (Optional)
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: outcome_var
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
+          - type: CheckBox
+            name: show_distribution_plots
+          - type: CheckBox
+            name: show_correlation_plot
+          - type: CheckBox
+            name: show_spatial_plot
+  - type: CollapseBox
+    label: Advanced Analysis Options
+    collapsed: true
     children:
-      - type: ComboBox
-        name: outlier_method
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Texture Features
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: texture_features
-            isTarget: true
-      - type: TargetLayoutBox
-        label: X Coordinate (Optional)
+          - type: ComboBox
+            name: analysis_focus
+          - type: ComboBox
+            name: feature_selection
+          - type: ComboBox
+            name: biomarker_context
+          - type: ComboBox
+            name: texture_interpretation
+  - type: CollapseBox
+    label: Statistical Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: x_coord
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Y Coordinate (Optional)
-        children:
-          - type: VariablesListBox
-            name: y_coord
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_distribution_plots
-      - type: CheckBox
-        name: show_correlation_plot
-      - type: CheckBox
-        name: show_spatial_plot
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: analysis_focus
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: texture_interpretation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: feature_selection
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: biomarker_context
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: correlation_threshold
-        format: number
+          - type: TextBox
+            name: correlation_threshold
+            format: number
+          - type: ComboBox
+            name: outlier_method
