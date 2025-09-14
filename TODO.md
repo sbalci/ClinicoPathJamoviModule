@@ -51,23 +51,13 @@ can we apply labelled logic as in oddsratio
 run jmvtools::prepare() to see if there are any errors
 run devtools::document() to see if there are any errors
 
+prepare a realistic data to test the features in detail 
 move csv files under data folder.
 move data generation files under data-raw folder.
 move documantation files under vignettes folder.
 
+
 ***
-
-
-
-- spatialanalysis - Spatial Statistics from Coordinates
-/check-function spatialanalysis
-/review-function spatialanalysis
-/fix-function spatialanalysis
-
-- pathologycomposition - Pathology Composition Analysis
-/check-function pathologycomposition
-/review-function pathologycomposition
-/fix-function pathologycomposition
 
 - ihcstats - IHC Expression Analysis
 /check-function ihcstats
@@ -90,29 +80,44 @@ move documantation files under vignettes folder.
 /fix-function multiplexanalysis
 
 
-- hierarchicalpathology - Hierarchical Mixed-Effects Models
-/check-function hierarchicalpathology
-/review-function hierarchicalpathology
-/fix-function hierarchicalpathology
-
-
-
-- consort - CONSORT Flowchart
-/check-function consort
-/review-function consort
-/fix-function consort
+***
 
 - flowchart - Study Flowchart
+
 /check-function flowchart
+
+check upstream flowchart and ggflowchart packages to get the relevant features, applicable arguments, and outputs. 
+
 /review-function flowchart
 /fix-function flowchart
 
 
-- clinmon - Clinical Hemodynamic Monitoring
-/check-function clinmon
-/review-function clinmon
-/fix-function clinmon
+- consort - CONSORT Flowchart
+/check-function consort
 
+read this documentation and improve implementation:
+https://cran.r-project.org/web/packages/consort/vignettes/consort_diagram.html
+
+
+read this documentation and improve implementation:
+https://www.riinu.me/2024/02/consort/
+
+read this documentation and improve implementation:
+https://hbiostat.org/rflow/doverview.html
+
+implement ggconsort package features
+https://github.com/tgerke/ggconsort
+https://tgerke.github.io/ggconsort/
+
+
+
+/review-function consort
+/fix-function consort
+
+prepare a realistic data to test consort
+
+
+***
 
 - pathologyagreement - Pathology Agreement Analysis
 /check-function pathologyagreement
@@ -120,23 +125,14 @@ move documantation files under vignettes folder.
 /fix-function pathologyagreement
 
 
-- digitalvalidation - Digital Pathology Validation
-/check-function digitalvalidation
-/review-function digitalvalidation
-/fix-function digitalvalidation
-
-
-- mlpathology - Classification Performance Metrics for Digital Pathology
-/check-function mlpathology
-/review-function mlpathology
-/fix-function mlpathology
-
+***
 
 - biopsysimulation - Biopsy Simulation Analysis
 /check-function biopsysimulation
 /review-function biopsysimulation
 /fix-function biopsysimulation
 
+***
 
 - diagnosticmeta - Diagnostic Test Meta-Analysis for Pathology
 /check-function diagnosticmeta
@@ -148,27 +144,3 @@ move documantation files under vignettes folder.
 /review-function metaanalysis
 /fix-function metaanalysis
 
-
-- biomarkerresponse - Biomarker Response Association
-/check-function biomarkerresponse
-/review-function biomarkerresponse
-/fix-function biomarkerresponse
-
-
-- qualitycontrol - Laboratory Quality Control Statistics
-/check-function qualitycontrol
-/review-function qualitycontrol
-/fix-function qualitycontrol
-
-
-
-- condsurvival - Conditional Survival Analysis
-/check-function condsurvival
-/review-function condsurvival
-/fix-function condsurvival
-
-
-- timeupdatesurvival - Time-Updated Survival Estimates
-/check-function timeupdatesurvival
-/review-function timeupdatesurvival
-/fix-function timeupdatesurvival

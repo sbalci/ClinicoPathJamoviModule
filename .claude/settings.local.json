@@ -46,7 +46,11 @@
       "Bash(git checkout:*)",
       "WebFetch(domain:selkamand.github.io)",
       "WebFetch(domain:www.serdarbalci.com)",
-      "Bash(do echo \"=== $param ===\")"
+      "Bash(do echo \"=== $param ===\")",
+      "WebFetch(domain:nrennie.rbind.io)",
+      "WebFetch(domain:bookdown.org)",
+      "Read(//Users/serdarbalci/Documents/GitHub/BrawStats-for-Jamovi-Full/**)",
+      "Bash(yamllint:*)"
     ],
     "deny": [],
     "ask": [],

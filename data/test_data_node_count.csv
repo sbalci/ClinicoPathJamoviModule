@@ -1,0 +1,14 @@
+node_label,participant_count,node_type,study_phase
+"Patients screened for eligibility",485,start,screening
+"Met inclusion criteria",412,process,screening
+"Provided informed consent",389,process,enrollment
+"Randomized to treatment",350,decision,randomization
+"Assigned to Drug A",175,allocation,treatment
+"Assigned to Drug B",175,allocation,treatment
+"Completed treatment - Drug A",156,outcome,completion
+"Completed treatment - Drug B",162,outcome,completion
+"Included in primary analysis",318,final,analysis
+"Included in safety analysis",340,final,analysis
+"Lost to follow-up",32,exclusion,dropout
+"Withdrew consent",21,exclusion,dropout
+"Adverse events leading to discontinuation",19,exclusion,safety

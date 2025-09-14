@@ -6,8 +6,13 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            input_mode = "node_count",
             nodes = NULL,
             counts = NULL,
+            from_var = NULL,
+            to_var = NULL,
+            group_var = NULL,
+            render_engine = "diagrammer",
             direction = "TB",
             nodeWidth = 2.5,
             nodeHeight = 1,
@@ -15,7 +20,26 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showPercentages = TRUE,
             showExclusions = TRUE,
             nodeColor = "blue",
-            includeTitle = TRUE, ...) {
+            enhancedStyling = TRUE,
+            showCounts = TRUE,
+            arrowColor = "darkgray",
+            fontFamily = "default",
+            nodeSpacing = 1,
+            nodeTyping = FALSE,
+            nodeAlpha = 1,
+            decisionNodeColor = "clinical_red",
+            outcomeNodeColor = "success_green",
+            customNodeSizing = FALSE,
+            nodeTextSize = "fixed",
+            advancedPositioning = FALSE,
+            ggplotIntegration = TRUE,
+            layoutAlgorithm = "tree",
+            layoutOrientation = "vertical",
+            intelligentLayout = TRUE,
+            nodeSpreadFactor = 1,
+            plot_title = "Study Flowchart",
+            includeTitle = TRUE,
+            show_interpretation = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -23,6 +47,13 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..input_mode <- jmvcore::OptionList$new(
+                "input_mode",
+                input_mode,
+                options=list(
+                    "node_count",
+                    "edge_list"),
+                default="node_count")
             private$..nodes <- jmvcore::OptionVariables$new(
                 "nodes",
                 nodes,
@@ -37,6 +68,37 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..from_var <- jmvcore::OptionVariable$new(
+                "from_var",
+                from_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..to_var <- jmvcore::OptionVariable$new(
+                "to_var",
+                to_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..group_var <- jmvcore::OptionVariable$new(
+                "group_var",
+                group_var,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..render_engine <- jmvcore::OptionList$new(
+                "render_engine",
+                render_engine,
+                options=list(
+                    "diagrammer",
+                    "ggplot2",
+                    "flowchart_pkg"),
+                default="diagrammer")
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
@@ -76,15 +138,141 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "blue",
                     "gray",
-                    "green"),
+                    "green",
+                    "viridis",
+                    "set1",
+                    "pastel",
+                    "gradient_blue",
+                    "clinical_warm"),
                 default="blue")
+            private$..enhancedStyling <- jmvcore::OptionBool$new(
+                "enhancedStyling",
+                enhancedStyling,
+                default=TRUE)
+            private$..showCounts <- jmvcore::OptionBool$new(
+                "showCounts",
+                showCounts,
+                default=TRUE)
+            private$..arrowColor <- jmvcore::OptionList$new(
+                "arrowColor",
+                arrowColor,
+                options=list(
+                    "darkgray",
+                    "black",
+                    "clinical_blue",
+                    "match_nodes"),
+                default="darkgray")
+            private$..fontFamily <- jmvcore::OptionList$new(
+                "fontFamily",
+                fontFamily,
+                options=list(
+                    "default",
+                    "Arial",
+                    "Times",
+                    "Courier",
+                    "Helvetica"),
+                default="default")
+            private$..nodeSpacing <- jmvcore::OptionNumber$new(
+                "nodeSpacing",
+                nodeSpacing,
+                min=0.5,
+                max=3,
+                default=1)
+            private$..nodeTyping <- jmvcore::OptionBool$new(
+                "nodeTyping",
+                nodeTyping,
+                default=FALSE)
+            private$..nodeAlpha <- jmvcore::OptionNumber$new(
+                "nodeAlpha",
+                nodeAlpha,
+                min=0.1,
+                max=1,
+                default=1)
+            private$..decisionNodeColor <- jmvcore::OptionList$new(
+                "decisionNodeColor",
+                decisionNodeColor,
+                options=list(
+                    "clinical_red",
+                    "warning_orange",
+                    "decision_blue",
+                    "same_primary"),
+                default="clinical_red")
+            private$..outcomeNodeColor <- jmvcore::OptionList$new(
+                "outcomeNodeColor",
+                outcomeNodeColor,
+                options=list(
+                    "success_green",
+                    "neutral_gray",
+                    "result_blue",
+                    "same_primary"),
+                default="success_green")
+            private$..customNodeSizing <- jmvcore::OptionBool$new(
+                "customNodeSizing",
+                customNodeSizing,
+                default=FALSE)
+            private$..nodeTextSize <- jmvcore::OptionList$new(
+                "nodeTextSize",
+                nodeTextSize,
+                options=list(
+                    "fixed",
+                    "content",
+                    "value"),
+                default="fixed")
+            private$..advancedPositioning <- jmvcore::OptionBool$new(
+                "advancedPositioning",
+                advancedPositioning,
+                default=FALSE)
+            private$..ggplotIntegration <- jmvcore::OptionBool$new(
+                "ggplotIntegration",
+                ggplotIntegration,
+                default=TRUE)
+            private$..layoutAlgorithm <- jmvcore::OptionList$new(
+                "layoutAlgorithm",
+                layoutAlgorithm,
+                options=list(
+                    "tree",
+                    "nicely",
+                    "star",
+                    "circle",
+                    "custom"),
+                default="tree")
+            private$..layoutOrientation <- jmvcore::OptionList$new(
+                "layoutOrientation",
+                layoutOrientation,
+                options=list(
+                    "vertical",
+                    "horizontal"),
+                default="vertical")
+            private$..intelligentLayout <- jmvcore::OptionBool$new(
+                "intelligentLayout",
+                intelligentLayout,
+                default=TRUE)
+            private$..nodeSpreadFactor <- jmvcore::OptionNumber$new(
+                "nodeSpreadFactor",
+                nodeSpreadFactor,
+                min=0.5,
+                max=2.5,
+                default=1)
+            private$..plot_title <- jmvcore::OptionString$new(
+                "plot_title",
+                plot_title,
+                default="Study Flowchart")
             private$..includeTitle <- jmvcore::OptionBool$new(
                 "includeTitle",
                 includeTitle,
                 default=TRUE)
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
+                default=TRUE)
 
+            self$.addOption(private$..input_mode)
             self$.addOption(private$..nodes)
             self$.addOption(private$..counts)
+            self$.addOption(private$..from_var)
+            self$.addOption(private$..to_var)
+            self$.addOption(private$..group_var)
+            self$.addOption(private$..render_engine)
             self$.addOption(private$..direction)
             self$.addOption(private$..nodeWidth)
             self$.addOption(private$..nodeHeight)
@@ -92,11 +280,35 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showPercentages)
             self$.addOption(private$..showExclusions)
             self$.addOption(private$..nodeColor)
+            self$.addOption(private$..enhancedStyling)
+            self$.addOption(private$..showCounts)
+            self$.addOption(private$..arrowColor)
+            self$.addOption(private$..fontFamily)
+            self$.addOption(private$..nodeSpacing)
+            self$.addOption(private$..nodeTyping)
+            self$.addOption(private$..nodeAlpha)
+            self$.addOption(private$..decisionNodeColor)
+            self$.addOption(private$..outcomeNodeColor)
+            self$.addOption(private$..customNodeSizing)
+            self$.addOption(private$..nodeTextSize)
+            self$.addOption(private$..advancedPositioning)
+            self$.addOption(private$..ggplotIntegration)
+            self$.addOption(private$..layoutAlgorithm)
+            self$.addOption(private$..layoutOrientation)
+            self$.addOption(private$..intelligentLayout)
+            self$.addOption(private$..nodeSpreadFactor)
+            self$.addOption(private$..plot_title)
             self$.addOption(private$..includeTitle)
+            self$.addOption(private$..show_interpretation)
         }),
     active = list(
+        input_mode = function() private$..input_mode$value,
         nodes = function() private$..nodes$value,
         counts = function() private$..counts$value,
+        from_var = function() private$..from_var$value,
+        to_var = function() private$..to_var$value,
+        group_var = function() private$..group_var$value,
+        render_engine = function() private$..render_engine$value,
         direction = function() private$..direction$value,
         nodeWidth = function() private$..nodeWidth$value,
         nodeHeight = function() private$..nodeHeight$value,
@@ -104,10 +316,34 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showPercentages = function() private$..showPercentages$value,
         showExclusions = function() private$..showExclusions$value,
         nodeColor = function() private$..nodeColor$value,
-        includeTitle = function() private$..includeTitle$value),
+        enhancedStyling = function() private$..enhancedStyling$value,
+        showCounts = function() private$..showCounts$value,
+        arrowColor = function() private$..arrowColor$value,
+        fontFamily = function() private$..fontFamily$value,
+        nodeSpacing = function() private$..nodeSpacing$value,
+        nodeTyping = function() private$..nodeTyping$value,
+        nodeAlpha = function() private$..nodeAlpha$value,
+        decisionNodeColor = function() private$..decisionNodeColor$value,
+        outcomeNodeColor = function() private$..outcomeNodeColor$value,
+        customNodeSizing = function() private$..customNodeSizing$value,
+        nodeTextSize = function() private$..nodeTextSize$value,
+        advancedPositioning = function() private$..advancedPositioning$value,
+        ggplotIntegration = function() private$..ggplotIntegration$value,
+        layoutAlgorithm = function() private$..layoutAlgorithm$value,
+        layoutOrientation = function() private$..layoutOrientation$value,
+        intelligentLayout = function() private$..intelligentLayout$value,
+        nodeSpreadFactor = function() private$..nodeSpreadFactor$value,
+        plot_title = function() private$..plot_title$value,
+        includeTitle = function() private$..includeTitle$value,
+        show_interpretation = function() private$..show_interpretation$value),
     private = list(
+        ..input_mode = NA,
         ..nodes = NA,
         ..counts = NA,
+        ..from_var = NA,
+        ..to_var = NA,
+        ..group_var = NA,
+        ..render_engine = NA,
         ..direction = NA,
         ..nodeWidth = NA,
         ..nodeHeight = NA,
@@ -115,7 +351,26 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showPercentages = NA,
         ..showExclusions = NA,
         ..nodeColor = NA,
-        ..includeTitle = NA)
+        ..enhancedStyling = NA,
+        ..showCounts = NA,
+        ..arrowColor = NA,
+        ..fontFamily = NA,
+        ..nodeSpacing = NA,
+        ..nodeTyping = NA,
+        ..nodeAlpha = NA,
+        ..decisionNodeColor = NA,
+        ..outcomeNodeColor = NA,
+        ..customNodeSizing = NA,
+        ..nodeTextSize = NA,
+        ..advancedPositioning = NA,
+        ..ggplotIntegration = NA,
+        ..layoutAlgorithm = NA,
+        ..layoutOrientation = NA,
+        ..intelligentLayout = NA,
+        ..nodeSpreadFactor = NA,
+        ..plot_title = NA,
+        ..includeTitle = NA,
+        ..show_interpretation = NA)
 )
 
 flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -124,7 +379,8 @@ flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         diagram = function() private$.items[["diagram"]],
-        nodeData = function() private$.items[["nodeData"]]),
+        nodeData = function() private$.items[["nodeData"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -138,17 +394,18 @@ flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do"))
-            self$add(jmvcore::Image$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="diagram",
                 title="Flowchart Diagram",
-                width=800,
-                height=1000,
-                renderFun=".plot",
-                requiresData=TRUE,
                 clearWith=list(
+                    "input_mode",
                     "nodes",
                     "counts",
+                    "from_var",
+                    "to_var",
+                    "group_var",
+                    "render_engine",
                     "direction",
                     "nodeWidth",
                     "nodeHeight",
@@ -156,7 +413,25 @@ flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "showPercentages",
                     "showExclusions",
                     "nodeColor",
-                    "includeTitle")))
+                    "enhancedStyling",
+                    "showCounts",
+                    "arrowColor",
+                    "fontFamily",
+                    "nodeSpacing",
+                    "nodeTyping",
+                    "nodeAlpha",
+                    "decisionNodeColor",
+                    "outcomeNodeColor",
+                    "customNodeSizing",
+                    "nodeTextSize",
+                    "advancedPositioning",
+                    "ggplotIntegration",
+                    "layoutAlgorithm",
+                    "layoutOrientation",
+                    "intelligentLayout",
+                    "nodeSpreadFactor",
+                    "includeTitle",
+                    "plot_title")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nodeData",
@@ -171,8 +446,19 @@ flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Count", 
                         `type`="integer")),
                 clearWith=list(
+                    "input_mode",
                     "nodes",
-                    "counts")))}))
+                    "counts",
+                    "from_var",
+                    "to_var")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Analysis Guide",
+                clearWith=list(
+                    "input_mode",
+                    "render_engine",
+                    "show_interpretation")))}))
 
 flowchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "flowchartBase",
@@ -182,7 +468,7 @@ flowchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "flowchart",
-                version = c(1,0,0),
+                version = c(2,0,0),
                 options = options,
                 results = flowchartResults$new(options=options),
                 data = data,
@@ -197,23 +483,64 @@ flowchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Study Flowchart
 #'
-#' Creates CONSORT-style flowcharts showing participant flow through studies
+#' Creates professional flowcharts for research workflows using DiagrammeR or 
+#' ggplot2
 #' @param data The data as a data frame.
-#' @param nodes Variables containing node descriptions/labels
-#' @param counts Variables containing counts for each node
-#' @param direction Direction of flowchart flow
+#' @param input_mode Choose data structure: Node-Count for sequential
+#'   flowcharts with counts,  Edge-List for network-style process connections
+#'   (use CONSORT function for clinical trial diagrams)
+#' @param nodes Variables containing node descriptions/labels (for Node-Count
+#'   mode)
+#' @param counts Variables containing counts for each node (for Node-Count
+#'   mode)
+#' @param from_var Variable defining starting nodes (for Edge-List mode)
+#' @param to_var Variable defining ending nodes (for Edge-List mode)
+#' @param group_var Optional variable for grouping nodes by categories
+#' @param render_engine Choose rendering engine: DiagrammeR for traditional
+#'   flowcharts,  ggplot2 for modern aesthetics, Clinical Flow for participant
+#'   flow diagrams
+#' @param direction Direction of flowchart flow (DiagrammeR mode)
 #' @param nodeWidth .
 #' @param nodeHeight .
 #' @param fontSize .
 #' @param showPercentages Show percentage of initial participants at each step
 #' @param showExclusions Show exclusion counts on edge labels
-#' @param nodeColor Color scheme for nodes
+#' @param nodeColor Color scheme for nodes (works with both rendering engines)
+#' @param enhancedStyling Apply enhanced modern styling for ggplot2 rendering
+#'   mode
+#' @param showCounts Include count information in node labels for ggplot2
+#'   rendering
+#' @param arrowColor Color scheme for arrows in ggplot2 mode
+#' @param fontFamily Font family for node text in ggplot2 mode
+#' @param nodeSpacing Horizontal spacing adjustment for nodes in ggplot2 mode
+#' @param nodeTyping Enable automatic node type detection and styling for
+#'   decision trees
+#' @param nodeAlpha Transparency level for nodes in ggplot2 mode (1.0 =
+#'   opaque)
+#' @param decisionNodeColor Special color scheme for decision/question nodes
+#' @param outcomeNodeColor Special color scheme for outcome/result nodes
+#' @param customNodeSizing Enable automatic node sizing based on content
+#'   length or data values
+#' @param nodeTextSize How to scale text size within nodes
+#' @param advancedPositioning Enable fine-tuned node positioning with nudging
+#'   capabilities
+#' @param ggplotIntegration Use complete ggplot2 theming and scale integration
+#' @param layoutAlgorithm Layout algorithm for node positioning in ggplot2
+#'   mode
+#' @param layoutOrientation Primary orientation for flowchart layout
+#' @param intelligentLayout Automatically choose optimal layout based on
+#'   flowchart structure
+#' @param nodeSpreadFactor Controls overall spacing between nodes (1.0 =
+#'   standard spacing)
+#' @param plot_title Title for the flowchart
 #' @param includeTitle Include automatic title with flow statistics
+#' @param show_interpretation Show interpretation and usage guide
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$diagram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagram} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nodeData} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -225,8 +552,13 @@ flowchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 flowchart <- function(
     data,
+    input_mode = "node_count",
     nodes,
     counts,
+    from_var,
+    to_var,
+    group_var,
+    render_engine = "diagrammer",
     direction = "TB",
     nodeWidth = 2.5,
     nodeHeight = 1,
@@ -234,24 +566,57 @@ flowchart <- function(
     showPercentages = TRUE,
     showExclusions = TRUE,
     nodeColor = "blue",
-    includeTitle = TRUE) {
+    enhancedStyling = TRUE,
+    showCounts = TRUE,
+    arrowColor = "darkgray",
+    fontFamily = "default",
+    nodeSpacing = 1,
+    nodeTyping = FALSE,
+    nodeAlpha = 1,
+    decisionNodeColor = "clinical_red",
+    outcomeNodeColor = "success_green",
+    customNodeSizing = FALSE,
+    nodeTextSize = "fixed",
+    advancedPositioning = FALSE,
+    ggplotIntegration = TRUE,
+    layoutAlgorithm = "tree",
+    layoutOrientation = "vertical",
+    intelligentLayout = TRUE,
+    nodeSpreadFactor = 1,
+    plot_title = "Study Flowchart",
+    includeTitle = TRUE,
+    show_interpretation = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("flowchart requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(nodes)) nodes <- jmvcore::resolveQuo(jmvcore::enquo(nodes))
     if ( ! missing(counts)) counts <- jmvcore::resolveQuo(jmvcore::enquo(counts))
+    if ( ! missing(from_var)) from_var <- jmvcore::resolveQuo(jmvcore::enquo(from_var))
+    if ( ! missing(to_var)) to_var <- jmvcore::resolveQuo(jmvcore::enquo(to_var))
+    if ( ! missing(group_var)) group_var <- jmvcore::resolveQuo(jmvcore::enquo(group_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(nodes), nodes, NULL),
-            `if`( ! missing(counts), counts, NULL))
+            `if`( ! missing(counts), counts, NULL),
+            `if`( ! missing(from_var), from_var, NULL),
+            `if`( ! missing(to_var), to_var, NULL),
+            `if`( ! missing(group_var), group_var, NULL))
 
     for (v in nodes) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in from_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in to_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in group_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- flowchartOptions$new(
+        input_mode = input_mode,
         nodes = nodes,
         counts = counts,
+        from_var = from_var,
+        to_var = to_var,
+        group_var = group_var,
+        render_engine = render_engine,
         direction = direction,
         nodeWidth = nodeWidth,
         nodeHeight = nodeHeight,
@@ -259,7 +624,26 @@ flowchart <- function(
         showPercentages = showPercentages,
         showExclusions = showExclusions,
         nodeColor = nodeColor,
-        includeTitle = includeTitle)
+        enhancedStyling = enhancedStyling,
+        showCounts = showCounts,
+        arrowColor = arrowColor,
+        fontFamily = fontFamily,
+        nodeSpacing = nodeSpacing,
+        nodeTyping = nodeTyping,
+        nodeAlpha = nodeAlpha,
+        decisionNodeColor = decisionNodeColor,
+        outcomeNodeColor = outcomeNodeColor,
+        customNodeSizing = customNodeSizing,
+        nodeTextSize = nodeTextSize,
+        advancedPositioning = advancedPositioning,
+        ggplotIntegration = ggplotIntegration,
+        layoutAlgorithm = layoutAlgorithm,
+        layoutOrientation = layoutOrientation,
+        intelligentLayout = intelligentLayout,
+        nodeSpreadFactor = nodeSpreadFactor,
+        plot_title = plot_title,
+        includeTitle = includeTitle,
+        show_interpretation = show_interpretation)
 
     analysis <- flowchartClass$new(
         options = options,

@@ -2,88 +2,210 @@ title: CONSORT Flowchart
 name: consort
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
-  - type: CollapseBox
-    label: Enrollment
-    collapsed: false
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Initial Numbers
-            children:
-              - type: TextBox
-                name: initialN
-                format: number
-              - type: TextBox
-                name: notEligibleN
-                format: number
-              - type: TextBox
-                name: notEligibleText
-                format: string
-                width: large
-  - type: CollapseBox
-    label: Randomization & Arms
-    collapsed: false
+      - type: TextBox
+        name: initialN
+        format: number
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Randomization
-            children:
-              - type: TextBox
-                name: randomizedN
-                format: number
-          - type: Label
-            label: Arm 1
-            children:
-              - type: TextBox
-                name: arm1Label
-                format: string
-              - type: TextBox
-                name: arm1N
-                format: number
-              - type: TextBox
-                name: arm1ReceivedN
-                format: number
-              - type: TextBox
-                name: arm1LostN
-                format: number
-              - type: TextBox
-                name: arm1AnalyzedN
-                format: number
-          - type: Label
-            label: Arm 2
-            children:
-              - type: TextBox
-                name: arm2Label
-                format: string
-              - type: TextBox
-                name: arm2N
-                format: number
-              - type: TextBox
-                name: arm2ReceivedN
-                format: number
-              - type: TextBox
-                name: arm2LostN
-                format: number
-              - type: TextBox
-                name: arm2AnalyzedN
-                format: number
-  - type: CollapseBox
-    label: Additional Information
-    collapsed: true
+      - type: TextBox
+        name: notEligibleN
+        format: number
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
+      - type: TextBox
+        name: notEligibleText
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: randomizedN
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm1Label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm1N
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm1ReceivedN
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm1LostN
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm1AnalyzedN
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm2Label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm2N
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm2ReceivedN
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm2LostN
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: arm2AnalyzedN
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: excludedText
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Participant ID Variable
         children:
-          - type: Label
-            label: Exclusion Details
-            children:
-              - type: TextBox
-                name: excludedText
-                format: string
-                width: large
+          - type: VariablesListBox
+            name: participant_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Randomization Variable
+        children:
+          - type: VariablesListBox
+            name: randomization_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Treatment Group Variable
+        children:
+          - type: VariablesListBox
+            name: trial_group_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Study Completion Variable
+        children:
+          - type: VariablesListBox
+            name: completion_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Primary Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Exclusion Reason Variable
+        children:
+          - type: VariablesListBox
+            name: exclusion_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: consort_labels
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_reasons
+      - type: CheckBox
+        name: validate_consort
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: render_engine
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: output_style
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: include_title
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: flowchart_title
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_percentages
+      - type: CheckBox
+        name: show_statistics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: color_scheme
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: node_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: node_height
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: font_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: export_format

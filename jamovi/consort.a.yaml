@@ -2,7 +2,7 @@
 name: consort
 title: CONSORT Flowchart
 menuGroup: OncoPathologyT2
-menuSubgroup: ClinicoPath Reports
+menuSubgroup: Study Design
 version: '0.0.3'
 jas: '1.2'
 
@@ -101,4 +101,214 @@ options:
       default: ""
       description:
           R: Reasons for post-randomization exclusions (comma separated)
+
+    # Data-driven mode variables
+    - name: participant_var
+      title: Participant ID Variable
+      type: Variable
+      suggested:
+          - id
+          - nominal
+      permitted:
+          - factor
+          - numeric
+          - id
+      description:
+          R: Variable containing participant identifiers
+
+    - name: randomization_var
+      title: Randomization Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Variable indicating randomization status (1 = randomized, 0 = not randomized)
+
+    - name: trial_group_var
+      title: Treatment Group Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Variable containing treatment group assignments
+
+    - name: completion_var
+      title: Study Completion Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Variable indicating study completion status (1 = completed, 0 = not completed)
+
+    - name: outcome_var
+      title: Primary Outcome Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Variable containing primary outcome results
+
+    - name: exclusion_var
+      title: Exclusion Reason Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Variable containing reasons for exclusion or dropout
+
+    # CONSORT compliance options
+    - name: consort_labels
+      title: CONSORT Stage Labels
+      type: String
+      default: "Assessed for eligibility,Randomized,Allocated,Analyzed"
+      description:
+          R: Comma-separated labels for CONSORT stages
+
+    - name: show_reasons
+      title: Show Exclusion Reasons
+      type: Bool
+      default: true
+      description:
+          R: Display exclusion reasons in the flowchart
+
+    - name: validate_consort
+      title: Validate CONSORT Compliance
+      type: Bool
+      default: false
+      description:
+          R: Perform CONSORT 2010 compliance validation
+
+    # Advanced visualization options (migrated from flowchart clinical trial mode)
+    - name: render_engine
+      title: Visualization Engine
+      type: List
+      options:
+        - name: diagrammer
+          title: Classic DiagrammeR
+        - name: html_css
+          title: Professional HTML/CSS
+        - name: clinical_flow
+          title: Clinical Flow Specialized
+      default: diagrammer
+      description:
+          R: Rendering engine for the flowchart visualization
+
+    - name: output_style
+      title: Output Style
+      type: List
+      options:
+        - name: publication
+          title: Publication Ready
+        - name: presentation
+          title: Presentation Style
+        - name: clinical
+          title: Clinical Report
+        - name: regulatory
+          title: Regulatory Submission
+      default: publication
+      description:
+          R: Style template for the output format
+
+    - name: include_title
+      title: Include Title
+      type: Bool
+      default: true
+      description:
+          R: Include a title in the flowchart
+
+    - name: flowchart_title
+      title: Flowchart Title
+      type: String
+      default: "CONSORT 2010 Flow Diagram"
+      description:
+          R: Title to display above the flowchart
+
+    - name: show_percentages
+      title: Show Percentages
+      type: Bool
+      default: true
+      description:
+          R: Display percentages in addition to counts
+
+    - name: show_statistics
+      title: Show Summary Statistics
+      type: Bool
+      default: true
+      description:
+          R: Include summary statistics below the flowchart
+
+    - name: color_scheme
+      title: Color Scheme
+      type: List
+      options:
+        - name: clinical
+          title: Clinical Blue/Green
+        - name: neutral
+          title: Neutral Gray
+        - name: accessible
+          title: Colorblind Accessible
+        - name: publication
+          title: Publication B&W
+      default: clinical
+      description:
+          R: Color scheme for the flowchart elements
+
+    - name: node_width
+      title: Node Width
+      type: Number
+      min: 100
+      max: 400
+      default: 200
+      description:
+          R: Width of flowchart nodes in pixels
+
+    - name: node_height
+      title: Node Height
+      type: Number
+      min: 50
+      max: 200
+      default: 80
+      description:
+          R: Height of flowchart nodes in pixels
+
+    - name: font_size
+      title: Font Size
+      type: Number
+      min: 8
+      max: 24
+      default: 12
+      description:
+          R: Font size for text in the flowchart
+
+    - name: export_format
+      title: Export Options
+      type: List
+      options:
+        - name: html
+          title: HTML only
+        - name: svg
+          title: SVG Vector
+        - name: png
+          title: PNG Image
+        - name: all
+          title: All Formats
+      default: html
+      description:
+          R: Available export formats for the flowchart
 ...

@@ -31,6 +31,82 @@ items:
       height: 1000
       renderFun: .plot
       requiresData: false
+      clearWith:
+        - initialN
+        - notEligibleN
+        - notEligibleText
+        - randomizedN
+        - arm1Label
+        - arm1N
+        - arm1ReceivedN
+        - arm1LostN
+        - arm1AnalyzedN
+        - arm2Label
+        - arm2N
+        - arm2ReceivedN
+        - arm2LostN
+        - arm2AnalyzedN
+        - excludedText
+        - participant_var
+        - randomization_var
+        - trial_group_var
+        - completion_var
+        - outcome_var
+        - exclusion_var
+        - consort_labels
+        - show_reasons
+        - validate_consort
+        - render_engine
+        - output_style
+        - include_title
+        - flowchart_title
+        - show_percentages
+        - show_statistics
+        - color_scheme
+        - node_width
+        - node_height
+        - font_size
+        - export_format
+
+    - name: consortDiagram
+      title: 'Enhanced CONSORT Diagram'
+      type: Html
+      clearWith:
+        - initialN
+        - notEligibleN
+        - notEligibleText
+        - randomizedN
+        - arm1Label
+        - arm1N
+        - arm1ReceivedN
+        - arm1LostN
+        - arm1AnalyzedN
+        - arm2Label
+        - arm2N
+        - arm2ReceivedN
+        - arm2LostN
+        - arm2AnalyzedN
+        - excludedText
+        - participant_var
+        - randomization_var
+        - trial_group_var
+        - completion_var
+        - outcome_var
+        - exclusion_var
+        - consort_labels
+        - show_reasons
+        - validate_consort
+        - render_engine
+        - output_style
+        - include_title
+        - flowchart_title
+        - show_percentages
+        - show_statistics
+        - color_scheme
+        - node_width
+        - node_height
+        - font_size
+        - export_format
 
     - name: text
       title: 'Text Summary'

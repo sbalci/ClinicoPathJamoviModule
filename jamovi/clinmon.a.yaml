@@ -1,7 +1,7 @@
 ---
 name: clinmon
 title: Clinical Hemodynamic Monitoring
-menuGroup: OncoPathologyT2
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: 'Hemodynamic Indices from Continuous Monitoring'
 version: '0.0.3'

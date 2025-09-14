@@ -4,42 +4,98 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: "📊 Quick Start Guide"
+    collapsed: false
+    children:
+      - type: Label
+        label: "👥 Node-Count: Use 'Step Names' + 'Participant Counts' variables"
+        margin: small
+      - type: Label
+        label: "🔄 Edge-List: Use 'From Step' + 'To Step' (+ optional Grouping)"
+        margin: small
+  
+  - type: ComboBox
+    name: input_mode
+    label: "📋 Flowchart Type"
+    margin: large
+
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
+
+      # All Variables - User will see all options, but we'll provide clear guidance about which to use
       - type: TargetLayoutBox
-        label: Node Data
+        label: "📝 Step Names (for Node-Count mode: 'Screened', 'Enrolled')"
         children:
           - type: VariablesListBox
             name: nodes
             isTarget: true
+            
       - type: TargetLayoutBox
-        label: Node Counts  
+        label: "🔢 Participant Counts (for Node-Count mode: 500, 485, 450)"
         children:
           - type: VariablesListBox
             name: counts
             isTarget: true
+
+      - type: TargetLayoutBox
+        label: "🔗 From Step (for Edge-List mode)"
+        children:
+          - type: VariablesListBox
+            name: from_var
+            maxItemCount: 1
+            isTarget: true
+            
+      - type: TargetLayoutBox
+        label: "➡️ To Step (for Edge-List mode)"
+        children:
+          - type: VariablesListBox
+            name: to_var
+            maxItemCount: 1
+            isTarget: true
+            
+      - type: TargetLayoutBox
+        label: "📊 Grouping (Optional - for Edge-List mode)"
+        children:
+          - type: VariablesListBox
+            name: group_var
+            maxItemCount: 1
+            isTarget: true
+
   - type: CollapseBox
-    label: Layout Options
+    label: "⚙️ Style & Layout"
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
+          - type: Label
+            label: "🎨 Visualization Style:"
+          - type: ComboBox
+            name: render_engine
+            label: "Engine"
+          - type: Label
+            label: "💡 DiagrammeR=Classic | ggplot2=Modern | Clinical Flow=CONSORT"
+            margin: small
           - type: ComboBox
             name: direction
+            label: "Flow Direction"
           - type: TextBox
             name: nodeWidth
+            label: "Box Width"
             format: number
           - type: TextBox  
             name: nodeHeight
+            label: "Box Height"
             format: number
           - type: TextBox
             name: fontSize
+            label: "Font Size"
             format: number
   - type: CollapseBox
-    label: Display Options
+    label: "🎨 Display Options"
     collapsed: true
     children:
       - type: LayoutBox
@@ -47,9 +103,84 @@ children:
         children:
           - type: CheckBox
             name: showPercentages
+            label: "Show percentages"
           - type: CheckBox
             name: showExclusions
+            label: "Show exclusions"
           - type: CheckBox
             name: includeTitle
+            label: "Include title"
+          - type: CheckBox
+            name: show_interpretation
+            label: "Show help text"
+          - type: TextBox
+            name: plot_title
+            label: "Chart title"
+            format: string
+      
+      - type: CollapseBox
+        label: "🌈 Colors & Fonts"
+        collapsed: true
+        children:
           - type: ComboBox
             name: nodeColor
+            label: "Box colors"
+          - type: ComboBox
+            name: arrowColor
+            label: "Arrow colors"
+          - type: ComboBox
+            name: fontFamily
+            label: "Font"
+          - type: CheckBox
+            name: enhancedStyling
+            label: "Enhanced styling"
+      
+      - type: CollapseBox
+        label: "📐 Advanced Layout"
+        collapsed: true
+        children:
+          - type: CheckBox
+            name: showCounts
+            label: "Show counts in ggplot2"
+          - type: TextBox
+            name: nodeSpacing
+            label: "Box spacing"
+            format: number
+          - type: CheckBox
+            name: nodeTyping
+            label: "Smart node types"
+          - type: TextBox
+            name: nodeAlpha
+            label: "Transparency (0-1)"
+            format: number
+          - type: ComboBox
+            name: decisionNodeColor
+            label: "Decision box colors"
+          - type: ComboBox
+            name: outcomeNodeColor
+            label: "Outcome box colors"
+          - type: CheckBox
+            name: customNodeSizing
+            label: "Auto-size boxes"
+          - type: ComboBox
+            name: nodeTextSize
+            label: "Text sizing"
+          - type: CheckBox
+            name: advancedPositioning
+            label: "Advanced positioning"
+          - type: CheckBox
+            name: ggplotIntegration
+            label: "Full ggplot2 features"
+          - type: ComboBox
+            name: layoutAlgorithm
+            label: "Layout algorithm"
+          - type: ComboBox
+            name: layoutOrientation
+            label: "Orientation"
+          - type: CheckBox
+            name: intelligentLayout
+            label: "Smart layout"
+          - type: TextBox
+            name: nodeSpreadFactor
+            label: "Spread factor"
+            format: number

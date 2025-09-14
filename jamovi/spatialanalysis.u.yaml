@@ -10,7 +10,11 @@ children:
     children:
       - type: TargetLayoutBox
         label: X Coordinates
+        stretchFactor: 1
         children:
+          - type: Label
+            label: "Spatial X-axis positions (e.g., cell centers, immune cell locations)"
+            margin: small
           - type: VariablesListBox
             name: coords_x
             maxItemCount: 1
@@ -18,7 +22,11 @@ children:
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
         label: Y Coordinates
+        stretchFactor: 1
         children:
+          - type: Label
+            label: "Spatial Y-axis positions (must correspond to X coordinates)"
+            margin: small
           - type: VariablesListBox
             name: coords_y
             maxItemCount: 1
@@ -26,7 +34,11 @@ children:
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
         label: Cell Types (Optional)
+        stretchFactor: 1
         children:
+          - type: Label
+            label: "Cell type classification (e.g., T-cell, B-cell, tumor cell)"
+            margin: small
           - type: VariablesListBox
             name: cell_types
             maxItemCount: 1
@@ -34,15 +46,23 @@ children:
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
         label: Group Variable (Optional)
+        stretchFactor: 1
         children:
+          - type: Label
+            label: "Compare spatial patterns between conditions (e.g., treated vs control)"
+            margin: small
           - type: VariablesListBox
             name: groups
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
-        label: ROI ID (Optional)
+        label: Region of Interest (Optional)
+        stretchFactor: 1
         children:
+          - type: Label
+            label: "Tissue region identifier for analyzing multiple areas separately"
+            margin: small
           - type: VariablesListBox
             name: roi_id
             maxItemCount: 1
@@ -57,40 +77,85 @@ children:
         children:
           - type: Label
             label: Analysis Options
+          - type: Label
+            label: "Select which spatial analyses to perform:"
+            margin: small
           - type: CheckBox
             name: perform_ripley
+            label: "Ripley's K-function (clustering detection)"
+          - type: Label
+            label: "Tests if cells are randomly distributed, clustered, or dispersed at different distances"
+            margin: small
           - type: CheckBox
             name: perform_nnd
+            label: "Nearest Neighbor Analysis (randomness test)"
+          - type: Label
+            label: "Clark-Evans test: compares observed vs expected nearest neighbor distances"
+            margin: small
           - type: CheckBox
             name: perform_hotspot
+            label: "Hotspot Detection (density peaks)"
+          - type: Label
+            label: "Identifies areas with unusually high cell concentrations using statistical methods"
+            margin: small
           - type: CheckBox
             name: perform_interaction
+            label: "Cell Type Interactions (requires cell types)"
+          - type: Label
+            label: "Analyzes spatial relationships between different cell populations"
+            margin: small
           - type: CheckBox
             name: show_plots
+            label: "Generate Spatial Visualization"
+          - type: Label
+            label: "Creates scatter plot showing cell positions, colored by cell type if available"
+            margin: small
   - type: LayoutBox
     margin: large
     children:
+      - type: Label
+        label: "Advanced Settings"
       - type: ComboBox
         name: analysis_scope
+        label: "Analysis Depth"
+      - type: Label
+        label: "Controls which analyses are included (basic: core stats only, comprehensive: all methods)"
+        margin: small
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: distance_method
+        label: "Distance Calculation"
+      - type: Label
+        label: "Method for measuring distances between cells (Euclidean: straight-line, Manhattan: grid-based)"
+        margin: small
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: correction_method
+        label: "Edge Correction"
+      - type: Label
+        label: "Corrects for bias near tissue boundaries (recommended: Both Methods)"
+        margin: small
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: significance_level
         format: number
+        label: "Significance Level (α)"
+      - type: Label
+        label: "Statistical threshold for detecting significant patterns (typical: 0.05 = 5%)"
+        margin: small
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: min_points
         format: number
+        label: "Minimum Points Required"
+      - type: Label
+        label: "Minimum number of cells needed for reliable spatial analysis (recommended: ≥10)"
+        margin: small

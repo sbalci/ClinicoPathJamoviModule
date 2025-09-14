@@ -221,7 +221,7 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Haralick Texture Analysis",
                 refs=list(
-                    "ClinicoPath"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
