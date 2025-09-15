@@ -8,6 +8,8 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         initialize = function(
             dep1 = NULL,
             dep2 = NULL,
+            additional_methods = NULL,
+            clinical_preset = "general",
             bootstrap_n = 1000,
             conf_level = 0.95,
             show_plots = TRUE,
@@ -35,6 +37,22 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..additional_methods <- jmvcore::OptionVariables$new(
+                "additional_methods",
+                additional_methods,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..clinical_preset <- jmvcore::OptionList$new(
+                "clinical_preset",
+                clinical_preset,
+                options=list(
+                    "general",
+                    "biomarker_platforms",
+                    "ai_pathologist",
+                    "multisite_validation"),
+                default="general")
             private$..bootstrap_n <- jmvcore::OptionInteger$new(
                 "bootstrap_n",
                 bootstrap_n,
@@ -56,7 +74,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 icc_type,
                 options=list(
                     "consistency",
-                    "agreement"),
+                    "absolute"),
                 default="consistency")
             private$..correlation_method <- jmvcore::OptionList$new(
                 "correlation_method",
@@ -73,6 +91,8 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 
             self$.addOption(private$..dep1)
             self$.addOption(private$..dep2)
+            self$.addOption(private$..additional_methods)
+            self$.addOption(private$..clinical_preset)
             self$.addOption(private$..bootstrap_n)
             self$.addOption(private$..conf_level)
             self$.addOption(private$..show_plots)
@@ -83,6 +103,8 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     active = list(
         dep1 = function() private$..dep1$value,
         dep2 = function() private$..dep2$value,
+        additional_methods = function() private$..additional_methods$value,
+        clinical_preset = function() private$..clinical_preset$value,
         bootstrap_n = function() private$..bootstrap_n$value,
         conf_level = function() private$..conf_level$value,
         show_plots = function() private$..show_plots$value,
@@ -92,6 +114,8 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     private = list(
         ..dep1 = NA,
         ..dep2 = NA,
+        ..additional_methods = NA,
+        ..clinical_preset = NA,
         ..bootstrap_n = NA,
         ..conf_level = NA,
         ..show_plots = NA,
@@ -108,7 +132,13 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         agreementtable = function() private$.items[["agreementtable"]],
         correlationtable = function() private$.items[["correlationtable"]],
         scatterplot = function() private$.items[["scatterplot"]],
-        blandaltmanplot = function() private$.items[["blandaltmanplot"]]),
+        blandaltmanplot = function() private$.items[["blandaltmanplot"]],
+        multimethod_summary = function() private$.items[["multimethod_summary"]],
+        correlationmatrix = function() private$.items[["correlationmatrix"]],
+        overall_icc_table = function() private$.items[["overall_icc_table"]],
+        report_sentences = function() private$.items[["report_sentences"]],
+        statistical_glossary = function() private$.items[["statistical_glossary"]],
+        icc_selection_guide = function() private$.items[["icc_selection_guide"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -200,7 +230,80 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 width=600,
                 height=450,
                 visible="(show_plots)",
-                renderFun=".blandaltmanplot"))}))
+                renderFun=".blandaltmanplot"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multimethod_summary",
+                title="Multi-Method Analysis Summary",
+                visible="(additional_methods)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="correlationmatrix",
+                title="Method Correlation Matrix",
+                visible="(additional_methods)",
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="method1_corr", 
+                        `title`="Method 1", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="method2_corr", 
+                        `title`="Method 2", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="additional_corrs", 
+                        `title`="Additional Methods", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="overall_icc_table",
+                title="Overall Multi-Method ICC",
+                visible="(additional_methods)",
+                columns=list(
+                    list(
+                        `name`="icc_type", 
+                        `title`="ICC Type", 
+                        `type`="text"),
+                    list(
+                        `name`="icc_value", 
+                        `title`="ICC Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="report_sentences",
+                title="Copy-Ready Report Text",
+                visible="(show_interpretation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="statistical_glossary",
+                title="Statistical Terms Glossary",
+                visible="(show_interpretation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="icc_selection_guide",
+                title="ICC Selection Guide",
+                visible="(show_interpretation)"))}))
 
 pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathologyagreementBase",
@@ -229,6 +332,10 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param data the data as a data frame
 #' @param dep1 a vector of numbers (the first measurement method)
 #' @param dep2 a vector of numbers (the second measurement method)
+#' @param additional_methods optional additional measurement methods for
+#'   multi-method analysis (enables 3+ method comparison)
+#' @param clinical_preset clinical analysis preset optimized for specific
+#'   pathology scenarios
 #' @param bootstrap_n number of bootstrap replicates for confidence intervals
 #' @param conf_level confidence level for intervals (default 0.95 for 95\% CI)
 #' @param show_plots show scatter plot and Bland-Altman plot
@@ -243,6 +350,12 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   \code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr
 #'   \code{results$scatterplot} \tab \tab \tab \tab \tab Scatter plot with line of perfect agreement \cr
 #'   \code{results$blandaltmanplot} \tab \tab \tab \tab \tab Bland-Altman plot showing bias and limits of agreement \cr
+#'   \code{results$multimethod_summary} \tab \tab \tab \tab \tab Summary of multi-method analysis results \cr
+#'   \code{results$correlationmatrix} \tab \tab \tab \tab \tab Correlation matrix for all methods \cr
+#'   \code{results$overall_icc_table} \tab \tab \tab \tab \tab ICC analysis for all methods combined \cr
+#'   \code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences for manuscripts and reports \cr
+#'   \code{results$statistical_glossary} \tab \tab \tab \tab \tab Definitions of statistical terms with clinical interpretations \cr
+#'   \code{results$icc_selection_guide} \tab \tab \tab \tab \tab When to use Consistency vs Absolute Agreement \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -256,6 +369,8 @@ pathologyagreement <- function(
     data,
     dep1,
     dep2,
+    additional_methods,
+    clinical_preset = "general",
     bootstrap_n = 1000,
     conf_level = 0.95,
     show_plots = TRUE,
@@ -268,16 +383,20 @@ pathologyagreement <- function(
 
     if ( ! missing(dep1)) dep1 <- jmvcore::resolveQuo(jmvcore::enquo(dep1))
     if ( ! missing(dep2)) dep2 <- jmvcore::resolveQuo(jmvcore::enquo(dep2))
+    if ( ! missing(additional_methods)) additional_methods <- jmvcore::resolveQuo(jmvcore::enquo(additional_methods))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep1), dep1, NULL),
-            `if`( ! missing(dep2), dep2, NULL))
+            `if`( ! missing(dep2), dep2, NULL),
+            `if`( ! missing(additional_methods), additional_methods, NULL))
 
 
     options <- pathologyagreementOptions$new(
         dep1 = dep1,
         dep2 = dep2,
+        additional_methods = additional_methods,
+        clinical_preset = clinical_preset,
         bootstrap_n = bootstrap_n,
         conf_level = conf_level,
         show_plots = show_plots,

@@ -22,6 +22,17 @@ children:
             name: dep2
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Additional Methods (Optional)
+        children:
+          - type: VariablesListBox
+            name: additional_methods
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinical_preset
   - type: LayoutBox
     margin: large
     children:

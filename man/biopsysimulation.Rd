@@ -26,9 +26,14 @@ biopsysimulation(
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{wholesection}{biomarker measurement from entire tissue section}
+\item{wholesection}{Biomarker measurement from entire tissue section.
+Example: Ki67 proliferation index (0-100\\%), ER/PR expression (0-8 Allred
+score), HER2 expression (0-3+ intensity), or quantitative molecular
+biomarker values.}
 
-\item{biopsy1}{first simulated biopsy measurement}
+\item{biopsy1}{Biomarker measurement from first simulated core biopsy
+sample. Should represent same biomarker as whole section measurement.
+Example: Ki67 \\% from 2mm core biopsy #1.}
 
 \item{biopsy2}{second simulated biopsy measurement}
 
@@ -44,11 +49,17 @@ biopsysimulation(
 
 \item{sampling_strategy}{biopsy sampling strategy used}
 
-\item{cv_threshold}{coefficient of variation threshold for acceptable
-sampling variability}
+\item{cv_threshold}{Coefficient of variation threshold for acceptable
+sampling variability. Typical clinical values: 15-25\\% for
+immunohistochemistry (Ki67, ER, PR), 10-20\\% for molecular assays, 20-30\\%
+for heterogeneous markers (HER2, PD-L1). Lower values indicate more
+stringent quality requirements.}
 
-\item{correlation_threshold}{minimum correlation between biopsy and whole
-section}
+\item{correlation_threshold}{Minimum Spearman correlation between biopsy
+and whole section measurements. Clinical guidelines: ≥0.80 excellent
+agreement, ≥0.70 good agreement, ≥0.60 moderate agreement, <0.60 poor
+agreement. Higher values indicate better representativeness of biopsy
+samples.}
 
 \item{show_variability_plots}{display plots showing sampling variability}
 
@@ -64,6 +75,8 @@ sampling strategy}
 A results object containing:
 \tabular{llllll}{
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences ready for clinical reports and publications \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab Analysis assumptions, data requirements, and methodological considerations \cr
 \code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
 \code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
 \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr

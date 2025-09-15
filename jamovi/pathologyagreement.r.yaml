@@ -76,9 +76,79 @@ items:
       type: Image
       description: Bland-Altman plot showing bias and limits of agreement
       width: 600
-      height: 450  
+      height: 450
       visible: (show_plots)
       renderFun: .blandaltmanplot
+
+    - name: multimethod_summary
+      title: Multi-Method Analysis Summary
+      type: Html
+      visible: (additional_methods)
+      description: Summary of multi-method analysis results
+
+    - name: correlationmatrix
+      title: Method Correlation Matrix
+      type: Table
+      description: Correlation matrix for all methods
+      visible: (additional_methods)
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: method1_corr
+          title: 'Method 1'
+          type: number
+          format: zto
+        - name: method2_corr
+          title: 'Method 2'
+          type: number
+          format: zto
+        - name: additional_corrs
+          title: 'Additional Methods'
+          type: text
+
+    - name: overall_icc_table
+      title: Overall Multi-Method ICC
+      type: Table
+      description: ICC analysis for all methods combined
+      visible: (additional_methods)
+      columns:
+        - name: icc_type
+          title: 'ICC Type'
+          type: text
+        - name: icc_value
+          title: 'ICC Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: report_sentences
+      title: Copy-Ready Report Text
+      type: Html
+      description: Pre-formatted sentences for manuscripts and reports
+      visible: (show_interpretation)
+
+    - name: statistical_glossary
+      title: Statistical Terms Glossary
+      type: Html
+      description: Definitions of statistical terms with clinical interpretations
+      visible: (show_interpretation)
+
+    - name: icc_selection_guide
+      title: ICC Selection Guide
+      type: Html
+      description: When to use Consistency vs Absolute Agreement
+      visible: (show_interpretation)
 
 
 refs:

@@ -8,6 +8,8 @@ pathologyagreement(
   data,
   dep1,
   dep2,
+  additional_methods,
+  clinical_preset = "general",
   bootstrap_n = 1000,
   conf_level = 0.95,
   show_plots = TRUE,
@@ -22,6 +24,12 @@ pathologyagreement(
 \item{dep1}{a vector of numbers (the first measurement method)}
 
 \item{dep2}{a vector of numbers (the second measurement method)}
+
+\item{additional_methods}{optional additional measurement methods for
+multi-method analysis (enables 3+ method comparison)}
+
+\item{clinical_preset}{clinical analysis preset optimized for specific
+pathology scenarios}
 
 \item{bootstrap_n}{number of bootstrap replicates for confidence intervals}
 
@@ -44,6 +52,12 @@ A results object containing:
 \code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr
 \code{results$scatterplot} \tab \tab \tab \tab \tab Scatter plot with line of perfect agreement \cr
 \code{results$blandaltmanplot} \tab \tab \tab \tab \tab Bland-Altman plot showing bias and limits of agreement \cr
+\code{results$multimethod_summary} \tab \tab \tab \tab \tab Summary of multi-method analysis results \cr
+\code{results$correlationmatrix} \tab \tab \tab \tab \tab Correlation matrix for all methods \cr
+\code{results$overall_icc_table} \tab \tab \tab \tab \tab ICC analysis for all methods combined \cr
+\code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences for manuscripts and reports \cr
+\code{results$statistical_glossary} \tab \tab \tab \tab \tab Definitions of statistical terms with clinical interpretations \cr
+\code{results$icc_selection_guide} \tab \tab \tab \tab \tab When to use Consistency vs Absolute Agreement \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

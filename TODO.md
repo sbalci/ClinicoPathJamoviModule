@@ -83,21 +83,6 @@ move documantation files under vignettes folder.
 
 ***
 
-- pathologyagreement - Pathology Agreement Analysis
-/check-function pathologyagreement
-/review-function pathologyagreement
-/fix-function pathologyagreement
-
-
-***
-
-- biopsysimulation - Biopsy Simulation Analysis
-/check-function biopsysimulation
-/review-function biopsysimulation
-/fix-function biopsysimulation
-
-***
-
 - diagnosticmeta - Diagnostic Test Meta-Analysis for Pathology
 /check-function diagnosticmeta
 /review-function diagnosticmeta

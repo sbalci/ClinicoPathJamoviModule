@@ -4,6 +4,20 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
     "pathologyagreementClass",
     inherit = pathologyagreementBase,
     private = list(
+        # Clinical constants based on established guidelines
+        .CLINICAL_CONSTANTS = list(
+            ICC_EXCELLENT = 0.90,           # Landis & Koch 1977
+            ICC_GOOD = 0.75,                # Cicchetti 1994
+            ICC_MODERATE = 0.50,
+            CORRELATION_VERY_STRONG = 0.90,
+            CORRELATION_STRONG = 0.70,
+            CORRELATION_MODERATE = 0.50,
+            CORRELATION_WEAK = 0.30,
+            MIN_SAMPLE_PATHOLOGY = 30,      # Minimum for pathology validation studies
+            BIOMARKER_MIN_RANGE = 0,        # Biomarker percentage range
+            BIOMARKER_MAX_RANGE = 100,
+            BOOTSTRAP_RECOMMENDED = 2000    # FDA guidance for high-stakes validation
+        ),
         .init = function() {
             if (is.null(self$data) || is.null(self$options$dep1) || is.null(self$options$dep2)) {
                 self$results$interpretation$setContent(
@@ -42,7 +56,13 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # Set up results structure
             private$.populateAgreementTable()
             private$.populateCorrelationTable()
-            
+
+            # Set up multi-method tables if additional methods are provided
+            if (!is.null(self$options$additional_methods) && length(self$options$additional_methods) > 0) {
+                private$.populateCorrelationMatrixTable()
+                private$.populateOverallICCTable()
+            }
+
             # Set plots visible based on user option
             self$results$blandaltmanplot$setVisible(self$options$show_plots)
             self$results$scatterplot$setVisible(self$options$show_plots)
@@ -66,17 +86,37 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             if (length(method1) < 3) {
                 self$results$interpretation$setContent(
-                    "<p style='color: red;'><strong>Error:</strong> Insufficient data for analysis. 
+                    "<p style='color: red;'><strong>Error:</strong> Insufficient data for analysis.
                     At least 3 complete paired observations are required.</p>"
                 )
                 return()
             }
+
+            # Enhanced validation based on clinical preset
+            private$.performClinicalValidation(method1, method2)
             
-            # Perform analysis
+            # Perform standard 2-method analysis
             private$.performAgreementAnalysis(method1, method2)
             private$.performCorrelationAnalysis(method1, method2)
             private$.generatePlots(method1, method2)
+
+            # Perform multi-method analysis if additional methods provided
+            if (!is.null(self$options$additional_methods) && length(self$options$additional_methods) > 0) {
+                # Get all methods including additional ones
+                all_methods <- private$.extractAllMethods(data)
+                if (ncol(all_methods) >= 3) {
+                    private$.performMultiMethodAnalysis(all_methods)
+                }
+            }
+
             private$.generateInterpretation(method1, method2)
+
+            # Generate copy-ready report, glossary, and ICC guide (if interpretation enabled)
+            if (self$options$show_interpretation) {
+                private$.generateReportSentences(method1, method2)
+                private$.generateStatisticalGlossary()
+                private$.generateICCSelectionGuide()
+            }
         },
         
         .populateAgreementTable = function() {
@@ -102,16 +142,27 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # Calculate ICC using user-selected type
             if (requireNamespace('psych', quietly = TRUE)) {
                 data_for_icc <- data.frame(Method1 = method1, Method2 = method2)
-                icc_type <- ifelse(self$options$icc_type == "consistency", "consistency", "agreement")
-                icc_result <- psych::ICC(data_for_icc, type = icc_type)
+                icc_result <- psych::ICC(data_for_icc)
+
+                # Select the appropriate ICC based on user choice
+                # ICC(3,1) for consistency (relative agreement), ICC(2,1) for absolute agreement
+                if (self$options$icc_type == "consistency") {
+                    icc_index <- 6  # ICC(3,1) - Consistency (fixed raters, relative agreement)
+                    icc_label <- "ICC(3,1) - Consistency"
+                    icc_interpretation <- "relative agreement between methods"
+                } else { # absolute
+                    icc_index <- 4  # ICC(2,1) - Absolute Agreement (random raters, absolute values)
+                    icc_label <- "ICC(2,1) - Absolute Agreement"
+                    icc_interpretation <- "absolute value concordance between methods"
+                }
+
+                icc_value <- icc_result$results$ICC[icc_index]
+                icc_lower <- icc_result$results$`lower bound`[icc_index]
+                icc_upper <- icc_result$results$`upper bound`[icc_index]
                 
-                icc_value <- icc_result$results$ICC[6]  # ICC(3,1)
-                icc_lower <- icc_result$results$`lower bound`[6]
-                icc_upper <- icc_result$results$`upper bound`[6]
-                
-                icc_interp <- ifelse(icc_value >= 0.90, "Excellent reliability",
-                             ifelse(icc_value >= 0.75, "Good reliability",
-                             ifelse(icc_value >= 0.50, "Moderate reliability", "Poor reliability")))
+                icc_interp <- ifelse(icc_value >= private$.CLINICAL_CONSTANTS$ICC_EXCELLENT, "Excellent reliability",
+                             ifelse(icc_value >= private$.CLINICAL_CONSTANTS$ICC_GOOD, "Good reliability",
+                             ifelse(icc_value >= private$.CLINICAL_CONSTANTS$ICC_MODERATE, "Moderate reliability", "Poor reliability")))
             } else {
                 icc_value <- icc_lower <- icc_upper <- NA
                 icc_interp <- "psych package required"
@@ -141,9 +192,9 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             # Populate agreement table
             table <- self$results$agreementtable
-            
+
             table$addRow(rowKey = 1, values = list(
-                metric = "ICC(3,1) - Consistency",
+                metric = icc_label,
                 value = icc_value,
                 ci_lower = icc_lower,
                 ci_upper = icc_upper,
@@ -197,10 +248,10 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 # Bootstrap CI for Spearman
                 spearman_boot_ci <- private$.performBootstrapCI(method1, method2, "spearman")
                 
-                spearman_strength <- ifelse(abs(spearman_r) >= 0.90, "Very strong",
-                                    ifelse(abs(spearman_r) >= 0.70, "Strong",
-                                    ifelse(abs(spearman_r) >= 0.50, "Moderate",
-                                    ifelse(abs(spearman_r) >= 0.30, "Weak", "Very weak"))))
+                spearman_strength <- ifelse(abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_VERY_STRONG, "Very strong",
+                                    ifelse(abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_STRONG, "Strong",
+                                    ifelse(abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_MODERATE, "Moderate",
+                                    ifelse(abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_WEAK, "Weak", "Very weak"))))
                 
                 table$addRow(rowKey = row_key, values = list(
                     method = "Spearman rank correlation",
@@ -221,10 +272,10 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 pearson_ci_lower <- pearson_test$conf.int[1]
                 pearson_ci_upper <- pearson_test$conf.int[2]
                 
-                pearson_strength <- ifelse(abs(pearson_r) >= 0.90, "Very strong",
-                                   ifelse(abs(pearson_r) >= 0.70, "Strong",
-                                   ifelse(abs(pearson_r) >= 0.50, "Moderate",
-                                   ifelse(abs(pearson_r) >= 0.30, "Weak", "Very weak"))))
+                pearson_strength <- ifelse(abs(pearson_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_VERY_STRONG, "Very strong",
+                                   ifelse(abs(pearson_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_STRONG, "Strong",
+                                   ifelse(abs(pearson_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_MODERATE, "Moderate",
+                                   ifelse(abs(pearson_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_WEAK, "Weak", "Very weak"))))
                 
                 table$addRow(rowKey = row_key, values = list(
                     method = "Pearson correlation",
@@ -316,7 +367,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # Create Bland-Altman plot
             p <- ggplot2::ggplot(data, ggplot2::aes(x = Means, y = Differences)) +
                 ggplot2::geom_point(alpha = 0.6, color = "steelblue") +
-                ggplot2::geom_hline(yintercept = unique(data$MeanDiff), color = "black", size = 1) +
+                ggplot2::geom_hline(yintercept = unique(data$MeanDiff), color = "black", linewidth = 1) +
                 ggplot2::geom_hline(yintercept = unique(data$LoA_Lower), color = "red", linetype = "dashed") +
                 ggplot2::geom_hline(yintercept = unique(data$LoA_Upper), color = "red", linetype = "dashed") +
                 ggplot2::geom_smooth(method = "lm", se = TRUE, color = "blue", alpha = 0.3) +
@@ -339,8 +390,16 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # Calculate agreement metrics for interpretation
             if (requireNamespace('psych', quietly = TRUE)) {
                 data_for_icc <- data.frame(Method1 = method1, Method2 = method2)
-                icc_result <- psych::ICC(data_for_icc, type = "consistency")
-                icc_value <- icc_result$results$ICC[6]
+                icc_result <- psych::ICC(data_for_icc)
+
+                # Use same ICC type as selected by user
+                if (self$options$icc_type == "consistency") {
+                    icc_index <- 6  # ICC(3,1) - Consistency
+                } else { # absolute
+                    icc_index <- 4  # ICC(2,1) - Absolute Agreement
+                }
+
+                icc_value <- icc_result$results$ICC[icc_index]
             } else {
                 icc_value <- NA
             }
@@ -400,6 +459,408 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             if (self$options$show_interpretation) {
                 self$results$interpretation$setContent(interpretation)
             }
+        },
+
+        # Multi-method analysis functions
+        .populateCorrelationMatrixTable = function() {
+            table <- self$results$correlationmatrix
+            table$addColumn(name = 'method', title = 'Method', type = 'text')
+            table$addColumn(name = 'method1_corr', title = 'Method 1', type = 'number', format = 'zto')
+            table$addColumn(name = 'method2_corr', title = 'Method 2', type = 'number', format = 'zto')
+            table$addColumn(name = 'additional_corrs', title = 'Additional Methods', type = 'text')
+        },
+
+        .populateOverallICCTable = function() {
+            table <- self$results$overall_icc_table
+            table$addColumn(name = 'icc_type', title = 'ICC Type', type = 'text')
+            table$addColumn(name = 'icc_value', title = 'ICC Value', type = 'number', format = 'zto')
+            table$addColumn(name = 'ci_lower', title = '95% CI Lower', type = 'number', format = 'zto')
+            table$addColumn(name = 'ci_upper', title = '95% CI Upper', type = 'number', format = 'zto')
+            table$addColumn(name = 'interpretation', title = 'Interpretation', type = 'text')
+        },
+
+        .extractAllMethods = function(data) {
+            # Extract all methods data (dep1, dep2, and additional_methods)
+            method1 <- data[[self$options$dep1]]
+            method2 <- data[[self$options$dep2]]
+
+            # Combine with additional methods
+            all_data <- data.frame(Method1 = method1, Method2 = method2)
+
+            if (!is.null(self$options$additional_methods) && length(self$options$additional_methods) > 0) {
+                for (i in seq_along(self$options$additional_methods)) {
+                    method_name <- paste0("Method", i + 2)
+                    all_data[[method_name]] <- data[[self$options$additional_methods[i]]]
+                }
+            }
+
+            # Remove rows with missing data
+            complete_cases <- complete.cases(all_data)
+            all_data[complete_cases, ]
+        },
+
+        .performMultiMethodAnalysis = function(all_methods) {
+            n_methods <- ncol(all_methods)
+
+            # 1. Generate correlation matrix
+            private$.generateCorrelationMatrix(all_methods)
+
+            # 2. Calculate overall ICC for all methods
+            private$.calculateOverallICC(all_methods)
+
+            # 3. Generate multi-method summary
+            private$.generateMultiMethodSummary(all_methods)
+        },
+
+        .generateCorrelationMatrix = function(all_methods) {
+            # Calculate correlation matrix (use spearman as primary method for multi-method)
+            method_choice <- if (self$options$correlation_method == "pearson") "pearson" else "spearman"
+            cor_matrix <- cor(all_methods, method = method_choice, use = "complete.obs")
+            n_methods <- ncol(all_methods)
+
+            table <- self$results$correlationmatrix
+
+            # Populate correlation matrix table
+            for (i in 1:n_methods) {
+                method_name <- colnames(all_methods)[i]
+
+                # Format correlations for display
+                method1_corr <- if (i == 1) 1.000 else cor_matrix[i, 1]
+                method2_corr <- if (i == 2) 1.000 else cor_matrix[i, 2]
+
+                # Additional correlations as text
+                additional_corrs <- ""
+                if (n_methods > 2) {
+                    additional_vals <- sapply(3:n_methods, function(j) {
+                        if (i == j) "1.000" else sprintf("%.3f", cor_matrix[i, j])
+                    })
+                    additional_corrs <- paste(additional_vals, collapse = ", ")
+                }
+
+                table$addRow(rowKey = i, values = list(
+                    method = method_name,
+                    method1_corr = method1_corr,
+                    method2_corr = method2_corr,
+                    additional_corrs = additional_corrs
+                ))
+            }
+        },
+
+        .calculateOverallICC = function(all_methods) {
+            if (!requireNamespace('psych', quietly = TRUE)) {
+                return()
+            }
+
+            # Calculate ICC for all methods
+            icc_result <- psych::ICC(all_methods)
+
+            table <- self$results$overall_icc_table
+
+            # Add relevant ICC types for multi-method analysis
+            icc_types <- list(
+                list(index = 1, name = "ICC(1,1) - Single rater, random effects"),
+                list(index = 4, name = "ICC(2,1) - Single rater, mixed effects"),
+                list(index = 6, name = "ICC(3,1) - Single rater, fixed effects")
+            )
+
+            row_key <- 1
+            for (icc_type in icc_types) {
+                icc_value <- icc_result$results$ICC[icc_type$index]
+                icc_lower <- icc_result$results$`lower bound`[icc_type$index]
+                icc_upper <- icc_result$results$`upper bound`[icc_type$index]
+
+                interpretation <- ifelse(icc_value >= 0.90, "Excellent reliability",
+                                 ifelse(icc_value >= 0.75, "Good reliability",
+                                 ifelse(icc_value >= 0.50, "Moderate reliability", "Poor reliability")))
+
+                table$addRow(rowKey = row_key, values = list(
+                    icc_type = icc_type$name,
+                    icc_value = icc_value,
+                    ci_lower = icc_lower,
+                    ci_upper = icc_upper,
+                    interpretation = interpretation
+                ))
+                row_key <- row_key + 1
+            }
+        },
+
+        .generateMultiMethodSummary = function(all_methods) {
+            n_methods <- ncol(all_methods)
+            n_cases <- nrow(all_methods)
+
+            # Calculate mean correlation
+            cor_matrix <- cor(all_methods, use = "complete.obs")
+            upper_tri <- cor_matrix[upper.tri(cor_matrix)]
+            mean_correlation <- mean(upper_tri, na.rm = TRUE)
+
+            summary_html <- paste0(
+                "<h3>Multi-Method Analysis Summary</h3>",
+                "<p><strong>Number of Methods:</strong> ", n_methods, "</p>",
+                "<p><strong>Complete Cases:</strong> ", n_cases, "</p>",
+                "<p><strong>Mean Inter-Method Correlation:</strong> ", sprintf("%.3f", mean_correlation), "</p>",
+
+                "<h4>Analysis Overview:</h4>",
+                "<ul>",
+                "<li><strong>Standard Pairwise Analysis:</strong> Method 1 vs Method 2 (above)</li>",
+                "<li><strong>Correlation Matrix:</strong> All pairwise correlations between methods</li>",
+                "<li><strong>Overall ICC:</strong> Reliability across all methods simultaneously</li>",
+                "</ul>",
+
+                "<h4>Multi-Method Interpretation:</h4>",
+                "<p>",
+                if (mean_correlation >= 0.90) {
+                    "All methods show <strong>excellent agreement</strong> with each other. Methods can be considered interchangeable."
+                } else if (mean_correlation >= 0.75) {
+                    "Methods show <strong>good overall agreement</strong>. Minor differences between methods may be acceptable."
+                } else {
+                    "Methods show <strong>moderate agreement</strong>. Investigate sources of disagreement between specific method pairs."
+                },
+                "</p>",
+
+                "<p><em>Note: The standard 2-method analysis (above) remains the primary comparison. Multi-method results provide additional insights for overall method reliability assessment.</em></p>"
+            )
+
+            self$results$multimethod_summary$setContent(summary_html)
+        },
+
+        # Clinical validation based on preset
+        .performClinicalValidation = function(method1, method2) {
+            n <- length(method1)
+
+            # Sample size warning for pathology studies
+            if (n < private$.CLINICAL_CONSTANTS$MIN_SAMPLE_PATHOLOGY) {
+                warning_msg <- paste0(
+                    "<p style='color: orange;'><strong>Advisory:</strong> Sample size (n=", n,
+                    ") is below recommended minimum for pathology validation studies (n≥",
+                    private$.CLINICAL_CONSTANTS$MIN_SAMPLE_PATHOLOGY, "). ",
+                    "Consider increasing sample size for more reliable results.</p>"
+                )
+                self$results$interpretation$setContent(warning_msg)
+            }
+
+            # Biomarker range validation for relevant presets
+            if (self$options$clinical_preset == "biomarker_platforms") {
+                range_check1 <- any(method1 < private$.CLINICAL_CONSTANTS$BIOMARKER_MIN_RANGE |
+                                   method1 > private$.CLINICAL_CONSTANTS$BIOMARKER_MAX_RANGE, na.rm = TRUE)
+                range_check2 <- any(method2 < private$.CLINICAL_CONSTANTS$BIOMARKER_MIN_RANGE |
+                                   method2 > private$.CLINICAL_CONSTANTS$BIOMARKER_MAX_RANGE, na.rm = TRUE)
+
+                if (range_check1 || range_check2) {
+                    range_warning <- "<p style='color: orange;'><strong>Data Check:</strong> Some biomarker values are outside the typical 0-100% range. Please verify data scaling (e.g., percentage vs. proportion).</p>"
+                    current_content <- self$results$interpretation$state
+                    if (is.null(current_content)) current_content <- ""
+                    self$results$interpretation$setContent(paste0(current_content, range_warning))
+                }
+            }
+
+            # Bootstrap recommendation for high-stakes studies
+            if (self$options$bootstrap_n < private$.CLINICAL_CONSTANTS$BOOTSTRAP_RECOMMENDED &&
+                self$options$clinical_preset %in% c("multisite_validation", "ai_pathologist")) {
+                bootstrap_rec <- paste0(
+                    "<p style='color: blue;'><strong>Recommendation:</strong> For ",
+                    gsub("_", "-", self$options$clinical_preset),
+                    " studies, consider increasing bootstrap samples to ",
+                    private$.CLINICAL_CONSTANTS$BOOTSTRAP_RECOMMENDED,
+                    "+ for more robust confidence intervals (current: ",
+                    self$options$bootstrap_n, ").</p>"
+                )
+                current_content <- self$results$interpretation$state
+                if (is.null(current_content)) current_content <- ""
+                self$results$interpretation$setContent(paste0(current_content, bootstrap_rec))
+            }
+        },
+
+        .generateReportSentences = function(method1, method2) {
+            # Calculate key metrics for report
+            spearman_test <- cor.test(method1, method2, method = "spearman")
+            spearman_r <- spearman_test$estimate
+            spearman_p <- spearman_test$p.value
+
+            # Get ICC if available
+            icc_value <- NA
+            icc_ci_text <- ""
+            if (requireNamespace('psych', quietly = TRUE)) {
+                data_for_icc <- data.frame(Method1 = method1, Method2 = method2)
+                icc_result <- psych::ICC(data_for_icc)
+                icc_index <- if (self$options$icc_type == "consistency") 6 else 4  # absolute
+                icc_value <- icc_result$results$ICC[icc_index]
+                icc_lower <- icc_result$results$`lower bound`[icc_index]
+                icc_upper <- icc_result$results$`upper bound`[icc_index]
+                icc_ci_text <- sprintf("95%% CI %.3f-%.3f", icc_lower, icc_upper)
+            }
+
+            # Bland-Altman metrics
+            differences <- method1 - method2
+            mean_diff <- mean(differences)
+
+            # Clinical interpretation based on preset
+            preset_context <- switch(self$options$clinical_preset,
+                "biomarker_platforms" = "biomarker platform comparison",
+                "ai_pathologist" = "AI algorithm versus pathologist assessment",
+                "multisite_validation" = "multi-institutional validation",
+                "general" = "measurement method comparison"
+            )
+
+            # Generate report sentences
+            methods_sentence <- sprintf(
+                "Agreement analysis between %s and %s was performed using %s.",
+                self$options$dep1, self$options$dep2, preset_context
+            )
+
+            correlation_sentence <- sprintf(
+                "Spearman rank correlation showed %s agreement (ρ = %.3f, p = %.3f).",
+                if (abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_STRONG) "strong"
+                else if (abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_MODERATE) "moderate"
+                else "weak",
+                spearman_r, spearman_p
+            )
+
+            icc_sentence <- if (!is.na(icc_value)) {
+                sprintf(
+                    "Intraclass correlation coefficient demonstrated %s reliability (ICC = %.3f, %s).",
+                    if (icc_value >= private$.CLINICAL_CONSTANTS$ICC_EXCELLENT) "excellent"
+                    else if (icc_value >= private$.CLINICAL_CONSTANTS$ICC_GOOD) "good"
+                    else "moderate",
+                    icc_value, icc_ci_text
+                )
+            } else {
+                "Intraclass correlation coefficient could not be calculated."
+            }
+
+            bias_sentence <- sprintf(
+                "Bland-Altman analysis revealed %s systematic bias (mean difference = %.3f).",
+                if (abs(mean_diff) < 0.1 * mean(c(method1, method2))) "minimal" else "notable",
+                mean_diff
+            )
+
+            # Clinical conclusion
+            conclusion_sentence <- sprintf(
+                "The methods demonstrated %s for %s applications.",
+                if (!is.na(icc_value) && icc_value >= private$.CLINICAL_CONSTANTS$ICC_GOOD &&
+                   abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_STRONG)
+                    "acceptable agreement suitable for interchangeable use"
+                else if (!is.na(icc_value) && icc_value >= private$.CLINICAL_CONSTANTS$ICC_MODERATE)
+                    "moderate agreement requiring caution for interchangeable use"
+                else "limited agreement not recommended for interchangeable use",
+                preset_context
+            )
+
+            report_html <- paste0(
+                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<h4>📋 Copy-Ready Report Sentences</h4>",
+                "<div style='font-family: monospace; background-color: white; padding: 12px; border: 1px solid #ddd; border-radius: 3px; margin: 8px 0;'>",
+                "<strong>Methods:</strong><br>", methods_sentence,
+                "</div>",
+                "<div style='font-family: monospace; background-color: white; padding: 12px; border: 1px solid #ddd; border-radius: 3px; margin: 8px 0;'>",
+                "<strong>Results:</strong><br>", correlation_sentence, " ", icc_sentence, " ", bias_sentence,
+                "</div>",
+                "<div style='font-family: monospace; background-color: white; padding: 12px; border: 1px solid #ddd; border-radius: 3px; margin: 8px 0;'>",
+                "<strong>Conclusion:</strong><br>", conclusion_sentence,
+                "</div>",
+                "<p><em>Tip: Select text above and copy (Ctrl+C/Cmd+C) for use in manuscripts or reports.</em></p>",
+                "</div>"
+            )
+
+            self$results$report_sentences$setContent(report_html)
+        },
+
+        .generateStatisticalGlossary = function() {
+            glossary_html <- paste0(
+                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
+                "<h4>📚 Statistical Terms Glossary</h4>",
+                "<div style='margin: 10px 0;'>",
+
+                "<p><strong>ICC (Intraclass Correlation Coefficient):</strong> Measures reliability and agreement between measurement methods. ",
+                "Values: 0.90+ excellent, 0.75+ good, 0.50+ moderate reliability.</p>",
+
+                "<p><strong>Spearman Correlation (ρ):</strong> Measures strength of monotonic relationship between methods, robust to outliers. ",
+                "Clinical interpretation: 0.90+ very strong, 0.70+ strong, 0.50+ moderate association.</p>",
+
+                "<p><strong>Concordance Correlation Coefficient (CCC):</strong> Measures agreement combining precision and accuracy. ",
+                "Values: 0.99+ almost perfect, 0.95+ substantial, 0.90+ moderate agreement.</p>",
+
+                "<p><strong>Bland-Altman Plot:</strong> Visualizes agreement by plotting differences vs. means. ",
+                "Shows systematic bias (mean difference) and limits of agreement (±1.96 SD).</p>",
+
+                "<p><strong>Bootstrap Confidence Intervals:</strong> Robust estimation method using resampling. ",
+                "1000+ samples recommended for reliable intervals in clinical studies.</p>",
+
+                "<p><strong>Clinical Presets:</strong></p>",
+                "<ul>",
+                "<li><strong>Biomarker Platforms:</strong> Optimized for Ki67, ER, PR, HER2 scoring across digital systems</li>",
+                "<li><strong>AI vs Pathologist:</strong> Specialized for algorithm validation studies</li>",
+                "<li><strong>Multi-site Validation:</strong> Enhanced for multi-institutional reproducibility studies</li>",
+                "</ul>",
+
+                "<p><em>Guidelines based on: Landis & Koch (1977), Cicchetti (1994), Koo & Li (2016), FDA Biomarker Qualification Guidance</em></p>",
+                "</div>",
+                "</div>"
+            )
+
+            self$results$statistical_glossary$setContent(glossary_html)
+        },
+
+        .generateICCSelectionGuide = function() {
+            # Dynamic guidance based on current selection
+            current_choice <- self$options$icc_type
+            current_preset <- self$options$clinical_preset
+
+            # Preset-specific recommendations
+            preset_recommendation <- switch(current_preset,
+                "biomarker_platforms" = "For biomarker platform comparison studies (Ki67, ER, PR, HER2), <strong>Consistency</strong> is typically recommended as relative ranking is more clinically relevant than exact numerical agreement.",
+                "ai_pathologist" = "For AI algorithm vs pathologist studies, choose based on application: <strong>Consistency</strong> for diagnostic ranking, <strong>Absolute Agreement</strong> for exact score matching.",
+                "multisite_validation" = "For multi-institutional validation, <strong>Consistency</strong> is usually preferred as it focuses on reproducible ranking across institutions despite potential systematic differences.",
+                "For general agreement studies, choose based on your research question: ranking reproducibility vs exact value concordance."
+            )
+
+            guide_html <- paste0(
+                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745;'>",
+                "<h4>🎯 ICC Selection Guide</h4>",
+
+                "<div style='margin: 15px 0;'>",
+                "<h5>Current Selection: <span style='color: #007bff; font-weight: bold;'>",
+                if (current_choice == "consistency") "Consistency (ICC 3,1)" else "Absolute Agreement (ICC 2,1)", "</span></h5>",
+                "</div>",
+
+                "<div style='background-color: white; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
+                "<h5>📊 When to Use Each Type:</h5>",
+
+                "<p><strong>🟢 Consistency (ICC 3,1) - Recommended for most studies:</strong></p>",
+                "<ul>",
+                "<li><strong>Biomarker Scoring:</strong> Ki67 proliferation index, ER/PR scoring, HER2 assessment</li>",
+                "<li><strong>Platform Comparison:</strong> HALO vs Aiforia vs ImageJ measurements</li>",
+                "<li><strong>Diagnostic Ranking:</strong> When relative ordering matters more than exact values</li>",
+                "<li><strong>Research Question:</strong> 'Do methods rank samples similarly?'</li>",
+                "</ul>",
+
+                "<p><strong>🟡 Absolute Agreement (ICC 2,1) - Use for exact concordance:</strong></p>",
+                "<ul>",
+                "<li><strong>Reference Range Validation:</strong> Establishing interchangeable cutoffs</li>",
+                "<li><strong>Method Substitution:</strong> When exact numerical agreement is critical</li>",
+                "<li><strong>Calibration Studies:</strong> Standardizing measurements across instruments</li>",
+                "<li><strong>Research Question:</strong> 'Do methods give identical values?'</li>",
+                "</ul>",
+                "</div>",
+
+                "<div style='background-color: #f8f9fa; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
+                "<h5>🏥 Clinical Preset Guidance:</h5>",
+                "<p>", preset_recommendation, "</p>",
+                "</div>",
+
+                "<div style='background-color: #fff3cd; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
+                "<h5>⚠️ Key Differences:</h5>",
+                "<ul>",
+                "<li><strong>Consistency:</strong> Focuses on relative agreement - methods may differ by a constant but rank similarly</li>",
+                "<li><strong>Absolute Agreement:</strong> Requires identical values - stricter criterion for interchangeability</li>",
+                "<li><strong>Clinical Impact:</strong> Consistency typically gives higher ICC values than Absolute Agreement</li>",
+                "</ul>",
+                "</div>",
+
+                "<p><em>💡 Tip: Most digital pathology studies use Consistency because systematic platform differences are common but don't affect clinical interpretation if ranking is preserved.</em></p>",
+                "</div>"
+            )
+
+            self$results$icc_selection_guide$setContent(guide_html)
         }
     )
 )

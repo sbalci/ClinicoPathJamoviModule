@@ -1,7 +1,7 @@
 ---
 name: pathologyagreement
 title: Pathology Agreement Analysis
-menuGroup: OncoPathologyT2
+menuGroup: OncoPathologyT
 version: '1.0.0'
 jas: '1.2'
 
@@ -33,6 +33,40 @@ options:
           R: >
             a vector of numbers (the second measurement method)
 
+    - name: additional_methods
+      title: Additional Methods (Optional)
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            optional additional measurement methods for multi-method analysis (enables 3+ method comparison)
+          ui: >
+            Add 3 or more measurement methods for comprehensive inter-platform reproducibility analysis.
+            Example: Ki67 measurements from HALO, Aiforia, and ImageJ platforms for digital pathology validation.
+
+    - name: clinical_preset
+      title: Clinical Analysis Type
+      type: List
+      options:
+        - name: general
+          title: 'General Agreement Analysis'
+        - name: biomarker_platforms
+          title: 'Biomarker Platform Comparison (Ki67, ER, PR, HER2)'
+        - name: ai_pathologist
+          title: 'AI Algorithm vs Pathologist Agreement'
+        - name: multisite_validation
+          title: 'Multi-institutional Validation Study'
+      default: general
+      description:
+          R: >
+            clinical analysis preset optimized for specific pathology scenarios
+          ui: >
+            Choose analysis preset optimized for your study type. Presets adjust thresholds and interpretations
+            for common digital pathology scenarios.
+
     - name: bootstrap_n
       title: Bootstrap Replicates
       type: Integer
@@ -42,6 +76,10 @@ options:
       description:
           R: >
             number of bootstrap replicates for confidence intervals
+          ui: >
+            Number of bootstrap samples for robust confidence intervals. 1000 samples (default) provides
+            reliable estimates for most studies. Increase to 5000+ for high-stakes validation studies.
+            Example: FDA biomarker qualification typically uses 2000+ samples.
 
     - name: conf_level
       title: Confidence Level
@@ -62,32 +100,48 @@ options:
             show scatter plot and Bland-Altman plot
 
     - name: icc_type
-      title: ICC Type
+      title: Reliability Assessment Type
       type: List
       options:
         - name: consistency
-          title: 'ICC(3,1) - Consistency'
-        - name: agreement
-          title: 'ICC(3,k) - Agreement'
+          title: 'Consistency - Relative Agreement (Recommended)'
+        - name: absolute
+          title: 'Absolute Agreement - Exact Value Concordance'
       default: consistency
       description:
           R: >
             type of intraclass correlation coefficient to calculate
+          ui: >
+            CONSISTENCY (Default): Assesses if methods rank samples similarly. Use for biomarker scoring
+            reproducibility (Ki67, ER, PR, HER2) where relative ranking matters more than exact values.
+
+            ABSOLUTE AGREEMENT: Assesses if methods give identical values. Use for diagnostic cutoffs
+            or when exact numerical concordance is critical (e.g., reference range validation).
+
+            Clinical Guidance:
+            • Biomarker scoring studies → Consistency
+            • Diagnostic cutoff validation → Absolute Agreement
+            • Platform comparison studies → Consistency
+            • Method substitution studies → Absolute Agreement
 
     - name: correlation_method
       title: Correlation Method
       type: List
       options:
         - name: both
-          title: 'Both Pearson and Spearman'
+          title: 'Both Pearson and Spearman (Recommended)'
         - name: pearson
-          title: 'Pearson only'
+          title: 'Pearson only - for normally distributed biomarker data'
         - name: spearman
-          title: 'Spearman only'
+          title: 'Spearman only - for ordinal or non-normal data'
       default: both
       description:
           R: >
             correlation method(s) to calculate
+          ui: >
+            Pearson correlation assumes normal distribution and linear relationships. Spearman rank
+            correlation is robust to outliers and non-normal distributions. Both (default) provides
+            comprehensive assessment for most digital pathology studies.
 
     - name: show_interpretation
       title: Show Clinical Interpretation
