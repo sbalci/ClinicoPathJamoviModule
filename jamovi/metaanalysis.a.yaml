@@ -85,53 +85,55 @@ options:
       type: List
       options:
         - name: generic
-          title: Generic Meta-Analysis
+          title: Standard Meta-Analysis (Most Common)
         - name: diagnostic_accuracy
-          title: Diagnostic Test Accuracy
+          title: Diagnostic Test Accuracy (Sensitivity/Specificity)
         - name: network
-          title: Network Meta-Analysis
+          title: Network Meta-Analysis (Multiple Treatments)
         - name: individual_patient
-          title: Individual Patient Data
+          title: Individual Patient Data Analysis
       default: generic
       description:
           R: >
-            Type of meta-analysis to perform
+            Type of meta-analysis to perform: Standard for combining effect sizes,
+            Diagnostic for test accuracy studies, Network for multiple treatment comparisons
 
     - name: model_type
-      title: Model Type
+      title: Statistical Model (How to combine studies)
       type: List
       options:
         - name: fixed_effects
-          title: Fixed-Effects Model
+          title: Fixed-Effects (All studies measure same true effect)
         - name: random_effects
-          title: Random-Effects Model
+          title: Random-Effects (Studies may vary - RECOMMENDED)
         - name: mixed_effects
-          title: Mixed-Effects Model
+          title: Mixed-Effects (Both fixed and random components)
       default: random_effects
       description:
           R: >
-            Statistical model for meta-analysis
+            Random-effects is usually preferred as it accounts for differences between studies
 
     - name: effect_measure
-      title: Effect Measure
+      title: What type of effect are you combining?
       type: List
       options:
         - name: mean_difference
-          title: Mean Difference
+          title: Mean Difference (e.g., blood pressure change)
         - name: standardized_mean_diff
-          title: Standardized Mean Difference
+          title: Standardized Mean Difference (Cohen's d)
         - name: odds_ratio
-          title: Odds Ratio (log)
+          title: Odds Ratio (log) - for binary outcomes
         - name: risk_ratio
-          title: Risk Ratio (log)
+          title: Risk Ratio (log) - for binary outcomes
         - name: hazard_ratio
-          title: Hazard Ratio (log)
+          title: Hazard Ratio (log) - for survival/time-to-event
         - name: correlation
-          title: Correlation Coefficient
+          title: Correlation Coefficient (association strength)
       default: odds_ratio
       description:
           R: >
-            Type of effect measure being meta-analyzed
+            Choose based on your outcome type: continuous (mean difference),
+            binary (odds/risk ratio), time-to-event (hazard ratio), or association (correlation)
 
     - name: heterogeneity_method
       title: Heterogeneity Estimation

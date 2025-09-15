@@ -80,12 +80,3 @@ move documantation files under vignettes folder.
 /fix-function multiplexanalysis
 
 
-
-***
-
-
-- metaanalysis - Meta-Analysis & Evidence Synthesis
-
-/review-function metaanalysis
-/fix-function metaanalysis
-
