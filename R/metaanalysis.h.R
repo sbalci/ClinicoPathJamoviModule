@@ -888,9 +888,14 @@ metaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   sensitivity analysis)
 #' @param year Publication year for temporal trend analysis and publication
 #'   bias assessment
-#' @param analysis_type Type of meta-analysis to perform
-#' @param model_type Statistical model for meta-analysis
-#' @param effect_measure Type of effect measure being meta-analyzed
+#' @param analysis_type Type of meta-analysis to perform: Standard for
+#'   combining effect sizes, Diagnostic for test accuracy studies, Network for
+#'   multiple treatment comparisons
+#' @param model_type Random-effects is usually preferred as it accounts for
+#'   differences between studies
+#' @param effect_measure Choose based on your outcome type: continuous (mean
+#'   difference), binary (odds/risk ratio), time-to-event (hazard ratio), or
+#'   association (correlation)
 #' @param heterogeneity_method Method for estimating between-study
 #'   heterogeneity (tau-squared)
 #' @param true_positives True positives for diagnostic test accuracy
