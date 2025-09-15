@@ -1,0 +1,128 @@
+---
+name: studydiagram
+jrs: '1.1'
+title: Study Diagram Results
+items:
+    - name: todo
+      title: Getting Started
+      type: Html
+      description: Instructions and data format guidance
+      clearWith:
+        - data_format
+        - participant_id
+        - step_excluded
+        - exclusion_reason_participant
+        - step_name
+        - participant_count
+        - exclusion_reason_summary
+        - participant_id_mapping
+        - exclusion_reason_mapping
+
+    - name: summary
+      title: Study Flow Summary
+      type: Table
+      description: Summary of participant flow through study steps
+      clearWith:
+        - data_format
+        - participant_id
+        - step_excluded
+        - exclusion_reason_participant
+        - step_name
+        - participant_count
+        - exclusion_reason_summary
+        - participant_id_mapping
+        - exclusion_reason_mapping
+        - step1_exclusions
+        - step2_exclusions
+        - step3_exclusions
+        - step4_exclusions
+        - step5_exclusions
+      columns:
+        - name: step
+          title: Study Step
+          type: text
+        - name: participants
+          title: Participants
+          type: integer
+        - name: excluded
+          title: Excluded
+          type: integer
+        - name: percent_retained
+          title: "% Retained"
+          type: number
+          format: zto,p
+        - name: exclusion_reasons
+          title: Exclusion Reasons
+          type: text
+
+    - name: diagram
+      title: Study Diagram
+      type: Html
+      description: Interactive study flow diagram
+      clearWith:
+        - data_format
+        - diagram_type
+        - participant_id
+        - step_excluded
+        - exclusion_reason_participant
+        - step_name
+        - participant_count
+        - exclusion_reason_summary
+        - participant_id_mapping
+        - exclusion_reason_mapping
+        - step1_exclusions
+        - step2_exclusions
+        - step3_exclusions
+        - step4_exclusions
+        - step5_exclusions
+        - step1_label
+        - step2_label
+        - step3_label
+        - step4_label
+        - step5_label
+        - show_percentages
+        - show_exclusion_boxes
+        - direction
+        - color_scheme
+
+    - name: plot
+      title: Diagram Plot
+      type: Image
+      description: Publication-ready diagram plot
+      width: 800
+      height: 600
+      requiresData: true
+      clearWith:
+        - data_format
+        - diagram_type
+        - participant_id
+        - step_excluded
+        - exclusion_reason_participant
+        - step_name
+        - participant_count
+        - exclusion_reason_summary
+        - participant_id_mapping
+        - exclusion_reason_mapping
+        - step1_exclusions
+        - step2_exclusions
+        - step3_exclusions
+        - step4_exclusions
+        - step5_exclusions
+        - step1_label
+        - step2_label
+        - step3_label
+        - step4_label
+        - step5_label
+        - show_percentages
+        - show_exclusion_boxes
+        - direction
+        - color_scheme
+
+    - name: interpretation
+      title: Interpretation & Guidance
+      type: Html
+      description: Explanatory text about the diagram and results
+      clearWith:
+        - show_interpretation
+        - data_format
+        - diagram_type

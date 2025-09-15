@@ -1,7 +1,7 @@
 ---
 name: jflowchart
 title: Study Flowchart 
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyD
 menuSubgroup: Study Design
 version: '2.0.0'
 jas: '1.2'
@@ -128,6 +128,11 @@ options:
       title: Show Percentages
       type: Bool
       default: true
+
+    - name: consortStyle
+      title: CONSORT Style (Publication-Ready)
+      type: Bool
+      default: true
       description:
           R: >
             Show percentage of initial participants at each step
@@ -145,10 +150,10 @@ options:
       title: Node Color Scheme
       type: List
       options:
-        - title: Clinical Blue
-          name: blue
         - title: Professional Gray
           name: gray
+        - title: Clinical Blue
+          name: blue
         - title: Success Green
           name: green
         - title: Modern Viridis
@@ -161,7 +166,7 @@ options:
           name: gradient_blue
         - title: Clinical Warm
           name: clinical_warm
-      default: blue
+      default: gray
       description:
           R: >
             Color scheme for nodes (works with both rendering engines)

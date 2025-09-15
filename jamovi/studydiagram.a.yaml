@@ -1,0 +1,248 @@
+---
+name: studydiagram
+title: Study Diagram
+menuGroup: OncoPathologyT
+menuSubgroup: Study Design
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Creates professional study flow diagrams including CONSORT diagrams and flowcharts using multiple rendering engines
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    # Data Format Selection
+    - name: data_format
+      title: Data Format
+      type: List
+      options:
+        - title: Participant tracking with step numbers
+          name: participant_step
+        - title: Step summary with counts
+          name: step_summary
+        - title: Exclusion reasons with step mapping
+          name: exclusion_mapping
+      default: participant_step
+      description:
+          R: >
+            How your data is structured. Participant tracking: each row is a participant with step excluded.
+            Step summary: each row is a study step with counts. Exclusion mapping: map exclusion reasons to steps.
+
+    # Diagram Type Selection
+    - name: diagram_type
+      title: Diagram Type
+      type: List
+      options:
+        - title: CONSORT (Standard)
+          name: consort_standard
+        - title: CONSORT (ggplot2)
+          name: consort_ggplot
+        - title: Flowchart (Standard)
+          name: flowchart_standard
+        - title: Flowchart (ggplot2)
+          name: flowchart_ggplot
+      default: consort_standard
+      description:
+          R: >
+            Rendering engine and diagram style. CONSORT for clinical trials,
+            Flowchart for general study flows. Standard uses DiagrammeR, ggplot2 uses modern styling.
+
+    # Format 1: Participant-Step Variables
+    - name: participant_id
+      title: Participant ID Variable
+      type: Variable
+      suggested: [ id ]
+      permitted: [ factor, numeric ]
+      description:
+          R: Variable identifying individual participants (for participant tracking format)
+
+    - name: step_excluded
+      title: Step Number Excluded
+      type: Variable
+      suggested: [ ordinal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: Variable indicating at which step number the participant was excluded (for participant tracking format)
+
+    - name: exclusion_reason_participant
+      title: Exclusion Reason Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: Variable containing exclusion reason text (for participant tracking format)
+
+    # Format 2: Step Summary Variables
+    - name: step_name
+      title: Step Name Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: Variable containing step/stage names (for step summary format)
+
+    - name: participant_count
+      title: Participant Count Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: Variable containing participant counts at each step (for step summary format)
+
+    - name: exclusion_reason_summary
+      title: Exclusion Reason Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: Variable containing exclusion reason descriptions (for step summary format)
+
+    # Format 3: Exclusion Mapping Variables
+    - name: participant_id_mapping
+      title: Participant ID Variable
+      type: Variable
+      suggested: [ id ]
+      permitted: [ factor, numeric ]
+      description:
+          R: Variable identifying individual participants (for exclusion mapping format)
+
+    - name: exclusion_reason_mapping
+      title: Exclusion Reason Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: Variable containing all exclusion reasons (for exclusion mapping format)
+
+    # Treatment/Group Variables (all formats)
+    - name: treatment_group
+      title: Treatment Group Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: Variable indicating treatment arm or group assignment (optional)
+
+    # Step Level Selectors for Format 3
+    - name: step1_exclusions
+      title: Step 1 Exclusions
+      type: Level
+      variable: (exclusion_reason_mapping)
+      description:
+          R: Select exclusion reason levels that occur at step 1
+
+    - name: step2_exclusions
+      title: Step 2 Exclusions
+      type: Level
+      variable: (exclusion_reason_mapping)
+      description:
+          R: Select exclusion reason levels that occur at step 2
+
+    - name: step3_exclusions
+      title: Step 3 Exclusions
+      type: Level
+      variable: (exclusion_reason_mapping)
+      description:
+          R: Select exclusion reason levels that occur at step 3
+
+    - name: step4_exclusions
+      title: Step 4 Exclusions
+      type: Level
+      variable: (exclusion_reason_mapping)
+      description:
+          R: Select exclusion reason levels that occur at step 4
+
+    - name: step5_exclusions
+      title: Step 5 Exclusions
+      type: Level
+      variable: (exclusion_reason_mapping)
+      description:
+          R: Select exclusion reason levels that occur at step 5
+
+    # Step Labels for Format 3
+    - name: step1_label
+      title: Step 1 Name
+      type: String
+      default: "Screening"
+      description:
+          R: Label for step 1 in the diagram
+
+    - name: step2_label
+      title: Step 2 Name
+      type: String
+      default: "Enrollment"
+      description:
+          R: Label for step 2 in the diagram
+
+    - name: step3_label
+      title: Step 3 Name
+      type: String
+      default: "Treatment"
+      description:
+          R: Label for step 3 in the diagram
+
+    - name: step4_label
+      title: Step 4 Name
+      type: String
+      default: "Follow-up"
+      description:
+          R: Label for step 4 in the diagram
+
+    - name: step5_label
+      title: Step 5 Name
+      type: String
+      default: "Analysis"
+      description:
+          R: Label for step 5 in the diagram
+
+    # Styling Options
+    - name: show_percentages
+      title: Show Percentages
+      type: Bool
+      default: true
+      description:
+          R: Show percentage of initial participants retained at each step
+
+    - name: show_exclusion_boxes
+      title: Show Exclusion Boxes
+      type: Bool
+      default: true
+      description:
+          R: Show side boxes with exclusion counts and reasons
+
+    - name: direction
+      title: Flow Direction
+      type: List
+      options:
+        - title: Top to Bottom
+          name: TB
+        - title: Left to Right
+          name: LR
+      default: TB
+      description:
+          R: Direction of diagram flow
+
+    - name: color_scheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Professional Gray
+          name: gray
+        - title: Clinical Blue
+          name: blue
+        - title: Publication Minimal
+          name: minimal
+      default: gray
+      description:
+          R: Color scheme for diagram elements
+
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description:
+          R: Show explanatory text about the generated diagram

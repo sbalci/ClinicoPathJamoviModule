@@ -5,97 +5,88 @@ stage: 0
 compilerMode: tame
 children:
   - type: CollapseBox
-    label: "📊 Quick Start Guide"
+    label: 📊 Quick Start Guide
     collapsed: false
     children:
       - type: Label
-        label: "👥 Node-Count: Use 'Step Names' + 'Participant Counts' variables"
+        label: '👥 Node-Count: Use ''Step Names'' + ''Participant Counts'' variables'
         margin: small
       - type: Label
-        label: "🔄 Edge-List: Use 'From Step' + 'To Step' (+ optional Grouping)"
+        label: '🔄 Edge-List: Use ''From Step'' + ''To Step'' (+ optional Grouping)'
         margin: small
-  
   - type: ComboBox
     name: input_mode
-    label: "📋 Flowchart Type"
+    label: 📋 Flowchart Type
     margin: large
-
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
-
-      # All Variables - User will see all options, but we'll provide clear guidance about which to use
       - type: TargetLayoutBox
-        label: "📝 Step Names (for Node-Count mode: 'Screened', 'Enrolled')"
+        label: '📝 Step Names (for Node-Count mode: ''Screened'', ''Enrolled'')'
         children:
           - type: VariablesListBox
             name: nodes
             isTarget: true
-            
       - type: TargetLayoutBox
-        label: "🔢 Participant Counts (for Node-Count mode: 500, 485, 450)"
+        label: '🔢 Participant Counts (for Node-Count mode: 500, 485, 450)'
         children:
           - type: VariablesListBox
             name: counts
             isTarget: true
-
       - type: TargetLayoutBox
-        label: "🔗 From Step (for Edge-List mode)"
+        label: 🔗 From Step (for Edge-List mode)
         children:
           - type: VariablesListBox
             name: from_var
             maxItemCount: 1
             isTarget: true
-            
       - type: TargetLayoutBox
-        label: "➡️ To Step (for Edge-List mode)"
+        label: ➡️ To Step (for Edge-List mode)
         children:
           - type: VariablesListBox
             name: to_var
             maxItemCount: 1
             isTarget: true
-            
       - type: TargetLayoutBox
-        label: "📊 Grouping (Optional - for Edge-List mode)"
+        label: 📊 Grouping (Optional - for Edge-List mode)
         children:
           - type: VariablesListBox
             name: group_var
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
-    label: "⚙️ Style & Layout"
+    label: ⚙️ Style & Layout
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: "🎨 Visualization Style:"
+            label: '🎨 Visualization Style:'
           - type: ComboBox
             name: render_engine
-            label: "Engine"
+            label: Engine
           - type: Label
-            label: "💡 DiagrammeR=Classic | ggplot2=Modern"
+            label: 💡 DiagrammeR=Classic | ggplot2=Modern
             margin: small
           - type: ComboBox
             name: direction
-            label: "Flow Direction"
+            label: Flow Direction
           - type: TextBox
             name: nodeWidth
-            label: "Box Width"
+            label: Box Width
             format: number
-          - type: TextBox  
+          - type: TextBox
             name: nodeHeight
-            label: "Box Height"
+            label: Box Height
             format: number
           - type: TextBox
             name: fontSize
-            label: "Font Size"
+            label: Font Size
             format: number
   - type: CollapseBox
-    label: "🎨 Display Options"
+    label: 🎨 Display Options
     collapsed: true
     children:
       - type: LayoutBox
@@ -103,165 +94,163 @@ children:
         children:
           - type: CheckBox
             name: showPercentages
-            label: "Show percentages"
+            label: Show percentages
           - type: CheckBox
             name: showExclusions
-            label: "Show exclusions"
+            label: Show exclusions
+          - type: CheckBox
+            name: consortStyle
           - type: CheckBox
             name: includeTitle
-            label: "Include title"
+            label: Include title
           - type: CheckBox
             name: show_interpretation
-            label: "Show help text"
+            label: Show help text
           - type: TextBox
             name: plot_title
-            label: "Chart title"
+            label: Chart title
             format: string
-      
       - type: CollapseBox
-        label: "🌈 Colors & Fonts"
+        label: 🌈 Colors & Fonts
         collapsed: true
         children:
           - type: ComboBox
             name: nodeColor
-            label: "Box colors"
+            label: Box colors
           - type: ComboBox
             name: arrowColor
-            label: "Arrow colors"
+            label: Arrow colors
           - type: ComboBox
             name: fontFamily
-            label: "Font"
+            label: Font
           - type: CheckBox
             name: enhancedStyling
-            label: "Enhanced styling"
-      
+            label: Enhanced styling
       - type: CollapseBox
-        label: "📐 Advanced Layout"
+        label: 📐 Advanced Layout
         collapsed: true
         children:
           - type: CheckBox
             name: showCounts
-            label: "Show counts in ggplot2"
+            label: Show counts in ggplot2
           - type: TextBox
             name: nodeSpacing
-            label: "Box spacing"
+            label: Box spacing
             format: number
           - type: CheckBox
             name: nodeTyping
-            label: "Smart node types"
+            label: Smart node types
           - type: TextBox
             name: nodeAlpha
-            label: "Transparency (0-1)"
+            label: Transparency (0-1)
             format: number
           - type: ComboBox
             name: decisionNodeColor
-            label: "Decision box colors"
+            label: Decision box colors
           - type: ComboBox
             name: outcomeNodeColor
-            label: "Outcome box colors"
+            label: Outcome box colors
           - type: CheckBox
             name: customNodeSizing
-            label: "Auto-size boxes"
+            label: Auto-size boxes
           - type: ComboBox
             name: nodeTextSize
-            label: "Text sizing"
+            label: Text sizing
           - type: CheckBox
             name: advancedPositioning
-            label: "Advanced positioning"
+            label: Advanced positioning
           - type: CheckBox
             name: ggplotIntegration
-            label: "Full ggplot2 features"
+            label: Full ggplot2 features
           - type: ComboBox
             name: layoutAlgorithm
-            label: "Layout algorithm"
+            label: Layout algorithm
           - type: ComboBox
             name: layoutOrientation
-            label: "Orientation"
+            label: Orientation
           - type: CheckBox
             name: intelligentLayout
-            label: "Smart layout"
+            label: Smart layout
           - type: TextBox
             name: nodeSpreadFactor
-            label: "Spread factor"
+            label: Spread factor
             format: number
-
   - type: CollapseBox
-    label: "🎨 ggflowchart Options (ggplot2 Mode)"
+    label: 🎨 ggflowchart Options (ggplot2 Mode)
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: "Text & Typography"
+            label: Text & Typography
             children:
               - type: TextBox
                 name: gg_text_size
-                label: "Text size"
+                label: Text size
                 format: number
               - type: TextBox
                 name: gg_text_colour
-                label: "Text color"
+                label: Text color
                 format: string
               - type: ComboBox
                 name: gg_font_family
-                label: "Font family"
+                label: Font family
           - type: Label
-            label: "Node Appearance"
+            label: Node Appearance
             children:
               - type: TextBox
                 name: gg_node_fill
-                label: "Node fill color"
+                label: Node fill color
                 format: string
               - type: TextBox
                 name: gg_node_colour
-                label: "Node border color"
+                label: Node border color
                 format: string
               - type: TextBox
                 name: gg_linewidth
-                label: "Node border width"
+                label: Node border width
                 format: number
               - type: TextBox
                 name: gg_alpha
-                label: "Node transparency"
+                label: Node transparency
                 format: number
               - type: TextBox
                 name: gg_x_nudge
-                label: "Node width"
+                label: Node width
                 format: number
               - type: TextBox
                 name: gg_y_nudge
-                label: "Node height"
+                label: Node height
                 format: number
           - type: Label
-            label: "Arrows & Layout"
+            label: Arrows & Layout
             children:
               - type: TextBox
                 name: gg_arrow_colour
-                label: "Arrow color"
+                label: Arrow color
                 format: string
               - type: TextBox
                 name: gg_arrow_size
-                label: "Arrow size"
+                label: Arrow size
                 format: number
               - type: ComboBox
                 name: gg_arrow_linetype
-                label: "Arrow line type"
+                label: Arrow line type
               - type: TextBox
                 name: gg_arrow_linewidth
-                label: "Arrow line width"
+                label: Arrow line width
                 format: number
               - type: TextBox
                 name: gg_arrow_label_fill
-                label: "Arrow label fill"
+                label: Arrow label fill
                 format: string
               - type: CheckBox
                 name: gg_parse
-                label: "Parse math expressions"
+                label: Parse math expressions
               - type: ComboBox
                 name: gg_layout_algorithm
-                label: "Layout algorithm"
+                label: Layout algorithm
               - type: CheckBox
                 name: gg_horizontal
-                label: "Horizontal layout"
-
+                label: Horizontal layout
