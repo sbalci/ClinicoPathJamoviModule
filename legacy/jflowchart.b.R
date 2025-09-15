@@ -148,22 +148,22 @@ jflowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Store processed data for plotting
             private$.nodeData <- validNodes
-            private$.dataMode <- "node_count"
+            private$.dataMode <- input_mode
             
             # Set plot state for jamovi
             # Set plot state for Image result
             plot <- self$results$plot
             plot$setState(list(
-                mode = "node_count",
+                mode = input_mode,
                 nodeData = validNodes,
                 analysis_complete = TRUE
             ))
 
             # Generate DiagrammeR HTML content
-            html_content <- private$.generateDiagrammeRHtml("node_count", validNodes)
+            html_content <- private$.generateDiagrammeRHtml(input_mode, validNodes)
             self$results$diagram$setContent(html_content)
-            cat("Set diagram HTML content with mode: node_count and", nrow(validNodes), "nodes\n")
-            cat("Set plot state for node_count mode with", nrow(validNodes), "nodes\n")
+            cat("Set diagram HTML content with mode:", input_mode, "and", nrow(validNodes), "nodes\n")
+            cat("Set plot state for", input_mode, "mode with", nrow(validNodes), "nodes\n")
         },
         
         .processEdgeListData = function() {
@@ -1086,16 +1086,124 @@ jflowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(result)
         },
 
+        .plotConsortDiagram = function(nodeData) {
+            cat("Creating CONSORT-style publication-ready flowchart\n")
+
+            n_nodes <- nrow(nodeData)
+
+            # Build DOT notation for CONSORT diagram
+            dot_lines <- c("digraph CONSORT {")
+
+            # Graph attributes for clean publication style
+            dot_lines <- c(dot_lines,
+                "graph [rankdir=TB, bgcolor=white, nodesep=0.5, ranksep=1.2, splines=ortho];",
+                "node [shape=rectangle, style=\"rounded,filled\", fillcolor=\"#f0f0f0\", color=\"#333333\", fontname=\"Helvetica\", fontsize=10, penwidth=1.5];",
+                "edge [color=\"#333333\", arrowsize=1, penwidth=1.5, arrowhead=vee];"
+            )
+
+            # Add main flow nodes
+            for (i in 1:n_nodes) {
+                label <- paste0(nodeData$label[i], "\\n(n = ", format(nodeData$count[i], big.mark=","), ")")
+
+                # Add retention percentage for nodes after first
+                if (i > 1 && nodeData$count[1] > 0) {
+                    pct <- round((nodeData$count[i] / nodeData$count[1]) * 100, 1)
+                    label <- paste0(label, "\\n[", pct, "% retained]")
+                }
+
+                # Style first and last nodes differently
+                if (i == 1) {
+                    # Enrollment/screening box - slightly larger, different color
+                    dot_lines <- c(dot_lines,
+                        sprintf("node%d [label=\"%s\", fillcolor=\"#e6f3ff\", color=\"#0066cc\", penwidth=2, width=3, height=1];", i, label)
+                    )
+                } else if (i == n_nodes) {
+                    # Final analysis box - different color
+                    dot_lines <- c(dot_lines,
+                        sprintf("node%d [label=\"%s\", fillcolor=\"#e6ffe6\", color=\"#009900\", penwidth=2];", i, label)
+                    )
+                } else {
+                    # Intermediate nodes
+                    dot_lines <- c(dot_lines,
+                        sprintf("node%d [label=\"%s\"];", i, label)
+                    )
+                }
+            }
+
+            # Create exclusion boxes with proper labels
+            for (i in 1:(n_nodes-1)) {
+                excluded <- nodeData$count[i] - nodeData$count[i+1]
+                if (excluded > 0) {
+                    exc_pct <- round((excluded / nodeData$count[i]) * 100, 1)
+                    exc_label <- paste0("Excluded\\n(n = ", format(excluded, big.mark=","), ")\\n[", exc_pct, "%]")
+
+                    # Add reason for exclusion if available in node names
+                    # Style exclusion boxes
+                    dot_lines <- c(dot_lines,
+                        sprintf("exc%d [label=\"%s\", shape=rectangle, style=\"filled\", fillcolor=\"#ffe6e6\", color=\"#cc0000\", fontsize=9];", i, exc_label)
+                    )
+                }
+            }
+
+            # Create subgraphs for better alignment
+            # Main flow in center
+            dot_lines <- c(dot_lines, "{rank=same;")
+            for (i in 1:n_nodes) {
+                dot_lines <- c(dot_lines, sprintf("node%d;", i))
+                if (i < n_nodes) dot_lines[length(dot_lines)] <- paste0(dot_lines[length(dot_lines)], " ")
+            }
+            dot_lines <- c(dot_lines, "}")
+
+            # Add main flow edges
+            for (i in 1:(n_nodes-1)) {
+                dot_lines <- c(dot_lines,
+                    sprintf("node%d -> node%d [label=\"\"];", i, i+1)
+                )
+            }
+
+            # Add exclusion edges (to the right)
+            for (i in 1:(n_nodes-1)) {
+                excluded <- nodeData$count[i] - nodeData$count[i+1]
+                if (excluded > 0) {
+                    dot_lines <- c(dot_lines,
+                        sprintf("node%d -> exc%d [style=dashed, color=\"#cc0000\", constraint=false];", i, i)
+                    )
+                }
+            }
+
+            dot_lines <- c(dot_lines, "}")
+
+            # Create the DOT code
+            dot_code <- paste(dot_lines, collapse = "\n")
+
+            cat("Generated DOT code for CONSORT diagram\n")
+
+            # Generate the graph
+            tryCatch({
+                plot_result <- DiagrammeR::grViz(dot_code)
+                cat("CONSORT diagram created successfully\n")
+                return(plot_result)
+            }, error = function(e) {
+                cat("Error creating CONSORT diagram:", e$message, "\n")
+                return(FALSE)
+            })
+        },
+
         .plotDiagrammeR = function(image, ggtheme, theme, ...) {
             cat("DiagrammeR plot function called\n")
-            
+
             # Get plot mode from state instead of private variable
             plot_mode <- image$state$mode
             cat("Plot mode from state:", plot_mode, "\n")
-            
-            if (plot_mode == "node_count") {
+
+            if (plot_mode == "node_count" || plot_mode == "node_count_long") {
                 nodeData <- image$state$nodeData
                 cat("NodeData rows:", nrow(nodeData), "\n")
+
+                # Create CONSORT-style flowchart
+                if (self$options$consortStyle) {
+                    return(private$.plotConsortDiagram(nodeData))
+                }
                 
                 # Calculate flow statistics
                 flow_stats <- list(
@@ -1220,7 +1328,7 @@ jflowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             
             # Add edges based on mode
-            if (plot_mode == "node_count") {
+            if (plot_mode == "node_count" || plot_mode == "node_count_long") {
                 nodeData <- image$state$nodeData
                 n_nodes <- nrow(nodeData)
                 
@@ -1943,7 +2051,7 @@ jflowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (palette_name == "blue") {
                 return(c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#593E2C", "#8E6C8A"))
             } else if (palette_name == "gray") {
-                return(c("#E8E8E8", "#D3D3D3", "#B8B8B8", "#A0A0A0", "#888888", "#707070"))
+                return(c("#f8f8f8", "#e8e8e8", "#d8d8d8", "#c8c8c8", "#b8b8b8", "#a8a8a8"))
             } else if (palette_name == "green") {
                 return(c("#4CAF50", "#8BC34A", "#CDDC39", "#FFC107", "#FF9800", "#FF5722"))
             } else if (palette_name == "viridis") {
@@ -2407,7 +2515,7 @@ jflowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (input_mode == "node_count_long" || input_mode == "ggflowchart_auto") {
                 # Generate summary for sequential steps
-                if (exists("private$.nodeData") && !is.null(private$.nodeData)) {
+                if (!is.null(private$.nodeData)) {
                     nodeData <- private$.nodeData
                     total_nodes <- nrow(nodeData)
 
@@ -2449,7 +2557,7 @@ jflowchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             } else if (input_mode == "edge_list") {
                 # Generate summary for edge list mode
-                if (exists("private$.edgeData") && !is.null(private$.edgeData)) {
+                if (!is.null(private$.edgeData)) {
                     edgeData <- private$.edgeData
                     total_edges <- nrow(edgeData)
                     unique_nodes <- length(unique(c(edgeData$from, edgeData$to)))

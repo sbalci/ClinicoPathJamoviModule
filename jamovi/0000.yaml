@@ -735,7 +735,7 @@ analyses:
   - title: CONSORT Flowchart
     name: jconsort
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyD
     menuSubgroup: Study Design
     menuTitle: CONSORT Flowchart
     ribbon: analyses
@@ -743,7 +743,7 @@ analyses:
   - title: Study Flowchart
     name: jflowchart
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: Study Design
     menuTitle: Study Flowchart
     ribbon: analyses
@@ -4663,6 +4663,16 @@ analyses:
     description: >-
       Creates oncoplots (mutation landscapes) to visualize genomic alterations
       across genes and samples with optional clinical annotations.
+  - title: Study Diagram
+    name: studydiagram
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuSubgroup: Study Design
+    menuTitle: Study Diagram
+    description: >-
+      Creates professional study flow diagrams including CONSORT diagrams and
+      flowcharts using multiple rendering engines
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

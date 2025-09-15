@@ -82,34 +82,15 @@ move documantation files under vignettes folder.
 
 ***
 
-- flowchart - Study Flowchart
-
-/fix-function jflowchart
-
-
-- consort - CONSORT Flowchart
-/check-function jconsort
-
-read this documentation and improve implementation:
-https://cran.r-project.org/web/packages/consort/vignettes/consort_diagram.html
-
-
-read this documentation and improve implementation:
-https://www.riinu.me/2024/02/consort/
-
-read this documentation and improve implementation:
-https://hbiostat.org/rflow/doverview.html
-
-implement ggconsort package features
+https://cran.r-project.org/web/packages/consort/readme/README.html
 https://github.com/tgerke/ggconsort
 https://tgerke.github.io/ggconsort/
+https://nrennie.rbind.io/ggflowchart/
+https://cran.r-project.org/web/packages/flowchart/
+https://cran.r-project.org/web/packages/consort/vignettes/consort_diagram.html
+https://www.riinu.me/2024/02/consort/
+https://hbiostat.org/rflow/doverview.html
 
-
-
-/review-function jconsort
-/fix-function jconsort
-
-prepare a realistic data to test jconsort
 
 
 ***

@@ -1,0 +1,161 @@
+title: Study Diagram
+name: studydiagram
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: ComboBox
+    name: data_format
+    label: Data Format
+  - type: ComboBox
+    name: diagram_type
+    label: Diagram Type
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Participant ID
+        children:
+          - type: VariablesListBox
+            name: participant_id
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Step Excluded
+        children:
+          - type: VariablesListBox
+            name: step_excluded
+            maxItemCount: 1
+            isTarget: true
+  - type: CheckBox
+    name: show_percentages
+    label: Show percentages
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Exclusion Reason Variable
+        children:
+          - type: VariablesListBox
+            name: exclusion_reason_participant
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Step Name Variable
+        children:
+          - type: VariablesListBox
+            name: step_name
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Participant Count Variable
+        children:
+          - type: VariablesListBox
+            name: participant_count
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Exclusion Reason Variable
+        children:
+          - type: VariablesListBox
+            name: exclusion_reason_summary
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Participant ID Variable
+        children:
+          - type: VariablesListBox
+            name: participant_id_mapping
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Exclusion Reason Variable
+        children:
+          - type: VariablesListBox
+            name: exclusion_reason_mapping
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Treatment Group Variable
+        children:
+          - type: VariablesListBox
+            name: treatment_group
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_exclusion_boxes
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step1_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: direction
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step2_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: color_scheme
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step3_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_interpretation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step4_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step5_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: step1_label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: step2_label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: step3_label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: step4_label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: step5_label
+        format: string

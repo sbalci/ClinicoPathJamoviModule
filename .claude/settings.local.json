@@ -50,7 +50,8 @@
       "WebFetch(domain:nrennie.rbind.io)",
       "WebFetch(domain:bookdown.org)",
       "Read(//Users/serdarbalci/Documents/GitHub/BrawStats-for-Jamovi-Full/**)",
-      "Bash(yamllint:*)"
+      "Bash(yamllint:*)",
+      "WebFetch(domain:www.riinu.me)"
     ],
     "deny": [],
     "ask": [],

@@ -18,8 +18,9 @@ jflowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nodeHeight = 1,
             fontSize = 10,
             showPercentages = TRUE,
+            consortStyle = TRUE,
             showExclusions = TRUE,
-            nodeColor = "blue",
+            nodeColor = "gray",
             enhancedStyling = TRUE,
             showCounts = TRUE,
             arrowColor = "darkgray",
@@ -145,6 +146,10 @@ jflowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showPercentages",
                 showPercentages,
                 default=TRUE)
+            private$..consortStyle <- jmvcore::OptionBool$new(
+                "consortStyle",
+                consortStyle,
+                default=TRUE)
             private$..showExclusions <- jmvcore::OptionBool$new(
                 "showExclusions",
                 showExclusions,
@@ -153,15 +158,15 @@ jflowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "nodeColor",
                 nodeColor,
                 options=list(
-                    "blue",
                     "gray",
+                    "blue",
                     "green",
                     "viridis",
                     "set1",
                     "pastel",
                     "gradient_blue",
                     "clinical_warm"),
-                default="blue")
+                default="gray")
             private$..enhancedStyling <- jmvcore::OptionBool$new(
                 "enhancedStyling",
                 enhancedStyling,
@@ -397,6 +402,7 @@ jflowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nodeHeight)
             self$.addOption(private$..fontSize)
             self$.addOption(private$..showPercentages)
+            self$.addOption(private$..consortStyle)
             self$.addOption(private$..showExclusions)
             self$.addOption(private$..nodeColor)
             self$.addOption(private$..enhancedStyling)
@@ -450,6 +456,7 @@ jflowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nodeHeight = function() private$..nodeHeight$value,
         fontSize = function() private$..fontSize$value,
         showPercentages = function() private$..showPercentages$value,
+        consortStyle = function() private$..consortStyle$value,
         showExclusions = function() private$..showExclusions$value,
         nodeColor = function() private$..nodeColor$value,
         enhancedStyling = function() private$..enhancedStyling$value,
@@ -502,6 +509,7 @@ jflowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nodeHeight = NA,
         ..fontSize = NA,
         ..showPercentages = NA,
+        ..consortStyle = NA,
         ..showExclusions = NA,
         ..nodeColor = NA,
         ..enhancedStyling = NA,
@@ -750,7 +758,8 @@ jflowchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param nodeWidth .
 #' @param nodeHeight .
 #' @param fontSize .
-#' @param showPercentages Show percentage of initial participants at each step
+#' @param showPercentages .
+#' @param consortStyle Show percentage of initial participants at each step
 #' @param showExclusions Show exclusion counts on edge labels
 #' @param nodeColor Color scheme for nodes (works with both rendering engines)
 #' @param enhancedStyling Apply enhanced modern styling for ggplot2 rendering
@@ -832,8 +841,9 @@ jflowchart <- function(
     nodeHeight = 1,
     fontSize = 10,
     showPercentages = TRUE,
+    consortStyle = TRUE,
     showExclusions = TRUE,
-    nodeColor = "blue",
+    nodeColor = "gray",
     enhancedStyling = TRUE,
     showCounts = TRUE,
     arrowColor = "darkgray",
@@ -907,6 +917,7 @@ jflowchart <- function(
         nodeHeight = nodeHeight,
         fontSize = fontSize,
         showPercentages = showPercentages,
+        consortStyle = consortStyle,
         showExclusions = showExclusions,
         nodeColor = nodeColor,
         enhancedStyling = enhancedStyling,
