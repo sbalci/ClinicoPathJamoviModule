@@ -2278,7 +2278,7 @@ analyses:
     name: biopsysimulation
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuTitle: Biopsy Simulation Analysis
   - title: Digital Pathology Validation
     name: digitalvalidation
@@ -2308,7 +2308,7 @@ analyses:
     name: pathologyagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuTitle: Pathology Agreement Analysis
   - title: Spatial Statistics from Coordinates
     name: spatialanalysis
@@ -4667,7 +4667,7 @@ analyses:
     name: studydiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: Study Design
     menuTitle: Study Diagram
     description: >-

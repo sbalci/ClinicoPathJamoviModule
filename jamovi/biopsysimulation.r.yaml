@@ -9,6 +9,18 @@ items:
       type: Html
       visible: true
 
+    - name: report_sentences
+      title: Copy-Ready Report Sentences
+      type: Html
+      visible: true
+      description: Pre-formatted sentences ready for clinical reports and publications
+
+    - name: assumptions
+      title: Methodology & Assumptions
+      type: Html
+      visible: true
+      description: Analysis assumptions, data requirements, and methodological considerations
+
     - name: reproducibilitytable
       title: Reproducibility Assessment
       type: Table
@@ -149,7 +161,7 @@ items:
       description: Spatial distribution of biomarker values
       width: 600
       height: 400
-      visible: (spatial_id && show_variability_plots)
+      visible: (show_variability_plots)
       renderFun: .spatialplot
 
 

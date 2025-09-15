@@ -9,14 +9,14 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Whole Section Value
+        label: Whole Section Biomarker Value
         children:
           - type: VariablesListBox
             name: wholesection
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Biopsy Sample 1
+        label: Biopsy Sample 1 (Required)
         children:
           - type: VariablesListBox
             name: biopsy1

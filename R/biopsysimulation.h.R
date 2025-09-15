@@ -179,6 +179,8 @@ biopsysimulationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         interpretation = function() private$.items[["interpretation"]],
+        report_sentences = function() private$.items[["report_sentences"]],
+        assumptions = function() private$.items[["assumptions"]],
         reproducibilitytable = function() private$.items[["reproducibilitytable"]],
         samplingbiastable = function() private$.items[["samplingbiastable"]],
         variancetable = function() private$.items[["variancetable"]],
@@ -200,6 +202,16 @@ biopsysimulationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation and Analysis Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="report_sentences",
+                title="Copy-Ready Report Sentences",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Methodology & Assumptions",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -358,7 +370,7 @@ biopsysimulationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Spatial Heterogeneity Visualization",
                 width=600,
                 height=400,
-                visible="(spatial_id && show_variability_plots)",
+                visible="(show_variability_plots)",
                 renderFun=".spatialplot"))}))
 
 biopsysimulationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -386,8 +398,13 @@ biopsysimulationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'
 #' 
 #' @param data the data as a data frame
-#' @param wholesection biomarker measurement from entire tissue section
-#' @param biopsy1 first simulated biopsy measurement
+#' @param wholesection Biomarker measurement from entire tissue section.
+#'   Example: Ki67 proliferation index (0-100\%), ER/PR expression (0-8 Allred
+#'   score), HER2 expression (0-3+ intensity), or quantitative molecular
+#'   biomarker values.
+#' @param biopsy1 Biomarker measurement from first simulated core biopsy
+#'   sample. Should represent same biomarker as whole section measurement.
+#'   Example: Ki67 \% from 2mm core biopsy #1.
 #' @param biopsy2 second simulated biopsy measurement
 #' @param biopsy3 third simulated biopsy measurement
 #' @param biopsy4 fourth simulated biopsy measurement
@@ -395,10 +412,16 @@ biopsysimulationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param spatial_id identifier for spatial regions or tissue areas
 #' @param analysis_type primary focus of biopsy simulation analysis
 #' @param sampling_strategy biopsy sampling strategy used
-#' @param cv_threshold coefficient of variation threshold for acceptable
-#'   sampling variability
-#' @param correlation_threshold minimum correlation between biopsy and whole
-#'   section
+#' @param cv_threshold Coefficient of variation threshold for acceptable
+#'   sampling variability. Typical clinical values: 15-25\% for
+#'   immunohistochemistry (Ki67, ER, PR), 10-20\% for molecular assays, 20-30\%
+#'   for heterogeneous markers (HER2, PD-L1). Lower values indicate more
+#'   stringent quality requirements.
+#' @param correlation_threshold Minimum Spearman correlation between biopsy
+#'   and whole section measurements. Clinical guidelines: ≥0.80 excellent
+#'   agreement, ≥0.70 good agreement, ≥0.60 moderate agreement, <0.60 poor
+#'   agreement. Higher values indicate better representativeness of biopsy
+#'   samples.
 #' @param show_variability_plots display plots showing sampling variability
 #' @param variance_components perform variance component decomposition
 #' @param power_analysis perform power analysis for sample size
@@ -408,6 +431,8 @@ biopsysimulationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences ready for clinical reports and publications \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab Analysis assumptions, data requirements, and methodological considerations \cr
 #'   \code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
 #'   \code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
 #'   \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr

@@ -1,7 +1,7 @@
 ---
 name: biopsysimulation
 title: Biopsy Simulation Analysis
-menuGroup: OncoPathologyT2
+menuGroup: OncoPathologyT
 version: '1.0.0'
 jas: '1.2'
 
@@ -12,7 +12,7 @@ options:
           R: the data as a data frame
 
     - name: wholesection
-      title: Whole Section Value
+      title: Whole Section Biomarker Value
       type: Variable
       suggested:
         - continuous
@@ -20,10 +20,12 @@ options:
         - numeric
       description:
           R: >
-            biomarker measurement from entire tissue section
+            Biomarker measurement from entire tissue section.
+            Example: Ki67 proliferation index (0-100%), ER/PR expression (0-8 Allred score),
+            HER2 expression (0-3+ intensity), or quantitative molecular biomarker values.
 
     - name: biopsy1
-      title: Biopsy Sample 1
+      title: Biopsy Sample 1 (Required)
       type: Variable
       suggested:
         - continuous
@@ -31,7 +33,9 @@ options:
         - numeric
       description:
           R: >
-            first simulated biopsy measurement
+            Biomarker measurement from first simulated core biopsy sample.
+            Should represent same biomarker as whole section measurement.
+            Example: Ki67 % from 2mm core biopsy #1.
 
     - name: biopsy2
       title: Biopsy Sample 2 (Optional)
@@ -130,7 +134,10 @@ options:
       default: 20.0
       description:
           R: >
-            coefficient of variation threshold for acceptable sampling variability
+            Coefficient of variation threshold for acceptable sampling variability.
+            Typical clinical values: 15-25% for immunohistochemistry (Ki67, ER, PR),
+            10-20% for molecular assays, 20-30% for heterogeneous markers (HER2, PD-L1).
+            Lower values indicate more stringent quality requirements.
 
     - name: correlation_threshold
       title: Minimum Acceptable Correlation
@@ -140,7 +147,10 @@ options:
       default: 0.80
       description:
           R: >
-            minimum correlation between biopsy and whole section
+            Minimum Spearman correlation between biopsy and whole section measurements.
+            Clinical guidelines: ≥0.80 excellent agreement, ≥0.70 good agreement,
+            ≥0.60 moderate agreement, <0.60 poor agreement.
+            Higher values indicate better representativeness of biopsy samples.
 
     - name: show_variability_plots
       title: Show Variability Plots
