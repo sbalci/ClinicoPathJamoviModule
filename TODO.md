@@ -83,13 +83,9 @@ move documantation files under vignettes folder.
 
 ***
 
-- diagnosticmeta - Diagnostic Test Meta-Analysis for Pathology
-/check-function diagnosticmeta
-/review-function diagnosticmeta
-/fix-function diagnosticmeta
 
 - metaanalysis - Meta-Analysis & Evidence Synthesis
-/check-function metaanalysis
+
 /review-function metaanalysis
 /fix-function metaanalysis
 

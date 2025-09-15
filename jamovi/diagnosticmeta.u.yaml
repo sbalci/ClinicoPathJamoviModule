@@ -11,6 +11,9 @@ children:
     children:
       - type: TargetLayoutBox
         children:
+          - type: Label
+            label: "📝 Study Names (Required)"
+            fitToGrid: true
           - type: VariablesListBox
             name: study
             maxItemCount: 1
@@ -19,6 +22,9 @@ children:
 
       - type: TargetLayoutBox
         children:
+          - type: Label
+            label: "✅ True Positives (Disease+, Test+)"
+            fitToGrid: true
           - type: VariablesListBox
             name: true_positives
             maxItemCount: 1
@@ -27,6 +33,9 @@ children:
 
       - type: TargetLayoutBox
         children:
+          - type: Label
+            label: "⚠️ False Positives (Disease-, Test+)"
+            fitToGrid: true
           - type: VariablesListBox
             name: false_positives
             maxItemCount: 1
@@ -35,6 +44,9 @@ children:
 
       - type: TargetLayoutBox
         children:
+          - type: Label
+            label: "❌ False Negatives (Disease+, Test-)"
+            fitToGrid: true
           - type: VariablesListBox
             name: false_negatives
             maxItemCount: 1
@@ -43,6 +55,9 @@ children:
 
       - type: TargetLayoutBox
         children:
+          - type: Label
+            label: "✅ True Negatives (Disease-, Test-)"
+            fitToGrid: true
           - type: VariablesListBox
             name: true_negatives
             maxItemCount: 1
@@ -51,6 +66,9 @@ children:
 
       - type: TargetLayoutBox
         children:
+          - type: Label
+            label: "📊 Meta-Regression Variable (Optional)"
+            fitToGrid: true
           - type: VariablesListBox
             name: covariate
             maxItemCount: 1
@@ -62,55 +80,66 @@ children:
     stretchFactor: 2
     children:
       - type: Label
-        label: Analysis Options
+        label: "🔬 Analysis Options"
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: bivariate_analysis
+                label: "Bivariate Random-Effects Model (Recommended)"
 
               - type: CheckBox
                 name: hsroc_analysis
+                label: "HSROC Analysis (Summary ROC Curve)"
 
               - type: CheckBox
                 name: heterogeneity_analysis
+                label: "Heterogeneity Assessment (Study Variability)"
 
               - type: CheckBox
                 name: meta_regression
+                label: "Meta-Regression (Explore Covariate Effects)"
 
               - type: CheckBox
                 name: publication_bias
+                label: "Publication Bias Assessment (Deeks' Test)"
 
               - type: CheckBox
                 name: show_individual_studies
+                label: "Show Individual Study Results"
 
       - type: Label
-        label: Advanced Options
+        label: "⚙️ Advanced Options"
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: TextBox
                 name: confidence_level
+                label: "Confidence Level (%)"
                 format: number
                 suffix: '%'
 
               - type: ComboBox
                 name: method
+                label: "Estimation Method"
 
       - type: Label
-        label: Plots
+        label: "📈 Visualization Options"
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: forest_plot
+                label: "Forest Plot (Sensitivity & Specificity)"
 
               - type: CheckBox
                 name: sroc_plot
+                label: "Summary ROC Plot"
 
               - type: CheckBox
                 name: funnel_plot
+                label: "Funnel Plot (Publication Bias)"
                 enable: (publication_bias)

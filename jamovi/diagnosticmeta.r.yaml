@@ -9,6 +9,22 @@ items:
       type: Html
       visible: true
 
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (bivariate_analysis)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+
+    - name: about
+      title: About This Analysis
+      type: Html
+      visible: true
+
     - name: bivariateresults
       title: Bivariate Meta-Analysis Results
       type: Table
@@ -21,7 +37,30 @@ items:
           - true_negatives
           - confidence_level
           - method
-      columns: []
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: ci_lower
+          title: CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: CI Upper
+          type: number
+          format: zto
+        - name: i_squared
+          title: I²
+          type: number
+          format: zto
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
 
     - name: hsrocresults
       title: HSROC Model Results
@@ -34,7 +73,26 @@ items:
           - false_negatives
           - true_negatives
           - method
-      columns: []
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: std_error
+          title: Std. Error
+          type: number
+          format: zto
+        - name: z_value
+          title: Z Value
+          type: number
+          format: zto
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
 
     - name: heterogeneity
       title: Heterogeneity Assessment
@@ -47,12 +105,34 @@ items:
           - false_negatives
           - true_negatives
           - method
-      columns: []
+      columns:
+        - name: measure
+          title: Measure
+          type: text
+        - name: q_statistic
+          title: Q Statistic
+          type: number
+          format: zto
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: i_squared
+          title: I² (%)
+          type: number
+          format: zto
+        - name: tau_squared
+          title: τ²
+          type: number
+          format: zto
 
     - name: metaregression
       title: Meta-Regression Results
       type: Table
-      visible: (meta_regression && covariate)
+      visible: (meta_regression)
       clearWith:
           - study
           - true_positives
@@ -61,7 +141,29 @@ items:
           - true_negatives
           - covariate
           - method
-      columns: []
+      columns:
+        - name: measure
+          title: Measure
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: std_error
+          title: Std. Error
+          type: number
+          format: zto
+        - name: z_value
+          title: Z Value
+          type: number
+          format: zto
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
 
     - name: publicationbias
       title: Publication Bias Assessment
@@ -73,7 +175,21 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
-      columns: []
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+          format: zto
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: Interpretation
+          type: text
 
     - name: individualstudies
       title: Individual Study Results
@@ -85,7 +201,33 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
-      columns: []
+      columns:
+        - name: study
+          title: Study
+          type: text
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: zto
+        - name: specificity
+          title: Specificity
+          type: number
+          format: zto
+        - name: tp
+          title: TP
+          type: integer
+        - name: fp
+          title: FP
+          type: integer
+        - name: fn
+          title: FN
+          type: integer
+        - name: tn
+          title: TN
+          type: integer
+        - name: sample_size
+          title: N
+          type: integer
 
     - name: forestplot
       title: Forest Plot
@@ -94,6 +236,7 @@ items:
       height: 600
       visible: (forest_plot)
       requiresData: true
+      renderFun: .forestplot
       clearWith:
           - study
           - true_positives
@@ -108,6 +251,7 @@ items:
       height: 600
       visible: (sroc_plot)
       requiresData: true
+      renderFun: .srocplot
       clearWith:
           - study
           - true_positives
@@ -120,8 +264,9 @@ items:
       type: Image
       width: 600
       height: 500
-      visible: (funnel_plot && publication_bias)
+      visible: (funnel_plot)
       requiresData: true
+      renderFun: .funnelplot
       clearWith:
           - study
           - true_positives

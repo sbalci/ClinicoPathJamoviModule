@@ -187,6 +187,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        summary = function() private$.items[["summary"]],
+        about = function() private$.items[["about"]],
         bivariateresults = function() private$.items[["bivariateresults"]],
         hsrocresults = function() private$.items[["hsrocresults"]],
         heterogeneity = function() private$.items[["heterogeneity"]],
@@ -211,6 +213,22 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="instructions",
                 title="Getting Started",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible="(bivariate_analysis)",
+                clearWith=list(
+                    "study",
+                    "true_positives",
+                    "false_positives",
+                    "false_negatives",
+                    "true_negatives")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About This Analysis",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bivariateresults",
@@ -224,7 +242,36 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_negatives",
                     "confidence_level",
                     "method"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="i_squared", 
+                        `title`="I\u00B2", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="hsrocresults",
@@ -237,7 +284,31 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_negatives",
                     "true_negatives",
                     "method"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="std_error", 
+                        `title`="Std. Error", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="z_value", 
+                        `title`="Z Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="heterogeneity",
@@ -250,12 +321,40 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_negatives",
                     "true_negatives",
                     "method"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="q_statistic", 
+                        `title`="Q Statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="i_squared", 
+                        `title`="I\u00B2 (%)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="tau_squared", 
+                        `title`="\u03C4\u00B2", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="metaregression",
                 title="Meta-Regression Results",
-                visible="(meta_regression && covariate)",
+                visible="(meta_regression)",
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -264,7 +363,35 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_negatives",
                     "covariate",
                     "method"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="std_error", 
+                        `title`="Std. Error", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="z_value", 
+                        `title`="Z Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="publicationbias",
@@ -276,7 +403,25 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_positives",
                     "false_negatives",
                     "true_negatives"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="individualstudies",
@@ -288,7 +433,41 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_positives",
                     "false_negatives",
                     "true_negatives"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="study", 
+                        `title`="Study", 
+                        `type`="text"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="tp", 
+                        `title`="TP", 
+                        `type`="integer"),
+                    list(
+                        `name`="fp", 
+                        `title`="FP", 
+                        `type`="integer"),
+                    list(
+                        `name`="fn", 
+                        `title`="FN", 
+                        `type`="integer"),
+                    list(
+                        `name`="tn", 
+                        `title`="TN", 
+                        `type`="integer"),
+                    list(
+                        `name`="sample_size", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="forestplot",
@@ -297,6 +476,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 height=600,
                 visible="(forest_plot)",
                 requiresData=TRUE,
+                renderFun=".forestplot",
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -311,6 +491,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 height=600,
                 visible="(sroc_plot)",
                 requiresData=TRUE,
+                renderFun=".srocplot",
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -323,8 +504,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Funnel Plot for Publication Bias",
                 width=600,
                 height=500,
-                visible="(funnel_plot && publication_bias)",
+                visible="(funnel_plot)",
                 requiresData=TRUE,
+                renderFun=".funnelplot",
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -403,6 +585,8 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$bivariateresults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$hsrocresults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$heterogeneity} \tab \tab \tab \tab \tab a table \cr
