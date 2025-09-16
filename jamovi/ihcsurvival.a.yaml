@@ -1,0 +1,202 @@
+---
+name: ihcsurvival
+title: IHC Survival Analysis
+menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
+menuTitle: Survival & Prognosis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Survival analysis and prognostic clustering using IHC markers.
+        Designed for prognostic biomarker discovery and risk stratification.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            ihcsurvival(
+                markers = c("ER", "PR", "HER2", "Ki67"),
+                survivalTime = "os_months",
+                survivalEvent = "death",
+                prognosticClustering = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: markers
+      title: IHC Markers
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            IHC marker variables for prognostic analysis
+
+    - name: survivalTime
+      title: Survival Time
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time to event variable (months, years, days)
+
+    - name: survivalEvent
+      title: Survival Event
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event indicator (1=event, 0=censored)
+
+    - name: id
+      title: Case ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - id
+      permitted:
+        - factor
+        - numeric
+      default: NULL
+      description:
+          R: >
+            Case identifier for tracking
+
+    - name: prognosticClustering
+      title: Prognostic Clustering
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform clustering optimized for survival outcomes
+
+    - name: multiRegionAnalysis
+      title: Multi-Region Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare central vs invasive tumor regions
+
+    - name: centralRegion
+      title: Central Region Markers
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            IHC markers from central tumor region
+
+    - name: invasiveRegion
+      title: Invasive Region Markers
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            IHC markers from invasive tumor region
+
+    - name: riskStratification
+      title: Risk Group Stratification
+      type: List
+      options:
+        - name: binary
+          title: Low/High Risk (2 groups)
+        - name: tertiles
+          title: Low/Intermediate/High (3 groups)
+        - name: quartiles
+          title: Quartile-based (4 groups)
+        - name: optimal
+          title: Optimal cutpoint-based
+      default: tertiles
+      description:
+          R: >
+            Method for creating prognostic risk groups
+
+    - name: coxRegression
+      title: Cox Regression Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Cox proportional hazards regression
+
+    - name: multivariateAdjustment
+      title: Multivariate Adjustment
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Clinical variables for multivariate adjustment
+
+    - name: kaplanMeierPlots
+      title: Kaplan-Meier Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate survival curves for risk groups
+
+    - name: landmarkAnalysis
+      title: Landmark Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform landmark survival analysis at specific time points
+
+    - name: landmarkTime
+      title: Landmark Time Point
+      type: Number
+      min: 1
+      max: 120
+      default: 60
+      description:
+          R: >
+            Time point for landmark analysis (same units as survival time)
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for survival estimates and hazard ratios
+
+...

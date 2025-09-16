@@ -54,29 +54,44 @@ run devtools::document() to see if there are any errors
 prepare a realistic data to test the features in detail 
 move csv files under data folder.
 move data generation files under data-raw folder.
-move documantation files under vignettes folder.
-
+move documentation files under vignettes folder.
 
 ***
 
-- ihcstats - IHC Expression Analysis
-/check-function ihcstats
-/review-function ihcstats
-/fix-function ihcstats
 
-- ihccluster - IHC Clustering Analysis
+
+/fix-function ihcdiagnostic
+
+
+
+/check-function ihcadvanced
+/review-function ihcadvanced
+/fix-function ihcadvanced
+
+
+
+
+/check-function ihcsurvival
+/review-function ihcsurvival
+/fix-function ihcsurvival
+
+
+
+
+
+/check-function ihcimmune
+/review-function ihcimmune
+/fix-function ihcimmune
+
+
 /check-function ihccluster
 /review-function ihccluster
 /fix-function ihccluster
 
-- ihcscoring - IHC Scoring Standardization
 /check-function ihcscoring
 /review-function ihcscoring
 /fix-function ihcscoring
 
-- multiplexanalysis - Multiplex Immunofluorescence Analysis
 /check-function multiplexanalysis
 /review-function multiplexanalysis
 /fix-function multiplexanalysis
-
-

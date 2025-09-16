@@ -1,0 +1,210 @@
+---
+name: ihcsurvival
+title: IHC Survival Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Survival Analysis Overview
+      type: Html
+      visible: true
+
+    - name: prognosticGroups
+      title: Prognostic Group Summary
+      type: Table
+      visible: (prognosticClustering)
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+        - riskStratification
+      columns:
+        - name: group
+          title: Risk Group
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: median_survival
+          title: Median Survival
+          type: number
+          format: zto:1
+        - name: survival_95ci
+          title: 95% CI
+          type: text
+        - name: pattern
+          title: IHC Pattern
+          type: text
+
+    - name: coxResults
+      title: Cox Regression Results
+      type: Table
+      visible: (coxRegression)
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: hazard_ratio
+          title: Hazard Ratio
+          type: number
+          format: zto:3
+        - name: hr_95ci
+          title: 95% CI
+          type: text
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto:4
+        - name: significance
+          title: Sig.
+          type: text
+
+    - name: multivariateResults
+      title: Multivariate Cox Analysis
+      type: Table
+      visible: (multivariateAdjustment)
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+        - multivariateAdjustment
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: hazard_ratio
+          title: Adjusted HR
+          type: number
+          format: zto:3
+        - name: hr_95ci
+          title: 95% CI
+          type: text
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto:4
+        - name: significance
+          title: Sig.
+          type: text
+
+    - name: regionalComparison
+      title: Central vs Invasive Region Analysis
+      type: Table
+      visible: (multiRegionAnalysis)
+      clearWith:
+        - centralRegion
+        - invasiveRegion
+        - survivalTime
+        - survivalEvent
+      columns:
+        - name: marker
+          title: Marker
+          type: text
+        - name: central_hr
+          title: Central HR
+          type: number
+          format: zto:3
+        - name: invasive_hr
+          title: Invasive HR
+          type: number
+          format: zto:3
+        - name: concordance
+          title: Concordance
+          type: number
+          format: zto:3
+        - name: better_region
+          title: Better Predictor
+          type: text
+
+    - name: landmarkResults
+      title: Landmark Analysis Results
+      type: Table
+      visible: (landmarkAnalysis)
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+        - landmarkTime
+      columns:
+        - name: group
+          title: Risk Group
+          type: text
+        - name: at_risk
+          title: At Risk
+          type: integer
+        - name: survival_prob
+          title: Survival Probability
+          type: number
+          format: zto:3
+        - name: survival_95ci
+          title: 95% CI
+          type: text
+
+    - name: modelFit
+      title: Model Performance
+      type: Table
+      visible: (coxRegression)
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto:3
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: kaplanMeierPlot
+      title: Kaplan-Meier Survival Curves
+      type: Image
+      visible: (kaplanMeierPlots)
+      renderFun: .plotKaplanMeier
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+        - riskStratification
+      width: 800
+      height: 600
+
+    - name: hazardPlot
+      title: Hazard Ratio Forest Plot
+      type: Image
+      visible: (coxRegression)
+      renderFun: .plotHazardRatios
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+      width: 800
+      height: 500
+
+    - name: riskScorePlot
+      title: Risk Score Distribution
+      type: Image
+      visible: (prognosticClustering)
+      renderFun: .plotRiskScores
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+      width: 700
+      height: 500
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

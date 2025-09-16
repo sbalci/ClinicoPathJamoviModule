@@ -1,0 +1,167 @@
+---
+name: ihcbasic
+title: Basic IHC Analysis
+menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
+menuTitle: Basic Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Essential IHC expression analysis with clustering and H-score calculation.
+        Designed for routine clinical use with simplified options.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            ihcbasic(
+                markers = c("ER", "PR", "HER2", "Ki67"),
+                clusterMethod = "hierarchical",
+                nClusters = 3,
+                computeHScore = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: markers
+      title: IHC Markers
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            IHC marker variables (categorical 0-3 or continuous H-scores)
+
+    - name: id
+      title: Case ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - id
+      permitted:
+        - factor
+        - numeric
+      default: NULL
+      description:
+          R: >
+            Optional case/sample identifier for labeling
+
+    - name: computeHScore
+      title: Calculate H-Score Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate H-score statistics (mean, median, range) for each marker. H-scores represent staining intensity multiplied by percentage of positive cells, providing a comprehensive measure of protein expression (range 0-300).
+
+    - name: clusterMethod
+      title: Clustering Method
+      type: List
+      options:
+        - name: hierarchical
+          title: Hierarchical (recommended for <100 samples)
+        - name: kmeans
+          title: K-means (fast, assumes spherical clusters)
+        - name: pam
+          title: PAM - robust to outliers
+      default: hierarchical
+      description:
+          R: >
+            Method for clustering samples by IHC expression patterns. Hierarchical clustering builds tree-like relationships and works well for small to medium datasets. K-means is faster for large datasets but assumes spherical clusters. PAM (Partitioning Around Medoids) is more robust to outliers.
+
+    - name: nClusters
+      title: Number of Expression Patterns
+      type: Integer
+      min: 2
+      max: 10
+      default: 3
+      description:
+          R: >
+            Number of distinct IHC expression patterns to identify. Start with 2-3 patterns for initial exploration. More patterns may reveal tumor heterogeneity but require larger sample sizes (rule of thumb: at least 3-5 samples per pattern).
+
+    - name: distanceMetric
+      title: Similarity Measure
+      type: List
+      options:
+        - name: gower
+          title: Gower (recommended - handles mixed data)
+        - name: jaccard
+          title: Jaccard (for presence/absence only)
+      default: gower
+      description:
+          R: >
+            How to measure similarity between samples. Gower distance works with different IHC scoring scales (0-3, H-scores, binary) and is recommended for most analyses. Jaccard distance only considers presence/absence of staining.
+
+    - name: linkageMethod
+      title: Grouping Strategy
+      type: List
+      options:
+        - name: ward.D2
+          title: Ward's (creates balanced groups)
+        - name: complete
+          title: Complete (creates compact groups)
+        - name: average
+          title: Average (moderate approach)
+      default: ward.D2
+      description:
+          R: >
+            How to form groups in hierarchical clustering. Ward's method creates well-balanced groups and is recommended for most IHC analyses. Complete linkage creates tight, compact clusters. Average linkage provides a moderate approach between the two.
+
+    - name: standardizeData
+      title: Normalize Different Scoring Scales
+      type: Bool
+      default: true
+      description:
+          R: >
+            Recommended when markers use different scales (e.g., mixing 0-3 scores with H-scores). Puts all markers on the same scale so no single marker dominates the analysis. Disable for binary data or when all markers use the same scale.
+
+    - name: showDendrogram
+      title: Show Clustering Tree (Dendrogram)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Shows the hierarchical relationship between samples as a tree diagram. Helps visualize how expression patterns relate to each other and identify the optimal number of groups.
+
+    - name: showHeatmap
+      title: Show Expression Pattern Heatmap
+      type: Bool
+      default: true
+      description:
+          R: >
+            Visual representation of IHC staining patterns across all samples. Each row represents a patient sample, each column represents a marker. Colors indicate expression levels, with samples grouped by similar patterns.
+
+    - name: silhouetteAnalysis
+      title: Assess Pattern Reliability
+      type: Bool
+      default: true
+      description:
+          R: >
+            Recommended: Evaluates how well-separated the expression patterns are. Higher scores indicate more reliable, clinically meaningful patterns. Helps determine if the identified patterns are real or due to noise.
+
+    - name: scoringScale
+      title: IHC Scoring System Used
+      type: List
+      options:
+        - name: standard
+          title: 0-3 Scale (0=negative, 1=weak, 2=moderate, 3=strong)
+        - name: binary
+          title: Binary (0=negative, 1=positive)
+        - name: hscore
+          title: H-Score (0-300, intensity × percentage)
+      default: standard
+      description:
+          R: >
+            The IHC scoring system used in your data. Standard 0-3 scale is most common (0=no staining, 1=weak, 2=moderate, 3=strong staining). Binary scoring records only presence/absence. H-score combines intensity and percentage of positive cells (range 0-300).
+
+...

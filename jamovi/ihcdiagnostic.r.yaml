@@ -1,0 +1,151 @@
+---
+name: ihcdiagnostic
+title: IHC Diagnostic Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Diagnostic Analysis Overview
+      type: Html
+      visible: true
+
+    - name: diagnosticPerformance
+      title: Diagnostic Performance by Marker
+      type: Table
+      visible: (calculateDiagnosticMetrics)
+      clearWith:
+        - markers
+        - diagnosis
+      columns:
+        - name: marker
+          title: Marker
+          type: text
+        - name: cutpoint
+          title: Cutpoint
+          type: number
+          format: zto:2
+        - name: sensitivity
+          title: Sensitivity (%)
+          type: number
+          format: zto:1
+        - name: specificity
+          title: Specificity (%)
+          type: number
+          format: zto:1
+        - name: ppv
+          title: PPV (%)
+          type: number
+          format: zto:1
+        - name: npv
+          title: NPV (%)
+          type: number
+          format: zto:1
+        - name: accuracy
+          title: Accuracy (%)
+          type: number
+          format: zto:1
+        - name: auc
+          title: AUC
+          type: number
+          format: zto:3
+
+    - name: differentialResults
+      title: Differential Diagnosis Results
+      type: Table
+      visible: (differentialDiagnosis)
+      clearWith:
+        - markers
+        - diagnosis
+        - clusterMethod
+      columns:
+        - name: case_id
+          title: Case
+          type: text
+        - name: predicted
+          title: Predicted
+          type: text
+        - name: actual
+          title: Actual
+          type: text
+        - name: confidence
+          title: Confidence (%)
+          type: number
+          format: zto:1
+        - name: cluster
+          title: Cluster
+          type: integer
+        - name: correct
+          title: Correct
+          type: text
+
+    - name: confusionMatrix
+      title: Confusion Matrix
+      type: Table
+      visible: (differentialDiagnosis)
+      clearWith:
+        - markers
+        - diagnosis
+      columns:
+        - name: actual
+          title: Actual \\ Predicted
+          type: text
+        - name: total
+          title: Total
+          type: integer
+
+    - name: panelOptimization
+      title: Antibody Panel Optimization
+      type: Table
+      visible: (antibodyOptimization)
+      clearWith:
+        - markers
+        - diagnosis
+      columns:
+        - name: panel_size
+          title: Panel Size
+          type: integer
+        - name: markers_included
+          title: Markers
+          type: text
+        - name: sensitivity
+          title: Sensitivity (%)
+          type: number
+          format: zto:1
+        - name: specificity
+          title: Specificity (%)
+          type: number
+          format: zto:1
+        - name: accuracy
+          title: Accuracy (%)
+          type: number
+          format: zto:1
+        - name: recommendation
+          title: Recommendation
+          type: text
+
+    - name: rocPlot
+      title: ROC Curves
+      type: Image
+      visible: (calculateDiagnosticMetrics)
+      renderFun: .plotROC
+      clearWith:
+        - markers
+        - diagnosis
+      width: 800
+      height: 600
+
+    - name: diagnosticPlot
+      title: Diagnostic Performance Comparison
+      type: Image
+      visible: (calculateDiagnosticMetrics)
+      renderFun: .plotDiagnosticPerformance
+      clearWith:
+        - markers
+        - diagnosis
+      width: 800
+      height: 500
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

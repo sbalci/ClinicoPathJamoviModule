@@ -1,0 +1,149 @@
+---
+name: ihcadvanced
+title: Advanced IHC Clustering
+menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
+menuTitle: Advanced Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Advanced clustering analysis with marker optimization and validation.
+        Includes optimal K selection, PCA analysis, and iterative marker selection.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            ihcadvanced(
+                markers = c("ER", "PR", "HER2", "Ki67"),
+                optimalKMethod = "silhouette",
+                iterativeClustering = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: markers
+      title: IHC Markers
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            IHC marker variables for advanced clustering analysis
+
+    - name: id
+      title: Case ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - id
+      permitted:
+        - factor
+        - numeric
+      default: NULL
+      description:
+          R: >
+            Case identifier for tracking
+
+    - name: optimalKMethod
+      title: Optimal K Selection
+      type: List
+      options:
+        - name: elbow
+          title: Elbow Method
+        - name: silhouette
+          title: Silhouette Analysis
+        - name: gap
+          title: Gap Statistic
+        - name: manual
+          title: Manual Selection
+      default: silhouette
+      description:
+          R: >
+            Method for automatically determining optimal number of clusters
+
+    - name: kRange
+      title: K Range to Test
+      type: String
+      default: "2:8"
+      description:
+          R: >
+            Range of K values to test (e.g., "2:8" or "2,3,4,5")
+
+    - name: iterativeClustering
+      title: Iterative Marker Selection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform iterative optimization to select most informative markers
+
+    - name: pcaAnalysis
+      title: Principal Component Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform PCA for dimensionality reduction and visualization
+
+    - name: consensusClustering
+      title: Consensus Clustering
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use bootstrap consensus clustering for stable results
+
+    - name: nBootstrap
+      title: Bootstrap Iterations
+      type: Integer
+      min: 50
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Number of bootstrap iterations for consensus clustering
+
+    - name: clusterValidation
+      title: Comprehensive Validation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform multiple validation metrics (silhouette, connectivity, Dunn index)
+
+    - name: showAdvancedPlots
+      title: Show Advanced Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display PCA, silhouette, and validation plots
+
+    - name: parallelProcessing
+      title: Use Parallel Processing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable parallel processing for computationally intensive tasks
+
+    - name: randomSeed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: >
+            Set random seed for reproducible results
+
+...

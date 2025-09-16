@@ -771,14 +771,6 @@ analyses:
       ggplot2 integration and customizable styling options.
     ribbon: analyses
     category: analyses
-  - title: IHC Expression Analysis
-    name: ihcstats
-    ns: ClinicoPath
-    menuGroup: OncoPathologyT2
-    menuSubgroup: IHC Analysis
-    menuTitle: IHC Expression Analysis
-    ribbon: analyses
-    category: analyses
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
@@ -2274,12 +2266,13 @@ analyses:
 
       accuracy assessment through time-dependent AUC and optimal cutpoint
       selection.
-  - title: Biopsy Simulation Analysis
-    name: biopsysimulation
+  - title: IHC Heterogeneity Analysis
+    name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
     menuGroup: OncoPathologyT
-    menuTitle: Biopsy Simulation Analysis
+    menuTitle: IHC Heterogeneity Analysis
+    menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation
     name: digitalvalidation
     ns: ClinicoPath
@@ -2302,7 +2295,7 @@ analyses:
     name: multiplexanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathologyT
     menuTitle: Multiplex Immunofluorescence Analysis
   - title: Pathology Agreement Analysis
     name: pathologyagreement
@@ -4673,6 +4666,59 @@ analyses:
     description: >-
       Creates professional study flow diagrams including CONSORT diagrams and
       flowcharts using multiple rendering engines
+  - title: Advanced IHC Clustering
+    name: ihcadvanced
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuSubgroup: IHC Analysis
+    menuTitle: Advanced Analysis
+    description: >
+      Advanced clustering analysis with marker optimization and validation.
+      Includes optimal K selection, PCA analysis, and iterative marker
+      selection.
+  - title: Basic IHC Analysis
+    name: ihcbasic
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuSubgroup: IHC Analysis
+    menuTitle: Basic Analysis
+    description: >
+      Essential IHC expression analysis with clustering and H-score calculation.
+      Designed for routine clinical use with simplified options.
+  - title: IHC Diagnostic Analysis
+    name: ihcdiagnostic
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuSubgroup: IHC Analysis
+    menuTitle: Clinical Diagnostics
+    description: >
+      Diagnostic performance analysis and clinical classification using IHC
+      markers. Designed for differential diagnosis and antibody panel
+      optimization.
+  - title: IHC Immune Analysis
+    name: ihcimmune
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuSubgroup: IHC Analysis
+    menuTitle: TIL & Immune Analysis
+    description: >
+      Tumor-infiltrating lymphocyte (TIL) analysis and immune microenvironment
+      characterization using IHC markers. Specialized for immuno-oncology
+      applications.
+  - title: IHC Survival Analysis
+    name: ihcsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuSubgroup: IHC Analysis
+    menuTitle: Survival & Prognosis
+    description: >
+      Survival analysis and prognostic clustering using IHC markers. Designed
+      for prognostic biomarker discovery and risk stratification.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

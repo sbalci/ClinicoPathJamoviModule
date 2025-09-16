@@ -1,0 +1,115 @@
+title: IHC Survival Analysis
+name: ihcsurvival
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: IHC Markers
+        children:
+          - type: VariablesListBox
+            name: markers
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Survival Variables
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: survivalEvent
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Case ID (Optional)
+        children:
+          - type: VariablesListBox
+            name: id
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: prognosticClustering
+              - type: CheckBox
+                name: coxRegression
+              - type: CheckBox
+                name: kaplanMeierPlots
+              - type: ComboBox
+                name: riskStratification
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Multi-Region Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: multiRegionAnalysis
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: Central Region Markers
+                children:
+                  - type: VariablesListBox
+                    name: centralRegion
+                    isTarget: true
+                    enable: (multiRegionAnalysis)
+              - type: TargetLayoutBox
+                label: Invasive Region Markers
+                children:
+                  - type: VariablesListBox
+                    name: invasiveRegion
+                    isTarget: true
+                    enable: (multiRegionAnalysis)
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Adjustments & Advanced Options
+        children:
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: Adjustment Variables (Optional)
+                children:
+                  - type: VariablesListBox
+                    name: multivariateAdjustment
+                    isTarget: true
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: landmarkAnalysis
+              - type: TextBox
+                name: landmarkTime
+                format: number
+                enable: (landmarkAnalysis)
+              - type: TextBox
+                name: confidenceLevel
+                format: number

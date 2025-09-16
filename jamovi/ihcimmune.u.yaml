@@ -1,0 +1,120 @@
+title: IHC Immune Analysis
+name: ihcimmune
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Immune Markers
+        children:
+          - type: VariablesListBox
+            name: immune_markers
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Checkpoint Markers (Optional)
+        children:
+          - type: VariablesListBox
+            name: checkpoint_markers
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Case ID (Optional)
+        children:
+          - type: VariablesListBox
+            name: id
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: TIL Analysis Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: tilAnalysis
+              - type: ComboBox
+                name: tilMethod
+                enable: (tilAnalysis)
+              - type: CheckBox
+                name: immuneContexture
+              - type: CheckBox
+                name: diversityMetrics
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Spatial Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: spatialAnalysis
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: X Coordinate
+                children:
+                  - type: VariablesListBox
+                    name: x_coordinate
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (spatialAnalysis)
+              - type: TargetLayoutBox
+                label: Y Coordinate
+                children:
+                  - type: VariablesListBox
+                    name: y_coordinate
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (spatialAnalysis)
+              - type: TargetLayoutBox
+                label: Tumor Region (Optional)
+                children:
+                  - type: VariablesListBox
+                    name: tumorRegion
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (spatialAnalysis)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: hotspotAnalysis
+                enable: (spatialAnalysis)
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Checkpoint Inhibitor Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: checkpointScore
+              - type: TextBox
+                name: pd1Cutoff
+                format: number
+                suffix: '%'
+                enable: (checkpointScore)
+              - type: TextBox
+                name: pdl1Cutoff
+                format: number
+                suffix: '%'
+                enable: (checkpointScore)

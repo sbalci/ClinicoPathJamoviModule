@@ -1,7 +1,8 @@
 ---
-name: biopsysimulation
-title: Biopsy Simulation Analysis
+name: ihcheterogeneity
+title: IHC Heterogeneity Analysis
 menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
 version: '1.0.0'
 jas: '1.2'
 

@@ -1,0 +1,141 @@
+---
+name: ihcbasic
+title: Basic IHC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Analysis Overview
+      type: Html
+      visible: true
+
+    - name: clinicalSummary
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+      description: Plain-language summary with clinical context
+
+    - name: reportText
+      title: Copy-Ready Report
+      type: Html
+      visible: true
+      description: Pre-formatted text for clinical reports
+
+    - name: clusterSummary
+      title: Clustering Results
+      type: Table
+      visible: true
+      clearWith:
+        - markers
+        - clusterMethod
+        - nClusters
+      columns:
+        - name: cluster
+          title: Cluster
+          type: integer
+        - name: n
+          title: N
+          type: integer
+        - name: percentage
+          title: '%'
+          type: number
+          format: zto:1
+        - name: pattern
+          title: Expression Pattern
+          type: text
+
+    - name: hscoreTable
+      title: H-Score Summary
+      type: Table
+      visible: (computeHScore)
+      clearWith:
+        - markers
+      columns:
+        - name: marker
+          title: Marker
+          type: text
+        - name: mean
+          title: Mean H-Score
+          type: number
+          format: zto:1
+        - name: sd
+          title: SD
+          type: number
+          format: zto:1
+        - name: median
+          title: Median
+          type: number
+          format: zto:1
+        - name: range
+          title: Range
+          type: text
+
+    - name: silhouetteTable
+      title: Cluster Quality Assessment
+      type: Table
+      visible: (silhouetteAnalysis)
+      clearWith:
+        - markers
+        - clusterMethod
+        - nClusters
+      columns:
+        - name: cluster
+          title: Cluster
+          type: text
+        - name: avg_width
+          title: Avg Silhouette Width
+          type: number
+          format: zto:3
+        - name: interpretation
+          title: Quality
+          type: text
+
+    - name: markerSummary
+      title: Marker Expression by Cluster
+      type: Table
+      visible: true
+      clearWith:
+        - markers
+        - clusterMethod
+        - nClusters
+      columns:
+        - name: marker
+          title: Marker
+          type: text
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto:4
+        - name: significance
+          title: Sig.
+          type: text
+
+    - name: dendrogramPlot
+      title: Hierarchical Clustering Dendrogram
+      type: Image
+      visible: (showDendrogram && clusterMethod:hierarchical)
+      renderFun: .plotDendrogram
+      clearWith:
+        - markers
+        - clusterMethod
+        - nClusters
+        - linkageMethod
+      width: 800
+      height: 600
+
+    - name: heatmapPlot
+      title: Expression Heatmap
+      type: Image
+      visible: (showHeatmap)
+      renderFun: .plotHeatmap
+      clearWith:
+        - markers
+        - clusterMethod
+        - nClusters
+      width: 800
+      height: 600
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

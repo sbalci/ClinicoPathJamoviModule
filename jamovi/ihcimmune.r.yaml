@@ -1,0 +1,278 @@
+---
+name: ihcimmune
+title: IHC Immune Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: TIL Analysis Overview
+      type: Html
+      visible: true
+
+    - name: tilSummary
+      title: TIL Analysis Summary
+      type: Table
+      visible: (tilAnalysis)
+      clearWith:
+        - immune_markers
+        - tilMethod
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto:2
+        - name: category
+          title: Category
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+
+    - name: immuneProfile
+      title: Immune Cell Profile
+      type: Table
+      visible: (immune_markers)
+      clearWith:
+        - immune_markers
+      columns:
+        - name: marker
+          title: Immune Marker
+          type: text
+        - name: mean_expression
+          title: Mean Expression
+          type: number
+          format: zto:2
+        - name: median_expression
+          title: Median Expression
+          type: number
+          format: zto:2
+        - name: positive_cases
+          title: Positive Cases (%)
+          type: number
+          format: zto:1
+        - name: density_category
+          title: Density Category
+          type: text
+
+    - name: checkpointAnalysis
+      title: Checkpoint Inhibitor Analysis
+      type: Table
+      visible: (checkpoint_markers && checkpointScore)
+      clearWith:
+        - checkpoint_markers
+        - pd1Cutoff
+        - pdl1Cutoff
+      columns:
+        - name: marker
+          title: Checkpoint Marker
+          type: text
+        - name: positive_rate
+          title: Positivity Rate (%)
+          type: number
+          format: zto:1
+        - name: composite_score
+          title: Composite Score
+          type: number
+          format: zto:2
+        - name: predicted_response
+          title: Predicted Response
+          type: text
+        - name: confidence
+          title: Confidence Level
+          type: text
+
+    - name: immuneContexture
+      title: Immune Contexture Classification
+      type: Table
+      visible: (immuneContexture)
+      clearWith:
+        - immune_markers
+      columns:
+        - name: case_id
+          title: Case ID
+          type: text
+        - name: contexture_score
+          title: Contexture Score
+          type: number
+          format: zto:2
+        - name: immune_classification
+          title: Immune Class
+          type: text
+        - name: cd8_score
+          title: CD8+ Score
+          type: number
+          format: zto:2
+        - name: cd45ro_score
+          title: CD45RO+ Score
+          type: number
+          format: zto:2
+        - name: prognosis_prediction
+          title: Prognostic Category
+          type: text
+
+    - name: spatialMetrics
+      title: Spatial Distribution Analysis
+      type: Table
+      visible: (spatialAnalysis)
+      clearWith:
+        - immune_markers
+        - x_coordinate
+        - y_coordinate
+      columns:
+        - name: marker
+          title: Marker
+          type: text
+        - name: moran_i
+          title: Moran's I
+          type: number
+          format: zto:3
+        - name: clustering_index
+          title: Clustering Index
+          type: number
+          format: zto:3
+        - name: nearest_neighbor_distance
+          title: Mean NN Distance
+          type: number
+          format: zto:2
+        - name: spatial_pattern
+          title: Spatial Pattern
+          type: text
+
+    - name: hotspotAnalysis
+      title: Immune Hotspot Analysis
+      type: Table
+      visible: (hotspotAnalysis)
+      clearWith:
+        - immune_markers
+      columns:
+        - name: region_id
+          title: Region ID
+          type: integer
+        - name: hotspot_type
+          title: Hotspot Type
+          type: text
+        - name: immune_density
+          title: Immune Density
+          type: number
+          format: zto:2
+        - name: dominant_population
+          title: Dominant Population
+          type: text
+        - name: diversity_index
+          title: Diversity Index
+          type: number
+          format: zto:3
+
+    - name: diversityResults
+      title: Immune Diversity Metrics
+      type: Table
+      visible: (diversityMetrics)
+      clearWith:
+        - immune_markers
+      columns:
+        - name: case_id
+          title: Case ID
+          type: text
+        - name: shannon_diversity
+          title: Shannon Index
+          type: number
+          format: zto:3
+        - name: simpson_diversity
+          title: Simpson Index
+          type: number
+          format: zto:3
+        - name: evenness
+          title: Evenness
+          type: number
+          format: zto:3
+        - name: richness
+          title: Species Richness
+          type: integer
+        - name: diversity_category
+          title: Diversity Category
+          type: text
+
+    - name: tilMethodResults
+      title: TIL Method-Specific Results
+      type: Table
+      visible: (tilAnalysis)
+      clearWith:
+        - immune_markers
+        - tilMethod
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto:2
+        - name: reference_range
+          title: Reference Range
+          type: text
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+
+    - name: immunePlot
+      title: Immune Cell Distribution
+      type: Image
+      visible: (immune_markers)
+      renderFun: .plotImmuneDistribution
+      clearWith:
+        - immune_markers
+      width: 800
+      height: 600
+
+    - name: tilPlot
+      title: TIL Analysis Visualization
+      type: Image
+      visible: (tilAnalysis)
+      renderFun: .plotTILAnalysis
+      clearWith:
+        - immune_markers
+        - tilMethod
+      width: 700
+      height: 500
+
+    - name: contextureHeatmap
+      title: Immune Contexture Heatmap
+      type: Image
+      visible: (immuneContexture)
+      renderFun: .plotContextureHeatmap
+      clearWith:
+        - immune_markers
+      width: 900
+      height: 600
+
+    - name: spatialPlot
+      title: Spatial Distribution Map
+      type: Image
+      visible: (spatialAnalysis)
+      renderFun: .plotSpatialDistribution
+      clearWith:
+        - immune_markers
+        - x_coordinate
+        - y_coordinate
+      width: 800
+      height: 800
+
+    - name: checkpointPlot
+      title: Checkpoint Inhibitor Score Plot
+      type: Image
+      visible: (checkpointScore)
+      renderFun: .plotCheckpointScore
+      clearWith:
+        - checkpoint_markers
+        - pd1Cutoff
+        - pdl1Cutoff
+      width: 700
+      height: 500
+
+refs:
+    - ClinicoPathJamoviModule
+
+...
