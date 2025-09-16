@@ -1,8 +1,8 @@
 # This file is a generated template, your changes will not be overwritten
 
-biopsysimulationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "biopsysimulationClass",
-    inherit = biopsysimulationBase,
+ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "ihcheterogeneityClass",
+    inherit = ihcheterogeneityBase,
     private = list(
         # Clinical threshold constants
         .CLINICAL_CONSTANTS = list(

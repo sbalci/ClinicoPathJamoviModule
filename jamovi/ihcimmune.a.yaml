@@ -1,0 +1,190 @@
+---
+name: ihcimmune
+title: IHC Immune Analysis
+menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
+menuTitle: TIL & Immune Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Tumor-infiltrating lymphocyte (TIL) analysis and immune microenvironment characterization
+        using IHC markers. Specialized for immuno-oncology applications.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            ihcimmune(
+                immune_markers = c("CD3", "CD4", "CD8", "CD20"),
+                tilAnalysis = TRUE,
+                immuneContexture = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: immune_markers
+      title: Immune Markers
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Immune cell markers (CD3, CD4, CD8, CD20, etc.)
+
+    - name: checkpoint_markers
+      title: Checkpoint Markers (Optional)
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Immune checkpoint markers (PD-1, PD-L1, CTLA-4, etc.)
+
+    - name: id
+      title: Case ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - id
+      permitted:
+        - factor
+        - numeric
+      default: NULL
+      description:
+          R: >
+            Case identifier for tracking
+
+    - name: tilAnalysis
+      title: TIL Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform specialized tumor-infiltrating lymphocyte analysis
+
+    - name: tilMethod
+      title: TIL Analysis Method
+      type: List
+      options:
+        - name: sterlacci
+          title: Sterlacci Method (Breast Cancer)
+        - name: cd4cd8_ratio
+          title: CD4/CD8 Ratio Analysis
+        - name: granzyme_focus
+          title: Granzyme B+ TIL Focus
+        - name: comprehensive
+          title: Comprehensive TIL Profiling
+      default: comprehensive
+      description:
+          R: >
+            Method for TIL analysis and interpretation
+
+    - name: immuneContexture
+      title: Immune Contexture Scoring
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate immune contexture score and classification
+
+    - name: spatialAnalysis
+      title: Spatial TIL Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Analyze spatial distribution of immune cells (requires coordinate data)
+
+    - name: x_coordinate
+      title: X Coordinate (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            X spatial coordinates for proximity analysis
+
+    - name: y_coordinate
+      title: Y Coordinate (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Y spatial coordinates for proximity analysis
+
+    - name: tumorRegion
+      title: Tumor Region Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Tumor region classification (center, invasive margin, stroma)
+
+    - name: hotspotAnalysis
+      title: Immune Hotspot Detection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Identify immune cell hotspots and cold regions
+
+    - name: diversityMetrics
+      title: Immune Diversity Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Shannon and Simpson diversity indices for immune populations
+
+    - name: checkpointScore
+      title: Checkpoint Inhibitor Score
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate composite score for checkpoint inhibitor therapy prediction
+
+    - name: pd1Cutoff
+      title: PD-1 Positivity Cutoff (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 1
+      description:
+          R: >
+            Threshold for PD-1 positivity assessment
+
+    - name: pdl1Cutoff
+      title: PD-L1 Positivity Cutoff (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 1
+      description:
+          R: >
+            Threshold for PD-L1 positivity assessment
+
+...

@@ -55,11 +55,16 @@ sensitivity analysis)}
 \item{year}{Publication year for temporal trend analysis and publication
 bias assessment}
 
-\item{analysis_type}{Type of meta-analysis to perform}
+\item{analysis_type}{Type of meta-analysis to perform: Standard for
+combining effect sizes, Diagnostic for test accuracy studies, Network for
+multiple treatment comparisons}
 
-\item{model_type}{Statistical model for meta-analysis}
+\item{model_type}{Random-effects is usually preferred as it accounts for
+differences between studies}
 
-\item{effect_measure}{Type of effect measure being meta-analyzed}
+\item{effect_measure}{Choose based on your outcome type: continuous (mean
+difference), binary (odds/risk ratio), time-to-event (hazard ratio), or
+association (correlation)}
 
 \item{heterogeneity_method}{Method for estimating between-study
 heterogeneity (tau-squared)}

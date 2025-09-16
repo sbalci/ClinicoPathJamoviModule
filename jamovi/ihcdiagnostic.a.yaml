@@ -1,0 +1,149 @@
+---
+name: ihcdiagnostic
+title: IHC Diagnostic Analysis
+menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
+menuTitle: Clinical Diagnostics
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Diagnostic performance analysis and clinical classification using IHC markers.
+        Designed for differential diagnosis and antibody panel optimization.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            ihcdiagnostic(
+                markers = c("ER", "PR", "HER2", "Ki67"),
+                diagnosis = "tumor_type",
+                differentialDiagnosis = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: markers
+      title: IHC Markers
+      type: Variables
+      suggested:
+        - ordinal
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            IHC marker variables for diagnostic analysis
+
+    - name: diagnosis
+      title: Known Diagnosis
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Reference diagnosis for validation and performance assessment
+
+    - name: id
+      title: Case ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - id
+      permitted:
+        - factor
+        - numeric
+      default: NULL
+      description:
+          R: >
+            Case identifier for tracking
+
+    - name: differentialDiagnosis
+      title: Perform Differential Diagnosis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use clustering to predict diagnosis based on IHC patterns
+
+    - name: antibodyOptimization
+      title: Antibody Panel Optimization
+      type: Bool
+      default: false
+      description:
+          R: >
+            Evaluate individual and combined antibody performance
+
+    - name: calculateDiagnosticMetrics
+      title: Calculate Diagnostic Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate sensitivity, specificity, PPV, NPV for each marker
+
+    - name: clusterMethod
+      title: Clustering Method
+      type: List
+      options:
+        - name: hierarchical
+          title: Hierarchical
+        - name: pam
+          title: PAM (K-medoids)
+      default: hierarchical
+      description:
+          R: >
+            Clustering method for differential diagnosis
+
+    - name: cutpointMethod
+      title: Cutpoint Selection
+      type: List
+      options:
+        - name: optimal
+          title: Optimal (Youden Index)
+        - name: clinical
+          title: Clinical Guidelines
+        - name: median
+          title: Median Split
+      default: optimal
+      description:
+          R: >
+            Method for determining positive/negative cutpoints
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for diagnostic performance intervals
+
+    - name: crossValidation
+      title: Cross-Validation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform cross-validation for diagnostic performance
+
+    - name: minimumGroupSize
+      title: Minimum Group Size
+      type: Integer
+      min: 5
+      max: 50
+      default: 10
+      description:
+          R: >
+            Minimum samples per diagnostic group for analysis
+
+...

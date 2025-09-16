@@ -69,6 +69,8 @@ summary tables}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$bivariateresults} \tab \tab \tab \tab \tab a table \cr
 \code{results$hsrocresults} \tab \tab \tab \tab \tab a table \cr
 \code{results$heterogeneity} \tab \tab \tab \tab \tab a table \cr

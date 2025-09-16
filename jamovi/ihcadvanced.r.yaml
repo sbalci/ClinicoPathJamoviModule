@@ -1,0 +1,207 @@
+---
+name: ihcadvanced
+title: Advanced IHC Clustering
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Advanced Analysis Overview
+      type: Html
+      visible: true
+
+    - name: optimalKResults
+      title: Optimal K Selection Results
+      type: Table
+      visible: true
+      clearWith:
+        - markers
+        - optimalKMethod
+        - kRange
+      columns:
+        - name: k
+          title: K
+          type: integer
+        - name: silhouette_avg
+          title: Avg Silhouette
+          type: number
+          format: zto:3
+        - name: within_ss
+          title: Within SS
+          type: number
+          format: zto:1
+        - name: gap_statistic
+          title: Gap Statistic
+          type: number
+          format: zto:3
+        - name: recommendation
+          title: Recommendation
+          type: text
+
+    - name: markerOptimization
+      title: Marker Selection Results
+      type: Table
+      visible: (iterativeClustering)
+      clearWith:
+        - markers
+        - iterativeClustering
+      columns:
+        - name: iteration
+          title: Iteration
+          type: integer
+        - name: marker
+          title: Marker Added/Removed
+          type: text
+        - name: action
+          title: Action
+          type: text
+        - name: silhouette_improvement
+          title: Silhouette Δ
+          type: number
+          format: zto:3
+        - name: selected_markers
+          title: Selected Markers
+          type: text
+
+    - name: pcaResults
+      title: Principal Component Analysis
+      type: Table
+      visible: (pcaAnalysis)
+      clearWith:
+        - markers
+        - pcaAnalysis
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: eigenvalue
+          title: Eigenvalue
+          type: number
+          format: zto:3
+        - name: variance_explained
+          title: Variance %
+          type: number
+          format: zto:1
+        - name: cumulative_variance
+          title: Cumulative %
+          type: number
+          format: zto:1
+
+    - name: pcaLoadings
+      title: PCA Loadings Matrix
+      type: Table
+      visible: (pcaAnalysis)
+      clearWith:
+        - markers
+        - pcaAnalysis
+      columns:
+        - name: marker
+          title: Marker
+          type: text
+        - name: pc1
+          title: PC1
+          type: number
+          format: zto:3
+        - name: pc2
+          title: PC2
+          type: number
+          format: zto:3
+        - name: pc3
+          title: PC3
+          type: number
+          format: zto:3
+
+    - name: validationMetrics
+      title: Cluster Validation Metrics
+      type: Table
+      visible: (clusterValidation)
+      clearWith:
+        - markers
+        - optimalKMethod
+      columns:
+        - name: metric
+          title: Validation Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto:3
+        - name: interpretation
+          title: Interpretation
+          type: text
+        - name: range
+          title: Range
+          type: text
+
+    - name: consensusResults
+      title: Consensus Clustering Stability
+      type: Table
+      visible: (consensusClustering)
+      clearWith:
+        - markers
+        - consensusClustering
+        - nBootstrap
+      columns:
+        - name: k
+          title: K
+          type: integer
+        - name: consensus_score
+          title: Consensus Score
+          type: number
+          format: zto:3
+        - name: stability
+          title: Stability
+          type: text
+        - name: frequency
+          title: Selection Frequency
+          type: number
+          format: zto:1
+
+    - name: optimalKPlot
+      title: Optimal K Selection Plot
+      type: Image
+      visible: true
+      renderFun: .plotOptimalK
+      clearWith:
+        - markers
+        - optimalKMethod
+        - kRange
+      width: 800
+      height: 600
+
+    - name: pcaPlot
+      title: PCA Biplot with Clusters
+      type: Image
+      visible: (pcaAnalysis && showAdvancedPlots)
+      renderFun: .plotPCA
+      clearWith:
+        - markers
+        - pcaAnalysis
+      width: 800
+      height: 600
+
+    - name: silhouettePlot
+      title: Silhouette Analysis Plot
+      type: Image
+      visible: (showAdvancedPlots)
+      renderFun: .plotSilhouette
+      clearWith:
+        - markers
+        - optimalKMethod
+      width: 800
+      height: 600
+
+    - name: validationPlot
+      title: Cluster Validation Plot
+      type: Image
+      visible: (clusterValidation && showAdvancedPlots)
+      renderFun: .plotValidation
+      clearWith:
+        - markers
+        - clusterValidation
+      width: 800
+      height: 500
+
+refs:
+    - ClinicoPathJamoviModule
+
+...
