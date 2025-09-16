@@ -20,7 +20,10 @@ ihcimmune(
   diversityMetrics = TRUE,
   checkpointScore = FALSE,
   pd1Cutoff = 1,
-  pdl1Cutoff = 1
+  pdl1Cutoff = 1,
+  cd3Threshold = 10,
+  cd8Threshold = 5,
+  immuneScoreThreshold = 10
 )
 }
 \arguments{
@@ -62,11 +65,21 @@ therapy prediction}
 \item{pd1Cutoff}{Threshold for PD-1 positivity assessment}
 
 \item{pdl1Cutoff}{Threshold for PD-L1 positivity assessment}
+
+\item{cd3Threshold}{Threshold for CD3+ TIL categorization (Low vs
+Intermediate)}
+
+\item{cd8Threshold}{Threshold for CD8+ TIL categorization (Low vs
+Intermediate)}
+
+\item{immuneScoreThreshold}{Threshold for overall immune infiltration
+categorization}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalContext} \tab \tab \tab \tab \tab a html \cr
 \code{results$tilSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$immuneProfile} \tab \tab \tab \tab \tab a table \cr
 \code{results$checkpointAnalysis} \tab \tab \tab \tab \tab a table \cr

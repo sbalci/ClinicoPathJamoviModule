@@ -61,6 +61,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             private$.populateExpressionTable()
             private$.populateCorrelationTable()
             private$.populateClusteringTable()
+            private$.populatePCATable()
             
             # Set plots visible based on options
             self$results$correlationplot$setVisible(self$options$show_plots)
@@ -70,31 +71,38 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         },
         
         .run = function() {
-            if (length(self$options$marker_vars) == 0) 
+            if (length(self$options$marker_vars) == 0)
                 return()
-                
+
             data <- self$data
             if (nrow(data) == 0) return()
-            
+
+            # Enhanced input validation
+            validation_result <- private$.validateInputs()
+            if (!validation_result$valid) {
+                self$results$interpretation$setContent(validation_result$message)
+                return()
+            }
+
             # Get marker variables
             marker_data <- data[self$options$marker_vars]
             marker_names <- self$options$marker_vars
-            
+
             # Remove rows with missing values
             complete_cases <- complete.cases(marker_data)
             marker_data <- marker_data[complete_cases, , drop = FALSE]
-            
+
             if (nrow(marker_data) < 3) {
                 self$results$interpretation$setContent(
-                    "<p style='color: red;'><strong>Error:</strong> Insufficient data for analysis. 
+                    "<p style='color: red;'><strong>Error:</strong> Insufficient data for analysis.
                     At least 3 complete observations are required.</p>"
                 )
                 return()
             }
-            
+
             if (ncol(marker_data) < 2) {
                 self$results$interpretation$setContent(
-                    "<p style='color: red;'><strong>Error:</strong> At least 2 marker variables are required 
+                    "<p style='color: red;'><strong>Error:</strong> At least 2 marker variables are required
                     for multiplex analysis.</p>"
                 )
                 return()
@@ -107,13 +115,110 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             private$.performPCAAnalysis(marker_data, marker_names)
             private$.generatePlots(marker_data, marker_names)
             private$.generateInterpretation(marker_data, marker_names)
-            
+            private$.generateClinicalReport(marker_data, marker_names)
+
             # Spatial analysis if coordinates provided
             if (!is.null(self$options$x_coord) && !is.null(self$options$y_coord)) {
                 private$.performSpatialAnalysis(marker_data, marker_names)
             }
         },
-        
+
+        .validateInputs = function() {
+            data <- self$data
+
+            # Check for basic requirements
+            if (length(self$options$marker_vars) < 2) {
+                return(list(
+                    valid = FALSE,
+                    message = "<p style='color: red;'><strong>Validation Error:</strong> At least 2 marker variables are required for multiplex analysis.</p>"
+                ))
+            }
+
+            # Check marker data types and ranges
+            marker_data <- data[self$options$marker_vars]
+            for (i in 1:ncol(marker_data)) {
+                col_data <- marker_data[[i]]
+                if (!is.numeric(col_data)) {
+                    return(list(
+                        valid = FALSE,
+                        message = paste0("<p style='color: red;'><strong>Validation Error:</strong> Marker variable '",
+                                       names(marker_data)[i], "' must be numeric.</p>")
+                    ))
+                }
+
+                # Check for negative values (optional warning)
+                if (any(col_data < 0, na.rm = TRUE)) {
+                    return(list(
+                        valid = FALSE,
+                        message = paste0("<p style='color: orange;'><strong>Warning:</strong> Marker variable '",
+                                       names(marker_data)[i], "' contains negative values. Expression data should typically be non-negative.</p>")
+                    ))
+                }
+            }
+
+            # Validate spatial analysis requirements
+            if (self$options$spatial_analysis) {
+                if (is.null(self$options$x_coord) || is.null(self$options$y_coord)) {
+                    return(list(
+                        valid = FALSE,
+                        message = "<p style='color: red;'><strong>Validation Error:</strong> Spatial analysis requires both X and Y coordinate variables. Please provide coordinate data or disable spatial analysis.</p>"
+                    ))
+                }
+
+                # Check coordinate data
+                x_data <- data[[self$options$x_coord]]
+                y_data <- data[[self$options$y_coord]]
+
+                if (!is.numeric(x_data) || !is.numeric(y_data)) {
+                    return(list(
+                        valid = FALSE,
+                        message = "<p style='color: red;'><strong>Validation Error:</strong> Coordinate variables must be numeric.</p>"
+                    ))
+                }
+
+                # Check for sufficient coordinate pairs
+                complete_coords <- complete.cases(data.frame(x = x_data, y = y_data))
+                if (sum(complete_coords) < 3) {
+                    return(list(
+                        valid = FALSE,
+                        message = "<p style='color: red;'><strong>Validation Error:</strong> Spatial analysis requires at least 3 complete coordinate pairs.</p>"
+                    ))
+                }
+            }
+
+            # Validate clustering requirements
+            if (self$options$perform_clustering) {
+                n_complete <- sum(complete.cases(marker_data))
+                if (n_complete < 6) {
+                    return(list(
+                        valid = FALSE,
+                        message = "<p style='color: orange;'><strong>Warning:</strong> Clustering analysis requires at least 6 complete observations for reliable results. Consider disabling clustering or providing more data.</p>"
+                    ))
+                }
+
+                if (self$options$n_clusters > 0 && self$options$n_clusters > n_complete/2) {
+                    return(list(
+                        valid = FALSE,
+                        message = "<p style='color: red;'><strong>Validation Error:</strong> Number of clusters cannot exceed half the number of observations.</p>"
+                    ))
+                }
+            }
+
+            # Validate PCA requirements
+            if (self$options$perform_pca) {
+                n_complete <- sum(complete.cases(marker_data))
+                n_markers <- length(self$options$marker_vars)
+                if (n_complete < n_markers) {
+                    return(list(
+                        valid = FALSE,
+                        message = "<p style='color: orange;'><strong>Warning:</strong> PCA requires more observations than variables for reliable results.</p>"
+                    ))
+                }
+            }
+
+            return(list(valid = TRUE, message = ""))
+        },
+
         .populateExpressionTable = function() {
             table <- self$results$expressiontable
             table$addColumn(name = 'marker', title = 'Marker', type = 'text')
@@ -143,6 +248,15 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             table$addColumn(name = 'phenotype', title = 'Suggested Phenotype', type = 'text')
             table$addColumn(name = 'dominant_markers', title = 'Dominant Markers', type = 'text')
             table$addColumn(name = 'mean_expression', title = 'Mean Expression Pattern', type = 'text')
+        },
+
+        .populatePCATable = function() {
+            table <- self$results$pcatable
+            table$addColumn(name = 'component', title = 'Component', type = 'text')
+            table$addColumn(name = 'eigenvalue', title = 'Eigenvalue', type = 'number')
+            table$addColumn(name = 'variance_explained', title = 'Variance Explained (%)', type = 'number', format = 'zto')
+            table$addColumn(name = 'cumulative_variance', title = 'Cumulative Variance (%)', type = 'number', format = 'zto')
+            table$addColumn(name = 'loadings_summary', title = 'Top Loading Variables', type = 'text')
         },
         
         .performExpressionAnalysis = function(marker_data, marker_names) {
@@ -299,6 +413,13 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                         mean_expression = mean_expr_pattern
                     ))
                 }
+
+                # Store clustering data for plotting
+                cluster_plot_data <- data.frame(
+                    marker_data,
+                    cluster = as.factor(clusters)
+                )
+                private$.cluster_data <- cluster_plot_data
             }, error = function(e) {
                 # Clustering failed, populate with error message
                 table <- self$results$clusteringtable
@@ -310,6 +431,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     dominant_markers = "Error in clustering algorithm",
                     mean_expression = as.character(e$message)
                 ))
+                private$.cluster_data <- NULL
             })
         },
         
@@ -340,14 +462,36 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         
         .performPCAAnalysis = function(marker_data, marker_names) {
             if (!self$options$perform_pca) return()
-            
+
             # Perform PCA
             tryCatch({
                 pca_result <- prcomp(marker_data, scale. = TRUE, center = TRUE)
-                
+
                 # Calculate variance explained
-                var_explained <- (pca_result$sdev^2) / sum(pca_result$sdev^2) * 100
-                
+                eigenvalues <- pca_result$sdev^2
+                var_explained <- eigenvalues / sum(eigenvalues) * 100
+                cumulative_var <- cumsum(var_explained)
+
+                # Populate PCA table
+                table <- self$results$pcatable
+                n_components <- min(5, length(var_explained))
+
+                for (i in 1:n_components) {
+                    # Get top loading variables for this component
+                    loadings_pc <- abs(pca_result$rotation[,i])
+                    top_vars_idx <- order(loadings_pc, decreasing = TRUE)[1:min(3, length(loadings_pc))]
+                    top_vars <- marker_names[top_vars_idx]
+                    loadings_summary <- paste(top_vars, collapse = ", ")
+
+                    table$addRow(rowKey = i, values = list(
+                        component = paste0("PC", i),
+                        eigenvalue = eigenvalues[i],
+                        variance_explained = var_explained[i],
+                        cumulative_variance = cumulative_var[i],
+                        loadings_summary = loadings_summary
+                    ))
+                }
+
                 # Store PCA results for plotting
                 pca_data <- data.frame(
                     PC1 = pca_result$x[, 1],
@@ -355,45 +499,181 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     Variance_PC1 = var_explained[1],
                     Variance_PC2 = var_explained[2]
                 )
-                
+
                 # Add loadings information
                 loadings_data <- data.frame(
                     Marker = marker_names,
                     PC1_loading = pca_result$rotation[, 1],
                     PC2_loading = pca_result$rotation[, 2]
                 )
-                
+
                 # Store for plotting
                 private$.pca_data <- pca_data
                 private$.loadings_data <- loadings_data
-                
+
             }, error = function(e) {
                 private$.pca_data <- NULL
                 private$.loadings_data <- NULL
+                # Add error row to table
+                table <- self$results$pcatable
+                table$addRow(rowKey = 1, values = list(
+                    component = "Error",
+                    eigenvalue = NA,
+                    variance_explained = NA,
+                    cumulative_variance = NA,
+                    loadings_summary = paste("PCA failed:", e$message)
+                ))
             })
         },
-        
+
+        .performSpatialAnalysis = function(marker_data, marker_names) {
+            if (!self$options$spatial_analysis) return()
+
+            # Check if coordinates are available
+            x_coord <- self$options$x_coord
+            y_coord <- self$options$y_coord
+
+            if (is.null(x_coord) || is.null(y_coord)) {
+                # Add error message to spatial results
+                if (!is.null(self$results$spatialanalysis$proximityresults)) {
+                    table <- self$results$spatialanalysis$proximityresults
+                    table$addColumn(name = 'error', title = 'Error', type = 'text')
+                    table$addRow(rowKey = 1, values = list(
+                        error = "Spatial analysis requires both X and Y coordinate variables"
+                    ))
+                }
+                return()
+            }
+
+            # Get coordinate data
+            data <- self$data
+            coords <- data.frame(
+                x = data[[x_coord]],
+                y = data[[y_coord]]
+            )
+
+            # Remove rows with missing coordinates
+            complete_coords <- complete.cases(coords)
+            coords <- coords[complete_coords, ]
+            spatial_marker_data <- marker_data[complete_coords, , drop = FALSE]
+
+            if (nrow(coords) < 3) {
+                # Add error message
+                if (!is.null(self$results$spatialanalysis$proximityresults)) {
+                    table <- self$results$spatialanalysis$proximityresults
+                    table$addColumn(name = 'error', title = 'Error', type = 'text')
+                    table$addRow(rowKey = 1, values = list(
+                        error = "Insufficient coordinate data for spatial analysis (minimum 3 points required)"
+                    ))
+                }
+                return()
+            }
+
+            tryCatch({
+                # Calculate pairwise distances
+                dist_matrix <- as.matrix(dist(coords))
+
+                # Proximity analysis based on threshold
+                proximity_threshold <- self$options$proximity_threshold
+                proximity_matrix <- dist_matrix <= proximity_threshold
+
+                # Calculate spatial statistics for each marker
+                if (!is.null(self$results$spatialanalysis$proximityresults)) {
+                    table <- self$results$spatialanalysis$proximityresults
+                    table$addColumn(name = 'marker', title = 'Marker', type = 'text')
+                    table$addColumn(name = 'mean_neighbors', title = 'Mean Neighbors', type = 'number')
+                    table$addColumn(name = 'spatial_clustering', title = 'Spatial Clustering Index', type = 'number')
+                    table$addColumn(name = 'interpretation', title = 'Interpretation', type = 'text')
+
+                    for (i in 1:length(marker_names)) {
+                        marker_name <- marker_names[i]
+                        marker_values <- spatial_marker_data[[i]]
+
+                        # Calculate mean number of proximate neighbors for positive cells
+                        positive_cells <- marker_values > self$options$positivity_cutpoint
+                        if (sum(positive_cells) > 0) {
+                            mean_neighbors <- mean(rowSums(proximity_matrix[positive_cells, positive_cells]) - 1)
+
+                            # Simple spatial clustering index (ratio of observed to expected neighbors)
+                            expected_neighbors <- (sum(positive_cells) - 1) * (proximity_threshold^2 * pi) /
+                                                (diff(range(coords$x)) * diff(range(coords$y)))
+                            spatial_index <- ifelse(expected_neighbors > 0, mean_neighbors / expected_neighbors, 0)
+
+                            # Interpretation
+                            interpretation <- if (spatial_index > 1.5) {
+                                "Strong spatial clustering"
+                            } else if (spatial_index > 1.1) {
+                                "Moderate spatial clustering"
+                            } else if (spatial_index < 0.5) {
+                                "Spatial dispersion"
+                            } else {
+                                "Random spatial distribution"
+                            }
+
+                            table$addRow(rowKey = i, values = list(
+                                marker = marker_name,
+                                mean_neighbors = round(mean_neighbors, 2),
+                                spatial_clustering = round(spatial_index, 3),
+                                interpretation = interpretation
+                            ))
+                        } else {
+                            table$addRow(rowKey = i, values = list(
+                                marker = marker_name,
+                                mean_neighbors = 0,
+                                spatial_clustering = 0,
+                                interpretation = "No positive cells detected"
+                            ))
+                        }
+                    }
+                }
+
+                # Store spatial data for plotting
+                private$.spatial_data <- list(
+                    coords = coords,
+                    marker_data = spatial_marker_data,
+                    proximity_matrix = proximity_matrix
+                )
+
+            }, error = function(e) {
+                # Spatial analysis failed
+                if (!is.null(self$results$spatialanalysis$proximityresults)) {
+                    table <- self$results$spatialanalysis$proximityresults
+                    table$addColumn(name = 'error', title = 'Error', type = 'text')
+                    table$addRow(rowKey = 1, values = list(
+                        error = paste("Spatial analysis failed:", e$message)
+                    ))
+                }
+                private$.spatial_data <- NULL
+            })
+        },
+
         .generatePlots = function(marker_data, marker_names) {
             # Correlation heatmap
             if (self$options$show_plots) {
-                cor_matrix <- cor(marker_data, use = "complete.obs", 
+                cor_matrix <- cor(marker_data, use = "complete.obs",
                                  method = if (self$options$correlation_method == "spearman") "spearman" else "pearson")
-                
+
                 # Convert correlation matrix to long format for ggplot
                 cor_data <- expand.grid(Var1 = marker_names, Var2 = marker_names)
                 cor_data$value <- as.vector(cor_matrix)
-                
+
                 image1 <- self$results$correlationplot
                 image1$setState(cor_data)
-                
+
                 image2 <- self$results$heatmapplot
                 image2$setState(list(matrix = cor_matrix, names = marker_names))
             }
-            
+
             # PCA plot
             if (self$options$show_plots && !is.null(private$.pca_data)) {
                 image3 <- self$results$pcaplot
                 image3$setState(list(pca = private$.pca_data, loadings = private$.loadings_data))
+            }
+
+            # Clustering plot
+            if (self$options$show_clustering_plots && !is.null(private$.cluster_data)) {
+                image4 <- self$results$clusterplot
+                image4$setState(list(cluster = private$.cluster_data, markers = marker_names))
             }
         },
         
@@ -492,11 +772,67 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                                                   label = Marker),
                                       color = "red", size = 3)
             }
-                
+
             print(p)
             TRUE
         },
-        
+
+        .clusterplot = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state) || is.null(image$state$cluster))
+                return(FALSE)
+
+            cluster_data <- image$state$cluster
+            marker_names <- image$state$markers
+
+            # Create a PCA for visualization if we have more than 2 markers
+            if (length(marker_names) > 2) {
+                # Perform PCA on the marker data for 2D visualization
+                marker_matrix <- as.matrix(cluster_data[, marker_names])
+                pca_result <- prcomp(marker_matrix, scale. = TRUE, center = TRUE)
+                plot_data <- data.frame(
+                    PC1 = pca_result$x[, 1],
+                    PC2 = pca_result$x[, 2],
+                    Cluster = cluster_data$cluster
+                )
+
+                var_explained <- (pca_result$sdev^2 / sum(pca_result$sdev^2)) * 100
+
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = PC1, y = PC2, color = Cluster)) +
+                    ggplot2::geom_point(size = 2, alpha = 0.7) +
+                    ggplot2::labs(
+                        title = "Cell Population Clusters",
+                        subtitle = "PCA visualization of identified cell clusters",
+                        x = paste("PC1 (", round(var_explained[1], 1), "% variance)", sep = ""),
+                        y = paste("PC2 (", round(var_explained[2], 1), "% variance)", sep = "")
+                    ) +
+                    ggplot2::scale_color_brewer(type = "qual", palette = "Set2") +
+                    ggplot2::theme(legend.title = ggplot2::element_text(size = 12)) +
+                    ggtheme
+            } else {
+                # For 2 markers, plot directly
+                plot_data <- data.frame(
+                    X = cluster_data[, marker_names[1]],
+                    Y = cluster_data[, marker_names[2]],
+                    Cluster = cluster_data$cluster
+                )
+
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = X, y = Y, color = Cluster)) +
+                    ggplot2::geom_point(size = 2, alpha = 0.7) +
+                    ggplot2::labs(
+                        title = "Cell Population Clusters",
+                        subtitle = "Direct marker expression visualization",
+                        x = marker_names[1],
+                        y = marker_names[2]
+                    ) +
+                    ggplot2::scale_color_brewer(type = "qual", palette = "Set2") +
+                    ggplot2::theme(legend.title = ggplot2::element_text(size = 12)) +
+                    ggtheme
+            }
+
+            print(p)
+            TRUE
+        },
+
         .generateInterpretation = function(marker_data, marker_names) {
             n_samples <- nrow(marker_data)
             n_markers <- length(marker_names)
@@ -572,8 +908,110 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 "<p><em>Results provide comprehensive characterization of multiplex marker relationships 
                 suitable for immune microenvironment profiling and biomarker development applications.</em></p>"
             )
-            
+
             self$results$interpretation$setContent(interpretation)
+        },
+
+        .generateClinicalReport = function(marker_data, marker_names) {
+            n_samples <- nrow(marker_data)
+            n_markers <- length(marker_names)
+
+            # Calculate key metrics for clinical report
+            cor_matrix <- cor(marker_data, use = "complete.obs", method = "pearson")
+            n_correlations <- sum(abs(cor_matrix[upper.tri(cor_matrix)]) >= 0.5, na.rm = TRUE)
+            total_pairs <- choose(n_markers, 2)
+            correlation_percentage <- round((n_correlations / total_pairs) * 100, 1)
+
+            # Get cluster information if clustering was performed
+            cluster_info <- ""
+            if (self$options$perform_clustering && !is.null(private$.cluster_data)) {
+                n_clusters <- length(unique(private$.cluster_data$cluster))
+                cluster_info <- sprintf(" %d distinct cell populations were identified through clustering analysis.", n_clusters)
+            }
+
+            # Get PCA information if performed
+            pca_info <- ""
+            if (self$options$perform_pca && !is.null(private$.pca_data)) {
+                total_variance <- private$.pca_data$Variance_PC1[1] + private$.pca_data$Variance_PC2[1]
+                pca_info <- sprintf(" Principal component analysis revealed that the first two components explain %.1f%% of the total variance in marker expression.", total_variance)
+            }
+
+            # Spatial analysis information
+            spatial_info <- ""
+            if (self$options$spatial_analysis && !is.null(private$.spatial_data)) {
+                spatial_info <- " Spatial proximity analysis was performed to assess cell-cell interactions and microenvironmental organization."
+            }
+
+            # Generate copy-ready clinical report sentences
+            clinical_report <- paste0(
+                "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<h4>📋 Copy-Ready Clinical Report</h4>",
+
+                "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                "<h5>Study Summary</h5>",
+                "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                sprintf("Multiplex immunofluorescence analysis was performed on %d samples using a %d-marker panel. ", n_samples, n_markers),
+                sprintf("Co-expression analysis identified %d significant correlations among %d possible marker pairs (%.1f%%). ", n_correlations, total_pairs, correlation_percentage),
+                cluster_info, pca_info, spatial_info,
+                "</p>",
+                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Summary</button>",
+                "</div>",
+
+                "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                "<h5>Correlation Analysis</h5>",
+                "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                if (correlation_percentage > 50) {
+                    sprintf("Strong co-expression patterns were observed with %.1f%% of marker pairs showing significant correlation (r ≥ 0.5), suggesting coordinated biological processes and potential functional marker relationships.", correlation_percentage)
+                } else if (correlation_percentage > 20) {
+                    sprintf("Moderate co-expression was detected with %.1f%% of marker pairs showing significant correlation, indicating some coordinated expression patterns with predominantly independent marker behavior.", correlation_percentage)
+                } else {
+                    sprintf("Independent expression patterns predominated with only %.1f%% of marker pairs showing significant correlation, suggesting diverse cellular phenotypes and limited functional redundancy.", correlation_percentage)
+                },
+                "</p>",
+                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Correlation</button>",
+                "</div>",
+
+                if (self$options$perform_clustering && !is.null(private$.cluster_data)) {
+                    n_clusters <- length(unique(private$.cluster_data$cluster))
+                    paste0(
+                        "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                        "<h5>Cell Population Analysis</h5>",
+                        "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                        sprintf("Unsupervised clustering analysis identified %d distinct cell populations based on multiplex marker expression profiles. ", n_clusters),
+                        "Each cluster exhibited characteristic marker expression patterns suggesting distinct cellular phenotypes and functional states relevant for tumor microenvironment characterization.",
+                        "</p>",
+                        "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Clustering</button>",
+                        "</div>"
+                    )
+                } else { "" },
+
+                if (self$options$perform_pca && !is.null(private$.pca_data)) {
+                    total_variance <- private$.pca_data$Variance_PC1[1] + private$.pca_data$Variance_PC2[1]
+                    paste0(
+                        "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                        "<h5>Principal Component Analysis</h5>",
+                        "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                        sprintf("Principal component analysis revealed structured variance in the multiplex data, with the first two components explaining %.1f%% of total expression variance. ", total_variance),
+                        "This dimensionality reduction approach facilitated visualization of major expression patterns and identification of key marker relationships driving phenotypic diversity.",
+                        "</p>",
+                        "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy PCA</button>",
+                        "</div>"
+                    )
+                } else { "" },
+
+                "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                "<h5>Clinical Implications</h5>",
+                "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                "These multiplex immunofluorescence findings provide quantitative characterization of the tumor immune microenvironment suitable for biomarker discovery, therapeutic target identification, and patient stratification in precision oncology applications. ",
+                "The identified marker relationships and cellular populations warrant further validation in independent cohorts for clinical implementation.",
+                "</p>",
+                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Implications</button>",
+                "</div>",
+
+                "</div>"
+            )
+
+            self$results$clinicalreport$setContent(clinical_report)
         }
     )
 )

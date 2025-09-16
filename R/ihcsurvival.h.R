@@ -20,6 +20,7 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             kaplanMeierPlots = TRUE,
             landmarkAnalysis = FALSE,
             landmarkTime = 60,
+            landmarkTimePoints = "12,24,36,48,60",
             confidenceLevel = 0.95, ...) {
 
             super$initialize(
@@ -129,6 +130,10 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 min=1,
                 max=120,
                 default=60)
+            private$..landmarkTimePoints <- jmvcore::OptionString$new(
+                "landmarkTimePoints",
+                landmarkTimePoints,
+                default="12,24,36,48,60")
             private$..confidenceLevel <- jmvcore::OptionNumber$new(
                 "confidenceLevel",
                 confidenceLevel,
@@ -150,6 +155,7 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..kaplanMeierPlots)
             self$.addOption(private$..landmarkAnalysis)
             self$.addOption(private$..landmarkTime)
+            self$.addOption(private$..landmarkTimePoints)
             self$.addOption(private$..confidenceLevel)
         }),
     active = list(
@@ -167,6 +173,7 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         kaplanMeierPlots = function() private$..kaplanMeierPlots$value,
         landmarkAnalysis = function() private$..landmarkAnalysis$value,
         landmarkTime = function() private$..landmarkTime$value,
+        landmarkTimePoints = function() private$..landmarkTimePoints$value,
         confidenceLevel = function() private$..confidenceLevel$value),
     private = list(
         ..markers = NA,
@@ -183,6 +190,7 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..kaplanMeierPlots = NA,
         ..landmarkAnalysis = NA,
         ..landmarkTime = NA,
+        ..landmarkTimePoints = NA,
         ..confidenceLevel = NA)
 )
 
@@ -191,6 +199,8 @@ ihcsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        assumptions = function() private$.items[["assumptions"]],
+        reportSentence = function() private$.items[["reportSentence"]],
         prognosticGroups = function() private$.items[["prognosticGroups"]],
         coxResults = function() private$.items[["coxResults"]],
         multivariateResults = function() private$.items[["multivariateResults"]],
@@ -214,6 +224,25 @@ ihcsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="instructions",
                 title="Survival Analysis Overview",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Analysis Assumptions & Caveats",
+                visible=TRUE,
+                clearWith=list(
+                    "markers",
+                    "survivalTime",
+                    "survivalEvent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentence",
+                title="Copy-Ready Report Summary",
+                visible="(prognosticClustering)",
+                clearWith=list(
+                    "markers",
+                    "survivalTime",
+                    "survivalEvent",
+                    "riskStratification")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="prognosticGroups",
@@ -281,6 +310,10 @@ ihcsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="significance", 
                         `title`="Sig.", 
+                        `type`="text"),
+                    list(
+                        `name`="clinical_interpretation", 
+                        `title`="Clinical Interpretation", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -493,11 +526,15 @@ ihcsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   points
 #' @param landmarkTime Time point for landmark analysis (same units as
 #'   survival time)
+#' @param landmarkTimePoints Comma-separated time points for landmark survival
+#'   analysis (e.g., "12,24,36")
 #' @param confidenceLevel Confidence level for survival estimates and hazard
 #'   ratios
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$prognosticGroups} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coxResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multivariateResults} \tab \tab \tab \tab \tab a table \cr
@@ -532,6 +569,7 @@ ihcsurvival <- function(
     kaplanMeierPlots = TRUE,
     landmarkAnalysis = FALSE,
     landmarkTime = 60,
+    landmarkTimePoints = "12,24,36,48,60",
     confidenceLevel = 0.95) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -571,6 +609,7 @@ ihcsurvival <- function(
         kaplanMeierPlots = kaplanMeierPlots,
         landmarkAnalysis = landmarkAnalysis,
         landmarkTime = landmarkTime,
+        landmarkTimePoints = landmarkTimePoints,
         confidenceLevel = confidenceLevel)
 
     analysis <- ihcsurvivalClass$new(

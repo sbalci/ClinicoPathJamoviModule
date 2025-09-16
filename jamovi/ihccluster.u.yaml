@@ -192,3 +192,39 @@ children:
                 name: survivalEvent
                 maxItemCount: 1
                 isTarget: true
+
+  # ============ ACCESSIBILITY OPTIONS ============
+  - type: CollapseBox
+    label: Accessibility & Display
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: colorPalette
+        label: Color Palette
+      - type: ComboBox
+        name: fontSize
+        label: Font Size
+      - type: CheckBox
+        name: plotContrast
+        label: High Contrast Mode
+
+  # ============ TUMOR-SPECIFIC PRESETS ============
+  - type: CollapseBox
+    label: Tumor-Specific Presets
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: tumorPreset
+        label: Select Tumor Type Preset
+      - type: CheckBox
+        name: applyPreset
+        label: Apply Preset Configuration
+
+  # ============ LANGUAGE OPTIONS ============
+  - type: CollapseBox
+    label: Language / Dil Seçimi
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: language
+        label: Select Language / Dil Seçin

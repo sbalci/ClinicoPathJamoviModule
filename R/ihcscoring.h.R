@@ -6,6 +6,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            guided_biomarker = "manual",
             intensity_var = NULL,
             proportion_var = NULL,
             sample_id_var = NULL,
@@ -50,7 +51,11 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pdl1_marker = NULL,
             checkpoint_cutoffs = "1, 10",
             subtype_statistics = TRUE,
-            subtype_visualization = TRUE, ...) {
+            subtype_visualization = TRUE,
+            language = "english",
+            colorblind_safe = TRUE,
+            high_contrast = FALSE,
+            font_size = "normal", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -58,6 +63,16 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..guided_biomarker <- jmvcore::OptionList$new(
+                "guided_biomarker",
+                guided_biomarker,
+                options=list(
+                    "er_pr",
+                    "her2",
+                    "ki67",
+                    "pdl1",
+                    "manual"),
+                default="manual")
             private$..intensity_var <- jmvcore::OptionVariable$new(
                 "intensity_var",
                 intensity_var,
@@ -75,6 +90,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..sample_id_var <- jmvcore::OptionVariable$new(
                 "sample_id_var",
                 sample_id_var,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -83,6 +99,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -173,6 +190,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..immune_cells_var <- jmvcore::OptionVariable$new(
                 "immune_cells_var",
                 immune_cells_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -180,6 +198,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..tumor_cells_var <- jmvcore::OptionVariable$new(
                 "tumor_cells_var",
                 tumor_cells_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -267,6 +286,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..primary_marker1 <- jmvcore::OptionVariable$new(
                 "primary_marker1",
                 primary_marker1,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -274,6 +294,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..primary_marker2 <- jmvcore::OptionVariable$new(
                 "primary_marker2",
                 primary_marker2,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -281,6 +302,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..secondary_marker <- jmvcore::OptionVariable$new(
                 "secondary_marker",
                 secondary_marker,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -292,6 +314,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pd1_marker <- jmvcore::OptionVariable$new(
                 "pd1_marker",
                 pd1_marker,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -299,6 +322,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pdl1_marker <- jmvcore::OptionVariable$new(
                 "pdl1_marker",
                 pdl1_marker,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -315,7 +339,31 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "subtype_visualization",
                 subtype_visualization,
                 default=TRUE)
+            private$..language <- jmvcore::OptionList$new(
+                "language",
+                language,
+                options=list(
+                    "english",
+                    "turkish"),
+                default="english")
+            private$..colorblind_safe <- jmvcore::OptionBool$new(
+                "colorblind_safe",
+                colorblind_safe,
+                default=TRUE)
+            private$..high_contrast <- jmvcore::OptionBool$new(
+                "high_contrast",
+                high_contrast,
+                default=FALSE)
+            private$..font_size <- jmvcore::OptionList$new(
+                "font_size",
+                font_size,
+                options=list(
+                    "normal",
+                    "large",
+                    "extra_large"),
+                default="normal")
 
+            self$.addOption(private$..guided_biomarker)
             self$.addOption(private$..intensity_var)
             self$.addOption(private$..proportion_var)
             self$.addOption(private$..sample_id_var)
@@ -361,8 +409,13 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..checkpoint_cutoffs)
             self$.addOption(private$..subtype_statistics)
             self$.addOption(private$..subtype_visualization)
+            self$.addOption(private$..language)
+            self$.addOption(private$..colorblind_safe)
+            self$.addOption(private$..high_contrast)
+            self$.addOption(private$..font_size)
         }),
     active = list(
+        guided_biomarker = function() private$..guided_biomarker$value,
         intensity_var = function() private$..intensity_var$value,
         proportion_var = function() private$..proportion_var$value,
         sample_id_var = function() private$..sample_id_var$value,
@@ -407,8 +460,13 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pdl1_marker = function() private$..pdl1_marker$value,
         checkpoint_cutoffs = function() private$..checkpoint_cutoffs$value,
         subtype_statistics = function() private$..subtype_statistics$value,
-        subtype_visualization = function() private$..subtype_visualization$value),
+        subtype_visualization = function() private$..subtype_visualization$value,
+        language = function() private$..language$value,
+        colorblind_safe = function() private$..colorblind_safe$value,
+        high_contrast = function() private$..high_contrast$value,
+        font_size = function() private$..font_size$value),
     private = list(
+        ..guided_biomarker = NA,
         ..intensity_var = NA,
         ..proportion_var = NA,
         ..sample_id_var = NA,
@@ -453,7 +511,11 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pdl1_marker = NA,
         ..checkpoint_cutoffs = NA,
         ..subtype_statistics = NA,
-        ..subtype_visualization = NA)
+        ..subtype_visualization = NA,
+        ..language = NA,
+        ..colorblind_safe = NA,
+        ..high_contrast = NA,
+        ..font_size = NA)
 )
 
 ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -461,6 +523,10 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         interpretation = function() private$.items[["interpretation"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        clinicalReport = function() private$.items[["clinicalReport"]],
+        assumptions = function() private$.items[["assumptions"]],
         scorestable = function() private$.items[["scorestable"]],
         statisticstable = function() private$.items[["statisticstable"]],
         agreementtable = function() private$.items[["agreementtable"]],
@@ -494,6 +560,41 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation and Guidelines",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="\uD83D\uDCCB Analysis Summary (Copy-Ready)",
+                visible=TRUE,
+                clearWith=list(
+                    "intensity_var",
+                    "proportion_var",
+                    "guided_biomarker",
+                    "biomarker_type",
+                    "scoring_method",
+                    "binary_cutpoint")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="\uD83D\uDD2C About This Analysis",
+                visible=TRUE))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="clinicalReport",
+                title="\uD83D\uDCC4 Clinical Report Template",
+                visible=TRUE,
+                clearWith=list(
+                    "intensity_var",
+                    "proportion_var",
+                    "guided_biomarker",
+                    "biomarker_type",
+                    "scoring_method",
+                    "binary_cutpoint",
+                    "confidence_level")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="\u26A0\uFE0F Assumptions & Caveats",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -633,7 +734,10 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "intensity_var",
                     "proportion_var",
                     "agreement_analysis",
-                    "confidence_level")))
+                    "confidence_level",
+                    "bootstrap_n",
+                    "biomarker_type",
+                    "scoring_method")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="qualitycontroltable",
@@ -679,7 +783,10 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "intensity_var",
                     "proportion_var",
                     "show_plots",
-                    "scoring_method")))
+                    "scoring_method",
+                    "bootstrap_n",
+                    "confidence_level",
+                    "biomarker_type")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="correlationplot",
@@ -693,7 +800,10 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "intensity_var",
                     "proportion_var",
                     "show_plots",
-                    "agreement_analysis")))
+                    "agreement_analysis",
+                    "bootstrap_n",
+                    "confidence_level",
+                    "biomarker_type")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="agreementplot",
@@ -707,7 +817,10 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "intensity_var",
                     "proportion_var",
                     "show_agreement_plots",
-                    "agreement_analysis")))
+                    "agreement_analysis",
+                    "bootstrap_n",
+                    "confidence_level",
+                    "biomarker_type")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cutpointplot",
@@ -1181,7 +1294,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="cpscomparison",
                             title="CPS Group Comparison",
-                            visible="(group_var && cutoff_comparison)",
+                            visible="(cutoff_comparison)",
                             columns=list(
                                 list(
                                     `name`="comparison_type", 
@@ -1323,7 +1436,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="checkpointanalysis",
                             title="Checkpoint Inhibitor Expression by Subtype",
-                            visible="(pd1_marker || pdl1_marker)",
+                            visible=TRUE,
                             columns=list(
                                 list(
                                     `name`="molecular_subtype", 
@@ -1374,7 +1487,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Checkpoint Inhibitor Expression Plot",
                 width=700,
                 height=500,
-                visible="(molecular_classification && (pd1_marker || pdl1_marker) && subtype_visualization)",
+                visible="(molecular_classification && subtype_visualization)",
                 requiresData=TRUE,
                 renderFun=".checkpointplot",
                 clearWith=list(
@@ -1455,6 +1568,8 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data the data as a data frame
+#' @param guided_biomarker guided configuration for common biomarkers with
+#'   recommended settings
 #' @param intensity_var staining intensity scores (typically 0-3 scale)
 #' @param proportion_var percentage of positive cells (0-100\%)
 #' @param sample_id_var unique identifier for each sample
@@ -1518,9 +1633,18 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   molecular subtypes
 #' @param subtype_visualization create plots showing molecular subtype
 #'   distributions and associations
+#' @param language language for interface elements and clinical
+#'   interpretations
+#' @param colorblind_safe use colorblind-safe palette for all visualizations
+#' @param high_contrast enable high contrast mode for better accessibility
+#' @param font_size base font size for improved readability
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalReport} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$scorestable} \tab \tab \tab \tab \tab Calculated H-scores, Allred scores, and binary classifications \cr
 #'   \code{results$statisticstable} \tab \tab \tab \tab \tab Comprehensive statistical summary for each scoring method \cr
 #'   \code{results$agreementtable} \tab \tab \tab \tab \tab Correlation and agreement statistics between scoring methods \cr
@@ -1567,10 +1691,11 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 ihcscoring <- function(
     data,
+    guided_biomarker = "manual",
     intensity_var,
     proportion_var,
-    sample_id_var,
-    group_var,
+    sample_id_var = NULL,
+    group_var = NULL,
     scoring_method = "both",
     binary_cutpoint = 100,
     allred_cutpoint = 3,
@@ -1587,8 +1712,8 @@ ihcscoring <- function(
     multiple_cutoffs = FALSE,
     cutoff_values = "1, 5, 10, 25, 50",
     cps_analysis = FALSE,
-    immune_cells_var,
-    tumor_cells_var,
+    immune_cells_var = NULL,
+    tumor_cells_var = NULL,
     cutoff_comparison = TRUE,
     confidence_level = 0.95,
     bootstrap_n = 1000,
@@ -1603,15 +1728,19 @@ ihcscoring <- function(
     validation_metrics = TRUE,
     molecular_classification = FALSE,
     classification_system = "bladder_mibc",
-    primary_marker1,
-    primary_marker2,
-    secondary_marker,
+    primary_marker1 = NULL,
+    primary_marker2 = NULL,
+    secondary_marker = NULL,
     classification_cutoffs = "20, 20, 70",
-    pd1_marker,
-    pdl1_marker,
+    pd1_marker = NULL,
+    pdl1_marker = NULL,
     checkpoint_cutoffs = "1, 10",
     subtype_statistics = TRUE,
-    subtype_visualization = TRUE) {
+    subtype_visualization = TRUE,
+    language = "english",
+    colorblind_safe = TRUE,
+    high_contrast = FALSE,
+    font_size = "normal") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcscoring requires jmvcore to be installed (restart may be required)")
@@ -1645,6 +1774,7 @@ ihcscoring <- function(
     for (v in group_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- ihcscoringOptions$new(
+        guided_biomarker = guided_biomarker,
         intensity_var = intensity_var,
         proportion_var = proportion_var,
         sample_id_var = sample_id_var,
@@ -1689,7 +1819,11 @@ ihcscoring <- function(
         pdl1_marker = pdl1_marker,
         checkpoint_cutoffs = checkpoint_cutoffs,
         subtype_statistics = subtype_statistics,
-        subtype_visualization = subtype_visualization)
+        subtype_visualization = subtype_visualization,
+        language = language,
+        colorblind_safe = colorblind_safe,
+        high_contrast = high_contrast,
+        font_size = font_size)
 
     analysis <- ihcscoringClass$new(
         options = options,

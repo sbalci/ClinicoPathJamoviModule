@@ -16,7 +16,6 @@ items:
       clearWith:
           - catVars
           - contVars
-          - vars
           - method
           - nClusters
           - autoSelectK
@@ -34,7 +33,6 @@ items:
       clearWith:
           - catVars
           - contVars
-          - vars
           - method
           - nClusters
           - autoSelectK
@@ -184,6 +182,11 @@ items:
           - contVars
           - method
           - nClusters
+          - autoSelectK
+          - colorPalette
+          - fontSize
+          - plotContrast
+          - language
 
     - name: heatmapPlot
       title: Expression Heatmap
@@ -198,6 +201,11 @@ items:
           - method
           - nClusters
           - heatmapScale
+          - autoSelectK
+          - colorPalette
+          - fontSize
+          - plotContrast
+          - language
 
     - name: dendrogramPlot
       title: Dendrogram
@@ -210,6 +218,11 @@ items:
           - catVars
           - contVars
           - nClusters
+          - autoSelectK
+          - colorPalette
+          - fontSize
+          - plotContrast
+          - language
 
     - name: pcaPlot
       title: PCA/MCA Plot
@@ -223,6 +236,11 @@ items:
           - contVars
           - method
           - nClusters
+          - autoSelectK
+          - colorPalette
+          - fontSize
+          - plotContrast
+          - language
 
     - name: boxplotPlot
       title: Marker Distributions by Cluster
@@ -234,6 +252,11 @@ items:
       clearWith:
           - contVars
           - nClusters
+          - autoSelectK
+          - colorPalette
+          - fontSize
+          - plotContrast
+          - language
 
     - name: survivalPlot
       title: Survival Analysis by Cluster
@@ -246,6 +269,11 @@ items:
           - survivalTime
           - survivalEvent
           - nClusters
+          - autoSelectK
+          - colorPalette
+          - fontSize
+          - plotContrast
+          - language
 
     - name: medoidInfo
       title: Cluster Medoids (Representative Cases)
@@ -271,6 +299,20 @@ items:
       title: Technical Notes
       type: Html
       visible: true
+
+    - name: executiveSummary
+      title: Executive Summary (Copy-Ready)
+      type: Preformatted
+      visible: true
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+          - language
+          - tumorPreset
+          - applyPreset
 
     # Legacy result tables for backward compatibility
     - name: sizes

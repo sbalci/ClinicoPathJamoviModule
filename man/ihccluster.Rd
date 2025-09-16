@@ -31,7 +31,13 @@ ihccluster(
   exportClusters = FALSE,
   clinicalVars,
   survivalTime = NULL,
-  survivalEvent = NULL
+  survivalEvent = NULL,
+  colorPalette = "default",
+  fontSize = "medium",
+  plotContrast = FALSE,
+  tumorPreset = "none",
+  applyPreset = FALSE,
+  language = "english"
 )
 }
 \arguments{
@@ -90,6 +96,19 @@ markers)}
 \item{survivalTime}{Time variable for survival analysis}
 
 \item{survivalEvent}{Event variable for survival analysis}
+
+\item{colorPalette}{Color palette for plots (colorblind-safe options
+available)}
+
+\item{fontSize}{Base font size for all text elements}
+
+\item{plotContrast}{Enable high contrast mode for better visibility}
+
+\item{tumorPreset}{Apply tumor-specific clustering configurations}
+
+\item{applyPreset}{Apply the selected tumor-specific preset settings}
+
+\item{language}{Interface and output language / Arayüz ve çıktı dili}
 }
 \value{
 A results object containing:
@@ -112,6 +131,7 @@ A results object containing:
 \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$executiveSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$sizes} \tab \tab \tab \tab \tab a table \cr
 \code{results$modes} \tab \tab \tab \tab \tab a table \cr
 \code{results$distr} \tab \tab \tab \tab \tab a table \cr

@@ -20,7 +20,10 @@ ihcimmuneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diversityMetrics = TRUE,
             checkpointScore = FALSE,
             pd1Cutoff = 1,
-            pdl1Cutoff = 1, ...) {
+            pdl1Cutoff = 1,
+            cd3Threshold = 10,
+            cd8Threshold = 5,
+            immuneScoreThreshold = 10, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -124,6 +127,24 @@ ihcimmuneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=0,
                 max=100,
                 default=1)
+            private$..cd3Threshold <- jmvcore::OptionNumber$new(
+                "cd3Threshold",
+                cd3Threshold,
+                min=1,
+                max=100,
+                default=10)
+            private$..cd8Threshold <- jmvcore::OptionNumber$new(
+                "cd8Threshold",
+                cd8Threshold,
+                min=1,
+                max=100,
+                default=5)
+            private$..immuneScoreThreshold <- jmvcore::OptionNumber$new(
+                "immuneScoreThreshold",
+                immuneScoreThreshold,
+                min=1,
+                max=100,
+                default=10)
 
             self$.addOption(private$..immune_markers)
             self$.addOption(private$..checkpoint_markers)
@@ -140,6 +161,9 @@ ihcimmuneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..checkpointScore)
             self$.addOption(private$..pd1Cutoff)
             self$.addOption(private$..pdl1Cutoff)
+            self$.addOption(private$..cd3Threshold)
+            self$.addOption(private$..cd8Threshold)
+            self$.addOption(private$..immuneScoreThreshold)
         }),
     active = list(
         immune_markers = function() private$..immune_markers$value,
@@ -156,7 +180,10 @@ ihcimmuneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diversityMetrics = function() private$..diversityMetrics$value,
         checkpointScore = function() private$..checkpointScore$value,
         pd1Cutoff = function() private$..pd1Cutoff$value,
-        pdl1Cutoff = function() private$..pdl1Cutoff$value),
+        pdl1Cutoff = function() private$..pdl1Cutoff$value,
+        cd3Threshold = function() private$..cd3Threshold$value,
+        cd8Threshold = function() private$..cd8Threshold$value,
+        immuneScoreThreshold = function() private$..immuneScoreThreshold$value),
     private = list(
         ..immune_markers = NA,
         ..checkpoint_markers = NA,
@@ -172,7 +199,10 @@ ihcimmuneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..diversityMetrics = NA,
         ..checkpointScore = NA,
         ..pd1Cutoff = NA,
-        ..pdl1Cutoff = NA)
+        ..pdl1Cutoff = NA,
+        ..cd3Threshold = NA,
+        ..cd8Threshold = NA,
+        ..immuneScoreThreshold = NA)
 )
 
 ihcimmuneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -180,6 +210,7 @@ ihcimmuneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        clinicalContext = function() private$.items[["clinicalContext"]],
         tilSummary = function() private$.items[["tilSummary"]],
         immuneProfile = function() private$.items[["immuneProfile"]],
         checkpointAnalysis = function() private$.items[["checkpointAnalysis"]],
@@ -207,6 +238,14 @@ ihcimmuneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="instructions",
                 title="TIL Analysis Overview",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalContext",
+                title="Clinical Interpretation Guide",
+                visible=TRUE,
+                clearWith=list(
+                    "immune_markers",
+                    "tilMethod")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tilSummary",
@@ -428,7 +467,17 @@ ihcimmuneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="diversity_category", 
                         `title`="Diversity Category", 
-                        `type`="text"))))
+                        `type`="text"),
+                    list(
+                        `name`="brillouin_diversity", 
+                        `title`="Brillouin Index", 
+                        `type`="number", 
+                        `format`="zto:3"),
+                    list(
+                        `name`="berger_parker_dominance", 
+                        `title`="Berger-Parker Index", 
+                        `type`="number", 
+                        `format`="zto:3"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tilMethodResults",
@@ -570,9 +619,16 @@ ihcimmuneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   therapy prediction
 #' @param pd1Cutoff Threshold for PD-1 positivity assessment
 #' @param pdl1Cutoff Threshold for PD-L1 positivity assessment
+#' @param cd3Threshold Threshold for CD3+ TIL categorization (Low vs
+#'   Intermediate)
+#' @param cd8Threshold Threshold for CD8+ TIL categorization (Low vs
+#'   Intermediate)
+#' @param immuneScoreThreshold Threshold for overall immune infiltration
+#'   categorization
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalContext} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tilSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$immuneProfile} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$checkpointAnalysis} \tab \tab \tab \tab \tab a table \cr
@@ -611,7 +667,10 @@ ihcimmune <- function(
     diversityMetrics = TRUE,
     checkpointScore = FALSE,
     pd1Cutoff = 1,
-    pdl1Cutoff = 1) {
+    pdl1Cutoff = 1,
+    cd3Threshold = 10,
+    cd8Threshold = 5,
+    immuneScoreThreshold = 10) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcimmune requires jmvcore to be installed (restart may be required)")
@@ -649,7 +708,10 @@ ihcimmune <- function(
         diversityMetrics = diversityMetrics,
         checkpointScore = checkpointScore,
         pd1Cutoff = pd1Cutoff,
-        pdl1Cutoff = pdl1Cutoff)
+        pdl1Cutoff = pdl1Cutoff,
+        cd3Threshold = cd3Threshold,
+        cd8Threshold = cd8Threshold,
+        immuneScoreThreshold = immuneScoreThreshold)
 
     analysis <- ihcimmuneClass$new(
         options = options,

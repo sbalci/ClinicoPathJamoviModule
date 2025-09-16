@@ -2,6 +2,7 @@
 name: ihcscoring
 title: IHC Scoring Standardization
 menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
 version: '1.0.0'
 jas: '1.2'
 
@@ -10,6 +11,25 @@ options:
       type: Data
       description:
           R: the data as a data frame
+
+    - name: guided_biomarker
+      title: 'Guided Biomarker Configuration'
+      type: List
+      options:
+        - name: er_pr
+          title: 'ER/PR (Breast Cancer)'
+        - name: her2
+          title: 'HER2 (Breast Cancer)'
+        - name: ki67
+          title: 'Ki-67 (Proliferation)'
+        - name: pdl1
+          title: 'PD-L1 (Immunotherapy)'
+        - name: manual
+          title: 'Manual Configuration'
+      default: manual
+      description:
+          R: >
+            guided configuration for common biomarkers with recommended settings
 
     - name: intensity_var
       title: Intensity Variable
@@ -36,6 +56,7 @@ options:
     - name: sample_id_var
       title: Sample ID Variable (Optional)
       type: Variable
+      default: null
       suggested:
         - nominal
       permitted:
@@ -48,6 +69,7 @@ options:
     - name: group_var
       title: Group Variable (Optional)
       type: Variable
+      default: null
       suggested:
         - nominal
       permitted:
@@ -219,6 +241,7 @@ options:
     - name: immune_cells_var
       title: Immune Cells Variable (for CPS)
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -230,6 +253,7 @@ options:
     - name: tumor_cells_var
       title: Tumor Cells Variable (for CPS)
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -392,6 +416,7 @@ options:
     - name: primary_marker1
       title: Primary Marker 1 (e.g., GATA3)
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -403,6 +428,7 @@ options:
     - name: primary_marker2
       title: Primary Marker 2 (e.g., CK5/6)
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -414,6 +440,7 @@ options:
     - name: secondary_marker
       title: Secondary Marker (e.g., p16)
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -433,6 +460,7 @@ options:
     - name: pd1_marker
       title: PD-1 Expression Variable
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -444,6 +472,7 @@ options:
     - name: pdl1_marker
       title: PD-L1 Expression Variable
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -475,5 +504,50 @@ options:
       description:
           R: >
             create plots showing molecular subtype distributions and associations
+
+    # Accessibility and Language Options
+    - name: language
+      title: 'Interface Language'
+      type: List
+      options:
+        - name: english
+          title: 'English'
+        - name: turkish
+          title: 'Türkçe'
+      default: english
+      description:
+          R: >
+            language for interface elements and clinical interpretations
+
+    - name: colorblind_safe
+      title: 'Use Colorblind-Safe Colors'
+      type: Bool
+      default: true
+      description:
+          R: >
+            use colorblind-safe palette for all visualizations
+
+    - name: high_contrast
+      title: 'High Contrast Mode'
+      type: Bool
+      default: false
+      description:
+          R: >
+            enable high contrast mode for better accessibility
+
+    - name: font_size
+      title: 'Font Size'
+      type: List
+      options:
+        - name: normal
+          title: 'Normal'
+        - name: large
+          title: 'Large'
+        - name: extra_large
+          title: 'Extra Large'
+      default: normal
+      description:
+          R: >
+            base font size for improved readability
 
 ...

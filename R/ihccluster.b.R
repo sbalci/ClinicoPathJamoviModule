@@ -1,3 +1,33 @@
+#' @title IHC Clustering Analysis Backend
+#' @description
+#' Backend implementation for IHC clustering analysis. Clusters cases based on
+#' immunohistochemistry (IHC) staining patterns using various clustering algorithms
+#' optimized for mixed categorical and continuous data.
+#'
+#' @details
+#' This function supports multiple clustering approaches:
+#' \itemize{
+#'   \item PAM (k-medoids) on Gower distance - best for mixed data types
+#'   \item Hierarchical clustering (Ward) on Gower distance - shows relationships
+#'   \item MCA/PCA + k-means - dimension reduction approach
+#' }
+#'
+#' The analysis automatically handles mixed data types using Gower distance,
+#' which appropriately weights categorical and continuous variables.
+#'
+#' @section Features:
+#' \itemize{
+#'   \item Automatic optimal k selection using silhouette analysis
+#'   \item Comprehensive visualization suite (heatmaps, dendrograms, PCA plots)
+#'   \item Consensus clustering for stability assessment
+#'   \item Clinical correlation analysis
+#'   \item Variable weighting support
+#'   \item Missing data handling (complete cases or pairwise distances)
+#' }
+#'
+#' @author ClinicoPath Development Team
+#' @keywords clustering immunohistochemistry pathology
+#'
 # Backend for ihccluster
 ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "ihcclusterClass",
@@ -174,8 +204,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # self$state$fit <- fit
                 # self$state$dist <- d
                 
-                # Store fit for medoid info using jamovi state management
-                self$results$clusterSizes$setState(list(fit = fit, df = df, clusters = clusters, usedK = usedK))
+                # Fit object now stored in central state management
 
             } else if (method == "hierarchical") {
                 # New hierarchical clustering method
@@ -336,8 +365,35 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 df = df,
                 method = method,
                 catVars = catVars,
-                contVars = contVars
+                contVars = contVars,
+                fit = NULL,  # Will store clustering fit object
+                dist = NULL, # Will store distance matrix
+                hc = NULL    # Will store hierarchical clustering object
             )
+
+            # Store method-specific objects for plots
+            if (method == "pam") {
+                # Recreate fit object for medoid info and silhouette plots
+                d <- if (is.null(weights)) {
+                    cluster::daisy(df, metric="gower")
+                } else {
+                    cluster::daisy(df, metric="gower", weights=weights)
+                }
+                fit <- cluster::pam(d, k=usedK, diss=TRUE)
+                analysisState$fit <- fit
+                analysisState$dist <- d
+            } else if (method == "hierarchical") {
+                # Store hierarchical clustering object for dendrogram
+                d <- if (is.null(weights)) {
+                    cluster::daisy(df, metric="gower")
+                } else {
+                    cluster::daisy(df, metric="gower", weights=weights)
+                }
+                hc <- cluster::agnes(d, method="ward")
+                analysisState$hc <- hc
+                analysisState$dist <- d
+            }
+
             self$results$summary$setState(analysisState)
 
             # --- Populate results tables ---
@@ -355,19 +411,17 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     tbl$addRow(rowKey=cl, list(cluster=cl, n=as.integer(sizes[[cl]])))
             }
             
-            # Medoid information for PAM clustering
-            if (opts$method == "pam") {
-                # Retrieve stored fit object
-                storedState <- self$results$clusterSizes$state
-                if (!is.null(storedState) && !is.null(storedState$fit)) {
-                    fit <- storedState$fit
-                    medoidTable <- self$results$medoidInfo
+            # Medoid information for PAM clustering using centralized state
+            if (method == "pam" && !is.null(analysisState$fit)) {
+                fit <- analysisState$fit
+                medoidTable <- self$results$medoidInfo
+                if (!is.null(medoidTable)) {
                     for (i in seq_along(fit$medoids)) {
                         medoidId <- if (!is.null(rownames(df))) rownames(df)[fit$medoids[i]] else as.character(fit$medoids[i])
                         # Create profile description
                         medoidRow <- df[fit$medoids[i], , drop = FALSE]
                         profileDesc <- paste(names(medoidRow), "=", sapply(medoidRow, as.character), collapse = ", ")
-                        
+
                         medoidTable$addRow(list(
                             cluster = paste0("C", i),
                             medoid_id = medoidId,
@@ -647,6 +701,12 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else if (!is.null(self$results$text)) {
                 self$results$text$setContent(txt)
             }
+
+            # Generate and populate executive summary
+            if (!is.null(self$results$executiveSummary)) {
+                executive_summary <- private$.generateExecutiveSummary()
+                self$results$executiveSummary$setContent(executive_summary)
+            }
             
             # Control survival plot visibility dynamically
             if (!is.null(self$results$survivalPlot)) {
@@ -660,6 +720,9 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
         },
         
+        # Initialize instruction panel with context-sensitive guidance
+        # Provides different instructions based on current variable selection
+        # and analysis configuration. Shows step-by-step workflow guidance.
         .initTodo = function() {
             if (is.null(self$options$catVars) && is.null(self$options$contVars)) {
                 html <- '
@@ -742,6 +805,9 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$todo$setContent(html)
         },
         
+        # Initialize technical implementation notes panel
+        # Provides comprehensive documentation about clustering algorithms,
+        # distance metrics, and statistical methods used in the analysis.
         .initTechnicalNotes = function() {
             html <- '
             <div style="background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border: 1px solid #dee2e6;">
@@ -819,10 +885,27 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$technicalNotes$setContent(html)
         },
         
+        # Initialize clinical interpretation guide panel
+        # Provides clinical context for interpreting clustering results,
+        # including guidelines for validation and clinical application.
         .initInterpretationGuide = function() {
+            # Get preset-specific interpretation if available
+            preset_interpretation <- private$.getPresetInterpretation()
+
             html <- '
             <div style="background-color: #fff8e1; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #ffc107;">
-            <h3 style="margin-top: 0; color: #e65100;">🏥 Clinical Interpretation Guide</h3>
+            <h3 style="margin-top: 0; color: #e65100;">🏥 Clinical Interpretation Guide</h3>'
+
+            # Add preset-specific guidance if available
+            if (nchar(preset_interpretation) > 0) {
+                html <- paste0(html, '
+                <div style="background-color: #e8f5e8; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 3px solid #4caf50;">
+                <h4 style="color: #2e7d32;">🧬 Tumor-Specific Classification</h4>
+                <pre style="white-space: pre-wrap; font-family: monospace; color: #2e7d32;">', preset_interpretation, '</pre>
+                </div>')
+            }
+
+            html <- paste0(html, '
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
             <h4>🎯 Understanding Your Results</h4>
@@ -914,8 +997,8 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <div style="background-color: #e3f2fd; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #90caf9;">
             <p style="margin: 0;"><b>💡 Next Steps:</b> Export cluster assignments and test associations with clinical variables using the survival analysis or cross-table modules.</p>
             </div>
-            </div>'
-            
+            </div>')
+
             self$results$interpretationGuide$setContent(html)
         },
         
@@ -1014,61 +1097,58 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # --- Plots ---
+        # Generate silhouette plot for cluster quality assessment
+        # Creates silhouette plot showing cluster cohesion and separation.
+        # Higher silhouette values indicate better clustering quality.
         .plotSilhouette = function(image, ggtheme, theme, ...) {
-            # New comprehensive silhouette plot
+            # Comprehensive silhouette plot using centralized state
             if (!isTRUE(self$options$showSilhouette)) return()
-            
-            method <- self$options$method %||% "pam"
-            
-            # Get analysis state from jamovi state management
+
+            # Get analysis state from centralized state management
             analysisState <- self$results$summary$state
             if (is.null(analysisState)) return()
-            
+
             clusters <- analysisState$clusters
-            df <- analysisState$df
-            
+            dist_matrix <- analysisState$dist
+            fit <- analysisState$fit
+            method <- analysisState$method
+
+            if (is.null(clusters) || is.null(dist_matrix)) return()
+
             tryCatch({
-                # Recreate distance matrix for silhouette calculation
-                opts <- self$options
-                if (is.null(df)) return()
-                
-                catVars <- character(0)
-                contVars <- character(0)
-                
-                # Collect variables
-                if (!is.null(opts$catVars) && length(opts$catVars) > 0) catVars <- c(catVars, opts$catVars)
-                if (!is.null(opts$contVars) && length(opts$contVars) > 0) contVars <- opts$contVars
-                
-                catVars <- unique(catVars)
-                contVars <- unique(contVars)
-                
-                # Calculate appropriate distance
-                if (length(catVars) > 0 && length(contVars) > 0) {
-                    # Mixed data: use Gower distance
-                    d <- cluster::daisy(df, metric = "gower")
-                } else if (length(catVars) > 0) {
-                    # Categorical only: use Gower distance
-                    d <- cluster::daisy(df, metric = "gower")
+                # Calculate silhouette using stored distance matrix
+                if (method == "pam" && !is.null(fit)) {
+                    # Use PAM silhouette directly
+                    s <- cluster::silhouette(fit)
                 } else {
-                    # Continuous only: use Euclidean distance
-                    d <- stats::dist(scale(df))
+                    # Calculate silhouette from stored distance matrix
+                    s <- cluster::silhouette(as.integer(clusters), dist_matrix)
                 }
                 
-                # Calculate silhouette
-                s <- cluster::silhouette(as.integer(clusters), d)
-                
+                # Get accessibility-aware colors
+                n_clusters <- length(unique(clusters))
+                colors <- private$.getColorPalette(n_clusters)
+
                 p <- factoextra::fviz_silhouette(s, label=FALSE) +
-                    ggplot2::theme_minimal() +
-                    ggplot2::labs(title = "Silhouette Analysis", 
+                    ggplot2::scale_fill_manual(values = colors) +
+                    ggplot2::scale_color_manual(values = colors) +
+                    ggplot2::labs(title = "Silhouette Analysis",
                                  subtitle = paste("Average silhouette width:", round(mean(s[,"sil_width"]), 3)))
+
+                # Apply accessibility theme
+                p <- private$.applyAccessibilityTheme(p)
                 print(p)
                 
             }, error = function(e) {
-                plot(1, type = "n", xlab = "", ylab = "", main = "Silhouette plot unavailable")
-                text(1, 1, paste("Error:", e$message))
+                error_msg <- private$.createUserFriendlyError(e, "silhouette plot")
+                plot(1, type = "n", xlab = "", ylab = "", main = "Silhouette Plot Error")
+                text(1, 1, error_msg, cex = 0.8, col = "red")
             })
         },
 
+        # Generate clustered heatmap of IHC expression data
+        # Creates heatmap with cases ordered by cluster assignment.
+        # Supports row/column scaling options for better visualization.
         .plotHeatmap = function(image, ggtheme, theme, ...) {
             if (!isTRUE(self$options$showHeatmap)) return()
             
@@ -1116,36 +1196,37 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        col = colorRampPalette(c("blue", "white", "red"))(50))
                 
             }, error = function(e) {
-                plot(1, type = "n", xlab = "", ylab = "", main = "Heatmap unavailable")
-                text(1, 1, paste("Error:", e$message))
+                error_msg <- private$.createUserFriendlyError(e, "heatmap")
+                plot(1, type = "n", xlab = "", ylab = "", main = "Heatmap Error")
+                text(1, 1, error_msg, cex = 0.8, col = "red")
             })
         },
 
+        # Generate dendrogram for hierarchical clustering
+        # Creates dendrogram showing hierarchical relationships between cases.
+        # Only available for hierarchical clustering method.
         .plotDendrogram = function(image, ggtheme, theme, ...) {
             if (!isTRUE(self$options$showDendrogram) || self$options$method != "hierarchical") return()
-            
-            # Get analysis state from jamovi state management
+
+            # Get analysis state from centralized state management
             analysisState <- self$results$summary$state
             if (is.null(analysisState)) return()
-            
-            clusters <- analysisState$clusters
-            df <- analysisState$df
+
+            hc <- analysisState$hc
             usedK <- analysisState$usedK
-            if (is.null(clusters) || is.null(df)) return()
-            
+            if (is.null(hc)) return()
+
             tryCatch({
-                # Recreate hierarchical clustering for dendrogram
-                d <- cluster::daisy(df, metric = "gower")
-                hc <- cluster::agnes(d, method = "ward")
-                
-                plot(as.hclust(hc), main = "Hierarchical Clustering Dendrogram", 
-                     xlab = "Cases", ylab = "Height")
+                # Use stored hierarchical clustering object
+                plot(as.hclust(hc), main = "Hierarchical Clustering Dendrogram",
+                     xlab = "Cases", ylab = "Height", cex = 0.6)
                 if (!is.null(usedK)) {
-                    rect.hclust(as.hclust(hc), k = usedK, border = "red")
+                    rect.hclust(as.hclust(hc), k = usedK, border = "red", lwd = 2)
                 }
             }, error = function(e) {
-                plot(1, type = "n", xlab = "", ylab = "", main = "Dendrogram unavailable")
-                text(1, 1, paste("Error:", e$message))
+                error_msg <- private$.createUserFriendlyError(e, "dendrogram")
+                plot(1, type = "n", xlab = "", ylab = "", main = "Dendrogram Error")
+                text(1, 1, error_msg, cex = 0.8, col = "red")
             })
         },
 
@@ -1177,44 +1258,68 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     catData <- df[, catVars, drop=FALSE]
                     catData[] <- lapply(catData, as.factor)
                     mca <- FactoMineR::MCA(catData, graph=FALSE)
-                    p <- factoextra::fviz_mca_ind(mca, 
-                                                 habillage = clusters, 
-                                                 addEllipses = TRUE, 
-                                                 repel = TRUE) +
-                        ggplot2::theme_minimal() +
+
+                    # Get accessibility-aware colors
+                    n_clusters <- length(unique(clusters))
+                    colors <- private$.getColorPalette(n_clusters)
+
+                    p <- factoextra::fviz_mca_ind(mca,
+                                                 habillage = clusters,
+                                                 addEllipses = TRUE,
+                                                 repel = TRUE,
+                                                 palette = colors) +
                         ggplot2::labs(title = "MCA Plot with Clusters")
                 } else if (length(contVars) > 0 && length(catVars) == 0) {
                     # Continuous only: PCA
                     contData <- df[, contVars, drop=FALSE]
                     pca <- stats::prcomp(contData, scale. = TRUE, center = TRUE)
-                    p <- factoextra::fviz_pca_ind(pca, 
-                                                 habillage = clusters, 
-                                                 addEllipses = TRUE, 
-                                                 repel = TRUE) +
-                        ggplot2::theme_minimal() +
+
+                    # Get accessibility-aware colors
+                    n_clusters <- length(unique(clusters))
+                    colors <- private$.getColorPalette(n_clusters)
+
+                    p <- factoextra::fviz_pca_ind(pca,
+                                                 habillage = clusters,
+                                                 addEllipses = TRUE,
+                                                 repel = TRUE,
+                                                 palette = colors) +
                         ggplot2::labs(title = "PCA Plot with Clusters")
                 } else {
                     # Mixed data: use first two principal coordinates from distance matrix
-                    d <- cluster::daisy(df, metric = "gower")
+                    # Use cached distance matrix if available
+                    d <- analysisState$dist
+                    if (is.null(d)) {
+                        # Fallback calculation if not cached
+                        d <- cluster::daisy(df, metric = "gower")
+                    }
                     cmd <- stats::cmdscale(d, k = 2)
                     plotData <- data.frame(
                         PC1 = cmd[, 1],
                         PC2 = cmd[, 2],
                         Cluster = clusters
                     )
+
+                    # Get accessibility-aware colors
+                    n_clusters <- length(unique(clusters))
+                    colors <- private$.getColorPalette(n_clusters)
+
                     p <- ggplot2::ggplot(plotData, ggplot2::aes(x = PC1, y = PC2, color = Cluster)) +
                         ggplot2::geom_point(size = 2) +
                         ggplot2::stat_ellipse() +
-                        ggplot2::theme_minimal() +
+                        ggplot2::scale_color_manual(values = colors) +
                         ggplot2::labs(title = "Multidimensional Scaling Plot with Clusters",
                                       x = "Coordinate 1", y = "Coordinate 2")
                 }
+
+                # Apply accessibility theme
+                p <- private$.applyAccessibilityTheme(p)
                 print(p)
                 TRUE
             }, error = function(e) {
-                plot(1, type = "n", axes = FALSE, xlab = "", ylab = "", 
-                     main = "PCA/MCA plot unavailable")
-                text(1, 1, paste("Error:", e$message), cex = 0.8)
+                error_msg <- private$.createUserFriendlyError(e, "PCA/MCA plot")
+                plot(1, type = "n", axes = FALSE, xlab = "", ylab = "",
+                     main = "PCA/MCA Plot Error")
+                text(1, 1, error_msg, cex = 0.8, col = "red")
             })
         },
         
@@ -1241,7 +1346,11 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Create long format data for continuous variables
                 cont_data <- df[, contVars, drop = FALSE]
                 cont_data$cluster <- clusters
-                
+
+                # Get accessibility-aware colors
+                n_clusters <- length(unique(clusters))
+                colors <- private$.getColorPalette(n_clusters)
+
                 # Simple boxplot approach using base R
                 par(mfrow = c(ceiling(length(contVars)/2), 2))
                 for (var in contVars) {
@@ -1249,14 +1358,15 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         boxplot(cont_data[[var]] ~ cont_data$cluster,
                                main = paste("Distribution of", var, "by Cluster"),
                                xlab = "Cluster", ylab = var,
-                               col = rainbow(length(levels(clusters))))
+                               col = colors)
                     }
                 }
                 par(mfrow = c(1, 1))
                 
             }, error = function(e) {
-                plot(1, type = "n", xlab = "", ylab = "", main = "Boxplot unavailable")
-                text(1, 1, paste("Error:", e$message))
+                error_msg <- private$.createUserFriendlyError(e, "boxplot")
+                plot(1, type = "n", xlab = "", ylab = "", main = "Boxplot Error")
+                text(1, 1, error_msg, cex = 0.8, col = "red")
             })
         },
 
@@ -1307,8 +1417,397 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                plot(1, type = "n", xlab = "", ylab = "", main = "Survival plot unavailable")
-                text(1, 1, paste("Error:", e$message))
+                error_msg <- private$.createUserFriendlyError(e, "survival plot")
+                plot(1, type = "n", xlab = "", ylab = "", main = "Survival Plot Error")
+                text(1, 1, error_msg, cex = 0.8, col = "red")
+            })
+        },
+
+        # Get accessibility-aware color palette
+        .getColorPalette = function(n_colors) {
+            palette_type <- self$options$colorPalette %||% "default"
+
+            switch(palette_type,
+                "colorblind" = {
+                    # Wong colorblind-safe palette
+                    colors <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442",
+                               "#0072B2", "#D55E00", "#CC79A7", "#000000")
+                    if (n_colors <= length(colors)) {
+                        return(colors[1:n_colors])
+                    } else {
+                        return(rep(colors, length.out = n_colors))
+                    }
+                },
+                "viridis" = {
+                    if (requireNamespace("viridis", quietly = TRUE)) {
+                        return(viridis::viridis(n_colors))
+                    } else {
+                        return(rainbow(n_colors))
+                    }
+                },
+                "high_contrast" = {
+                    # High contrast black/white/red palette
+                    colors <- c("#000000", "#FFFFFF", "#FF0000", "#00FF00",
+                               "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF")
+                    if (n_colors <= length(colors)) {
+                        return(colors[1:n_colors])
+                    } else {
+                        return(rep(colors, length.out = n_colors))
+                    }
+                },
+                "default" = {
+                    return(rainbow(n_colors))
+                }
+            )
+        },
+
+        # Get accessibility-aware font size
+        .getFontSize = function() {
+            font_setting <- self$options$fontSize %||% "medium"
+
+            switch(font_setting,
+                "small" = 10,
+                "medium" = 12,
+                "large" = 14,
+                "extra_large" = 16,
+                12  # default
+            )
+        },
+
+        # Apply tumor-specific preset configurations
+        .applyTumorPreset = function() {
+            if (!isTRUE(self$options$applyPreset)) return()
+
+            preset <- self$options$tumorPreset %||% "none"
+            if (preset == "none") return()
+
+            # Define preset configurations
+            preset_configs <- list(
+                "breast_luminal" = list(
+                    method = "pam",
+                    nClusters = 4,
+                    recommendedMarkers = c("ER", "PR", "HER2", "Ki67", "CK5/6", "EGFR"),
+                    description = "Breast cancer luminal subtype classification (ER+/PR+/HER2-, ER+/PR+/HER2+, ER-/PR-/HER2+, Triple negative)"
+                ),
+                "breast_triple_negative" = list(
+                    method = "hierarchical",
+                    nClusters = 3,
+                    recommendedMarkers = c("CK5/6", "EGFR", "AR", "LAR", "BL1", "BL2"),
+                    description = "Triple-negative breast cancer molecular subtypes (Basal-like 1, Basal-like 2, LAR)"
+                ),
+                "lung_nsclc" = list(
+                    method = "pam",
+                    nClusters = 3,
+                    recommendedMarkers = c("TTF1", "Napsin A", "p40", "CK5/6", "ALK", "ROS1", "PD-L1"),
+                    description = "NSCLC histologic and molecular classification (Adenocarcinoma, Squamous, Large cell)"
+                ),
+                "prostate_standard" = list(
+                    method = "pam",
+                    nClusters = 3,
+                    recommendedMarkers = c("PSA", "PSAP", "AR", "AMACR", "p63", "CK903"),
+                    description = "Prostate cancer Gleason grade groups and molecular subtypes"
+                ),
+                "colon_standard" = list(
+                    method = "hierarchical",
+                    nClusters = 4,
+                    recommendedMarkers = c("MLH1", "MSH2", "MSH6", "PMS2", "BRAF", "KRAS"),
+                    description = "Colorectal cancer molecular classification (MSI-H, MSS, CIN, POLE)"
+                ),
+                "melanoma_immune" = list(
+                    method = "pam",
+                    nClusters = 4,
+                    recommendedMarkers = c("PD-1", "PD-L1", "CD8", "CD4", "FOXP3", "LAG3", "TIM3"),
+                    description = "Melanoma immune microenvironment classification"
+                ),
+                "lymphoma_panel" = list(
+                    method = "pam",
+                    nClusters = 6,
+                    recommendedMarkers = c("CD20", "CD3", "CD10", "BCL6", "MUM1", "CD30", "ALK"),
+                    description = "Lymphoma subtype classification (DLBCL, FL, HL, ALCL, etc.)"
+                )
+            )
+
+            config <- preset_configs[[preset]]
+            if (is.null(config)) return()
+
+            # Update options based on preset (note: this is for guidance only)
+            # In jamovi, options are typically set by user interaction
+            # This function serves to provide recommendations
+
+            return(config)
+        },
+
+        # Translation framework for Turkish/English support
+        .translate = function(key, lang = NULL) {
+            if (is.null(lang)) {
+                lang <- self$options$language %||% "english"
+            }
+
+            translations <- list(
+                "english" = list(
+                    "analysis_method" = "Analysis Method",
+                    "total_cases" = "Total Cases Analyzed",
+                    "clusters_identified" = "Number of Clusters Identified",
+                    "categorical_markers" = "Categorical Markers",
+                    "continuous_markers" = "Continuous Markers",
+                    "cluster_distribution" = "CLUSTER DISTRIBUTION",
+                    "clinical_interpretation" = "CLINICAL INTERPRETATION",
+                    "recommendations" = "RECOMMENDATIONS",
+                    "executive_summary" = "IMMUNOHISTOCHEMISTRY CLUSTERING ANALYSIS - EXECUTIVE SUMMARY",
+                    "generated_by" = "Generated by ClinicoPath IHC Clustering Analysis on",
+                    "cluster" = "Cluster",
+                    "cases" = "cases",
+                    "two_groups_interpretation" = "The analysis identified two distinct immunophenotypic groups, suggesting potential biological heterogeneity that may have diagnostic or prognostic implications. Consider correlating these clusters with clinical outcomes.",
+                    "three_groups_interpretation" = "Three immunophenotypic subgroups were identified, indicating moderate tumor heterogeneity. This stratification may be useful for risk assessment and treatment planning.",
+                    "multiple_groups_interpretation" = "immunophenotypic subgroups were identified, suggesting high tumor heterogeneity. This complex pattern may require additional validation and correlation with molecular markers.",
+                    "recommendation_1" = "1. Correlate clustering results with clinical parameters and outcomes",
+                    "recommendation_2" = "2. Consider validation in an independent cohort",
+                    "recommendation_3" = "3. Evaluate cluster-specific treatment responses if applicable",
+                    "recommendation_4" = "4. Review individual cluster profiles for biomarker patterns"
+                ),
+                "turkish" = list(
+                    "analysis_method" = "Analiz Yöntemi",
+                    "total_cases" = "Analiz Edilen Toplam Vaka",
+                    "clusters_identified" = "Tanımlanan Küme Sayısı",
+                    "categorical_markers" = "Kategorik Belirteçler",
+                    "continuous_markers" = "Sürekli Belirteçler",
+                    "cluster_distribution" = "KÜME DAĞILIMI",
+                    "clinical_interpretation" = "KLİNİK YORUM",
+                    "recommendations" = "ÖNERİLER",
+                    "executive_summary" = "İMMÜNOHİSTOKİMYA KÜMELEME ANALİZİ - YÖNETİCİ ÖZETİ",
+                    "generated_by" = "ClinicoPath İHK Kümeleme Analizi tarafından oluşturuldu",
+                    "cluster" = "Küme",
+                    "cases" = "vaka",
+                    "two_groups_interpretation" = "Analiz, potansiyel biyolojik heterojenite öneren iki farklı immünofenotipik grup tanımladı. Bu kümelerin tanısal veya prognostik etkileri olabilir. Bu kümeleri klinik sonuçlarla korelasyon halinde değerlendirmeyi düşünün.",
+                    "three_groups_interpretation" = "Üç immünofenotipik alt grup tanımlandı, bu orta düzeyde tümör heterojenitesini göstermektedir. Bu katmanlaşma risk değerlendirmesi ve tedavi planlaması için yararlı olabilir.",
+                    "multiple_groups_interpretation" = "immünofenotipik alt grup tanımlandı, bu yüksek tümör heterojenitesini göstermektedir. Bu karmaşık desen ek doğrulama ve moleküler belirteçlerle korelasyon gerektirebilir.",
+                    "recommendation_1" = "1. Kümeleme sonuçlarını klinik parametreler ve sonuçlarla korelasyon halinde değerlendirin",
+                    "recommendation_2" = "2. Bağımsız bir kohortta doğrulamayı düşünün",
+                    "recommendation_3" = "3. Uygunsa küme-özgü tedavi yanıtlarını değerlendirin",
+                    "recommendation_4" = "4. Biyobelirteç kalıpları için bireysel küme profillerini gözden geçirin"
+                )
+            )
+
+            lang_dict <- translations[[lang]]
+            if (is.null(lang_dict) || is.null(lang_dict[[key]])) {
+                return(translations[["english"]][[key]] %||% key)
+            }
+            return(lang_dict[[key]])
+        },
+
+        # Get preset-specific interpretation guidance
+        .getPresetInterpretation = function() {
+            preset <- self$options$tumorPreset %||% "none"
+            if (preset == "none" || !isTRUE(self$options$applyPreset)) return("")
+
+            interpretations <- list(
+                "breast_luminal" = paste(
+                    "BREAST CANCER LUMINAL CLASSIFICATION:",
+                    "- Cluster 1: Luminal A (ER+/PR+/HER2-, low Ki67)",
+                    "- Cluster 2: Luminal B (ER+/PR+/HER2-, high Ki67 or HER2+)",
+                    "- Cluster 3: HER2-enriched (ER-/PR-/HER2+)",
+                    "- Cluster 4: Triple-negative (ER-/PR-/HER2-)",
+                    "Clinical relevance: Guides treatment selection and prognosis.",
+                    sep = "\n"
+                ),
+                "breast_triple_negative" = paste(
+                    "TRIPLE-NEGATIVE BREAST CANCER SUBTYPES:",
+                    "- BL1: Basal-like 1 (immune-activated, better prognosis)",
+                    "- BL2: Basal-like 2 (glycolysis, worse prognosis)",
+                    "- LAR: Luminal androgen receptor (AR+, potential AR-targeted therapy)",
+                    "Clinical relevance: Predicts response to chemotherapy and immunotherapy.",
+                    sep = "\n"
+                ),
+                "lung_nsclc" = paste(
+                    "NON-SMALL CELL LUNG CANCER CLASSIFICATION:",
+                    "- Adenocarcinoma: TTF1+/Napsin A+",
+                    "- Squamous cell: p40+/CK5/6+",
+                    "- Large cell: TTF1-/p40-",
+                    "Molecular targets: ALK, ROS1, EGFR, PD-L1 expression",
+                    "Clinical relevance: Determines targeted therapy eligibility.",
+                    sep = "\n"
+                ),
+                "prostate_standard" = paste(
+                    "PROSTATE CANCER MOLECULAR CLASSIFICATION:",
+                    "- Low risk: PSA+/AR+/low AMACR",
+                    "- Intermediate risk: Mixed expression pattern",
+                    "- High risk: p63+/altered AR signaling",
+                    "Clinical relevance: Correlates with Gleason score and prognosis.",
+                    sep = "\n"
+                ),
+                "colon_standard" = paste(
+                    "COLORECTAL CANCER MOLECULAR SUBTYPES:",
+                    "- MSI-H: MLH1/MSH2/MSH6/PMS2 loss (immunotherapy responsive)",
+                    "- MSS: Intact mismatch repair",
+                    "- CIN: Chromosomal instability",
+                    "- POLE: Ultra-mutated, excellent prognosis",
+                    "Clinical relevance: Guides immunotherapy and chemotherapy decisions.",
+                    sep = "\n"
+                ),
+                "melanoma_immune" = paste(
+                    "MELANOMA IMMUNE MICROENVIRONMENT:",
+                    "- Hot: High CD8+/PD-L1+/immune infiltrate",
+                    "- Cold: Low immune infiltrate",
+                    "- Excluded: Immune cells at tumor periphery",
+                    "- Exhausted: High checkpoint receptors",
+                    "Clinical relevance: Predicts immunotherapy response.",
+                    sep = "\n"
+                ),
+                "lymphoma_panel" = paste(
+                    "LYMPHOMA CLASSIFICATION:",
+                    "- DLBCL: CD20+/variable CD10/BCL6/MUM1",
+                    "- FL: CD20+/CD10+/BCL6+",
+                    "- HL: CD30+/variable CD20",
+                    "- ALCL: CD30+/ALK+/-",
+                    "Clinical relevance: Determines treatment protocol and prognosis.",
+                    sep = "\n"
+                )
+            )
+
+            return(interpretations[[preset]] %||% "")
+        },
+
+        # Apply accessibility theme to ggplot
+        .applyAccessibilityTheme = function(p) {
+            base_size <- private$.getFontSize()
+            high_contrast <- isTRUE(self$options$plotContrast)
+
+            if (high_contrast) {
+                # High contrast theme
+                p <- p + ggplot2::theme_minimal(base_size = base_size) +
+                    ggplot2::theme(
+                        panel.background = ggplot2::element_rect(fill = "white", color = "black", size = 2),
+                        plot.background = ggplot2::element_rect(fill = "white", color = "black", size = 2),
+                        panel.grid.major = ggplot2::element_line(color = "black", size = 0.5),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        axis.text = ggplot2::element_text(color = "black", size = base_size),
+                        axis.title = ggplot2::element_text(color = "black", size = base_size + 2),
+                        plot.title = ggplot2::element_text(color = "black", size = base_size + 4),
+                        legend.text = ggplot2::element_text(color = "black", size = base_size),
+                        legend.title = ggplot2::element_text(color = "black", size = base_size + 2)
+                    )
+            } else {
+                # Standard theme with font size adjustment
+                p <- p + ggplot2::theme_minimal(base_size = base_size)
+            }
+
+            return(p)
+        },
+
+        # Create user-friendly error messages for plot functions
+        .createUserFriendlyError = function(e, plotType = "plot") {
+            error_message <- tolower(e$message)
+
+            if (grepl("package|namespace", error_message)) {
+                return(paste("Required package missing for", plotType, ".\nPlease install missing dependencies."))
+            } else if (grepl("data|insufficient|empty", error_message)) {
+                return(paste("Insufficient data for", plotType, ".\nTry different clustering options or add more variables."))
+            } else if (grepl("cluster|silhouette", error_message)) {
+                return(paste("Clustering issue in", plotType, ".\nCheck cluster assignments and parameters."))
+            } else if (grepl("memory|allocation", error_message)) {
+                return(paste("Memory issue in", plotType, ".\nTry reducing data size or complexity."))
+            } else {
+                return(paste(plotType, "error:", e$message))
+            }
+        },
+
+        # Generate copy-ready executive summary for clinical reports
+        .generateExecutiveSummary = function() {
+            tryCatch({
+                analysisState <- self$results$summary$state
+                if (is.null(analysisState)) return("")
+
+                clusters <- analysisState$clusters
+                method <- analysisState$method
+                catVars <- analysisState$catVars
+                contVars <- analysisState$contVars
+
+                if (is.null(clusters)) return("")
+
+                # Basic cluster information
+                n_clusters <- length(unique(clusters))
+                n_cases <- length(clusters)
+                cluster_sizes <- table(clusters)
+
+                # Method description
+                method_desc <- switch(method,
+                    "pam" = "PAM (Partitioning Around Medoids)",
+                    "hierarchical" = "hierarchical clustering",
+                    "mca_kmeans" = "Multiple Correspondence Analysis with k-means",
+                    "dimreduce" = "dimensionality reduction with k-means",
+                    method
+                )
+
+                # Generate summary text
+                summary_lines <- c()
+
+                # Header (translated)
+                summary_lines <- c(summary_lines, private$.translate("executive_summary"))
+                summary_lines <- c(summary_lines, paste0("=", strrep("=", 60)))
+                summary_lines <- c(summary_lines, "")
+
+                # Basic analysis information (translated)
+                summary_lines <- c(summary_lines, paste0(private$.translate("analysis_method"), ": ", method_desc))
+                summary_lines <- c(summary_lines, paste0(private$.translate("total_cases"), ": ", n_cases))
+                summary_lines <- c(summary_lines, paste0(private$.translate("clusters_identified"), ": ", n_clusters))
+                summary_lines <- c(summary_lines, "")
+
+                # Variables analyzed (translated)
+                if (length(catVars) > 0) {
+                    summary_lines <- c(summary_lines, paste0(private$.translate("categorical_markers"), ": ", paste(catVars, collapse = ", ")))
+                }
+                if (length(contVars) > 0) {
+                    summary_lines <- c(summary_lines, paste0(private$.translate("continuous_markers"), ": ", paste(contVars, collapse = ", ")))
+                }
+                summary_lines <- c(summary_lines, "")
+
+                # Cluster distribution (translated)
+                summary_lines <- c(summary_lines, private$.translate("cluster_distribution"))
+                summary_lines <- c(summary_lines, paste0("-", strrep("-", 20)))
+                for (i in 1:n_clusters) {
+                    cluster_name <- paste(private$.translate("cluster"), i)
+                    cluster_size <- cluster_sizes[i]
+                    cluster_pct <- round(100 * cluster_size / n_cases, 1)
+                    summary_lines <- c(summary_lines,
+                        paste0(cluster_name, ": ", cluster_size, " ", private$.translate("cases"), " (", cluster_pct, "%)"))
+                }
+                summary_lines <- c(summary_lines, "")
+
+                # Clinical interpretation (translated)
+                summary_lines <- c(summary_lines, private$.translate("clinical_interpretation"))
+                summary_lines <- c(summary_lines, paste0("-", strrep("-", 25)))
+
+                if (n_clusters == 2) {
+                    summary_lines <- c(summary_lines, private$.translate("two_groups_interpretation"))
+                } else if (n_clusters == 3) {
+                    summary_lines <- c(summary_lines, private$.translate("three_groups_interpretation"))
+                } else if (n_clusters >= 4) {
+                    summary_lines <- c(summary_lines,
+                        paste0(n_clusters, " ", private$.translate("multiple_groups_interpretation")))
+                }
+
+                summary_lines <- c(summary_lines, "")
+
+                # Recommendations (translated)
+                summary_lines <- c(summary_lines, private$.translate("recommendations"))
+                summary_lines <- c(summary_lines, paste0("-", strrep("-", 15)))
+                summary_lines <- c(summary_lines,
+                    private$.translate("recommendation_1"),
+                    private$.translate("recommendation_2"),
+                    private$.translate("recommendation_3"),
+                    private$.translate("recommendation_4"))
+
+                summary_lines <- c(summary_lines, "")
+                summary_lines <- c(summary_lines,
+                    paste0(private$.translate("generated_by"), " ", Sys.Date()))
+
+                # Join all lines
+                executive_summary <- paste(summary_lines, collapse = "\n")
+
+                return(executive_summary)
+
+            }, error = function(e) {
+                return(paste("Executive summary generation failed:", e$message))
             })
         }
     )

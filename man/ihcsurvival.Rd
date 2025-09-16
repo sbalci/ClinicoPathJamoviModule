@@ -20,6 +20,7 @@ ihcsurvival(
   kaplanMeierPlots = TRUE,
   landmarkAnalysis = FALSE,
   landmarkTime = 60,
+  landmarkTimePoints = "12,24,36,48,60",
   confidenceLevel = 0.95
 )
 }
@@ -58,6 +59,9 @@ points}
 \item{landmarkTime}{Time point for landmark analysis (same units as
 survival time)}
 
+\item{landmarkTimePoints}{Comma-separated time points for landmark survival
+analysis (e.g., "12,24,36")}
+
 \item{confidenceLevel}{Confidence level for survival estimates and hazard
 ratios}
 }
@@ -65,6 +69,8 @@ ratios}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 \code{results$prognosticGroups} \tab \tab \tab \tab \tab a table \cr
 \code{results$coxResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$multivariateResults} \tab \tab \tab \tab \tab a table \cr

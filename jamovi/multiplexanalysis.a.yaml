@@ -2,6 +2,7 @@
 name: multiplexanalysis
 title: Multiplex Immunofluorescence Analysis
 menuGroup: OncoPathologyT
+menuSubgroup: IHC Analysis
 version: '1.0.0'
 jas: '1.2'
 
@@ -25,6 +26,7 @@ options:
     - name: x_coord
       title: X Coordinate (Optional)
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -36,6 +38,7 @@ options:
     - name: y_coord
       title: Y Coordinate (Optional)
       type: Variable
+      default: null
       suggested:
         - continuous
       permitted:
@@ -47,6 +50,7 @@ options:
     - name: cell_type_var
       title: Cell Type Variable (Optional)
       type: Variable
+      default: null
       suggested:
         - nominal
       permitted:
@@ -58,6 +62,7 @@ options:
     - name: sample_id_var
       title: Sample ID Variable (Optional)
       type: Variable
+      default: null
       suggested:
         - nominal
       permitted:
@@ -70,6 +75,7 @@ options:
     - name: group_var
       title: Group Variable (Optional)
       type: Variable
+      default: null
       suggested:
         - nominal
       permitted:

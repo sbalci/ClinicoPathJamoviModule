@@ -28,7 +28,7 @@ options:
           R: the data as a data frame
 
     - name: markers
-      title: IHC Markers
+      title: IHC Markers (antibodies/biomarkers)
       type: Variables
       suggested:
         - ordinal
@@ -39,7 +39,8 @@ options:
         - numeric
       description:
           R: >
-            IHC marker variables for advanced clustering analysis
+            Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD markers).
+            Can be categorical scores (0/1+/2+/3+) or continuous values (H-scores, percentages).
 
     - name: id
       title: Case ID (Optional)

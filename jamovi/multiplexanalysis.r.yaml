@@ -12,7 +12,28 @@ items:
     - name: expressiontable
       title: Marker Expression Summary
       type: Table
-      columns: []
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: mean
+            title: Mean
+            type: number
+          - name: median
+            title: Median
+            type: number
+          - name: sd
+            title: SD
+            type: number
+          - name: cv
+            title: "CV (%)"
+            type: number
+          - name: positive_percent
+            title: "% Positive"
+            type: number
+          - name: high_expr_percent
+            title: "% High Expression"
+            type: number
       description: Descriptive statistics for each biomarker
       clearWith:
           - marker_vars
@@ -22,7 +43,25 @@ items:
     - name: correlationtable
       title: Co-expression Analysis
       type: Table
-      columns: []
+      columns:
+          - name: marker1
+            title: Marker 1
+            type: text
+          - name: marker2
+            title: Marker 2
+            type: text
+          - name: correlation
+            title: Correlation
+            type: number
+          - name: p_value
+            title: P-value
+            type: number
+          - name: significance
+            title: Significance
+            type: text
+          - name: coexpression
+            title: Co-expression Pattern
+            type: text
       description: Pairwise correlations between biomarkers
       clearWith:
           - marker_vars
@@ -32,7 +71,25 @@ items:
     - name: clusteringtable
       title: Cell Population Clustering
       type: Table
-      columns: []
+      columns:
+          - name: cluster_id
+            title: Cluster ID
+            type: integer
+          - name: n_cells
+            title: N Cells
+            type: integer
+          - name: percent
+            title: Percentage
+            type: number
+          - name: phenotype
+            title: Suggested Phenotype
+            type: text
+          - name: dominant_markers
+            title: Dominant Markers
+            type: text
+          - name: mean_expression
+            title: Mean Expression Pattern
+            type: text
       description: Identified cell clusters and phenotype suggestions
       visible: (perform_clustering)
       clearWith:
@@ -43,7 +100,22 @@ items:
     - name: pcatable
       title: Principal Component Analysis
       type: Table
-      columns: []
+      columns:
+          - name: component
+            title: Component
+            type: text
+          - name: eigenvalue
+            title: Eigenvalue
+            type: number
+          - name: variance_explained
+            title: Variance Explained (%)
+            type: number
+          - name: cumulative_variance
+            title: Cumulative Variance (%)
+            type: number
+          - name: loadings_summary
+            title: Top Loading Variables
+            type: text
       description: PCA results and variance explained
       visible: (perform_pca)
       clearWith:
@@ -58,6 +130,7 @@ items:
       height: 500
       visible: (show_plots)
       requiresData: true
+      renderFun: .correlationplot
       clearWith:
           - marker_vars
           - correlation_method
@@ -65,12 +138,13 @@ items:
 
     - name: heatmapplot
       title: Expression Heatmap
-      type: Image  
+      type: Image
       description: Comprehensive marker expression patterns
       width: 600
       height: 500
       visible: (show_plots)
       requiresData: true
+      renderFun: .heatmapplot
       clearWith:
           - marker_vars
           - show_plots
@@ -84,6 +158,7 @@ items:
       height: 500
       visible: (perform_pca && show_plots)
       requiresData: true
+      renderFun: .pcaplot
       clearWith:
           - marker_vars
           - perform_pca
@@ -98,6 +173,7 @@ items:
       height: 500
       visible: (perform_clustering && show_clustering_plots)
       requiresData: true
+      renderFun: .clusterplot
       clearWith:
           - marker_vars
           - perform_clustering
@@ -107,7 +183,7 @@ items:
     - name: spatialanalysis
       title: Spatial Proximity Analysis
       type: Group
-      visible: (spatial_analysis && x_coord && y_coord)
+      visible: (spatial_analysis)
       items:
           - name: proximityresults
             title: Cell-Cell Proximity Statistics
@@ -182,6 +258,12 @@ items:
             type: Table
             columns: []
             description: Biological pathway associations
+
+    - name: clinicalreport
+      title: Clinical Report Summary
+      type: Html
+      visible: true
+      description: Copy-ready clinical interpretation and summary
 
     - name: exportdata
       title: Export-Ready Results

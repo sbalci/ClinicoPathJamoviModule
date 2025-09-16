@@ -189,6 +189,14 @@ options:
           R: >
             Time point for landmark analysis (same units as survival time)
 
+    - name: landmarkTimePoints
+      title: Landmark Survival Time Points
+      type: String
+      default: "12,24,36,48,60"
+      description:
+          R: >
+            Comma-separated time points for landmark survival analysis (e.g., "12,24,36")
+
     - name: confidenceLevel
       title: Confidence Level
       type: Number

@@ -243,3 +243,82 @@ options:
           - numeric
       description: 'Event variable for survival analysis'
       default: NULL
+
+    # Accessibility Options
+    - name: colorPalette
+      title: 'Color Palette'
+      type: List
+      options:
+          - name: default
+            title: 'Default'
+          - name: colorblind
+            title: 'Colorblind Safe'
+          - name: viridis
+            title: 'Viridis'
+          - name: high_contrast
+            title: 'High Contrast'
+      default: default
+      description: 'Color palette for plots (colorblind-safe options available)'
+
+    - name: fontSize
+      title: 'Font Size'
+      type: List
+      options:
+          - name: small
+            title: 'Small (10pt)'
+          - name: medium
+            title: 'Medium (12pt)'
+          - name: large
+            title: 'Large (14pt)'
+          - name: extra_large
+            title: 'Extra Large (16pt)'
+      default: medium
+      description: 'Base font size for all text elements'
+
+    - name: plotContrast
+      title: 'High Contrast Mode'
+      type: Bool
+      default: false
+      description: 'Enable high contrast mode for better visibility'
+
+    # Tumor-Specific Presets
+    - name: tumorPreset
+      title: 'Tumor-Specific Preset'
+      type: List
+      options:
+          - name: none
+            title: 'No Preset (Custom)'
+          - name: breast_luminal
+            title: 'Breast Cancer - Luminal Markers'
+          - name: breast_triple_negative
+            title: 'Breast Cancer - Triple Negative'
+          - name: lung_nsclc
+            title: 'Lung Cancer - NSCLC Panel'
+          - name: prostate_standard
+            title: 'Prostate Cancer - Standard Panel'
+          - name: colon_standard
+            title: 'Colorectal Cancer - Standard Panel'
+          - name: melanoma_immune
+            title: 'Melanoma - Immune Panel'
+          - name: lymphoma_panel
+            title: 'Lymphoma - Classification Panel'
+      default: none
+      description: 'Apply tumor-specific clustering configurations'
+
+    - name: applyPreset
+      title: 'Apply Preset Configuration'
+      type: Bool
+      default: false
+      description: 'Apply the selected tumor-specific preset settings'
+
+    # Internationalization Options
+    - name: language
+      title: 'Language / Dil'
+      type: List
+      options:
+          - name: english
+            title: 'English'
+          - name: turkish
+            title: 'Türkçe'
+      default: english
+      description: 'Interface and output language / Arayüz ve çıktı dili'

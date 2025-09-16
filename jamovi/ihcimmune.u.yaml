@@ -118,3 +118,28 @@ children:
                 format: number
                 suffix: '%'
                 enable: (checkpointScore)
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: TIL Threshold Settings
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: cd3Threshold
+                format: number
+                suffix: '%'
+                enable: (tilAnalysis)
+              - type: TextBox
+                name: cd8Threshold
+                format: number
+                suffix: '%'
+                enable: (tilAnalysis)
+              - type: TextBox
+                name: immuneScoreThreshold
+                format: number
+                suffix: '%'

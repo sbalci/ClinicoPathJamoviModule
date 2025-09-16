@@ -31,7 +31,13 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             exportClusters = FALSE,
             clinicalVars = NULL,
             survivalTime = NULL,
-            survivalEvent = NULL, ...) {
+            survivalEvent = NULL,
+            colorPalette = "default",
+            fontSize = "medium",
+            plotContrast = FALSE,
+            tumorPreset = "none",
+            applyPreset = FALSE,
+            language = "english", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -190,6 +196,52 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "factor",
                     "numeric"),
                 default=NULL)
+            private$..colorPalette <- jmvcore::OptionList$new(
+                "colorPalette",
+                colorPalette,
+                options=list(
+                    "default",
+                    "colorblind",
+                    "viridis",
+                    "high_contrast"),
+                default="default")
+            private$..fontSize <- jmvcore::OptionList$new(
+                "fontSize",
+                fontSize,
+                options=list(
+                    "small",
+                    "medium",
+                    "large",
+                    "extra_large"),
+                default="medium")
+            private$..plotContrast <- jmvcore::OptionBool$new(
+                "plotContrast",
+                plotContrast,
+                default=FALSE)
+            private$..tumorPreset <- jmvcore::OptionList$new(
+                "tumorPreset",
+                tumorPreset,
+                options=list(
+                    "none",
+                    "breast_luminal",
+                    "breast_triple_negative",
+                    "lung_nsclc",
+                    "prostate_standard",
+                    "colon_standard",
+                    "melanoma_immune",
+                    "lymphoma_panel"),
+                default="none")
+            private$..applyPreset <- jmvcore::OptionBool$new(
+                "applyPreset",
+                applyPreset,
+                default=FALSE)
+            private$..language <- jmvcore::OptionList$new(
+                "language",
+                language,
+                options=list(
+                    "english",
+                    "turkish"),
+                default="english")
 
             self$.addOption(private$..catVars)
             self$.addOption(private$..contVars)
@@ -217,6 +269,12 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..clinicalVars)
             self$.addOption(private$..survivalTime)
             self$.addOption(private$..survivalEvent)
+            self$.addOption(private$..colorPalette)
+            self$.addOption(private$..fontSize)
+            self$.addOption(private$..plotContrast)
+            self$.addOption(private$..tumorPreset)
+            self$.addOption(private$..applyPreset)
+            self$.addOption(private$..language)
         }),
     active = list(
         catVars = function() private$..catVars$value,
@@ -244,7 +302,13 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         exportClusters = function() private$..exportClusters$value,
         clinicalVars = function() private$..clinicalVars$value,
         survivalTime = function() private$..survivalTime$value,
-        survivalEvent = function() private$..survivalEvent$value),
+        survivalEvent = function() private$..survivalEvent$value,
+        colorPalette = function() private$..colorPalette$value,
+        fontSize = function() private$..fontSize$value,
+        plotContrast = function() private$..plotContrast$value,
+        tumorPreset = function() private$..tumorPreset$value,
+        applyPreset = function() private$..applyPreset$value,
+        language = function() private$..language$value),
     private = list(
         ..catVars = NA,
         ..contVars = NA,
@@ -271,7 +335,13 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..exportClusters = NA,
         ..clinicalVars = NA,
         ..survivalTime = NA,
-        ..survivalEvent = NA)
+        ..survivalEvent = NA,
+        ..colorPalette = NA,
+        ..fontSize = NA,
+        ..plotContrast = NA,
+        ..tumorPreset = NA,
+        ..applyPreset = NA,
+        ..language = NA)
 )
 
 ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -296,6 +366,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         medoidInfo = function() private$.items[["medoidInfo"]],
         interpretationGuide = function() private$.items[["interpretationGuide"]],
         technicalNotes = function() private$.items[["technicalNotes"]],
+        executiveSummary = function() private$.items[["executiveSummary"]],
         sizes = function() private$.items[["sizes"]],
         modes = function() private$.items[["modes"]],
         distr = function() private$.items[["distr"]],
@@ -325,7 +396,6 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "catVars",
                     "contVars",
-                    "vars",
                     "method",
                     "nClusters",
                     "autoSelectK",
@@ -343,7 +413,6 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "catVars",
                     "contVars",
-                    "vars",
                     "method",
                     "nClusters",
                     "autoSelectK",
@@ -521,7 +590,12 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "catVars",
                     "contVars",
                     "method",
-                    "nClusters")))
+                    "nClusters",
+                    "autoSelectK",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast",
+                    "language")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="heatmapPlot",
@@ -535,7 +609,12 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "contVars",
                     "method",
                     "nClusters",
-                    "heatmapScale")))
+                    "heatmapScale",
+                    "autoSelectK",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast",
+                    "language")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="dendrogramPlot",
@@ -547,7 +626,12 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "catVars",
                     "contVars",
-                    "nClusters")))
+                    "nClusters",
+                    "autoSelectK",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast",
+                    "language")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="pcaPlot",
@@ -560,7 +644,12 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "catVars",
                     "contVars",
                     "method",
-                    "nClusters")))
+                    "nClusters",
+                    "autoSelectK",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast",
+                    "language")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="boxplotPlot",
@@ -571,7 +660,12 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showBoxplots)",
                 clearWith=list(
                     "contVars",
-                    "nClusters")))
+                    "nClusters",
+                    "autoSelectK",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast",
+                    "language")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
@@ -583,7 +677,12 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "survivalTime",
                     "survivalEvent",
-                    "nClusters")))
+                    "nClusters",
+                    "autoSelectK",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast",
+                    "language")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="medoidInfo",
@@ -612,6 +711,20 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="technicalNotes",
                 title="Technical Notes",
                 visible=TRUE))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="executiveSummary",
+                title="Executive Summary (Copy-Ready)",
+                visible=TRUE,
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK",
+                    "language",
+                    "tumorPreset",
+                    "applyPreset")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="sizes",
@@ -744,6 +857,13 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clinicalVars Clinical variables to compare across clusters
 #' @param survivalTime Time variable for survival analysis
 #' @param survivalEvent Event variable for survival analysis
+#' @param colorPalette Color palette for plots (colorblind-safe options
+#'   available)
+#' @param fontSize Base font size for all text elements
+#' @param plotContrast Enable high contrast mode for better visibility
+#' @param tumorPreset Apply tumor-specific clustering configurations
+#' @param applyPreset Apply the selected tumor-specific preset settings
+#' @param language Interface and output language / Arayüz ve çıktı dili
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -764,6 +884,7 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$executiveSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$sizes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$distr} \tab \tab \tab \tab \tab a table \cr
@@ -805,7 +926,13 @@ ihccluster <- function(
     exportClusters = FALSE,
     clinicalVars,
     survivalTime = NULL,
-    survivalEvent = NULL) {
+    survivalEvent = NULL,
+    colorPalette = "default",
+    fontSize = "medium",
+    plotContrast = FALSE,
+    tumorPreset = "none",
+    applyPreset = FALSE,
+    language = "english") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihccluster requires jmvcore to be installed (restart may be required)")
@@ -854,7 +981,13 @@ ihccluster <- function(
         exportClusters = exportClusters,
         clinicalVars = clinicalVars,
         survivalTime = survivalTime,
-        survivalEvent = survivalEvent)
+        survivalEvent = survivalEvent,
+        colorPalette = colorPalette,
+        fontSize = fontSize,
+        plotContrast = plotContrast,
+        tumorPreset = tumorPreset,
+        applyPreset = applyPreset,
+        language = language)
 
     analysis <- ihcclusterClass$new(
         options = options,

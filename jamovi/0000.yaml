@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.66
+version: 0.0.31.67
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-15'
+date: '2025-09-16'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -2291,12 +2291,14 @@ analyses:
     category: analyses
     menuGroup: OncoPathologyT
     menuTitle: IHC Scoring Standardization
+    menuSubgroup: IHC Analysis
   - title: Multiplex Immunofluorescence Analysis
     name: multiplexanalysis
     ns: ClinicoPath
     category: analyses
     menuGroup: OncoPathologyT
     menuTitle: Multiplex Immunofluorescence Analysis
+    menuSubgroup: IHC Analysis
   - title: Pathology Agreement Analysis
     name: pathologyagreement
     ns: ClinicoPath
