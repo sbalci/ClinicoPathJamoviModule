@@ -39,19 +39,23 @@ children:
     stretchFactor: 1
     children:
       - type: Label
-        label: Analysis Options
+        label: Analysis Options - Select which analyses to perform
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: prognosticClustering
+                label: "Survival-optimized patient grouping (groups patients by survival risk)"
               - type: CheckBox
                 name: coxRegression
+                label: "Cox regression analysis (calculates hazard ratios for each marker)"
               - type: CheckBox
                 name: kaplanMeierPlots
+                label: "Kaplan-Meier survival curves (visualizes survival differences)"
               - type: ComboBox
                 name: riskStratification
+                label: "Risk group strategy (how many risk groups to create)"
 
   - type: LayoutBox
     margin: large
@@ -111,5 +115,24 @@ children:
                 format: number
                 enable: (landmarkAnalysis)
               - type: TextBox
+                name: landmarkTimePoints
+                format: string
+                enable: (landmarkAnalysis)
+              - type: TextBox
                 name: confidenceLevel
                 format: number
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: "Clinical Interpretation Guide"
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: "HR > 1: Higher marker → Higher risk; HR < 1: Higher marker → Lower risk"
+              - type: Label
+                label: "C-index > 0.7: Good discrimination; Log-rank p < 0.05: Significant difference"

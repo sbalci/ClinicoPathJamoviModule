@@ -46,6 +46,7 @@ multiplexanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..x_coord <- jmvcore::OptionVariable$new(
                 "x_coord",
                 x_coord,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -53,6 +54,7 @@ multiplexanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..y_coord <- jmvcore::OptionVariable$new(
                 "y_coord",
                 y_coord,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -60,6 +62,7 @@ multiplexanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..cell_type_var <- jmvcore::OptionVariable$new(
                 "cell_type_var",
                 cell_type_var,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -67,6 +70,7 @@ multiplexanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..sample_id_var <- jmvcore::OptionVariable$new(
                 "sample_id_var",
                 sample_id_var,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -75,6 +79,7 @@ multiplexanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -270,6 +275,7 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         diversityanalysis = function() private$.items[["diversityanalysis"]],
         qualitycontrol = function() private$.items[["qualitycontrol"]],
         advancedanalysis = function() private$.items[["advancedanalysis"]],
+        clinicalreport = function() private$.items[["clinicalreport"]],
         exportdata = function() private$.items[["exportdata"]]),
     private = list(),
     public=list(
@@ -289,7 +295,35 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="expressiontable",
                 title="Marker Expression Summary",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="marker", 
+                        `title`="Marker", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number"),
+                    list(
+                        `name`="cv", 
+                        `title`="CV (%)", 
+                        `type`="number"),
+                    list(
+                        `name`="positive_percent", 
+                        `title`="% Positive", 
+                        `type`="number"),
+                    list(
+                        `name`="high_expr_percent", 
+                        `title`="% High Expression", 
+                        `type`="number")),
                 clearWith=list(
                     "marker_vars",
                     "positivity_cutpoint",
@@ -298,7 +332,31 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="correlationtable",
                 title="Co-expression Analysis",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="marker1", 
+                        `title`="Marker 1", 
+                        `type`="text"),
+                    list(
+                        `name`="marker2", 
+                        `title`="Marker 2", 
+                        `type`="text"),
+                    list(
+                        `name`="correlation", 
+                        `title`="Correlation", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number"),
+                    list(
+                        `name`="significance", 
+                        `title`="Significance", 
+                        `type`="text"),
+                    list(
+                        `name`="coexpression", 
+                        `title`="Co-expression Pattern", 
+                        `type`="text")),
                 clearWith=list(
                     "marker_vars",
                     "correlation_method",
@@ -307,7 +365,31 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="clusteringtable",
                 title="Cell Population Clustering",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="cluster_id", 
+                        `title`="Cluster ID", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_cells", 
+                        `title`="N Cells", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percentage", 
+                        `type`="number"),
+                    list(
+                        `name`="phenotype", 
+                        `title`="Suggested Phenotype", 
+                        `type`="text"),
+                    list(
+                        `name`="dominant_markers", 
+                        `title`="Dominant Markers", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_expression", 
+                        `title`="Mean Expression Pattern", 
+                        `type`="text")),
                 visible="(perform_clustering)",
                 clearWith=list(
                     "marker_vars",
@@ -317,7 +399,27 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="pcatable",
                 title="Principal Component Analysis",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Component", 
+                        `type`="text"),
+                    list(
+                        `name`="eigenvalue", 
+                        `title`="Eigenvalue", 
+                        `type`="number"),
+                    list(
+                        `name`="variance_explained", 
+                        `title`="Variance Explained (%)", 
+                        `type`="number"),
+                    list(
+                        `name`="cumulative_variance", 
+                        `title`="Cumulative Variance (%)", 
+                        `type`="number"),
+                    list(
+                        `name`="loadings_summary", 
+                        `title`="Top Loading Variables", 
+                        `type`="text")),
                 visible="(perform_pca)",
                 clearWith=list(
                     "marker_vars",
@@ -330,6 +432,7 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 height=500,
                 visible="(show_plots)",
                 requiresData=TRUE,
+                renderFun=".correlationplot",
                 clearWith=list(
                     "marker_vars",
                     "correlation_method",
@@ -342,6 +445,7 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 height=500,
                 visible="(show_plots)",
                 requiresData=TRUE,
+                renderFun=".heatmapplot",
                 clearWith=list(
                     "marker_vars",
                     "show_plots",
@@ -354,6 +458,7 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 height=500,
                 visible="(perform_pca && show_plots)",
                 requiresData=TRUE,
+                renderFun=".pcaplot",
                 clearWith=list(
                     "marker_vars",
                     "perform_pca",
@@ -367,6 +472,7 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 height=500,
                 visible="(perform_clustering && show_clustering_plots)",
                 requiresData=TRUE,
+                renderFun=".clusterplot",
                 clearWith=list(
                     "marker_vars",
                     "perform_clustering",
@@ -478,6 +584,11 @@ multiplexanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                             name="pathwayenrichment",
                             title="Pathway Enrichment Results",
                             columns=list()))}))$new(options=options))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalreport",
+                title="Clinical Report Summary",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="exportdata",
@@ -557,6 +668,7 @@ multiplexanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$qualitycontrol$batcheffects} \tab \tab \tab \tab \tab Analysis of systematic technical variation \cr
 #'   \code{results$advancedanalysis$networkanalysis} \tab \tab \tab \tab \tab Network-based marker interaction analysis \cr
 #'   \code{results$advancedanalysis$pathwayenrichment} \tab \tab \tab \tab \tab Biological pathway associations \cr
+#'   \code{results$clinicalreport} \tab \tab \tab \tab \tab Copy-ready clinical interpretation and summary \cr
 #'   \code{results$exportdata} \tab \tab \tab \tab \tab Formatted data for external analysis \cr
 #' }
 #'
@@ -570,11 +682,11 @@ multiplexanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 multiplexanalysis <- function(
     data,
     marker_vars,
-    x_coord,
-    y_coord,
-    cell_type_var,
-    sample_id_var,
-    group_var,
+    x_coord = NULL,
+    y_coord = NULL,
+    cell_type_var = NULL,
+    sample_id_var = NULL,
+    group_var = NULL,
     analysis_focus = "comprehensive",
     correlation_method = "pearson",
     positivity_cutpoint = 0.1,

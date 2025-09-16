@@ -6,6 +6,7 @@
 \usage{
 ihcscoring(
   data,
+  guided_biomarker = "manual",
   intensity_var,
   proportion_var,
   sample_id_var,
@@ -50,11 +51,18 @@ ihcscoring(
   pdl1_marker,
   checkpoint_cutoffs = "1, 10",
   subtype_statistics = TRUE,
-  subtype_visualization = TRUE
+  subtype_visualization = TRUE,
+  language = "english",
+  colorblind_safe = TRUE,
+  high_contrast = FALSE,
+  font_size = "normal"
 )
 }
 \arguments{
 \item{data}{the data as a data frame}
+
+\item{guided_biomarker}{guided configuration for common biomarkers with
+recommended settings}
 
 \item{intensity_var}{staining intensity scores (typically 0-3 scale)}
 
@@ -163,11 +171,24 @@ molecular subtypes}
 
 \item{subtype_visualization}{create plots showing molecular subtype
 distributions and associations}
+
+\item{language}{language for interface elements and clinical
+interpretations}
+
+\item{colorblind_safe}{use colorblind-safe palette for all visualizations}
+
+\item{high_contrast}{enable high contrast mode for better accessibility}
+
+\item{font_size}{base font size for improved readability}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalReport} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$scorestable} \tab \tab \tab \tab \tab Calculated H-scores, Allred scores, and binary classifications \cr
 \code{results$statisticstable} \tab \tab \tab \tab \tab Comprehensive statistical summary for each scoring method \cr
 \code{results$agreementtable} \tab \tab \tab \tab \tab Correlation and agreement statistics between scoring methods \cr

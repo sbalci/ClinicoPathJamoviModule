@@ -9,6 +9,25 @@ items:
       type: Html
       visible: true
 
+    - name: assumptions
+      title: Analysis Assumptions & Caveats
+      type: Html
+      visible: true
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+
+    - name: reportSentence
+      title: Copy-Ready Report Summary
+      type: Html
+      visible: (prognosticClustering)
+      clearWith:
+        - markers
+        - survivalTime
+        - survivalEvent
+        - riskStratification
+
     - name: prognosticGroups
       title: Prognostic Group Summary
       type: Table
@@ -64,6 +83,9 @@ items:
           format: zto:4
         - name: significance
           title: Sig.
+          type: text
+        - name: clinical_interpretation
+          title: Clinical Interpretation
           type: text
 
     - name: multivariateResults

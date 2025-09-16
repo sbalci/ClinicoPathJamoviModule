@@ -9,6 +9,41 @@ items:
       type: Html
       visible: true
 
+    - name: clinicalSummary
+      title: 📋 Analysis Summary (Copy-Ready)
+      type: Html
+      visible: true
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - guided_biomarker
+          - biomarker_type
+          - scoring_method
+          - binary_cutpoint
+
+    - name: aboutAnalysis
+      title: 🔬 About This Analysis
+      type: Html
+      visible: true
+
+    - name: clinicalReport
+      title: 📄 Clinical Report Template
+      type: Preformatted
+      visible: true
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - guided_biomarker
+          - biomarker_type
+          - scoring_method
+          - binary_cutpoint
+          - confidence_level
+
+    - name: assumptions
+      title: ⚠️ Assumptions & Caveats
+      type: Html
+      visible: true
+
     - name: scorestable
       title: Individual Sample Scores
       type: Table
@@ -127,6 +162,9 @@ items:
           - proportion_var
           - agreement_analysis
           - confidence_level
+          - bootstrap_n
+          - biomarker_type
+          - scoring_method
 
     - name: qualitycontroltable
       title: Quality Control Metrics
@@ -170,6 +208,9 @@ items:
           - proportion_var
           - show_plots
           - scoring_method
+          - bootstrap_n
+          - confidence_level
+          - biomarker_type
 
     - name: correlationplot
       title: Method Correlation Plot
@@ -185,6 +226,9 @@ items:
           - proportion_var
           - show_plots
           - agreement_analysis
+          - bootstrap_n
+          - confidence_level
+          - biomarker_type
 
     - name: agreementplot
       title: Method Agreement Plot
@@ -200,6 +244,9 @@ items:
           - proportion_var
           - show_agreement_plots
           - agreement_analysis
+          - bootstrap_n
+          - confidence_level
+          - biomarker_type
 
     - name: cutpointplot
       title: Cutpoint Optimization Plot
@@ -578,7 +625,7 @@ items:
 
           - name: cpscomparison
             title: CPS Group Comparison
-            visible: (group_var && cutoff_comparison)
+            visible: (cutoff_comparison)
             type: Table
             description: Statistical comparison of CPS between groups
             columns:
@@ -695,7 +742,7 @@ items:
 
           - name: checkpointanalysis
             title: Checkpoint Inhibitor Expression by Subtype
-            visible: (pd1_marker || pdl1_marker)
+            visible: true
             type: Table
             description: PD-1/PD-L1 expression patterns across molecular subtypes
             columns:
@@ -743,7 +790,7 @@ items:
       description: PD-1/PD-L1 expression patterns across molecular subtypes
       width: 700
       height: 500
-      visible: (molecular_classification && (pd1_marker || pdl1_marker) && subtype_visualization)
+      visible: (molecular_classification && subtype_visualization)
       requiresData: true
       renderFun: .checkpointplot
       clearWith:

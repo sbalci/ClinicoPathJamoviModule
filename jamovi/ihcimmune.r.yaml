@@ -9,6 +9,14 @@ items:
       type: Html
       visible: true
 
+    - name: clinicalContext
+      title: Clinical Interpretation Guide
+      type: Html
+      visible: true
+      clearWith:
+        - immune_markers
+        - tilMethod
+
     - name: tilSummary
       title: TIL Analysis Summary
       type: Table
@@ -194,6 +202,14 @@ items:
         - name: diversity_category
           title: Diversity Category
           type: text
+        - name: brillouin_diversity
+          title: Brillouin Index
+          type: number
+          format: zto:3
+        - name: berger_parker_dominance
+          title: Berger-Parker Index
+          type: number
+          format: zto:3
 
     - name: tilMethodResults
       title: TIL Method-Specific Results

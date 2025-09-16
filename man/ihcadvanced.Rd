@@ -23,7 +23,9 @@ ihcadvanced(
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{markers}{IHC marker variables for advanced clustering analysis}
+\item{markers}{Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD
+markers). Can be categorical scores (0/1+/2+/3+) or continuous values
+(H-scores, percentages).}
 
 \item{id}{Case identifier for tracking}
 
@@ -57,6 +59,7 @@ intensive tasks}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$optimalKResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$markerOptimization} \tab \tab \tab \tab \tab a table \cr
 \code{results$pcaResults} \tab \tab \tab \tab \tab a table \cr

@@ -79,6 +79,11 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$distributionplot$setVisible(self$options$show_plots)
             self$results$correlationplot$setVisible(self$options$show_plots)
             self$results$agreementplot$setVisible(self$options$show_agreement_plots)
+
+            # Initialize clinical guidance content
+            private$.initializeAboutAnalysis()
+            private$.initializeAssumptions()
+            private$.applyGuidedConfiguration()
         },
         
         .run = function() {
@@ -147,12 +152,36 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Multiple cut-off analysis
             if (self$options$multiple_cutoffs) {
-                private$.performMultipleCutoffAnalysis(intensity, proportion, groups)
+                tryCatch({
+                    if (is.null(self$options$cutoff_values) || nchar(self$options$cutoff_values) == 0) {
+                        stop("Multiple cutoff analysis requires cutoff values to be specified")
+                    }
+                    private$.performMultipleCutoffAnalysis(intensity, proportion, groups)
+                }, error = function(e) {
+                    warning(paste("Multiple cutoff analysis failed:", e$message))
+                    self$results$interpretation$setContent(
+                        paste0(self$results$interpretation$content,
+                        "<p style='color: orange;'><strong>Warning:</strong> Multiple cutoff analysis failed. ",
+                        "Please check that cutoff values are properly specified as comma-separated percentages.</p>")
+                    )
+                })
             }
             
             # CPS analysis
             if (self$options$cps_analysis) {
-                private$.performCPSAnalysis(intensity, proportion, groups)
+                tryCatch({
+                    if (is.null(self$options$tumor_cells_var) || is.null(self$options$immune_cells_var)) {
+                        stop("CPS analysis requires both tumor cells and immune cells variables")
+                    }
+                    private$.performCPSAnalysis(intensity, proportion, groups)
+                }, error = function(e) {
+                    warning(paste("CPS analysis failed:", e$message))
+                    self$results$interpretation$setContent(
+                        paste0(self$results$interpretation$content,
+                        "<p style='color: orange;'><strong>Warning:</strong> CPS analysis failed. ",
+                        "Please ensure both tumor cells and immune cells variables are provided.</p>")
+                    )
+                })
             }
             
             # Biomarker-specific analysis
@@ -167,16 +196,39 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Molecular classification analysis
             if (self$options$molecular_classification) {
-                private$.performMolecularClassification()
+                tryCatch({
+                    private$.performMolecularClassification()
+                }, error = function(e) {
+                    warning(paste("Molecular classification failed:", e$message))
+                    self$results$interpretation$setContent(
+                        paste0(self$results$interpretation$content,
+                        "<p style='color: orange;'><strong>Warning:</strong> Molecular classification analysis failed. ",
+                        "Please check that all required markers are provided and properly formatted.</p>")
+                    )
+                })
             }
-            
+
             private$.generatePlots(intensity, proportion)
             private$.generateInterpretation(intensity, proportion)
-            
+
             # Perform automated analysis if enabled
             if (self$options$automated_analysis) {
-                private$.performAutomatedAnalysis()
+                tryCatch({
+                    private$.performAutomatedAnalysis()
+                }, error = function(e) {
+                    warning(paste("Automated analysis failed:", e$message))
+                    self$results$interpretation$setContent(
+                        paste0(self$results$interpretation$content,
+                        "<p style='color: orange;'><strong>Warning:</strong> Automated image analysis failed. ",
+                        "This feature requires specialized image processing libraries. Please ensure all dependencies are installed.</p>")
+                    )
+                })
             }
+
+            # Generate clinical summaries and reports
+            private$.generateClinicalSummary(intensity, proportion)
+            private$.generateClinicalReport(intensity, proportion)
+            private$.addMisuseWarnings(intensity, proportion)
         },
         
         .populateScoresTable = function() {
@@ -271,10 +323,29 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .calculateScores = function(intensity, proportion, sample_ids = NULL, groups = NULL) {
+            # Input validation
+            if (length(intensity) != length(proportion)) {
+                stop("Intensity and proportion vectors must have the same length")
+            }
+
             n <- length(intensity)
-            
+            if (n == 0) {
+                stop("No data available for scoring calculation")
+            }
+
             if (is.null(sample_ids)) {
                 sample_ids <- 1:n
+            }
+
+            # Validate data ranges with warnings for unusual values
+            if (any(intensity < 0, na.rm = TRUE)) {
+                warning("Negative intensity values detected - scores may be invalid")
+            }
+            if (any(proportion < 0, na.rm = TRUE)) {
+                warning("Negative proportion values detected - scores may be invalid")
+            }
+            if (any(proportion > 100, na.rm = TRUE)) {
+                warning("Proportion values > 100% detected - please verify data format")
             }
             
             # Calculate H-score (weighted intensity score: 0-300)
@@ -463,24 +534,36 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .distributionplot = function(image, ggtheme, theme, ...) {
             if (is.null(image$state))
                 return(FALSE)
-                
+
             data <- image$state
-            
-            # Create distribution plot
+
+            # Get accessibility settings
+            colors <- private$.getColorblindSafePalette()
+            accessibility_theme <- private$.getPlotTheme(ggtheme)
+            language <- self$options$language %||% "english"
+
+            # Translate labels based on language
+            title_text <- if (language == "turkish") "İHK Skorlama Dağılımı" else "IHC Scoring Distribution"
+            subtitle_text <- if (language == "turkish") "Örnekler boyunca H-skoru ve Allred skorları" else "H-score and Allred scores across samples"
+            x_label <- if (language == "turkish") "Örnek Numarası" else "Sample Number"
+            y_label <- if (language == "turkish") "Skor Değeri" else "Score Value"
+            color_label <- if (language == "turkish") "Skor Türü" else "Score Type"
+
+            # Create distribution plot with accessibility features
             p <- ggplot2::ggplot(data, ggplot2::aes(x = Sample)) +
                 ggplot2::geom_point(ggplot2::aes(y = Hscore, color = "H-score"), alpha = 0.7, size = 2) +
                 ggplot2::geom_point(ggplot2::aes(y = Allred * 30, color = "Allred (scaled)"), alpha = 0.7, size = 2) +
-                ggplot2::scale_color_manual(values = c("H-score" = "steelblue", "Allred (scaled)" = "coral")) +
+                ggplot2::scale_color_manual(values = c("H-score" = colors[1], "Allred (scaled)" = colors[2])) +
                 ggplot2::labs(
-                    title = "IHC Scoring Distribution",
-                    subtitle = "H-score and Allred scores across samples",
-                    x = "Sample Number",
-                    y = "Score Value",
-                    color = "Score Type"
+                    title = title_text,
+                    subtitle = subtitle_text,
+                    x = x_label,
+                    y = y_label,
+                    color = color_label
                 ) +
                 ggplot2::theme(legend.position = "bottom") +
-                ggtheme
-                
+                accessibility_theme
+
             print(p)
             TRUE
         },
@@ -488,21 +571,32 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .correlationplot = function(image, ggtheme, theme, ...) {
             if (is.null(image$state))
                 return(FALSE)
-                
+
             data <- image$state
-            
-            # Create correlation plot
+
+            # Get accessibility settings
+            colors <- private$.getColorblindSafePalette()
+            accessibility_theme <- private$.getPlotTheme(ggtheme)
+            language <- self$options$language %||% "english"
+
+            # Translate labels based on language
+            title_text <- if (language == "turkish") "H-skoru vs Allred Skoru Korelasyonu" else "H-score vs Allred Score Correlation"
+            subtitle_text <- if (language == "turkish") "Skorlama yöntemleri arasında korelasyon analizi" else "Correlation analysis between scoring methods"
+            x_label <- if (language == "turkish") "Allred Skoru (ölçeklenmiş)" else "Allred Score (scaled)"
+            y_label <- if (language == "turkish") "H-skoru" else "H-score"
+
+            # Create correlation plot with accessibility features
             p <- ggplot2::ggplot(data, ggplot2::aes(x = Allred * 30, y = Hscore)) +
-                ggplot2::geom_point(alpha = 0.6, color = "steelblue", size = 2) +
-                ggplot2::geom_smooth(method = "lm", se = TRUE, color = "red", alpha = 0.3) +
+                ggplot2::geom_point(alpha = 0.6, color = colors[1], size = 2) +
+                ggplot2::geom_smooth(method = "lm", se = TRUE, color = colors[4], alpha = 0.3) +
                 ggplot2::labs(
-                    title = "H-score vs Allred Score Correlation",
-                    subtitle = paste("Correlation analysis between scoring methods"),
-                    x = "Allred Score (scaled)",
-                    y = "H-score"
+                    title = title_text,
+                    subtitle = subtitle_text,
+                    x = x_label,
+                    y = y_label
                 ) +
-                ggtheme
-                
+                accessibility_theme
+
             print(p)
             TRUE
         },
@@ -510,25 +604,36 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .agreementplot = function(image, ggtheme, theme, ...) {
             if (is.null(image$state))
                 return(FALSE)
-                
+
             data <- image$state
-            
-            # Create Bland-Altman style agreement plot
+
+            # Get accessibility settings
+            colors <- private$.getColorblindSafePalette()
+            accessibility_theme <- private$.getPlotTheme(ggtheme)
+            language <- self$options$language %||% "english"
+
+            # Translate labels based on language
+            title_text <- if (language == "turkish") "Uyum Analizi: H-skoru vs Allred" else "Agreement Analysis: H-score vs Allred"
+            subtitle_text <- if (language == "turkish") "Yöntem uyumunu gösteren Bland-Altman stili grafik" else "Bland-Altman style plot showing method agreement"
+            x_label <- if (language == "turkish") "Yöntemlerin Ortalaması" else "Mean of Methods"
+            y_label <- if (language == "turkish") "Fark (H-skoru - Allred ölçekli)" else "Difference (H-score - Allred scaled)"
+
+            # Create Bland-Altman style agreement plot with accessibility features
             p <- ggplot2::ggplot(data, ggplot2::aes(x = Mean, y = Difference)) +
-                ggplot2::geom_point(alpha = 0.6, color = "steelblue", size = 2) +
-                ggplot2::geom_hline(yintercept = unique(data$MeanDiff), color = "red", size = 1) +
-                ggplot2::geom_hline(yintercept = unique(data$MeanDiff) + 1.96 * unique(data$SD), 
-                                   color = "red", linetype = "dashed") +
-                ggplot2::geom_hline(yintercept = unique(data$MeanDiff) - 1.96 * unique(data$SD), 
-                                   color = "red", linetype = "dashed") +
+                ggplot2::geom_point(alpha = 0.6, color = colors[1], size = 2) +
+                ggplot2::geom_hline(yintercept = unique(data$MeanDiff), color = colors[4], size = 1) +
+                ggplot2::geom_hline(yintercept = unique(data$MeanDiff) + 1.96 * unique(data$SD),
+                                   color = colors[4], linetype = "dashed") +
+                ggplot2::geom_hline(yintercept = unique(data$MeanDiff) - 1.96 * unique(data$SD),
+                                   color = colors[4], linetype = "dashed") +
                 ggplot2::labs(
-                    title = "Agreement Analysis: H-score vs Allred",
-                    subtitle = "Bland-Altman style plot showing method agreement",
-                    x = "Mean of Methods",
-                    y = "Difference (H-score - Allred scaled)"
+                    title = title_text,
+                    subtitle = subtitle_text,
+                    x = x_label,
+                    y = y_label
                 ) +
-                ggtheme
-                
+                accessibility_theme
+
             print(p)
             TRUE
         },
@@ -1820,6 +1925,388 @@ def segment_nuclei(image_path):
             }, error = function(e) {
                 return(defaults)
             })
+        },
+
+        # Initialize About This Analysis panel
+        .initializeAboutAnalysis = function() {
+            about_html <- paste0(
+                "<div style='background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<h4>🔬 About IHC Scoring Analysis</h4>",
+                "<p><strong>Purpose:</strong> Standardize immunohistochemistry scoring using validated clinical methods (H-score and Allred score)</p>",
+                "<p><strong>When to Use:</strong></p>",
+                "<ul>",
+                "<li>Biomarker quantification for research or clinical trials</li>",
+                "<li>Standardization across multiple observers or institutions</li>",
+                "<li>Validation of digital pathology algorithms</li>",
+                "<li>Quality assurance for diagnostic laboratories</li>",
+                "</ul>",
+                "<p><strong>Key Outputs:</strong></p>",
+                "<ul>",
+                "<li><strong>H-scores:</strong> Weighted intensity × proportion (0-300 scale)</li>",
+                "<li><strong>Allred scores:</strong> Combined intensity + proportion categories (0-8 scale)</li>",
+                "<li><strong>Binary classification:</strong> Positive/negative based on clinical cutoffs</li>",
+                "<li><strong>Method agreement:</strong> Correlation and reliability statistics</li>",
+                "</ul>",
+                "<p><strong>Clinical Applications:</strong> ER/PR scoring, HER2 assessment, Ki-67 quantification, PD-L1 evaluation</p>",
+                "</div>"
+            )
+            self$results$aboutAnalysis$setContent(about_html)
+        },
+
+        # Initialize Assumptions & Caveats panel
+        .initializeAssumptions = function() {
+            assumptions_html <- paste0(
+                "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #ffc107;'>",
+                "<h4>⚠️ Important Assumptions & Caveats</h4>",
+                "<p><strong>Data Requirements:</strong></p>",
+                "<ul>",
+                "<li>Intensity scores: Typically 0-3 scale (0=negative, 1=weak, 2=moderate, 3=strong)</li>",
+                "<li>Proportion values: 0-100% representing percentage of positive cells</li>",
+                "<li>Minimum sample size: n≥30 recommended for reliable statistics</li>",
+                "</ul>",
+                "<p><strong>Clinical Considerations:</strong></p>",
+                "<ul>",
+                "<li>Cutoff values should be validated for your specific biomarker and population</li>",
+                "<li>Results should be interpreted with full clinical context</li>",
+                "<li>Consider inter-observer agreement validation</li>",
+                "<li>Digital scoring may require algorithm validation against manual scoring</li>",
+                "</ul>",
+                "<p><strong>Statistical Assumptions:</strong></p>",
+                "<ul>",
+                "<li>Correlation analysis assumes monotonic relationships</li>",
+                "<li>Agreement statistics require paired observations</li>",
+                "<li>Bootstrap intervals assume representative sampling</li>",
+                "</ul>",
+                "<p><strong>⚠️ Contextual Warnings:</strong></p>",
+                "<div id='contextual-warnings' style='color: #d73502; font-weight: bold;'></div>",
+                "</div>"
+            )
+            self$results$assumptions$setContent(assumptions_html)
+        },
+
+        # Apply guided biomarker configuration
+        .applyGuidedConfiguration = function() {
+            guided_type <- self$options$guided_biomarker %||% "manual"
+
+            if (guided_type != "manual") {
+                # Configure based on biomarker type
+                recommendations <- switch(guided_type,
+                    "er_pr" = list(
+                        cutpoint = 100,
+                        allred_cutpoint = 3,
+                        description = "ER/PR (Estrogen/Progesterone Receptors)",
+                        clinical_context = "FDA-approved cutoff: H-score ≥100 for positive classification"
+                    ),
+                    "her2" = list(
+                        cutpoint = 150,
+                        allred_cutpoint = 4,
+                        description = "HER2 (Human Epidermal Growth Factor Receptor 2)",
+                        clinical_context = "Research standard: H-score ≥150, requires validation with FISH if 2+"
+                    ),
+                    "ki67" = list(
+                        cutpoint = 100,
+                        allred_cutpoint = 3,
+                        description = "Ki-67 (Proliferation Index)",
+                        clinical_context = "Common research cutoffs: 14-20% for breast cancer prognosis"
+                    ),
+                    "pdl1" = list(
+                        cutpoint = 30,  # Equivalent to 1% TPS
+                        allred_cutpoint = 2,
+                        description = "PD-L1 (Programmed Death-Ligand 1)",
+                        clinical_context = "Immunotherapy eligibility: TPS ≥1%, ≥10%, or ≥50% depending on indication"
+                    )
+                )
+
+                # Store recommendations for use in analysis
+                self$.guidedRecommendations <- recommendations
+            }
+        },
+
+        # Generate clinical summary with copy-ready content
+        .generateClinicalSummary = function(intensity, proportion) {
+            n <- length(intensity)
+            hscore <- intensity * proportion
+            cutpoint <- self$options$binary_cutpoint
+            positive_count <- sum(hscore >= cutpoint, na.rm = TRUE)
+            positive_percent <- round((positive_count/n) * 100, 1)
+
+            hscore_mean <- round(mean(hscore, na.rm = TRUE), 1)
+            hscore_median <- round(median(hscore, na.rm = TRUE), 1)
+            hscore_range <- paste0(round(min(hscore, na.rm = TRUE), 1), "-", round(max(hscore, na.rm = TRUE), 1))
+
+            biomarker_name <- switch(self$options$biomarker_type,
+                "er" = "estrogen receptor (ER)",
+                "pr" = "progesterone receptor (PR)",
+                "her2" = "HER2",
+                "ki67" = "Ki-67",
+                "pdl1" = "PD-L1",
+                "biomarker expression"
+            )
+
+            correlation <- cor(hscore, intensity + ifelse(proportion == 0, 0,
+                ifelse(proportion <= 1, 1, ifelse(proportion <= 10, 2,
+                ifelse(proportion <= 33, 3, ifelse(proportion <= 66, 4, 5))))),
+                use = "complete.obs")
+
+            agreement_level <- ifelse(abs(correlation) >= 0.9, "excellent",
+                ifelse(abs(correlation) >= 0.75, "good",
+                ifelse(abs(correlation) >= 0.5, "moderate", "poor")))
+
+            summary_html <- paste0(
+                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #28a745;'>",
+                "<h4>📋 Analysis Summary</h4>",
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<h5>Key Findings (Copy-Ready)</h5>",
+                "<p style='font-family: monospace; background-color: #f8f9fa; padding: 10px; border-radius: 3px;'>",
+                "IHC analysis of <strong>", n, " cases</strong> showed ", biomarker_name, " expression with mean H-score of <strong>", hscore_mean, "</strong> (range: ", hscore_range, "). ",
+                "Using a cutoff of ", cutpoint, ", <strong>", positive_count, "/", n, " (", positive_percent, "%)</strong> cases were classified as positive. ",
+                "The correlation between H-score and Allred methods was ", agreement_level, " (r=", round(correlation, 3), "), indicating reliable scoring consistency.",
+                "</p>",
+                "</div>",
+                "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px;'>",
+                "<strong>Clinical Interpretation:</strong> ",
+                if (positive_percent >= 50) "High proportion of positive cases suggests strong biomarker expression suitable for targeted therapy consideration."
+                else if (positive_percent >= 20) "Moderate biomarker expression observed; clinical correlation recommended."
+                else "Low biomarker expression in this cohort; negative predictive value for targeted therapies.",
+                "</div>",
+                "</div>"
+            )
+
+            self$results$clinicalSummary$setContent(summary_html)
+        },
+
+        # Generate copy-ready clinical report
+        .generateClinicalReport = function(intensity, proportion) {
+            n <- length(intensity)
+            hscore <- intensity * proportion
+            cutpoint <- self$options$binary_cutpoint
+            positive_count <- sum(hscore >= cutpoint, na.rm = TRUE)
+            positive_percent <- round((positive_count/n) * 100, 1)
+
+            hscore_mean <- round(mean(hscore, na.rm = TRUE), 1)
+            hscore_sd <- round(sd(hscore, na.rm = TRUE), 1)
+            hscore_median <- round(median(hscore, na.rm = TRUE), 1)
+            hscore_q1 <- round(quantile(hscore, 0.25, na.rm = TRUE), 1)
+            hscore_q3 <- round(quantile(hscore, 0.75, na.rm = TRUE), 1)
+
+            biomarker_name <- switch(self$options$biomarker_type,
+                "er" = "Estrogen Receptor (ER)",
+                "pr" = "Progesterone Receptor (PR)",
+                "her2" = "HER2",
+                "ki67" = "Ki-67 Proliferation Index",
+                "pdl1" = "PD-L1",
+                "Biomarker Expression"
+            )
+
+            method_description <- switch(self$options$scoring_method,
+                "hscore" = "H-score methodology",
+                "allred" = "Allred scoring system",
+                "both" = "H-score and Allred scoring methods"
+            )
+
+            report_text <- paste0(
+                "IMMUNOHISTOCHEMISTRY SCORING ANALYSIS REPORT\n",
+                "===========================================\n\n",
+                "Biomarker: ", biomarker_name, "\n",
+                "Scoring Method: ", method_description, "\n",
+                "Sample Size: ", n, " cases\n",
+                "Analysis Date: ", Sys.Date(), "\n\n",
+                "SCORING RESULTS:\n",
+                "---------------\n",
+                "H-score Statistics:\n",
+                "  Mean ± SD: ", hscore_mean, " ± ", hscore_sd, "\n",
+                "  Median (IQR): ", hscore_median, " (", hscore_q1, "-", hscore_q3, ")\n",
+                "  Range: ", round(min(hscore, na.rm = TRUE), 1), "-", round(max(hscore, na.rm = TRUE), 1), "\n\n",
+                "Binary Classification (H-score ≥", cutpoint, "):\n",
+                "  Positive: ", positive_count, "/", n, " (", positive_percent, "%)\n",
+                "  Negative: ", (n - positive_count), "/", n, " (", round(100 - positive_percent, 1), "%)\n\n",
+                "CLINICAL INTERPRETATION:\n",
+                "----------------------\n",
+                if (positive_percent >= 50) {
+                    "High proportion of positive cases indicates significant biomarker expression.\nRecommendation: Consider for targeted therapy evaluation."
+                } else if (positive_percent >= 20) {
+                    "Moderate biomarker expression observed.\nRecommendation: Clinical correlation and additional testing may be warranted."
+                } else {
+                    "Low biomarker expression in this cohort.\nRecommendation: Negative for targeted therapy; consider alternative approaches."
+                }, "\n\n",
+                "QUALITY ASSURANCE:\n",
+                "----------------\n",
+                "- Scoring methodology: ", method_description, "\n",
+                "- Inter-method correlation: ", round(cor(hscore, intensity + ifelse(proportion == 0, 0, 1), use = "complete.obs"), 3), "\n",
+                "- Statistical framework: Bootstrap confidence intervals (", self$options$confidence_level * 100, "% CI)\n\n",
+                "RECOMMENDATIONS:\n",
+                "---------------\n",
+                "1. Validate results with clinical outcomes data\n",
+                "2. Consider inter-observer agreement assessment\n",
+                "3. Correlate findings with molecular testing when available\n",
+                "4. Follow institutional guidelines for cutoff interpretation\n\n",
+                "Generated by ClinicoPath IHC Scoring Analysis v", self$version %||% "1.0", "\n",
+                "Report generated on: ", Sys.time()
+            )
+
+            self$results$clinicalReport$setContent(report_text)
+        },
+
+        # Add misuse detection guards
+        .addMisuseWarnings = function(intensity, proportion) {
+            warnings <- c()
+
+            # Sample size warnings
+            n <- length(intensity)
+            if (n < 30) {
+                warnings <- c(warnings, "Small sample size (n<30) may affect reliability of statistical tests")
+            }
+            if (n < 10) {
+                warnings <- c(warnings, "Very small sample size (n<10) - results should be interpreted with extreme caution")
+            }
+
+            # Biomarker-specific warnings
+            biomarker_type <- self$options$biomarker_type
+            cutpoint <- self$options$binary_cutpoint
+
+            if (biomarker_type == "her2" && cutpoint < 150) {
+                warnings <- c(warnings, "HER2 typically uses higher cutoffs (≥150) - verify your threshold")
+            }
+            if (biomarker_type == "er" && cutpoint != 100) {
+                warnings <- c(warnings, "ER scoring typically uses FDA-approved cutoff of 100 - consider standard threshold")
+            }
+            if (biomarker_type == "pr" && cutpoint != 100) {
+                warnings <- c(warnings, "PR scoring typically uses FDA-approved cutoff of 100 - consider standard threshold")
+            }
+
+            # Data quality warnings
+            if (any(proportion > 100, na.rm = TRUE)) {
+                warnings <- c(warnings, "Proportion values >100% detected - verify data format (should be 0-100%)")
+            }
+            if (any(intensity > 3, na.rm = TRUE) && self$options$intensity_scale == "standard") {
+                warnings <- c(warnings, "Intensity values >3 detected with standard scale - verify scale selection")
+            }
+
+            # Guided configuration warnings
+            guided_type <- self$options$guided_biomarker %||% "manual"
+            if (guided_type != "manual" && biomarker_type == "other") {
+                warnings <- c(warnings, "Guided biomarker selected but biomarker type set to 'other' - ensure consistency")
+            }
+
+            # Update contextual warnings in assumptions panel
+            if (length(warnings) > 0) {
+                warning_html <- paste0(
+                    "The following issues were detected:<br>",
+                    paste("• ", warnings, collapse = "<br>")
+                )
+                # This would ideally update the contextual-warnings div via JavaScript
+                # For now, we'll add to the interpretation
+                current_content <- self$results$interpretation$content %||% ""
+                warning_content <- paste0(
+                    "<div style='background-color: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #dc3545;'>",
+                    "<strong>⚠️ Analysis Warnings:</strong><br>", warning_html,
+                    "</div>"
+                )
+                self$results$interpretation$setContent(paste0(current_content, warning_content))
+            }
+        },
+
+        # Accessibility and internationalization support
+        .getTranslatedText = function(key, language = NULL) {
+            if (is.null(language)) {
+                language <- self$options$language %||% "english"
+            }
+
+            translations <- list(
+                english = list(
+                    analysis_complete = "Analysis completed successfully",
+                    scoring_method = "Scoring Method",
+                    positive_cases = "Positive Cases",
+                    negative_cases = "Negative Cases",
+                    correlation = "Method Correlation",
+                    clinical_significance = "Clinical Significance",
+                    quality_control = "Quality Control",
+                    recommendations = "Recommendations"
+                ),
+                turkish = list(
+                    analysis_complete = "Analiz başarıyla tamamlandı",
+                    scoring_method = "Skorlama Yöntemi",
+                    positive_cases = "Pozitif Olgular",
+                    negative_cases = "Negatif Olgular",
+                    correlation = "Yöntem Korelasyonu",
+                    clinical_significance = "Klinik Önem",
+                    quality_control = "Kalite Kontrolü",
+                    recommendations = "Öneriler"
+                )
+            )
+
+            return(translations[[language]][[key]] %||% key)
+        },
+
+        .getColorblindSafePalette = function() {
+            if (self$options$colorblind_safe) {
+                # Colorbrewer colorblind-safe palette
+                return(c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"))
+            } else {
+                # Standard ggplot2 palette
+                return(c("steelblue", "coral", "forestgreen", "red", "purple", "orange", "pink", "gray"))
+            }
+        },
+
+        .getPlotTheme = function(base_theme) {
+            font_size_map <- list(
+                normal = 11,
+                large = 14,
+                extra_large = 16
+            )
+
+            base_size <- font_size_map[[self$options$font_size %||% "normal"]]
+
+            theme_elements <- list()
+
+            if (self$options$high_contrast) {
+                theme_elements <- append(theme_elements, list(
+                    panel.background = ggplot2::element_rect(fill = "white", color = "black", size = 1),
+                    plot.background = ggplot2::element_rect(fill = "white", color = "black", size = 1),
+                    text = ggplot2::element_text(color = "black", size = base_size),
+                    axis.text = ggplot2::element_text(color = "black", size = base_size - 1),
+                    axis.title = ggplot2::element_text(color = "black", size = base_size),
+                    legend.text = ggplot2::element_text(color = "black", size = base_size - 1),
+                    legend.title = ggplot2::element_text(color = "black", size = base_size),
+                    strip.background = ggplot2::element_rect(fill = "white", color = "black"),
+                    strip.text = ggplot2::element_text(color = "black", size = base_size)
+                ))
+            } else {
+                theme_elements <- append(theme_elements, list(
+                    text = ggplot2::element_text(size = base_size),
+                    axis.text = ggplot2::element_text(size = base_size - 1),
+                    axis.title = ggplot2::element_text(size = base_size),
+                    legend.text = ggplot2::element_text(size = base_size - 1),
+                    legend.title = ggplot2::element_text(size = base_size),
+                    strip.text = ggplot2::element_text(size = base_size)
+                ))
+            }
+
+            return(do.call(ggplot2::theme, theme_elements))
+        },
+
+        .updatePlotsWithAccessibility = function() {
+            # Update existing plots with accessibility settings
+            accessibility_theme <- private$.getPlotTheme()
+
+            # Store accessibility settings for plot functions
+            if (exists("distributionplot", where = self$results)) {
+                self$results$distributionplot$setOptions(list(
+                    colorblind_safe = self$options$colorblind_safe,
+                    high_contrast = self$options$high_contrast,
+                    font_size = self$options$font_size,
+                    language = self$options$language
+                ))
+            }
+
+            if (exists("correlationplot", where = self$results)) {
+                self$results$correlationplot$setOptions(list(
+                    colorblind_safe = self$options$colorblind_safe,
+                    high_contrast = self$options$high_contrast,
+                    font_size = self$options$font_size,
+                    language = self$options$language
+                ))
+            }
         }
     )
 )

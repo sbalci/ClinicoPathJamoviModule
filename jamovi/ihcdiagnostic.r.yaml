@@ -9,6 +9,22 @@ items:
       type: Html
       visible: true
 
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      visible: false
+      clearWith:
+        - markers
+        - diagnosis
+
+    - name: interpretationGuide
+      title: How to Interpret Results
+      type: Html
+      visible: false
+      clearWith:
+        - markers
+        - diagnosis
+
     - name: diagnosticPerformance
       title: Diagnostic Performance by Marker
       type: Table

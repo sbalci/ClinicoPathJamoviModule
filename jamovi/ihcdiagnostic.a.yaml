@@ -28,7 +28,7 @@ options:
           R: the data as a data frame
 
     - name: markers
-      title: IHC Markers
+      title: IHC Markers (antibodies/biomarkers)
       type: Variables
       suggested:
         - ordinal
@@ -39,10 +39,11 @@ options:
         - numeric
       description:
           R: >
-            IHC marker variables for diagnostic analysis
+            Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD markers).
+            These can be percentage scores, H-scores, or categorical results.
 
     - name: diagnosis
-      title: Known Diagnosis
+      title: Known Diagnosis (gold standard)
       type: Variable
       suggested:
         - nominal
@@ -50,10 +51,11 @@ options:
         - factor
       description:
           R: >
-            Reference diagnosis for validation and performance assessment
+            Select the reference diagnosis variable (e.g., tumor type, grade, subtype).
+            This is your gold standard for evaluating marker performance.
 
     - name: id
-      title: Case ID (Optional)
+      title: Case/Patient ID (Optional)
       type: Variable
       suggested:
         - nominal
@@ -64,7 +66,8 @@ options:
       default: NULL
       description:
           R: >
-            Case identifier for tracking
+            Optional case identifier for tracking individual results in differential diagnosis.
+            Useful for matching predictions with actual diagnoses.
 
     - name: differentialDiagnosis
       title: Perform Differential Diagnosis
@@ -72,7 +75,8 @@ options:
       default: true
       description:
           R: >
-            Use clustering to predict diagnosis based on IHC patterns
+            Predict diagnosis for each case based on IHC marker patterns.
+            Uses clustering to classify cases into diagnostic groups.
 
     - name: antibodyOptimization
       title: Antibody Panel Optimization
@@ -80,7 +84,8 @@ options:
       default: false
       description:
           R: >
-            Evaluate individual and combined antibody performance
+            Find the best combination of markers for diagnosis.
+            Tests single markers and combinations to identify optimal panels.
 
     - name: calculateDiagnosticMetrics
       title: Calculate Diagnostic Metrics
@@ -88,16 +93,17 @@ options:
       default: true
       description:
           R: >
-            Calculate sensitivity, specificity, PPV, NPV for each marker
+            Calculate sensitivity, specificity, PPV, NPV, and AUC for each marker.
+            Essential for evaluating marker diagnostic performance.
 
     - name: clusterMethod
       title: Clustering Method
       type: List
       options:
         - name: hierarchical
-          title: Hierarchical
+          title: Hierarchical (groups similar cases together)
         - name: pam
-          title: PAM (K-medoids)
+          title: PAM/K-medoids (finds representative cases)
       default: hierarchical
       description:
           R: >
@@ -108,11 +114,11 @@ options:
       type: List
       options:
         - name: optimal
-          title: Optimal (Youden Index)
+          title: Optimal balance (Youden Index) - Recommended
         - name: clinical
-          title: Clinical Guidelines
+          title: Clinical guidelines (marker-specific thresholds)
         - name: median
-          title: Median Split
+          title: Median split (50/50 division)
       default: optimal
       description:
           R: >
@@ -126,7 +132,8 @@ options:
       default: 0.95
       description:
           R: >
-            Confidence level for diagnostic performance intervals
+            Confidence level for performance metrics (0.95 = 95% confidence intervals).
+            Higher values give wider, more conservative intervals.
 
     - name: crossValidation
       title: Cross-Validation
@@ -134,7 +141,8 @@ options:
       default: true
       description:
           R: >
-            Perform cross-validation for diagnostic performance
+            Use 5-fold cross-validation for more reliable performance estimates.
+            Recommended for clinical validation but takes longer to compute.
 
     - name: minimumGroupSize
       title: Minimum Group Size
@@ -144,6 +152,7 @@ options:
       default: 10
       description:
           R: >
-            Minimum samples per diagnostic group for analysis
+            Minimum number of cases required per diagnostic group.
+            Groups with fewer cases will trigger a warning (recommend ≥10).
 
 ...

@@ -138,6 +138,8 @@ ihcdiagnosticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        interpretationGuide = function() private$.items[["interpretationGuide"]],
         diagnosticPerformance = function() private$.items[["diagnosticPerformance"]],
         differentialResults = function() private$.items[["differentialResults"]],
         confusionMatrix = function() private$.items[["confusionMatrix"]],
@@ -158,6 +160,22 @@ ihcdiagnosticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="instructions",
                 title="Diagnostic Analysis Overview",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible=FALSE,
+                clearWith=list(
+                    "markers",
+                    "diagnosis")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretationGuide",
+                title="How to Interpret Results",
+                visible=FALSE,
+                clearWith=list(
+                    "markers",
+                    "diagnosis")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diagnosticPerformance",
@@ -354,25 +372,37 @@ ihcdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' )
 #'
 #' @param data the data as a data frame
-#' @param markers IHC marker variables for diagnostic analysis
-#' @param diagnosis Reference diagnosis for validation and performance
-#'   assessment
-#' @param id Case identifier for tracking
-#' @param differentialDiagnosis Use clustering to predict diagnosis based on
-#'   IHC patterns
-#' @param antibodyOptimization Evaluate individual and combined antibody
-#'   performance
+#' @param markers Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD
+#'   markers). These can be percentage scores, H-scores, or categorical results.
+#' @param diagnosis Select the reference diagnosis variable (e.g., tumor type,
+#'   grade, subtype). This is your gold standard for evaluating marker
+#'   performance.
+#' @param id Optional case identifier for tracking individual results in
+#'   differential diagnosis. Useful for matching predictions with actual
+#'   diagnoses.
+#' @param differentialDiagnosis Predict diagnosis for each case based on IHC
+#'   marker patterns. Uses clustering to classify cases into diagnostic groups.
+#' @param antibodyOptimization Find the best combination of markers for
+#'   diagnosis. Tests single markers and combinations to identify optimal
+#'   panels.
 #' @param calculateDiagnosticMetrics Calculate sensitivity, specificity, PPV,
-#'   NPV for each marker
+#'   NPV, and AUC for each marker. Essential for evaluating marker diagnostic
+#'   performance.
 #' @param clusterMethod Clustering method for differential diagnosis
 #' @param cutpointMethod Method for determining positive/negative cutpoints
-#' @param confidenceLevel Confidence level for diagnostic performance
-#'   intervals
-#' @param crossValidation Perform cross-validation for diagnostic performance
-#' @param minimumGroupSize Minimum samples per diagnostic group for analysis
+#' @param confidenceLevel Confidence level for performance metrics (0.95 =
+#'   95\% confidence intervals). Higher values give wider, more conservative
+#'   intervals.
+#' @param crossValidation Use 5-fold cross-validation for more reliable
+#'   performance estimates. Recommended for clinical validation but takes longer
+#'   to compute.
+#' @param minimumGroupSize Minimum number of cases required per diagnostic
+#'   group. Groups with fewer cases will trigger a warning (recommend ≥10).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$diagnosticPerformance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$differentialResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr

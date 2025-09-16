@@ -139,6 +139,7 @@ ihcadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        assumptions = function() private$.items[["assumptions"]],
         optimalKResults = function() private$.items[["optimalKResults"]],
         markerOptimization = function() private$.items[["markerOptimization"]],
         pcaResults = function() private$.items[["pcaResults"]],
@@ -163,6 +164,14 @@ ihcadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="instructions",
                 title="Advanced Analysis Overview",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Analysis Assumptions & Caveats",
+                visible=TRUE,
+                clearWith=list(
+                    "markers",
+                    "optimalKMethod")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="optimalKResults",
@@ -418,7 +427,9 @@ ihcadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' )
 #'
 #' @param data the data as a data frame
-#' @param markers IHC marker variables for advanced clustering analysis
+#' @param markers Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD
+#'   markers). Can be categorical scores (0/1+/2+/3+) or continuous values
+#'   (H-scores, percentages).
 #' @param id Case identifier for tracking
 #' @param optimalKMethod Method for automatically determining optimal number
 #'   of clusters
@@ -439,6 +450,7 @@ ihcadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$optimalKResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$markerOptimization} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pcaResults} \tab \tab \tab \tab \tab a table \cr

@@ -22,37 +22,49 @@ ihcdiagnostic(
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{markers}{IHC marker variables for diagnostic analysis}
+\item{markers}{Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD
+markers). These can be percentage scores, H-scores, or categorical results.}
 
-\item{diagnosis}{Reference diagnosis for validation and performance
-assessment}
+\item{diagnosis}{Select the reference diagnosis variable (e.g., tumor type,
+grade, subtype). This is your gold standard for evaluating marker
+performance.}
 
-\item{id}{Case identifier for tracking}
+\item{id}{Optional case identifier for tracking individual results in
+differential diagnosis. Useful for matching predictions with actual
+diagnoses.}
 
-\item{differentialDiagnosis}{Use clustering to predict diagnosis based on
-IHC patterns}
+\item{differentialDiagnosis}{Predict diagnosis for each case based on IHC
+marker patterns. Uses clustering to classify cases into diagnostic groups.}
 
-\item{antibodyOptimization}{Evaluate individual and combined antibody
-performance}
+\item{antibodyOptimization}{Find the best combination of markers for
+diagnosis. Tests single markers and combinations to identify optimal
+panels.}
 
 \item{calculateDiagnosticMetrics}{Calculate sensitivity, specificity, PPV,
-NPV for each marker}
+NPV, and AUC for each marker. Essential for evaluating marker diagnostic
+performance.}
 
 \item{clusterMethod}{Clustering method for differential diagnosis}
 
 \item{cutpointMethod}{Method for determining positive/negative cutpoints}
 
-\item{confidenceLevel}{Confidence level for diagnostic performance
-intervals}
+\item{confidenceLevel}{Confidence level for performance metrics (0.95 =
+95\\% confidence intervals). Higher values give wider, more conservative
+intervals.}
 
-\item{crossValidation}{Perform cross-validation for diagnostic performance}
+\item{crossValidation}{Use 5-fold cross-validation for more reliable
+performance estimates. Recommended for clinical validation but takes longer
+to compute.}
 
-\item{minimumGroupSize}{Minimum samples per diagnostic group for analysis}
+\item{minimumGroupSize}{Minimum number of cases required per diagnostic
+group. Groups with fewer cases will trigger a warning (recommend ≥10).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$diagnosticPerformance} \tab \tab \tab \tab \tab a table \cr
 \code{results$differentialResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr

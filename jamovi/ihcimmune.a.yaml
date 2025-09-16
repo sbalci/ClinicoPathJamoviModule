@@ -187,4 +187,34 @@ options:
           R: >
             Threshold for PD-L1 positivity assessment
 
+    - name: cd3Threshold
+      title: CD3+ TIL Threshold (%)
+      type: Number
+      min: 1
+      max: 100
+      default: 10
+      description:
+          R: >
+            Threshold for CD3+ TIL categorization (Low vs Intermediate)
+
+    - name: cd8Threshold
+      title: CD8+ TIL Threshold (%)
+      type: Number
+      min: 1
+      max: 100
+      default: 5
+      description:
+          R: >
+            Threshold for CD8+ TIL categorization (Low vs Intermediate)
+
+    - name: immuneScoreThreshold
+      title: Immune Score Threshold (%)
+      type: Number
+      min: 1
+      max: 100
+      default: 10
+      description:
+          R: >
+            Threshold for overall immune infiltration categorization
+
 ...

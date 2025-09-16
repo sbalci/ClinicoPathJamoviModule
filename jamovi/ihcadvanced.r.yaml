@@ -9,6 +9,14 @@ items:
       type: Html
       visible: true
 
+    - name: assumptions
+      title: Analysis Assumptions & Caveats
+      type: Html
+      visible: true
+      clearWith:
+        - markers
+        - optimalKMethod
+
     - name: optimalKResults
       title: Optimal K Selection Results
       type: Table

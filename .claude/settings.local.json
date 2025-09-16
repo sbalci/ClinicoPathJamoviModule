@@ -51,7 +51,9 @@
       "WebFetch(domain:bookdown.org)",
       "Read(//Users/serdarbalci/Documents/GitHub/BrawStats-for-Jamovi-Full/**)",
       "Bash(yamllint:*)",
-      "WebFetch(domain:www.riinu.me)"
+      "WebFetch(domain:www.riinu.me)",
+      "Bash(do echo \"=== Checking .$func ===\")",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": [],
