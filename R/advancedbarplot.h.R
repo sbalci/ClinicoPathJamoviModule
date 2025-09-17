@@ -32,6 +32,12 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             add_trend_line = FALSE,
             highlight_bars = "",
             transparency = 0.9,
+            diverging_center = 0,
+            pattern_type = "none",
+            radial_start_angle = 0,
+            label_inside = FALSE,
+            subtitle_text = "",
+            source_text = "",
             export_options = TRUE,
             show_comparison = FALSE, ...) {
 
@@ -84,7 +90,11 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "interactive",
                     "publication",
                     "bbc_style",
-                    "prism_style"),
+                    "prism_style",
+                    "diverging",
+                    "circular",
+                    "economist",
+                    "pattern"),
                 default="polished")
             private$..bar_position <- jmvcore::OptionList$new(
                 "bar_position",
@@ -257,6 +267,40 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 min=0.1,
                 max=1,
                 default=0.9)
+            private$..diverging_center <- jmvcore::OptionNumber$new(
+                "diverging_center",
+                diverging_center,
+                default=0)
+            private$..pattern_type <- jmvcore::OptionList$new(
+                "pattern_type",
+                pattern_type,
+                options=list(
+                    "none",
+                    "stripe",
+                    "crosshatch",
+                    "dot",
+                    "grid",
+                    "wave",
+                    "gradient"),
+                default="none")
+            private$..radial_start_angle <- jmvcore::OptionNumber$new(
+                "radial_start_angle",
+                radial_start_angle,
+                min=0,
+                max=360,
+                default=0)
+            private$..label_inside <- jmvcore::OptionBool$new(
+                "label_inside",
+                label_inside,
+                default=FALSE)
+            private$..subtitle_text <- jmvcore::OptionString$new(
+                "subtitle_text",
+                subtitle_text,
+                default="")
+            private$..source_text <- jmvcore::OptionString$new(
+                "source_text",
+                source_text,
+                default="")
             private$..export_options <- jmvcore::OptionBool$new(
                 "export_options",
                 export_options,
@@ -292,6 +336,12 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..add_trend_line)
             self$.addOption(private$..highlight_bars)
             self$.addOption(private$..transparency)
+            self$.addOption(private$..diverging_center)
+            self$.addOption(private$..pattern_type)
+            self$.addOption(private$..radial_start_angle)
+            self$.addOption(private$..label_inside)
+            self$.addOption(private$..subtitle_text)
+            self$.addOption(private$..source_text)
             self$.addOption(private$..export_options)
             self$.addOption(private$..show_comparison)
         }),
@@ -322,6 +372,12 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         add_trend_line = function() private$..add_trend_line$value,
         highlight_bars = function() private$..highlight_bars$value,
         transparency = function() private$..transparency$value,
+        diverging_center = function() private$..diverging_center$value,
+        pattern_type = function() private$..pattern_type$value,
+        radial_start_angle = function() private$..radial_start_angle$value,
+        label_inside = function() private$..label_inside$value,
+        subtitle_text = function() private$..subtitle_text$value,
+        source_text = function() private$..source_text$value,
         export_options = function() private$..export_options$value,
         show_comparison = function() private$..show_comparison$value),
     private = list(
@@ -351,6 +407,12 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..add_trend_line = NA,
         ..highlight_bars = NA,
         ..transparency = NA,
+        ..diverging_center = NA,
+        ..pattern_type = NA,
+        ..radial_start_angle = NA,
+        ..label_inside = NA,
+        ..subtitle_text = NA,
+        ..source_text = NA,
         ..export_options = NA,
         ..show_comparison = NA)
 )
@@ -542,6 +604,12 @@ advancedbarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param add_trend_line Whether to add a trend line for numeric x-axis.
 #' @param highlight_bars Comma-separated list of categories to highlight.
 #' @param transparency Transparency level for bars (alpha value).
+#' @param diverging_center Center value for diverging bar plots.
+#' @param pattern_type Pattern type for textured bar plots.
+#' @param radial_start_angle Starting angle for circular bar plots.
+#' @param label_inside Whether to place value labels inside bars.
+#' @param subtitle_text Subtitle text for the plot.
+#' @param source_text Source text for data attribution.
 #' @param export_options Whether to optimize plot for high-quality export.
 #' @param show_comparison Whether to show comparison grid of all 5
 #'   visualization approaches.
@@ -587,6 +655,12 @@ advancedbarplot <- function(
     add_trend_line = FALSE,
     highlight_bars = "",
     transparency = 0.9,
+    diverging_center = 0,
+    pattern_type = "none",
+    radial_start_angle = 0,
+    label_inside = FALSE,
+    subtitle_text = "",
+    source_text = "",
     export_options = TRUE,
     show_comparison = FALSE) {
 
@@ -636,6 +710,12 @@ advancedbarplot <- function(
         add_trend_line = add_trend_line,
         highlight_bars = highlight_bars,
         transparency = transparency,
+        diverging_center = diverging_center,
+        pattern_type = pattern_type,
+        radial_start_angle = radial_start_angle,
+        label_inside = label_inside,
+        subtitle_text = subtitle_text,
+        source_text = source_text,
         export_options = export_options,
         show_comparison = show_comparison)
 

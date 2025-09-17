@@ -18,7 +18,8 @@
 #' @importFrom ggplot2 theme_minimal theme_classic theme_bw labs scale_fill_brewer
 #' @importFrom ggplot2 scale_fill_viridis_d coord_flip geom_text element_text
 #' @importFrom ggplot2 theme element_rect element_line margin geom_errorbar
-#' @importFrom ggplot2 scale_fill_manual position_dodge theme_void annotate
+#' @importFrom ggplot2 scale_fill_manual position_dodge theme_void annotate coord_polar
+#' @importFrom ggplot2 geom_hline scale_color_identity
 #' @importFrom dplyr group_by summarise mutate arrange across all_of desc
 #' @importFrom plotly ggplotly plot_ly layout as_widget
 #' @importFrom RColorBrewer brewer.pal
@@ -57,6 +58,12 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "<li><strong>Statistical Annotations:</strong> Integrated statistical tests with automated annotations</li>",
                 "<li><strong>Interactive Plotly:</strong> Web-based interactive visualization for exploration</li>",
                 "<li><strong>Publication Ready:</strong> Journal-quality formatting meeting publication standards</li>",
+                "<li><strong>BBC News Style:</strong> Professional news graphics following BBC standards</li>",
+                "<li><strong>GraphPad Prism:</strong> Scientific publication style with Prism themes</li>",
+                "<li><strong>Diverging Bars:</strong> Emphasize positive/negative deviations from baseline</li>",
+                "<li><strong>Circular/Radial:</strong> Transform bars into engaging circular layouts</li>",
+                "<li><strong>Economist Style:</strong> Clean horizontal bars with smart labeling</li>",
+                "<li><strong>Pattern/Textured:</strong> Black & white friendly with patterns for accessibility</li>",
                 "</ol>",
                 "</div>",
                 "<div style='margin: 10px 0;'>",
@@ -90,7 +97,9 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 patchwork = requireNamespace("patchwork", quietly = TRUE),
                 gridExtra = requireNamespace("gridExtra", quietly = TRUE),
                 viridis = requireNamespace("viridis", quietly = TRUE),
-                scales = requireNamespace("scales", quietly = TRUE)
+                scales = requireNamespace("scales", quietly = TRUE),
+                ggpattern = requireNamespace("ggpattern", quietly = TRUE),
+                shadowtext = requireNamespace("shadowtext", quietly = TRUE)
             )
         },
 
@@ -379,6 +388,30 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     description = "Professional news graphics following BBC Visual and Data Journalism standards with Helvetica typography, BBC brand colors, and clean minimalist design.",
                     strengths = c("BBC design standards", "News-quality aesthetics", "Professional typography", "Brand consistency"),
                     use_case = "News reports, journalism, public communications, professional presentations"
+                ),
+                diverging = list(
+                    title = "Diverging Bar Plot Approach",
+                    description = "Emphasizes positive and negative deviations from a baseline value with contrasting colors, inspired by NYTimes data visualizations.",
+                    strengths = c("Clear positive/negative distinction", "Baseline emphasis", "Intuitive comparisons", "Change visualization"),
+                    use_case = "Before/after comparisons, profit/loss, survey responses, climate data"
+                ),
+                circular = list(
+                    title = "Circular/Radial Bar Plot Approach",
+                    description = "Transforms traditional bars into a circular layout using polar coordinates, creating visually striking radial visualizations.",
+                    strengths = c("Space efficient", "Visually engaging", "Cyclical data display", "360-degree comparison"),
+                    use_case = "Time-based cycles, seasonal data, directional data, dashboard displays"
+                ),
+                economist = list(
+                    title = "Economist Style Approach",
+                    description = "Clean horizontal bars with intelligent label placement following The Economist's data journalism standards.",
+                    strengths = c("Professional journalism style", "Smart labeling", "Red accent signature", "Horizontal readability"),
+                    use_case = "Economic reports, rankings, survey results, professional publications"
+                ),
+                pattern = list(
+                    title = "Pattern/Textured Bar Plot Approach",
+                    description = "Uses patterns and textures instead of colors for black & white printing and accessibility.",
+                    strengths = c("Printer friendly", "Colorblind accessible", "Pattern variety", "Publication ready"),
+                    use_case = "Black & white publications, accessibility requirements, scientific journals"
                 )
             )
 
@@ -583,7 +616,11 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 interactive = 'library(plotly)\np <- ggplot(data, aes(x = {x_var}, y = {y_var})) + geom_col()\nggplotly(p)',
                 publication = 'ggplot(data, aes(x = {x_var}, y = {y_var})) +\n  geom_col(fill = "steelblue", alpha = 0.7) +\n  theme_classic() +\n  theme(text = element_text(size = 12, family = "serif"))',
                 bbc_style = 'library(ggplot2)\nggplot(data, aes(x = {x_var}, y = {y_var})) +\n  geom_col(fill = "#1380A1") +\n  theme_minimal() +\n  theme(text = element_text(family = "Helvetica", size = 18))',
-                prism_style = 'library(ggprism)\nggplot(data, aes(x = {x_var}, y = {y_var})) +\n  geom_col() +\n  theme_prism() +\n  scale_fill_prism()'
+                prism_style = 'library(ggprism)\nggplot(data, aes(x = {x_var}, y = {y_var})) +\n  geom_col() +\n  theme_prism() +\n  scale_fill_prism()',
+                diverging = 'ggplot(data, aes(x = {x_var}, y = {y_var},\n       fill = ifelse({y_var} > 0, "positive", "negative"))) +\n  geom_col() +\n  geom_hline(yintercept = 0) +\n  scale_fill_manual(values = c("positive" = "#2ca02c", "negative" = "#d62728"))',
+                circular = 'ggplot(data, aes(x = {x_var}, y = {y_var})) +\n  geom_col() +\n  coord_polar(theta = "x") +\n  theme_minimal()',
+                economist = 'ggplot(data, aes(x = {x_var}, y = {y_var})) +\n  geom_col(fill = "#0073e6") +\n  coord_flip() +\n  theme_minimal() +\n  # Add smart labels inside/outside bars',
+                pattern = 'library(ggpattern)\nggplot(data, aes(x = {x_var}, y = {y_var})) +\n  geom_col_pattern(fill = "white", colour = "black",\n                   pattern_density = 0.5) +\n  theme_bw()'
             )
 
             code_template <- code_examples[[approach]]
@@ -740,6 +777,10 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     "publication" = private$.create_publication_plot(data, x_var, y_column, fill_var),
                     "bbc_style" = private$.create_bbc_style_plot(data, x_var, y_column, fill_var),
                     "prism_style" = private$.create_prism_style_plot(data, x_var, y_column, fill_var),
+                    "diverging" = private$.create_diverging_plot(data, x_var, y_column, fill_var),
+                    "circular" = private$.create_circular_plot(data, x_var, y_column, fill_var),
+                    "economist" = private$.create_economist_plot(data, x_var, y_column, fill_var),
+                    "pattern" = private$.create_pattern_plot(data, x_var, y_column, fill_var),
                     # Default fallback
                     private$.create_basic_plot(data, x_var, y_column, fill_var)
                 )
@@ -1001,6 +1042,257 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 subtitle = if (self$options$subtitle_text != "") self$options$subtitle_text else NULL,
                 caption = if (self$options$source_text != "") paste("Source:", self$options$source_text) else NULL
             )
+
+            return(plot)
+        },
+
+        .create_diverging_plot = function(data, x_var, y_column, fill_var) {
+            # Diverging bar plot implementation inspired by NYTimes style
+            center_value <- self$options$diverging_center
+
+            # Create base aesthetic
+            aes_mapping <- ggplot2::aes(
+                x = .data[[x_var]],
+                y = .data[[y_column]],
+                fill = ifelse(.data[[y_column]] > center_value, "positive", "negative"),
+                color = ifelse(.data[[y_column]] > center_value, "positive", "negative")
+            )
+
+            plot <- ggplot2::ggplot(data, aes_mapping) +
+                ggplot2::geom_col(width = self$options$bar_width, alpha = self$options$transparency) +
+                ggplot2::geom_hline(yintercept = center_value, linetype = "solid", color = "black", size = 0.5) +
+                ggplot2::scale_fill_manual(values = c("positive" = "#2ca02c", "negative" = "#d62728")) +
+                ggplot2::scale_color_manual(values = c("positive" = "#2ca02c", "negative" = "#d62728")) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    legend.position = "none",
+                    panel.grid.minor = ggplot2::element_blank(),
+                    panel.grid.major.x = ggplot2::element_blank(),
+                    text = ggplot2::element_text(size = 12),
+                    plot.title = ggplot2::element_text(size = 14, face = "bold")
+                )
+
+            # Add value labels with smart positioning
+            if (self$options$show_values) {
+                plot <- plot + ggplot2::geom_text(
+                    ggplot2::aes(
+                        label = private$.format_values(.data[[y_column]]),
+                        vjust = ifelse(.data[[y_column]] > center_value, -0.5, 1.5)
+                    ),
+                    size = 3.5
+                )
+            }
+
+            # Add reference line label
+            plot <- plot + ggplot2::annotate(
+                "text",
+                x = -Inf,
+                y = center_value,
+                label = paste("Baseline:", center_value),
+                hjust = -0.1,
+                vjust = -0.5,
+                size = 3,
+                color = "gray40"
+            )
+
+            return(plot)
+        },
+
+        .create_circular_plot = function(data, x_var, y_column, fill_var) {
+            # Circular/radial bar plot implementation
+            start_angle <- self$options$radial_start_angle
+
+            # Ensure x_var is a factor for proper ordering in circular plot
+            data[[x_var]] <- factor(data[[x_var]], levels = unique(data[[x_var]]))
+
+            # Create base aesthetic
+            aes_mapping <- private$.create_base_aesthetic(data, x_var, y_column, fill_var)
+
+            plot <- ggplot2::ggplot(data, aes_mapping) +
+                ggplot2::geom_col(
+                    width = self$options$bar_width,
+                    alpha = self$options$transparency
+                ) +
+                ggplot2::coord_polar(theta = "x", start = start_angle * pi / 180) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.y = ggplot2::element_blank(),
+                    axis.ticks = ggplot2::element_blank(),
+                    panel.grid.major.y = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank(),
+                    plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5),
+                    legend.position = self$options$legend_position
+                )
+
+            # Apply color palette
+            if (!is.null(fill_var) || self$options$color_palette != "default") {
+                plot <- private$.apply_color_palette(plot, self$options$color_palette)
+            }
+
+            # Add radial labels if requested
+            if (self$options$show_values) {
+                # Calculate label positions
+                n_bars <- nrow(data)
+                angles <- seq(start_angle, start_angle + 360 - 360/n_bars, length.out = n_bars)
+
+                plot <- plot + ggplot2::geom_text(
+                    ggplot2::aes(
+                        label = private$.format_values(.data[[y_column]]),
+                        y = .data[[y_column]] + max(data[[y_column]]) * 0.05
+                    ),
+                    size = 3,
+                    angle = 0
+                )
+            }
+
+            return(plot)
+        },
+
+        .create_economist_plot = function(data, x_var, y_column, fill_var) {
+            # Economist style horizontal bar plot with labels
+            aes_mapping <- private$.create_base_aesthetic(data, x_var, y_column, fill_var)
+
+            plot <- ggplot2::ggplot(data, aes_mapping) +
+                ggplot2::geom_col(
+                    width = self$options$bar_width,
+                    fill = "#0073e6",  # Economist blue
+                    alpha = 0.9
+                ) +
+                ggplot2::coord_flip() +  # Always horizontal for Economist style
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    # Economist specific styling
+                    text = ggplot2::element_text(family = "sans", size = 11),
+                    plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0),
+                    plot.subtitle = ggplot2::element_text(size = 12, color = "gray40", hjust = 0),
+                    plot.caption = ggplot2::element_text(size = 9, color = "gray50", hjust = 1),
+                    # Clean axes
+                    axis.title = ggplot2::element_blank(),
+                    axis.text.x = ggplot2::element_text(size = 10),
+                    axis.text.y = ggplot2::element_text(size = 10, face = "bold"),
+                    # Grid lines
+                    panel.grid.major.y = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank(),
+                    panel.grid.major.x = ggplot2::element_line(color = "gray80", size = 0.3),
+                    # Remove legend by default
+                    legend.position = "none"
+                )
+
+            # Add value labels intelligently positioned
+            if (self$options$show_values || self$options$label_inside) {
+                # Determine label position based on bar size
+                max_val <- max(data[[y_column]], na.rm = TRUE)
+                threshold <- max_val * 0.15  # Threshold for inside vs outside
+
+                plot <- plot + ggplot2::geom_text(
+                    ggplot2::aes(
+                        label = private$.format_values(.data[[y_column]]),
+                        x = .data[[x_var]],
+                        y = ifelse(.data[[y_column]] > threshold,
+                                  .data[[y_column]] * 0.95,  # Inside bar
+                                  .data[[y_column]] + max_val * 0.02),  # Outside bar
+                        hjust = ifelse(.data[[y_column]] > threshold, 1, 0),
+                        color = ifelse(.data[[y_column]] > threshold, "white", "black")
+                    ),
+                    size = 3.5,
+                    fontface = "bold"
+                ) +
+                ggplot2::scale_color_identity()
+            }
+
+            # Add red accent line (Economist signature)
+            plot <- plot + ggplot2::annotate(
+                "segment",
+                x = -Inf, xend = -Inf,
+                y = -Inf, yend = Inf,
+                color = "#d7282a",
+                size = 2
+            )
+
+            return(plot)
+        },
+
+        .create_pattern_plot = function(data, x_var, y_column, fill_var) {
+            # Pattern/textured bar plot for black & white printing
+            pattern_type <- self$options$pattern_type
+
+            # Check if ggpattern is available
+            if (requireNamespace("ggpattern", quietly = TRUE)) {
+                aes_mapping <- ggplot2::aes(
+                    x = .data[[x_var]],
+                    y = .data[[y_column]]
+                )
+
+                if (!is.null(fill_var) && fill_var != "") {
+                    aes_mapping$pattern = rlang::sym(fill_var)
+                }
+
+                plot <- ggplot2::ggplot(data, aes_mapping) +
+                    ggpattern::geom_col_pattern(
+                        aes(pattern = if (!is.null(fill_var)) .data[[fill_var]] else NULL),
+                        fill = 'white',
+                        colour = 'black',
+                        pattern_density = 0.5,
+                        pattern_fill = 'black',
+                        pattern_colour = 'darkgrey',
+                        width = self$options$bar_width
+                    ) +
+                    ggplot2::theme_bw() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 11),
+                        plot.title = ggplot2::element_text(size = 12, face = "bold"),
+                        legend.position = self$options$legend_position
+                    )
+
+                # Map pattern types if specified
+                if (pattern_type != "none" && pattern_type != "auto") {
+                    pattern_values <- switch(pattern_type,
+                        "stripe" = "stripe",
+                        "crosshatch" = "crosshatch",
+                        "dot" = "circle",
+                        "grid" = "grid",
+                        "wave" = "wave",
+                        "gradient" = "gradient",
+                        "stripe"  # default
+                    )
+
+                    if (!is.null(fill_var)) {
+                        n_categories <- length(unique(data[[fill_var]]))
+                        patterns <- rep(c("stripe", "crosshatch", "circle", "none"),
+                                      length.out = n_categories)
+                        plot <- plot + ggpattern::scale_pattern_manual(values = patterns)
+                    }
+                }
+            } else {
+                # Fallback to grayscale if ggpattern not available
+                warning("ggpattern package not found. Using grayscale fallback.")
+
+                aes_mapping <- private$.create_base_aesthetic(data, x_var, y_column, fill_var)
+
+                plot <- ggplot2::ggplot(data, aes_mapping) +
+                    ggplot2::geom_col(
+                        width = self$options$bar_width,
+                        color = "black",
+                        size = 0.5
+                    ) +
+                    ggplot2::scale_fill_grey(start = 0.2, end = 0.8) +
+                    ggplot2::theme_bw() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 11),
+                        plot.title = ggplot2::element_text(size = 12, face = "bold"),
+                        legend.position = self$options$legend_position
+                    )
+            }
+
+            # Add value labels
+            if (self$options$show_values) {
+                plot <- plot + ggplot2::geom_text(
+                    ggplot2::aes(label = private$.format_values(.data[[y_column]])),
+                    position = ggplot2::position_dodge(width = self$options$bar_width),
+                    vjust = -0.5,
+                    size = 3.5
+                )
+            }
 
             return(plot)
         },

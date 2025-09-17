@@ -86,6 +86,14 @@ options:
           name: bbc_style
         - title: "7. GraphPad Prism Style"
           name: prism_style
+        - title: "8. Diverging Bar Plot"
+          name: diverging
+        - title: "9. Circular/Radial Bar Plot"
+          name: circular
+        - title: "10. Economist Style"
+          name: economist
+        - title: "11. Pattern/Textured"
+          name: pattern
       default: polished
       description:
         R: Choose the bar chart approach and styling.
@@ -414,6 +422,71 @@ options:
       description:
         R: Transparency level for bars (alpha value).
         jamovi: Adjust transparency of bars.
+
+    - name: diverging_center
+      title: "Diverging Center Value"
+      type: Number
+      default: 0
+      description:
+        R: Center value for diverging bar plots.
+        jamovi: Value at which to center diverging bars (typically 0).
+
+    - name: pattern_type
+      title: "Pattern Type"
+      type: List
+      options:
+        - title: "No Pattern"
+          name: none
+        - title: "Stripes"
+          name: stripe
+        - title: "Crosshatch"
+          name: crosshatch
+        - title: "Dots"
+          name: dot
+        - title: "Grid"
+          name: grid
+        - title: "Wave"
+          name: wave
+        - title: "Gradient"
+          name: gradient
+      default: none
+      description:
+        R: Pattern type for textured bar plots.
+        jamovi: Add patterns/textures to bars for black & white printing.
+
+    - name: radial_start_angle
+      title: "Radial Start Angle"
+      type: Number
+      min: 0
+      max: 360
+      default: 0
+      description:
+        R: Starting angle for circular bar plots.
+        jamovi: Angle from which circular bars start (in degrees).
+
+    - name: label_inside
+      title: "Labels Inside Bars"
+      type: Bool
+      default: false
+      description:
+        R: Whether to place value labels inside bars.
+        jamovi: Place value labels inside bars (useful for horizontal layouts).
+
+    - name: subtitle_text
+      title: "Subtitle"
+      type: String
+      default: ""
+      description:
+        R: Subtitle text for the plot.
+        jamovi: Optional subtitle under main title.
+
+    - name: source_text
+      title: "Source Citation"
+      type: String
+      default: ""
+      description:
+        R: Source text for data attribution.
+        jamovi: Data source citation for publication.
 
     - name: export_options
       title: "Export Ready"

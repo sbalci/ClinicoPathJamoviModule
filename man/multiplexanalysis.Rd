@@ -7,11 +7,11 @@
 multiplexanalysis(
   data,
   marker_vars,
-  x_coord,
-  y_coord,
-  cell_type_var,
-  sample_id_var,
-  group_var,
+  x_coord = NULL,
+  y_coord = NULL,
+  cell_type_var = NULL,
+  sample_id_var = NULL,
+  group_var = NULL,
   analysis_focus = "comprehensive",
   correlation_method = "pearson",
   positivity_cutpoint = 0.1,
@@ -105,6 +105,7 @@ A results object containing:
 \code{results$qualitycontrol$batcheffects} \tab \tab \tab \tab \tab Analysis of systematic technical variation \cr
 \code{results$advancedanalysis$networkanalysis} \tab \tab \tab \tab \tab Network-based marker interaction analysis \cr
 \code{results$advancedanalysis$pathwayenrichment} \tab \tab \tab \tab \tab Biological pathway associations \cr
+\code{results$clinicalreport} \tab \tab \tab \tab \tab Copy-ready clinical interpretation and summary \cr
 \code{results$exportdata} \tab \tab \tab \tab \tab Formatted data for external analysis \cr
 }
 

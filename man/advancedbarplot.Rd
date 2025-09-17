@@ -32,6 +32,12 @@ advancedbarplot(
   add_trend_line = FALSE,
   highlight_bars = "",
   transparency = 0.9,
+  diverging_center = 0,
+  pattern_type = "none",
+  radial_start_angle = 0,
+  label_inside = FALSE,
+  subtitle_text = "",
+  source_text = "",
   export_options = TRUE,
   show_comparison = FALSE
 )
@@ -93,6 +99,18 @@ Prism themes.}
 \item{highlight_bars}{Comma-separated list of categories to highlight.}
 
 \item{transparency}{Transparency level for bars (alpha value).}
+
+\item{diverging_center}{Center value for diverging bar plots.}
+
+\item{pattern_type}{Pattern type for textured bar plots.}
+
+\item{radial_start_angle}{Starting angle for circular bar plots.}
+
+\item{label_inside}{Whether to place value labels inside bars.}
+
+\item{subtitle_text}{Subtitle text for the plot.}
+
+\item{source_text}{Source text for data attribution.}
 
 \item{export_options}{Whether to optimize plot for high-quality export.}
 

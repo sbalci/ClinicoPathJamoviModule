@@ -4,7 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # Variables Section
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -37,8 +36,6 @@ children:
             name: facet_var
             maxItemCount: 1
             isTarget: true
-
-  # Main Chart Approach Section
   - type: Label
     label: Chart Approach & Style
   - type: LayoutBox
@@ -56,8 +53,6 @@ children:
     children:
       - type: ComboBox
         name: theme_style
-
-  # Data & Statistics Section
   - type: CollapseBox
     label: Data & Statistics
     collapsed: false
@@ -93,8 +88,6 @@ children:
         children:
           - type: ComboBox
             name: sort_bars
-
-  # Display Options Section
   - type: CollapseBox
     label: Display Options
     collapsed: true
@@ -120,8 +113,6 @@ children:
         children:
           - type: ComboBox
             name: legend_position
-
-  # Plot Customization Section
   - type: CollapseBox
     label: Plot Customization
     collapsed: true
@@ -156,8 +147,6 @@ children:
           - type: TextBox
             name: transparency
             format: number
-
-  # Advanced Options Section
   - type: CollapseBox
     label: Advanced Options
     collapsed: true
@@ -190,8 +179,12 @@ children:
         children:
           - type: CheckBox
             name: export_options
-
-  # Comparison Section
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: diverging_center
+        format: number
   - type: CollapseBox
     label: Comparison & Export
     collapsed: true
@@ -201,3 +194,31 @@ children:
         children:
           - type: CheckBox
             name: show_comparison
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: pattern_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: radial_start_angle
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: label_inside
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: subtitle_text
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: source_text
+        format: string
