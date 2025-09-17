@@ -1,7 +1,7 @@
 ---
 name: labcontrolcharts
 title: Laboratory Control Charts (Shewhart, CUSUM, EWMA)
-menuGroup: ClinicoPathDescriptivesD
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 description:

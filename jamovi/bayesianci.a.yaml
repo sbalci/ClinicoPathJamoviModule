@@ -1,7 +1,7 @@
 ---
 name: bayesianci
 title: Bayesian Confidence Intervals (Credible Intervals)
-menuGroup: ClinicoPathDescriptivesD
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 description:

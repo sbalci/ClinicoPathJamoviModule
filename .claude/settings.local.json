@@ -53,7 +53,8 @@
       "Bash(yamllint:*)",
       "WebFetch(domain:www.riinu.me)",
       "Bash(do echo \"=== Checking .$func ===\")",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Read(//Users/serdarbalci/Documents/GitHub/jPwrSS/**)"
     ],
     "deny": [],
     "ask": [],

@@ -1,4 +1,5 @@
 #' @title IHC Diagnostic Analysis
+#' @name ihcdiagnostic
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom cluster daisy pam

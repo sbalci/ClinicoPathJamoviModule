@@ -1,7 +1,7 @@
 ---
 name: extratrees
 title: Extremely Randomized Trees for Survival
-menuGroup: jsurvivalD
+menuGroup: SurvivalD
 menuSubgroup: Machine Learning
 menuSubtitle: Ultra-fast random forest with extreme randomization
 version: '0.0.31'

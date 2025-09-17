@@ -1,7 +1,7 @@
 ---
 name: sigmametrics
 title: Six Sigma Metrics for Laboratory Performance
-menuGroup: ClinicoPathDescriptivesD
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 description:

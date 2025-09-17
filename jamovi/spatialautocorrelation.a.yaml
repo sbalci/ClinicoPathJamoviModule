@@ -1,7 +1,7 @@
 ---
 name: spatialautocorrelation
 title: Spatial Autocorrelation Analysis (Moran's I, Geary's C)
-menuGroup: ClinicoPathDescriptivesD
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 description:

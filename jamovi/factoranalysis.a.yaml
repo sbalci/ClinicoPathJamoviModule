@@ -1,7 +1,7 @@
 ---
 name: factoranalysis
 title: Comprehensive Factor Analysis
-menuGroup: ClinicoPathDescriptives
+menuGroup: ClinicoPathD
 menuSubgroup: Multivariate Analysis
 menuSubtitle: "Factor analysis with BlueSky integration"
 version: '0.0.31'

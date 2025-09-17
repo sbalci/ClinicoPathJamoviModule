@@ -1,7 +1,7 @@
 ---
 name: explainableai
 title: Explainable AI Analysis
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: Advanced AI
 menuSubtitle: Model Interpretability
 version: '1.0.0'
