@@ -1,7 +1,7 @@
 ---
 name: gradientboosting
 title: Gradient Boosting for Survival Analysis
-menuGroup: jsurvivalD
+menuGroup: SurvivalD
 menuSubgroup: Machine Learning
 menuSubtitle: Ensemble learning with boosted survival trees
 version: '0.0.31'

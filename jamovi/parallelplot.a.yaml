@@ -1,10 +1,10 @@
 ---
 name:  parallelplot
 title: Parallel Coordinates Plot
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: ClinicoPath Descriptive Plots
 menuSubtitle: Multivariate Exploration
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 options:

@@ -1,6 +1,6 @@
 name: smoothhazard
 title: Smooth Hazard Estimation & Analysis
-menuGroup: ClinicoPathD Survival
+menuGroup: SurvivalD
 version: '1.0.0'
 jas: '1.2'
 

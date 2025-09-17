@@ -1,10 +1,10 @@
 ---
 name: jviolin
 title: Professional Violin Plot
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: Distribution Plots
 menuSubtitle: Advanced Violin Plots for Data Distribution
-version: '1.0.0'
+version: '0.0.31'
 jas: '1.2'
 description:
     main: |

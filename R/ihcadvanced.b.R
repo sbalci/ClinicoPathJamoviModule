@@ -1,4 +1,5 @@
 #' @title Advanced IHC Clustering Analysis
+#' @name ihcadvanced
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom stats prcomp kmeans dist hclust cutree sd

@@ -1,7 +1,7 @@
 ---
 name: mixedeffectscox
 title: Mixed-Effects Cox Models
-menuGroup: ClinicoPathD Survival
+menuGroup: SurvivalD
 version: '1.0.0'
 jas: '1.2'
 

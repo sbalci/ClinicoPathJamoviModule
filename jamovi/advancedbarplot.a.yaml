@@ -1,10 +1,10 @@
 ---
 name: advancedbarplot
 title: "Advanced Bar Charts - 5 Ways"
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: ClinicoPath Advanced Plots
 menuSubtitle: "Professional Bar Charts with Multiple Approaches"
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

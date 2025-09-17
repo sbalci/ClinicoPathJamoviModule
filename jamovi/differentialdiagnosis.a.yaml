@@ -1,8 +1,8 @@
 ---
 name: differentialdiagnosis
 title: Differential Diagnosis Assistance
-menuGroup: ClinicoPathD
-version: '1.0.0'
+menuGroup: meddecideT
+version: '0.0.31'
 jas: '1.2'
 
 description:

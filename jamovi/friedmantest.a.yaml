@@ -1,7 +1,7 @@
 ---
 name: friedmantest
 title: Friedman Test for Non-Parametric Repeated Measures
-menuGroup: ClinicoPathDescriptivesD
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 description:

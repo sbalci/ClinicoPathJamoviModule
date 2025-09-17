@@ -1,7 +1,7 @@
 ---
 name: effectsize
 title: Comprehensive Effect Size Analysis
-menuGroup: ClinicoPathDescriptives
+menuGroup: ClinicoPathD
 menuSubgroup: Statistical Tests
 menuSubtitle: "Complete effect size toolkit with BlueSky integration"
 version: '0.0.31'

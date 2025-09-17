@@ -1,6 +1,6 @@
 name: survivalmodelvalidation
 title: Enhanced Survival Model Validation
-menuGroup: ClinicoPathD Survival
+menuGroup: SurvivalD
 menuSubgroup: Advanced Validation
 menuSubtitle: 'Comprehensive Model Performance Assessment'
 version: '1.0.0'
