@@ -12,8 +12,7 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             complete_cases_only = FALSE,
             visual_analysis = TRUE,
             visdat_type = "vis_dat",
-            missing_threshold_visual = 10,
-            export_plots = FALSE, ...) {
+            missing_threshold_visual = 10, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -56,10 +55,6 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 min=0,
                 max=100,
                 default=10)
-            private$..export_plots <- jmvcore::OptionBool$new(
-                "export_plots",
-                export_plots,
-                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..check_duplicates)
@@ -68,7 +63,6 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..visual_analysis)
             self$.addOption(private$..visdat_type)
             self$.addOption(private$..missing_threshold_visual)
-            self$.addOption(private$..export_plots)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -77,8 +71,7 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         complete_cases_only = function() private$..complete_cases_only$value,
         visual_analysis = function() private$..visual_analysis$value,
         visdat_type = function() private$..visdat_type$value,
-        missing_threshold_visual = function() private$..missing_threshold_visual$value,
-        export_plots = function() private$..export_plots$value),
+        missing_threshold_visual = function() private$..missing_threshold_visual$value),
     private = list(
         ..vars = NA,
         ..check_duplicates = NA,
@@ -86,8 +79,7 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..complete_cases_only = NA,
         ..visual_analysis = NA,
         ..visdat_type = NA,
-        ..missing_threshold_visual = NA,
-        ..export_plots = NA)
+        ..missing_threshold_visual = NA)
 )
 
 dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -114,11 +106,15 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="text",
                 title="Data Quality Summary"))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Data Quality Visualization",
-                visible="(check_duplicates || check_missing)"))}))
+                width=600,
+                height=450,
+                renderFun=".plotVisdat",
+                visible="(visual_analysis)",
+                requiresData=TRUE))}))
 
 dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dataqualityBase",
@@ -141,7 +137,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Data Quality Assessment
+#' Multi-Variable Visual Quality
 #'
 #' This module provides data quality assessment including duplicate detection,
 #' missing value analysis, and data completeness summary (similar to sumvar's 
@@ -171,13 +167,11 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   visdat.
 #' @param missing_threshold_visual Threshold percentage for highlighting
 #'   variables with missing values in visual analysis.
-#' @param export_plots Enable export functionality for visual data quality
-#'   plots.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -189,8 +183,7 @@ dataquality <- function(
     complete_cases_only = FALSE,
     visual_analysis = TRUE,
     visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE) {
+    missing_threshold_visual = 10) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataquality requires jmvcore to be installed (restart may be required)")
@@ -209,8 +202,7 @@ dataquality <- function(
         complete_cases_only = complete_cases_only,
         visual_analysis = visual_analysis,
         visdat_type = visdat_type,
-        missing_threshold_visual = missing_threshold_visual,
-        export_plots = export_plots)
+        missing_threshold_visual = missing_threshold_visual)
 
     analysis <- dataqualityClass$new(
         options = options,

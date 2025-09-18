@@ -19,7 +19,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (length(self$options$vars) == 0) {
             intro_msg <- "
             <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-            <h3 style='color: #2e7d32; margin-top: 0;'>🔍 Welcome to Enhanced Data Quality Assessment!</h3>
+            <h3 style='color: #2e7d32; margin-top: 0;'>Welcome to Enhanced Data Quality Assessment!</h3>
             <p><strong>Comprehensive data quality analysis</strong> with visual exploration capabilities</p>
             <p>Enhanced with <strong>visdat integration</strong> based on autoEDA research (R Journal 2019)</p>
 
@@ -41,7 +41,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             </ul>
 
             <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-            💡 <em>Enhanced with visdat package - unique visual data exploration (68,978+ downloads)</em>
+            <em>Enhanced with visdat package - unique visual data exploration (68,978+ downloads)</em>
             </p>
             </div>"
             self$results$todo$setContent(intro_msg)
@@ -140,14 +140,13 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         final_results <- paste(unlist(quality_results), collapse = "<br><br>")
         self$results$text$setContent(final_results)
 
-        # Enhanced visualization with visdat or fallback to gt summary
+        # Set plot state for visdat visualization
         if (self$options$visual_analysis) {
-            private$.generate_visdat_plots(analysis_data)
-        } else if (self$options$check_duplicates || self$options$check_missing) {
-            plot_dataset <- analysis_data %>%
-                gtExtras::gt_plt_summary()
-            plot_html <- htmltools::HTML(print(plot_dataset)[["children"]][[2]])
-            self$results$plot$setContent(plot_html)
+            plotData <- list(
+                data = analysis_data,
+                visdat_type = self$options$visdat_type
+            )
+            self$results$plot$setState(plotData)
         }
 
     },
@@ -172,7 +171,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Generate visual analysis summary
         header_html <- paste0(
             "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-            "<h3 style='color: #1976d2; margin-top: 0;'>👁️ Visual Data Exploration (visdat)</h3>",
+            "<h3 style='color: #1976d2; margin-top: 0;'>Visual Data Exploration (visdat)</h3>",
             "<p>Advanced visual data quality assessment - Based on autoEDA research</p>",
             "<p><strong>Analysis Type:</strong> ",
             switch(visdat_type,
@@ -193,7 +192,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         overview_html <- paste0(
             "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-            "<h4 style='color: #333; margin-top: 0;'>📊 Visual Analysis Overview</h4>",
+            "<h4 style='color: #333; margin-top: 0;'>Visual Analysis Overview</h4>",
             "<table style='width: 100%; border-collapse: collapse;'>",
             "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Variables:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", n_vars, "</td></tr>",
             "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Observations:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", n_obs, "</td></tr>",
@@ -214,7 +213,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         insights_html <- paste0(
             "<div style='background-color: #fff8e1; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-            "<h4 style='color: #f57f17; margin-top: 0;'>🔍 Visual Analysis Insights</h4>"
+            "<h4 style='color: #f57f17; margin-top: 0;'>Visual Analysis Insights</h4>"
         )
 
         if (visdat_type %in% c("vis_dat", "all_visual")) {
@@ -267,7 +266,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Add recommendations
         insights_html <- paste0(insights_html,
-            "<p><strong>💡 Recommendations:</strong></p>",
+            "<p><strong>Recommendations:</strong></p>",
             "<ul>",
             "<li>Review visual plots below for detailed patterns</li>",
             "<li>Address missing value issues before analysis</li>",
@@ -279,92 +278,59 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         return(insights_html)
     },
 
-    .generate_visdat_plots = function(data) {
-        # Generate visdat plots based on options
+    .plotVisdat = function(image, ggtheme, theme, ...) {
+        # Get plot state
+        plotData <- image$state
 
-        if (!requireNamespace("visdat", quietly = TRUE)) {
-            error_html <- paste0(
-                "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                "<h4>visdat Package Not Available</h4>",
-                "<p>Visual plots require the visdat package.</p>",
-                "</div>"
-            )
-            self$results$plot$setContent(error_html)
-            return()
+        if (is.null(plotData)) {
+            return(FALSE)
         }
 
-        visdat_type <- self$options$visdat_type
+        # Check if visdat package is available
+        if (!requireNamespace("visdat", quietly = TRUE)) {
+            return(FALSE)
+        }
+
+        data <- plotData$data
+        visdat_type <- plotData$visdat_type
+
+        if (is.null(data) || nrow(data) == 0) {
+            return(FALSE)
+        }
 
         tryCatch({
-
-            # Generate appropriate visdat plot
+            # Generate the appropriate visdat plot
             if (visdat_type == "vis_dat" || visdat_type == "all_visual") {
                 # Data overview plot
-                plot_html <- paste0(
-                    "<div style='background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #333; margin-top: 0;'>📊 Data Overview Visualization</h4>",
-                    "<p>Visual representation of variable types and missing values using <code>visdat::vis_dat()</code></p>",
-                    "<p><em>Each cell represents a data point, colored by type and missing values are highlighted.</em></p>",
-                    "</div>"
-                )
+                plot <- visdat::vis_dat(data)
 
             } else if (visdat_type == "vis_miss") {
                 # Missing value pattern plot
-                plot_html <- paste0(
-                    "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #f57c00; margin-top: 0;'>🔍 Missing Value Patterns</h4>",
-                    "<p>Visual analysis of missing value patterns using <code>visdat::vis_miss()</code></p>",
-                    "<p><em>Missing values are highlighted to reveal patterns and clustering.</em></p>",
-                    "</div>"
-                )
+                plot <- visdat::vis_miss(data)
 
             } else if (visdat_type == "vis_guess") {
                 # Data type guessing plot
-                plot_html <- paste0(
-                    "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #7b1fa2; margin-top: 0;'>🔢 Data Type Analysis</h4>",
-                    "<p>Visual data type detection using <code>visdat::vis_guess()</code></p>",
-                    "<p><em>Shows guessed data types for each variable to validate data structure.</em></p>",
-                    "</div>"
-                )
+                plot <- visdat::vis_guess(data)
 
             } else if (visdat_type == "vis_expect") {
-                # Value expectation plot
-                plot_html <- paste0(
-                    "<div style='background-color: #e1f5fe; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #0277bd; margin-top: 0;'>⚡ Value Expectations</h4>",
-                    "<p>Expected vs actual value patterns using <code>visdat::vis_expect()</code></p>",
-                    "<p><em>Highlights unexpected values that may indicate data quality issues.</em></p>",
-                    "</div>"
-                )
+                # Value expectation plot - default to vis_dat
+                plot <- visdat::vis_dat(data)
+
+            } else {
+                # Default to data overview
+                plot <- visdat::vis_dat(data)
             }
 
-            # Add export information if enabled
-            if (self$options$export_plots) {
-                plot_html <- paste0(plot_html,
-                    "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #2e7d32; margin-top: 0;'>📄 Plot Export Ready</h4>",
-                    "<p>Visual plots are ready for export. Use visdat functions to generate high-quality plots:</p>",
-                    "<ul>",
-                    "<li><code>visdat::vis_dat(data)</code> - Data overview</li>",
-                    "<li><code>visdat::vis_miss(data)</code> - Missing patterns</li>",
-                    "<li><code>visdat::vis_guess(data)</code> - Type detection</li>",
-                    "</ul>",
-                    "</div>"
-                )
-            }
+            # Apply jamovi theme
+            plot <- plot + ggtheme
 
-            self$results$plot$setContent(plot_html)
+            # Print the plot
+            print(plot)
+            return(TRUE)
 
         }, error = function(e) {
-            error_html <- paste0(
-                "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                "<h4>visdat Visualization Error</h4>",
-                "<p>Error generating visual plots: ", e$message, "</p>",
-                "<p><em>Please check your data and try again.</em></p>",
-                "</div>"
-            )
-            self$results$plot$setContent(error_html)
+            warning(paste("visdat plot generation failed:", e$message))
+            return(FALSE)
         })
     }
 

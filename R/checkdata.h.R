@@ -62,8 +62,10 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "checkdataResults",
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         qualityText = function() private$.items[["qualityText"]],
         missingVals = function() private$.items[["missingVals"]],
+        noOutliers = function() private$.items[["noOutliers"]],
         outliers = function() private$.items[["outliers"]],
         distribution = function() private$.items[["distribution"]],
         duplicates = function() private$.items[["duplicates"]],
@@ -74,9 +76,13 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Data Quality Assessment",
+                title="Single Variable Quality Check",
                 refs=list(
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="Getting Started"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="qualityText",
@@ -99,6 +105,11 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="noOutliers",
+                title="Outlier Detection (Z-Score > 3)",
+                visible="(showOutliers)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outliers",
@@ -188,7 +199,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "checkdata",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = checkdataResults$new(options=options),
                 data = data,
@@ -201,7 +212,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Data Quality Assessment
+#' Single Variable Quality Check
 #'
 #' 
 #' @param data .
@@ -215,8 +226,10 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   distributions.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$noOutliers} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$outliers} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr

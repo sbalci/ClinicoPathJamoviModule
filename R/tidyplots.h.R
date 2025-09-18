@@ -15,15 +15,23 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pointType = "basic",
             lineType = "direct",
             barType = "mean",
+            stackType = "absolute",
             showMean = FALSE,
             meanType = "dash",
             showMedian = FALSE,
             medianType = "dash",
+            showSum = FALSE,
+            sumType = "dash",
+            showCount = FALSE,
+            countType = "dash",
             showSEM = FALSE,
+            semType = "errorbar",
             showSD = FALSE,
+            sdType = "errorbar",
             showCI = FALSE,
             ciType = "errorbar",
             showRange = FALSE,
+            rangeType = "errorbar",
             showDistribution = FALSE,
             distributionType = "density",
             showOutliers = TRUE,
@@ -32,6 +40,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             areaType = "absolute",
             showPValue = FALSE,
             showSignificance = FALSE,
+            showReferenceLines = FALSE,
+            referenceX = "",
+            referenceY = "",
             colorScheme = "friendly",
             alpha = 1,
             fontSize = 12,
@@ -39,14 +50,24 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             xLabel = "",
             yLabel = "",
             legendTitle = "",
+            plotCaption = "",
+            plotWidth = 20,
+            plotHeight = 20,
+            pointShape = 16,
             removeLegend = FALSE,
+            removeLegendTitle = FALSE,
             removePadding = FALSE,
             removeXAxis = FALSE,
             removeXAxisLabels = FALSE,
             removeXAxisTitle = FALSE,
             removeYAxis = FALSE,
             removeYAxisLabels = FALSE,
-            removeYAxisTitle = FALSE, ...) {
+            removeYAxisTitle = FALSE,
+            sortXAxisLabels = FALSE,
+            reverseXAxisLabels = FALSE,
+            plotTheme = "default",
+            removeXAxisLine = FALSE,
+            removeYAxisLine = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -105,11 +126,16 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "points",
                     "line",
                     "bar",
+                    "barstack",
                     "boxplot",
                     "violin",
                     "histogram",
                     "area",
-                    "density"),
+                    "areastack",
+                    "pie",
+                    "donut",
+                    "heatmap",
+                    "ellipse"),
                 default="points")
             private$..pointType <- jmvcore::OptionList$new(
                 "pointType",
@@ -134,8 +160,16 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "mean",
                     "median",
-                    "count"),
+                    "count",
+                    "sum"),
                 default="mean")
+            private$..stackType <- jmvcore::OptionList$new(
+                "stackType",
+                stackType,
+                options=list(
+                    "absolute",
+                    "relative"),
+                default="absolute")
             private$..showMean <- jmvcore::OptionBool$new(
                 "showMean",
                 showMean,
@@ -160,14 +194,52 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dot",
                     "value"),
                 default="dash")
+            private$..showSum <- jmvcore::OptionBool$new(
+                "showSum",
+                showSum,
+                default=FALSE)
+            private$..sumType <- jmvcore::OptionList$new(
+                "sumType",
+                sumType,
+                options=list(
+                    "dash",
+                    "dot",
+                    "value"),
+                default="dash")
+            private$..showCount <- jmvcore::OptionBool$new(
+                "showCount",
+                showCount,
+                default=FALSE)
+            private$..countType <- jmvcore::OptionList$new(
+                "countType",
+                countType,
+                options=list(
+                    "dash",
+                    "dot",
+                    "value"),
+                default="dash")
             private$..showSEM <- jmvcore::OptionBool$new(
                 "showSEM",
                 showSEM,
                 default=FALSE)
+            private$..semType <- jmvcore::OptionList$new(
+                "semType",
+                semType,
+                options=list(
+                    "errorbar",
+                    "ribbon"),
+                default="errorbar")
             private$..showSD <- jmvcore::OptionBool$new(
                 "showSD",
                 showSD,
                 default=FALSE)
+            private$..sdType <- jmvcore::OptionList$new(
+                "sdType",
+                sdType,
+                options=list(
+                    "errorbar",
+                    "ribbon"),
+                default="errorbar")
             private$..showCI <- jmvcore::OptionBool$new(
                 "showCI",
                 showCI,
@@ -183,6 +255,13 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showRange",
                 showRange,
                 default=FALSE)
+            private$..rangeType <- jmvcore::OptionList$new(
+                "rangeType",
+                rangeType,
+                options=list(
+                    "errorbar",
+                    "ribbon"),
+                default="errorbar")
             private$..showDistribution <- jmvcore::OptionBool$new(
                 "showDistribution",
                 showDistribution,
@@ -223,6 +302,18 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showSignificance",
                 showSignificance,
                 default=FALSE)
+            private$..showReferenceLines <- jmvcore::OptionBool$new(
+                "showReferenceLines",
+                showReferenceLines,
+                default=FALSE)
+            private$..referenceX <- jmvcore::OptionString$new(
+                "referenceX",
+                referenceX,
+                default="")
+            private$..referenceY <- jmvcore::OptionString$new(
+                "referenceY",
+                referenceY,
+                default="")
             private$..colorScheme <- jmvcore::OptionList$new(
                 "colorScheme",
                 colorScheme,
@@ -230,6 +321,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "friendly",
                     "seaside",
                     "apple",
+                    "custom",
                     "rainbow",
                     "viridis",
                     "inferno",
@@ -266,9 +358,35 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "legendTitle",
                 legendTitle,
                 default="")
+            private$..plotCaption <- jmvcore::OptionString$new(
+                "plotCaption",
+                plotCaption,
+                default="")
+            private$..plotWidth <- jmvcore::OptionInteger$new(
+                "plotWidth",
+                plotWidth,
+                default=20,
+                min=10,
+                max=100)
+            private$..plotHeight <- jmvcore::OptionInteger$new(
+                "plotHeight",
+                plotHeight,
+                default=20,
+                min=10,
+                max=100)
+            private$..pointShape <- jmvcore::OptionInteger$new(
+                "pointShape",
+                pointShape,
+                default=16,
+                min=0,
+                max=25)
             private$..removeLegend <- jmvcore::OptionBool$new(
                 "removeLegend",
                 removeLegend,
+                default=FALSE)
+            private$..removeLegendTitle <- jmvcore::OptionBool$new(
+                "removeLegendTitle",
+                removeLegendTitle,
                 default=FALSE)
             private$..removePadding <- jmvcore::OptionBool$new(
                 "removePadding",
@@ -298,6 +416,33 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "removeYAxisTitle",
                 removeYAxisTitle,
                 default=FALSE)
+            private$..sortXAxisLabels <- jmvcore::OptionBool$new(
+                "sortXAxisLabels",
+                sortXAxisLabels,
+                default=FALSE)
+            private$..reverseXAxisLabels <- jmvcore::OptionBool$new(
+                "reverseXAxisLabels",
+                reverseXAxisLabels,
+                default=FALSE)
+            private$..plotTheme <- jmvcore::OptionList$new(
+                "plotTheme",
+                plotTheme,
+                options=list(
+                    "default",
+                    "tidyplot",
+                    "ggplot2",
+                    "minimal_x",
+                    "minimal_y",
+                    "minimal_xy"),
+                default="default")
+            private$..removeXAxisLine <- jmvcore::OptionBool$new(
+                "removeXAxisLine",
+                removeXAxisLine,
+                default=FALSE)
+            private$..removeYAxisLine <- jmvcore::OptionBool$new(
+                "removeYAxisLine",
+                removeYAxisLine,
+                default=FALSE)
 
             self$.addOption(private$..xvar)
             self$.addOption(private$..yvar)
@@ -308,15 +453,23 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pointType)
             self$.addOption(private$..lineType)
             self$.addOption(private$..barType)
+            self$.addOption(private$..stackType)
             self$.addOption(private$..showMean)
             self$.addOption(private$..meanType)
             self$.addOption(private$..showMedian)
             self$.addOption(private$..medianType)
+            self$.addOption(private$..showSum)
+            self$.addOption(private$..sumType)
+            self$.addOption(private$..showCount)
+            self$.addOption(private$..countType)
             self$.addOption(private$..showSEM)
+            self$.addOption(private$..semType)
             self$.addOption(private$..showSD)
+            self$.addOption(private$..sdType)
             self$.addOption(private$..showCI)
             self$.addOption(private$..ciType)
             self$.addOption(private$..showRange)
+            self$.addOption(private$..rangeType)
             self$.addOption(private$..showDistribution)
             self$.addOption(private$..distributionType)
             self$.addOption(private$..showOutliers)
@@ -325,6 +478,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..areaType)
             self$.addOption(private$..showPValue)
             self$.addOption(private$..showSignificance)
+            self$.addOption(private$..showReferenceLines)
+            self$.addOption(private$..referenceX)
+            self$.addOption(private$..referenceY)
             self$.addOption(private$..colorScheme)
             self$.addOption(private$..alpha)
             self$.addOption(private$..fontSize)
@@ -332,7 +488,12 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..xLabel)
             self$.addOption(private$..yLabel)
             self$.addOption(private$..legendTitle)
+            self$.addOption(private$..plotCaption)
+            self$.addOption(private$..plotWidth)
+            self$.addOption(private$..plotHeight)
+            self$.addOption(private$..pointShape)
             self$.addOption(private$..removeLegend)
+            self$.addOption(private$..removeLegendTitle)
             self$.addOption(private$..removePadding)
             self$.addOption(private$..removeXAxis)
             self$.addOption(private$..removeXAxisLabels)
@@ -340,6 +501,11 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..removeYAxis)
             self$.addOption(private$..removeYAxisLabels)
             self$.addOption(private$..removeYAxisTitle)
+            self$.addOption(private$..sortXAxisLabels)
+            self$.addOption(private$..reverseXAxisLabels)
+            self$.addOption(private$..plotTheme)
+            self$.addOption(private$..removeXAxisLine)
+            self$.addOption(private$..removeYAxisLine)
         }),
     active = list(
         xvar = function() private$..xvar$value,
@@ -351,15 +517,23 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pointType = function() private$..pointType$value,
         lineType = function() private$..lineType$value,
         barType = function() private$..barType$value,
+        stackType = function() private$..stackType$value,
         showMean = function() private$..showMean$value,
         meanType = function() private$..meanType$value,
         showMedian = function() private$..showMedian$value,
         medianType = function() private$..medianType$value,
+        showSum = function() private$..showSum$value,
+        sumType = function() private$..sumType$value,
+        showCount = function() private$..showCount$value,
+        countType = function() private$..countType$value,
         showSEM = function() private$..showSEM$value,
+        semType = function() private$..semType$value,
         showSD = function() private$..showSD$value,
+        sdType = function() private$..sdType$value,
         showCI = function() private$..showCI$value,
         ciType = function() private$..ciType$value,
         showRange = function() private$..showRange$value,
+        rangeType = function() private$..rangeType$value,
         showDistribution = function() private$..showDistribution$value,
         distributionType = function() private$..distributionType$value,
         showOutliers = function() private$..showOutliers$value,
@@ -368,6 +542,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         areaType = function() private$..areaType$value,
         showPValue = function() private$..showPValue$value,
         showSignificance = function() private$..showSignificance$value,
+        showReferenceLines = function() private$..showReferenceLines$value,
+        referenceX = function() private$..referenceX$value,
+        referenceY = function() private$..referenceY$value,
         colorScheme = function() private$..colorScheme$value,
         alpha = function() private$..alpha$value,
         fontSize = function() private$..fontSize$value,
@@ -375,14 +552,24 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         xLabel = function() private$..xLabel$value,
         yLabel = function() private$..yLabel$value,
         legendTitle = function() private$..legendTitle$value,
+        plotCaption = function() private$..plotCaption$value,
+        plotWidth = function() private$..plotWidth$value,
+        plotHeight = function() private$..plotHeight$value,
+        pointShape = function() private$..pointShape$value,
         removeLegend = function() private$..removeLegend$value,
+        removeLegendTitle = function() private$..removeLegendTitle$value,
         removePadding = function() private$..removePadding$value,
         removeXAxis = function() private$..removeXAxis$value,
         removeXAxisLabels = function() private$..removeXAxisLabels$value,
         removeXAxisTitle = function() private$..removeXAxisTitle$value,
         removeYAxis = function() private$..removeYAxis$value,
         removeYAxisLabels = function() private$..removeYAxisLabels$value,
-        removeYAxisTitle = function() private$..removeYAxisTitle$value),
+        removeYAxisTitle = function() private$..removeYAxisTitle$value,
+        sortXAxisLabels = function() private$..sortXAxisLabels$value,
+        reverseXAxisLabels = function() private$..reverseXAxisLabels$value,
+        plotTheme = function() private$..plotTheme$value,
+        removeXAxisLine = function() private$..removeXAxisLine$value,
+        removeYAxisLine = function() private$..removeYAxisLine$value),
     private = list(
         ..xvar = NA,
         ..yvar = NA,
@@ -393,15 +580,23 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pointType = NA,
         ..lineType = NA,
         ..barType = NA,
+        ..stackType = NA,
         ..showMean = NA,
         ..meanType = NA,
         ..showMedian = NA,
         ..medianType = NA,
+        ..showSum = NA,
+        ..sumType = NA,
+        ..showCount = NA,
+        ..countType = NA,
         ..showSEM = NA,
+        ..semType = NA,
         ..showSD = NA,
+        ..sdType = NA,
         ..showCI = NA,
         ..ciType = NA,
         ..showRange = NA,
+        ..rangeType = NA,
         ..showDistribution = NA,
         ..distributionType = NA,
         ..showOutliers = NA,
@@ -410,6 +605,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..areaType = NA,
         ..showPValue = NA,
         ..showSignificance = NA,
+        ..showReferenceLines = NA,
+        ..referenceX = NA,
+        ..referenceY = NA,
         ..colorScheme = NA,
         ..alpha = NA,
         ..fontSize = NA,
@@ -417,14 +615,24 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..xLabel = NA,
         ..yLabel = NA,
         ..legendTitle = NA,
+        ..plotCaption = NA,
+        ..plotWidth = NA,
+        ..plotHeight = NA,
+        ..pointShape = NA,
         ..removeLegend = NA,
+        ..removeLegendTitle = NA,
         ..removePadding = NA,
         ..removeXAxis = NA,
         ..removeXAxisLabels = NA,
         ..removeXAxisTitle = NA,
         ..removeYAxis = NA,
         ..removeYAxisLabels = NA,
-        ..removeYAxisTitle = NA)
+        ..removeYAxisTitle = NA,
+        ..sortXAxisLabels = NA,
+        ..reverseXAxisLabels = NA,
+        ..plotTheme = NA,
+        ..removeXAxisLine = NA,
+        ..removeYAxisLine = NA)
 )
 
 tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -459,8 +667,8 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Plot",
                 renderFun=".plot",
                 requiresData=TRUE,
-                width=800,
-                height=600,
+                width=1600,
+                height=1000,
                 clearWith=list(
                     "xvar",
                     "yvar",
@@ -471,16 +679,24 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "pointType",
                     "lineType",
                     "barType",
+                    "stackType",
                     "areaType",
                     "showMean",
                     "meanType",
                     "showMedian",
                     "medianType",
+                    "showSum",
+                    "sumType",
+                    "showCount",
+                    "countType",
                     "showSEM",
+                    "semType",
                     "showSD",
+                    "sdType",
                     "showCI",
                     "ciType",
                     "showRange",
+                    "rangeType",
                     "showDistribution",
                     "distributionType",
                     "showOutliers",
@@ -488,6 +704,9 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "histogramBins",
                     "showPValue",
                     "showSignificance",
+                    "showReferenceLines",
+                    "referenceX",
+                    "referenceY",
                     "colorScheme",
                     "alpha",
                     "fontSize",
@@ -495,14 +714,24 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "xLabel",
                     "yLabel",
                     "legendTitle",
+                    "plotCaption",
+                    "plotWidth",
+                    "plotHeight",
+                    "pointShape",
                     "removeLegend",
+                    "removeLegendTitle",
                     "removePadding",
                     "removeXAxis",
                     "removeXAxisLabels",
                     "removeXAxisTitle",
                     "removeYAxis",
                     "removeYAxisLabels",
-                    "removeYAxisTitle")))}))
+                    "removeYAxisTitle",
+                    "sortXAxisLabels",
+                    "reverseXAxisLabels",
+                    "plotTheme",
+                    "removeXAxisLine",
+                    "removeYAxisLine")))}))
 
 tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "tidyplotsBase",
@@ -543,15 +772,23 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pointType .
 #' @param lineType .
 #' @param barType .
+#' @param stackType .
 #' @param showMean .
 #' @param meanType .
 #' @param showMedian .
 #' @param medianType .
+#' @param showSum .
+#' @param sumType .
+#' @param showCount .
+#' @param countType .
 #' @param showSEM .
+#' @param semType .
 #' @param showSD .
+#' @param sdType .
 #' @param showCI .
 #' @param ciType .
 #' @param showRange .
+#' @param rangeType .
 #' @param showDistribution .
 #' @param distributionType .
 #' @param showOutliers .
@@ -560,6 +797,9 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param areaType .
 #' @param showPValue .
 #' @param showSignificance .
+#' @param showReferenceLines .
+#' @param referenceX .
+#' @param referenceY .
 #' @param colorScheme .
 #' @param alpha .
 #' @param fontSize .
@@ -567,7 +807,12 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param xLabel .
 #' @param yLabel .
 #' @param legendTitle .
+#' @param plotCaption .
+#' @param plotWidth .
+#' @param plotHeight .
+#' @param pointShape .
 #' @param removeLegend .
+#' @param removeLegendTitle .
 #' @param removePadding .
 #' @param removeXAxis .
 #' @param removeXAxisLabels .
@@ -575,6 +820,11 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param removeYAxis .
 #' @param removeYAxisLabels .
 #' @param removeYAxisTitle .
+#' @param sortXAxisLabels .
+#' @param reverseXAxisLabels .
+#' @param plotTheme .
+#' @param removeXAxisLine .
+#' @param removeYAxisLine .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -593,15 +843,23 @@ tidyplots <- function(
     pointType = "basic",
     lineType = "direct",
     barType = "mean",
+    stackType = "absolute",
     showMean = FALSE,
     meanType = "dash",
     showMedian = FALSE,
     medianType = "dash",
+    showSum = FALSE,
+    sumType = "dash",
+    showCount = FALSE,
+    countType = "dash",
     showSEM = FALSE,
+    semType = "errorbar",
     showSD = FALSE,
+    sdType = "errorbar",
     showCI = FALSE,
     ciType = "errorbar",
     showRange = FALSE,
+    rangeType = "errorbar",
     showDistribution = FALSE,
     distributionType = "density",
     showOutliers = TRUE,
@@ -610,6 +868,9 @@ tidyplots <- function(
     areaType = "absolute",
     showPValue = FALSE,
     showSignificance = FALSE,
+    showReferenceLines = FALSE,
+    referenceX = "",
+    referenceY = "",
     colorScheme = "friendly",
     alpha = 1,
     fontSize = 12,
@@ -617,14 +878,24 @@ tidyplots <- function(
     xLabel = "",
     yLabel = "",
     legendTitle = "",
+    plotCaption = "",
+    plotWidth = 20,
+    plotHeight = 20,
+    pointShape = 16,
     removeLegend = FALSE,
+    removeLegendTitle = FALSE,
     removePadding = FALSE,
     removeXAxis = FALSE,
     removeXAxisLabels = FALSE,
     removeXAxisTitle = FALSE,
     removeYAxis = FALSE,
     removeYAxisLabels = FALSE,
-    removeYAxisTitle = FALSE) {
+    removeYAxisTitle = FALSE,
+    sortXAxisLabels = FALSE,
+    reverseXAxisLabels = FALSE,
+    plotTheme = "default",
+    removeXAxisLine = FALSE,
+    removeYAxisLine = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tidyplots requires jmvcore to be installed (restart may be required)")
@@ -654,15 +925,23 @@ tidyplots <- function(
         pointType = pointType,
         lineType = lineType,
         barType = barType,
+        stackType = stackType,
         showMean = showMean,
         meanType = meanType,
         showMedian = showMedian,
         medianType = medianType,
+        showSum = showSum,
+        sumType = sumType,
+        showCount = showCount,
+        countType = countType,
         showSEM = showSEM,
+        semType = semType,
         showSD = showSD,
+        sdType = sdType,
         showCI = showCI,
         ciType = ciType,
         showRange = showRange,
+        rangeType = rangeType,
         showDistribution = showDistribution,
         distributionType = distributionType,
         showOutliers = showOutliers,
@@ -671,6 +950,9 @@ tidyplots <- function(
         areaType = areaType,
         showPValue = showPValue,
         showSignificance = showSignificance,
+        showReferenceLines = showReferenceLines,
+        referenceX = referenceX,
+        referenceY = referenceY,
         colorScheme = colorScheme,
         alpha = alpha,
         fontSize = fontSize,
@@ -678,14 +960,24 @@ tidyplots <- function(
         xLabel = xLabel,
         yLabel = yLabel,
         legendTitle = legendTitle,
+        plotCaption = plotCaption,
+        plotWidth = plotWidth,
+        plotHeight = plotHeight,
+        pointShape = pointShape,
         removeLegend = removeLegend,
+        removeLegendTitle = removeLegendTitle,
         removePadding = removePadding,
         removeXAxis = removeXAxis,
         removeXAxisLabels = removeXAxisLabels,
         removeXAxisTitle = removeXAxisTitle,
         removeYAxis = removeYAxis,
         removeYAxisLabels = removeYAxisLabels,
-        removeYAxisTitle = removeYAxisTitle)
+        removeYAxisTitle = removeYAxisTitle,
+        sortXAxisLabels = sortXAxisLabels,
+        reverseXAxisLabels = reverseXAxisLabels,
+        plotTheme = plotTheme,
+        removeXAxisLine = removeXAxisLine,
+        removeYAxisLine = removeYAxisLine)
 
     analysis <- tidyplotsClass$new(
         options = options,

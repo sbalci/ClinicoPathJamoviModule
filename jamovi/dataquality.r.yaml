@@ -14,8 +14,12 @@ items:
 
     - name: plot
       title: Data Quality Visualization
-      type: Html
-      visible: (check_duplicates || check_missing)
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotVisdat
+      visible: (visual_analysis)
+      requiresData: true
 
 
 refs:

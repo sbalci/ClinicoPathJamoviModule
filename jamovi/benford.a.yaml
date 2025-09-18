@@ -1,7 +1,7 @@
 ---
 name:  benford
 title: Benford Analysis
-menuGroup: ExplorationT2
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'

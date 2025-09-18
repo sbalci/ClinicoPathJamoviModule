@@ -1,9 +1,13 @@
 ---
 name: checkdata
-title: Data Quality Assessment
+title: Single Variable Quality Check
 jrs: '1.1'
 
 items:
+    - name: todo
+      title: Getting Started
+      type: Html
+
     - name: qualityText
       title: Quality Assessment Summary
       type: Preformatted
@@ -23,9 +27,14 @@ items:
           title: "Interpretation"
           type: text
 
+    - name: noOutliers
+      title: Outlier Detection (Z-Score > 3)
+      type: Html
+      visible: (showOutliers)
+
     - name: outliers
       title: Outlier Detection (Z-Score > 3)
-      type: Table 
+      type: Table
       visible: (showOutliers)
       rows: 0
       columns:
@@ -33,7 +42,7 @@ items:
           title: "Row"
           type: integer
         - name: value
-          title: "Value"  
+          title: "Value"
           type: number
         - name: zscore
           title: "Z-Score"
