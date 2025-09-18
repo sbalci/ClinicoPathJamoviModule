@@ -1,7 +1,7 @@
 ---
 name: dataquality
 title: Data Quality Assessment
-menuGroup: ExplorationT
+menuGroup: ExplorationT2
 menuSubgroup: ClinicoPath Descriptives
 version: '0.0.3'
 jas: '1.2'

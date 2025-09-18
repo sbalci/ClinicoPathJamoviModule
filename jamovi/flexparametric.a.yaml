@@ -1,7 +1,7 @@
 ---
 name: flexparametric
 title: Flexible Parametric Survival Models (Enhanced)
-menuGroup: SurvivalT
+menuGroup: SurvivalT2
 menuSubgroup: Survival Analysis
 version: '2.0.0'
 jas: '1.2'

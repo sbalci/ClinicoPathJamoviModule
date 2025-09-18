@@ -1,7 +1,7 @@
 ---
 name:  classification
 title: Clinical Classification
-menuGroup: ExplorationT2
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Predictions
 menuSubtitle: Classification Analysis
 version: '0.0.3'

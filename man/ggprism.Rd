@@ -114,6 +114,11 @@ styling and formatting.}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions_check} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretation_guide} \tab \tab \tab \tab \tab a html \cr
+\code{results$report_sentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$statistical_glossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$main_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$palette_preview} \tab \tab \tab \tab \tab an image \cr
 \code{results$publication_plot} \tab \tab \tab \tab \tab an image \cr
@@ -123,6 +128,7 @@ A results object containing:
 \code{results$palette_information} \tab \tab \tab \tab \tab a html \cr
 \code{results$export_code} \tab \tab \tab \tab \tab a html \cr
 \code{results$accessibility_notes} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinical_presets} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

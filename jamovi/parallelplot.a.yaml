@@ -51,12 +51,6 @@ options:
       default: false
       description: Include cases with missing values
 
-    - name: interactive
-      title: Interactive Plot
-      type: Bool
-      default: true
-      description: Create interactive plotly visualization
-
     - name: colorPalette
       title: Color Palette
       type: List

@@ -11,7 +11,6 @@ parallelplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             scaling = "std",
             alpha = 0.7,
             showMissing = FALSE,
-            interactive = TRUE,
             colorPalette = "default", ...) {
 
             super$initialize(
@@ -46,10 +45,6 @@ parallelplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "showMissing",
                 showMissing,
                 default=FALSE)
-            private$..interactive <- jmvcore::OptionBool$new(
-                "interactive",
-                interactive,
-                default=TRUE)
             private$..colorPalette <- jmvcore::OptionList$new(
                 "colorPalette",
                 colorPalette,
@@ -65,7 +60,6 @@ parallelplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..scaling)
             self$.addOption(private$..alpha)
             self$.addOption(private$..showMissing)
-            self$.addOption(private$..interactive)
             self$.addOption(private$..colorPalette)
         }),
     active = list(
@@ -74,7 +68,6 @@ parallelplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         scaling = function() private$..scaling$value,
         alpha = function() private$..alpha$value,
         showMissing = function() private$..showMissing$value,
-        interactive = function() private$..interactive$value,
         colorPalette = function() private$..colorPalette$value),
     private = list(
         ..vars = NA,
@@ -82,7 +75,6 @@ parallelplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..scaling = NA,
         ..alpha = NA,
         ..showMissing = NA,
-        ..interactive = NA,
         ..colorPalette = NA)
 )
 
@@ -92,7 +84,6 @@ parallelplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         instructions = function() private$.items[["instructions"]],
         plot = function() private$.items[["plot"]],
-        plotly = function() private$.items[["plotly"]],
         summary = function() private$.items[["summary"]]),
     private = list(),
     public=list(
@@ -116,11 +107,6 @@ parallelplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 height=600,
                 renderFun=".plot",
                 visible="(vars:length > 1)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="plotly",
-                title="Interactive Plot",
-                visible="(interactive && vars:length > 1)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -165,7 +151,7 @@ parallelplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "parallelplot",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = parallelplotResults$new(options=options),
                 data = data,
@@ -187,13 +173,11 @@ parallelplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param scaling Method for scaling variables to comparable ranges
 #' @param alpha Transparency level for parallel coordinate lines
 #' @param showMissing Include cases with missing values
-#' @param interactive Create interactive plotly visualization
 #' @param colorPalette Color scheme for grouping variable
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plotly} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
@@ -211,7 +195,6 @@ parallelplot <- function(
     scaling = "std",
     alpha = 0.7,
     showMissing = FALSE,
-    interactive = TRUE,
     colorPalette = "default") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -232,7 +215,6 @@ parallelplot <- function(
         scaling = scaling,
         alpha = alpha,
         showMissing = showMissing,
-        interactive = interactive,
         colorPalette = colorPalette)
 
     analysis <- parallelplotClass$new(

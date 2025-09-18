@@ -1,7 +1,7 @@
 ---
 name: multiclassdiagnostics
 title: Multi-class Diagnostic Performance Evaluation
-menuGroup: meddecideT2
+menuGroup: meddecideD
 menuSubgroup: Diagnostic Performance
 menuTitle: Multi-class Diagnostics
 version: '0.0.31'

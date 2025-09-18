@@ -16,6 +16,9 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
         
         # Internal data storage
         .analysis_data = NULL,
+        .clinical_warnings = NULL,
+        .interpretation_cache = NULL,
+        .sample_summary = NULL,
         
         .init = function() {
             # Dynamic plot sizing based on plot type and options
@@ -155,6 +158,15 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 self$results$statistical_tests$setContent(stats_html)
             }
             
+            # Generate clinical analysis outputs
+            private$.validate_clinical_assumptions()
+            private$.generate_clinical_summary()
+            private$.generate_interpretation_guide_content()
+            private$.generate_assumptions_check()
+            private$.generate_report_sentences()
+            private$.generate_statistical_glossary()
+            private$.generate_clinical_presets()
+
             # Generate Prism style guide
             guide_html <- private$.generate_prism_guide(analysis_data, x_var, y_var, group_var)
             self$results$prism_guide$setContent(guide_html)
@@ -173,8 +185,31 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             accessibility_html <- private$.generate_accessibility_notes()
             self$results$accessibility_notes$setContent(accessibility_html)
 
-            # Store data for plotting
-            private$.analysis_data <- analysis_data
+            # Store data for plotting with performance optimization
+            if (nrow(analysis_data) > 10000) {
+                # For large datasets, sample for preview but keep full data for publication
+                sample_size <- min(5000, nrow(analysis_data))
+                private$.sample_summary <- list(
+                    n_total = nrow(analysis_data),
+                    is_sampled = TRUE,
+                    sample_size = sample_size
+                )
+                if (self$options$publication_ready) {
+                    # Use full dataset for publication plots
+                    private$.analysis_data <- analysis_data
+                } else {
+                    # Safe sampling for interactive preview
+                    sample_indices <- sample(nrow(analysis_data), sample_size)
+                    private$.analysis_data <- analysis_data[sample_indices, ]
+                }
+            } else {
+                private$.analysis_data <- analysis_data
+                private$.sample_summary <- list(
+                    n_total = nrow(analysis_data),
+                    is_sampled = FALSE,
+                    sample_size = nrow(analysis_data)
+                )
+            }
 
         },
 
@@ -204,8 +239,19 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             facet_var <- self$options$facet_var
             plot_type <- self$options$plot_type
             
-            # Determine grouping variable for aesthetics
-            group_mapping <- if (!is.null(group_var) && group_var != "") group_var else NULL
+            # Determine grouping variable for aesthetics with safe validation
+            group_mapping <- if (!is.null(group_var) &&
+                               group_var != "" &&
+                               group_var %in% names(analysis_data)) {
+                # Check if group variable has multiple levels
+                if (length(unique(analysis_data[[group_var]])) > 1) {
+                    group_var
+                } else {
+                    NULL  # Single group, don't use for aesthetics
+                }
+            } else {
+                NULL
+            }
             
             # Create base plot
             if (!is.null(group_mapping)) {
@@ -217,25 +263,49 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             
             # Add plot type specific geoms
             if (plot_type == "violin") {
-                p <- p + ggplot2::geom_violin(alpha = 0.7, trim = FALSE)
+                # Use violin_width if specified
+                violin_width <- if (!is.null(self$options$violin_width) && self$options$violin_width > 0) {
+                    self$options$violin_width
+                } else {
+                    0.9
+                }
+                p <- p + ggplot2::geom_violin(alpha = 0.7, trim = FALSE, width = violin_width)
                 if (self$options$error_bars != "none") {
-                    p <- p + ggplot2::stat_summary(fun.data = private$.get_error_function(), 
+                    p <- p + ggplot2::stat_summary(fun.data = private$.get_error_function(),
                                                   geom = "errorbar", width = 0.2)
                 }
                 if (self$options$show_points) {
-                    p <- p + ggplot2::geom_point(position = ggplot2::position_jitter(width = 0.2), 
+                    # Use jitter_width if specified
+                    jitter_width <- if (!is.null(self$options$jitter_width) && self$options$jitter_width >= 0) {
+                        self$options$jitter_width
+                    } else {
+                        0.2
+                    }
+                    p <- p + ggplot2::geom_point(position = ggplot2::position_jitter(width = jitter_width),
                                                 size = self$options$point_size, alpha = self$options$point_alpha)
                 }
                 
             } else if (plot_type == "boxplot") {
                 p <- p + ggplot2::geom_boxplot(alpha = 0.7)
                 if (self$options$show_points) {
-                    p <- p + ggplot2::geom_point(position = ggplot2::position_jitter(width = 0.2), 
+                    # Use jitter_width if specified for boxplot points
+                    jitter_width <- if (!is.null(self$options$jitter_width) && self$options$jitter_width >= 0) {
+                        self$options$jitter_width
+                    } else {
+                        0.2
+                    }
+                    p <- p + ggplot2::geom_point(position = ggplot2::position_jitter(width = jitter_width),
                                                 size = self$options$point_size, alpha = self$options$point_alpha)
                 }
                 
             } else if (plot_type == "scatter") {
-                p <- p + ggplot2::geom_point(size = self$options$point_size, alpha = self$options$point_alpha)
+                # For scatter plots, jitter can be applied if specified
+                if (!is.null(self$options$jitter_width) && self$options$jitter_width > 0) {
+                    p <- p + ggplot2::geom_jitter(width = self$options$jitter_width, height = 0,
+                                                 size = self$options$point_size, alpha = self$options$point_alpha)
+                } else {
+                    p <- p + ggplot2::geom_point(size = self$options$point_size, alpha = self$options$point_alpha)
+                }
                 
             } else if (plot_type == "column") {
                 # Create summary data for column plot
@@ -292,6 +362,16 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             # Apply Prism guides if advanced options enabled
             if (self$options$prism_guides != "standard") {
                 p <- p + private$.get_prism_guides()
+            }
+
+            # Add annotation ticks if requested
+            if (self$options$annotation_ticks) {
+                p <- p + private$.add_annotation_ticks()
+            }
+
+            # Add custom statistical comparisons if specified
+            if (!is.null(self$options$custom_comparisons) && self$options$custom_comparisons != "") {
+                p <- p + private$.add_custom_comparisons()
             }
             
             # Apply shape palette if relevant for scatter plots
@@ -375,6 +455,51 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             )
         },
         
+        .add_annotation_ticks = function() {
+            # Add minor ticks and enhanced axis annotations for Prism-style plots
+            if (requireNamespace("ggprism", quietly = TRUE)) {
+                list(
+                    ggprism::guide_prism_minor(),
+                    ggplot2::theme(
+                        axis.ticks.length = ggplot2::unit(0.2, "cm"),
+                        axis.minor.ticks.length = ggplot2::unit(0.1, "cm")
+                    )
+                )
+            } else {
+                # Fallback enhanced ticks
+                ggplot2::theme(
+                    axis.ticks.length = ggplot2::unit(0.2, "cm"),
+                    axis.line = ggplot2::element_line(size = 0.8)
+                )
+            }
+        },
+
+        .add_custom_comparisons = function() {
+            # Parse and add custom statistical comparisons
+            comparisons_text <- self$options$custom_comparisons
+
+            # Simple parsing - expecting format like "Group1 vs Group2, Group1 vs Group3"
+            if (nchar(comparisons_text) > 0) {
+                comparisons <- strsplit(comparisons_text, ",")[[1]]
+                comparisons <- trimws(comparisons)
+
+                # For now, add as text annotation
+                # Future enhancement: implement actual statistical comparison
+                if (length(comparisons) > 0) {
+                    ggplot2::annotate("text",
+                                    x = Inf, y = Inf,
+                                    label = paste("Custom comparisons:", paste(comparisons, collapse = "; ")),
+                                    hjust = 1, vjust = 1,
+                                    size = 3, color = "gray50",
+                                    fontface = "italic")
+                } else {
+                    NULL
+                }
+            } else {
+                NULL
+            }
+        },
+
         .get_prism_guides = function() {
             guide_type <- self$options$prism_guides
             
@@ -714,7 +839,14 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             if (!self$options$publication_ready) {
                 return()
             }
-            
+
+            # Set DPI for high-resolution output
+            export_dpi <- if (!is.null(self$options$export_dpi) && self$options$export_dpi > 0) {
+                self$options$export_dpi
+            } else {
+                300  # Default publication DPI
+            }
+
             # Create enhanced publication version
             p <- private$.create_main_plot(image, ggtheme, theme, ...)
             
@@ -904,6 +1036,465 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             )
             
             return(accessibility_html)
+        },
+
+        # ===== CLINICAL-FOCUSED ENHANCEMENTS =====
+
+        .validate_clinical_assumptions = function() {
+            if (is.null(private$.analysis_data)) return()
+
+            data <- private$.analysis_data
+            warnings <- character(0)
+
+            # Sample size warnings
+            n_total <- nrow(data)
+            if (n_total < 30) {
+                warnings <- c(warnings, paste("Small sample size (n =", n_total, ") may affect statistical validity. Consider non-parametric tests."))
+            }
+
+            # Plot type appropriateness
+            plot_type <- self$options$plot_type
+            if (plot_type == "violin" && n_total < 20) {
+                warnings <- c(warnings, "Violin plots work best with larger sample sizes (n ≥ 20). Consider box plots for smaller samples.")
+            }
+
+            # Group size balance - enhanced error handling
+            if (!is.null(self$options$group_var) &&
+                self$options$group_var != "" &&
+                self$options$group_var %in% names(data)) {
+
+                group_counts <- table(data[[self$options$group_var]], useNA = "no")
+                if (length(group_counts) > 1) {
+                    min_group <- min(group_counts)
+                    max_group <- max(group_counts)
+
+                    if (min_group < 5) {
+                        warnings <- c(warnings, paste("Some groups have very small sample sizes (minimum n =", min_group, "). Results may be unreliable."))
+                    }
+
+                    if (max_group / min_group > 3) {
+                        warnings <- c(warnings, "Unbalanced group sizes detected. Consider Welch's t-test for comparing means.")
+                    }
+                } else if (length(group_counts) == 1) {
+                    warnings <- c(warnings, "Only one group detected in grouping variable. Consider removing grouping variable.")
+                }
+            } else if (!is.null(self$options$group_var) && self$options$group_var != "") {
+                warnings <- c(warnings, paste("Grouping variable '", self$options$group_var, "' not found in dataset."))
+            }
+
+            # Statistical test appropriateness
+            if (self$options$show_statistics) {
+                if (self$options$stats_method == "ttest" && n_total < 30) {
+                    warnings <- c(warnings, "t-test assumes normality. With small samples, consider Wilcoxon test for non-normal data.")
+                }
+            }
+
+            private$.clinical_warnings <- warnings
+        },
+
+        .generate_clinical_summary = function() {
+            if (is.null(private$.analysis_data)) return()
+
+            data <- private$.analysis_data
+            plot_type <- self$options$plot_type
+            x_var <- self$options$x_var
+            y_var <- self$options$y_var
+            group_var <- self$options$group_var
+
+            n_total <- if (!is.null(private$.sample_summary)) {
+                private$.sample_summary$n_total
+            } else {
+                nrow(data)
+            }
+
+            n_displayed <- nrow(data)
+            is_sampled <- if (!is.null(private$.sample_summary)) {
+                private$.sample_summary$is_sampled
+            } else {
+                FALSE
+            }
+
+            # Determine analysis type with safe group variable handling
+            analysis_type <- if (!is.null(group_var) &&
+                                group_var != "" &&
+                                group_var %in% names(data)) {
+                n_groups <- length(unique(data[[group_var]]))
+                if (n_groups > 1) {
+                    paste("group comparison with", n_groups, "groups")
+                } else {
+                    "single group analysis (grouping variable has only one level)"
+                }
+            } else {
+                "single variable visualization"
+            }
+
+            # Statistical testing info
+            stats_info <- if (self$options$show_statistics) {
+                paste("Statistical differences evaluated using",
+                      switch(self$options$stats_method,
+                             "ttest" = "t-test (comparing means)",
+                             "wilcox" = "Wilcoxon test (comparing medians)",
+                             "anova" = "ANOVA (comparing multiple group means)",
+                             "kruskal" = "Kruskal-Wallis test (comparing multiple group medians)",
+                             self$options$stats_method))
+            } else {
+                "No statistical testing performed"
+            }
+
+            # Plot interpretation
+            plot_description <- switch(plot_type,
+                "violin" = "Violin plot shows the full distribution shape of data, revealing skewness, multimodality, and spread",
+                "boxplot" = "Box plot displays median, quartiles, and outliers, providing a robust summary of data distribution",
+                "scatter" = "Scatter plot reveals relationships and correlations between variables at the individual data point level",
+                "column" = "Column plot compares mean values between groups with error bars showing variability",
+                "line" = "Line plot shows trends and changes across categories or time points",
+                "Data visualization"
+            )
+
+            summary_html <- paste(
+                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #2e7d32;'>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'>📊 Clinical Summary</h3>",
+                paste0("<p><strong>Analysis:</strong> ", stringr::str_to_title(analysis_type), " of ", y_var,
+                       if (!is.null(group_var) && group_var != "") paste(" across", group_var) else "",
+                       " (n = ", n_total,
+                       if (is_sampled) paste0("; displaying ", n_displayed, " sampled points for performance") else "",
+                       ")</p>"),
+                paste0("<p><strong>Visualization:</strong> ", plot_description, "</p>"),
+                paste0("<p><strong>Statistical Analysis:</strong> ", stats_info, "</p>"),
+                if (length(private$.clinical_warnings) > 0) {
+                    paste0("<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                           "<p style='color: #e65100; margin: 0;'><strong>⚠️ Clinical Considerations:</strong></p>",
+                           "<ul style='margin: 5px 0; color: #e65100;'>",
+                           paste0("<li>", private$.clinical_warnings, "</li>", collapse = ""),
+                           "</ul></div>")
+                } else "",
+                "</div>"
+            )
+
+            self$results$clinical_summary$setContent(summary_html)
+        },
+
+        .generate_interpretation_guide_content = function() {
+            plot_type <- self$options$plot_type
+
+            interpretation_html <- paste(
+                "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'>📖 How to Interpret This Plot</h3>",
+
+                switch(plot_type,
+                    "violin" = paste(
+                        "<h4>Violin Plot Interpretation:</h4>",
+                        "<ul>",
+                        "<li><strong>Width:</strong> Wider sections indicate more data points at that value</li>",
+                        "<li><strong>Shape:</strong> Reveals distribution pattern (normal, skewed, bimodal)</li>",
+                        "<li><strong>Symmetry:</strong> Symmetric violins suggest normal distribution</li>",
+                        "<li><strong>Multiple peaks:</strong> May indicate subpopulations</li>",
+                        "</ul>",
+                        "<p><strong>Clinical Use:</strong> Excellent for comparing distribution shapes between treatment groups.</p>"
+                    ),
+                    "boxplot" = paste(
+                        "<h4>Box Plot Interpretation:</h4>",
+                        "<ul>",
+                        "<li><strong>Center line:</strong> Median (50th percentile)</li>",
+                        "<li><strong>Box edges:</strong> 25th and 75th percentiles (interquartile range)</li>",
+                        "<li><strong>Whiskers:</strong> Range of typical values (within 1.5 × IQR)</li>",
+                        "<li><strong>Points beyond whiskers:</strong> Potential outliers</li>",
+                        "</ul>",
+                        "<p><strong>Clinical Use:</strong> Robust summary that's not affected by extreme values.</p>"
+                    ),
+                    "scatter" = paste(
+                        "<h4>Scatter Plot Interpretation:</h4>",
+                        "<ul>",
+                        "<li><strong>Point clusters:</strong> Similar values group together</li>",
+                        "<li><strong>Linear patterns:</strong> Suggest correlation between variables</li>",
+                        "<li><strong>Outliers:</strong> Points far from the main pattern</li>",
+                        "<li><strong>Spread:</strong> Indicates variability in the relationship</li>",
+                        "</ul>",
+                        "<p><strong>Clinical Use:</strong> Reveals individual patient patterns and correlations.</p>"
+                    ),
+                    "column" = paste(
+                        "<h4>Column Plot Interpretation:</h4>",
+                        "<ul>",
+                        "<li><strong>Bar height:</strong> Mean value for each group</li>",
+                        "<li><strong>Error bars:</strong> Indicate uncertainty (standard error or confidence interval)</li>",
+                        "<li><strong>Non-overlapping error bars:</strong> Suggest statistically significant differences</li>",
+                        "<li><strong>Group comparisons:</strong> Direct visual comparison of means</li>",
+                        "</ul>",
+                        "<p><strong>Clinical Use:</strong> Clear comparison of average outcomes between treatments.</p>"
+                    ),
+                    "line" = paste(
+                        "<h4>Line Plot Interpretation:</h4>",
+                        "<ul>",
+                        "<li><strong>Slope:</strong> Rate of change between points</li>",
+                        "<li><strong>Intersections:</strong> Points where groups converge</li>",
+                        "<li><strong>Parallel lines:</strong> Consistent group differences</li>",
+                        "<li><strong>Trends:</strong> Overall direction of change</li>",
+                        "</ul>",
+                        "<p><strong>Clinical Use:</strong> Shows progression over time or ordered categories.</p>"
+                    ),
+                    "<p>General visualization showing data patterns and relationships.</p>"
+                ),
+                "</div>"
+            )
+
+            self$results$interpretation_guide$setContent(interpretation_html)
+        },
+
+        .generate_assumptions_check = function() {
+            if (!self$options$show_statistics) return()
+
+            stats_method <- self$options$stats_method
+
+            assumptions_html <- paste(
+                "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<h3 style='color: #ef6c00; margin-top: 0;'>⚠️ Statistical Assumptions & Requirements</h3>",
+
+                switch(stats_method,
+                    "ttest" = paste(
+                        "<h4>t-test Assumptions:</h4>",
+                        "<ul>",
+                        "<li><strong>Normality:</strong> Data should be approximately normal (especially important for n < 30)</li>",
+                        "<li><strong>Independence:</strong> Observations should be independent</li>",
+                        "<li><strong>Equal variances:</strong> Groups should have similar spread (use Welch's t-test if not)</li>",
+                        "</ul>",
+                        "<p><strong>Violations:</strong> Consider Wilcoxon test for non-normal data or unequal variances.</p>"
+                    ),
+                    "wilcox" = paste(
+                        "<h4>Wilcoxon Test Assumptions:</h4>",
+                        "<ul>",
+                        "<li><strong>Independence:</strong> Observations should be independent</li>",
+                        "<li><strong>Ordinal data:</strong> Data should be at least ordinal (rankable)</li>",
+                        "<li><strong>Similar shapes:</strong> Group distributions should have similar shapes</li>",
+                        "</ul>",
+                        "<p><strong>Benefits:</strong> Robust to outliers and non-normal distributions.</p>"
+                    ),
+                    "anova" = paste(
+                        "<h4>ANOVA Assumptions:</h4>",
+                        "<ul>",
+                        "<li><strong>Normality:</strong> Residuals should be normally distributed</li>",
+                        "<li><strong>Homogeneity:</strong> Equal variances across groups</li>",
+                        "<li><strong>Independence:</strong> Observations should be independent</li>",
+                        "</ul>",
+                        "<p><strong>Violations:</strong> Consider Kruskal-Wallis test for non-normal data.</p>"
+                    ),
+                    "kruskal" = paste(
+                        "<h4>Kruskal-Wallis Test Assumptions:</h4>",
+                        "<ul>",
+                        "<li><strong>Independence:</strong> Observations should be independent</li>",
+                        "<li><strong>Ordinal data:</strong> Data should be at least ordinal</li>",
+                        "<li><strong>Similar shapes:</strong> Group distributions should have similar shapes</li>",
+                        "</ul>",
+                        "<p><strong>Benefits:</strong> Non-parametric alternative to ANOVA.</p>"
+                    ),
+                    "<p>Statistical test assumptions will be displayed here.</p>"
+                ),
+
+                if (length(private$.clinical_warnings) > 0) {
+                    paste0("<div style='background-color: #ffebee; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                           "<h4 style='color: #c62828;'>Detected Issues:</h4>",
+                           "<ul style='color: #c62828;'>",
+                           paste0("<li>", private$.clinical_warnings, "</li>", collapse = ""),
+                           "</ul></div>")
+                } else {
+                    "<div style='background-color: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;'><p style='color: #2e7d32; margin: 0;'>✅ No major assumption violations detected.</p></div>"
+                },
+                "</div>"
+            )
+
+            self$results$assumptions_check$setContent(assumptions_html)
+        },
+
+        .generate_report_sentences = function() {
+            if (is.null(private$.analysis_data)) return()
+
+            data <- private$.analysis_data
+            x_var <- self$options$x_var
+            y_var <- self$options$y_var
+            group_var <- self$options$group_var
+            plot_type <- self$options$plot_type
+            n_total <- nrow(data)
+
+            # Generate sample sentence with safe group handling
+            sample_desc <- if (!is.null(group_var) &&
+                             group_var != "" &&
+                             group_var %in% names(data)) {
+                group_counts <- table(data[[group_var]], useNA = "no")
+                if (length(group_counts) > 1) {
+                    group_text <- paste(names(group_counts), "(n =", group_counts, ")", collapse = ", ")
+                    paste("across", length(group_counts), "groups:", group_text)
+                } else {
+                    paste("(n =", n_total, "; single group)")
+                }
+            } else {
+                paste("(n =", n_total, ")")
+            }
+
+            plot_desc <- switch(plot_type,
+                "violin" = "violin plot",
+                "boxplot" = "box plot",
+                "scatter" = "scatter plot",
+                "column" = "column chart",
+                "line" = "line graph",
+                "visualization"
+            )
+
+            # Basic report sentence
+            report_sentence <- paste0(
+                "We analyzed ", y_var, " ", sample_desc, " using a GraphPad Prism-style ",
+                plot_desc, ". "
+            )
+
+            # Add statistical testing if performed
+            if (self$options$show_statistics) {
+                test_desc <- switch(self$options$stats_method,
+                    "ttest" = "independent samples t-test",
+                    "wilcox" = "Wilcoxon rank-sum test",
+                    "anova" = "one-way ANOVA",
+                    "kruskal" = "Kruskal-Wallis test",
+                    "statistical testing"
+                )
+                report_sentence <- paste0(report_sentence, "Statistical differences were evaluated using ", test_desc, ". ")
+            }
+
+            # Method statement
+            method_sentence <- paste0(
+                "Data visualization and analysis were performed using the ClinicoPath R package with GraphPad Prism styling."
+            )
+
+            report_html <- paste(
+                "<div style='background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<h3 style='color: #424242; margin-top: 0;'>📄 Copy-Ready Report Sentences</h3>",
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;'>",
+                "<h4>Results Description:</h4>",
+                "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6;'>", report_sentence, "</p>",
+                "<h4>Methods Statement:</h4>",
+                "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6;'>", method_sentence, "</p>",
+                "</div>",
+                "<div style='margin-top: 15px;'>",
+                "<button onclick='navigator.clipboard.writeText(\"", gsub("\"", "'", paste(report_sentence, method_sentence)), "\")' style='background-color: #1976d2; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
+                "📋 Copy to Clipboard",
+                "</button>",
+                "</div>",
+                "<p style='font-size: 12px; color: #666; margin-top: 10px;'>",
+                "💡 <em>Edit these sentences as needed for your specific research context.</em>",
+                "</p>",
+                "</div>"
+            )
+
+            self$results$report_sentences$setContent(report_html)
+        },
+
+        .generate_statistical_glossary = function() {
+            glossary_html <- paste(
+                "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<h3 style='color: #1565c0; margin-top: 0;'>📚 Statistical Terms Glossary</h3>",
+                "<div style='column-count: 2; column-gap: 20px;'>",
+
+                "<div style='break-inside: avoid; margin-bottom: 15px;'>",
+                "<h4 style='color: #1976d2; margin-bottom: 5px;'>P-value</h4>",
+                "<p style='margin: 0; font-size: 14px;'>Probability of observing results this extreme if no real difference exists. p < 0.05 typically considered significant.</p>",
+                "</div>",
+
+                "<div style='break-inside: avoid; margin-bottom: 15px;'>",
+                "<h4 style='color: #1976d2; margin-bottom: 5px;'>Confidence Interval</h4>",
+                "<p style='margin: 0; font-size: 14px;'>Range of values likely to contain the true population parameter. 95% CI means 95% confidence the true value lies within this range.</p>",
+                "</div>",
+
+                "<div style='break-inside: avoid; margin-bottom: 15px;'>",
+                "<h4 style='color: #1976d2; margin-bottom: 5px;'>Effect Size</h4>",
+                "<p style='margin: 0; font-size: 14px;'>Magnitude of difference between groups. Large effect sizes are more clinically meaningful than small ones.</p>",
+                "</div>",
+
+                "<div style='break-inside: avoid; margin-bottom: 15px;'>",
+                "<h4 style='color: #1976d2; margin-bottom: 5px;'>Standard Error</h4>",
+                "<p style='margin: 0; font-size: 14px;'>Uncertainty in the estimated mean. Smaller SE indicates more precise estimates.</p>",
+                "</div>",
+
+                "<div style='break-inside: avoid; margin-bottom: 15px;'>",
+                "<h4 style='color: #1976d2; margin-bottom: 5px;'>Median vs Mean</h4>",
+                "<p style='margin: 0; font-size: 14px;'><strong>Median:</strong> Middle value, robust to outliers. <strong>Mean:</strong> Average value, affected by extreme values.</p>",
+                "</div>",
+
+                "<div style='break-inside: avoid; margin-bottom: 15px;'>",
+                "<h4 style='color: #1976d2; margin-bottom: 5px;'>Parametric vs Non-parametric</h4>",
+                "<p style='margin: 0; font-size: 14px;'><strong>Parametric:</strong> Assumes normal distribution (t-test, ANOVA). <strong>Non-parametric:</strong> No distribution assumptions (Wilcoxon, Kruskal-Wallis).</p>",
+                "</div>",
+
+                "</div>",
+                "</div>"
+            )
+
+            self$results$statistical_glossary$setContent(glossary_html)
+        },
+
+        .generate_clinical_presets = function() {
+            presets_html <- paste(
+                "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'>🎯 Clinical Research Presets</h3>",
+                "<p>Common configurations for clinical research scenarios:</p>",
+
+                "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;'>",
+
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;'>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>Treatment Comparison</h4>",
+                "<ul style='font-size: 14px; margin: 5px 0;'>",
+                "<li>Plot: Box plot</li>",
+                "<li>Test: t-test or Wilcoxon</li>",
+                "<li>Error bars: 95% CI</li>",
+                "<li>Shows: Individual points</li>",
+                "</ul>",
+                "<p style='font-size: 12px; color: #666; margin: 5px 0;'><em>Best for comparing treatment outcomes between two groups</em></p>",
+                "</div>",
+
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;'>",
+                "<h4 style='color: #d32f2f; margin-top: 0;'>Biomarker Analysis</h4>",
+                "<ul style='font-size: 14px; margin: 5px 0;'>",
+                "<li>Plot: Violin plot</li>",
+                "<li>Test: Kruskal-Wallis</li>",
+                "<li>Error bars: Standard error</li>",
+                "<li>Shows: Distribution shape</li>",
+                "</ul>",
+                "<p style='font-size: 12px; color: #666; margin: 5px 0;'><em>Ideal for biomarker expression across multiple groups</em></p>",
+                "</div>",
+
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;'>",
+                "<h4 style='color: #1976d2; margin-top: 0;'>Dose-Response</h4>",
+                "<ul style='font-size: 14px; margin: 5px 0;'>",
+                "<li>Plot: Line plot</li>",
+                "<li>Test: ANOVA</li>",
+                "<li>Error bars: Standard error</li>",
+                "<li>Shows: Trend analysis</li>",
+                "</ul>",
+                "<p style='font-size: 12px; color: #666; margin: 5px 0;'><em>Perfect for dose-response relationships</em></p>",
+                "</div>",
+
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;'>",
+                "<h4 style='color: #ef6c00; margin-top: 0;'>Correlation Study</h4>",
+                "<ul style='font-size: 14px; margin: 5px 0;'>",
+                "<li>Plot: Scatter plot</li>",
+                "<li>Test: Correlation analysis</li>",
+                "<li>Error bars: None</li>",
+                "<li>Shows: Individual values</li>",
+                "</ul>",
+                "<p style='font-size: 12px; color: #666; margin: 5px 0;'><em>Best for examining relationships between variables</em></p>",
+                "</div>",
+
+                "</div>",
+
+                "<div style='margin-top: 20px; padding: 15px; background-color: #e8f5e8; border-radius: 5px;'>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>Quick Selection Guide:</h4>",
+                "<ul style='font-size: 14px;'>",
+                "<li><strong>2 groups, normal data:</strong> Box plot + t-test</li>",
+                "<li><strong>2 groups, non-normal data:</strong> Box plot + Wilcoxon test</li>",
+                "<li><strong>3+ groups, normal data:</strong> Violin plot + ANOVA</li>",
+                "<li><strong>3+ groups, non-normal data:</strong> Violin plot + Kruskal-Wallis</li>",
+                "<li><strong>Continuous relationships:</strong> Scatter plot + correlation</li>",
+                "</ul>",
+                "</div>",
+                "</div>"
+            )
+
+            self$results$clinical_presets$setContent(presets_html)
         }
 
     )

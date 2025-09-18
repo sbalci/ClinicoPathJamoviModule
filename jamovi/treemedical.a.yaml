@@ -1,7 +1,7 @@
 ---
 name: treemedical
 title: Medical Decision Trees
-menuGroup: meddecideT2
+menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Simple Clinical Decision Trees
 version: '0.0.31'

@@ -54,7 +54,8 @@
       "WebFetch(domain:www.riinu.me)",
       "Bash(do echo \"=== Checking .$func ===\")",
       "Bash(echo:*)",
-      "Read(//Users/serdarbalci/Documents/GitHub/jPwrSS/**)"
+      "Read(//Users/serdarbalci/Documents/GitHub/jPwrSS/**)",
+      "Bash(comm:*)"
     ],
     "deny": [],
     "ask": [],

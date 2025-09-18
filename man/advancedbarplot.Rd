@@ -2,7 +2,7 @@
 % Please edit documentation in R/advancedbarplot.h.R
 \name{advancedbarplot}
 \alias{advancedbarplot}
-\title{Advanced Bar Charts - 5 Ways}
+\title{Advanced Bar Charts}
 \usage{
 advancedbarplot(
   data,
