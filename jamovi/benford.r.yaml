@@ -12,6 +12,7 @@ items:
     - name:  summary
       title: Analysis Summary
       type:  Table
+      rows: 0
       columns:
           - name: statistic
             title: Statistic

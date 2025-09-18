@@ -1,8 +1,8 @@
 ---
 name: dataquality
-title: Data Quality Assessment
-menuGroup: ExplorationT2
-menuSubgroup: ClinicoPath Descriptives
+title: Multi-Variable Visual Quality
+menuGroup: ExplorationT
+menuSubgroup: ClinicoPath Data Quality
 version: '0.0.3'
 jas: '1.2'
 
@@ -98,12 +98,5 @@ options:
         R: >
           Threshold percentage for highlighting variables with missing values in visual analysis.
 
-    - name: export_plots
-      title: "Enable Plot Export"
-      type: Bool
-      default: false
-      description:
-        R: >
-          Enable export functionality for visual data quality plots.
 
 ...

@@ -5,7 +5,39 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "checkdataClass",
     inherit = checkdataBase,
     private = list(
-        
+
+        # Cache for performance optimization
+        .data_cache = NULL,
+
+        # Initialize and manage data cache
+        .initializeCache = function(variable, var_name) {
+            cache_key <- paste0(var_name, "_", length(variable))
+
+            if (is.null(private$.data_cache) || private$.data_cache$key != cache_key) {
+                private$.data_cache <- list(
+                    key = cache_key,
+                    clean_var = variable[!is.na(variable)],
+                    freq_table = table(variable, useNA = "no"),
+                    n_total = length(variable),
+                    n_complete = sum(!is.na(variable)),
+                    n_missing = sum(is.na(variable)),
+                    n_unique = length(unique(variable[!is.na(variable)])),
+                    is_numeric = is.numeric(variable),
+                    is_categorical = is.factor(variable) || is.character(variable),
+                    variable_name = var_name
+                )
+                # Calculate derived metrics
+                private$.data_cache$missing_pct <- (private$.data_cache$n_missing / private$.data_cache$n_total) * 100
+                private$.data_cache$unique_pct <- ifelse(private$.data_cache$n_complete > 0,
+                                                        (private$.data_cache$n_unique / private$.data_cache$n_complete) * 100, 0)
+            }
+            return(private$.data_cache)
+        },
+
+        .clearCache = function() {
+            private$.data_cache <- NULL
+        },
+
         # Generate interpretation for missing data
         .interpretMissing = function(missing_pct) {
             if (missing_pct == 0) {
@@ -399,19 +431,339 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             return(clinical_issues)
         },
-        
+
+        # Initialize function for setup tasks
+        .init = function() {
+            # Set initial visibility states
+            # This runs once when the analysis is created
+        },
+
+        # Populate distribution analysis table
+        .populateDistributionAnalysis = function(variable, is_numeric, is_categorical, n_complete) {
+            if (!self$options$showDistribution) {
+                return()
+            }
+
+            if (is_numeric && n_complete >= 2) {
+                clean_var <- variable[!is.na(variable)]
+
+                mean_val <- mean(clean_var)
+                median_val <- median(clean_var)
+                sd_val <- sd(clean_var)
+
+                # Enhanced skewness calculation with interpretation
+                skewness <- ifelse(sd_val > 0 && length(clean_var) > 2,
+                    mean((clean_var - mean_val)^3) / sd_val^3, 0)
+
+                # Enhanced coefficient of variation with clinical context
+                cv <- ifelse(mean_val != 0, abs(sd_val / mean_val) * 100, 0)
+
+                # Kurtosis calculation (measure of tail heaviness)
+                kurtosis <- ifelse(sd_val > 0 && length(clean_var) > 3,
+                    mean((clean_var - mean_val)^4) / sd_val^4 - 3, 0)
+
+                self$results$distribution$addRow(rowKey="mean", values=list(
+                    metric="Mean",
+                    value=round(mean_val, 4),
+                    interpretation=ifelse(cv < 10, "Stable central value", "Variable central tendency")
+                ))
+
+                self$results$distribution$addRow(rowKey="median", values=list(
+                    metric="Median",
+                    value=round(median_val, 4),
+                    interpretation=ifelse(abs(mean_val - median_val) / sd_val < 0.2,
+                                        "Close to mean (symmetric)", "Different from mean (skewed)")
+                ))
+
+                self$results$distribution$addRow(rowKey="std_dev", values=list(
+                    metric="Standard Deviation",
+                    value=round(sd_val, 4),
+                    interpretation=ifelse(cv < 15, "Low variability (good precision)",
+                                        ifelse(cv < 35, "Moderate variability", "High variability (precision concern)"))
+                ))
+
+                self$results$distribution$addRow(rowKey="coeff_var", values=list(
+                    metric="Coefficient of Variation (%)",
+                    value=round(cv, 2),
+                    interpretation=ifelse(cv < 10, "Excellent precision",
+                                        ifelse(cv < 20, "Good precision",
+                                              ifelse(cv < 50, "Moderate precision", "Poor precision")))
+                ))
+
+                self$results$distribution$addRow(rowKey="skewness", values=list(
+                    metric="Skewness",
+                    value=round(skewness, 3),
+                    interpretation=private$.interpretSkewness(skewness)
+                ))
+
+                # Enhanced range analysis with outlier context
+                min_val <- min(clean_var)
+                max_val <- max(clean_var)
+                range_val <- max_val - min_val
+
+                self$results$distribution$addRow(rowKey="range", values=list(
+                    metric="Range",
+                    value=round(range_val, 4),
+                    interpretation=sprintf("From %.3f to %.3f", min_val, max_val)
+                ))
+
+                # Add quartile information
+                q1 <- quantile(clean_var, 0.25)
+                q3 <- quantile(clean_var, 0.75)
+                iqr <- q3 - q1
+
+                self$results$distribution$addRow(rowKey="iqr", values=list(
+                    metric="Interquartile Range",
+                    value=round(iqr, 4),
+                    interpretation=sprintf("Q1: %.3f, Q3: %.3f", q1, q3)
+                ))
+
+            } else if (is_categorical && n_complete >= 1) {
+                # Distribution analysis for categorical variables
+                clean_var <- variable[!is.na(variable)]
+                freq_table <- table(clean_var)
+                n_categories <- length(freq_table)
+
+                # Modal category and frequency
+                modal_category <- names(which.max(freq_table))
+                modal_freq <- max(freq_table)
+                modal_pct <- round(100 * modal_freq / n_complete, 1)
+
+                # Category balance (entropy-based)
+                props <- as.numeric(freq_table) / n_complete
+                entropy <- -sum(props * log(props, base = 2))
+                max_entropy <- log(n_categories, base = 2)
+                balance_index <- ifelse(max_entropy > 0, entropy / max_entropy, 1)
+
+                # Rare categories (< 5% of data)
+                rare_categories <- sum(freq_table < 0.05 * n_complete)
+
+                self$results$distribution$addRow(rowKey="num_categories", values=list(
+                    metric="Number of Categories",
+                    value=n_categories,
+                    interpretation=ifelse(n_categories <= 5, "Manageable number of categories",
+                                        ifelse(n_categories <= 10, "Moderate number of categories",
+                                              "Many categories - consider grouping"))
+                ))
+
+                self$results$distribution$addRow(rowKey="modal_category", values=list(
+                    metric="Modal Category",
+                    value=paste0(modal_category, " (", modal_freq, ")"),
+                    interpretation=sprintf("Most frequent: %s (%.1f%%)", modal_category, modal_pct)
+                ))
+
+                self$results$distribution$addRow(rowKey="balance_index", values=list(
+                    metric="Category Balance Index",
+                    value=round(balance_index, 3),
+                    interpretation=ifelse(balance_index > 0.8, "Well balanced categories",
+                                        ifelse(balance_index > 0.6, "Moderately balanced",
+                                              "Imbalanced categories"))
+                ))
+
+                if (rare_categories > 0) {
+                    self$results$distribution$addRow(rowKey="rare_categories", values=list(
+                        metric="Rare Categories",
+                        value=rare_categories,
+                        interpretation=sprintf("%d categories with <5%% frequency", rare_categories)
+                    ))
+                }
+
+                # Dominant category concern
+                if (modal_pct > 80) {
+                    self$results$distribution$addRow(rowKey="dominance_warning", values=list(
+                        metric="Dominance Warning",
+                        value=paste0(modal_pct, "%"),
+                        interpretation="One category dominates - consider data quality"
+                    ))
+                }
+            }
+        },
+
+        # Populate outlier analysis
+        .populateOutlierAnalysis = function(variable, is_numeric, n_complete) {
+            if (!self$options$showOutliers) {
+                return(0)
+            }
+
+            outliers_found <- 0
+
+            if (is_numeric && n_complete >= 3) {
+                outlier_analysis <- private$.advancedOutlierDetection(variable)
+                outliers_found <- length(outlier_analysis$outlier_indices)
+
+                if (outliers_found > 0) {
+                    # Show outliers table, hide no outliers message
+                    self$results$outliers$setVisible(TRUE)
+                    self$results$noOutliers$setVisible(FALSE)
+
+                    # Get original row numbers
+                    complete_indices <- which(!is.na(variable))
+
+                    for (i in seq_along(outlier_analysis$outlier_indices)) {
+                        outlier_idx <- outlier_analysis$outlier_indices[i]
+                        original_row <- complete_indices[outlier_idx]
+                        clean_var <- variable[!is.na(variable)]
+
+                        # Enhanced severity assessment
+                        z_score <- scale(clean_var)[outlier_idx,1]
+                        confidence_level <- ifelse(length(outlier_analysis$detection_count) >= i,
+                                                 outlier_analysis$detection_count[i], 1)
+
+                        severity_text <- paste(private$.outlierSeverity(z_score),
+                                             "(", confidence_level, "/", length(outlier_analysis$methods_used), "methods)")
+
+                        self$results$outliers$addRow(rowKey=i, values=list(
+                            rowNumber=original_row,
+                            value=clean_var[outlier_idx],
+                            zscore=round(z_score, 3),
+                            severity=severity_text
+                        ))
+                    }
+                } else {
+                    # No outliers detected - show confirmation message, hide table
+                    self$results$outliers$setVisible(FALSE)
+                    self$results$noOutliers$setVisible(TRUE)
+                    no_outliers_message <- "<p style='color: #28a745; font-weight: bold;'>No outliers detected</p><p>All values fall within normal statistical ranges (Z-score ≤ 3). This indicates good data quality for this variable.</p>"
+                    self$results$noOutliers$setContent(no_outliers_message)
+                }
+            } else if (is_numeric && n_complete < 3) {
+                # Insufficient data for outlier detection
+                self$results$outliers$setVisible(FALSE)
+                self$results$noOutliers$setVisible(TRUE)
+                no_outliers_message <- "<p style='color: #ffc107; font-weight: bold;'>Insufficient data for outlier detection</p><p>At least 3 complete observations are required for reliable outlier analysis.</p>"
+                self$results$noOutliers$setContent(no_outliers_message)
+            } else if (!is_numeric) {
+                # Non-numeric variables - explain why outlier detection isn't applicable
+                self$results$outliers$setVisible(FALSE)
+                self$results$noOutliers$setVisible(TRUE)
+                no_outliers_message <- "<p style='color: #17a2b8; font-weight: bold;'>Outlier detection not applicable</p><p>Outlier analysis is only available for numeric variables. This variable is categorical.</p>"
+                self$results$noOutliers$setContent(no_outliers_message)
+            }
+
+            return(outliers_found)
+        },
+
+        # Populate missing data analysis
+        .populateMissingDataAnalysis = function(variable, n_total) {
+            n_missing <- sum(is.na(variable))
+            n_complete <- n_total - n_missing
+            missing_pct <- (n_missing / n_total) * 100
+            n_unique <- length(unique(variable[!is.na(variable)]))
+            unique_pct <- ifelse(n_complete > 0, (n_unique / n_complete) * 100, 0)
+
+            self$results$missingVals$addRow(rowKey="total_obs", values=list(
+                metric="Total Observations",
+                value=as.character(n_total),
+                interpretation=ifelse(n_total >= 100, "Adequate sample size",
+                                    ifelse(n_total >= 30, "Moderate sample size", "Small sample size"))
+            ))
+
+            self$results$missingVals$addRow(rowKey="missing_vals", values=list(
+                metric="Missing Values",
+                value=sprintf("%d (%.1f%%)", n_missing, missing_pct),
+                interpretation=private$.interpretMissing(missing_pct)
+            ))
+
+            self$results$missingVals$addRow(rowKey="complete_cases", values=list(
+                metric="Complete Cases",
+                value=sprintf("%d (%.1f%%)", n_complete, 100-missing_pct),
+                interpretation=ifelse(n_complete >= 0.9 * n_total, "Excellent completeness",
+                                    ifelse(n_complete >= 0.8 * n_total, "Good completeness",
+                                          ifelse(n_complete >= 0.7 * n_total, "Acceptable completeness", "Poor completeness")))
+            ))
+
+            self$results$missingVals$addRow(rowKey="unique_vals", values=list(
+                metric="Unique Values",
+                value=sprintf("%d (%.1f%%)", n_unique, unique_pct),
+                interpretation=ifelse(unique_pct > 95, "Very high variability",
+                                    ifelse(unique_pct > 50, "High variability",
+                                          ifelse(unique_pct > 10, "Moderate variability", "Low variability")))
+            ))
+
+            return(list(
+                n_missing = n_missing,
+                n_complete = n_complete,
+                missing_pct = missing_pct,
+                n_unique = n_unique,
+                unique_pct = unique_pct
+            ))
+        },
+
+        # Populate duplicate analysis
+        .populateDuplicateAnalysis = function(variable, n_complete) {
+            if (!self$options$showDuplicates || n_complete == 0) {
+                return()
+            }
+
+            clean_var <- variable[!is.na(variable)]
+            freq_table <- table(clean_var)
+            is_categorical <- is.factor(variable) || is.character(variable)
+
+            # Enhanced duplicate detection
+            if (is_categorical) {
+                # For categorical data, show all frequencies
+                freq_table_sorted <- sort(freq_table, decreasing = TRUE)
+                max_display <- min(20, length(freq_table_sorted))  # Limit display
+
+                for (i in 1:max_display) {
+                    value_name <- names(freq_table_sorted)[i]
+                    count <- freq_table_sorted[i]
+                    percentage <- round((count / n_complete) * 100, 1)
+
+                    self$results$duplicates$addRow(rowKey=paste0("cat_", i), values=list(
+                        value=value_name,
+                        count=as.integer(count),
+                        percentage=percentage
+                    ))
+                }
+            } else {
+                # For numeric data, only show values that appear more than once
+                duplicates <- freq_table[freq_table > 1]
+                if (length(duplicates) > 0) {
+                    duplicates_sorted <- sort(duplicates, decreasing = TRUE)
+                    max_display <- min(15, length(duplicates_sorted))
+
+                    for (i in 1:max_display) {
+                        value_name <- names(duplicates_sorted)[i]
+                        count <- duplicates_sorted[i]
+                        percentage <- round((count / n_complete) * 100, 1)
+
+                        self$results$duplicates$addRow(rowKey=paste0("dup_", i), values=list(
+                            value=value_name,
+                            count=as.integer(count),
+                            percentage=percentage
+                        ))
+                    }
+                }
+            }
+        },
+
         .run = function() {
+            # Control visibility based on variable selection
+            variable_selected <- !is.null(self$options$var)
+
+            # Set visibility for all items
+            self$results$todo$setVisible(!variable_selected)
+            self$results$qualityText$setVisible(variable_selected)
+            self$results$missingVals$setVisible(variable_selected)
+            # Outlier visibility will be controlled dynamically based on results
+            self$results$noOutliers$setVisible(FALSE)  # Initially hidden, shown when no outliers
+            self$results$outliers$setVisible(FALSE)    # Initially hidden, shown when outliers found
+            self$results$distribution$setVisible(variable_selected && self$options$showDistribution)
+            self$results$duplicates$setVisible(variable_selected && self$options$showDuplicates)
+            self$results$patterns$setVisible(variable_selected && self$options$showPatterns)
+
             # Enhanced input validation with user guidance
             if (is.null(self$options$var)) {
-                todo <- "
+                todo_content <- "
                 <h3>📊 ClinicoPath Data Quality Assessment</h3>
                 <p><strong>Purpose:</strong> Comprehensive evaluation of data completeness, accuracy, and patterns for clinical research.</p>
-                
-                <h4>📋 Required Input:</h4>
+
+                <h4>Required Input:</h4>
                 <ul>
                     <li><strong>Variable to Check:</strong> Select any variable for quality assessment</li>
                 </ul>
-                
+
                 <h4>⚙️ Analysis Options:</h4>
                 <ul>
                     <li><strong>Outlier Analysis:</strong> Statistical outlier detection using multiple methods</li>
@@ -419,7 +771,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Duplicate Analysis:</strong> Identify repeated values and patterns</li>
                     <li><strong>Pattern Analysis:</strong> Missing data mechanisms and systematic issues</li>
                 </ul>
-                
+
                 <h4>🔬 Assessment Dimensions:</h4>
                 <ul>
                     <li><strong>Completeness:</strong> Missing data evaluation and impact assessment</li>
@@ -427,7 +779,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Consistency:</strong> Pattern recognition and systematic issues</li>
                     <li><strong>Clinical Validity:</strong> Context-specific validation (age, lab values, etc.)</li>
                 </ul>
-                
+
                 <h4>📈 Quality Grading:</h4>
                 <ul>
                     <li><strong>Grade A:</strong> Excellent quality - ready for analysis</li>
@@ -435,7 +787,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Grade C:</strong> Concerning quality - cleaning recommended</li>
                     <li><strong>Grade D:</strong> Poor quality - major intervention required</li>
                 </ul>
-                
+
                 <h4>🏥 Clinical Applications:</h4>
                 <ul>
                     <li><strong>Clinical Trials:</strong> Regulatory compliance and data monitoring</li>
@@ -443,14 +795,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Quality Improvement:</strong> Systematic quality monitoring</li>
                     <li><strong>Publication Preparation:</strong> Data quality documentation</li>
                 </ul>
-                
-                <p><strong>Resources:</strong></p>
-                <ul>
-                    <li><a href='https://clinicopath.github.io/ClinicoPathJamoviModule/' target='_blank'>User Guide</a></li>
-                    <li><a href='https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e6-r2-good-clinical-practice-integrated-addendum-ich-e6r1' target='_blank'>ICH E6 GCP Guidelines</a></li>
-                </ul>
                 "
-                self$results$qualityText$setContent(todo)
+                self$results$todo$setContent(todo_content)
                 return()
             }
             
@@ -485,28 +831,28 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             is_logical <- is.logical(variable)
             
             # Enhanced missing value analysis with clinical interpretation
-            self$results$missingVals$addRow(rowKey=1, values=list(
+            self$results$missingVals$addRow(rowKey="total_obs", values=list(
                 metric="Total Observations",
                 value=as.character(n_total),
-                interpretation=ifelse(n_total >= 100, "Adequate sample size", 
+                interpretation=ifelse(n_total >= 100, "Adequate sample size",
                                     ifelse(n_total >= 30, "Moderate sample size", "Small sample size"))
             ))
-            
-            self$results$missingVals$addRow(rowKey=2, values=list(
+
+            self$results$missingVals$addRow(rowKey="missing_vals", values=list(
                 metric="Missing Values",
                 value=sprintf("%d (%.1f%%)", n_missing, missing_pct),
                 interpretation=private$.interpretMissing(missing_pct)
             ))
-            
-            self$results$missingVals$addRow(rowKey=3, values=list(
+
+            self$results$missingVals$addRow(rowKey="complete_cases", values=list(
                 metric="Complete Cases",
                 value=sprintf("%d (%.1f%%)", n_complete, 100-missing_pct),
-                interpretation=ifelse(n_complete >= 0.9 * n_total, "Excellent completeness", 
-                                    ifelse(n_complete >= 0.8 * n_total, "Good completeness", 
+                interpretation=ifelse(n_complete >= 0.9 * n_total, "Excellent completeness",
+                                    ifelse(n_complete >= 0.8 * n_total, "Good completeness",
                                           ifelse(n_complete >= 0.7 * n_total, "Acceptable completeness", "Poor completeness")))
             ))
-            
-            self$results$missingVals$addRow(rowKey=4, values=list(
+
+            self$results$missingVals$addRow(rowKey="unique_vals", values=list(
                 metric="Unique Values",
                 value=sprintf("%d (%.1f%%)", n_unique, unique_pct),
                 interpretation=ifelse(unique_pct > 95, "Very high variability", 
@@ -521,22 +867,26 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outliers_found <- length(outlier_analysis$outlier_indices)
                 
                 if (outliers_found > 0) {
+                    # Show outliers table, hide no outliers message
+                    self$results$outliers$setVisible(TRUE)
+                    self$results$noOutliers$setVisible(FALSE)
+
                     # Get original row numbers
                     complete_indices <- which(!is.na(variable))
-                    
+
                     for (i in seq_along(outlier_analysis$outlier_indices)) {
                         outlier_idx <- outlier_analysis$outlier_indices[i]
                         original_row <- complete_indices[outlier_idx]
                         clean_var <- variable[!is.na(variable)]
-                        
+
                         # Enhanced severity assessment
                         z_score <- scale(clean_var)[outlier_idx,1]
-                        confidence_level <- ifelse(length(outlier_analysis$detection_count) >= i, 
+                        confidence_level <- ifelse(length(outlier_analysis$detection_count) >= i,
                                                  outlier_analysis$detection_count[i], 1)
-                        
-                        severity_text <- paste(private$.outlierSeverity(z_score), 
+
+                        severity_text <- paste(private$.outlierSeverity(z_score),
                                              "(", confidence_level, "/", length(outlier_analysis$methods_used), "methods)")
-                        
+
                         self$results$outliers$addRow(rowKey=i, values=list(
                             rowNumber=original_row,
                             value=clean_var[outlier_idx],
@@ -544,10 +894,28 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             severity=severity_text
                         ))
                     }
+                } else {
+                    # No outliers detected - show confirmation message, hide table
+                    self$results$outliers$setVisible(FALSE)
+                    self$results$noOutliers$setVisible(TRUE)
+                    no_outliers_message <- "<p style='color: #28a745; font-weight: bold;'>No outliers detected</p><p>All values fall within normal statistical ranges (Z-score ≤ 3). This indicates good data quality for this variable.</p>"
+                    self$results$noOutliers$setContent(no_outliers_message)
                 }
+            } else if (self$options$showOutliers && is_numeric && n_complete < 3) {
+                # Insufficient data for outlier detection
+                self$results$outliers$setVisible(FALSE)
+                self$results$noOutliers$setVisible(TRUE)
+                no_outliers_message <- "<p style='color: #ffc107; font-weight: bold;'>Insufficient data for outlier detection</p><p>At least 3 complete observations are required for reliable outlier analysis.</p>"
+                self$results$noOutliers$setContent(no_outliers_message)
+            } else if (self$options$showOutliers && !is_numeric) {
+                # Non-numeric variables - explain why outlier detection isn't applicable
+                self$results$outliers$setVisible(FALSE)
+                self$results$noOutliers$setVisible(TRUE)
+                no_outliers_message <- "<p style='color: #17a2b8; font-weight: bold;'>Outlier detection not applicable</p><p>Outlier analysis is only available for numeric variables. This variable is categorical.</p>"
+                self$results$noOutliers$setContent(no_outliers_message)
             }
 
-            # Enhanced distribution analysis for numeric variables
+            # Enhanced distribution analysis for numeric and categorical variables
             if (self$options$showDistribution && is_numeric && n_complete >= 2) {
                 clean_var <- variable[!is.na(variable)]
                 
@@ -624,6 +992,64 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     value=round(iqr, 4),
                     interpretation=sprintf("Q1: %.3f, Q3: %.3f", q1, q3)
                 ))
+            } else if (self$options$showDistribution && is_categorical && n_complete >= 1) {
+                # Distribution analysis for categorical variables
+                clean_var <- variable[!is.na(variable)]
+                freq_table <- table(clean_var)
+                n_categories <- length(freq_table)
+
+                # Modal category and frequency
+                modal_category <- names(which.max(freq_table))
+                modal_freq <- max(freq_table)
+                modal_pct <- round(100 * modal_freq / n_complete, 1)
+
+                # Category balance (entropy-based)
+                props <- as.numeric(freq_table) / n_complete
+                entropy <- -sum(props * log(props, base = 2))
+                max_entropy <- log(n_categories, base = 2)
+                balance_index <- ifelse(max_entropy > 0, entropy / max_entropy, 1)
+
+                # Rare categories (< 5% of data)
+                rare_categories <- sum(freq_table < 0.05 * n_complete)
+
+                self$results$distribution$addRow(rowKey="num_categories", values=list(
+                    metric="Number of Categories",
+                    value=n_categories,
+                    interpretation=ifelse(n_categories <= 5, "Manageable number of categories",
+                                        ifelse(n_categories <= 10, "Moderate number of categories",
+                                              "Many categories - consider grouping"))
+                ))
+
+                self$results$distribution$addRow(rowKey="modal_category", values=list(
+                    metric="Modal Category",
+                    value=paste0(modal_category, " (", modal_freq, ")"),
+                    interpretation=sprintf("Most frequent: %s (%.1f%%)", modal_category, modal_pct)
+                ))
+
+                self$results$distribution$addRow(rowKey="balance_index", values=list(
+                    metric="Category Balance Index",
+                    value=round(balance_index, 3),
+                    interpretation=ifelse(balance_index > 0.8, "Well balanced categories",
+                                        ifelse(balance_index > 0.6, "Moderately balanced",
+                                              "Imbalanced categories"))
+                ))
+
+                if (rare_categories > 0) {
+                    self$results$distribution$addRow(rowKey="rare_categories", values=list(
+                        metric="Rare Categories",
+                        value=rare_categories,
+                        interpretation=sprintf("%d categories with <5%% frequency", rare_categories)
+                    ))
+                }
+
+                # Dominant category concern
+                if (modal_pct > 80) {
+                    self$results$distribution$addRow(rowKey="dominance_warning", values=list(
+                        metric="Dominance Warning",
+                        value=paste0(modal_pct, "%"),
+                        interpretation="One category dominates - consider data quality"
+                    ))
+                }
             }
 
             # Enhanced duplicate analysis with categorical support
@@ -742,16 +1168,68 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # High outlier rate pattern (enhanced)
                 if (outliers_found > 0.05 * n_complete) {
                     outlier_rate_pct <- round(100 * outliers_found / n_complete, 1)
-                    severity_desc <- ifelse(outlier_rate_pct > 15, "Very high", 
+                    severity_desc <- ifelse(outlier_rate_pct > 15, "Very high",
                                           ifelse(outlier_rate_pct > 10, "High", "Elevated"))
-                    
+
                     self$results$patterns$addRow(rowKey=pattern_count, values=list(
                         pattern="Outlier Pattern",
-                        description=sprintf("%s outlier rate: %d outliers (%.1f%% of data)", 
+                        description=sprintf("%s outlier rate: %d outliers (%.1f%% of data)",
                                           severity_desc, outliers_found, outlier_rate_pct),
                         recommendation="Investigate measurement procedures and consider robust analysis methods"
                     ))
                     pattern_count <- pattern_count + 1
+                }
+
+                # Additional patterns for numeric variables
+                if (is_numeric && n_complete >= 2) {
+                    clean_var <- variable[!is.na(variable)]
+
+                    # Distribution shape pattern
+                    if (length(clean_var) > 3) {
+                        skewness <- ifelse(sd(clean_var) > 0,
+                            mean((clean_var - mean(clean_var))^3) / sd(clean_var)^3, 0)
+
+                        if (abs(skewness) > 1) {
+                            skew_direction <- ifelse(skewness > 0, "right-skewed", "left-skewed")
+                            self$results$patterns$addRow(rowKey=pattern_count, values=list(
+                                pattern="Distribution Shape",
+                                description=sprintf("Highly %s distribution (skewness: %.2f)", skew_direction, skewness),
+                                recommendation="Consider data transformation or non-parametric methods"
+                            ))
+                            pattern_count <- pattern_count + 1
+                        }
+                    }
+
+                    # Range and precision patterns
+                    range_val <- max(clean_var) - min(clean_var)
+                    if (all(clean_var == round(clean_var))) {
+                        self$results$patterns$addRow(rowKey=pattern_count, values=list(
+                            pattern="Data Precision",
+                            description="All values are integers (whole numbers)",
+                            recommendation="Verify if decimal precision is needed for analysis"
+                        ))
+                        pattern_count <- pattern_count + 1
+                    }
+
+                    # Concentration patterns (clustering)
+                    if (length(unique(clean_var)) < n_complete * 0.5 && length(unique(clean_var)) > 2) {
+                        concentration_pct <- round(100 * length(unique(clean_var)) / n_complete, 1)
+                        self$results$patterns$addRow(rowKey=pattern_count, values=list(
+                            pattern="Value Concentration",
+                            description=sprintf("Moderate value clustering: %.1f%% unique values", concentration_pct),
+                            recommendation="Check for rounding, grouping, or measurement intervals"
+                        ))
+                        pattern_count <- pattern_count + 1
+                    }
+                }
+
+                # If no patterns were found, add a general assessment
+                if (pattern_count == 1) {
+                    self$results$patterns$addRow(rowKey=pattern_count, values=list(
+                        pattern="Overall Assessment",
+                        description="No significant data quality issues detected",
+                        recommendation="Data appears suitable for standard statistical analysis"
+                    ))
                 }
             }
 
@@ -852,7 +1330,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Variable type and basic characteristics
             var_type_desc <- ifelse(is_numeric, "Numeric/Continuous", 
                                    ifelse(is_categorical, "Categorical/Factor", "Other"))
-            quality_text <- paste0(quality_text, sprintf("📋 VARIABLE CHARACTERISTICS:\n"))
+            quality_text <- paste0(quality_text, sprintf("VARIABLE CHARACTERISTICS:\n"))
             quality_text <- paste0(quality_text, sprintf("• Variable Type: %s\n", var_type_desc))
             quality_text <- paste0(quality_text, sprintf("• Total Observations: %d\n", n_total))
             quality_text <- paste0(quality_text, sprintf("• Complete Cases: %d (%.1f%%)\n", n_complete, 100-missing_pct))
@@ -918,7 +1396,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Quality issues summary
             if (length(quality_issues) > 0) {
-                quality_text <- paste0(quality_text, "⚠️  QUALITY CONCERNS IDENTIFIED:\n")
+                quality_text <- paste0(quality_text, "QUALITY CONCERNS IDENTIFIED:\n")
                 for (issue in quality_issues) {
                     quality_text <- paste0(quality_text, sprintf("• %s\n", stringr::str_to_sentence(issue)))
                 }
@@ -929,21 +1407,21 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             quality_text <- paste0(quality_text, "💡 RECOMMENDATIONS:\n")
             
             if (quality_grade == "A") {
-                quality_text <- paste0(quality_text, "✅ EXCELLENT QUALITY - Ready for Analysis\n")
+                quality_text <- paste0(quality_text, "EXCELLENT QUALITY - Ready for Analysis\n")
                 quality_text <- paste0(quality_text, "• Data meets high-quality standards for clinical research\n")
                 quality_text <- paste0(quality_text, "• Proceed with planned statistical analyses\n")
                 quality_text <- paste0(quality_text, "• Consider as reference standard for quality benchmarking\n")
                 quality_text <- paste0(quality_text, "• Document quality assessment for regulatory submissions\n")
                 
             } else if (quality_grade == "B") {
-                quality_text <- paste0(quality_text, "✅ GOOD QUALITY - Minor Issues Noted\n")
+                quality_text <- paste0(quality_text, "GOOD QUALITY - Minor Issues Noted\n")
                 quality_text <- paste0(quality_text, "• Data suitable for analysis with minor limitations\n")
                 quality_text <- paste0(quality_text, "• Document identified limitations in study methods\n")
                 quality_text <- paste0(quality_text, "• Consider sensitivity analyses for robust conclusions\n")
                 quality_text <- paste0(quality_text, "• Monitor quality trends in ongoing data collection\n")
                 
             } else if (quality_grade == "C") {
-                quality_text <- paste0(quality_text, "⚠️  CONCERNING QUALITY - Intervention Required\n")
+                quality_text <- paste0(quality_text, "CONCERNING QUALITY - Intervention Required\n")
                 quality_text <- paste0(quality_text, "• Data quality issues require attention before analysis\n")
                 quality_text <- paste0(quality_text, "• Implement data cleaning procedures (see specific recommendations below)\n")
                 quality_text <- paste0(quality_text, "• Perform sensitivity analyses to assess impact of quality issues\n")
@@ -985,7 +1463,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add validation warnings if present
             if (length(validation_results$warnings) > 0) {
-                quality_text <- paste0(quality_text, "\n⚠️  VALIDATION WARNINGS:\n")
+                quality_text <- paste0(quality_text, "\nVALIDATION WARNINGS:\n")
                 for (warning in validation_results$warnings) {
                     quality_text <- paste0(quality_text, sprintf("• %s\n", warning))
                 }
@@ -993,7 +1471,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add recommendations if present
             if (length(validation_results$recommendations) > 0) {
-                quality_text <- paste0(quality_text, "\n📋 ADDITIONAL RECOMMENDATIONS:\n")
+                quality_text <- paste0(quality_text, "\nADDITIONAL RECOMMENDATIONS:\n")
                 for (rec in validation_results$recommendations) {
                     quality_text <- paste0(quality_text, sprintf("• %s\n", rec))
                 }

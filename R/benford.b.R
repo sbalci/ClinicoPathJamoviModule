@@ -214,33 +214,36 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Generate clinical interpretation
                 interpretation <- private$.interpretResults(bfd.cp, suspects, var)
                 
-                # Populate summary table
-                summaryData <- data.frame(
-                    statistic = c(
-                        .("Total Observations"),
-                        .("Valid Observations"), 
-                        .("Suspicious Points"),
-                        .("Suspicion Rate"),
-                        .("Concern Level")
-                    ),
-                    value = c(
-                        as.character(interpretation$total_observations),
-                        as.character(interpretation$valid_observations),
-                        as.character(interpretation$suspicious_count),
-                        paste0(interpretation$suspicion_rate, "%"),
-                        interpretation$concern_level
-                    ),
-                    interpretation = c(
-                        .("Number of data points analyzed"),
-                        .("Non-missing numeric values"),
-                        .("Data points deviating from expected pattern"),
-                        .("Percentage of suspicious observations"),
-                        interpretation$clinical_interpretation
-                    ),
-                    stringsAsFactors = FALSE
-                )
-                
-                self$results$summary$setData(summaryData)
+                # Populate summary table using addRow method
+                self$results$summary$addRow(rowKey=1, values=list(
+                    statistic=.("Total Observations"),
+                    value=as.character(interpretation$total_observations),
+                    interpretation=.("Number of data points analyzed")
+                ))
+
+                self$results$summary$addRow(rowKey=2, values=list(
+                    statistic=.("Valid Observations"),
+                    value=as.character(interpretation$valid_observations),
+                    interpretation=.("Non-missing numeric values")
+                ))
+
+                self$results$summary$addRow(rowKey=3, values=list(
+                    statistic=.("Suspicious Points"),
+                    value=as.character(interpretation$suspicious_count),
+                    interpretation=.("Data points deviating from expected pattern")
+                ))
+
+                self$results$summary$addRow(rowKey=4, values=list(
+                    statistic=.("Suspicion Rate"),
+                    value=paste0(interpretation$suspicion_rate, "%"),
+                    interpretation=.("Percentage of suspicious observations")
+                ))
+
+                self$results$summary$addRow(rowKey=5, values=list(
+                    statistic=.("Concern Level"),
+                    value=interpretation$concern_level,
+                    interpretation=interpretation$clinical_interpretation
+                ))
                 
                 # Generate clinical report sentence
                 report_sentence <- private$.generateReportSentence(interpretation, digits)
@@ -262,11 +265,10 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     error_msg <- glue::glue(error_template, msg = e$message)
                 }
                 
-                self$results$summary$setData(data.frame(
-                    statistic = .("Error"),
-                    value = "",
-                    interpretation = error_msg,
-                    stringsAsFactors = FALSE
+                self$results$summary$addRow(rowKey=1, values=list(
+                    statistic=.("Error"),
+                    value="",
+                    interpretation=error_msg
                 ))
             })
         },

@@ -1,4 +1,4 @@
-title: Data Quality Assessment
+title: Multi-Variable Visual Quality
 name: dataquality
 jus: '3.0'
 stage: 0
@@ -36,8 +36,3 @@ children:
       - type: TextBox
         name: missing_threshold_visual
         format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: export_plots

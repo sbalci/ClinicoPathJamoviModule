@@ -10,6 +10,8 @@ args:
 usage: /review-function <function_name>
 ---
 
+_Note: This command intentionally avoids emoji and uses UI toggles to control visibility of natural‑language outputs._
+
 # Detailed Jamovi Function Code Review
 
 You are conducting a thorough code review of the jamovi function `$ARGUMENTS`. Focus on code quality, best practices, performance, and maintainability.
@@ -20,28 +22,30 @@ Function: **`$ARGUMENTS`**
 
 ## Code Review Focus Areas
 
-### 🏗️ **Architecture & Design**
+### Architecture & Design
 
 - R6 class structure and inheritance
 - Function modularization and separation of concerns
 - Data flow and state management
 - Error propagation and handling
 
-### 🔧 **Implementation Quality**
+### Implementation Quality
 
 - Algorithm efficiency and performance
 - Memory usage patterns
 - Code readability and maintainability
 - Following jamovi and R best practices
 
-### 🛡️ **Robustness & Security**
+### Robustness & Security
 
 - Input validation completeness
 - Edge case handling
 - Error message quality and helpfulness
 - Data sanitization
 
-### 📚 **Documentation & UX**
+### Documentation & UX
+
+**Visibility rule:** Natural‑language summaries and educational/explanatory outputs must render **only when** the corresponding UI options are enabled by the user (see the `.u.yaml` checkboxes below). Keep these sections hidden by default unless selected.
 
 - Code comments and self-documentation
 - User interface clarity
@@ -50,14 +54,14 @@ Function: **`$ARGUMENTS`**
 - Natural‑language summary of results (plain, copy‑ready).
 - Explanatory output panel: what the function does, when/how to use it, assumptions/caveats, and a short user guide.
 
-### ⚡ **Performance & Scalability**
+### Performance & Scalability
 
 - Computational complexity
 - Memory efficiency
 - Large dataset handling
 - Optimization opportunities
 
-### **Clinician‑Friendly (Pathologist/Oncologist) Additions**
+### Clinician‑Friendly (Pathologist/Oncologist) Additions
 
 - Plain‑language labels and tooltips for each option (avoid jargon; show examples: e.g., “Select tumor grade (G1/G2/G3)”).
 - In‑app micro‑explanations for statistics (what the test answers clinically, assumptions, effect size meaning, minimal sample heuristics).
@@ -70,7 +74,7 @@ Function: **`$ARGUMENTS`**
 - Accessibility & readability: larger font option, color‑blind‑safe palettes, avoid red‑green only.
 - Internationalization hooks (TR/EN) for labels, help, and report templates.
 
-### 🩺 Clinician‑Friendly UX & Explanations
+### Clinician‑Friendly UX & Explanations
 
 | Area | Status | Notes |
 |---|---:|---|
@@ -91,9 +95,9 @@ Function: **`$ARGUMENTS`**
 
 ## Review Response Format
 
-### 🔍 CODE REVIEW: `$ARGUMENTS`
+### CODE REVIEW: `$ARGUMENTS`
 
-**Overall Quality**: ⭐⭐⭐⭐⭐ (1-5 stars)  
+**Overall Quality**: 1–5 (stars)  
 
 **Maintainability**: HIGH/MEDIUM/LOW  
 
@@ -101,25 +105,25 @@ Function: **`$ARGUMENTS`**
 
 **User Experience**: EXCELLENT/GOOD/NEEDS_WORK  
 
-#### 🏆 **STRENGTHS**
+#### STRENGTHS
 
 1. [Specific positive findings with code references]
 2. [Well-implemented patterns]
 3. [Good practices observed]
 
-#### 🚨 **CRITICAL ISSUES**
+#### CRITICAL ISSUES
 
 1. [Security/reliability concerns with file:line references]
 2. [Performance bottlenecks]
 3. [Major design flaws]
 
-#### ⚠️ **IMPROVEMENT OPPORTUNITIES**
+#### IMPROVEMENT OPPORTUNITIES
 
 1. [Code quality improvements with examples]
 2. [Refactoring suggestions]
 3. [Performance optimizations]
 
-#### 💡 **ENHANCEMENT SUGGESTIONS**
+#### ENHANCEMENT SUGGESTIONS
 
 1. [Feature improvements]
 2. [User experience enhancements]
@@ -142,7 +146,7 @@ Function: **`$ARGUMENTS`**
 - Add a **Caveats & assumptions** panel that lists assumptions, data requirements (e.g., expected counts, proportional hazards), and common pitfalls; surface contextual warnings if violated.
 - Provide a **How to use** checklist (variables → options → run → interpret), and, if possible, a mini example with mock numbers.
 
-#### 🔧 **SPECIFIC RECOMMENDATIONS**
+#### SPECIFIC RECOMMENDATIONS
 
 **Architecture:**
 
@@ -150,7 +154,7 @@ Function: **`$ARGUMENTS`**
 # Suggested refactoring
 ```
 
-#### 📋 **ACTION ITEMS**
+#### ACTION ITEMS
 
 - [ ] [Specific actionable item]
 - [ ] [Another specific item]
@@ -178,7 +182,38 @@ Function: **`$ARGUMENTS`**
 **User Experience:**
 
 ```yaml
-# UI improvements
+# Panels controlled by checkboxes; render only when enabled.
+children:
+  - type: ComboBox
+    name: test
+    label: "Group comparison test"
+    options:
+      - label: "t‑test (means)"
+        value: ttest
+      - label: "Mann–Whitney U (medians)"
+        value: wilcox
+      - label: "Welch t‑test (unequal variances)"
+        value: welch
+  - type: CheckBox
+    name: assume_equal_var
+    label: "Assume equal variances"
+
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Analysis Output
+        fitToGrid: true
+        children:
+          # When unchecked, Summary/Explanations sections must not be rendered.
+          - type: CheckBox
+            name: showSummary
+            label: "Show Summary (natural‑language)"
+          - type: CheckBox
+            name: showExplanations
+            label: "Show Explanations (educational notes)"
 ```
 
 # .u.yaml (labels & tooltips)
@@ -208,17 +243,13 @@ children:
         label: Analysis Output
         fitToGrid: true
         children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: showSummaries
-                label: Analysis Summary
-              - type: CheckBox
-                name: showExplanations
-                label: Show Explanations
-
-
+          # When unchecked, Summary/Explanations sections must not be rendered.
+          - type: CheckBox
+            name: showSummary
+            label: "Show Summary (natural‑language)"
+          - type: CheckBox
+            name: showExplanations
+            label: "Show Explanations (educational notes)"
 ```
 
 ```yaml
@@ -227,48 +258,48 @@ items:
   - name: report
     type: Html
     title: "Report sentence"
+  - name: summary
+    type: Html
+    title: "Summary (natural‑language)"
+    visible: false
+  - name: explanations
+    type: Html
+    title: "Explanations"
+    visible: false
 ```
 
 ```r
 # .b.R (auto‑generated interpretation)
+# Auto-generated interpretation sentence (always safe to compute; display controlled by UI)
 interp <- sprintf(
   "The %s between %s and %s was %s (%.2f, 95%% CI %.2f–%.2f), p = %.3f.",
   if (test == "ttest") "difference in means" else "difference in distributions",
   g1, g2, stat_name, stat_value, ci_low, ci_high, pval
 )
 self$results$report$setContent(interp)
+
+# Natural-language summary: only render when user enables 'Show Summary'
+if (isTRUE(self$options$showSummary)) {
+  summary_text <- sprintf(
+    "We compared %s vs %s using %s. The key effect was %s (95%% CI %.2f–%.2f), p = %.3f. Clinically, this suggests %s.",
+    g1, g2, stat_name, stat_value, ci_low, ci_high, pval, clinical_hint
+  )
+  self$results$summary$setVisible(TRUE)
+  self$results$summary$setContent(summary_text)
+} else {
+  self$results$summary$setVisible(FALSE)
+}
+
+# Explanations (educational notes): only render when user enables 'Show Explanations'
+if (isTRUE(self$options$showExplanations)) {
+  expl <- paste0(
+    "&lt;b&gt;What does this test answer?&lt;/b&gt; ", test_expl, "&lt;br/&gt;",
+    "&lt;b&gt;Assumptions:&lt;/b&gt; ", assumptions_text, "&lt;br/&gt;",
+    "&lt;b&gt;Effect size meaning:&lt;/b&gt; ", effect_expl
+  )
+  self$results$explanations$setVisible(TRUE)
+  self$results$explanations$setContent(expl)
+} else {
+  self$results$explanations$setVisible(FALSE)
+}
 ```
-
-#### 📋 **ACTION ITEMS**
-
-**High Priority:**
-
-- [ ] [Specific actionable item]
-- [ ] [Another specific item]
-- [ ] Add plain‑language tooltips.
-- [ ] Insert example‑interpretation blocks for key outputs.
-- [ ] Implement misuse guards (e.g., switch to Fisher’s exact when expected counts < 5).
-
-**Medium Priority:**
-
-- [ ] [Enhancement opportunity]
-- [ ] [Code quality improvement]
-
-**Nice to Have:**
-
-- [ ] [Future enhancement]
-- [ ] [Documentation improvement]
-
-#### 📊 **METRICS & ASSESSMENT**
-
-| Aspect | Score | Notes |
-|--------|-------|-------|
-| Code Quality | X/10 | [Brief note] |
-| Error Handling | X/10 | [Brief note] |
-| Performance | X/10 | [Brief note] |
-| Documentation | X/10 | [Brief note] |
-| User Experience | X/10 | [Brief note] |
-
-**Recommendation**: APPROVE / APPROVE_WITH_CHANGES / NEEDS_REWORK
-
-Provide specific, actionable feedback with code examples where helpful.

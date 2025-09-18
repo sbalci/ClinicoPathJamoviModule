@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -43,7 +43,7 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
@@ -56,7 +56,7 @@ analyses:
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -72,7 +72,7 @@ analyses:
   - title: Alluvial & Sankey Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial & Sankey Diagrams
     ribbon: analyses
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -102,7 +102,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -239,12 +239,12 @@ analyses:
     menuSubtitle: DataExplorer AutoEDA Integration
     ribbon: analyses
     category: analyses
-  - title: Data Quality Assessment
+  - title: Multi-Variable Visual Quality
     name: dataquality
     ns: ClinicoPath
-    menuGroup: ExplorationT2
-    menuSubgroup: ClinicoPath Descriptives
-    menuTitle: Data Quality Assessment
+    menuGroup: ExplorationT
+    menuSubgroup: ClinicoPath Data Quality
+    menuTitle: Multi-Variable Visual Quality
     description: >
       This module provides data quality assessment including duplicate
       detection,
@@ -256,8 +256,8 @@ analyses:
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: ExplorationT2
-    menuSubgroup: ClinicoPath Descriptives
+    menuGroup: ExplorationT
+    menuSubgroup: ClinicoPath Data Quality
     menuTitle: Advanced Outlier Detection
     menuSubtitle: easystats Performance Package
     description: >
@@ -584,7 +584,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -675,12 +675,12 @@ analyses:
       publications. Uses OpenRetractions API to validate publication status and
       can optionally retrieve PubMed IDs. Includes DOI format validation, rate
       limiting, and  robust error handling for reliable results.
-  - title: Data Quality Assessment
+  - title: Single Variable Quality Check
     name: checkdata
     ns: ClinicoPath
-    menuGroup: ExplorationT2
-    menuTitle: Data Quality Assessment
-    menuSubgroup: ClinicoPath Descriptives
+    menuGroup: Exploration
+    menuTitle: Single Variable Quality Check
+    menuSubgroup: ClinicoPath Data Quality
     ribbon: analyses
     category: analyses
   - title: Confidence Intervals for Mean Values
@@ -774,7 +774,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: Exploration
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
@@ -1041,7 +1041,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1169,7 +1169,7 @@ analyses:
   - title: Advanced TNM Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPath
     menuSubgroup: Stage Migration Analysis
     menuTitle: Advanced TNM Stage Migration Analysis
     menuSubtitle: State-of-the-Art Staging System Validation
@@ -1293,7 +1293,7 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -1486,7 +1486,7 @@ analyses:
     name: jjhistostats
     ns: ClinicoPath
     menuGroup: JJStatsPlot
-    menuSubgroup: Continuous
+    menuSubgroup: Distribution
     menuTitle: Histogram
     description: |
       'Wrapper Function for ggstatsplot::gghistostats and
@@ -1755,7 +1755,7 @@ analyses:
   - title: Comprehensive Tidy Plots
     name: tidyplots
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotD
     menuTitle: Comprehensive Tidy Plots
     ribbon: analyses
     category: analyses
@@ -1780,7 +1780,7 @@ analyses:
   - title: River Plots & Alluvial Diagrams
     name: riverplot
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots & Alluvial Diagrams
     menuSubtitle: Flow, Stream, and Transition Visualization
@@ -1858,7 +1858,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: JJStatsPlot
     menuTitle: Segmented Total Bar Charts
-    menuSubgroup: ClinicoPath Advanced Plots
+    menuSubgroup: Categorical vs Categorical
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
     description: >
       Create segmented total bar charts (100% stacked bars) that show
@@ -2270,46 +2270,46 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation
     name: digitalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Digital Pathology Validation
   - title: Haralick Texture Analysis
     name: haralicktexture
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Haralick Texture Analysis
   - title: IHC Scoring Standardization
     name: ihcscoring
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuTitle: IHC Scoring Standardization
     menuSubgroup: IHC Analysis
   - title: Multiplex Immunofluorescence Analysis
     name: multiplexanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuTitle: Multiplex Immunofluorescence Analysis
     menuSubgroup: IHC Analysis
   - title: Pathology Agreement Analysis
     name: pathologyagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuTitle: Pathology Agreement Analysis
   - title: Spatial Statistics from Coordinates
     name: spatialanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Spatial Statistics from Coordinates
   - title: Enhanced Non-Parametric Tests
     name: enhancednonparametric
@@ -2344,7 +2344,7 @@ analyses:
     name: hierarchicalpathology
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuSubgroup: Inferential
     menuTitle: Hierarchical Mixed-Effects Models
     menuSubtitle: Multi-level analysis for nested pathology data
@@ -2408,7 +2408,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
@@ -2425,7 +2425,7 @@ analyses:
     name: mlpathology
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Classification Performance Metrics for Digital Pathology
     description: >
       Comprehensive evaluation of machine learning models and algorithms for 
@@ -2440,7 +2440,7 @@ analyses:
     name: pathologycomposition
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Pathology Composition Analysis
     description: >
       Semi-quantitative analysis of histologic components and their association
@@ -2724,7 +2724,7 @@ analyses:
     name: flexparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalD
     menuSubgroup: Survival Analysis
     menuTitle: Flexible Parametric Survival Models (Enhanced)
     description: >-
@@ -3552,7 +3552,7 @@ analyses:
     name: ihccluster
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: IHC Clustering Analysis
     menuSubtitle: Cluster cases by IHC expression patterns
@@ -3710,7 +3710,7 @@ analyses:
     name: qualitycontrol
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Laboratory Quality Control Statistics
     description: >
       Comprehensive laboratory quality control statistics including control
@@ -3721,7 +3721,7 @@ analyses:
     name: metaanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuTitle: Meta-Analysis & Evidence Synthesis
     description: >
       Comprehensive meta-analysis and evidence synthesis including forest plots,
@@ -3731,7 +3731,7 @@ analyses:
     name: condsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Conditional Survival Analysis
     description: >
       Conditional survival analysis for calculating the probability of surviving
@@ -3742,7 +3742,7 @@ analyses:
     name: timeupdatesurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuTitle: Time-Updated Survival Estimates
     description: >
       Time-updated survival estimates using time-varying regression coefficients
@@ -4552,7 +4552,7 @@ analyses:
     name: explainableai
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT2
+    menuGroup: OncoPathT2
     menuSubgroup: Advanced AI
     menuTitle: Explainable AI Analysis
     menuSubtitle: Model Interpretability
@@ -4651,7 +4651,7 @@ analyses:
     name: jjoncoplot
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: Molecular Pathology Plots
     menuTitle: Genomic Landscape Visualization
     menuSubtitle: Oncoplot, Mutation Landscape, Clinical Annotations
@@ -4662,7 +4662,7 @@ analyses:
     name: studydiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathD
     menuSubgroup: Study Design
     menuTitle: Study Diagram
     description: >-
@@ -4672,7 +4672,7 @@ analyses:
     name: ihcadvanced
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Advanced Analysis
     description: >
@@ -4683,7 +4683,7 @@ analyses:
     name: ihcbasic
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Basic Analysis
     description: >
@@ -4693,7 +4693,7 @@ analyses:
     name: ihcdiagnostic
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Clinical Diagnostics
     description: >
@@ -4704,7 +4704,7 @@ analyses:
     name: ihcimmune
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: TIL & Immune Analysis
     description: >
@@ -4715,7 +4715,7 @@ analyses:
     name: ihcsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT2
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Survival & Prognosis
     description: >

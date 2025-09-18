@@ -69,6 +69,7 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="summary",
                 title="Analysis Summary",
+                rows=0,
                 columns=list(
                     list(
                         `name`="statistic", 
