@@ -1,7 +1,7 @@
 ---
 name: spatialanalysis
 title: Spatial Statistics from Coordinates
-menuGroup: OncoPathologyD
+menuGroup: OncoPathD
 version: '1.0.0'
 jas: '1.2'
 

@@ -2,8 +2,8 @@
 name: jjsegmentedtotalbar
 title: "Segmented Total Bar Charts"
 menuGroup: JJStatsPlot
-menuSubgroup: ClinicoPath Advanced Plots
-menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
+menuSubgroup: 'Categorical vs Categorical'
+# menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
 version: '0.0.31'
 jas: '1.2'
 

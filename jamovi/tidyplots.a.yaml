@@ -1,7 +1,7 @@
 ---
 name: tidyplots
 title: Comprehensive Tidy Plots
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotD
 version: '0.0.31'
 jas: '1.2'
 
@@ -81,6 +81,8 @@ options:
           title: Line Plot
         - name: bar
           title: Bar Plot
+        - name: barstack
+          title: Stacked Bar Plot
         - name: boxplot
           title: Box Plot
         - name: violin
@@ -89,8 +91,16 @@ options:
           title: Histogram
         - name: area
           title: Area Plot
-        - name: density
-          title: Density Plot
+        - name: areastack
+          title: Stacked Area Plot
+        - name: pie
+          title: Pie Chart
+        - name: donut
+          title: Donut Chart
+        - name: heatmap
+          title: Heatmap
+        - name: ellipse
+          title: Ellipse Plot
       default: points
 
     # === PLOT STYLE OPTIONS ===
@@ -130,7 +140,19 @@ options:
           title: Median Bar
         - name: count
           title: Count Bar
+        - name: sum
+          title: Sum Bar
       default: mean
+
+    - name: stackType
+      title: Stack Type (for stacked plots)
+      type: List
+      options:
+        - name: absolute
+          title: Absolute Values
+        - name: relative
+          title: Relative (Proportional)
+      default: absolute
 
     # === STATISTICAL ELEMENTS ===
     - name: showMean
@@ -167,15 +189,69 @@ options:
           title: Value Label
       default: dash
 
+    - name: showSum
+      title: Show Sum
+      type: Bool
+      default: false
+
+    - name: sumType
+      title: Sum Display
+      type: List
+      options:
+        - name: dash
+          title: Dash
+        - name: dot
+          title: Dot
+        - name: value
+          title: Value Label
+      default: dash
+
+    - name: showCount
+      title: Show Count
+      type: Bool
+      default: false
+
+    - name: countType
+      title: Count Display
+      type: List
+      options:
+        - name: dash
+          title: Dash
+        - name: dot
+          title: Dot
+        - name: value
+          title: Value Label
+      default: dash
+
     - name: showSEM
       title: Show Standard Error
       type: Bool
       default: false
 
+    - name: semType
+      title: SEM Display
+      type: List
+      options:
+        - name: errorbar
+          title: Error Bars
+        - name: ribbon
+          title: Ribbon
+      default: errorbar
+
     - name: showSD
       title: Show Standard Deviation
       type: Bool
       default: false
+
+    - name: sdType
+      title: SD Display
+      type: List
+      options:
+        - name: errorbar
+          title: Error Bars
+        - name: ribbon
+          title: Ribbon
+      default: errorbar
 
     - name: showCI
       title: Show 95% Confidence Interval
@@ -196,6 +272,16 @@ options:
       title: Show Range (Min-Max)
       type: Bool
       default: false
+
+    - name: rangeType
+      title: Range Display
+      type: List
+      options:
+        - name: errorbar
+          title: Error Bars
+        - name: ribbon
+          title: Ribbon
+      default: errorbar
 
     # === DISTRIBUTION ELEMENTS ===
     - name: showDistribution
@@ -252,6 +338,22 @@ options:
       type: Bool
       default: false
 
+    # === REFERENCE LINES ===
+    - name: showReferenceLines
+      title: Show Reference Lines
+      type: Bool
+      default: false
+
+    - name: referenceX
+      title: X Reference Values (comma-separated)
+      type: String
+      default: ''
+
+    - name: referenceY
+      title: Y Reference Values (comma-separated)
+      type: String
+      default: ''
+
     # === COLOR SCHEMES ===
     - name: colorScheme
       title: Color Scheme
@@ -264,6 +366,8 @@ options:
           title: Seaside
         - name: apple
           title: Apple
+        - name: custom
+          title: Custom Colors
         - name: rainbow
           title: Rainbow
         # Continuous schemes
@@ -318,9 +422,42 @@ options:
       type: String
       default: ''
 
+    - name: plotCaption
+      title: Plot Caption
+      type: String
+      default: ''
+
+    # === PLOT SIZE ===
+    - name: plotWidth
+      title: Plot Width
+      type: Integer
+      default: 20
+      min: 10
+      max: 100
+
+    - name: plotHeight
+      title: Plot Height
+      type: Integer
+      default: 20
+      min: 10
+      max: 100
+
+    # === POINT OPTIONS ===
+    - name: pointShape
+      title: Point Shape
+      type: Integer
+      default: 16
+      min: 0
+      max: 25
+
     # === APPEARANCE OPTIONS ===
     - name: removeLegend
       title: Remove Legend
+      type: Bool
+      default: false
+
+    - name: removeLegendTitle
+      title: Remove Legend Title
       type: Bool
       default: false
 
@@ -357,6 +494,46 @@ options:
 
     - name: removeYAxisTitle
       title: Remove Y Axis Title
+      type: Bool
+      default: false
+
+    # === AXIS MANIPULATIONS ===
+    - name: sortXAxisLabels
+      title: Sort X Axis Labels
+      type: Bool
+      default: false
+
+    - name: reverseXAxisLabels
+      title: Reverse X Axis Labels
+      type: Bool
+      default: false
+
+    # === THEME OPTIONS ===
+    - name: plotTheme
+      title: Plot Theme
+      type: List
+      options:
+        - name: default
+          title: Default
+        - name: tidyplot
+          title: Tidyplot Theme
+        - name: ggplot2
+          title: ggplot2 Theme
+        - name: minimal_x
+          title: Minimal X Theme
+        - name: minimal_y
+          title: Minimal Y Theme
+        - name: minimal_xy
+          title: Minimal XY Theme
+      default: default
+
+    - name: removeXAxisLine
+      title: Remove X Axis Line
+      type: Bool
+      default: false
+
+    - name: removeYAxisLine
+      title: Remove Y Axis Line
       type: Bool
       default: false
 ...

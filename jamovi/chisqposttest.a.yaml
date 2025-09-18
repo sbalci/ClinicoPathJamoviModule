@@ -1,9 +1,9 @@
 ---
 name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
-menuGroup: ExplorationT2
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

@@ -1,7 +1,7 @@
 ---
 name: jflowchart
 title: Study Flowchart 
-menuGroup: OncoPathologyD
+menuGroup: OncoPathD
 menuSubgroup: Study Design
 version: '2.0.0'
 jas: '1.2'

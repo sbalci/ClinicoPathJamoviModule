@@ -73,11 +73,24 @@ children:
             name: barType
             enable: (plotType=="bar")
       - type: Label
+        label: Stack Type
+        children:
+          - type: ComboBox
+            name: stackType
+            enable: (plotType=="barstack" || plotType=="areastack")
+      - type: Label
         label: Area Type
         children:
           - type: ComboBox
             name: areaType
             enable: (plotType=="area")
+      - type: Label
+        label: Point Shape
+        children:
+          - type: TextBox
+            name: pointShape
+            format: number
+            enable: (plotType=="points" && pointType=="beeswarm")
 
   - type: CollapseBox
     label: Central Tendency
@@ -99,6 +112,22 @@ children:
           - type: ComboBox
             name: medianType
             enable: (showMedian)
+      - type: CheckBox
+        name: showSum
+      - type: Label
+        label: Sum Display Type
+        children:
+          - type: ComboBox
+            name: sumType
+            enable: (showSum)
+      - type: CheckBox
+        name: showCount
+      - type: Label
+        label: Count Display Type
+        children:
+          - type: ComboBox
+            name: countType
+            enable: (showCount)
 
   - type: CollapseBox
     label: Uncertainty & Spread
@@ -106,8 +135,20 @@ children:
     children:
       - type: CheckBox
         name: showSEM
+      - type: Label
+        label: SEM Display Type
+        children:
+          - type: ComboBox
+            name: semType
+            enable: (showSEM)
       - type: CheckBox
         name: showSD
+      - type: Label
+        label: SD Display Type
+        children:
+          - type: ComboBox
+            name: sdType
+            enable: (showSD)
       - type: CheckBox
         name: showCI
       - type: Label
@@ -118,6 +159,12 @@ children:
             enable: (showCI)
       - type: CheckBox
         name: showRange
+      - type: Label
+        label: Range Display Type
+        children:
+          - type: ComboBox
+            name: rangeType
+            enable: (showRange)
 
   - type: CollapseBox
     label: Distribution
@@ -160,6 +207,27 @@ children:
         name: showSignificance
 
   - type: CollapseBox
+    label: Reference Lines
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showReferenceLines
+      - type: Label
+        label: X Reference Values (comma-separated)
+        children:
+          - type: TextBox
+            name: referenceX
+            format: string
+            enable: (showReferenceLines)
+      - type: Label
+        label: Y Reference Values (comma-separated)
+        children:
+          - type: TextBox
+            name: referenceY
+            format: string
+            enable: (showReferenceLines)
+
+  - type: CollapseBox
     label: Colors & Theme
     collapsed: true
     children:
@@ -168,6 +236,11 @@ children:
         children:
           - type: ComboBox
             name: colorScheme
+      - type: Label
+        label: Plot Theme
+        children:
+          - type: ComboBox
+            name: plotTheme
       - type: Label
         label: Transparency
         children:
@@ -182,6 +255,9 @@ children:
             format: number
       - type: CheckBox
         name: removeLegend
+      - type: CheckBox
+        name: removeLegendTitle
+        enable: (!removeLegend)
       - type: CheckBox
         name: removePadding
 
@@ -213,6 +289,29 @@ children:
           - type: TextBox
             name: legendTitle
             format: string
+      - type: Label
+        label: Plot Caption
+        children:
+          - type: TextBox
+            name: plotCaption
+            format: string
+
+  - type: CollapseBox
+    label: Plot Size
+    collapsed: true
+    children:
+      - type: Label
+        label: Plot Width
+        children:
+          - type: TextBox
+            name: plotWidth
+            format: number
+      - type: Label
+        label: Plot Height
+        children:
+          - type: TextBox
+            name: plotHeight
+            format: number
 
   - type: CollapseBox
     label: Axis Options
@@ -229,6 +328,14 @@ children:
           - type: CheckBox
             name: removeXAxisTitle
             enable: (!removeXAxis)
+          - type: CheckBox
+            name: removeXAxisLine
+          - type: CheckBox
+            name: sortXAxisLabels
+            enable: (!removeXAxisLabels && !removeXAxis)
+          - type: CheckBox
+            name: reverseXAxisLabels
+            enable: (!removeXAxisLabels && !removeXAxis)
       - type: Label
         label: Y Axis
         children:
@@ -240,3 +347,5 @@ children:
           - type: CheckBox
             name: removeYAxisTitle
             enable: (!removeYAxis)
+          - type: CheckBox
+            name: removeYAxisLine

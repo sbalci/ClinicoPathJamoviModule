@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.68
+version: 0.0.31.69
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-17'
+date: '2025-09-18'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -568,7 +568,7 @@ analyses:
   - title: Modern Table Formatting
     name: tinytable
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Modern Table Formatting
     menuSubtitle: TinyTable - Zero Dependencies
@@ -1660,7 +1660,7 @@ analyses:
   - title: Parallel Coordinates Plot
     name: parallelplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotD
     menuTitle: Parallel Coordinates Plot
     menuSubgroup: ClinicoPath Descriptive Plots
     menuSubtitle: Multivariate Exploration

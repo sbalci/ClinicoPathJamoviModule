@@ -55,14 +55,22 @@
       "Bash(do echo \"=== Checking .$func ===\")",
       "Bash(echo:*)",
       "Read(//Users/serdarbalci/Documents/GitHub/jPwrSS/**)",
-      "Bash(comm:*)"
+      "Bash(comm:*)",
+      "WebFetch(domain:jbengler.github.io)",
+      "Read(//Users/serdarbalci/Documents/GitHub/**)",
+      "Bash(do echo \"=== Checking $dir ===\")"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
       "/Users/serdarbalci/Documents/GitHub/conttablesplus",
       "/Users/serdarbalci/Documents/GitHub/JamoviTest",
-      "/private/tmp"
+      "/private/tmp",
+      "/Users/serdarbalci/Documents/GitHub/OncoPath",
+      "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives",
+      "/Users/serdarbalci/Documents/GitHub/jjstatsplot",
+      "/Users/serdarbalci/Documents/GitHub/meddecide",
+      "/Users/serdarbalci/Documents/GitHub/jsurvival"
     ]
   }
 }

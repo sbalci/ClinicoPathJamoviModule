@@ -1,7 +1,7 @@
 ---
 name: pathologyagreement
 title: Pathology Agreement Analysis
-menuGroup: OncoPathologyT2
+menuGroup: OncoPathT2
 version: '1.0.0'
 jas: '1.2'
 
