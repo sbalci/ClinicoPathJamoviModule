@@ -104,10 +104,11 @@ Then you can install the submodules directly inside the jamovi, using library.
 
 Submodules are:
 
-- ClinicoPathDescriptives  
-- jsurvival  
-- meddecide  
-- jjstatsplot  
+- ClinicoPathDescriptives
+- jsurvival
+- meddecide
+- jjstatsplot
+- OncoPath
 
 
 
@@ -260,6 +261,21 @@ remotes::install_github("sbalci/meddecide")
 <!--        - macos  -->
 
 
+##### OncoPath
+
+OncoPath functions are specialized for oncological and pathological research under OncoPath menu
+
+OncoPath module can be downloaded inside jamovi (click Modules and jamovi library)
+
+https://github.com/sbalci/OncoPath
+
+https://github.com/sbalci/OncoPath/releases/
+
+```r
+remotes::install_github("sbalci/OncoPath")
+```
+
+
 
 
 
@@ -348,9 +364,6 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 ##### [Summary of Continuous Variables 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/summarydata2_documentation.html)
 (Enhanced summary statistics for continuous and date variables)
 
-##### [Swimmer Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/swimmerplot_documentation.html)
-(Comprehensive swimmer plots for visualizing patient timelines)
-
 ##### [Table One](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone_documentation.html)
 <img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
 <img src="man/figures/jamovi-ClinicoPath-tableone.gif" align="center" width = 75% />
@@ -371,11 +384,8 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 (Venn and Upset diagrams)
 
 ##### [Variable Tree](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/vartree_documentation.html)
-<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />  
-<img src="man/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width = 75% />  
-
-##### [Waterfall Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/waterfall_documentation.html)
-(Treatment response analysis)
+<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />
+<img src="man/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width = 75% />
 
 ---
 
@@ -458,6 +468,20 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 <img src="man/figures/jamovi-and-ggstatsplot.gif" align="center" width = 75% />
 
+
+---
+
+### OncoPath
+
+#### Patient Follow-Up Plots
+
+##### [Swimmer Plot](https://www.serdarbalci.com/OncoPath/articles/swimmerplot_documentation.html)
+<img src="man/figures/jamovi-OncoPath-swimmerplot.gif" align="center" width = 75% />
+(Comprehensive swimmer plots for visualizing patient timelines, clinical events, and treatment responses)
+
+##### [Waterfall Plot](https://www.serdarbalci.com/OncoPath/articles/waterfall_documentation.html)
+<img src="man/figures/jamovi-OncoPath-waterfall.gif" align="center" width = 75% />
+(Treatment response analysis with RECIST criteria, waterfall plots, and spider plots)
 
 ---
 
