@@ -1,5 +1,63 @@
 # ClinicoPath News
 
+## Version 0.0.31.69
+
+### 🗓️ **September 18, 2025 - OncoPath Module Launch & Specialized Oncological Analysis**
+
+#### 🧬 **New OncoPath Module - Specialized Oncological & Pathological Research Tools**
+
+##### **OncoPath Module Introduction**
+
+* **Specialized Focus:** Dedicated module for oncological and pathological research with patient follow-up visualization
+* **Patient Timeline Analysis:** Comprehensive tools for visualizing treatment responses and clinical outcomes
+* **RECIST Integration:** Built-in support for Response Evaluation Criteria In Solid Tumors (RECIST) guidelines
+* **Clinical Event Tracking:** Advanced capabilities for monitoring patient progress and treatment milestones
+
+##### **Core Functions Migrated to OncoPath:**
+
+**Waterfall Plot Analysis:**
+* **Treatment Response Visualization:** Comprehensive waterfall and spider plots for tumor response analysis
+* **RECIST Criteria Support:** Automated RECIST classification with response evaluation
+* **Dual Data Input:** Supports both raw tumor measurements and pre-calculated percentage changes
+* **Clinical Metrics:** Automated calculation of ORR (Overall Response Rate), DCR (Disease Control Rate), and person-time metrics
+* **Publication Ready:** Professional visualization suitable for clinical publications and presentations
+
+**Swimmer Plot Visualization:**
+* **Patient Timeline Tracking:** Comprehensive swimmer plots using enhanced ggswim package integration
+* **Multi-dimensional Data:** Supports clinical events, milestones, treatment responses, and adverse events
+* **Enhanced Data Validation:** Robust input validation with comprehensive error handling
+* **Flexible Timeline Visualization:** Customizable patient journey visualization with event overlays
+* **Clinical Research Integration:** Designed specifically for oncological clinical trial reporting
+
+##### **Module Organization & Access:**
+
+* **Menu Group:** `OncoPath` - Dedicated navigation section for oncological analysis tools
+* **Menu Subgroup:** `Patient Follow-Up Plots` - Organized visualization tools for patient tracking
+* **Documentation:** Comprehensive help documentation at https://www.serdarbalci.com/OncoPath/
+* **GitHub Repository:** https://github.com/sbalci/OncoPath with dedicated issue tracking and releases
+
+##### **Technical Implementation:**
+
+* **Namespace Migration:** Functions moved from `ClinicoPathDescriptives::OncoPathology` to `OncoPath::OncoPath`
+* **Dependency Management:** Optimized package dependencies including ggswim, recist, lubridate, and RColorBrewer
+* **Enhanced Error Handling:** Improved user feedback and data validation for clinical data formats
+* **Documentation Integration:** Seamless integration with ClinicoPath documentation ecosystem
+
+#### 🔧 **ClinicoPath Module Structure Reorganization**
+
+##### **Updated Module Architecture:**
+* **ClinicoPathDescriptives:** Descriptive statistics, cross tables, data quality, and general exploration tools
+* **jjstatsplot:** Statistical visualization with ggstatsplot integration and advanced plotting capabilities
+* **jsurvival:** Comprehensive survival analysis including Cox regression and Kaplan-Meier methods
+* **meddecide:** Medical decision analysis, ROC curves, diagnostic test evaluation, and clinical decision trees
+* **OncoPath:** Specialized oncological visualization tools for patient follow-up and treatment response analysis
+
+##### **Migration Benefits:**
+* **Focused Functionality:** Each module now has clear, specialized focus areas for improved user experience
+* **Reduced Dependencies:** Optimized package dependencies per module for faster loading and fewer conflicts
+* **Enhanced Maintenance:** Simplified development and maintenance with clear separation of concerns
+* **Better Documentation:** Module-specific documentation websites for targeted user guidance
+
 ## Version 0.0.31.59
 
 ### 🗓️ **September 7, 2025 - Enhanced ROC Analysis & Clinical Workflow Optimization**
