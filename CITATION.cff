@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: ClinicoPathJamoviModule
+title: "ClinicoPath jamovi Module"
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -12,6 +12,8 @@ authors:
     family-names: Balci
     email: serdarbalci@serdarbalci.com
     orcid: 'https://orcid.org/0000-0002-7852-3851'
+date-released: '2025-09-18'
+version: "0.0.31.69"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.3997188
@@ -41,14 +43,18 @@ identifiers:
   - type: url
     value: 'https://github.com/sbalci/jsurvival'
     description: jsurvival
+  - type: url
+    value: 'https://github.com/sbalci/OncoPath'
+    description: OncoPath
 repository-code: 'https://github.com/sbalci/ClinicoPathJamoviModule/'
 url: 'https://www.serdarbalci.com/ClinicoPathJamoviModule'
 abstract: >-
-  Analysis for Clinicopathological Research: ClinicoPath
-  help researchers to generate natural language summaries of
-  their dataset, generate cross tables with statistical
-  tests, and survival analysis with survival tables,
-  survival plots, and natural language summaries. 
+  Comprehensive Analysis for Clinicopathological Research: ClinicoPath
+  is a jamovi module that helps researchers generate natural language
+  summaries of their datasets, create cross tables with statistical tests,
+  perform survival analyses with tables and plots, conduct medical decision
+  analysis, create statistical visualizations, and perform specialized
+  oncological patient follow-up analyses including waterfall and swimmer plots. 
 keywords:
   - jamovi
   - module
