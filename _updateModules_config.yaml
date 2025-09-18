@@ -67,11 +67,11 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     r_files:
       - "utils.R"
-      - "ihc_utilities.R"
   OncoPath:
     directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
     r_files:
       - "utils.R"
+      - "ihc_utilities.R"
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     enabled: false  # Automatically enabled when TEST mode is active
