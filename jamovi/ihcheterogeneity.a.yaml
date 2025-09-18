@@ -1,7 +1,7 @@
 ---
 name: ihcheterogeneity
 title: IHC Heterogeneity Analysis
-menuGroup: OncoPathologyT2
+menuGroup: OncoPathT2
 menuSubgroup: IHC Analysis
 version: '1.0.0'
 jas: '1.2'

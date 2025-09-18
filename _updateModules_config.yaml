@@ -13,11 +13,12 @@
 new_version: "0.0.31.69"
 new_date: "2025-09-18"
 quick: false
-TEST: true
-meddecide: false
-jjstatsplot: false
-jsurvival: false
-ClinicoPathDescriptives: false
+TEST: false
+meddecide: true
+jjstatsplot: true
+jsurvival: true
+ClinicoPathDescriptives: true
+OncoPath: true
 
 # ========================================
 # DETAILED CONFIGURATION BELOW
@@ -67,6 +68,10 @@ modules:
     r_files:
       - "utils.R"
       - "ihc_utilities.R"
+  OncoPath:
+    directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
+    r_files:
+      - "utils.R"
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     enabled: false  # Automatically enabled when TEST mode is active
@@ -75,7 +80,7 @@ modules:
       - "menuGroup: meddecideT$"
       - "menuGroup: SurvivalT$"
       - "menuGroup: ExplorationT$"
-      - "menuGroup: OncoPathologyT$"
+      - "menuGroup: OncoPathT$"
     data_files:
       - "histopathology.rda"
     r_files: 

@@ -99,6 +99,7 @@ meddecide_module <- config$meddecide %||% modes$meddecide %||% FALSE
 jjstatsplot_module <- config$jjstatsplot %||% modes$jjstatsplot %||% FALSE
 jsurvival_module <- config$jsurvival %||% modes$jsurvival %||% FALSE
 ClinicoPathDescriptives_module <- config$ClinicoPathDescriptives %||% modes$ClinicoPathDescriptives %||% FALSE
+OncoPath_module <- config$OncoPath %||% modes$OncoPath %||% FALSE
 
 # Hardcoded module configurations (simplified for maintainability)
 module_patterns <- list(
@@ -126,8 +127,13 @@ module_patterns <- list(
                          "large_performance", "problematic", "combined", "summary_stats"), ".rda"))
   ),
   ClinicoPathDescriptives = list(
-    pattern = "menuGroup: Exploration$|menuGroup: OncoPathology$",
+    pattern = "menuGroup: Exploration$",
     pattern_wip = "menuGroup: Exploration",
+    data_files = c("histopathology.rda")
+  ),
+  OncoPath = list(
+    pattern = "menuGroup: OncoPath$",
+    pattern_wip = "menuGroup: OncoPath",
     data_files = c("histopathology.rda")
   )
 )
@@ -152,6 +158,11 @@ if (ClinicoPathDescriptives_module) {
   modules_config$ClinicoPathDescriptives$enabled <- TRUE
   modules_config$ClinicoPathDescriptives <- c(modules_config$ClinicoPathDescriptives, module_patterns$ClinicoPathDescriptives)
   cat("🔧 ClinicoPathDescriptives enabled\n")
+}
+if (OncoPath_module) {
+  modules_config$OncoPath$enabled <- TRUE
+  modules_config$OncoPath <- c(modules_config$OncoPath, module_patterns$OncoPath)
+  cat("🔧 OncoPath enabled\n")
 }
 
 # Apply WIP mode overrides
@@ -222,9 +233,10 @@ for (module_name in names(modules_config)) {
   # Check if module is enabled via top-level toggles or old enabled property
   module_enabled <- FALSE
   if (module_name == "meddecide" && meddecide_module) module_enabled <- TRUE
-  if (module_name == "jjstatsplot" && jjstatsplot_module) module_enabled <- TRUE  
+  if (module_name == "jjstatsplot" && jjstatsplot_module) module_enabled <- TRUE
   if (module_name == "jsurvival" && jsurvival_module) module_enabled <- TRUE
   if (module_name == "ClinicoPathDescriptives" && ClinicoPathDescriptives_module) module_enabled <- TRUE
+  if (module_name == "OncoPath" && OncoPath_module) module_enabled <- TRUE
   if (module_name == "JamoviTest" && (TEST || (!is.null(modules_config[[module_name]]$enabled) && modules_config[[module_name]]$enabled))) module_enabled <- TRUE
   
   if (module_enabled) {
@@ -309,6 +321,7 @@ jjstatsplot_dir <- module_dirs$jjstatsplot %||% modules_config$jjstatsplot$direc
 meddecide_dir <- module_dirs$meddecide %||% modules_config$meddecide$directory
 jsurvival_dir <- module_dirs$jsurvival %||% modules_config$jsurvival$directory
 ClinicoPathDescriptives_dir <- module_dirs$ClinicoPathDescriptives %||% modules_config$ClinicoPathDescriptives$directory
+OncoPath_dir <- module_dirs$OncoPath %||% modules_config$OncoPath$directory
 
 # Enhanced WIP mode with backup and validation (TEST mode uses standalone JamoviTest only)
 if (WIP) {
@@ -369,6 +382,7 @@ if (WIP) {
   meddecide_dir <- module_dirs$meddecide %||% meddecide_dir
   jsurvival_dir <- module_dirs$jsurvival %||% jsurvival_dir
   ClinicoPathDescriptives_dir <- module_dirs$ClinicoPathDescriptives %||% ClinicoPathDescriptives_dir
+  OncoPath_dir <- module_dirs$OncoPath %||% OncoPath_dir
 
   if (!wip_setup_success) {
     stop("❌", mode_name, "setup failed for one or more modules. Check warnings above.")
@@ -817,9 +831,10 @@ if (!WIP && !TEST) {
     # Skip disabled modules - use top-level configuration flags
     module_enabled <- FALSE
     if (module_name == "meddecide" && meddecide_module) module_enabled <- TRUE
-    if (module_name == "jjstatsplot" && jjstatsplot_module) module_enabled <- TRUE  
+    if (module_name == "jjstatsplot" && jjstatsplot_module) module_enabled <- TRUE
     if (module_name == "jsurvival" && jsurvival_module) module_enabled <- TRUE
     if (module_name == "ClinicoPathDescriptives" && ClinicoPathDescriptives_module) module_enabled <- TRUE
+    if (module_name == "OncoPath" && OncoPath_module) module_enabled <- TRUE
     if (module_name == "JamoviTest" && TEST) module_enabled <- TRUE
     
     if (!module_enabled) next
@@ -1179,6 +1194,28 @@ ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = ".a.yaml",
                                              x = ClinicoPathDescriptives_a_yaml_files)
 ClinicoPathDescriptives_modules <- ClinicoPathDescriptives_a_yaml_files
 
+## OncoPath module functions ----
+
+# Get the menuGroup pattern from config for OncoPath
+oncopath_pattern <- if (WIP) {
+  modules_config$OncoPath$menuGroup_pattern_wip %||% "menuGroup: OncoPath"
+} else {
+  modules_config$OncoPath$menuGroup_pattern %||% "menuGroup: OncoPath$"
+}
+
+# Apply the pattern to find matching files
+OncoPath_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+  any(grepl(oncopath_pattern, readLines(f, warn = FALSE)))
+})
+
+OncoPath_a_yaml_files <- gsub(pattern = "./jamovi/",
+                              replacement = "",
+                              x = OncoPath_a_yaml_files)
+OncoPath_a_yaml_files <- gsub(pattern = ".a.yaml",
+                              replacement = "",
+                              x = OncoPath_a_yaml_files)
+OncoPath_modules <- OncoPath_a_yaml_files
+
 ## JamoviTest module functions (TEST mode) ----
 JamoviTest_modules <- c()
 
@@ -1222,7 +1259,8 @@ description_paths <- c(
   # meddecide repository
   file.path(jsurvival_dir, "DESCRIPTION"),
   # jsurvival repository
-  file.path(ClinicoPathDescriptives_dir, "DESCRIPTION")   # ClinicoPathDescriptives repository
+  file.path(ClinicoPathDescriptives_dir, "DESCRIPTION"),   # ClinicoPathDescriptives repository
+  file.path(OncoPath_dir, "DESCRIPTION")   # OncoPath repository
 )
 update_description_files(paths = description_paths,
                          version = new_version,
@@ -1235,14 +1273,16 @@ yaml_0000_paths <- c(
   file.path(jjstatsplot_dir, "jamovi", "0000.yaml"),
   file.path(meddecide_dir, "jamovi", "0000.yaml"),
   file.path(jsurvival_dir, "jamovi", "0000.yaml"),
-  file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml")
+  file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml"),
+  file.path(OncoPath_dir, "jamovi", "0000.yaml")
 )
 
 modules <- c(
   jjstatsplot_modules,
   meddecide_modules,
   jsurvival_modules,
-  ClinicoPathDescriptives_modules
+  ClinicoPathDescriptives_modules,
+  OncoPath_modules
 )
 
 yaml_a_paths <- c(
@@ -1433,6 +1473,45 @@ if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 
 }
 
 
+# OncoPath_modules
+if (OncoPath_module && length(OncoPath_modules) > 0) {
+  cat("\n🧬 Processing OncoPath modules...\n")
+
+  # Copy R backend files
+  copy_module_files(
+    OncoPath_modules,
+    source_dir = file.path(main_repo_dir, "R"),
+    dest_dir = file.path(OncoPath_dir, "R"),
+    file_extensions = c(".b.R")
+  )
+
+  # Ensure jamovi directory exists
+  jamovi_dir <- file.path(OncoPath_dir, "jamovi")
+  if (!dir.exists(jamovi_dir)) {
+    dir.create(jamovi_dir, recursive = TRUE)
+    cat("  📁 Created jamovi directory:", jamovi_dir, "\n")
+  }
+
+  # Copy jamovi YAML files
+  copy_module_files(
+    OncoPath_modules,
+    source_dir = file.path(main_repo_dir, "jamovi"),
+    dest_dir = jamovi_dir,
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+  )
+
+  # Copy JavaScript and HTML assets
+  copy_jamovi_assets(
+    OncoPath_modules,
+    source_base_dir = main_repo_dir,
+    dest_base_dir = OncoPath_dir,
+    module_type = "OncoPath"
+  )
+} else {
+  cat("\n⏭️ Skipping OncoPath modules (disabled or no modules found)\n")
+}
+
+
 } else {
   cat("\n🧪 TEST mode: Skipping regular module processing - only JamoviTest will be processed\n")
 }
@@ -1529,6 +1608,7 @@ if (!WIP & webpage) {
   replace_clinicopath_with_module(meddecide_dir, "meddecide")
   replace_clinicopath_with_module(jsurvival_dir, "jsurvival")
   replace_clinicopath_with_module(ClinicoPathDescriptives_dir, "ClinicoPathDescriptives")
+  replace_clinicopath_with_module(OncoPath_dir, "OncoPath")
 }
 
 # --- Prepare, document, and install modules ----
@@ -1593,8 +1673,8 @@ if (TEST) {
   cat("🧪 TEST mode was enabled - using standalone JamoviTest module\n")
 }
 
-active_modules <- sum(c(jjstatsplot_module, meddecide_module, jsurvival_module, ClinicoPathDescriptives_module))
-cat("📊 Active modules:", active_modules, "/4\n")
+active_modules <- sum(c(jjstatsplot_module, meddecide_module, jsurvival_module, ClinicoPathDescriptives_module, OncoPath_module))
+cat("📊 Active modules:", active_modules, "/5\n")
 
 # Show active and disabled modules
 if (jjstatsplot_module) {
@@ -1619,6 +1699,12 @@ if (ClinicoPathDescriptives_module) {
   cat("  ✅ ClinicoPathDescriptives\n")
 } else {
   cat("  ⏭️ ClinicoPathDescriptives (disabled)\n")
+}
+
+if (OncoPath_module) {
+  cat("  ✅ OncoPath\n")
+} else {
+  cat("  ⏭️ OncoPath (disabled)\n")
 }
 
 cat("\n🎉 Module update process completed successfully!\n")
@@ -1797,6 +1883,44 @@ if (extended) {
     })
   } else {
     cat("\n⏭️ Skipping ClinicoPathDescriptives package (disabled)\n")
+  }
+
+  if (OncoPath_module) {
+    cat("\n🧬 Processing OncoPath package...\n")
+    old_wd <- getwd()
+    tryCatch({
+      setwd(OncoPath_dir)
+      cat("  📄 Preparing package...\n")
+      jmvtools::prepare()
+      cat("  📝 Documenting...\n")
+      devtools::document()
+
+      # NAMESPACE-DESCRIPTION synchronization for OncoPath
+      if (sync_namespace_description) {
+        cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
+        sync_namespace_with_description(OncoPath_dir, namespace_sync_dry_run)
+      }
+
+      jmvtools::prepare()
+      devtools::document()
+      cat("  📦 Installing...\n")
+      jmvtools::install()
+      if (check) {
+        cat("  🔍 Running R CMD check...\n")
+        devtools::check()
+      }
+      if (webpage) {
+        cat("  🌐 Building website...\n")
+        pkgdown::build_site()
+      }
+      cat("  ✅ OncoPath processing completed\n")
+    }, error = function(e) {
+      warning("⚠️ Error processing OncoPath: ", e$message)
+    }, finally = {
+      setwd(old_wd)
+    })
+  } else {
+    cat("\n⏭️ Skipping OncoPath package (disabled)\n")
   }
 
   # Process JamoviTest in TEST mode

@@ -1,7 +1,7 @@
 ---
 name: haralicktexture
 title: Haralick Texture Analysis
-menuGroup: OncoPathologyD
+menuGroup: OncoPathD
 version: '1.0.0'
 jas: '1.2'
 

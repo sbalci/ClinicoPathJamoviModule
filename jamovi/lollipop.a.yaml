@@ -3,7 +3,6 @@ name: lollipop
 title: Lollipop Chart
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
-menuSubtitle: 'Categorical Data Visualization'
 version: '0.0.31'
 jas: '1.2'
 

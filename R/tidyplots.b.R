@@ -1,587 +1,566 @@
 #' @title Comprehensive Tidy Plots with Advanced Statistical Visualization
-#' 
-#' @description 
-#' Create publication-ready plots using the tidyplots framework with extensive
-#' customization options, statistical features, and advanced visualization capabilities.
-#' This implementation provides a jamovi interface to the tidyplots package for
-#' streamlined scientific plotting.
-#' 
-#' @details
-#' This function provides comprehensive plotting capabilities including:
-#' \itemize{
-#'   \item Multiple plot types: points, lines, bars, boxplots, violin plots, histograms
-#'   \item Advanced statistical features: means, medians, error bars, confidence intervals
-#'   \item Statistical testing: p-values, significance asterisks
-#'   \item Extensive color schemes: discrete, continuous, and diverging palettes
-#'   \item Grouping and faceting capabilities
-#'   \item Publication-ready customization options
-#' }
-#' 
+#'
+#' @description
+#' Create publication-ready plots with extensive customization options,
+#' statistical features, and advanced visualization capabilities using tidyplots.
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import tidyplots
-#' @import ggplot2
-#' @import dplyr
-#' @import rlang
 
 tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tidyplotsClass",
     inherit = tidyplotsBase,
     private = list(
         .init = function() {
-            # Initialize plot size with responsive dimensions
-            self$results$plot$setSize(800, 600)
-            
-            # Initialize instructions
-            self$results$instructions$setContent(
-                self$.createInstructions()
-            )
+            # Initialize plot size - make it much larger by default
+            self$results$plot$setSize(1600, 1000)
         },
 
         .run = function() {
-            # Comprehensive input validation
+            # Check if required variables are provided
             if (is.null(self$options$xvar) || is.null(self$options$yvar)) {
+                self$results$instructions$setContent(
+                    private$.createInstructions()
+                )
                 self$results$instructions$setVisible(TRUE)
                 return()
             }
-            
+
             # Hide instructions when variables are selected
             self$results$instructions$setVisible(FALSE)
-            
+
             # Validate data
             if (nrow(self$data) == 0) {
                 stop('Data contains no (complete) rows')
             }
-            
-            # Check for required packages
-            if (!requireNamespace('tidyplots', quietly = TRUE)) {
-                stop('tidyplots package is required but not installed. Please install it with: install.packages("tidyplots")')
-            }
-            
-            # Validate variable types
+
+            # Validate variables exist in data
             private$.validateVariables()
-            
-            # Set dynamic plot dimensions based on content
-            private$.setPlotDimensions()
         },
 
         .plot = function(image, ...) {
-            # Comprehensive plotting function with full tidyplots support
-            
+            message("=== TIDYPLOTS DEBUG: Starting .plot function ===")
+
             # Get data and prepare variables
             plotData <- private$.prepareData()
-            if (is.null(plotData)) return(FALSE)
-            
+            if (is.null(plotData)) {
+                message("ERROR: plotData is NULL")
+                return(FALSE)
+            }
+            message(paste("DEBUG: plotData has", nrow(plotData), "rows and", ncol(plotData), "columns"))
+
             # Extract plotting variables
             xvar <- self$options$xvar
             yvar <- self$options$yvar
             colorvar <- self$options$color
             groupvar <- self$options$group
             facetvar <- self$options$facet
-            
-            # Initialize base plot with comprehensive error handling
-            tryCatch({
-                plot <- private$.initializePlot(plotData, xvar, yvar, colorvar, groupvar)
-                
-                # Add main plot elements
-                plot <- private$.addMainPlotElements(plot)
-                
-                # Add statistical elements
-                plot <- private$.addStatisticalElements(plot)
-                
-                # Add distribution elements
-                plot <- private$.addDistributionElements(plot)
-                
-                # Apply styling and customization
-                plot <- private$.applyCustomization(plot)
-                
-                # Add statistical tests if requested
-                plot <- private$.addStatisticalTests(plot)
-                
-                # Apply faceting if specified
-                if (!is.null(facetvar) && facetvar != "") {
-                    plot <- private$.applyFaceting(plot, facetvar)
-                }
-                
-                # Final plot adjustments
-                plot <- private$.applyFinalAdjustments(plot)
-                
-                print(plot)
-                return(TRUE)
-                
-            }, error = function(e) {
-                stop(paste("Error creating plot:", e$message))
-            })
+
+            message(paste("DEBUG: Variables - xvar:", xvar, "yvar:", yvar, "color:", colorvar, "group:", groupvar, "facet:", facetvar))
+
+            # Check if required packages are available
+            if (!requireNamespace("tidyplots", quietly = TRUE)) {
+                stop("tidyplots package is not available")
+            }
+
+            if (!requireNamespace("rlang", quietly = TRUE)) {
+                stop("rlang package is not available")
+            }
+
+            message("DEBUG: Packages available")
+
+            # Initialize tidyplot with required aesthetics
+            message("DEBUG: Creating tidyplot with basic aesthetics")
+            # Build the aesthetic mapping
+            aes_args <- list(x = rlang::sym(xvar), y = rlang::sym(yvar))
+
+            if (!is.null(colorvar) && colorvar != "") {
+                message(paste("DEBUG: Adding color aesthetic:", colorvar))
+                aes_args$color <- rlang::sym(colorvar)
+            }
+
+            # Note: tidyplots may not support group aesthetic directly
+            # Group functionality may be handled through color or facet
+            if (!is.null(groupvar) && groupvar != "" &&
+                (is.null(colorvar) || colorvar == "")) {
+                message(paste("DEBUG: Using group as color:", groupvar))
+                # Use group as color if no color variable is specified
+                aes_args$color <- rlang::sym(groupvar)
+            }
+
+            message("DEBUG: Calling tidyplots::tidyplot")
+            message(paste("DEBUG: Data dimensions:", nrow(plotData), "x", ncol(plotData)))
+            message(paste("DEBUG: Data columns:", paste(names(plotData), collapse = ", ")))
+
+            # Try simple approach first
+            if (!is.null(colorvar) && colorvar != "") {
+                message("DEBUG: Creating tidyplot with color")
+                p <- plotData |> tidyplots::tidyplot(x = !!rlang::sym(xvar), y = !!rlang::sym(yvar), color = !!rlang::sym(colorvar))
+            } else if (!is.null(groupvar) && groupvar != "" && (is.null(colorvar) || colorvar == "")) {
+                message("DEBUG: Creating tidyplot with group as color")
+                p <- plotData |> tidyplots::tidyplot(x = !!rlang::sym(xvar), y = !!rlang::sym(yvar), color = !!rlang::sym(groupvar))
+            } else {
+                message("DEBUG: Creating basic tidyplot")
+                p <- plotData |> tidyplots::tidyplot(x = !!rlang::sym(xvar), y = !!rlang::sym(yvar))
+            }
+            message("DEBUG: tidyplot object created successfully")
+            message(paste("DEBUG: Current plot type option:", self$options$plotType))
+            message(paste("DEBUG: Alpha option:", self$options$alpha))
+
+            # Add main plot elements
+            p <- private$.addTidyPlotElements(p)
+
+            # Add statistical elements
+            p <- private$.addTidyStatisticalElements(p)
+
+            # Add distribution elements
+            p <- private$.addTidyDistributionElements(p)
+
+            # Apply customization (including plot size)
+            p <- private$.applyTidyCustomization(p)
+
+            # Apply final adjustments (themes, axis manipulations, element removal)
+            p <- private$.applyTidyFinalAdjustments(p)
+
+            # Apply faceting if specified
+            if (!is.null(facetvar) && facetvar != "") {
+                p <- p |> tidyplots::split_plot(by = !!rlang::sym(facetvar))
+            }
+
+            print(p)
+            return(TRUE)
         },
-        
-        # ===================================================================
-        # COMPREHENSIVE HELPER FUNCTIONS
-        # ===================================================================
-        
+
         .createInstructions = function() {
             paste0(
-                "<html>",
-                "<head></head>",
-                "<body>",
-                "<div class='instructions'>",
-                "<h3>Comprehensive Tidy Plots Analysis</h3>",
-                "<p>Create publication-ready plots with advanced statistical visualization capabilities.</p>",
+                "<div style='padding: 20px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<h3 style='color: #007bff; margin-top: 0;'>Comprehensive Tidy Plots</h3>",
+                "<h4>Create Advanced Statistical Visualizations</h4>",
+                "<p>This tool creates publication-ready plots with extensive customization options.</p>",
                 "<h4>Getting Started:</h4>",
                 "<ol>",
-                "<li><b>Required:</b> Select X and Y variables</li>",
-                "<li><b>Optional:</b> Add Color, Group, or Facet variables for advanced visualization</li>",
-                "<li><b>Customize:</b> Choose plot types, statistical elements, and styling options</li>",
+                "<li><strong>Required:</strong> Select X and Y variables</li>",
+                "<li><strong>Optional:</strong> Add Color, Group, or Facet variables</li>",
+                "<li><strong>Customize:</strong> Choose plot types and statistical elements</li>",
                 "</ol>",
                 "<h4>Available Features:</h4>",
                 "<ul>",
-                "<li>Multiple plot types: Points, Lines, Bars, Boxplots, Violin plots, Histograms</li>",
-                "<li>Statistical elements: Means, medians, error bars, confidence intervals</li>",
-                "<li>Statistical testing: P-values, significance indicators</li>",
-                "<li>Advanced customization: Color schemes, themes, labels</li>",
+                "<li><strong>Plot Types:</strong> Points, Lines, Bars, Boxplots, Violin plots, Histograms</li>",
+                "<li><strong>Statistics:</strong> Means, medians, error bars, confidence intervals</li>",
+                "<li><strong>Testing:</strong> P-values, significance indicators</li>",
+                "<li><strong>Styling:</strong> Color schemes, themes, custom labels</li>",
                 "</ul>",
-                "</div>",
-                "</body>",
-                "</html>"
+                "<p><em>Start by selecting X and Y variables to create your plot.</em></p>",
+                "</div>"
             )
         },
-        
+
         .validateVariables = function() {
             data <- self$data
-            
-            # Check if variables exist in data
+
+            # Check if required variables exist in data
             if (!self$options$xvar %in% names(data)) {
                 stop(paste("X variable", self$options$xvar, "not found in data"))
             }
             if (!self$options$yvar %in% names(data)) {
                 stop(paste("Y variable", self$options$yvar, "not found in data"))
             }
-            
-            # Validate optional variables
-            if (!is.null(self$options$color) && self$options$color != "" && 
+
+            # Check optional variables
+            if (!is.null(self$options$color) && self$options$color != "" &&
                 !self$options$color %in% names(data)) {
-                warning(paste("Color variable", self$options$color, "not found in data"))
+                stop(paste("Color variable", self$options$color, "not found in data"))
             }
-            if (!is.null(self$options$group) && self$options$group != "" && 
+            if (!is.null(self$options$group) && self$options$group != "" &&
                 !self$options$group %in% names(data)) {
-                warning(paste("Group variable", self$options$group, "not found in data"))
+                stop(paste("Group variable", self$options$group, "not found in data"))
+            }
+            if (!is.null(self$options$facet) && self$options$facet != "" &&
+                !self$options$facet %in% names(data)) {
+                stop(paste("Facet variable", self$options$facet, "not found in data"))
             }
         },
-        
-        .setPlotDimensions = function() {
-            # Set responsive plot dimensions based on plot complexity
-            base_width <- 800
-            base_height <- 600
-            
-            # Adjust for faceting
-            if (!is.null(self$options$facet) && self$options$facet != "") {
-                base_width <- base_width * 1.2
-                base_height <- base_height * 1.2
-            }
-            
-            # Adjust for grouping
-            if (!is.null(self$options$group) && self$options$group != "") {
-                base_width <- base_width * 1.1
-            }
-            
-            self$results$plot$setSize(base_width, base_height)
-        },
-        
+
         .prepareData = function() {
             data <- self$data
-            
-            # Remove rows with missing values in key variables
-            key_vars <- c(self$options$xvar, self$options$yvar)
+
+            # Get all variables that will be used
+            used_vars <- c(self$options$xvar, self$options$yvar)
             if (!is.null(self$options$color) && self$options$color != "") {
-                key_vars <- c(key_vars, self$options$color)
+                used_vars <- c(used_vars, self$options$color)
             }
             if (!is.null(self$options$group) && self$options$group != "") {
-                key_vars <- c(key_vars, self$options$group)
+                used_vars <- c(used_vars, self$options$group)
             }
             if (!is.null(self$options$facet) && self$options$facet != "") {
-                key_vars <- c(key_vars, self$options$facet)
+                used_vars <- c(used_vars, self$options$facet)
             }
-            
-            # Filter complete cases
-            complete_data <- data[complete.cases(data[, key_vars, drop = FALSE]), ]
-            
+
+            # Remove rows with missing values in used variables
+            complete_data <- data[complete.cases(data[, used_vars, drop = FALSE]), ]
+
             if (nrow(complete_data) == 0) {
                 stop("No complete cases found for the selected variables")
             }
-            
+
             return(complete_data)
         },
-        
-        .initializePlot = function(data, xvar, yvar, colorvar, groupvar) {
-            # Initialize base tidyplot
-            
-            # Build aesthetic mapping
-            aes_list <- list(
-                x = rlang::sym(xvar),
-                y = rlang::sym(yvar)
-            )
-            
-            if (!is.null(colorvar) && colorvar != "") {
-                aes_list$color <- rlang::sym(colorvar)
-            }
-            
-            if (!is.null(groupvar) && groupvar != "") {
-                aes_list$group <- rlang::sym(groupvar)
-            }
-            
-            # Create base plot
-            plot <- data %>%
-                tidyplots::tidyplot(
-                    x = aes_list$x,
-                    y = aes_list$y,
-                    color = aes_list$color,
-                    group = aes_list$group
-                )
-            
-            return(plot)
-        },
-        
-        .addMainPlotElements = function(plot) {
-            # Add main plot elements based on plot type
-            
+
+        .addTidyPlotElements = function(p) {
             plot_type <- self$options$plotType
-            
-            if (plot_type == 'points') {
-                plot <- private$.addPointElements(plot)
-            } else if (plot_type == 'line') {
-                plot <- private$.addLineElements(plot)
-            } else if (plot_type == 'bar') {
-                plot <- private$.addBarElements(plot)
-            } else if (plot_type == 'boxplot') {
-                plot <- private$.addBoxplotElements(plot)
-            } else if (plot_type == 'violin') {
-                plot <- private$.addViolinElements(plot)
-            } else if (plot_type == 'histogram') {
-                plot <- private$.addHistogramElements(plot)
-            } else if (plot_type == 'area') {
-                plot <- private$.addAreaElements(plot)
-            } else if (plot_type == 'density') {
-                plot <- private$.addDensityElements(plot)
-            }
-            
-            return(plot)
+            alpha <- self$options$alpha
+            message(paste("DEBUG: Adding plot elements for type:", plot_type, "with alpha:", alpha))
+
+            switch(plot_type,
+                "points" = {
+                    message(paste("DEBUG: Adding points with pointType:", self$options$pointType))
+                    if (self$options$pointType == "jitter") {
+                        message("DEBUG: Adding jittered points")
+                        p <- p |> tidyplots::add_data_points_jitter(alpha = alpha)
+                    } else if (self$options$pointType == "beeswarm") {
+                        # Use shape parameter from options if available
+                        shape_param <- if (!is.null(self$options$pointShape)) self$options$pointShape else 16
+                        message(paste("DEBUG: Adding beeswarm points with shape:", shape_param))
+                        p <- p |> tidyplots::add_data_points_beeswarm(alpha = alpha, shape = shape_param)
+                    } else {
+                        message("DEBUG: Adding basic data points")
+                        p <- p |> tidyplots::add_data_points(alpha = alpha)
+                    }
+                },
+                "line" = {
+                    if (self$options$lineType == "curve") {
+                        p <- p |> tidyplots::add_curve_fit(alpha = alpha)
+                    } else if (self$options$lineType == "mean") {
+                        p <- p |> tidyplots::add_mean_line(alpha = alpha)
+                    } else if (self$options$lineType == "median") {
+                        p <- p |> tidyplots::add_median_line(alpha = alpha)
+                    } else {
+                        p <- p |> tidyplots::add_line(alpha = alpha)
+                    }
+                },
+                "bar" = {
+                    if (self$options$barType == "mean") {
+                        p <- p |> tidyplots::add_mean_bar(alpha = alpha)
+                    } else if (self$options$barType == "count") {
+                        p <- p |> tidyplots::add_count_bar(alpha = alpha)
+                    } else if (self$options$barType == "sum") {
+                        p <- p |> tidyplots::add_sum_bar(alpha = alpha)
+                    } else {
+                        p <- p |> tidyplots::add_mean_bar(alpha = alpha)
+                    }
+                },
+                "barstack" = {
+                    if (self$options$stackType == "absolute") {
+                        p <- p |> tidyplots::add_barstack_absolute(alpha = alpha)
+                    } else {
+                        p <- p |> tidyplots::add_barstack_relative(alpha = alpha)
+                    }
+                },
+                "boxplot" = {
+                    p <- p |> tidyplots::add_boxplot(alpha = alpha)
+                },
+                "violin" = {
+                    p <- p |> tidyplots::add_violin(alpha = alpha)
+                    if (self$options$violinPoints) {
+                        p <- p |> tidyplots::add_data_points_jitter(alpha = alpha * 0.6)
+                    }
+                },
+                "histogram" = {
+                    p <- p |> tidyplots::add_histogram(alpha = alpha, bins = self$options$histogramBins)
+                },
+                "area" = {
+                    p <- p |> tidyplots::add_area(alpha = alpha)
+                },
+                "areastack" = {
+                    if (self$options$stackType == "absolute") {
+                        p <- p |> tidyplots::add_areastack_absolute(alpha = alpha)
+                    } else {
+                        p <- p |> tidyplots::add_areastack_relative(alpha = alpha)
+                    }
+                },
+                "pie" = {
+                    p <- p |> tidyplots::add_pie(alpha = alpha)
+                },
+                "donut" = {
+                    p <- p |> tidyplots::add_donut(alpha = alpha)
+                },
+                "heatmap" = {
+                    p <- p |> tidyplots::add_heatmap(alpha = alpha)
+                },
+                "ellipse" = {
+                    p <- p |> tidyplots::add_ellipse(alpha = alpha)
+                }
+            )
+
+            return(p)
         },
-        
-        .addPointElements = function(plot) {
-            point_style <- self$options$pointType
-            
-            if (point_style == 'basic') {
-                plot <- plot %>% tidyplots::add_data_points()
-            } else if (point_style == 'beeswarm') {
-                plot <- plot %>% tidyplots::add_data_points_beeswarm()
-            } else if (point_style == 'jitter') {
-                plot <- plot %>% tidyplots::add_data_points_jitter()
-            }
-            
-            return(plot)
-        },
-        
-        .addLineElements = function(plot) {
-            line_type <- self$options$lineType
-            
-            if (line_type == 'mean') {
-                plot <- plot %>% tidyplots::add_mean_line()
-            } else if (line_type == 'median') {
-                plot <- plot %>% tidyplots::add_median_line()
-            } else if (line_type == 'curve') {
-                plot <- plot %>% tidyplots::add_curve_fit()
-            } else {
-                plot <- plot %>% tidyplots::add_line()
-            }
-            
-            return(plot)
-        },
-        
-        .addBarElements = function(plot) {
-            bar_type <- self$options$barType
-            
-            if (bar_type == 'mean') {
-                plot <- plot %>% tidyplots::add_mean_bar(alpha = 0.7)
-            } else if (bar_type == 'median') {
-                plot <- plot %>% tidyplots::add_median_bar(alpha = 0.7)
-            } else if (bar_type == 'count') {
-                plot <- plot %>% tidyplots::add_count_bar()
-            }
-            
-            return(plot)
-        },
-        
-        .addBoxplotElements = function(plot) {
-            plot <- plot %>% tidyplots::add_boxplot()
-            
-            # Add optional outlier points
-            if (self$options$showOutliers) {
-                plot <- plot %>% tidyplots::add_data_points()
-            }
-            
-            return(plot)
-        },
-        
-        .addViolinElements = function(plot) {
-            plot <- plot %>% tidyplots::add_violin()
-            
-            # Add optional data points
-            if (self$options$violinPoints) {
-                plot <- plot %>% tidyplots::add_data_points_beeswarm()
-            }
-            
-            return(plot)
-        },
-        
-        .addHistogramElements = function(plot) {
-            bins <- ifelse(is.null(self$options$histogramBins) || self$options$histogramBins == 0, 
-                          30, self$options$histogramBins)
-            
-            plot <- plot %>% tidyplots::add_histogram(bins = bins)
-            
-            return(plot)
-        },
-        
-        .addAreaElements = function(plot) {
-            area_type <- self$options$areaType
-            
-            if (area_type == 'absolute') {
-                plot <- plot %>% tidyplots::add_area()
-            } else if (area_type == 'relative') {
-                plot <- plot %>% tidyplots::add_area_relative()
-            }
-            
-            return(plot)
-        },
-        
-        .addDensityElements = function(plot) {
-            plot <- plot %>% tidyplots::add_density()
-            return(plot)
-        },
-        
-        .addStatisticalElements = function(plot) {
-            # Add central tendency measures
+
+        .addTidyStatisticalElements = function(p) {
+            # Add mean if requested
             if (self$options$showMean) {
-                if (self$options$meanType == 'dash') {
-                    plot <- plot %>% tidyplots::add_mean_dash()
-                } else if (self$options$meanType == 'dot') {
-                    plot <- plot %>% tidyplots::add_mean_dot()
-                } else if (self$options$meanType == 'value') {
-                    plot <- plot %>% tidyplots::add_mean_value()
+                if (self$options$meanType == "dash") {
+                    p <- p |> tidyplots::add_mean_dash()
+                } else if (self$options$meanType == "dot") {
+                    p <- p |> tidyplots::add_mean_dot()
+                } else if (self$options$meanType == "value") {
+                    p <- p |> tidyplots::add_mean_value()
                 }
             }
-            
+
+            # Add median if requested
             if (self$options$showMedian) {
-                if (self$options$medianType == 'dash') {
-                    plot <- plot %>% tidyplots::add_median_dash()
-                } else if (self$options$medianType == 'dot') {
-                    plot <- plot %>% tidyplots::add_median_dot()
-                } else if (self$options$medianType == 'value') {
-                    plot <- plot %>% tidyplots::add_median_value()
+                if (self$options$medianType == "dash") {
+                    p <- p |> tidyplots::add_median_dash()
+                } else if (self$options$medianType == "dot") {
+                    p <- p |> tidyplots::add_median_dot()
+                } else if (self$options$medianType == "value") {
+                    p <- p |> tidyplots::add_median_value()
                 }
             }
-            
-            # Add error bars and confidence intervals
+
+            # Add sum if requested
+            if (self$options$showSum) {
+                if (self$options$sumType == "dash") {
+                    p <- p |> tidyplots::add_sum_dash()
+                } else if (self$options$sumType == "dot") {
+                    p <- p |> tidyplots::add_sum_dot()
+                } else if (self$options$sumType == "value") {
+                    p <- p |> tidyplots::add_sum_value()
+                }
+            }
+
+            # Add count if requested
+            if (self$options$showCount) {
+                if (self$options$countType == "dash") {
+                    p <- p |> tidyplots::add_count_dash()
+                } else if (self$options$countType == "dot") {
+                    p <- p |> tidyplots::add_count_dot()
+                } else if (self$options$countType == "value") {
+                    p <- p |> tidyplots::add_count_value()
+                }
+            }
+
+            # Add error bars if requested
             if (self$options$showSEM) {
-                plot <- plot %>% tidyplots::add_sem_errorbar()
+                if (self$options$semType == "errorbar") {
+                    p <- p |> tidyplots::add_sem_errorbar()
+                } else {
+                    p <- p |> tidyplots::add_sem_ribbon()
+                }
             }
-            
+
             if (self$options$showSD) {
-                plot <- plot %>% tidyplots::add_sd_errorbar()
+                if (self$options$sdType == "errorbar") {
+                    p <- p |> tidyplots::add_sd_errorbar()
+                } else {
+                    p <- p |> tidyplots::add_sd_ribbon()
+                }
             }
-            
+
             if (self$options$showCI) {
-                if (self$options$ciType == 'errorbar') {
-                    plot <- plot %>% tidyplots::add_ci95_errorbar()
-                } else if (self$options$ciType == 'ribbon') {
-                    plot <- plot %>% tidyplots::add_ci95_ribbon()
+                if (self$options$ciType == "errorbar") {
+                    p <- p |> tidyplots::add_ci95_errorbar()
+                } else {
+                    p <- p |> tidyplots::add_ci95_ribbon()
                 }
             }
-            
+
+            # Add range if requested
             if (self$options$showRange) {
-                plot <- plot %>% tidyplots::add_range_errorbar()
-            }
-            
-            return(plot)
-        },
-        
-        .addDistributionElements = function(plot) {
-            # Add distribution-related elements if requested
-            
-            if (self$options$showDistribution) {
-                dist_type <- self$options$distributionType
-                
-                if (dist_type == 'density') {
-                    plot <- plot %>% tidyplots::add_density()
-                } else if (dist_type == 'rug') {
-                    plot <- plot %>% tidyplots::add_rug()
+                if (self$options$rangeType == "errorbar") {
+                    p <- p |> tidyplots::add_range_errorbar()
+                } else {
+                    p <- p |> tidyplots::add_range_ribbon()
                 }
             }
-            
-            return(plot)
-        },
-        
-        .applyCustomization = function(plot) {
-            # Apply color schemes
-            plot <- private$.applyColorScheme(plot)
-            
-            # Apply themes and styling
-            plot <- private$.applyTheme(plot)
-            
-            # Apply labels and titles
-            plot <- private$.applyLabels(plot)
-            
-            # Apply axis modifications
-            plot <- private$.applyAxisModifications(plot)
-            
-            return(plot)
-        },
-        
-        .applyColorScheme = function(plot) {
-            color_scheme <- self$options$colorScheme
-            
-            # Discrete color schemes
-            if (color_scheme == 'friendly') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_discrete_friendly)
-            } else if (color_scheme == 'seaside') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_discrete_seaside)
-            } else if (color_scheme == 'apple') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_discrete_apple)
-            } else if (color_scheme == 'rainbow') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_discrete_rainbow)
-            }
-            # Continuous color schemes  
-            else if (color_scheme == 'viridis') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_continuous_viridis)
-            } else if (color_scheme == 'inferno') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_continuous_inferno)
-            } else if (color_scheme == 'magma') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_continuous_magma)
-            } else if (color_scheme == 'turbo') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_continuous_turbo)
-            }
-            # Diverging color schemes
-            else if (color_scheme == 'blue2red') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_diverging_blue2red)
-            } else if (color_scheme == 'blue2brown') {
-                plot <- plot %>% tidyplots::adjust_colors(tidyplots::colors_diverging_blue2brown)
-            }
-            
-            return(plot)
-        },
-        
-        .applyTheme = function(plot) {
-            # Apply theme modifications
-            if (self$options$removeLegend) {
-                plot <- plot %>% tidyplots::remove_legend()
-            }
-            
-            if (self$options$removePadding) {
-                plot <- plot %>% tidyplots::remove_padding()
-            }
-            
-            # Apply font adjustments
-            if (!is.null(self$options$fontSize) && self$options$fontSize > 0) {
-                plot <- plot %>% tidyplots::adjust_font(size = self$options$fontSize)
-            }
-            
-            return(plot)
-        },
-        
-        .applyLabels = function(plot) {
-            # Add title
-            if (!is.null(self$options$plotTitle) && self$options$plotTitle != '') {
-                plot <- plot %>% tidyplots::add_title(self$options$plotTitle)
-            }
-            
-            # Adjust axis titles
-            if (!is.null(self$options$xLabel) && self$options$xLabel != '') {
-                plot <- plot %>% tidyplots::adjust_x_axis_title(self$options$xLabel)
-            }
-            
-            if (!is.null(self$options$yLabel) && self$options$yLabel != '') {
-                plot <- plot %>% tidyplots::adjust_y_axis_title(self$options$yLabel)
-            }
-            
-            # Adjust legend title
-            if (!is.null(self$options$legendTitle) && self$options$legendTitle != '') {
-                plot <- plot %>% tidyplots::adjust_legend_title(self$options$legendTitle)
-            }
-            
-            return(plot)
-        },
-        
-        .applyAxisModifications = function(plot) {
-            # X-axis modifications
-            if (self$options$removeXAxis) {
-                plot <- plot %>% tidyplots::remove_x_axis()
-            } else {
-                if (self$options$removeXAxisLabels) {
-                    plot <- plot %>% tidyplots::remove_x_axis_labels()
-                }
-                if (self$options$removeXAxisTitle) {
-                    plot <- plot %>% tidyplots::remove_x_axis_title()
-                }
-            }
-            
-            # Y-axis modifications
-            if (self$options$removeYAxis) {
-                plot <- plot %>% tidyplots::remove_y_axis()
-            } else {
-                if (self$options$removeYAxisLabels) {
-                    plot <- plot %>% tidyplots::remove_y_axis_labels()
-                }
-                if (self$options$removeYAxisTitle) {
-                    plot <- plot %>% tidyplots::remove_y_axis_title()
-                }
-            }
-            
-            return(plot)
-        },
-        
-        .addStatisticalTests = function(plot) {
+
             # Add statistical testing if requested
-            if (self$options$showPValue && !is.null(self$options$color) && self$options$color != "") {
-                tryCatch({
-                    plot <- plot %>% tidyplots::add_test_pvalue()
-                }, error = function(e) {
-                    warning(paste("Could not add p-value:", e$message))
-                })
+            if (self$options$showPValue) {
+                p <- p |> tidyplots::add_test_pvalue()
             }
-            
-            if (self$options$showSignificance && !is.null(self$options$color) && self$options$color != "") {
-                tryCatch({
-                    plot <- plot %>% tidyplots::add_test_asterisks()
-                }, error = function(e) {
-                    warning(paste("Could not add significance asterisks:", e$message))
-                })
+
+            if (self$options$showSignificance) {
+                p <- p |> tidyplots::add_test_asterisks()
             }
-            
-            return(plot)
+
+            # Add reference lines if requested
+            if (self$options$showReferenceLines) {
+                message("DEBUG: Adding reference lines")
+                ref_x <- if (!is.null(self$options$referenceX) && self$options$referenceX != "") {
+                    message(paste("DEBUG: Parsing X reference values:", self$options$referenceX))
+                    as.numeric(strsplit(self$options$referenceX, ",")[[1]])
+                } else NULL
+
+                ref_y <- if (!is.null(self$options$referenceY) && self$options$referenceY != "") {
+                    message(paste("DEBUG: Parsing Y reference values:", self$options$referenceY))
+                    as.numeric(strsplit(self$options$referenceY, ",")[[1]])
+                } else NULL
+
+                if (!is.null(ref_x) || !is.null(ref_y)) {
+                    message("DEBUG: Calling add_reference_lines")
+                    p <- p |> tidyplots::add_reference_lines(x = ref_x, y = ref_y)
+                    message("DEBUG: Reference lines added")
+                }
+            }
+
+            return(p)
         },
-        
-        .applyFaceting = function(plot, facetvar) {
-            # Apply faceting/splitting
-            tryCatch({
-                plot <- plot %>% tidyplots::split_plot(by = rlang::sym(facetvar))
-            }, error = function(e) {
-                warning(paste("Could not apply faceting:", e$message))
-            })
-            
-            return(plot)
-        },
-        
-        .applyFinalAdjustments = function(plot) {
-            # Apply any final adjustments
-            
-            # Adjust transparency/alpha if specified
-            if (!is.null(self$options$alpha) && self$options$alpha < 1) {
-                # Note: This might need to be applied earlier in specific add_* functions
-                # depending on the tidyplots implementation
+
+        .addTidyDistributionElements = function(p) {
+            if (self$options$showDistribution) {
+                if (self$options$distributionType == "density") {
+                    # tidyplots may not have direct density, use histogram as alternative
+                    p <- p |> tidyplots::add_histogram(alpha = 0.3)
+                } else if (self$options$distributionType == "rug") {
+                    # tidyplots may not have rug plot support
+                    # Could add data points instead
+                    p <- p |> tidyplots::add_data_points(alpha = 0.5)
+                }
             }
-            
-            # Any other final modifications can go here
-            
-            return(plot)
+
+            return(p)
+        },
+
+        .applyTidyCustomization = function(p) {
+            # Apply color scheme
+            if (!is.null(self$options$color) && self$options$color != "") {
+                color_scheme <- self$options$colorScheme
+
+                if (color_scheme == "friendly") {
+                    p <- p |> tidyplots::adjust_colors(new_colors = tidyplots::colors_discrete_friendly)
+                } else if (color_scheme == "seaside") {
+                    p <- p |> tidyplots::adjust_colors(new_colors = tidyplots::colors_discrete_seaside)
+                } else if (color_scheme == "viridis") {
+                    p <- p |> tidyplots::adjust_colors(new_colors = tidyplots::colors_discrete_viridis)
+                } else if (color_scheme == "apple") {
+                    apple_colors <- c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f")
+                    p <- p |> tidyplots::adjust_colors(new_colors = apple_colors)
+                } else if (color_scheme == "custom") {
+                    # Custom colors example from tidyplots
+                    custom_colors <- c("#644296","#F08533","#3B78B0", "#D1352C")
+                    p <- p |> tidyplots::adjust_colors(new_colors = custom_colors)
+                }
+            }
+
+            # Apply custom labels
+            if (self$options$plotTitle != "") {
+                p <- p |> tidyplots::adjust_title(self$options$plotTitle)
+            }
+            if (self$options$xLabel != "") {
+                p <- p |> tidyplots::adjust_x_axis_title(self$options$xLabel)
+            }
+            if (self$options$yLabel != "") {
+                p <- p |> tidyplots::adjust_y_axis_title(self$options$yLabel)
+            }
+            if (!is.null(self$options$color) && self$options$color != "" && self$options$legendTitle != "") {
+                p <- p |> tidyplots::adjust_legend_title(self$options$legendTitle)
+            }
+
+            # Apply caption if provided
+            if (!is.null(self$options$plotCaption) && self$options$plotCaption != "") {
+                p <- p |> tidyplots::adjust_caption(self$options$plotCaption)
+            }
+
+            # Apply font size
+            if (self$options$fontSize != 12) {
+                p <- p |> tidyplots::adjust_font(size = self$options$fontSize)
+            }
+
+            # Only apply size adjustments if user explicitly sets them
+            # Let jamovi handle default sizing instead of tidyplots
+            if (!is.null(self$options$plotWidth) && !is.null(self$options$plotHeight) &&
+                self$options$plotWidth > 0 && self$options$plotHeight > 0) {
+                message(paste("DEBUG: User set plot size to", self$options$plotWidth, "x", self$options$plotHeight))
+                p <- p |> tidyplots::adjust_size(width = self$options$plotWidth, height = self$options$plotHeight)
+            } else {
+                message("DEBUG: Using jamovi default sizing (no tidyplots adjust_size)")
+            }
+
+            return(p)
+        },
+
+        .applyTidyFinalAdjustments = function(p) {
+            # Apply axis label manipulations
+            if (self$options$sortXAxisLabels) {
+                p <- p |> tidyplots::sort_x_axis_labels()
+            }
+
+            if (self$options$reverseXAxisLabels) {
+                p <- p |> tidyplots::reverse_x_axis_labels()
+            }
+
+            # Apply theme if specified (but not default tidyplot themes that might shrink plot)
+            theme_type <- self$options$plotTheme
+            if (!is.null(theme_type) && theme_type != "default") {
+                message(paste("DEBUG: Applying theme:", theme_type))
+                switch(theme_type,
+                    "tidyplot" = {
+                        message("DEBUG: Skipping tidyplot theme (may affect size)")
+                        # p <- p |> tidyplots::theme_tidyplot()
+                    },
+                    "ggplot2" = {
+                        p <- p |> tidyplots::theme_ggplot2()
+                    },
+                    "minimal_x" = {
+                        p <- p |> tidyplots::theme_minimal_x()
+                    },
+                    "minimal_y" = {
+                        p <- p |> tidyplots::theme_minimal_y()
+                    },
+                    "minimal_xy" = {
+                        p <- p |> tidyplots::theme_minimal_xy()
+                    }
+                )
+            }
+
+            # Remove axis lines if requested
+            if (self$options$removeXAxisLine) {
+                p <- p |> tidyplots::remove_x_axis_line()
+            }
+
+            if (self$options$removeYAxisLine) {
+                p <- p |> tidyplots::remove_y_axis_line()
+            }
+
+            # Remove elements if requested
+            if (self$options$removeLegend) {
+                p <- p |> tidyplots::remove_legend()
+            }
+
+            if (self$options$removeLegendTitle) {
+                p <- p |> tidyplots::remove_legend_title()
+            }
+
+            if (self$options$removeXAxis) {
+                p <- p |> tidyplots::remove_x_axis()
+            }
+
+            if (self$options$removeXAxisLabels) {
+                p <- p |> tidyplots::remove_x_axis_labels()
+            }
+
+            if (self$options$removeXAxisTitle) {
+                p <- p |> tidyplots::remove_x_axis_title()
+            }
+
+            if (self$options$removeYAxis) {
+                p <- p |> tidyplots::remove_y_axis()
+            }
+
+            if (self$options$removeYAxisLabels) {
+                p <- p |> tidyplots::remove_y_axis_labels()
+            }
+
+            if (self$options$removeYAxisTitle) {
+                p <- p |> tidyplots::remove_y_axis_title()
+            }
+
+            if (self$options$removePadding) {
+                p <- p |> tidyplots::remove_padding()
+            }
+
+            return(p)
         }
     )
 )

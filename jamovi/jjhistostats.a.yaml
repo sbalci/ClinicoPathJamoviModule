@@ -2,7 +2,7 @@
 name:  jjhistostats
 title: Histogram
 menuGroup: JJStatsPlot
-menuSubgroup: Continuous
+menuSubgroup: Distribution
 # menuSubtitle: Histogram
 version: '0.0.31'
 jas: '1.2'

@@ -7,15 +7,15 @@ items:
     - name: instructions
       title: Instructions
       type: Html
-      visible: (xvar === null || yvar === null)
+      visible: (!xvar || !yvar)
 
     - name: plot
       title: Plot
       type: Image
       renderFun: .plot
       requiresData: true
-      width: 800
-      height: 600
+      width: 1600
+      height: 1000
       clearWith:
           - xvar
           - yvar
@@ -26,16 +26,24 @@ items:
           - pointType
           - lineType
           - barType
+          - stackType
           - areaType
           - showMean
           - meanType
           - showMedian
           - medianType
+          - showSum
+          - sumType
+          - showCount
+          - countType
           - showSEM
+          - semType
           - showSD
+          - sdType
           - showCI
           - ciType
           - showRange
+          - rangeType
           - showDistribution
           - distributionType
           - showOutliers
@@ -43,6 +51,9 @@ items:
           - histogramBins
           - showPValue
           - showSignificance
+          - showReferenceLines
+          - referenceX
+          - referenceY
           - colorScheme
           - alpha
           - fontSize
@@ -50,7 +61,12 @@ items:
           - xLabel
           - yLabel
           - legendTitle
+          - plotCaption
+          - plotWidth
+          - plotHeight
+          - pointShape
           - removeLegend
+          - removeLegendTitle
           - removePadding
           - removeXAxis
           - removeXAxisLabels
@@ -58,6 +74,11 @@ items:
           - removeYAxis
           - removeYAxisLabels
           - removeYAxisTitle
+          - sortXAxisLabels
+          - reverseXAxisLabels
+          - plotTheme
+          - removeXAxisLine
+          - removeYAxisLine
 
 refs:
     - ClinicoPathJamoviModule

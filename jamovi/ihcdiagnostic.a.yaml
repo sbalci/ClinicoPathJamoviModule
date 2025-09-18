@@ -1,7 +1,7 @@
 ---
 name: ihcdiagnostic
 title: IHC Diagnostic Analysis
-menuGroup: OncoPathologyT2
+menuGroup: OncoPathT2
 menuSubgroup: IHC Analysis
 menuTitle: Clinical Diagnostics
 version: '1.0.0'

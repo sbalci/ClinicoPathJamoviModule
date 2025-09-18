@@ -3,7 +3,7 @@ name: jjridges
 title: Ridge Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Distribution
-menuSubtitle: 'Enhanced Ridgeline Visualization'
+# menuSubtitle: 'Enhanced Ridgeline Visualization'
 version: '0.0.31'
 jas: '1.2'
 

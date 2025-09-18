@@ -1,7 +1,7 @@
 ---
 name: jconsort
 title: CONSORT Flowchart
-menuGroup: OncoPathologyD
+menuGroup: OncoPathD
 menuSubgroup: Study Design
 version: '0.0.3'
 jas: '1.2'

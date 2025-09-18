@@ -1,7 +1,7 @@
 ---
 name: tinytable
 title: Modern Table Formatting
-menuGroup: ExplorationT
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 version: '0.0.31'
 jas: '1.2'
