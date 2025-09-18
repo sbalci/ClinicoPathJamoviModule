@@ -17,11 +17,6 @@ items:
       renderFun: .plot
       visible: (vars:length > 1)
 
-    - name:  plotly
-      title: Interactive Plot
-      type:  Html
-      visible: (interactive && vars:length > 1)
-
     - name:  summary
       title: Variable Summary
       type:  Table

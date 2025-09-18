@@ -1,7 +1,7 @@
 ---
 name: summarydata2
 title: Enhanced Descriptives
-menuGroup: ExplorationT2
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: Advanced Continuous Variables
 version: '0.0.3'

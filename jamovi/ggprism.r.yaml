@@ -9,6 +9,51 @@ items:
       type: Html
       visible: true
 
+    - name: clinical_summary
+      title: Clinical Summary
+      type: Html
+      visible: true
+      clearWith:
+        - x_var
+        - y_var
+        - group_var
+        - plot_type
+        - stats_method
+
+    - name: assumptions_check
+      title: Statistical Assumptions & Warnings
+      type: Html
+      visible: (show_statistics)
+      clearWith:
+        - x_var
+        - y_var
+        - group_var
+        - stats_method
+
+    - name: interpretation_guide
+      title: How to Interpret This Plot
+      type: Html
+      visible: true
+      clearWith:
+        - plot_type
+        - stats_method
+
+    - name: report_sentences
+      title: Copy-Ready Report
+      type: Html
+      visible: true
+      clearWith:
+        - x_var
+        - y_var
+        - group_var
+        - plot_type
+        - stats_method
+
+    - name: statistical_glossary
+      title: Statistical Terms Glossary
+      type: Html
+      visible: (show_statistics)
+
     - name: main_plot
       title: Prism Style Plot
       type: Image
@@ -92,6 +137,11 @@ items:
 
     - name: accessibility_notes
       title: Accessibility & Best Practices
+      type: Html
+      visible: true
+
+    - name: clinical_presets
+      title: Clinical Research Presets
       type: Html
       visible: true
 

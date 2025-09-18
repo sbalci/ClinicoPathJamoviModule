@@ -1,7 +1,7 @@
 ---
 name:  reportcat2
 title: Enhanced Frequencies
-menuGroup: ExplorationT2
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: Advanced Categorical Variables
 version: '0.0.3'

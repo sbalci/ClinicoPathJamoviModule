@@ -1,7 +1,7 @@
 ---
 name: ihcadvanced
 title: Advanced IHC Clustering
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyT2
 menuSubgroup: IHC Analysis
 menuTitle: Advanced Analysis
 version: '1.0.0'

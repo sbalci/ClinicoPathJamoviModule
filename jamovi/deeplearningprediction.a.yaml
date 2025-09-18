@@ -1,7 +1,7 @@
 ---
 name: deeplearningprediction
 title: Deep Learning Image Prediction
-menuGroup: ExplorationT2
+menuGroup: ExplorationD
 menuSubgroup: Advanced AI
 menuSubtitle: Neural Network Analysis
 version: '1.0.0'

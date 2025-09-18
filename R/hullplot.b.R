@@ -21,7 +21,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .run = function() {
 
             # Check if required variables have been selected
-            if (is.null(self$options$x_var) || is.null(self$options$y_var) || is.null(self$options$group_var)) {
+            if (is.null(self$options$x_var) || is.null(self$options$y_var) || is.null(self$options$group_var) ||
+                self$options$x_var == "" || self$options$y_var == "" || self$options$group_var == "") {
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                 <h3 style='color: #1976d2; margin-top: 0;'>🎯 Welcome to Hull Plot Visualization!</h3>
@@ -81,21 +82,34 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             color_var <- self$options$color_var
             size_var <- self$options$size_var
 
-            # Prepare data
-            plot_data <- dataset[c(x_var, y_var, group_var)]
-            
+            # Validate variable names exist in dataset
+            required_vars <- c(x_var, y_var, group_var)
+            missing_vars <- required_vars[!required_vars %in% names(dataset)]
+            if (length(missing_vars) > 0) {
+                stop(paste("Error: Variables not found in dataset:", paste(missing_vars, collapse = ", ")))
+            }
+
+            # Prepare data - create subset with required variables
+            plot_data <- data.frame(
+                x = dataset[[x_var]],
+                y = dataset[[y_var]],
+                group = dataset[[group_var]]
+            )
+            names(plot_data) <- c(x_var, y_var, group_var)
+
             # Add color variable if specified and different from group variable
-            if (!is.null(color_var) && color_var != group_var) {
+            if (!is.null(color_var) && color_var != "" && color_var != group_var && color_var %in% names(dataset)) {
                 plot_data[[paste0("color_", color_var)]] <- dataset[[color_var]]
             }
-            
+
             # Add size variable if specified
-            if (!is.null(size_var)) {
+            if (!is.null(size_var) && size_var != "" && size_var %in% names(dataset)) {
                 plot_data[[paste0("size_", size_var)]] <- dataset[[size_var]]
             }
 
             # Remove rows with missing values in required variables
-            plot_data <- plot_data[complete.cases(plot_data[c(x_var, y_var, group_var)]), ]
+            required_cols <- c(x_var, y_var, group_var)
+            plot_data <- plot_data[complete.cases(plot_data[required_cols]), ]
             
             if (nrow(plot_data) == 0) {
                 stop("Error: No complete cases found for the selected variables.")
@@ -125,7 +139,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .plot = function(image, ggtheme, theme, ...) {
             
             # Check if required variables are selected
-            if (is.null(self$options$x_var) || is.null(self$options$y_var) || is.null(self$options$group_var)) {
+            if (is.null(self$options$x_var) || is.null(self$options$y_var) || is.null(self$options$group_var) ||
+                self$options$x_var == "" || self$options$y_var == "" || self$options$group_var == "") {
                 return()
             }
 
@@ -137,23 +152,36 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             color_var <- self$options$color_var
             size_var <- self$options$size_var
 
-            # Prepare data
-            plot_data <- dataset[c(x_var, y_var, group_var)]
-            
+            # Validate variable names exist in dataset
+            required_vars <- c(x_var, y_var, group_var)
+            missing_vars <- required_vars[!required_vars %in% names(dataset)]
+            if (length(missing_vars) > 0) {
+                return()  # Silently return for plot function
+            }
+
+            # Prepare data - create subset with required variables
+            plot_data <- data.frame(
+                x = dataset[[x_var]],
+                y = dataset[[y_var]],
+                group = dataset[[group_var]]
+            )
+            names(plot_data) <- c(x_var, y_var, group_var)
+
             # Add color variable if specified and different from group variable
             color_mapping <- group_var  # Default to group variable
-            if (!is.null(color_var) && color_var != group_var) {
+            if (!is.null(color_var) && color_var != "" && color_var != group_var && color_var %in% names(dataset)) {
                 plot_data[[paste0("color_", color_var)]] <- dataset[[color_var]]
                 color_mapping <- paste0("color_", color_var)
             }
-            
+
             # Add size variable if specified
-            if (!is.null(size_var)) {
+            if (!is.null(size_var) && size_var != "" && size_var %in% names(dataset)) {
                 plot_data[[paste0("size_", size_var)]] <- dataset[[size_var]]
             }
 
             # Remove missing values
-            plot_data <- plot_data[complete.cases(plot_data[c(x_var, y_var, group_var)]), ]
+            required_cols <- c(x_var, y_var, group_var)
+            plot_data <- plot_data[complete.cases(plot_data[required_cols]), ]
             
             if (nrow(plot_data) == 0) {
                 return()
@@ -168,19 +196,24 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Create base plot
             p <- ggplot2::ggplot(plot_data, ggplot2::aes_string(x = x_var, y = y_var))
             
-            # Add hull polygons
-            hull_aes <- ggplot2::aes_string(fill = group_var)
+            # Add hull polygons - fix aes construction
             if (self$options$show_labels) {
-                hull_aes$label <- ggplot2::aes_string(label = group_var)$label
+                p <- p + ggforce::geom_mark_hull(
+                    ggplot2::aes_string(fill = group_var, label = group_var),
+                    concavity = self$options$hull_concavity,
+                    expand = ggplot2::unit(self$options$hull_expand, "mm"),
+                    alpha = self$options$hull_alpha,
+                    show.legend = TRUE
+                )
+            } else {
+                p <- p + ggforce::geom_mark_hull(
+                    ggplot2::aes_string(fill = group_var),
+                    concavity = self$options$hull_concavity,
+                    expand = ggplot2::unit(self$options$hull_expand, "mm"),
+                    alpha = self$options$hull_alpha,
+                    show.legend = TRUE
+                )
             }
-            
-            p <- p + ggforce::geom_mark_hull(
-                hull_aes,
-                concavity = self$options$hull_concavity,
-                expand = ggplot2::unit(self$options$hull_expand, "mm"),
-                alpha = self$options$hull_alpha,
-                show.legend = TRUE
-            )
             
             # Add confidence ellipses if requested
             if (self$options$confidence_ellipses) {
@@ -192,21 +225,23 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 )
             }
             
-            # Add points
-            point_aes <- ggplot2::aes_string(color = color_mapping)
-            if (!is.null(size_var)) {
-                point_aes$size <- ggplot2::aes_string(size = paste0("size_", size_var))$size
+            # Add points - fix aes construction
+            if (!is.null(size_var) && size_var != "" && paste0("size_", size_var) %in% names(plot_data)) {
+                p <- p + ggplot2::geom_point(
+                    ggplot2::aes_string(color = color_mapping, size = paste0("size_", size_var)),
+                    alpha = self$options$point_alpha
+                )
+            } else {
+                p <- p + ggplot2::geom_point(
+                    ggplot2::aes_string(color = color_mapping),
+                    alpha = self$options$point_alpha,
+                    size = self$options$point_size
+                )
             }
             
-            p <- p + ggplot2::geom_point(
-                point_aes,
-                alpha = self$options$point_alpha,
-                size = if (is.null(size_var)) self$options$point_size else NULL
-            )
-            
-            # Apply color palette
+            # Apply color palette - fix transparency application
             colors <- private$.get_color_palette(length(levels(plot_data[[group_var]])))
-            p <- p + ggplot2::scale_fill_manual(values = scales::alpha(colors, self$options$hull_alpha))
+            p <- p + ggplot2::scale_fill_manual(values = colors)
             p <- p + ggplot2::scale_color_manual(values = colors)
             
             # Apply theme

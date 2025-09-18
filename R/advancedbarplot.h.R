@@ -542,7 +542,7 @@ advancedbarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "advancedbarplot",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = advancedbarplotResults$new(options=options),
                 data = data,
@@ -555,7 +555,7 @@ advancedbarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 weightsSupport = 'auto')
         }))
 
-#' Advanced Bar Charts - 5 Ways
+#' Advanced Bar Charts
 #'
 #' Advanced bar chart visualization module implementing 5 different approaches 
 #' for creating professional bar charts. Choose from ggplot2 basics, polished 

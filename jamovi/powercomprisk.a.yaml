@@ -1,7 +1,7 @@
 ---
 name: powercomprisk
 title: Power Analysis for Competing Risks Studies
-menuGroup: SurvivalT
+menuGroup: SurvivalT2
 menuSubgroup: jsurvival Power Analysis
 version: '0.0.1'
 jas: '1.2'

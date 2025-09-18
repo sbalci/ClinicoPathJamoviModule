@@ -1,7 +1,7 @@
 ---
 name: ggprism
 title: GraphPad Prism Style Plots
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotD
 menuSubgroup: ClinicoPath Descriptive Plots
 version: '0.0.31'
 jas: '1.2'

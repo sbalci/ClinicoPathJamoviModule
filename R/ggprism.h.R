@@ -353,6 +353,11 @@ ggprismResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        clinical_summary = function() private$.items[["clinical_summary"]],
+        assumptions_check = function() private$.items[["assumptions_check"]],
+        interpretation_guide = function() private$.items[["interpretation_guide"]],
+        report_sentences = function() private$.items[["report_sentences"]],
+        statistical_glossary = function() private$.items[["statistical_glossary"]],
         main_plot = function() private$.items[["main_plot"]],
         palette_preview = function() private$.items[["palette_preview"]],
         publication_plot = function() private$.items[["publication_plot"]],
@@ -361,7 +366,8 @@ ggprismResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         prism_guide = function() private$.items[["prism_guide"]],
         palette_information = function() private$.items[["palette_information"]],
         export_code = function() private$.items[["export_code"]],
-        accessibility_notes = function() private$.items[["accessibility_notes"]]),
+        accessibility_notes = function() private$.items[["accessibility_notes"]],
+        clinical_presets = function() private$.items[["clinical_presets"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -379,6 +385,51 @@ ggprismResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="instructions",
                 title="Instructions",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_summary",
+                title="Clinical Summary",
+                visible=TRUE,
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "plot_type",
+                    "stats_method")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions_check",
+                title="Statistical Assumptions & Warnings",
+                visible="(show_statistics)",
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "stats_method")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation_guide",
+                title="How to Interpret This Plot",
+                visible=TRUE,
+                clearWith=list(
+                    "plot_type",
+                    "stats_method")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="report_sentences",
+                title="Copy-Ready Report",
+                visible=TRUE,
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "plot_type",
+                    "stats_method")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="statistical_glossary",
+                title="Statistical Terms Glossary",
+                visible="(show_statistics)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="main_plot",
@@ -464,6 +515,11 @@ ggprismResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="accessibility_notes",
                 title="Accessibility & Best Practices",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_presets",
+                title="Clinical Research Presets",
                 visible=TRUE))}))
 
 ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -474,7 +530,7 @@ ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "ggprism",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = ggprismResults$new(options=options),
                 data = data,
@@ -556,6 +612,11 @@ ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions_check} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation_guide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$report_sentences} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$statistical_glossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$main_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$palette_preview} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$publication_plot} \tab \tab \tab \tab \tab an image \cr
@@ -565,6 +626,7 @@ ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$palette_information} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$export_code} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$accessibility_notes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinical_presets} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

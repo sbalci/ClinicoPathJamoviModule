@@ -37,8 +37,6 @@ children:
     children:
       - type: CheckBox
         name: showMissing
-      - type: CheckBox
-        name: interactive
   - type: LayoutBox
     margin: large
     children:

@@ -1,7 +1,7 @@
 ---
 name: survivalvalidation
 title: Survival Model Validation
-menuGroup: SurvivalT
+menuGroup: SurvivalT2
 menuSubgroup: Advanced Survival
 menuSubtitle: 'Model Performance Assessment and Validation'
 version: '0.0.3'

@@ -16,155 +16,299 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Y-Axis Variable
+        label: Y-Axis Variable (Outcome)
         children:
           - type: VariablesListBox
             name: y_var
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Grouping Variable (Optional)
+        label: Grouping Variable (Treatment/Group)
         children:
           - type: VariablesListBox
             name: group_var
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Faceting Variable (Optional)
+        label: Faceting Variable (Subgroups)
         children:
           - type: VariablesListBox
             name: facet_var
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  # Plot Configuration Section
+  - type: CollapseBox
+    label: "📊 Plot Configuration"
+    collapsed: false
     children:
-      - type: ComboBox
-        name: plot_type
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Visualization Type"
+            children:
+              - type: ComboBox
+                name: plot_type
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "GraphPad Prism Theme"
+            children:
+              - type: ComboBox
+                name: prism_theme
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Color Palette (Clinical-Safe)"
+            children:
+              - type: ComboBox
+                name: prism_palette
+
+  # Statistical Analysis Section
+  - type: CollapseBox
+    label: "📈 Statistical Analysis"
+    collapsed: false
     children:
-      - type: ComboBox
-        name: prism_theme
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: show_statistics
+            label: "Perform Statistical Testing"
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Statistical Test Method"
+            children:
+              - type: ComboBox
+                name: stats_method
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "P-value Display Format"
+            children:
+              - type: ComboBox
+                name: pvalue_format
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Error Bar Type"
+            children:
+              - type: ComboBox
+                name: error_bars
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Custom Group Comparisons"
+            children:
+              - type: TextBox
+                name: custom_comparisons
+                format: string
+
+  # Points and Geometry Section
+  - type: CollapseBox
+    label: "🎯 Data Points & Geometry"
+    collapsed: true
     children:
-      - type: ComboBox
-        name: prism_palette
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: show_points
+            label: "Show Individual Data Points"
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Point Size (1-5 recommended)"
+            children:
+              - type: TextBox
+                name: point_size
+                format: number
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Point Transparency (0.3-1.0)"
+            children:
+              - type: TextBox
+                name: point_alpha
+                format: number
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Point Jitter Width (0-0.4)"
+            children:
+              - type: TextBox
+                name: jitter_width
+                format: number
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Violin Plot Width (0.5-1.5)"
+            children:
+              - type: TextBox
+                name: violin_width
+                format: number
+
+  # Plot Appearance Section
+  - type: CollapseBox
+    label: "🎨 Plot Appearance & Labels"
+    collapsed: true
     children:
-      - type: CheckBox
-        name: show_points
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Main Title"
+            children:
+              - type: TextBox
+                name: plot_title
+                format: string
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "X-Axis Label"
+            children:
+              - type: TextBox
+                name: x_label
+                format: string
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Y-Axis Label (with units)"
+            children:
+              - type: TextBox
+                name: y_label
+                format: string
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Legend Position"
+            children:
+              - type: ComboBox
+                name: legend_position
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Base Font Size (10-16 recommended)"
+            children:
+              - type: TextBox
+                name: base_size
+                format: number
+
+  # Advanced Prism Features Section
+  - type: CollapseBox
+    label: "⚙️ Advanced Prism Features"
+    collapsed: true
     children:
-      - type: TextBox
-        name: point_size
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Axis Guide Style"
+            children:
+              - type: ComboBox
+                name: prism_guides
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Point Shape Palette"
+            children:
+              - type: ComboBox
+                name: prism_shape_palette
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: annotation_ticks
+            label: "Enhanced Axis Ticks (Prism-style)"
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: preview_mode
+            label: "Show Color Palette Preview"
+
+  # Publication and Export Section
+  - type: CollapseBox
+    label: "📄 Publication & Export"
+    collapsed: true
     children:
-      - type: TextBox
-        name: point_alpha
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: publication_ready
+            label: "Publication-Ready Format"
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Export DPI (300+ for print)"
+            children:
+              - type: TextBox
+                name: export_dpi
+                format: number
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: show_summary
+            label: "Show Summary Statistics"
+
+  # Clinical Help Section
+  - type: CollapseBox
+    label: "🩺 Clinical Research Guide"
+    collapsed: true
     children:
-      - type: CheckBox
-        name: show_statistics
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: stats_method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: pvalue_format
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plot_title
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: x_label
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: y_label
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: legend_position
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: base_size
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_summary
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: error_bars
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: prism_guides
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: annotation_ticks
-      - type: CheckBox
-        name: preview_mode
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: prism_shape_palette
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: jitter_width
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: violin_width
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: publication_ready
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: export_dpi
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: custom_comparisons
-        format: string
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "Quick Selection Help:"
+            fitToGrid: true
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "• 2 groups, normal data → Box plot + t-test"
+            fitToGrid: true
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "• 2 groups, non-normal → Box plot + Wilcoxon"
+            fitToGrid: true
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "• 3+ groups, normal → Violin + ANOVA"
+            fitToGrid: true
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "• 3+ groups, non-normal → Violin + Kruskal-Wallis"
+            fitToGrid: true
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: "• Correlations → Scatter plot"
+            fitToGrid: true

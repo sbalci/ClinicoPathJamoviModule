@@ -3,7 +3,7 @@ name: enhancedcorrelation
 title: Enhanced Correlation Analysis  
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPathT2
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Enhanced Correlation Analysis
 menuSubtitle: Advanced correlation with confidence intervals
