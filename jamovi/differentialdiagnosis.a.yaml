@@ -1,7 +1,7 @@
 ---
 name: differentialdiagnosis
 title: Differential Diagnosis Assistance
-menuGroup: meddecideT2
+menuGroup: meddecideT
 version: '0.0.31'
 jas: '1.2'
 

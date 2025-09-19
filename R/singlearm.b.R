@@ -2255,44 +2255,19 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return()  # Exit if median table hasn't been populated yet
         }
 
-        # Extract key survival metrics
+        # Extract key survival metrics directly from the median table data
         tryCatch({
-          median_row <- self$results$medianTable$asDF()
-          if (nrow(median_row) == 0) return()
+          # Get data from the median table - we know this has been populated since rowCount > 0
+          # The table structure is: records, events, rmean, se_rmean, median, x0_95lcl, x0_95ucl
 
-          # Debug: Check what columns are available
-          if (!"records" %in% colnames(median_row)) {
-            # Try alternative column names that might exist
-            if ("Records" %in% colnames(median_row)) {
-              colnames(median_row)[colnames(median_row) == "Records"] <- "records"
-            }
-          }
-          if (!"events" %in% colnames(median_row)) {
-            if ("Events" %in% colnames(median_row)) {
-              colnames(median_row)[colnames(median_row) == "Events"] <- "events"
-            }
-          }
-          if (!"median" %in% colnames(median_row)) {
-            if ("Median" %in% colnames(median_row)) {
-              colnames(median_row)[colnames(median_row) == "Median"] <- "median"
-            }
-          }
-          if (!"x0_95lcl" %in% colnames(median_row)) {
-            if ("Lower" %in% colnames(median_row)) {
-              colnames(median_row)[colnames(median_row) == "Lower"] <- "x0_95lcl"
-            }
-          }
-          if (!"x0_95ucl" %in% colnames(median_row)) {
-            if ("Upper" %in% colnames(median_row)) {
-              colnames(median_row)[colnames(median_row) == "Upper"] <- "x0_95ucl"
-            }
-          }
+          # Access the first (and only) row of data directly from the table
+          median_table_row <- 1  # First row
 
-          n_total <- median_row$records[1]
-          n_events <- median_row$events[1]
-          median_survival <- median_row$median[1]
-          ci_lower <- median_row$x0_95lcl[1]
-          ci_upper <- median_row$x0_95ucl[1]
+          n_total <- self$results$medianTable$getCell(rowNo = median_table_row, "records")$value
+          n_events <- self$results$medianTable$getCell(rowNo = median_table_row, "events")$value
+          median_survival <- self$results$medianTable$getCell(rowNo = median_table_row, "median")$value
+          ci_lower <- self$results$medianTable$getCell(rowNo = median_table_row, "x0_95lcl")$value
+          ci_upper <- self$results$medianTable$getCell(rowNo = median_table_row, "x0_95ucl")$value
           
           # Get event rate
           event_rate <- round((n_events / n_total) * 100, 1)
@@ -2394,23 +2369,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
         }, error = function(e) {
           # Provide more specific error information for debugging
-          # Safely get column names without calling asDF() again
-          col_info <- tryCatch({
-            if (self$results$medianTable$rowCount > 0) {
-              df <- self$results$medianTable$asDF()
-              paste(names(df), collapse = ", ")
-            } else {
-              "No data available"
-            }
-          }, error = function(e2) {
-            "Unable to access column information"
-          })
-
           fallback_html <- paste0(
             "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
             "<p>", .("Error generating clinical summary:"), " ", e$message, "</p>",
-            "<p><small>", .("Debug: Table rows ="), " ", self$results$medianTable$rowCount,
-            ", ", .("Columns available:"), " ", col_info, "</small></p>",
+            "<p><small>", .("Debug: Table rows ="), " ", self$results$medianTable$rowCount, "</small></p>",
             "</div>"
           )
           self$results$clinicalSummary$setContent(fallback_html)

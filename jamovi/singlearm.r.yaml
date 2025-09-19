@@ -76,7 +76,8 @@ items:
     - name:  clinicalSummary
       title: 'Clinical Summary (Copy-Ready for Reports)'
       type:  Html
-      visible: (guided_mode || showSummaries)
+      visible: (showSummaries)
+      # visible: (guided_mode || showSummaries)
       clearWith:
           - outcome
           - outcomeLevel
