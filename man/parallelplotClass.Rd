@@ -2,22 +2,12 @@
 % Please edit documentation in R/parallelplot.b.R
 \name{parallelplotClass}
 \alias{parallelplotClass}
-\title{Parallel Coordinates Plot - Complete Implementation}
+\title{Parallel Coordinates Plot - Simplified Implementation}
 \description{
 Creates parallel coordinates plots for multivariate data visualization.
 Parallel coordinates plots are excellent for exploring relationships
 between multiple continuous variables and identifying patterns, clusters,
 and outliers in high-dimensional data.
-}
-\details{
-This implementation provides comprehensive parallel coordinates functionality:
-\enumerate{
-\item Multiple scaling methods for variables with different ranges
-\item Grouping support for categorical visualization
-\item Interactive plotly integration for exploration
-\item Summary statistics for variable understanding
-\item Missing data handling options
-}
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::parallelplotBase} -> \code{parallelplotClass}

@@ -1,7 +1,7 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Combine tests and evaluate performance
 version: '0.0.31'

@@ -24,12 +24,13 @@ children:
       - type: CheckBox
         name: complete_cases_only
       - type: CheckBox
-        name: visual_analysis
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: visdat_type
+        name: plot_data_overview
+      - type: CheckBox
+        name: plot_missing_patterns
+      - type: CheckBox
+        name: plot_data_types
+      - type: CheckBox
+        name: plot_value_expectations
   - type: LayoutBox
     margin: large
     children:

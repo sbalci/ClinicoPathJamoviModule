@@ -19,10 +19,11 @@ test_that("dataquality basic functionality", {
     check_duplicates = TRUE,
     check_missing = TRUE,
     complete_cases_only = FALSE,
-    visual_analysis = FALSE,  # Disable to avoid visdat dependency issues
-    visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE
+    plot_data_overview = FALSE,  # Disable to avoid visdat dependency issues
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
+    missing_threshold_visual = 10
   )
   
   expect_s3_class(result, "dataqualityResults")
@@ -37,9 +38,9 @@ test_that("dataquality parameter validation", {
   data("histopathology", package = "ClinicoPath")
   
   # Test parameter structure based on YAML configuration
-  expected_params <- c("data", "vars", "check_duplicates", "check_missing", 
-                      "complete_cases_only", "visual_analysis", "visdat_type", 
-                      "missing_threshold_visual", "export_plots")
+  expected_params <- c("data", "vars", "check_duplicates", "check_missing",
+                      "complete_cases_only", "plot_data_overview", "plot_missing_patterns",
+                      "plot_data_types", "plot_value_expectations", "missing_threshold_visual")
   
   # Get function arguments
   func_args <- names(formals(dataquality))
@@ -63,10 +64,11 @@ test_that("dataquality missing data analysis", {
     check_duplicates = FALSE,
     check_missing = TRUE,
     complete_cases_only = FALSE,
-    visual_analysis = FALSE,
-    visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE
+    plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
+    missing_threshold_visual = 10
   )
   
   expect_s3_class(result, "dataqualityResults")
@@ -88,10 +90,11 @@ test_that("dataquality duplicate detection", {
     check_duplicates = TRUE,
     check_missing = FALSE,
     complete_cases_only = FALSE,
-    visual_analysis = FALSE,
-    visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE
+    plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
+    missing_threshold_visual = 10
   )
   
   expect_s3_class(result, "dataqualityResults")
@@ -112,10 +115,11 @@ test_that("dataquality complete cases analysis", {
     check_duplicates = TRUE,
     check_missing = TRUE,
     complete_cases_only = TRUE,
-    visual_analysis = FALSE,
-    visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE
+    plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
+    missing_threshold_visual = 10
   )
   
   expect_s3_class(result, "dataqualityResults")
@@ -130,20 +134,19 @@ test_that("dataquality visdat analysis types", {
   data("histopathology", package = "ClinicoPath")
   
   # Test different visdat types
-  visdat_types <- c("vis_dat", "vis_miss", "vis_guess", "vis_expect", "all_visual")
-  
-  for (visdat_type in visdat_types) {
+  # Test individual plot functionality
     result <- dataquality(
       data = histopathology,
       vars = c("Age", "Sex"),
       check_duplicates = FALSE,
       check_missing = FALSE,
       complete_cases_only = FALSE,
-      visual_analysis = TRUE,
-      visdat_type = visdat_type,
+      plot_data_overview = TRUE,
+    plot_missing_patterns = TRUE,
+    plot_data_types = TRUE,
+    plot_value_expectations = TRUE,
       missing_threshold_visual = 10,
-      export_plots = FALSE
-    )
+      )
     
     expect_s3_class(result, "dataqualityResults")
     expect_true("plot" %in% names(result))
@@ -165,11 +168,12 @@ test_that("dataquality missing threshold validation", {
       check_duplicates = FALSE,
       check_missing = TRUE,
       complete_cases_only = FALSE,
-      visual_analysis = TRUE,
-      visdat_type = "vis_miss",
+      plot_data_overview = TRUE,
+    plot_missing_patterns = TRUE,
+    plot_data_types = TRUE,
+    plot_value_expectations = TRUE,
       missing_threshold_visual = threshold,
-      export_plots = FALSE
-    )
+      )
     
     expect_s3_class(result, "dataqualityResults")
   }
@@ -187,10 +191,12 @@ test_that("dataquality export functionality", {
     check_duplicates = FALSE,
     check_missing = FALSE,
     complete_cases_only = FALSE,
-    visual_analysis = TRUE,
+    plot_data_overview = TRUE,
+    plot_missing_patterns = TRUE,
+    plot_data_types = TRUE,
+    plot_value_expectations = TRUE,
     visdat_type = "vis_dat",
     missing_threshold_visual = 10,
-    export_plots = TRUE
   )
   
   expect_s3_class(result, "dataqualityResults")
@@ -213,10 +219,11 @@ test_that("dataquality with different variable types", {
     check_duplicates = TRUE,
     check_missing = TRUE,
     complete_cases_only = FALSE,
-    visual_analysis = FALSE,
-    visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE
+    plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
+    missing_threshold_visual = 10
   )
   
   expect_s3_class(result_cont, "dataqualityResults")
@@ -228,10 +235,11 @@ test_that("dataquality with different variable types", {
     check_duplicates = TRUE,
     check_missing = TRUE,
     complete_cases_only = FALSE,
-    visual_analysis = FALSE,
-    visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE
+    plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
+    missing_threshold_visual = 10
   )
   
   expect_s3_class(result_cat, "dataqualityResults")
@@ -243,10 +251,11 @@ test_that("dataquality with different variable types", {
     check_duplicates = TRUE,
     check_missing = TRUE,
     complete_cases_only = FALSE,
-    visual_analysis = FALSE,
-    visdat_type = "vis_dat",
-    missing_threshold_visual = 10,
-    export_plots = FALSE
+    plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
+    missing_threshold_visual = 10
   )
   
   expect_s3_class(result_mixed, "dataqualityResults")
@@ -283,11 +292,13 @@ test_that("dataquality error handling", {
       check_duplicates = TRUE,
       check_missing = TRUE,
       complete_cases_only = FALSE,
-      visual_analysis = FALSE,
+      plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
       visdat_type = "vis_dat",
       missing_threshold_visual = 10,
-      export_plots = FALSE
-    ),
+      ),
     info = "Should error with non-existent variable"
   )
   
@@ -300,11 +311,13 @@ test_that("dataquality error handling", {
       check_duplicates = TRUE,
       check_missing = TRUE,
       complete_cases_only = FALSE,
-      visual_analysis = FALSE,
+      plot_data_overview = FALSE,
+    plot_missing_patterns = FALSE,
+    plot_data_types = FALSE,
+    plot_value_expectations = FALSE,
       visdat_type = "vis_dat",
       missing_threshold_visual = 10,
-      export_plots = FALSE
-    ),
+      ),
     info = "Should error with empty dataset"
   )
 })

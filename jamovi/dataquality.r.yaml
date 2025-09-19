@@ -12,13 +12,40 @@ items:
       title: Data Quality Summary
       type: Html
 
-    - name: plot
-      title: Data Quality Visualization
+    - name: plotDataOverview
+      title: Data Overview
       type: Image
-      width: 600
-      height: 450
-      renderFun: .plotVisdat
-      visible: (visual_analysis)
+      width: 900
+      height: 600
+      renderFun: .plotDataOverview
+      visible: (plot_data_overview)
+      requiresData: true
+
+    - name: plotMissingPatterns
+      title: Missing Patterns
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .plotMissingPatterns
+      visible: (plot_missing_patterns)
+      requiresData: true
+
+    - name: plotDataTypes
+      title: Data Types
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .plotDataTypes
+      visible: (plot_data_types)
+      requiresData: true
+
+    - name: plotValueExpectations
+      title: Value Expectations
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .plotValueExpectations
+      visible: (plot_value_expectations)
       requiresData: true
 
 

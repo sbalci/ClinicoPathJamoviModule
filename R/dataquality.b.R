@@ -130,8 +130,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             )
         }
 
-        # visdat Visual Analysis - NEW FUNCTIONALITY
-        if (self$options$visual_analysis) {
+        # visdat Visual Analysis - Individual plot options
+        if (self$options$plot_data_overview || self$options$plot_missing_patterns ||
+            self$options$plot_data_types || self$options$plot_value_expectations) {
             visdat_results <- private$.generate_visdat_analysis(analysis_data)
             quality_results$visual <- visdat_results
         }
@@ -140,19 +141,32 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         final_results <- paste(unlist(quality_results), collapse = "<br><br>")
         self$results$text$setContent(final_results)
 
-        # Set plot state for visdat visualization
-        if (self$options$visual_analysis) {
-            plotData <- list(
-                data = analysis_data,
-                visdat_type = self$options$visdat_type
-            )
-            self$results$plot$setState(plotData)
+        # Set plot states for individual visual analyses
+        plotData <- list(
+            data = analysis_data,
+            threshold = self$options$missing_threshold_visual
+        )
+
+        if (self$options$plot_data_overview) {
+            self$results$plotDataOverview$setState(plotData)
+        }
+
+        if (self$options$plot_missing_patterns) {
+            self$results$plotMissingPatterns$setState(plotData)
+        }
+
+        if (self$options$plot_data_types) {
+            self$results$plotDataTypes$setState(plotData)
+        }
+
+        if (self$options$plot_value_expectations) {
+            self$results$plotValueExpectations$setState(plotData)
         }
 
     },
 
     .generate_visdat_analysis = function(data) {
-        # Generate visdat analysis based on autoEDA research
+        # Generate visdat analysis based on individual plot selections
 
         # Safely require visdat
         if (!requireNamespace("visdat", quietly = TRUE)) {
@@ -165,22 +179,21 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             ))
         }
 
-        visdat_type <- self$options$visdat_type
         missing_threshold <- self$options$missing_threshold_visual
+
+        # Determine which analyses are enabled
+        enabled_analyses <- c()
+        if (self$options$plot_data_overview) enabled_analyses <- c(enabled_analyses, "Data Overview")
+        if (self$options$plot_missing_patterns) enabled_analyses <- c(enabled_analyses, "Missing Patterns")
+        if (self$options$plot_data_types) enabled_analyses <- c(enabled_analyses, "Data Types")
+        if (self$options$plot_value_expectations) enabled_analyses <- c(enabled_analyses, "Value Expectations")
 
         # Generate visual analysis summary
         header_html <- paste0(
             "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
             "<h3 style='color: #1976d2; margin-top: 0;'>Visual Data Exploration (visdat)</h3>",
             "<p>Advanced visual data quality assessment - Based on autoEDA research</p>",
-            "<p><strong>Analysis Type:</strong> ",
-            switch(visdat_type,
-                "vis_dat" = "Data Overview - Variable types and missing values",
-                "vis_miss" = "Missing Patterns - Missing value clustering",
-                "vis_guess" = "Data Types - Type detection and validation",
-                "vis_expect" = "Value Expectations - Expected vs actual patterns",
-                "all_visual" = "Comprehensive - All visual analyses"
-            ), "</p>",
+            "<p><strong>Enabled Analyses:</strong> ", paste(enabled_analyses, collapse = ", "), "</p>",
             "</div>"
         )
 
@@ -202,21 +215,21 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</div>"
         )
 
-        # Analysis insights based on visdat type
-        insights_html <- private$.generate_visdat_insights(data, visdat_type, missing_threshold)
+        # Analysis insights based on enabled plots
+        insights_html <- private$.generate_visdat_insights(data, missing_threshold)
 
         return(paste0(header_html, overview_html, insights_html))
     },
 
-    .generate_visdat_insights = function(data, visdat_type, threshold) {
-        # Generate insights based on visual analysis type
+    .generate_visdat_insights = function(data, threshold) {
+        # Generate insights based on enabled plot types
 
         insights_html <- paste0(
             "<div style='background-color: #fff8e1; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
             "<h4 style='color: #f57f17; margin-top: 0;'>Visual Analysis Insights</h4>"
         )
 
-        if (visdat_type %in% c("vis_dat", "all_visual")) {
+        if (self$options$plot_data_overview) {
             # Data overview insights
             var_types <- sapply(data, class)
             type_summary <- table(var_types)
@@ -234,7 +247,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             insights_html <- paste0(insights_html, "</ul>")
         }
 
-        if (visdat_type %in% c("vis_miss", "all_visual")) {
+        if (self$options$plot_missing_patterns) {
             # Missing pattern insights
             missing_counts <- sapply(data, function(x) sum(is.na(x)))
             vars_above_threshold <- sum(missing_counts > (nrow(data) * threshold / 100))
@@ -248,7 +261,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             )
         }
 
-        if (visdat_type %in% c("vis_guess", "all_visual")) {
+        if (self$options$plot_data_types) {
             # Type detection insights
             char_vars <- sum(sapply(data, is.character))
             numeric_vars <- sum(sapply(data, is.numeric))
@@ -278,11 +291,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         return(insights_html)
     },
 
-    .plotVisdat = function(image, ggtheme, theme, ...) {
+    .plotDataOverview = function(image, ggtheme, theme, ...) {
         # Get plot state
         plotData <- image$state
 
-        if (is.null(plotData)) {
+        if (is.null(plotData) || is.null(plotData$data) || nrow(plotData$data) == 0) {
             return(FALSE)
         }
 
@@ -291,45 +304,134 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(FALSE)
         }
 
-        data <- plotData$data
-        visdat_type <- plotData$visdat_type
-
-        if (is.null(data) || nrow(data) == 0) {
-            return(FALSE)
-        }
-
         tryCatch({
-            # Generate the appropriate visdat plot
-            if (visdat_type == "vis_dat" || visdat_type == "all_visual") {
-                # Data overview plot
-                plot <- visdat::vis_dat(data)
+            # Create data overview plot
+            plot <- visdat::vis_dat(plotData$data) +
+                ggtheme +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(
+                        angle = 45,
+                        hjust = 0,
+                        vjust = 0.5,
+                        margin = ggplot2::margin(t = 5)
+                    ),
+                    plot.margin = ggplot2::margin(t = 5, r = 5, b = 40, l = 5)
+                )
 
-            } else if (visdat_type == "vis_miss") {
-                # Missing value pattern plot
-                plot <- visdat::vis_miss(data)
-
-            } else if (visdat_type == "vis_guess") {
-                # Data type guessing plot
-                plot <- visdat::vis_guess(data)
-
-            } else if (visdat_type == "vis_expect") {
-                # Value expectation plot - default to vis_dat
-                plot <- visdat::vis_dat(data)
-
-            } else {
-                # Default to data overview
-                plot <- visdat::vis_dat(data)
-            }
-
-            # Apply jamovi theme
-            plot <- plot + ggtheme
-
-            # Print the plot
             print(plot)
             return(TRUE)
 
         }, error = function(e) {
-            warning(paste("visdat plot generation failed:", e$message))
+            warning(paste("Data overview plot generation failed:", e$message))
+            return(FALSE)
+        })
+    },
+
+    .plotMissingPatterns = function(image, ggtheme, theme, ...) {
+        # Get plot state
+        plotData <- image$state
+
+        if (is.null(plotData) || is.null(plotData$data) || nrow(plotData$data) == 0) {
+            return(FALSE)
+        }
+
+        # Check if visdat package is available
+        if (!requireNamespace("visdat", quietly = TRUE)) {
+            return(FALSE)
+        }
+
+        tryCatch({
+            # Create missing patterns plot
+            plot <- visdat::vis_miss(plotData$data) +
+                ggtheme +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(
+                        angle = 45,
+                        hjust = 0,
+                        vjust = 0.5,
+                        margin = ggplot2::margin(t = 5)
+                    ),
+                    plot.margin = ggplot2::margin(t = 5, r = 5, b = 40, l = 5)
+                )
+
+            print(plot)
+            return(TRUE)
+
+        }, error = function(e) {
+            warning(paste("Missing patterns plot generation failed:", e$message))
+            return(FALSE)
+        })
+    },
+
+    .plotDataTypes = function(image, ggtheme, theme, ...) {
+        # Get plot state
+        plotData <- image$state
+
+        if (is.null(plotData) || is.null(plotData$data) || nrow(plotData$data) == 0) {
+            return(FALSE)
+        }
+
+        # Check if visdat package is available
+        if (!requireNamespace("visdat", quietly = TRUE)) {
+            return(FALSE)
+        }
+
+        tryCatch({
+            # Create data types plot
+            plot <- visdat::vis_guess(plotData$data) +
+                ggtheme +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(
+                        angle = 45,
+                        hjust = 0,
+                        vjust = 0.5,
+                        margin = ggplot2::margin(t = 5)
+                    ),
+                    plot.margin = ggplot2::margin(t = 5, r = 5, b = 40, l = 5)
+                )
+
+            print(plot)
+            return(TRUE)
+
+        }, error = function(e) {
+            warning(paste("Data types plot generation failed:", e$message))
+            return(FALSE)
+        })
+    },
+
+    .plotValueExpectations = function(image, ggtheme, theme, ...) {
+        # Get plot state
+        plotData <- image$state
+
+        if (is.null(plotData) || is.null(plotData$data) || nrow(plotData$data) == 0) {
+            return(FALSE)
+        }
+
+        # Check if visdat package is available
+        if (!requireNamespace("visdat", quietly = TRUE)) {
+            return(FALSE)
+        }
+
+        tryCatch({
+            # Create value expectations plot (fallback to data overview)
+            plot <- visdat::vis_dat(plotData$data) +
+                ggplot2::labs(subtitle = "Value Expectations Analysis") +
+                ggtheme +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(
+                        angle = 45,
+                        hjust = 0,
+                        vjust = 0.5,
+                        margin = ggplot2::margin(t = 5)
+                    ),
+                    plot.margin = ggplot2::margin(t = 5, r = 5, b = 40, l = 5)
+                )
+
+            print(plot)
+            return(TRUE)
+
+        }, error = function(e) {
+            warning(paste("Value expectations plot generation failed:", e$message))
             return(FALSE)
         })
     }

@@ -29,9 +29,12 @@ detect outliers based on the selected variables using the chosen detection
 methods.}
 
 \item{method_category}{Category of outlier detection methods to use.
-Univariate methods analyze each variable separately, multivariate methods
-consider relationships between variables, and composite combines multiple
-methods for robust detection.}
+CLINICAL GUIDANCE: Univariate methods analyze each variable separately
+(ideal for lab values, vital signs). Multivariate methods consider
+relationships between variables (useful for correlated biomarkers).
+Composite combines multiple approaches for robust detection (recommended
+for most clinical data). Examples: Use univariate for hemoglobin levels,
+multivariate for complete blood count panels.}
 
 \item{univariate_methods}{Specific univariate method for outlier detection
 when univariate category is selected.}
@@ -43,13 +46,17 @@ detection when multivariate category is selected.}
 Default 0.5 means observations  classified as outliers by at least half of
 the methods are considered outliers.}
 
-\item{zscore_threshold}{Threshold for Z-score based methods. Default 3.29
-corresponds to 99.9\\% confidence interval (approximately 0.1\\% extreme
-observations).}
+\item{zscore_threshold}{Threshold for Z-score based methods. CLINICAL
+EXAMPLES: 3.0 = 99.7\\% confidence (standard screening for most lab values),
+3.29 = 99.9\\% confidence (stringent, for critical values like cardiac
+enzymes), 2.5 = 98.8\\% confidence (sensitive detection for research).
+Recommended: 3.29 for clinical quality control.}
 
-\item{iqr_multiplier}{Multiplier for IQR-based outlier detection. Default
-1.7 is more conservative than Tukey's 1.5, reducing false positive
-detection.}
+\item{iqr_multiplier}{Multiplier for IQR-based outlier detection. CLINICAL
+EXAMPLES: 1.5 = Tukey's standard (sensitive, may flag ~0.7\\% of normal
+data), 1.7 = conservative (recommended for clinical screening), 2.0 = very
+conservative (for critical biomarkers). Useful for non-normal distributions
+common in clinical data.}
 
 \item{confidence_level}{Confidence level for interval-based methods (ETI,
 HDI). Default 99.9\\% identifies the most extreme observations.}
