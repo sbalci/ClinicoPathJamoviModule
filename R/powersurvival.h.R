@@ -213,9 +213,16 @@ powersurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Power Analysis for Survival Studies
 #'
-#' Calculates power, sample size, or minimum detectable hazard ratio for 
-#' survival studies. This helps researchers design adequately powered studies 
-#' to detect meaningful differences in survival between groups.
+#' Power analysis calculating power, sample size, or minimum detectable hazard 
+#' ratio for survival studies.
+#' This helps researchers design adequately powered studies to detect 
+#' meaningful differences in survival between groups.
+#' 
+#' This is the original power analysis function for survival studies. For 
+#' enhanced functionality including
+#' competing risks, RMST analysis, and additional methods, also consider 
+#' 'Comprehensive Survival Power Analysis'.
+#' 
 #'
 #' @examples
 #' \donttest{

@@ -111,10 +111,20 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$powerResults)}
 }
 \description{
-Performs power analysis and sample size calculations for competing risks
-studies. Calculates power for testing differences in cumulative incidence
-functions between groups using Gray's test and subdistribution hazard
-models.
+⚠️  DEPRECATED: This function has been merged into
+'survivalPowerComprehensive' for better functionality.
+}
+\details{
+Legacy power analysis and sample size calculations for competing risks
+studies. Calculates power for testing
+differences in cumulative incidence functions between groups using Gray's
+test and subdistribution hazard models.
+
+📢 PLEASE USE: 'Comprehensive Survival Power Analysis' instead - it
+provides all the same functionality
+plus additional methods and improved interface.
+
+This function is maintained for backward compatibility only.
 }
 \examples{
 \donttest{

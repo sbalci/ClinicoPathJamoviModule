@@ -108,8 +108,19 @@ A results object containing:
 }
 }
 \description{
-Power analysis and sample size calculation for survival studies using
-Lachin-Foulkes and Schoenfeld methods from gsDesign package.
+⚠️  DEPRECATED: This function has been merged into
+'survivalPowerComprehensive' for better functionality.
+}
+\details{
+Legacy power analysis and sample size calculation for survival studies
+using Lachin-Foulkes and
+Schoenfeld methods from gsDesign package.
+
+📢 PLEASE USE: 'Comprehensive Survival Power Analysis' instead - it
+provides all the same functionality
+plus additional methods and improved interface.
+
+This function is maintained for backward compatibility only.
 }
 \examples{
 \donttest{

@@ -836,15 +836,15 @@ poweranalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Power Analysis & Sample Size Calculation
 #'
-#' Comprehensive power analysis and sample size calculation for survival 
-#' studies and clinical trials.
+#' Power analysis and sample size calculation for survival studies and 
+#' clinical trials.
 #' Supports log-rank tests, Cox regression, competing risks, non-inferiority 
-#' trials, and RMST-based 
-#' analyses. Includes specialized methods for SNP-based survival studies and 
-#' complex trial designs.
-#' Essential for study planning, grant applications, and regulatory 
-#' submissions requiring rigorous
-#' sample size justification.
+#' trials, and RMST-based
+#' analyses.
+#' 
+#' This is the original comprehensive power analysis function. For the latest 
+#' unified interface,
+#' also consider 'Comprehensive Survival Power Analysis'.
 #' 
 #'
 #' @examples

@@ -1,7 +1,7 @@
 ---
 name:  comparingSurvival
 title: Comparing Survival Outcomes
-menuGroup: SurvivalT2
+menuGroup: SurvivalT
 menuSubgroup: Drafts
 menuSubtitle: SimpleSurvival
 version: '0.0.3'
