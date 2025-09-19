@@ -1,0 +1,290 @@
+---
+name: survivalPowerComprehensive
+title: Comprehensive Survival Power Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Power Analysis Instructions
+      type: Html
+      visible: true
+
+    # Main Results Table
+    - name: powerResults
+      title: Power Analysis Results
+      type: Table
+      rows: 0
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: description
+          title: Description
+          type: text
+      clearWith:
+        - method_category
+        - calculation_type
+        - statistical_method
+        - study_design
+        - alpha
+        - power
+        - sample_size
+        - hazard_ratio
+
+    # Method-Specific Results
+    - name: methodDetails
+      title: Method-Specific Details
+      type: Table
+      rows: 0
+      columns:
+        - name: aspect
+          title: Analysis Aspect
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+      clearWith:
+        - method_category
+        - statistical_method
+        - study_design
+
+    # Study Design Summary
+    - name: studyDesign
+      title: Study Design Summary
+      type: Html
+      visible: (show_detailed_output)
+      clearWith:
+        - method_category
+        - study_design
+        - accrual_period
+        - follow_up_period
+        - allocation_ratio
+
+    # Assumptions Table
+    - name: assumptions
+      title: Key Assumptions
+      type: Table
+      visible: (show_detailed_output)
+      rows: 0
+      columns:
+        - name: assumption
+          title: Assumption
+          type: text
+        - name: value
+          title: Value Used
+          type: text
+        - name: impact
+          title: Impact on Results
+          type: text
+      clearWith:
+        - method_category
+        - statistical_method
+        - hazard_ratio
+        - event_rate
+        - dropout_rate
+
+    # Sensitivity Analysis
+    - name: sensitivityTable
+      title: Sensitivity Analysis
+      type: Table
+      visible: (show_sensitivity_analysis)
+      rows: 0
+      columns:
+        - name: parameter_varied
+          title: Parameter Varied
+          type: text
+        - name: variation
+          title: Variation
+          type: text
+        - name: result_change
+          title: Result Change
+          type: text
+        - name: percent_change
+          title: "% Change"
+          type: number
+          format: pc
+      clearWith:
+        - method_category
+        - calculation_type
+        - show_sensitivity_analysis
+
+    # Power Curve Plot
+    - name: powerCurvePlot
+      title: Power Curve Analysis
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .powerCurvePlot
+      visible: (show_power_curves)
+      requiresData: false
+      clearWith:
+        - method_category
+        - calculation_type
+        - statistical_method
+        - alpha
+        - hazard_ratio
+
+    # Effect Size Plot
+    - name: effectSizePlot
+      title: Detectable Effect Size vs Sample Size
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .effectSizePlot
+      visible: (show_power_curves && calculation_type:effect_size)
+      requiresData: false
+      clearWith:
+        - method_category
+        - statistical_method
+        - alpha
+        - power
+
+    # Method Comparison (when multiple methods applicable)
+    - name: methodComparison
+      title: Method Comparison
+      type: Table
+      visible: (method_category:standard && show_detailed_output)
+      rows: 0
+      columns:
+        - name: method
+          title: Method
+          type: text
+        - name: sample_size_est
+          title: Sample Size
+          type: integer
+        - name: power_est
+          title: Power
+          type: number
+          format: pc
+        - name: assumptions
+          title: Key Assumptions
+          type: text
+      clearWith:
+        - method_category
+        - calculation_type
+        - hazard_ratio
+        - alpha
+        - power
+
+    # Competing Risks Specific Results
+    - name: competingRisksDetails
+      title: Competing Risks Analysis Details
+      type: Table
+      visible: (method_category:competing_risks)
+      rows: 0
+      columns:
+        - name: event_type
+          title: Event Type
+          type: text
+        - name: expected_incidence
+          title: Expected Cumulative Incidence
+          type: number
+          format: pc
+        - name: contribution_to_power
+          title: Contribution to Power
+          type: text
+      clearWith:
+        - method_category
+        - statistical_method
+        - cumulative_incidence_control
+        - cumulative_incidence_treatment
+        - competing_event_rate
+
+    # Sequential Design Results
+    - name: sequentialDesign
+      title: Sequential Design Analysis
+      type: Table
+      visible: (study_design:sequential)
+      rows: 0
+      columns:
+        - name: analysis_number
+          title: Analysis #
+          type: integer
+        - name: timing
+          title: Timing
+          type: text
+        - name: alpha_spent
+          title: Alpha Spent
+          type: number
+          format: zto,pvalue
+        - name: critical_value
+          title: Critical Value
+          type: number
+          format: zto
+        - name: conditional_power
+          title: Conditional Power
+          type: number
+          format: pc
+      clearWith:
+        - study_design
+        - number_of_looks
+        - spending_function
+        - alpha
+
+    # Clinical Interpretation
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+      clearWith:
+        - method_category
+        - calculation_type
+        - statistical_method
+        - hazard_ratio
+        - sample_size
+        - power
+
+    # Study Protocol Summary
+    - name: protocolSummary
+      title: Study Protocol Summary
+      type: Html
+      visible: (export_study_design)
+      clearWith:
+        - method_category
+        - study_design
+        - sample_size
+        - accrual_period
+        - follow_up_period
+        - allocation_ratio
+
+    # Regulatory Considerations
+    - name: regulatoryNotes
+      title: Regulatory Considerations
+      type: Html
+      visible: (show_detailed_output)
+      clearWith:
+        - method_category
+        - statistical_method
+        - alpha
+        - non_inferiority_margin
+
+    # Technical Details
+    - name: technicalDetails
+      title: Technical Details & References
+      type: Html
+      visible: (show_detailed_output)
+      clearWith:
+        - method_category
+        - statistical_method
+
+refs:
+    - gsDesign
+    - powerSurvEpi
+    - survival
+    - CompRisk
+    - survRM2
+    - ClinicoPathJamoviModule
+    - survivalPowerAnalysis
+    - clinicalTrialDesign
+    - NPHMC
+    - survSNP
+    - survivalpwr
+    - rpact
+
+...

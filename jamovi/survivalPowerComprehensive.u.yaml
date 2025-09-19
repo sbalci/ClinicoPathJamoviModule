@@ -1,0 +1,264 @@
+title: Comprehensive Survival Power Analysis
+name: survivalPowerComprehensive
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  # === ANALYSIS CONFIGURATION ===
+  - type: CollapseBox
+    label: Analysis Configuration
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Select Method Category and Calculation Type"
+            children:
+              - type: ComboBox
+                name: method_category
+              - type: ComboBox
+                name: calculation_type
+              - type: ComboBox
+                name: statistical_method
+                enable: "(method_category)"
+
+  # === STUDY DESIGN PARAMETERS ===
+  - type: CollapseBox
+    label: Study Design Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Basic Study Parameters"
+            children:
+              - type: ComboBox
+                name: study_design
+              - type: TextBox
+                name: alpha
+                format: number
+              - type: TextBox
+                name: power
+                format: number
+                enable: "(calculation_type:sample_size)"
+              - type: TextBox
+                name: sample_size
+                format: number
+                enable: "(calculation_type:power || calculation_type:effect_size)"
+              - type: TextBox
+                name: allocation_ratio
+                format: number
+
+  # === SURVIVAL PARAMETERS ===
+  - type: CollapseBox
+    label: Survival Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Effect Size and Survival Times"
+            children:
+              - type: TextBox
+                name: hazard_ratio
+                format: number
+                enable: "(method_category:standard || method_category:advanced || method_category:genetic || method_category:epidemiological)"
+              - type: TextBox
+                name: median_survival_control
+                format: number
+                enable: "(study_design:complex)"
+              - type: TextBox
+                name: median_survival_treatment
+                format: number
+                enable: "(study_design:complex)"
+              - type: TextBox
+                name: event_rate
+                format: number
+                enable: "(study_design:simple || method_category:competing_risks)"
+
+  # === STUDY TIMELINE ===
+  - type: CollapseBox
+    label: Study Timeline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Accrual and Follow-up Periods"
+            enable: "(study_design:complex)"
+            children:
+              - type: TextBox
+                name: accrual_period
+                format: number
+              - type: TextBox
+                name: follow_up_period
+                format: number
+              - type: TextBox
+                name: dropout_rate
+                format: number
+
+  # === COMPETING RISKS PARAMETERS ===
+  - type: CollapseBox
+    label: Competing Risks Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Competing Event Rates"
+            enable: "(method_category:competing_risks)"
+            children:
+              - type: TextBox
+                name: competing_event_rate
+                format: number
+              - type: TextBox
+                name: cumulative_incidence_control
+                format: number
+              - type: TextBox
+                name: cumulative_incidence_treatment
+                format: number
+
+  # === ADVANCED METHOD PARAMETERS ===
+  - type: CollapseBox
+    label: Advanced Method Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "RMST and Non-inferiority Parameters"
+            enable: "(method_category:advanced)"
+            children:
+              - type: TextBox
+                name: rmst_timepoint
+                format: number
+                enable: "(statistical_method:rmst)"
+              - type: TextBox
+                name: non_inferiority_margin
+                format: number
+                enable: "(statistical_method:non_inferiority)"
+              - type: CheckBox
+                name: superiority_test
+                enable: "(statistical_method:non_inferiority)"
+
+  # === GENETIC ANALYSIS PARAMETERS ===
+  - type: CollapseBox
+    label: Genetic Analysis Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "SNP and Genetic Model Parameters"
+            enable: "(method_category:genetic)"
+            children:
+              - type: TextBox
+                name: snp_maf
+                format: number
+              - type: ComboBox
+                name: genetic_model
+              - type: TextBox
+                name: genetic_effect_size
+                format: number
+
+  # === CURE MODEL PARAMETERS ===
+  - type: CollapseBox
+    label: Cure Model Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Mixture Cure Model Parameters"
+            enable: "(method_category:cure_models)"
+            children:
+              - type: TextBox
+                name: cure_rate_control
+                format: number
+              - type: TextBox
+                name: cure_rate_treatment
+                format: number
+              - type: ComboBox
+                name: survival_distribution
+              - type: ComboBox
+                name: accrual_distribution
+
+  # === SEQUENTIAL ANALYSIS PARAMETERS ===
+  - type: CollapseBox
+    label: Sequential Analysis Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Group Sequential Design Parameters"
+            enable: "(method_category:sequential)"
+            children:
+              - type: TextBox
+                name: number_of_looks
+                format: number
+              - type: ComboBox
+                name: spending_function
+              - type: TextBox
+                name: interim_futility_boundary
+                format: number
+              - type: CheckBox
+                name: binding_futility
+
+  # === EPIDEMIOLOGICAL PARAMETERS ===
+  - type: CollapseBox
+    label: Epidemiological Study Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Multiple Covariates and Interaction Effects"
+            enable: "(method_category:epidemiological)"
+            children:
+              - type: TextBox
+                name: number_of_covariates
+                format: number
+              - type: TextBox
+                name: covariate_correlation
+                format: number
+              - type: TextBox
+                name: interaction_effect_size
+                format: number
+                enable: "(statistical_method:interaction_effects)"
+              - type: ComboBox
+                name: covariate_distribution
+              - type: CheckBox
+                name: adjust_for_confounders
+
+  # === OUTPUT OPTIONS ===
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Display and Export Options"
+            children:
+              - type: CheckBox
+                name: show_detailed_output
+              - type: CheckBox
+                name: show_sensitivity_analysis
+              - type: CheckBox
+                name: show_power_curves
+              - type: CheckBox
+                name: show_method_comparison
+              - type: CheckBox
+                name: export_study_design

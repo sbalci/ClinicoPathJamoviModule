@@ -144,15 +144,21 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$power_summary)}
 }
 \description{
-Comprehensive power analysis and sample size calculation for survival
-studies and clinical trials.
+⚠️  DEPRECATED: This function has been merged into
+'survivalPowerComprehensive' for better functionality.
+}
+\details{
+Legacy power analysis and sample size calculation for survival studies and
+clinical trials.
 Supports log-rank tests, Cox regression, competing risks, non-inferiority
 trials, and RMST-based
-analyses. Includes specialized methods for SNP-based survival studies and
-complex trial designs.
-Essential for study planning, grant applications, and regulatory
-submissions requiring rigorous
-sample size justification.
+analyses.
+
+📢 PLEASE USE: 'Comprehensive Survival Power Analysis' instead - it
+provides all the same functionality
+plus additional methods and improved interface.
+
+This function is maintained for backward compatibility only.
 }
 \examples{
 poweranalysis(

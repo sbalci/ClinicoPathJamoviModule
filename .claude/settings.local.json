@@ -60,7 +60,11 @@
       "Read(//Users/serdarbalci/Documents/GitHub/**)",
       "Bash(do echo \"=== Checking $dir ===\")",
       "Bash(ls:*)",
-      "WebFetch(domain:easystats.github.io)"
+      "WebFetch(domain:easystats.github.io)",
+      "WebFetch(domain:lucymcgowan.github.io)",
+      "WebFetch(domain:manual.rpact.org)",
+      "WebFetch(domain:stats.oarc.ucla.edu)",
+      "WebFetch(domain:shariq-mohammed.github.io)"
     ],
     "deny": [],
     "ask": [],

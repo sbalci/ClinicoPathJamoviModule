@@ -532,10 +532,14 @@ powercompriskBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Power Analysis for Competing Risks Studies
 #'
-#' Performs power analysis and sample size calculations for competing risks  
-#' studies. Calculates power for testing differences in cumulative incidence  
-#' functions between groups using Gray's test and subdistribution hazard 
-#' models.
+#' Power analysis and sample size calculations for competing risks studies. 
+#' Calculates power for testing
+#' differences in cumulative incidence functions between groups using Gray's 
+#' test and subdistribution hazard models.
+#' 
+#' This is the specialized function for competing risks power analysis. For 
+#' unified analysis across all survival
+#' study types, also consider 'Comprehensive Survival Power Analysis'.
 #' 
 #'
 #' @examples

@@ -498,7 +498,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="clinicalSummary",
                 title="Clinical Summary (Copy-Ready for Reports)",
-                visible="(guided_mode || showSummaries)",
+                visible="(showSummaries)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",

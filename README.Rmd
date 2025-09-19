@@ -515,8 +515,12 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 ##### [Survival Analysis for Continuous Explanatory Variable](https://www.serdarbalci.com/jsurvival/articles/survivalcont_documentation.html)
 (Cut-off & Univariate Survival Analysis)
 
-##### [Survival Analysis Power & Sample Size](https://www.serdarbalci.com/jsurvival/articles/survivalpower_documentation.html)
-(Power Analysis for Survival Studies)
+##### [Comprehensive Survival Power Analysis](https://www.serdarbalci.com/jsurvival/articles/jsurvival-02-comprehensive-survival-power-analysis.html)
+**Enhanced Unified Power Analysis Platform**
+- **Seven Method Categories:** Standard methods, competing risks, advanced methods, genetic analysis, cure models, sequential analysis, and epidemiological studies
+- **Advanced Statistical Methods:** NPHMC mixture cure models, powerSurvEpi epidemiological methods, survSNP genetic associations, survivalpwr Cox regression, and rpact sequential designs
+- **Comprehensive Calculations:** Sample size, power, and effect size calculations across all methodologies
+- **Modern Interface:** Organized CollapseBox layout with conditional parameter visibility for streamlined analysis workflow
 
 ##### [Time-Dependent ROC Analysis](https://www.serdarbalci.com/jsurvival/articles/timeroc_documentation.html)
 (Predictive Performance Over Time)

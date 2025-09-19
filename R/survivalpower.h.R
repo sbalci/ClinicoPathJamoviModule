@@ -438,8 +438,15 @@ survivalpowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Survival Analysis Power & Sample Size
 #'
-#' Power analysis and sample size calculation for survival studies using 
-#' Lachin-Foulkes and Schoenfeld methods from gsDesign package.
+#' Legacy power analysis and sample size calculation for survival studies 
+#' using Lachin-Foulkes and
+#' Schoenfeld methods from gsDesign package.
+#' 
+#' This is the original survival power analysis function. For enhanced 
+#' functionality including
+#' competing risks, RMST analysis, and additional methods, also consider 
+#' 'Comprehensive Survival Power Analysis'.
+#' 
 #'
 #' @examples
 #' \donttest{

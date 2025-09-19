@@ -1,5 +1,59 @@
 # ClinicoPath News
 
+## Version 0.0.31.70
+
+### 🗓️ **September 19, 2025 - Comprehensive Survival Power Analysis Enhancement**
+
+#### 🔬 **Major Enhancement: survivalPowerComprehensive Function**
+
+##### **Unified Power Analysis Platform**
+
+* **Comprehensive Integration:** Consolidated multiple specialized power analysis methods into a single, unified interface
+* **Seven Method Categories:** Standard methods, competing risks, advanced methods, genetic analysis, cure models, sequential analysis, and epidemiological studies
+* **Enhanced UI Organization:** Restructured interface with logical CollapseBox groupings and conditional parameter visibility
+* **Backend Architecture:** Sophisticated method dispatcher supporting all legacy functionality plus new advanced methods
+
+##### **New Statistical Methods Integration:**
+
+**NPHMC Package Integration:**
+* **Mixture Cure Models:** Non-proportional hazards mixture cure model power calculations
+* **Survival Distributions:** Support for Weibull, exponential, and log-normal distributions
+* **Accrual Patterns:** Uniform and exponential patient recruitment modeling
+
+**powerSurvEpi Package Integration:**
+* **Epidemiological Studies:** Multi-covariate survival analysis power calculations
+* **Confounding Adjustment:** Advanced methods for observational study design
+* **Interaction Effects:** Power calculations for gene-environment and treatment-covariate interactions
+
+**survSNP Package Integration:**
+* **Genetic Association Studies:** SNP-based survival analysis with genome-wide significance thresholds
+* **Inheritance Models:** Additive, dominant, and recessive genetic models
+* **Minor Allele Frequency:** Comprehensive MAF-based power calculations
+
+**survivalpwr Package Integration:**
+* **Advanced Cox Regression:** Enhanced power calculations for proportional hazards models
+* **RMST Analysis:** Restricted mean survival time power calculations
+* **Non-inferiority Trials:** Specialized methods for non-inferiority margin testing
+
+**rpact Package Integration:**
+* **Group Sequential Designs:** Multi-stage trial designs with interim analyses
+* **Alpha Spending Functions:** O'Brien-Fleming, Pocock, and custom spending approaches
+* **Futility Boundaries:** Interim futility stopping rules and binding/non-binding boundaries
+
+##### **Enhanced User Interface:**
+
+* **Organized Layout:** Seven logical sections with CollapseBox organization for improved navigation
+* **Conditional Visibility:** Smart parameter display based on selected method categories
+* **Method-Specific Parameters:** Tailored input fields for each statistical approach
+* **Comprehensive Output Options:** Detailed results, sensitivity analysis, power curves, and method comparisons
+
+##### **Technical Improvements:**
+
+* **Method Dispatcher:** Sophisticated backend routing for seven analysis categories
+* **Parameter Validation:** Enhanced input validation with method-specific requirements
+* **Error Handling:** Improved user feedback and convergence monitoring
+* **Documentation:** Comprehensive vignette with usage examples and best practices
+
 ## Version 0.0.31.69
 
 ### 🗓️ **September 18, 2025 - OncoPath Module Launch & Specialized Oncological Analysis**

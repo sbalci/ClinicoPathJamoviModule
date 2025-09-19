@@ -78,9 +78,20 @@ A results object containing:
 }
 }
 \description{
-Calculates power, sample size, or minimum detectable hazard ratio for
-survival studies. This helps researchers design adequately powered studies
-to detect meaningful differences in survival between groups.
+⚠️  DEPRECATED: This function has been merged into
+'survivalPowerComprehensive' for better functionality.
+}
+\details{
+Legacy power analysis calculating power, sample size, or minimum detectable
+hazard ratio for survival studies.
+This helps researchers design adequately powered studies to detect
+meaningful differences in survival between groups.
+
+📢 PLEASE USE: 'Comprehensive Survival Power Analysis' instead - it
+provides all the same functionality
+plus additional methods and improved interface.
+
+This function is maintained for backward compatibility only.
 }
 \examples{
 \donttest{
