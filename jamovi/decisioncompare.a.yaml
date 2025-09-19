@@ -1,7 +1,7 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
 version: '0.0.31'

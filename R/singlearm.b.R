@@ -2259,7 +2259,35 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         tryCatch({
           median_row <- self$results$medianTable$asDF()
           if (nrow(median_row) == 0) return()
-          
+
+          # Debug: Check what columns are available
+          if (!"records" %in% colnames(median_row)) {
+            # Try alternative column names that might exist
+            if ("Records" %in% colnames(median_row)) {
+              colnames(median_row)[colnames(median_row) == "Records"] <- "records"
+            }
+          }
+          if (!"events" %in% colnames(median_row)) {
+            if ("Events" %in% colnames(median_row)) {
+              colnames(median_row)[colnames(median_row) == "Events"] <- "events"
+            }
+          }
+          if (!"median" %in% colnames(median_row)) {
+            if ("Median" %in% colnames(median_row)) {
+              colnames(median_row)[colnames(median_row) == "Median"] <- "median"
+            }
+          }
+          if (!"x0_95lcl" %in% colnames(median_row)) {
+            if ("Lower" %in% colnames(median_row)) {
+              colnames(median_row)[colnames(median_row) == "Lower"] <- "x0_95lcl"
+            }
+          }
+          if (!"x0_95ucl" %in% colnames(median_row)) {
+            if ("Upper" %in% colnames(median_row)) {
+              colnames(median_row)[colnames(median_row) == "Upper"] <- "x0_95ucl"
+            }
+          }
+
           n_total <- median_row$records[1]
           n_events <- median_row$events[1]
           median_survival <- median_row$median[1]
@@ -2365,10 +2393,24 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$clinicalSummary$setContent(summary_html)
           
         }, error = function(e) {
-          # Fallback summary if detailed analysis fails
+          # Provide more specific error information for debugging
+          # Safely get column names without calling asDF() again
+          col_info <- tryCatch({
+            if (self$results$medianTable$rowCount > 0) {
+              df <- self$results$medianTable$asDF()
+              paste(names(df), collapse = ", ")
+            } else {
+              "No data available"
+            }
+          }, error = function(e2) {
+            "Unable to access column information"
+          })
+
           fallback_html <- paste0(
             "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-            "<p>", .("Clinical summary will be generated once the analysis is complete."), "</p>",
+            "<p>", .("Error generating clinical summary:"), " ", e$message, "</p>",
+            "<p><small>", .("Debug: Table rows ="), " ", self$results$medianTable$rowCount,
+            ", ", .("Columns available:"), " ", col_info, "</small></p>",
             "</div>"
           )
           self$results$clinicalSummary$setContent(fallback_html)

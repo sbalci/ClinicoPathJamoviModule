@@ -15,15 +15,23 @@ tidyplots(
   pointType = "basic",
   lineType = "direct",
   barType = "mean",
+  stackType = "absolute",
   showMean = FALSE,
   meanType = "dash",
   showMedian = FALSE,
   medianType = "dash",
+  showSum = FALSE,
+  sumType = "dash",
+  showCount = FALSE,
+  countType = "dash",
   showSEM = FALSE,
+  semType = "errorbar",
   showSD = FALSE,
+  sdType = "errorbar",
   showCI = FALSE,
   ciType = "errorbar",
   showRange = FALSE,
+  rangeType = "errorbar",
   showDistribution = FALSE,
   distributionType = "density",
   showOutliers = TRUE,
@@ -32,6 +40,9 @@ tidyplots(
   areaType = "absolute",
   showPValue = FALSE,
   showSignificance = FALSE,
+  showReferenceLines = FALSE,
+  referenceX = "",
+  referenceY = "",
   colorScheme = "friendly",
   alpha = 1,
   fontSize = 12,
@@ -39,14 +50,24 @@ tidyplots(
   xLabel = "",
   yLabel = "",
   legendTitle = "",
+  plotCaption = "",
+  plotWidth = 20,
+  plotHeight = 20,
+  pointShape = 16,
   removeLegend = FALSE,
+  removeLegendTitle = FALSE,
   removePadding = FALSE,
   removeXAxis = FALSE,
   removeXAxisLabels = FALSE,
   removeXAxisTitle = FALSE,
   removeYAxis = FALSE,
   removeYAxisLabels = FALSE,
-  removeYAxisTitle = FALSE
+  removeYAxisTitle = FALSE,
+  sortXAxisLabels = FALSE,
+  reverseXAxisLabels = FALSE,
+  plotTheme = "default",
+  removeXAxisLine = FALSE,
+  removeYAxisLine = FALSE
 )
 }
 \arguments{
@@ -70,6 +91,8 @@ tidyplots(
 
 \item{barType}{.}
 
+\item{stackType}{.}
+
 \item{showMean}{.}
 
 \item{meanType}{.}
@@ -78,15 +101,29 @@ tidyplots(
 
 \item{medianType}{.}
 
+\item{showSum}{.}
+
+\item{sumType}{.}
+
+\item{showCount}{.}
+
+\item{countType}{.}
+
 \item{showSEM}{.}
 
+\item{semType}{.}
+
 \item{showSD}{.}
+
+\item{sdType}{.}
 
 \item{showCI}{.}
 
 \item{ciType}{.}
 
 \item{showRange}{.}
+
+\item{rangeType}{.}
 
 \item{showDistribution}{.}
 
@@ -104,6 +141,12 @@ tidyplots(
 
 \item{showSignificance}{.}
 
+\item{showReferenceLines}{.}
+
+\item{referenceX}{.}
+
+\item{referenceY}{.}
+
 \item{colorScheme}{.}
 
 \item{alpha}{.}
@@ -118,7 +161,17 @@ tidyplots(
 
 \item{legendTitle}{.}
 
+\item{plotCaption}{.}
+
+\item{plotWidth}{.}
+
+\item{plotHeight}{.}
+
+\item{pointShape}{.}
+
 \item{removeLegend}{.}
+
+\item{removeLegendTitle}{.}
 
 \item{removePadding}{.}
 
@@ -133,6 +186,16 @@ tidyplots(
 \item{removeYAxisLabels}{.}
 
 \item{removeYAxisTitle}{.}
+
+\item{sortXAxisLabels}{.}
+
+\item{reverseXAxisLabels}{.}
+
+\item{plotTheme}{.}
+
+\item{removeXAxisLine}{.}
+
+\item{removeYAxisLine}{.}
 }
 \value{
 A results object containing:

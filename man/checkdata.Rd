@@ -2,7 +2,7 @@
 % Please edit documentation in R/checkdata.h.R
 \name{checkdata}
 \alias{checkdata}
-\title{Data Quality Assessment}
+\title{Single Variable Quality Check}
 \usage{
 checkdata(
   data,
@@ -32,8 +32,10 @@ distributions.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
+\code{results$noOutliers} \tab \tab \tab \tab \tab a html \cr
 \code{results$outliers} \tab \tab \tab \tab \tab a table \cr
 \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
@@ -47,5 +49,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$missingVals)}
 }
 \description{
-Data Quality Assessment
+Single Variable Quality Check
 }

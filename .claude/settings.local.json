@@ -59,7 +59,8 @@
       "WebFetch(domain:jbengler.github.io)",
       "Read(//Users/serdarbalci/Documents/GitHub/**)",
       "Bash(do echo \"=== Checking $dir ===\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:easystats.github.io)"
     ],
     "deny": [],
     "ask": [],

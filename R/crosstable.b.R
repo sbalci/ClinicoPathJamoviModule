@@ -92,7 +92,7 @@
     # Check overall sample size
     n_total <- nrow(mydata)
     if (n_total < 20) {
-        issues <- append(issues, .("Very small sample size (n = {n}). Results may be unreliable.", n = n_total))
+        issues <- append(issues, sprintf(.("Very small sample size (n = %d). Results may be unreliable."), n_total))
     }
     
     # Check group sizes
@@ -143,18 +143,18 @@
     total_tests <- length(myvars)
     
     if (test_type == "crosstable") {
-        summary <- .("Cross-table analysis comparing {n_vars} variable(s) across {group} groups.", 
-                    n_vars = total_tests, group = mygroup)
-        
+        summary <- sprintf(.("Cross-table analysis comparing %d variable(s) across %s groups."),
+                          total_tests, mygroup)
+
         if (significant_count > 0) {
-            summary <- paste0(summary, " ", 
-                .("Found {n_sig} significant association(s) (p < 0.05).", n_sig = significant_count))
+            summary <- paste0(summary, " ",
+                sprintf(.("Found %d significant association(s) (p < 0.05)."), significant_count))
         } else {
-            summary <- paste0(summary, " ", 
+            summary <- paste0(summary, " ",
                 .("No significant associations detected (all p ≥ 0.05)."))
         }
-        
-        summary <- paste0(summary, " ", 
+
+        summary <- paste0(summary, " ",
             .("Review individual test results below for detailed findings."))
     }
     

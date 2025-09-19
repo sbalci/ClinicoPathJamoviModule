@@ -11,7 +11,6 @@ parallelplot(
   scaling = "std",
   alpha = 0.7,
   showMissing = FALSE,
-  interactive = TRUE,
   colorPalette = "default"
 )
 }
@@ -28,8 +27,6 @@ parallelplot(
 
 \item{showMissing}{Include cases with missing values}
 
-\item{interactive}{Create interactive plotly visualization}
-
 \item{colorPalette}{Color scheme for grouping variable}
 }
 \value{
@@ -37,7 +34,6 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$plotly} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 }
 

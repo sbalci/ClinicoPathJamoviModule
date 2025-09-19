@@ -1,9 +1,9 @@
 ---
 name: outlierdetection
 title: Advanced Outlier Detection
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -57,9 +57,12 @@ options:
       default: composite
       description:
           R: >
-            Category of outlier detection methods to use. Univariate methods analyze each variable
-            separately, multivariate methods consider relationships between variables, and composite
-            combines multiple methods for robust detection.
+            Category of outlier detection methods to use. CLINICAL GUIDANCE: Univariate methods
+            analyze each variable separately (ideal for lab values, vital signs). Multivariate
+            methods consider relationships between variables (useful for correlated biomarkers).
+            Composite combines multiple approaches for robust detection (recommended for most
+            clinical data). Examples: Use univariate for hemoglobin levels, multivariate for
+            complete blood count panels.
 
     - name: univariate_methods
       title: Univariate Methods
@@ -118,8 +121,10 @@ options:
       default: 3.29
       description:
           R: >
-            Threshold for Z-score based methods. Default 3.29 corresponds to 99.9% confidence
-            interval (approximately 0.1% extreme observations).
+            Threshold for Z-score based methods. CLINICAL EXAMPLES: 3.0 = 99.7% confidence
+            (standard screening for most lab values), 3.29 = 99.9% confidence (stringent,
+            for critical values like cardiac enzymes), 2.5 = 98.8% confidence (sensitive
+            detection for research). Recommended: 3.29 for clinical quality control.
 
     - name: iqr_multiplier
       title: IQR Multiplier
@@ -129,8 +134,10 @@ options:
       default: 1.7
       description:
           R: >
-            Multiplier for IQR-based outlier detection. Default 1.7 is more conservative
-            than Tukey's 1.5, reducing false positive detection.
+            Multiplier for IQR-based outlier detection. CLINICAL EXAMPLES: 1.5 = Tukey's
+            standard (sensitive, may flag ~0.7% of normal data), 1.7 = conservative
+            (recommended for clinical screening), 2.0 = very conservative (for critical
+            biomarkers). Useful for non-normal distributions common in clinical data.
 
     - name: confidence_level
       title: Confidence Level for Intervals

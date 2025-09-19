@@ -10,12 +10,13 @@ items:
       visible: false
 
     - name: plot
-      title: Outlier Detection Plot
+      title: Advanced Outlier Detection Plot
       type: Image
       width: 800
       height: 600
       renderFun: .plot
       visible: (show_visualization)
+      requiresData: true
       clearWith:
         - vars
         - method_category
@@ -78,5 +79,8 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
+    - performance
+    - anomalydetection
+    - lofoutlier
 
 ...

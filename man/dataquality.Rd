@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataquality.h.R
 \name{dataquality}
 \alias{dataquality}
-\title{Data Quality Assessment}
+\title{Multi-Variable Visual Quality}
 \usage{
 dataquality(
   data,
@@ -10,10 +10,11 @@ dataquality(
   check_duplicates = TRUE,
   check_missing = TRUE,
   complete_cases_only = FALSE,
-  visual_analysis = TRUE,
-  visdat_type = "vis_dat",
-  missing_threshold_visual = 10,
-  export_plots = FALSE
+  plot_data_overview = FALSE,
+  plot_missing_patterns = FALSE,
+  plot_data_types = FALSE,
+  plot_value_expectations = FALSE,
+  missing_threshold_visual = 10
 )
 }
 \arguments{
@@ -31,24 +32,29 @@ and patterns.}
 \item{complete_cases_only}{If TRUE, analyzes completeness across all
 selected variables simultaneously.}
 
-\item{visual_analysis}{Enable visual data exploration using visdat package
-integration. Provides visual summaries of data types and missing patterns.}
+\item{plot_data_overview}{Show data overview visualization displaying
+variable types and missing values.}
 
-\item{visdat_type}{Choose the type of visual analysis to perform using
-visdat.}
+\item{plot_missing_patterns}{Show missing value patterns visualization.}
+
+\item{plot_data_types}{Show data type detection and validation
+visualization.}
+
+\item{plot_value_expectations}{Show value expectations analysis
+visualization.}
 
 \item{missing_threshold_visual}{Threshold percentage for highlighting
 variables with missing values in visual analysis.}
-
-\item{export_plots}{Enable export functionality for visual data quality
-plots.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot} \tab \tab \tab \tab \tab a html \cr
+\code{results$plotDataOverview} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotMissingPatterns} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotDataTypes} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotValueExpectations} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

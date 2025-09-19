@@ -1,7 +1,7 @@
 ---
 name: explainableai
 title: Explainable AI Analysis
-menuGroup: OncoPathT2
+menuGroup: OncoPathD
 menuSubgroup: Advanced AI
 menuSubtitle: Model Interpretability
 version: '1.0.0'

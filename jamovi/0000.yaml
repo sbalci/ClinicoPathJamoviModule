@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.69
+version: 0.0.31.70
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-18'
+date: '2025-09-19'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -242,7 +242,7 @@ analyses:
   - title: Multi-Variable Visual Quality
     name: dataquality
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Multi-Variable Visual Quality
     description: >
@@ -256,7 +256,7 @@ analyses:
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Advanced Outlier Detection
     menuSubtitle: easystats Performance Package
@@ -584,7 +584,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -866,7 +866,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1041,7 +1041,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1054,7 +1054,7 @@ analyses:
   - title: Power Analysis for Survival Studies
     name: powersurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Power Analysis for Survival Studies
     menuSubgroup: Design and Analysis
     menuSubtitle: Power analysis for survival studies
@@ -1188,7 +1188,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: >
@@ -1201,7 +1201,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1213,7 +1213,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1245,7 +1245,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1305,7 +1305,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
@@ -1356,7 +1356,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Analyze combined test results
@@ -2806,7 +2806,7 @@ analyses:
     name: flexrstpm2
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Comprehensive Flexible Parametric Survival Models
     menuSubtitle: Advanced flexible parametric models with clinical analysis
@@ -3966,7 +3966,7 @@ analyses:
     name: aivalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideD
     menuSubgroup: AI & Machine Learning
     menuTitle: AI Model Validation with Cross-Validation
     menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
@@ -4552,7 +4552,7 @@ analyses:
     name: explainableai
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathD
     menuSubgroup: Advanced AI
     menuTitle: Explainable AI Analysis
     menuSubtitle: Model Interpretability
