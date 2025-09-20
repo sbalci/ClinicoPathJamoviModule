@@ -1,5 +1,5 @@
-title: Power Analysis for Competing Risks Studies
-name: powercomprisk
+title: Competing Risks Power Analysis
+name: competingRisksPower
 jus: '3.0'
 stage: 0
 compilerMode: tame

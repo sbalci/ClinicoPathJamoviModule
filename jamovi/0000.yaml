@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.70
+version: 0.0.31.71
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-19'
+date: '2025-09-20'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -883,7 +883,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -900,7 +900,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -909,7 +909,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -938,7 +938,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -1041,7 +1041,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1051,16 +1051,16 @@ analyses:
       risks, progression-free survival, and multistate models.
     ribbon: analyses
     category: analyses
-  - title: Power Analysis for Survival Studies
-    name: powersurvival
+  - title: Advanced Survival Power Analysis (Advanced)
+    name: advancedSurvivalPower
     ns: ClinicoPath
     menuGroup: SurvivalT
-    menuTitle: Power Analysis for Survival Studies
-    menuSubgroup: Design and Analysis
-    menuSubtitle: Power analysis for survival studies
+    menuTitle: Advanced Survival Power Analysis (Advanced)
+    menuSubgroup: Design and Power Analysis
+    menuSubtitle: Advanced options - Multiple design types
     description: >-
-      Power analysis calculating power, sample size, or minimum detectable
-      hazard ratio for survival studies.
+      Basic power analysis for survival studies with simple and complex design
+      options.
 
       This helps researchers design adequately powered studies to detect
       meaningful differences in survival between groups.
@@ -1077,13 +1077,13 @@ analyses:
       Cox proportional hazards model diagnostic plots using ggcoxdiagnostics
       from survminer package for comprehensive model validation.
     category: analyses
-  - title: Survival Analysis Power & Sample Size
-    name: survivalpower
+  - title: Classical Survival Power Analysis (Intermediate)
+    name: classicalSurvivalPower
     ns: ClinicoPath
     menuGroup: SurvivalT
-    menuTitle: Survival Analysis Power & Sample Size
-    menuSubgroup: Design and Analysis
-    menuSubtitle: Power Analysis for Survival Studies
+    menuTitle: Classical Survival Power Analysis (Intermediate)
+    menuSubgroup: Design and Power Analysis
+    menuSubtitle: Traditional methods - Lachin-Foulkes & Schoenfeld
     description: >-
       Legacy power analysis and sample size calculation for survival studies
       using Lachin-Foulkes and
@@ -1117,9 +1117,9 @@ analyses:
   - title: Comparing Survival Outcomes
     name: comparingSurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Comparing Survival Outcomes
-    menuSubgroup: Drafts
+    menuSubgroup: ClinicoPath Survival
     menuSubtitle: SimpleSurvival
     ribbon: analyses
     category: analyses
@@ -1173,7 +1173,7 @@ analyses:
   - title: Advanced TNM Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Stage Migration Analysis
     menuTitle: Advanced TNM Stage Migration Analysis
     menuSubtitle: State-of-the-Art Staging System Validation
@@ -2226,8 +2226,8 @@ analyses:
     name: survivalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT2
-    menuSubgroup: Advanced Survival
+    menuGroup: SurvivalT
+    menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Model Validation
     menuSubtitle: Model Performance Assessment and Validation
     description: >
@@ -2274,7 +2274,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation
@@ -2293,21 +2293,21 @@ analyses:
     name: ihcscoring
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: IHC Scoring Standardization
     menuSubgroup: IHC Analysis
   - title: Multiplex Immunofluorescence Analysis
     name: multiplexanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: Multiplex Immunofluorescence Analysis
     menuSubgroup: IHC Analysis
   - title: Pathology Agreement Analysis
     name: pathologyagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: Pathology Agreement Analysis
   - title: Spatial Statistics from Coordinates
     name: spatialanalysis
@@ -2412,7 +2412,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
@@ -3556,7 +3556,7 @@ analyses:
     name: ihccluster
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: IHC Clustering Analysis
     menuSubtitle: Cluster cases by IHC expression patterns
@@ -3725,7 +3725,7 @@ analyses:
     name: metaanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathD
     menuTitle: Meta-Analysis & Evidence Synthesis
     description: >
       Comprehensive meta-analysis and evidence synthesis including forest plots,
@@ -3990,7 +3990,7 @@ analyses:
     name: tumorgrowth
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathT2
+    menuGroup: ClinicoPathT
     menuSubgroup: Survival Analysis
     menuTitle: Tumor Growth Models
   - title: Progression-Free Survival Analysis
@@ -4063,22 +4063,19 @@ analyses:
       state-of-the-art
 
       methodology and regulatory compliance.
-  - title: Power Analysis & Sample Size Calculation
-    name: poweranalysis
+  - title: Simple Survival Power Analysis (Basic)
+    name: simpleSurvivalPower
     ns: ClinicoPath
     category: analyses
     menuGroup: SurvivalT
-    menuSubgroup: Specialized Survival Methods
+    menuSubgroup: Design and Power Analysis
     menuTitle: Power Analysis
-    menuSubtitle: Comprehensive power and sample size calculations for survival studies
+    menuSubtitle: Basic power analysis - Easy to use for beginners
     description: >-
-      Power analysis and sample size calculation for survival studies and
-      clinical trials.
+      Simple power analysis and sample size calculation for survival studies.
 
-      Supports log-rank tests, Cox regression, competing risks, non-inferiority
-      trials, and RMST-based
-
-      analyses.
+      User-friendly interface for basic survival power calculations with
+      multiple statistical methods.
   - title: Smoothly Clipped Absolute Deviation Cox Regression
     name: ncvregcox
     ns: ClinicoPath
@@ -4562,19 +4559,20 @@ analyses:
       importance,
 
       SHAP values, and other interpretability methods.
-  - title: Power Analysis for Competing Risks Studies
-    name: powercomprisk
+  - title: Competing Risks Power Analysis (Specialized)
+    name: competingRisksPower
     ns: ClinicoPath
     category: analyses
     menuGroup: SurvivalT
-    menuSubgroup: jsurvival Power Analysis
-    menuTitle: Power Analysis for Competing Risks Studies
+    menuSubgroup: Design and Power Analysis
+    menuTitle: Competing Risks Power Analysis (Specialized)
     description: >-
       Power analysis and sample size calculations for competing risks studies.
       Calculates power for testing
 
       differences in cumulative incidence functions between groups using Gray's
       test and subdistribution hazard models.
+    menuSubtitle: Specialized for competing events scenarios
   - title: Advanced Ridge Plot
     name: jjridges
     ns: ClinicoPath
@@ -4650,7 +4648,7 @@ analyses:
     name: jjoncoplot
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: Molecular Pathology Plots
     menuTitle: Genomic Landscape Visualization
     menuSubtitle: Oncoplot, Mutation Landscape, Clinical Annotations
@@ -4671,7 +4669,7 @@ analyses:
     name: ihcadvanced
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: Advanced Analysis
     description: >
@@ -4682,7 +4680,7 @@ analyses:
     name: ihcbasic
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: Basic Analysis
     description: >
@@ -4692,7 +4690,7 @@ analyses:
     name: ihcdiagnostic
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: Clinical Diagnostics
     description: >
@@ -4703,7 +4701,7 @@ analyses:
     name: ihcimmune
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: TIL & Immune Analysis
     description: >
@@ -4714,18 +4712,74 @@ analyses:
     name: ihcsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: Survival & Prognosis
     description: >
       Survival analysis and prognostic clustering using IHC markers. Designed
       for prognostic biomarker discovery and risk stratification.
+  - title: Comprehensive Survival Power Analysis (Expert)
+    name: comprehensiveSurvivalPower
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: Design and Power Analysis
+    menuTitle: Comprehensive Survival Power Analysis (Expert)
+    menuSubtitle: All-in-one expert tool - All methods & study types
+    description: >-
+      Comprehensive power analysis and sample size calculation for survival
+      studies and clinical trials. Unifies all survival power methods: standard
+      log-rank tests, Cox regression, competing risks, RMST-based analyses,
+      non-inferiority trials, and specialized methods. Supports both simple and
+      complex study designs with accrual periods, variable follow-up, and
+      dropout considerations. Essential for study planning, grant applications,
+      and regulatory submissions.
+  - title: Power Analysis for Survival Studies
+    name: powersurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: Design and Power Analysis
+    menuTitle: Power Analysis for Survival Studies
+    menuSubtitle: Power analysis for survival studies
+    description: >-
+      Basic power analysis for survival studies with simple and complex design
+      options.
+
+      This helps researchers design adequately powered studies to detect
+      meaningful differences in survival between groups.
+  - title: Survival Analysis Power & Sample Size
+    name: survivalpower
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: Design and Power Analysis
+    menuTitle: Survival Analysis Power & Sample Size
+    menuSubtitle: Power Analysis for Survival Studies
+    description: >-
+      Legacy power analysis and sample size calculation for survival studies
+      using Lachin-Foulkes and
+
+      Schoenfeld methods from gsDesign package.
+  - title: Power Analysis for Competing Risks Studies
+    name: powercomprisk
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: Design and Power Analysis
+    menuTitle: Power Analysis for Competing Risks Studies
+    description: >-
+      Power analysis and sample size calculations for competing risks studies.
+      Calculates power for testing
+
+      differences in cumulative incidence functions between groups using Gray's
+      test and subdistribution hazard models.
   - title: Comprehensive Survival Power Analysis
     name: survivalPowerComprehensive
     ns: ClinicoPath
     category: analyses
     menuGroup: SurvivalT
-    menuSubgroup: Design and Analysis
+    menuSubgroup: Design and Power Analysis
     menuTitle: Comprehensive Survival Power Analysis
     menuSubtitle: Unified power analysis for all survival study types
     description: >-

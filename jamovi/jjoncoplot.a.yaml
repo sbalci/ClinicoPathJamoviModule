@@ -1,7 +1,7 @@
 ---
 name: jjoncoplot
 title: Genomic Landscape Visualization
-menuGroup: OncoPathT2
+menuGroup: OncoPathT
 menuSubgroup: 'Molecular Pathology Plots'
 menuSubtitle: 'Oncoplot, Mutation Landscape, Clinical Annotations'
 version: '0.0.1'

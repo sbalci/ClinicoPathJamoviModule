@@ -1,14 +1,14 @@
 #' @title Comprehensive Survival Power Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom gsDesign nSurvival nEvents gsPower
+#' @importFrom gsDesign nSurvival nEvents nSurv
 #' @importFrom ggplot2 ggplot aes geom_line geom_point geom_hline labs scale_y_continuous scale_x_continuous annotate
 #' @importFrom scales percent_format comma_format
 #'
 
-survivalPowerComprehensiveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "survivalPowerComprehensiveClass",
-    inherit = survivalPowerComprehensiveBase,
+comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "comprehensiveSurvivalPowerClass",
+    inherit = comprehensiveSurvivalPowerBase,
     private = list(
         .init = function() {
             # Initialize instructions

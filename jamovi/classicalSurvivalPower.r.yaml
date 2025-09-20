@@ -1,6 +1,6 @@
 ---
-name: survivalpower
-title: "Survival Analysis Power & Sample Size"
+name: classicalSurvivalPower
+title: "Classical Survival Power Analysis"
 jrs: '1.1'
 
 items:

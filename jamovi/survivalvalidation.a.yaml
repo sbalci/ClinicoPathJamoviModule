@@ -1,8 +1,8 @@
 ---
 name: survivalvalidation
 title: Survival Model Validation
-menuGroup: SurvivalT2
-menuSubgroup: Advanced Survival
+menuGroup: SurvivalT
+menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Model Performance Assessment and Validation'
 version: '0.0.3'
 jas: '1.2'

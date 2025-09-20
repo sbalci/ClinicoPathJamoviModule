@@ -1,5 +1,5 @@
 title: Power Analysis & Sample Size Calculation
-name: poweranalysis
+name: simpleSurvivalPower
 jus: '3.0'
 stage: 0
 compilerMode: tame
@@ -32,15 +32,24 @@ children:
           - type: TextBox
             name: effect_size
             format: number
+            suffix: "(HR < 1 favors treatment)"
           - type: TextBox
             name: alpha_level
             format: number
+            suffix: "(typically 0.05)"
           - type: TextBox
             name: power_level
             format: number
+            suffix: "(typically 0.80)"
           - type: TextBox
             name: allocation_ratio
             format: number
+            suffix: "(1 = equal groups)"
+          - type: TextBox
+            name: sample_size_input
+            format: number
+            suffix: "(for power/effect calculations)"
+            enable: (analysis_type != "sample_size")
 
   - type: CollapseBox
     label: Survival Distribution Parameters
@@ -52,12 +61,14 @@ children:
           - type: TextBox
             name: control_median_survival
             format: number
+            suffix: "(months)"
           - type: ComboBox
             name: survival_distribution
           - type: TextBox
             name: weibull_shape
             format: number
-            enable: (survival_distribution:weibull)
+            suffix: "(1 = exponential)"
+            enable: (survival_distribution=="weibull")
 
   - type: CollapseBox
     label: Study Timeline
@@ -69,14 +80,17 @@ children:
           - type: TextBox
             name: accrual_period
             format: number
+            suffix: "(months)"
           - type: TextBox
             name: follow_up_period
             format: number
+            suffix: "(months)"
           - type: ComboBox
             name: accrual_pattern
           - type: TextBox
             name: dropout_rate
             format: number
+            suffix: "(0-1, e.g., 0.05 = 5%)"
 
   - type: CollapseBox
     label: Specialized Methods
@@ -88,33 +102,33 @@ children:
           - type: TextBox
             name: ni_margin
             format: number
-            enable: (test_type:non_inferiority)
+            enable: (test_type=="non_inferiority")
           - type: ComboBox
             name: ni_type
-            enable: (test_type:non_inferiority)
+            enable: (test_type=="non_inferiority")
           - type: TextBox
             name: competing_risk_rate
             format: number
-            enable: (test_type:competing_risks)
+            enable: (test_type=="competing_risks")
           - type: TextBox
             name: competing_risk_hr
             format: number
-            enable: (test_type:competing_risks)
+            enable: (test_type=="competing_risks")
           - type: TextBox
             name: rmst_tau
             format: number
-            enable: (test_type:rmst_test)
+            enable: (test_type=="rmst_test")
           - type: TextBox
             name: rmst_difference
             format: number
-            enable: (test_type:rmst_test)
+            enable: (test_type=="rmst_test")
           - type: TextBox
             name: snp_maf
             format: number
-            enable: (test_type:snp_survival)
+            enable: (test_type=="snp_survival")
           - type: ComboBox
             name: genetic_model
-            enable: (test_type:snp_survival)
+            enable: (test_type=="snp_survival")
 
   - type: CollapseBox
     label: Advanced Options
@@ -126,24 +140,24 @@ children:
           - type: TextBox
             name: number_of_arms
             format: number
-            enable: (study_design:multi_arm)
+            enable: (study_design=="multi_arm")
           - type: ComboBox
             name: multiple_comparisons
-            enable: (study_design:multi_arm)
+            enable: (study_design=="multi_arm")
           - type: TextBox
             name: cluster_size
             format: number
-            enable: (study_design:cluster_randomized)
+            enable: (study_design=="cluster_randomized")
           - type: TextBox
             name: icc
             format: number
-            enable: (study_design:cluster_randomized)
+            enable: (study_design=="cluster_randomized")
           - type: TextBox
             name: interim_analyses
             format: number
           - type: ComboBox
             name: alpha_spending
-            enable: (interim_analyses:>0)
+            enable: (interim_analyses>0)
           - type: TextBox
             name: stratification_factors
             format: number

@@ -1,0 +1,589 @@
+---
+name: comprehensiveSurvivalPower
+title: Comprehensive Survival Power Analysis (Expert)
+menuGroup: SurvivalT
+menuSubgroup: Design and Power Analysis
+menuSubtitle: 'All-in-one expert tool - All methods & study types'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >-
+        Comprehensive power analysis and sample size calculation for survival studies and clinical trials.
+        Unifies all survival power methods: standard log-rank tests, Cox regression, competing risks,
+        RMST-based analyses, non-inferiority trials, and specialized methods. Supports both simple
+        and complex study designs with accrual periods, variable follow-up, and dropout considerations.
+        Essential for study planning, grant applications, and regulatory submissions.
+    R:
+        dontrun: false
+        usage: |
+            # Standard log-rank test power calculation
+            comprehensiveSurvivalPower(
+                method_category = "standard",
+                calculation_type = "sample_size",
+                statistical_method = "log_rank",
+                hazard_ratio = 0.75,
+                power = 0.80,
+                alpha = 0.05,
+                allocation_ratio = 1
+            )
+
+            # Competing risks power analysis
+            comprehensiveSurvivalPower(
+                method_category = "competing_risks",
+                calculation_type = "power",
+                statistical_method = "grays_test",
+                sample_size = 300,
+                effect_size = 0.15,
+                alpha = 0.05
+            )
+
+            # Advanced RMST-based analysis
+            comprehensiveSurvivalPower(
+                method_category = "advanced",
+                calculation_type = "effect_size",
+                statistical_method = "rmst",
+                sample_size = 400,
+                power = 0.90,
+                alpha = 0.05,
+                rmst_timepoint = 24
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (optional for power calculations).
+
+    # Primary Method Selection
+    - name: method_category
+      title: 'Analysis Method Category'
+      type: List
+      options:
+        - title: "Standard Survival Analysis"
+          name: standard
+        - title: "Competing Risks Analysis"
+          name: competing_risks
+        - title: "Advanced Methods"
+          name: advanced
+        - title: "Genetic Association Studies"
+          name: genetic
+        - title: "Cure Model Analysis"
+          name: cure_models
+        - title: "Sequential/Group Sequential"
+          name: sequential
+        - title: "Epidemiological Studies"
+          name: epidemiological
+      default: standard
+      description: >-
+        Choose the category of survival analysis method. Standard methods include
+        log-rank tests and Cox regression. Competing risks methods analyze multiple
+        event types. Advanced methods include RMST, non-inferiority, and specialized approaches.
+
+    # Calculation Type
+    - name: calculation_type
+      title: 'What to Calculate'
+      type: List
+      options:
+        - title: "Sample Size (from power)"
+          name: sample_size
+        - title: "Power (from sample size)"
+          name: power
+        - title: "Detectable Effect Size"
+          name: effect_size
+        - title: "Study Duration"
+          name: duration
+        - title: "Number of Events Required"
+          name: events
+      default: sample_size
+      description: >-
+        Select what parameter to calculate. Most commonly used are sample size
+        (given desired power) and power (given available sample size).
+
+    # Statistical Methods - Context Sensitive
+    - name: statistical_method
+      title: 'Statistical Method'
+      type: List
+      options:
+        # Standard Methods
+        - title: "Log-rank Test (Schoenfeld)"
+          name: log_rank_schoenfeld
+        - title: "Log-rank Test (Lachin-Foulkes)"
+          name: log_rank_lachin
+        - title: "Cox Regression"
+          name: cox_regression
+        - title: "Weighted Log-rank"
+          name: weighted_logrank
+        # Competing Risks Methods
+        - title: "Gray's Test"
+          name: grays_test
+        - title: "Subdistribution Hazards"
+          name: subdist_hazards
+        - title: "Cause-Specific Hazards"
+          name: cause_specific
+        # Advanced Methods
+        - title: "RMST Comparison"
+          name: rmst
+        - title: "Non-inferiority Trial"
+          name: non_inferiority
+        - title: "Bayesian Power"
+          name: bayesian
+        # Genetic Methods
+        - title: "SNP-based Survival (Additive)"
+          name: snp_survival_additive
+        - title: "SNP-based Survival (Dominant)"
+          name: snp_survival_dominant
+        - title: "SNP-based Survival (Recessive)"
+          name: snp_survival_recessive
+        # Cure Model Methods
+        - title: "Mixture Cure Model"
+          name: mixture_cure
+        - title: "Non-mixture Cure Model"
+          name: non_mixture_cure
+        - title: "Promotion Time Cure"
+          name: promotion_time_cure
+        # Sequential Methods
+        - title: "O'Brien-Fleming"
+          name: obrien_fleming
+        - title: "Pocock Boundary"
+          name: pocock
+        - title: "Lan-DeMets"
+          name: lan_demets
+        - title: "Wang-Tsiatis"
+          name: wang_tsiatis
+        # Epidemiological Methods
+        - title: "Multiple Covariates"
+          name: multi_covariates
+        - title: "Interaction Effects"
+          name: interaction_effects
+        - title: "Continuous Exposure"
+          name: continuous_exposure
+      default: log_rank_schoenfeld
+      description: >-
+        Choose the specific statistical method. Available options depend on the
+        selected method category. Schoenfeld method is most common for log-rank tests.
+
+    # Study Design
+    - name: study_design
+      title: 'Study Design Complexity'
+      type: List
+      options:
+        - title: "Simple (Fixed follow-up)"
+          name: simple
+        - title: "Complex (Accrual + Variable follow-up)"
+          name: complex
+        - title: "Sequential/Group Sequential"
+          name: sequential
+      default: simple
+      description: >-
+        Simple design assumes fixed follow-up time. Complex design includes
+        accrual period and variable follow-up. Sequential designs allow interim analyses.
+
+    # Core Parameters
+    - name: alpha
+      title: 'Significance Level (α)'
+      type: Number
+      min: 0.001
+      max: 0.20
+      default: 0.05
+      description: >-
+        Type I error rate. Standard values: 0.05 (two-sided) or 0.025 (one-sided).
+        For non-inferiority trials, consider 0.025.
+
+    - name: power
+      title: 'Desired Power (1-β)'
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.80
+      description: >-
+        Statistical power (probability of detecting true effect). Standard values:
+        0.80 (80%) or 0.90 (90%). Higher power requires larger sample sizes.
+
+    - name: sample_size
+      title: 'Total Sample Size'
+      type: Integer
+      min: 10
+      max: 100000
+      default: 200
+      description: >-
+        Total number of subjects in the study. Used when calculating power or
+        detectable effect size from a fixed sample size.
+
+    - name: allocation_ratio
+      title: 'Allocation Ratio (Control:Treatment)'
+      type: Number
+      min: 0.1
+      max: 10.0
+      default: 1.0
+      description: >-
+        Ratio of control to treatment group sizes. 1.0 = equal allocation (1:1),
+        2.0 = twice as many controls (2:1). Equal allocation is most efficient.
+
+    # Effect Size Parameters
+    - name: hazard_ratio
+      title: 'Hazard Ratio (Treatment vs Control)'
+      type: Number
+      min: 0.1
+      max: 10.0
+      default: 0.75
+      description: >-
+        Expected hazard ratio. Values < 1 indicate treatment benefit.
+        Common values: 0.75 (25% reduction), 0.67 (33% reduction), 0.50 (50% reduction).
+
+    - name: median_survival_control
+      title: 'Median Survival - Control Group'
+      type: Number
+      min: 0.1
+      max: 1000
+      default: 12
+      description: >-
+        Expected median survival time in control group. Units should match
+        your study timeline (months, years, etc.).
+
+    - name: median_survival_treatment
+      title: 'Median Survival - Treatment Group'
+      type: Number
+      min: 0.1
+      max: 1000
+      default: 16
+      description: >-
+        Expected median survival time in treatment group. Should be longer
+        than control group for beneficial treatments.
+
+    # Study Timeline
+    - name: accrual_period
+      title: 'Accrual Period'
+      type: Number
+      min: 0.1
+      max: 100
+      default: 24
+      description: >-
+        Time period for patient recruitment (months/years). Longer accrual
+        periods allow for smaller sample sizes but extend study duration.
+
+    - name: follow_up_period
+      title: 'Follow-up Period'
+      type: Number
+      min: 0.1
+      max: 100
+      default: 36
+      description: >-
+        Additional follow-up time after accrual completion. Total study
+        duration = accrual period + follow-up period.
+
+    - name: dropout_rate
+      title: 'Annual Dropout Rate'
+      type: Number
+      min: 0.0
+      max: 0.5
+      default: 0.05
+      description: >-
+        Annual rate of loss to follow-up (0.05 = 5% per year). Higher dropout
+        rates require larger sample sizes to maintain power.
+
+    # Event Rates
+    - name: event_rate
+      title: 'Expected Event Rate'
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.60
+      description: >-
+        Proportion of subjects expected to experience the event during study period.
+        Used for simple design calculations.
+
+    # Competing Risks Parameters
+    - name: competing_event_rate
+      title: 'Competing Event Rate'
+      type: Number
+      min: 0.0
+      max: 0.8
+      default: 0.20
+      description: >-
+        Proportion experiencing competing events (for competing risks analysis).
+        Should be less than primary event rate.
+
+    - name: cumulative_incidence_control
+      title: 'Cumulative Incidence - Control'
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.40
+      description: >-
+        Expected cumulative incidence of primary event in control group
+        (for competing risks analysis).
+
+    - name: cumulative_incidence_treatment
+      title: 'Cumulative Incidence - Treatment'
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.30
+      description: >-
+        Expected cumulative incidence of primary event in treatment group
+        (for competing risks analysis).
+
+    # Advanced Method Parameters
+    - name: rmst_timepoint
+      title: 'RMST Analysis Timepoint'
+      type: Number
+      min: 1
+      max: 1000
+      default: 24
+      description: >-
+        Time point for restricted mean survival time analysis. Should be
+        clinically meaningful and within study follow-up period.
+
+    - name: non_inferiority_margin
+      title: 'Non-inferiority Margin'
+      type: Number
+      min: 0.01
+      max: 2.0
+      default: 1.25
+      description: >-
+        Non-inferiority margin for hazard ratio. 1.25 means treatment is
+        non-inferior if HR < 1.25 (25% increase in hazard is acceptable).
+
+    - name: superiority_test
+      title: 'Test for Superiority After Non-inferiority'
+      type: Bool
+      default: false
+      description: >-
+        After establishing non-inferiority, test for superiority. Requires
+        hierarchical testing approach to control Type I error.
+
+    # SNP Analysis Parameters
+    - name: snp_maf
+      title: 'Minor Allele Frequency'
+      type: Number
+      min: 0.01
+      max: 0.50
+      default: 0.20
+      description: >-
+        Minor allele frequency for SNP-based survival analysis. Common range: 0.05-0.45.
+
+    - name: genetic_model
+      title: 'Genetic Model'
+      type: List
+      options:
+        - title: "Additive"
+          name: additive
+        - title: "Dominant"
+          name: dominant
+        - title: "Recessive"
+          name: recessive
+      default: additive
+      description: >-
+        Genetic inheritance model for SNP analysis. Additive model is most common.
+
+    # Sequential Design Parameters
+    - name: number_of_looks
+      title: 'Number of Interim Analyses'
+      type: Integer
+      min: 1
+      max: 10
+      default: 1
+      description: >-
+        Number of planned interim analyses for sequential designs. More looks
+        require larger sample sizes to maintain overall Type I error.
+
+    - name: spending_function
+      title: 'Alpha Spending Function'
+      type: List
+      options:
+        - title: "O'Brien-Fleming"
+          name: obf
+        - title: "Pocock"
+          name: pocock
+        - title: "Lan-DeMets (O'Brien-Fleming type)"
+          name: lan_demets_obf
+        - title: "Lan-DeMets (Pocock type)"
+          name: lan_demets_pocock
+      default: lan_demets_obf
+      description: >-
+        Method for spending Type I error across interim analyses. O'Brien-Fleming
+        type preserves most alpha for final analysis.
+
+    # Output Options
+    - name: show_detailed_output
+      title: 'Show Detailed Calculations'
+      type: Bool
+      default: true
+      description: >-
+        Display detailed calculation steps and intermediate results.
+
+    - name: show_sensitivity_analysis
+      title: 'Show Sensitivity Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform sensitivity analysis varying key parameters around their
+        specified values (+/- 10%, 20%).
+
+    - name: show_power_curves
+      title: 'Generate Power Curves'
+      type: Bool
+      default: false
+      description: >-
+        Generate plots showing power vs sample size, effect size, or other parameters.
+
+    - name: export_study_design
+      title: 'Export Study Design Summary'
+      type: Bool
+      default: false
+      description: >-
+        Generate a comprehensive study design document suitable for protocols
+        and grant applications.
+
+    # === NEW GENETIC ANALYSIS PARAMETERS ===
+    - name: genetic_effect_size
+      title: 'Genetic Effect Size'
+      type: Number
+      min: 1.0
+      max: 5.0
+      default: 1.5
+      description: >-
+        Genetic effect size for SNP-based survival analysis. Represents the
+        hazard ratio per copy of the risk allele.
+
+    # === CURE MODEL PARAMETERS ===
+    - name: cure_rate_control
+      title: 'Cure Rate (Control Group)'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.0
+      description: >-
+        Proportion of subjects in control group who will never experience the event
+        (cure fraction). 0 = no cure, standard survival model.
+
+    - name: cure_rate_treatment
+      title: 'Cure Rate (Treatment Group)'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.0
+      description: >-
+        Proportion of subjects in treatment group who will never experience the event
+        (cure fraction). Usually higher than control group in effective treatments.
+
+    - name: survival_distribution
+      title: 'Survival Distribution'
+      type: List
+      options:
+        - name: exponential
+          title: Exponential
+        - name: weibull
+          title: Weibull
+        - name: lognormal
+          title: Log-normal
+        - name: piecewise_exponential
+          title: Piecewise Exponential
+      default: exponential
+      description: >-
+        Assumed underlying survival distribution. Exponential assumes constant hazard;
+        Weibull allows increasing/decreasing hazard; Piecewise allows complex patterns.
+
+    - name: accrual_distribution
+      title: 'Accrual Distribution'
+      type: List
+      options:
+        - name: uniform
+          title: Uniform
+        - name: increasing
+          title: Increasing
+        - name: decreasing
+          title: Decreasing
+        - name: truncated_exponential
+          title: Truncated Exponential
+      default: uniform
+      description: >-
+        Pattern of patient enrollment over time. Uniform = constant rate;
+        Increasing/Decreasing = linear change; Exponential = curved pattern.
+
+    # === SEQUENTIAL ANALYSIS PARAMETERS ===
+    - name: interim_futility_boundary
+      title: 'Interim Futility Boundary'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.2
+      description: >-
+        Futility boundary for interim analyses in sequential designs.
+        Probability threshold below which study may be stopped for futility.
+
+    - name: binding_futility
+      title: 'Binding Futility Boundary'
+      type: Bool
+      default: false
+      description: >-
+        Whether futility boundaries are binding (must stop if crossed) or
+        non-binding (advisory only).
+
+    # === EPIDEMIOLOGICAL PARAMETERS ===
+    - name: number_of_covariates
+      title: 'Number of Covariates'
+      type: Integer
+      min: 1
+      max: 20
+      default: 2
+      description: >-
+        Number of covariates to include in the Cox regression model.
+        More covariates generally require larger sample sizes.
+
+    - name: covariate_correlation
+      title: 'Covariate Correlation'
+      type: Number
+      min: 0.0
+      max: 0.9
+      default: 0.0
+      description: >-
+        Correlation between covariates in the model. Higher correlation
+        reduces effective sample size and increases required sample size.
+
+    - name: interaction_effect_size
+      title: 'Interaction Effect Size'
+      type: Number
+      min: 0.1
+      max: 5.0
+      default: 1.0
+      description: >-
+        Effect size for interaction between main exposure and other covariates.
+        Used when testing interaction effects.
+
+    - name: covariate_distribution
+      title: 'Covariate Distribution'
+      type: List
+      options:
+        - name: normal
+          title: Normal
+        - name: binary
+          title: Binary
+        - name: uniform
+          title: Uniform
+        - name: mixed
+          title: Mixed
+      default: normal
+      description: >-
+        Distribution type for covariates in the model. Affects power
+        calculations for epidemiological studies.
+
+    - name: adjust_for_confounders
+      title: 'Adjust for Confounders'
+      type: Bool
+      default: true
+      description: >-
+        Whether to account for confounding variables in power calculations.
+        Generally recommended for epidemiological studies.
+
+    # === OUTPUT OPTIONS ===
+    - name: show_method_comparison
+      title: 'Show Method Comparison'
+      type: Bool
+      default: false
+      description: >-
+        Compare results across multiple power calculation methods to assess
+        robustness of sample size estimates.
+
+...

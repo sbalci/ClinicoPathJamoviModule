@@ -64,7 +64,12 @@
       "WebFetch(domain:lucymcgowan.github.io)",
       "WebFetch(domain:manual.rpact.org)",
       "WebFetch(domain:stats.oarc.ucla.edu)",
-      "WebFetch(domain:shariq-mohammed.github.io)"
+      "WebFetch(domain:shariq-mohammed.github.io)",
+      "Bash(do echo \"$file:\")",
+      "Bash(do)",
+      "Bash(if grep -q \"examples:\" \"$file\")",
+      "Bash(then)",
+      "Bash(else)"
     ],
     "deny": [],
     "ask": [],

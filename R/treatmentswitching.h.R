@@ -487,7 +487,7 @@ treatmentswitchingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="bootstrapTable",
                 title="Bootstrap Confidence Intervals",
-                visible="(bootstrapSamples:>0)",
+                visible="(bootstrapSamples>0)",
                 rows=1,
                 columns=list(
                     list(
