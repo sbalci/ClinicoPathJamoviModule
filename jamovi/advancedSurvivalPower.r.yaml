@@ -1,6 +1,6 @@
 ---
-name: powersurvival
-title: Power Analysis for Survival Studies
+name: advancedSurvivalPower
+title: Advanced Survival Power Analysis
 jrs: '1.1'
 
 items:

@@ -1,7 +1,7 @@
 
-powercompriskClass <- R6::R6Class(
-    "powercompriskClass",
-    inherit = powercompriskBase,
+competingRisksPowerClass <- R6::R6Class(
+    "competingRisksPowerClass",
+    inherit = competingRisksPowerBase,
     private = list(
 
         .params = NULL,

@@ -42,9 +42,9 @@
 #' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_vline labs theme_bw ylim scale_x_reverse
 #'
 
-powersurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "powersurvivalClass",
-    inherit = powersurvivalBase,
+advancedSurvivalPowerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "advancedSurvivalPowerClass",
+    inherit = advancedSurvivalPowerBase,
     private = list(
         # Initialize function to set up the analysis
         .init = function() {

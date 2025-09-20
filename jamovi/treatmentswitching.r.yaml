@@ -191,7 +191,7 @@ items:
     - name:  bootstrapTable
       title: Bootstrap Confidence Intervals
       type:  Table
-      visible: (bootstrapSamples:>0)
+      visible: (bootstrapSamples>0)
       rows: 1
       columns:
           - name: method

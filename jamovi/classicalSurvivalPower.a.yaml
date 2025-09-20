@@ -1,14 +1,19 @@
 ---
-name: survivalpower
-title: "Survival Analysis Power & Sample Size"
+name: classicalSurvivalPower
+title: "Classical Survival Power Analysis (Intermediate)"
 menuGroup: SurvivalT
-menuSubgroup: Design and Analysis
-menuSubtitle: "Power Analysis for Survival Studies"
+menuSubgroup: Design and Power Analysis
+menuSubtitle: "Traditional methods - Lachin-Foulkes & Schoenfeld"
 version: '0.0.3'
 jas: '1.2'
 
 description:
-    main: Power analysis and sample size calculation for survival studies using Lachin-Foulkes and Schoenfeld methods from gsDesign package.
+    main: |
+        Legacy power analysis and sample size calculation for survival studies using Lachin-Foulkes and
+        Schoenfeld methods from gsDesign package.
+
+        This is the original survival power analysis function. For enhanced functionality including
+        competing risks, RMST analysis, and additional methods, also consider 'Comprehensive Survival Power Analysis'.
     R:
         dontrun: true
         usage: |

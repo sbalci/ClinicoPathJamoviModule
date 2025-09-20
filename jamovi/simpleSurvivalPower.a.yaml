@@ -1,24 +1,24 @@
 ---
-name: poweranalysis
-title: Power Analysis & Sample Size Calculation
+name: simpleSurvivalPower
+title: Simple Survival Power Analysis (Basic)
 menuGroup: SurvivalT
-menuSubgroup: Specialized Survival Methods
+menuSubgroup: Design and Power Analysis
 menuTitle: Power Analysis
-menuSubtitle: Comprehensive power and sample size calculations for survival studies
+menuSubtitle: Basic power analysis - Easy to use for beginners
 version: '1.0.0'
 jas: '1.2'
 
 description:
     main: |
-        Comprehensive power analysis and sample size calculation for survival studies and clinical trials.
-        Supports log-rank tests, Cox regression, competing risks, non-inferiority trials, and RMST-based 
-        analyses. Includes specialized methods for SNP-based survival studies and complex trial designs.
-        Essential for study planning, grant applications, and regulatory submissions requiring rigorous
-        sample size justification.
+        Simple power analysis and sample size calculation for survival studies.
+        User-friendly interface for basic survival power calculations with multiple statistical methods.
+
+        This function provides a streamlined approach to survival power analysis. For specialized needs,
+        consider the other power analysis functions: Classical, Competing Risks, Advanced, or Comprehensive.
     R:
         dontrun: false
         usage: |
-            poweranalysis(
+            simpleSurvivalPower(
                 test_type = "log_rank",
                 effect_size = 0.75,
                 alpha = 0.05,
@@ -31,11 +31,6 @@ description:
 completeWhenFilled: false
 
 options:
-    - name: data
-      type: Data
-      description:
-          R: the data as a data frame (optional for power calculations)
-
     # Analysis Type
     - name: analysis_type
       title: Analysis Type
@@ -164,6 +159,15 @@ options:
       max: 10.0
       description:
           R: Ratio of control to experimental group sizes
+
+    - name: sample_size_input
+      title: Total Sample Size (for Power/Effect/Duration Calculations)
+      type: Integer
+      default: 200
+      min: 10
+      max: 100000
+      description:
+          R: Total sample size to use when calculating power, effect size, or duration
 
     # Survival Distribution Parameters
     - name: control_median_survival

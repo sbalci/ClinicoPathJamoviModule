@@ -1,23 +1,25 @@
 ---
-name: powersurvival
-title: Power Analysis for Survival Studies
+name: advancedSurvivalPower
+title: Advanced Survival Power Analysis (Advanced)
 menuGroup: SurvivalT
-menuSubgroup: Design and Analysis
-menuSubtitle: 'Power analysis for survival studies'
+menuSubgroup: Design and Power Analysis
+menuSubtitle: 'Advanced options - Multiple design types'
 version: '0.0.3'
 jas: '1.2'
 
 description:
-    main: >-
-      Calculates power, sample size, or minimum detectable hazard ratio for survival studies.
-      This helps researchers design adequately powered studies to detect meaningful differences
-      in survival between groups.
+    main: |
+        Basic power analysis for survival studies with simple and complex design options.
+        This helps researchers design adequately powered studies to detect meaningful differences in survival between groups.
+
+        This is the straightforward power analysis function. For more advanced methods including
+        competing risks, RMST analysis, and additional statistical tests, also consider other specialized power functions.
     R:
         dontrun: true
         usage: |
             # Example 1: Calculate required sample size for a cancer treatment study
             # Detect 30% reduction in hazard (HR=0.7) with 80% power
-            # powersurvival(
+            # advancedSurvivalPower(
             #   data = data.frame(),
             #   calc_type = "sample_size",
             #   hazard_ratio = 0.7,
@@ -26,20 +28,20 @@ description:
             #   prob_event = 0.6,          # 60% event rate over study period
             #   allocation_ratio = 1       # Equal allocation
             # )
-            
+
             # Example 2: Calculate power for an existing study design
-            # powersurvival(
+            # advancedSurvivalPower(
             #   data = data.frame(),
-            #   calc_type = "power", 
+            #   calc_type = "power",
             #   hazard_ratio = 0.75,       # Modest treatment effect
             #   sample_size = 300,         # Available sample size
             #   alpha = 0.05,
             #   prob_event = 0.4,          # 40% event rate
             #   allocation_ratio = 2       # 2:1 control:treatment ratio
             # )
-            
+
             # Example 3: Find minimum detectable effect size
-            # powersurvival(
+            # advancedSurvivalPower(
             #   data = data.frame(),
             #   calc_type = "hazard_ratio",
             #   sample_size = 200,
@@ -47,9 +49,9 @@ description:
             #   alpha = 0.05,
             #   prob_event = 0.5
             # )
-            
+
             # Example 4: Complex design with accrual and follow-up periods
-            # powersurvival(
+            # advancedSurvivalPower(
             #   data = data.frame(),
             #   calc_type = "sample_size",
             #   study_design = "complex",
@@ -202,5 +204,4 @@ options:
       description: >-
         The annual rate of loss to follow-up (attrition).
         Only used for complex designs.
-
 ...

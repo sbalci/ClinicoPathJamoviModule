@@ -41,9 +41,9 @@
 #' @importFrom ggplot2 labs scale_y_continuous scale_y_discrete scale_fill_manual theme_minimal theme element_text element_blank
 #' @importFrom scales percent
 
-survivalpowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "survivalpowerClass",
-    inherit = survivalpowerBase,
+classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "classicalSurvivalPowerClass",
+    inherit = classicalSurvivalPowerBase,
     private = list(
         
         # Internal storage

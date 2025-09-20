@@ -1,5 +1,5 @@
 ---
-name: poweranalysis
+name: simpleSurvivalPower
 title: Power Analysis & Sample Size Calculation
 jrs: '1.1'
 
@@ -41,7 +41,7 @@ items:
       title: 'Sample Size Calculations'
       type: Table
       rows: 0
-      visible: (analysis_type:sample_size)
+      visible: (analysis_type=="sample_size")
       columns:
           - name: parameter
             title: 'Parameter'
@@ -57,7 +57,7 @@ items:
       title: 'Power Analysis Results'
       type: Table
       rows: 0
-      visible: (analysis_type:power)
+      visible: (analysis_type=="power")
       columns:
           - name: parameter
             title: 'Parameter'
@@ -73,7 +73,7 @@ items:
       title: 'Detectable Effect Size'
       type: Table
       rows: 0
-      visible: (analysis_type:effect_size)
+      visible: (analysis_type=="effect_size")
       columns:
           - name: parameter
             title: 'Parameter'
@@ -89,7 +89,7 @@ items:
       title: 'Study Duration Analysis'
       type: Table
       rows: 0
-      visible: (analysis_type:duration)
+      visible: (analysis_type=="duration")
       columns:
           - name: parameter
             title: 'Parameter'
@@ -124,7 +124,7 @@ items:
       title: 'Competing Risks Analysis'
       type: Table
       rows: 0
-      visible: (test_type:competing_risks)
+      visible: (test_type=="competing_risks")
       columns:
           - name: risk_type
             title: 'Risk Type'
@@ -149,7 +149,7 @@ items:
       title: 'Non-inferiority Analysis'
       type: Table
       rows: 0
-      visible: (test_type:non_inferiority)
+      visible: (test_type=="non_inferiority")
       columns:
           - name: parameter
             title: 'Parameter'
@@ -168,7 +168,7 @@ items:
       title: 'RMST Analysis Parameters'
       type: Table
       rows: 0
-      visible: (test_type:rmst_test)
+      visible: (test_type=="rmst_test")
       columns:
           - name: parameter
             title: 'Parameter'
@@ -190,7 +190,7 @@ items:
       title: 'SNP-based Survival Analysis'
       type: Table
       rows: 0
-      visible: (test_type:snp_survival)
+      visible: (test_type=="snp_survival")
       columns:
           - name: genetic_model
             title: 'Genetic Model'
@@ -212,7 +212,7 @@ items:
       title: 'Multi-arm Trial Analysis'
       type: Table
       rows: 0
-      visible: (study_design:multi_arm)
+      visible: (study_design=="multi_arm")
       columns:
           - name: comparison
             title: 'Comparison'
@@ -234,7 +234,7 @@ items:
       title: 'Interim Analysis Plan'
       type: Table
       rows: 0
-      visible: (interim_analyses:>0)
+      visible: (interim_analyses>0)
       columns:
           - name: analysis_number
             title: 'Analysis'
@@ -277,7 +277,7 @@ items:
     - name: regulatory_table
       title: 'Regulatory Considerations'
       type: Table
-      rows: 1
+      rows: 0
       visible: true
       columns:
           - name: regulatory_aspect
@@ -299,6 +299,7 @@ items:
       width: 600
       height: 450
       visible: true
+      requiresData: false
       renderFun: .plot_power_curves
 
     - name: sample_size_plot
@@ -306,7 +307,8 @@ items:
       type: Image
       width: 600
       height: 450
-      visible: (analysis_type:sample_size)
+      visible: (analysis_type=="sample_size")
+      requiresData: false
       renderFun: .plot_sample_size_curves
 
     - name: survival_curves_plot
@@ -315,6 +317,7 @@ items:
       width: 600
       height: 450
       visible: true
+      requiresData: false
       renderFun: .plot_expected_survival
 
     - name: accrual_timeline_plot
@@ -323,6 +326,7 @@ items:
       width: 600
       height: 450
       visible: true
+      requiresData: false
       renderFun: .plot_study_timeline
 
     - name: sensitivity_plot
@@ -331,6 +335,7 @@ items:
       width: 600
       height: 450
       visible: (sensitivity_analysis)
+      requiresData: false
       renderFun: .plot_sensitivity_analysis
 
     - name: clinical_interpretation

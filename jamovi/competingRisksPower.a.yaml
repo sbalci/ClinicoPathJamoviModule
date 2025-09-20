@@ -1,16 +1,19 @@
 ---
-name: powercomprisk
-title: Power Analysis for Competing Risks Studies
+name: competingRisksPower
+title: Competing Risks Power Analysis (Specialized)
 menuGroup: SurvivalT
-menuSubgroup: jsurvival Power Analysis
+menuSubgroup: Design and Power Analysis
+menuSubtitle: "Specialized for competing events scenarios"
 version: '0.0.1'
 jas: '1.2'
 
 description:
-    main: >
-        Performs power analysis and sample size calculations for competing risks 
-        studies. Calculates power for testing differences in cumulative incidence 
-        functions between groups using Gray's test and subdistribution hazard models.
+    main: |
+        Power analysis and sample size calculations for competing risks studies. Calculates power for testing
+        differences in cumulative incidence functions between groups using Gray's test and subdistribution hazard models.
+
+        This is the specialized function for competing risks power analysis. For unified analysis across all survival
+        study types, also consider 'Comprehensive Survival Power Analysis'.
     R:
         dontrun: true
         usage: |

@@ -1,8 +1,8 @@
 title: Survival Analysis Power & Sample Size
-name: survivalpower
+name: classicalSurvivalPower
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: LayoutBox
     margin: large

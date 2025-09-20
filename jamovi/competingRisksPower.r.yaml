@@ -1,6 +1,6 @@
 ---
-name: powercomprisk
-title: Power Analysis for Competing Risks Studies
+name: competingRisksPower
+title: Competing Risks Power Analysis
 jrs: '1.1'
 
 items:
