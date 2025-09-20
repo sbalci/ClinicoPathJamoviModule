@@ -69,7 +69,9 @@
       "Bash(do)",
       "Bash(if grep -q \"examples:\" \"$file\")",
       "Bash(then)",
-      "Bash(else)"
+      "Bash(else)",
+      "Bash(do echo -n \"$opt: \")",
+      "Bash(do echo -n \"$opt (via options): \")"
     ],
     "deny": [],
     "ask": [],
