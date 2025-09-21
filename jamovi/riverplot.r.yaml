@@ -20,6 +20,11 @@ items:
       type: Html
       visible: true
 
+    - name: about_analysis
+      title: About This Analysis
+      type: Html
+      visible: true
+
     - name: plot
       title: River Plot
       type: Image
@@ -93,7 +98,7 @@ items:
     - name: transitionMatrix
       title: Transition Matrix
       type: Table
-      visible: (enableDiagnostics && (plotType:alluvial || plotType:flow))
+      visible: (enableDiagnostics && (plotType == 'alluvial' || plotType == 'flow'))
       columns:
           - name: from
             title: From Category

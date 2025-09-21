@@ -43,75 +43,118 @@ children:
             name: size_var
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Hull Shape & Appearance
+    collapsed: false
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: hull_concavity
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Hull Shape (0 = curved boundaries, 2 = straight edges)
+            children:
+              - type: TextBox
+                name: hull_concavity
+                format: number
+          - type: Label
+            label: Hull Transparency (0 = invisible, 1 = solid)
+            children:
+              - type: TextBox
+                name: hull_alpha
+                format: number
+          - type: Label
+            label: Hull Boundary Expansion (larger = more padding)
+            children:
+              - type: TextBox
+                name: hull_expand
+                format: number
+          - type: CheckBox
+            name: show_labels
+            label: Show group labels inside hulls
+
+  - type: CollapseBox
+    label: Points & Color Scheme
+    collapsed: false
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: hull_alpha
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Point Size (larger numbers = bigger points)
+            children:
+              - type: TextBox
+                name: point_size
+                format: number
+          - type: Label
+            label: Point Transparency (0 = invisible, 1 = solid)
+            children:
+              - type: TextBox
+                name: point_alpha
+                format: number
+          - type: Label
+            label: Color Palette (clinical = color-blind safe)
+            children:
+              - type: ComboBox
+                name: color_palette
+          - type: Label
+            label: Plot Theme (clinical = publication ready)
+            children:
+              - type: ComboBox
+                name: plot_theme
+
+  - type: CollapseBox
+    label: Labels & Titles
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: CheckBox
-        name: show_labels
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Plot Title (leave empty for default)
+            children:
+              - type: TextBox
+                name: plot_title
+                format: string
+                width: largest
+          - type: Label
+            label: X-Axis Label (leave empty for variable name)
+            children:
+              - type: TextBox
+                name: x_label
+                format: string
+                width: largest
+          - type: Label
+            label: Y-Axis Label (leave empty for variable name)
+            children:
+              - type: TextBox
+                name: y_label
+                format: string
+                width: largest
+
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: point_size
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: point_alpha
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: color_palette
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: plot_theme
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plot_title
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: x_label
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: y_label
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: hull_expand
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_statistics
-      - type: CheckBox
-        name: outlier_detection
-      - type: CheckBox
-        name: confidence_ellipses
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: confidence_ellipses
+            label: Show 95% confidence ellipses around groups
+          - type: CheckBox
+            name: show_statistics
+            label: Generate group statistics table (means, sample sizes)
+          - type: CheckBox
+            name: outlier_detection
+            label: Detect outliers within groups (IQR method)
+          - type: CheckBox
+            name: show_summary
+            label: Natural language summary (copy-ready text)
+          - type: CheckBox
+            name: show_assumptions
+            label: Show data requirements and assumptions

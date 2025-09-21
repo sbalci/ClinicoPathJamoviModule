@@ -1,7 +1,7 @@
 ---
 name: hullplot
 title: Hull Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 version: '0.0.31'
 jas: '1.2'
@@ -241,5 +241,21 @@ options:
       description:
         R: >
           If TRUE, adds confidence ellipses in addition to hull polygons.
+
+    - name: show_summary
+      title: Natural Language Summary
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, displays a plain-language summary of the results with copy-ready text.
+
+    - name: show_assumptions
+      title: Assumptions & Guidelines
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, displays data requirements, assumptions, and usage guidelines.
 
 ...

@@ -487,6 +487,7 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
         reportSentence = function() private$.items[["reportSentence"]],
+        about_analysis = function() private$.items[["about_analysis"]],
         plot = function() private$.items[["plot"]],
         diagnostics = function() private$.items[["diagnostics"]],
         flowTable = function() private$.items[["flowTable"]],
@@ -521,6 +522,11 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="reportSentence",
                 title="Copy-Ready Report",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about_analysis",
+                title="About This Analysis",
                 visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -608,7 +614,7 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="transitionMatrix",
                 title="Transition Matrix",
-                visible="(enableDiagnostics && (plotType:alluvial || plotType:flow))",
+                visible="(enableDiagnostics && (plotType == 'alluvial' || plotType == 'flow'))",
                 columns=list(
                     list(
                         `name`="from", 
@@ -859,6 +865,7 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about_analysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$diagnostics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$flowTable} \tab \tab \tab \tab \tab a table \cr
