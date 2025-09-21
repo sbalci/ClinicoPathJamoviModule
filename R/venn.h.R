@@ -287,8 +287,8 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   with more features).
 #' @param sortBy How to sort the intersections in the UpSet plot.
 #' @param minSize Minimum size of intersections to display.
-#' @param showAnnotations Add statistical annotations to the ComplexUpset
-#'   plot.
+#' @param showAnnotations Add percentage labels to intersection sizes in
+#'   ComplexUpset plots or enhanced text scaling in UpSetR plots.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

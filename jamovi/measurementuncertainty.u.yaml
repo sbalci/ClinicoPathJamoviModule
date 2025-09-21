@@ -2,7 +2,7 @@ title: Measurement Uncertainty Estimation (ISO 15189)
 name: measurementuncertainty
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

@@ -35,6 +35,7 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..x_var <- jmvcore::OptionVariable$new(
                 "x_var",
                 x_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -42,6 +43,7 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..y_var <- jmvcore::OptionVariable$new(
                 "y_var",
                 y_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -49,6 +51,7 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -237,7 +240,7 @@ hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Instructions",
-                visible=FALSE))
+                visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -343,9 +346,9 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 hullplot <- function(
     data,
-    x_var,
-    y_var,
-    group_var,
+    x_var = NULL,
+    y_var = NULL,
+    group_var = NULL,
     color_var = NULL,
     size_var = NULL,
     hull_concavity = 2,

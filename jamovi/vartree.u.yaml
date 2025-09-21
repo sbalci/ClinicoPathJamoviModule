@@ -9,13 +9,13 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variables
+        label: Variables for Tree Analysis
         children:
           - type: VariablesListBox
             name: vars
             isTarget: true
       - type: TargetLayoutBox
-        label: Variable for Percentage
+        label: Reference Variable for Percentages
         children:
           - type: VariablesListBox
             name: percvar
@@ -23,8 +23,9 @@ children:
             isTarget: true
           - type: LevelSelector
             name: percvarLevel
+            label: "Reference Level"
       - type: TargetLayoutBox
-        label: Continuous Variable for Summaries
+        label: Continuous Variable (for summary statistics)
         children:
           - type: VariablesListBox
             name: summaryvar
@@ -53,46 +54,110 @@ children:
           - type: LevelSelector
             name: followLevel2
   - type: CollapseBox
-    label: Options
+    label: Basic Tree Options
     stretchFactor: 1
     collapsed: false
     children:
       - type: LayoutBox
-        margin: small
+        margin: large
+        stretchFactor: 1
         children:
-          - type: Label
-            label: Output
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
             children:
-              - type: CheckBox
-                name: excl
-              - type: CheckBox
-                name: varnames
-              - type: CheckBox
-                name: showcount
-              - type: CheckBox
-                name: pct
-              - type: CheckBox
-                name: vp
-                enable: (!excl && pct)
-              - type: CheckBox
-                name: nodelabel
-              - type: CheckBox
-                name: legend
-                enable: (varnames)
-              - type: TextBox
-                name: mytitle
-                format: string
-                width: large
+              - type: Label
+                label: Output Display
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: showcount
+                  - type: CheckBox
+                    name: pct
+                  - type: CheckBox
+                    name: vp
+                    enable: (!excl && pct)
+                  - type: CheckBox
+                    name: varnames
+                  - type: CheckBox
+                    name: legend
+                    enable: (varnames)
+                  - type: CheckBox
+                    name: nodelabel
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Layout
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: horizontal
+                  - type: CheckBox
+                    name: sline
+                  - type: TextBox
+                    name: mytitle
+                    format: string
+                    width: largest
+  - type: CollapseBox
+    label: Advanced Tree Features
+    stretchFactor: 1
+    collapsed: true
+    children:
       - type: LayoutBox
-        margin: small
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Tree Types
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: pattern
+                    enable: (!sequence)
+                  - type: CheckBox
+                    name: ptable
+                    enable: (pattern)
+                  - type: CheckBox
+                    name: sequence
+                    enable: (!pattern)
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Summary Options
+                fitToGrid: true
+                children:
+                  - type: ComboBox
+                    name: summarylocation
+                    enable: (summaryvar)
+                  - type: CheckBox
+                    name: showInterpretation
+  - type: CollapseBox
+    label: Conditional Analysis
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
         children:
           - type: Label
-            label: Plots
+            label: Prune Small Nodes
             children:
-              - type: CheckBox
-                name: horizontal
-              - type: CheckBox
-                name: sline
               - type: CheckBox
                 name: useprunesmaller
                 children:
@@ -100,32 +165,39 @@ children:
                     name: prunesmaller
                     format: number
                     enable: (useprunesmaller)
-              - type: CheckBox
-                name: pattern
-                enable: (!sequence)
-              - type: CheckBox
-                name: sequence
-                enable: (!pattern)
-              - type: CheckBox
-                name: ptable
-              - type: ComboBox
-                name: summarylocation
+  - type: CollapseBox
+    label: Display & Styling
+    stretchFactor: 1
+    collapsed: true
+    children:
       - type: LayoutBox
-        margin: small
+        margin: large
+        stretchFactor: 1
         children:
-          - type: Label
-            label: Advanced
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
             children:
-              - type: CheckBox
-                name: showInterpretation
-              - type: ComboBox
-                name: style
-      - type: LayoutBox
-        margin: small
-        children:
-          - type: Label
-            label: Display
+              - type: Label
+                label: Visual Style
+                fitToGrid: true
+                children:
+                  - type: ComboBox
+                    name: style
+                  - type: TextBox
+                    name: maxwidth
+                    format: number
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
             children:
-              - type: TextBox
-                name: maxwidth
-                format: number
+              - type: Label
+                label: Missing Data Handling
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: excl

@@ -2,7 +2,7 @@ title: Screening Program Evaluation & Performance Analysis
 name: screeningevaluation
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

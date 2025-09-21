@@ -2,7 +2,7 @@ title: Social Science Statistical Visualization
 name: jsjplot
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: LayoutBox
     margin: large

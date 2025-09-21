@@ -71,7 +71,8 @@
       "Bash(then)",
       "Bash(else)",
       "Bash(do echo -n \"$opt: \")",
-      "Bash(do echo -n \"$opt (via options): \")"
+      "Bash(do echo -n \"$opt (via options): \")",
+      "WebFetch(domain:krassowski.github.io)"
     ],
     "deny": [],
     "ask": [],

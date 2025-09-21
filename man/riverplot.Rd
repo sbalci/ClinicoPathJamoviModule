@@ -8,7 +8,7 @@ riverplot(
   data,
   id = NULL,
   time = NULL,
-  strata,
+  strata = list(),
   weight = NULL,
   plotType = "alluvial",
   fillType = "first",

@@ -2,7 +2,7 @@ title: Marginal Models for Recurrent Events
 name: marginalrecurrent
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

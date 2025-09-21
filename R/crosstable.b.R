@@ -33,6 +33,64 @@
 #' @importFrom purrr partial
 #' @import magrittr
 
+# Helper function to escape variable names with special characters
+.escapeVariableNames <- function(var_names) {
+    # Check if variable names contain special characters that need escaping
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    return(var_names)
+}
+
+# Helper function to get display name from mapping
+.getDisplayName <- function(cleaned_name, name_mapping) {
+    # Get original display name from mapping
+    original_name <- name_mapping[[cleaned_name]]
+    if (is.null(original_name)) {
+        return(cleaned_name)  # Fallback to cleaned name
+    }
+    return(original_name)
+}
+
+# Helper function to validate variable names and detect issues
+.validateVariableNames <- function(original_names, cleaned_names) {
+    issues <- list()
+    warnings <- list()
+
+    # Check for duplicate names after cleaning
+    duplicated_cleaned <- duplicated(cleaned_names) | duplicated(cleaned_names, fromLast = TRUE)
+    if (any(duplicated_cleaned)) {
+        duplicate_originals <- original_names[duplicated_cleaned]
+        duplicate_cleaned <- unique(cleaned_names[duplicated_cleaned])
+
+        issues <- append(issues, paste0(
+            "Duplicate variable names after cleaning: ",
+            paste(duplicate_originals, collapse = ", "),
+            " → ", paste(duplicate_cleaned, collapse = ", ")
+        ))
+    }
+
+    # Check for very long names that might be truncated
+    long_names <- original_names[nchar(original_names) > 50]
+    if (length(long_names) > 0) {
+        warnings <- append(warnings, paste0(
+            "Very long variable names detected (>50 characters): ",
+            paste(substring(long_names, 1, 30), "...", sep = "", collapse = ", ")
+        ))
+    }
+
+    # Check for special characters that needed escaping
+    needs_escaping <- grepl("[^a-zA-Z0-9._]", original_names)
+    if (any(needs_escaping)) {
+        special_names <- original_names[needs_escaping]
+        warnings <- append(warnings, paste0(
+            "Variable names with special characters detected: ",
+            paste(special_names, collapse = ", ")
+        ))
+    }
+
+    return(list(issues = issues, warnings = warnings))
+}
+
 # Helper function for intelligent test selection with clinical rationale
 .selectAppropriateTest <- function(contingency_table, test_preference = "auto", min_expected = 5) {
     # Calculate expected frequencies
@@ -167,25 +225,94 @@ crosstableClass <- if (requireNamespace('jmvcore'))
         inherit = crosstableBase,
         private = list(
             # .labelData ----
-            # Prepare data by cleaning names and setting original labels.
+            # Prepare data by cleaning names and setting original labels with robust handling.
             .labelData = function() {
                 mydata <- self$data
                 original_names <- names(mydata)
-                # Save original names as labels.
-                labels <- setNames(original_names, original_names)
-                # Clean variable names.
+
+                # Validate variable names and report issues
+                cleaned_names_preview <- janitor::make_clean_names(original_names)
+                validation_results <- .validateVariableNames(original_names, cleaned_names_preview)
+
+                # Report any critical issues
+                if (length(validation_results$issues) > 0) {
+                    stop(paste("Variable name issues detected:",
+                              paste(validation_results$issues, collapse = "; ")))
+                }
+
+                # Clean variable names using janitor
                 mydata <- mydata %>% janitor::clean_names()
-                # Create a mapping of cleaned names to original names.
-                corrected_labels <- setNames(original_names, names(mydata))
-                # Apply the labels.
-                mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
-                # Retrieve all labels.
+                cleaned_names <- names(mydata)
+
+                # Create bidirectional mappings for robust variable handling
+                # original_names_mapping: cleaned_name -> original_name
+                original_names_mapping <- setNames(original_names, cleaned_names)
+                # cleaned_names_mapping: original_name -> cleaned_name
+                cleaned_names_mapping <- setNames(cleaned_names, original_names)
+
+                # Apply labels to preserve original names
+                mydata <- labelled::set_variable_labels(
+                    .data = mydata,
+                    .labels = original_names_mapping
+                )
+
+                # Retrieve all variable labels
                 all_labels <- labelled::var_label(mydata)
-                # Match the user-specified variables and grouping variable.
-                myvars <- self$options$vars
-                myvars <- names(all_labels)[match(myvars, all_labels)]
-                mygroup <- names(all_labels)[all_labels == self$options$group]
-                return(list("mydata" = mydata, "myvars" = myvars, "mygroup" = mygroup))
+
+                # Robust variable matching with error handling
+                tryCatch({
+                    # Match user-specified variables to cleaned names
+                    user_vars <- self$options$vars
+                    if (length(user_vars) > 0) {
+                        matched_indices <- match(user_vars, all_labels)
+                        if (any(is.na(matched_indices))) {
+                            missing_vars <- user_vars[is.na(matched_indices)]
+                            warning(paste("Could not find variables:", paste(missing_vars, collapse = ", ")))
+                        }
+                        myvars <- names(all_labels)[matched_indices[!is.na(matched_indices)]]
+                    } else {
+                        myvars <- character(0)
+                    }
+
+                    # Match grouping variable
+                    if (!is.null(self$options$group) && self$options$group != "") {
+                        group_match <- which(all_labels == self$options$group)
+                        if (length(group_match) > 0) {
+                            mygroup <- names(all_labels)[group_match[1]]  # Take first match
+                        } else {
+                            warning(paste("Could not find grouping variable:", self$options$group))
+                            mygroup <- character(0)
+                        }
+                    } else {
+                        mygroup <- character(0)
+                    }
+
+                }, error = function(e) {
+                    stop(paste("Variable matching failed:", e$message))
+                })
+
+                # Report warnings about variable names if any
+                if (length(validation_results$warnings) > 0) {
+                    warning_msg <- paste0(
+                        "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                        "<strong>Variable Name Warnings:</strong><br>",
+                        paste(validation_results$warnings, collapse = "<br>"),
+                        "</div>"
+                    )
+                    # Note: Store warning for later display in results
+                    # TEMPORARILY DISABLED - assumptions results element not defined in .r.yaml
+                    # if (exists("self") && "results" %in% names(self) && "assumptions" %in% names(self$results)) {
+                    #     self$results$assumptions$setContent(warning_msg)
+                    # }
+                }
+
+                return(list(
+                    "mydata" = mydata,
+                    "myvars" = myvars,
+                    "mygroup" = mygroup,
+                    "original_names_mapping" = original_names_mapping,
+                    "cleaned_names_mapping" = cleaned_names_mapping
+                ))
             },
 
 
@@ -267,14 +394,18 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     warning(paste(.("Large number of variable combinations:"), n_combinations, .("Consider reducing variables.")))
                 }
 
-                # Read and label data.
+                # Read and label data with robust variable name handling.
                 cleaneddata <- private$.labelData()
                 mydata <- cleaneddata$mydata
                 myvars <- cleaneddata$myvars
                 mygroup <- cleaneddata$mygroup
+                original_names_mapping <- cleaneddata$original_names_mapping
+                cleaned_names_mapping <- cleaneddata$cleaned_names_mapping
 
-                # Build formula using the cleaned variables.
-                formula <- jmvcore::constructFormula(terms = myvars, dep = mygroup)
+                # Build formula using escaped variable names for safety.
+                escaped_myvars <- .escapeVariableNames(myvars)
+                escaped_mygroup <- .escapeVariableNames(mygroup)
+                formula <- jmvcore::constructFormula(terms = escaped_myvars, dep = escaped_mygroup)
                 formula <- as.formula(formula)
 
                 # Exclude missing data if requested.
@@ -282,11 +413,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     mydata <- jmvcore::naOmit(mydata)
                 
                 # Validate analysis assumptions and data quality
-                validation_results <- private$.validateAnalysisAssumptions(mydata, myvars, mygroup)
+                validation_results <- .validateAnalysisAssumptions(mydata, myvars, mygroup)
                 if (length(validation_results$warnings) > 0) {
                     warning_text <- paste("<strong>Data Quality Warnings:</strong><br>",
                                         paste(validation_results$warnings, collapse = "<br>"))
-                    self$results$assumptions$setContent(warning_text)
+                    # TEMPORARILY DISABLED - assumptions results element not defined in .r.yaml
+                    # self$results$assumptions$setContent(warning_text)
                 }
 
                 # Generate table based on selected style.
@@ -454,585 +586,595 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         ),
                         fragment = TRUE,
                         style = sty_term,
-                        caption = paste0("Cross Table for Dependent ", mygroup),
+                        caption = paste0("Cross Table for Dependent ", .getDisplayName(mygroup, original_names_mapping)),
                         id = "tbl3"
                     )
                     self$results$tablestyle4$setContent(tabletangram)
                 }
                 
+                # TEMPORARILY DISABLED - pairwise and advanced options not available in .a.yaml
                 # Pairwise comparisons section
-                if (self$options$pairwise && !is.null(self$options$group) && !is.null(self$options$vars)) {
-                    private$.performPairwiseComparisons()
-                }
-                
+                # if (self$options$pairwise && !is.null(self$options$group) && !is.null(self$options$vars)) {
+                #     private$.performPairwiseComparisons()
+                # }
+
                 # Advanced post-hoc analysis section
-                if (self$options$posthoc_method != "none" || self$options$effect_size_measures || 
-                    self$options$residual_analysis || self$options$correspondence_analysis) {
-                    private$.performAdvancedPosthoc()
-                }
+                # if (self$options$posthoc_method != "none" || self$options$effect_size_measures ||
+                #     self$options$residual_analysis || self$options$correspondence_analysis) {
+                #     private$.performAdvancedPosthoc()
+                # }
                 
-                # Generate clinical summary with natural language interpretation
-                tryCatch({
-                    clinical_summary <- private$.generateClinicalSummary(
-                        results = list(data = mydata, vars = myvars, group = mygroup),
-                        myvars = myvars,
-                        mygroup = mygroup,
-                        test_type = "crosstable"
-                    )
-                    
-                    # Add clinical summary to results
-                    if (!is.null(clinical_summary)) {
-                        summary_html <- paste0(
-                            "<div style='background-color: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #28a745;'>",
-                            "<h4 style='margin-top: 0; color: #28a745;'>Clinical Summary</h4>",
-                            clinical_summary,
-                            "</div>"
-                        )
-                        self$results$clinicalSummary$setContent(summary_html)
-                        
-                        # Also populate the copy-ready sentences
-                        copy_ready <- paste0(
-                            "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                            "<h4 style='margin-top: 0; color: #856404;'>Copy-Ready Clinical Interpretation</h4>",
-                            "<p>", gsub("<[^>]*>", "", clinical_summary), "</p>",
-                            "</div>"
-                        )
-                        self$results$reportSentences$setContent(copy_ready)
-                    }
-                }, error = function(e) {
-                    # Handle clinical summary generation errors gracefully
-                    detailed_error <- paste(.("Clinical summary generation failed:"), e$message)
-                    warning(detailed_error)
-                    
-                    # Provide fallback guidance
-                    fallback_msg <- paste0(
-                        "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>", .("Manual Interpretation Required"), "</h4>",
-                        "<p>", .("Automatic clinical summary could not be generated. Please review results manually."), "</p>",
-                        "</div>"
-                    )
-                    self$results$reportSentences$setContent(fallback_msg)
-                })
+                # # Generate clinical summary with natural language interpretation
+                # tryCatch({
+                #     clinical_summary <- private$.generateClinicalSummary(
+                #         results = list(data = mydata, vars = myvars, group = mygroup),
+                #         myvars = myvars,
+                #         mygroup = mygroup,
+                #         test_type = "crosstable"
+                #     )
+                #     
+                #     # Add clinical summary to results
+                #     if (!is.null(clinical_summary)) {
+                #         summary_html <- paste0(
+                #             "<div style='background-color: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #28a745;'>",
+                #             "<h4 style='margin-top: 0; color: #28a745;'>Clinical Summary</h4>",
+                #             clinical_summary,
+                #             "</div>"
+                #         )
+                #         self$results$clinicalSummary$setContent(summary_html)
+                #         
+                #         # Also populate the copy-ready sentences
+                #         copy_ready <- paste0(
+                #             "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                #             "<h4 style='margin-top: 0; color: #856404;'>Copy-Ready Clinical Interpretation</h4>",
+                #             "<p>", gsub("<[^>]*>", "", clinical_summary), "</p>",
+                #             "</div>"
+                #         )
+                #         self$results$reportSentences$setContent(copy_ready)
+                #     }
+                # }, error = function(e) {
+                #     # Handle clinical summary generation errors gracefully
+                #     detailed_error <- paste(.("Clinical summary generation failed:"), e$message)
+                #     warning(detailed_error)
+                #     
+                #     # Provide fallback guidance
+                #     fallback_msg <- paste0(
+                #         "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                #         "<h4 style='margin-top: 0; color: #856404;'>", .("Manual Interpretation Required"), "</h4>",
+                #         "<p>", .("Automatic clinical summary could not be generated. Please review results manually."), "</p>",
+                #         "</div>"
+                #     )
+                #     self$results$reportSentences$setContent(fallback_msg)
+                # })
 
             },
             
+            # TEMPORARILY DISABLED - pairwise option not available in .a.yaml
             # .performPairwiseComparisons ----
-            .performPairwiseComparisons = function() {
-                # Get the labeled data
-                labelData <- private$.labelData()
-                mydata <- labelData$mydata
-                myvars <- labelData$myvars
-                mygroup <- labelData$mygroup
-                
-                # Check if we have a valid group variable
-                if (length(mygroup) == 0 || !(mygroup %in% names(mydata))) {
-                    return()
-                }
-                
-                # Get the group variable data
-                group_var <- mydata[[mygroup]]
-                
-                # Check if group has more than 2 levels
-                if (!is.factor(group_var)) {
-                    group_var <- as.factor(group_var)
-                }
-                
-                group_levels <- levels(group_var)
-                n_groups <- length(group_levels)
-                
-                if (n_groups <= 2) {
-                    note <- paste0(
-                        "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<strong>Note:</strong> Pairwise comparisons are only performed when the grouping variable has more than 2 levels. ",
-                        "Your grouping variable has ", n_groups, " level(s).",
-                        "</div>"
-                    )
-                    self$results$pairwiseNote$setContent(note)
-                    return()
-                }
-                
-                # Perform pairwise comparisons for each variable
-                results_list <- list()
-                test_type <- self$options$pcat
-                
-                for (var in myvars) {
-                    if (!(var %in% names(mydata))) next
-                    
-                    var_data <- mydata[[var]]
-                    
-                    # Skip if not categorical
-                    if (!is.factor(var_data) && !is.character(var_data)) next
-                    
-                    # Generate all pairwise combinations
-                    pairs <- utils::combn(group_levels, 2)
-                    
-                    for (i in 1:ncol(pairs)) {
-                        group1 <- pairs[1, i]
-                        group2 <- pairs[2, i]
-                        
-                        # Subset data for this pair
-                        subset_idx <- group_var %in% c(group1, group2)
-                        subset_var <- var_data[subset_idx]
-                        subset_group <- group_var[subset_idx]
-                        
-                        # Create contingency table
-                        cont_table <- table(subset_var, subset_group)
-                        
-                        # Perform test
-                        test_result <- NULL
-                        # Use intelligent test selection with clinical rationale
-                        test_selection <- private$.selectAppropriateTest(
-                            cont_table,
-                            test_preference = if (test_type == "fisher") "fisher" else "auto",
-                            min_expected = 5
-                        )
-                        
-                        test_name <- test_selection$test
-                        test_rationale <- test_selection$reason
-                        
-                        # Perform the selected test
-                        if (test_selection$test == "fisher") {
-                            tryCatch({
-                                test_result <- fisher.test(cont_table)
-                                test_name <- .("Fisher's Exact")
-                            }, error = function(e) {
-                                test_result <- NULL
-                            })
-                        } else {
-                            tryCatch({
-                                test_result <- chisq.test(cont_table)
-                                test_name <- .("Chi-square")
-                            }, error = function(e) {
-                                test_result <- NULL
-                            })
-                        }
-                        
-                        # Add warning if test selection was based on assumption violations
-                        if (test_selection$warning) {
-                            warning_msg <- paste(.("Test selection warning:"), test_rationale)
-                            # Store warning for later display
-                            if (is.null(self$results$assumptions$content)) {
-                                assumption_warnings <- warning_msg
-                            } else {
-                                assumption_warnings <- paste(self$results$assumptions$content, "<br>", warning_msg)
-                            }
-                        }
-                        
-                        if (!is.null(test_result)) {
-                            results_list <- append(results_list, list(list(
-                                variable = var,
-                                comparison = paste0(var, ": ", group1, " vs ", group2),
-                                group1 = group1,
-                                group2 = group2,
-                                test = test_name,
-                                statistic = if (test_name == "Chi-square") test_result$statistic else NA,
-                                df = if (test_name == "Chi-square") test_result$parameter else NA,
-                                p_value = test_result$p.value
-                            )))
-                        }
-                    }
-                }
-                
-                # Apply p-value adjustment if requested
-                if (length(results_list) > 0) {
-                    p_values <- sapply(results_list, function(x) x$p_value)
-                    
-                    if (self$options$p_adjust != "none") {
-                        adjusted_p <- stats::p.adjust(p_values, method = self$options$p_adjust)
-                        for (i in seq_along(results_list)) {
-                            results_list[[i]]$p_adjusted <- adjusted_p[i]
-                        }
-                    } else {
-                        for (i in seq_along(results_list)) {
-                            results_list[[i]]$p_adjusted <- NA
-                        }
-                    }
-                    
-                    # Populate the table
-                    for (result in results_list) {
-                        self$results$pairwiseTable$addRow(
-                            rowKey = paste0(result$comparison, "_", result$test),
-                            values = list(
-                                comparison = result$comparison,
-                                group1 = result$group1,
-                                group2 = result$group2,
-                                test = result$test,
-                                statistic = result$statistic,
-                                df = result$df,
-                                p_value = result$p_value,
-                                p_adjusted = result$p_adjusted
-                            )
-                        )
-                    }
-                    
-                    # Add explanatory note
-                    note <- paste0(
-                        "<div style='background-color: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
-                        "<strong>Pairwise Comparisons:</strong> All possible pairs of groups have been compared. ",
-                        "Total comparisons: ", length(results_list), ". ",
-                        if (self$options$p_adjust != "none") {
-                            paste0("P-values have been adjusted using the ", self$options$p_adjust, " method to control for multiple testing.")
-                        } else {
-                            "P-values are not adjusted for multiple comparisons."
-                        },
-                        "</div>"
-                    )
-                    self$results$pairwiseNote$setContent(note)
-                }
-            },
+            # .performPairwiseComparisons = function() {
+                # # Get the labeled data
+                # # labelData <- private$.labelData()
+                # mydata <- labelData$mydata
+                # myvars <- labelData$myvars
+                # mygroup <- labelData$mygroup
+                # 
+                # # Check if we have a valid group variable
+                # if (length(mygroup) == 0 || !(mygroup %in% names(mydata))) {
+                #     return()
+                # }
+                # 
+                # # Get the group variable data
+                # group_var <- mydata[[mygroup]]
+                # 
+                # # Check if group has more than 2 levels
+                # if (!is.factor(group_var)) {
+                #     group_var <- as.factor(group_var)
+                # }
+                # 
+                # group_levels <- levels(group_var)
+                # n_groups <- length(group_levels)
+                # 
+                # if (n_groups <= 2) {
+                #     note <- paste0(
+                #         "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                #         "<strong>Note:</strong> Pairwise comparisons are only performed when the grouping variable has more than 2 levels. ",
+                #         "Your grouping variable has ", n_groups, " level(s).",
+                #         "</div>"
+                #     )
+                #     self$results$pairwiseNote$setContent(note)
+                #     return()
+                # }
+                # 
+                # # Perform pairwise comparisons for each variable
+                # results_list <- list()
+                # test_type <- self$options$pcat
+                # 
+                # for (var in myvars) {
+                #     if (!(var %in% names(mydata))) next
+                #     
+                #     var_data <- mydata[[var]]
+                #     
+                #     # Skip if not categorical
+                #     if (!is.factor(var_data) && !is.character(var_data)) next
+                #     
+                #     # Generate all pairwise combinations
+                #     pairs <- utils::combn(group_levels, 2)
+                #     
+                #     for (i in 1:ncol(pairs)) {
+                #         group1 <- pairs[1, i]
+                #         group2 <- pairs[2, i]
+                #         
+                #         # Subset data for this pair
+                #         subset_idx <- group_var %in% c(group1, group2)
+                #         subset_var <- var_data[subset_idx]
+                #         subset_group <- group_var[subset_idx]
+                #         
+                #         # Create contingency table
+                #         cont_table <- table(subset_var, subset_group)
+                #         
+                #         # Perform test
+                #         test_result <- NULL
+                #         # Use intelligent test selection with clinical rationale
+                #         test_selection <- private$.selectAppropriateTest(
+                #             cont_table,
+                #             test_preference = if (test_type == "fisher") "fisher" else "auto",
+                #             min_expected = 5
+                #         )
+                #         
+                #         test_name <- test_selection$test
+                #         test_rationale <- test_selection$reason
+                #         
+                #         # Perform the selected test
+                #         if (test_selection$test == "fisher") {
+                #             tryCatch({
+                #                 test_result <- fisher.test(cont_table)
+                #                 test_name <- .("Fisher's Exact")
+                #             }, error = function(e) {
+                #                 test_result <- NULL
+                #             })
+                #         } else {
+                #             tryCatch({
+                #                 test_result <- chisq.test(cont_table)
+                #                 test_name <- .("Chi-square")
+                #             }, error = function(e) {
+                #                 test_result <- NULL
+                #             })
+                #         }
+                #         
+                #         # Add warning if test selection was based on assumption violations
+                #         if (test_selection$warning) {
+                #             warning_msg <- paste(.("Test selection warning:"), test_rationale)
+                #             # Store warning for later display
+                #             if (is.null(self$results$assumptions$content)) {
+                #                 assumption_warnings <- warning_msg
+                #             } else {
+                #                 assumption_warnings <- paste(self$results$assumptions$content, "<br>", warning_msg)
+                #             }
+                #         }
+                #         
+                #         if (!is.null(test_result)) {
+                #             results_list <- append(results_list, list(list(
+                #                 variable = var,
+                #                 comparison = paste0(var, ": ", group1, " vs ", group2),
+                #                 group1 = group1,
+                #                 group2 = group2,
+                #                 test = test_name,
+                #                 statistic = if (test_name == "Chi-square") test_result$statistic else NA,
+                #                 df = if (test_name == "Chi-square") test_result$parameter else NA,
+                #                 p_value = test_result$p.value
+                #             )))
+                #         }
+                #     }
+                # }
+                # 
+                # # Apply p-value adjustment if requested
+                # if (length(results_list) > 0) {
+                #     p_values <- sapply(results_list, function(x) x$p_value)
+                #     
+                #     if (self$options$p_adjust != "none") {
+                #         adjusted_p <- stats::p.adjust(p_values, method = self$options$p_adjust)
+                #         for (i in seq_along(results_list)) {
+                #             results_list[[i]]$p_adjusted <- adjusted_p[i]
+                #         }
+                #     } else {
+                #         for (i in seq_along(results_list)) {
+                #             results_list[[i]]$p_adjusted <- NA
+                #         }
+                #     }
+                #     
+                #     # Populate the table
+                #     for (result in results_list) {
+                #         self$results$pairwiseTable$addRow(
+                #             rowKey = paste0(result$comparison, "_", result$test),
+                #             values = list(
+                #                 comparison = result$comparison,
+                #                 group1 = result$group1,
+                #                 group2 = result$group2,
+                #                 test = result$test,
+                #                 statistic = result$statistic,
+                #                 df = result$df,
+                #                 p_value = result$p_value,
+                #                 p_adjusted = result$p_adjusted
+                #             )
+                #         )
+                #     }
+                #     
+                #     # Add explanatory note
+                #     note <- paste0(
+                #         "<div style='background-color: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                #         "<strong>Pairwise Comparisons:</strong> All possible pairs of groups have been compared. ",
+                #         "Total comparisons: ", length(results_list), ". ",
+                #         if (self$options$p_adjust != "none") {
+                #             paste0("P-values have been adjusted using the ", self$options$p_adjust, " method to control for multiple testing.")
+                #         } else {
+                #             "P-values are not adjusted for multiple comparisons."
+                #         },
+                #         "</div>"
+                #     )
+                # #     self$results$pairwiseNote$setContent(note)
+                # # }
+            # },
             
+            # TEMPORARILY DISABLED - advanced post-hoc options not available in .a.yaml
             # Advanced Post-hoc Testing Methods
-            .performAdvancedPosthoc = function() {
-                # Get the labeled data
-                labelData <- private$.labelData()
-                mydata <- labelData$mydata
-                myvars <- labelData$myvars
-                mygroup <- labelData$mygroup
-                
-                # Perform analyses for each variable
-                for (var in myvars) {
-                    # Create contingency table
-                    contingency_table <- table(mydata[[var]], mydata[[mygroup]])
-                    
-                    # Skip if table is empty or has single dimension
-                    if (length(contingency_table) == 0 || length(dim(contingency_table)) < 2) {
-                        next
-                    }
-                    
-                    # Effect size measures
-                    if (self$options$effect_size_measures) {
-                        private$.calculateEffectSizes(var, contingency_table)
-                    }
-                    
-                    # Residual analysis
-                    if (self$options$residual_analysis) {
-                        private$.performResidualAnalysis(var, contingency_table)
-                    }
-                    
-                    # Advanced post-hoc statistical tests
-                    if (self$options$posthoc_method != "none") {
-                        private$.performPosthocTests(var, contingency_table)
-                    }
-                    
-                    # Correspondence analysis
-                    if (self$options$correspondence_analysis) {
-                        private$.performCorrespondenceAnalysis(var, contingency_table)
-                    }
-                }
-                
-                # Generate visualizations
-                if (self$options$mosaic_plot) {
-                    private$.prepareMosaicPlot()
-                }
-                
-                if (self$options$correspondence_analysis) {
-                    private$.prepareCorrespondencePlot()
-                }
-            },
+            # .performAdvancedPosthoc = function() {
+                # # Get the labeled data
+                # labelData <- private$.labelData()
+                # mydata <- labelData$mydata
+                # myvars <- labelData$myvars
+                # mygroup <- labelData$mygroup
+                # 
+                # # Perform analyses for each variable
+                # for (var in myvars) {
+                #     # Create contingency table
+                #     contingency_table <- table(mydata[[var]], mydata[[mygroup]])
+                #     
+                #     # Skip if table is empty or has single dimension
+                #     if (length(contingency_table) == 0 || length(dim(contingency_table)) < 2) {
+                #         next
+                #     }
+                #     
+                #     # Effect size measures
+                #     if (self$options$effect_size_measures) {
+                #         private$.calculateEffectSizes(var, contingency_table)
+                #     }
+                #     
+                #     # Residual analysis
+                #     if (self$options$residual_analysis) {
+                #         private$.performResidualAnalysis(var, contingency_table)
+                #     }
+                #     
+                #     # Advanced post-hoc statistical tests
+                #     if (self$options$posthoc_method != "none") {
+                #         private$.performPosthocTests(var, contingency_table)
+                #     }
+                #     
+                #     # Correspondence analysis
+                #     if (self$options$correspondence_analysis) {
+                #         private$.performCorrespondenceAnalysis(var, contingency_table)
+                #     }
+                # }
+                # 
+                # # TEMPORARILY DISABLED - plot options not available in .a.yaml
+                # # Generate visualizations
+                # # if (self$options$mosaic_plot) {
+                # #     private$.prepareMosaicPlot()
+                # # }
+
+                # # if (self$options$correspondence_analysis) {
+                # #     private$.prepareCorrespondencePlot()
+                # # }
+            # },
             
-            .calculateEffectSizes = function(var, contingency_table) {
-                # Calculate various effect size measures
-                n <- sum(contingency_table)
-                
-                # Cramér's V
-                chi_square <- chisq.test(contingency_table)$statistic
-                k <- min(nrow(contingency_table), ncol(contingency_table))
-                cramers_v <- sqrt(chi_square / (n * (k - 1)))
-                
-                # Phi coefficient (for 2x2 tables)
-                phi <- sqrt(chi_square / n)
-                
-                # Calculate confidence intervals (using bootstrap approximation)
-                conf_level <- self$options$confidence_level
-                
-                # Add Cramér's V
-                self$results$effectsizes$addRow(
-                    rowKey = paste0(var, "_cramers_v"),
-                    values = list(
-                        variable = var,
-                        measure = .("Cramér's V"),
-                        value = cramers_v,
-                        ci_lower = max(0, cramers_v - 1.96 * sqrt(cramers_v / n)),
-                        ci_upper = min(1, cramers_v + 1.96 * sqrt(cramers_v / n)),
-                        interpretation = private$.interpretEffectSize(cramers_v, "cramers_v")
-                    )
-                )
-                
-                # Add Phi coefficient for 2x2 tables
-                if (nrow(contingency_table) == 2 && ncol(contingency_table) == 2) {
-                    self$results$effectsizes$addRow(
-                        rowKey = paste0(var, "_phi"),
-                        values = list(
-                            variable = var,
-                            measure = .("Phi Coefficient"),
-                            value = phi,
-                            ci_lower = max(-1, phi - 1.96 * sqrt(phi / n)),
-                            ci_upper = min(1, phi + 1.96 * sqrt(phi / n)),
-                            interpretation = private$.interpretEffectSize(phi, "phi")
-                        )
-                    )
-                }
-            },
+            # .calculateEffectSizes = function(var, contingency_table) {
+                # # Calculate various effect size measures
+                # n <- sum(contingency_table)
+                #
+                # # Cramér's V
+                # chi_square <- chisq.test(contingency_table)$statistic
+                # k <- min(nrow(contingency_table), ncol(contingency_table))
+                # cramers_v <- sqrt(chi_square / (n * (k - 1)))
+                # 
+                # # Phi coefficient (for 2x2 tables)
+                # phi <- sqrt(chi_square / n)
+                # 
+                # # Calculate confidence intervals (using bootstrap approximation)
+                # conf_level <- self$options$confidence_level
+                # 
+                # # Add Cramér's V
+                # self$results$effectsizes$addRow(
+                #     rowKey = paste0(var, "_cramers_v"),
+                #     values = list(
+                #         variable = var,
+                #         measure = .("Cramér's V"),
+                #         value = cramers_v,
+                #         ci_lower = max(0, cramers_v - 1.96 * sqrt(cramers_v / n)),
+                #         ci_upper = min(1, cramers_v + 1.96 * sqrt(cramers_v / n)),
+                #         interpretation = private$.interpretEffectSize(cramers_v, "cramers_v")
+                #     )
+                # )
+                # 
+                # # Add Phi coefficient for 2x2 tables
+                # if (nrow(contingency_table) == 2 && ncol(contingency_table) == 2) {
+                #     self$results$effectsizes$addRow(
+                #         rowKey = paste0(var, "_phi"),
+                #         values = list(
+                #             variable = var,
+                #             measure = .("Phi Coefficient"),
+                #             value = phi,
+                #             ci_lower = max(-1, phi - 1.96 * sqrt(phi / n)),
+                #             ci_upper = min(1, phi + 1.96 * sqrt(phi / n)),
+                #             interpretation = private$.interpretEffectSize(phi, "phi")
+                #         )
+                #     )
+                # # }
+            # },
             
-            .performResidualAnalysis = function(var, contingency_table) {
-                # Calculate standardized and adjusted residuals
-                chi_test <- chisq.test(contingency_table)
-                expected <- chi_test$expected
-                observed <- contingency_table
-                
-                # Standardized residuals
-                std_residuals <- (observed - expected) / sqrt(expected)
-                
-                # Adjusted residuals
-                row_totals <- rowSums(observed)
-                col_totals <- colSums(observed)
-                n <- sum(observed)
-                
-                adj_residuals <- matrix(0, nrow = nrow(observed), ncol = ncol(observed))
-                
-                for (i in 1:nrow(observed)) {
-                    for (j in 1:ncol(observed)) {
-                        variance <- expected[i,j] * (1 - row_totals[i]/n) * (1 - col_totals[j]/n)
-                        adj_residuals[i,j] <- (observed[i,j] - expected[i,j]) / sqrt(variance)
-                        
-                        # Calculate contribution to chi-square
-                        contribution <- ((observed[i,j] - expected[i,j])^2 / expected[i,j]) / chi_test$statistic * 100
-                        
-                        self$results$residuals$addRow(
-                            rowKey = paste0(var, "_", i, "_", j),
-                            values = list(
-                                variable = var,
-                                group_level = colnames(contingency_table)[j],
-                                var_level = rownames(contingency_table)[i],
-                                observed = observed[i,j],
-                                expected = expected[i,j],
-                                std_residual = std_residuals[i,j],
-                                adj_residual = adj_residuals[i,j],
-                                contribution = contribution
-                            )
-                        )
-                    }
-                }
-            },
-            
-            .performPosthocTests = function(var, contingency_table) {
-                method <- self$options$posthoc_method
-                
-                if (method == "standardized_residuals") {
-                    # Test for significant standardized residuals
-                    chi_test <- chisq.test(contingency_table)
-                    
-                    self$results$posthocstats$addRow(
-                        rowKey = paste0(var, "_std_residuals"),
-                        values = list(
-                            variable = var,
-                            method = .("Standardized Residuals"),
-                            statistic = chi_test$statistic,
-                            df = chi_test$parameter,
-                            p_value = chi_test$p.value,
-                            interpretation = ifelse(chi_test$p.value < 0.05,
-                                "Significant departure from independence",
-                                "No significant departure from independence")
-                        )
-                    )
-                    
-                } else if (method == "cramers_v") {
-                    # Test significance of Cramér's V
-                    chi_test <- chisq.test(contingency_table)
-                    n <- sum(contingency_table)
-                    k <- min(nrow(contingency_table), ncol(contingency_table))
-                    cramers_v <- sqrt(chi_test$statistic / (n * (k - 1)))
-                    
-                    self$results$posthocstats$addRow(
-                        rowKey = paste0(var, "_cramers_v_test"),
-                        values = list(
-                            variable = var,
-                            method = .("Cramér's V Test"),
-                            statistic = cramers_v,
-                            df = chi_test$parameter,
-                            p_value = chi_test$p.value,
-                            interpretation = private$.interpretEffectSize(cramers_v, "cramers_v")
-                        )
-                    )
-                    
-                } else if (method == "freeman_halton") {
-                    # Freeman-Halton extension of Fisher's exact test
-                    if (self$options$exact_tests) {
-                        tryCatch({
-                            if (requireNamespace("RVAideMemoire", quietly = TRUE)) {
-                                fh_test <- RVAideMemoire::fisher.multcomp(contingency_table)
-                                
-                                self$results$posthocstats$addRow(
-                                    rowKey = paste0(var, "_freeman_halton"),
-                                    values = list(
-                                        variable = var,
-                                        method = .("Freeman-Halton Extension"),
-                                        statistic = NA,
-                                        df = NA,
-                                        p_value = fh_test$p.value,
-                                        interpretation = ifelse(fh_test$p.value < 0.05,
-                                            "Significant association (exact test)",
-                                            "No significant association (exact test)")
-                                    )
-                                )
-                            }
-                        }, error = function(e) {
-                            # Fallback to regular Fisher's test
-                            fisher_test <- fisher.test(contingency_table, simulate.p.value = TRUE)
-                            self$results$posthocstats$addRow(
-                                rowKey = paste0(var, "_fisher_simulated"),
-                                values = list(
-                                    variable = var,
-                                    method = .("Fisher's Exact (Simulated)"),
-                                    statistic = NA,
-                                    df = NA,
-                                    p_value = fisher_test$p.value,
-                                    interpretation = ifelse(fisher_test$p.value < 0.05,
-                                        "Significant association (simulated)",
-                                        "No significant association (simulated)")
-                                )
-                            )
-                        })
-                    }
-                }
-            },
-            
-            .performCorrespondenceAnalysis = function(var, contingency_table) {
-                tryCatch({
-                    if (requireNamespace("ca", quietly = TRUE)) {
-                        ca_result <- ca::ca(contingency_table)
-                        
-                        # Extract eigenvalues and variance explained
-                        eigenvalues <- ca_result$sv^2
-                        total_inertia <- sum(eigenvalues)
-                        variance_explained <- eigenvalues / total_inertia * 100
-                        cumulative_variance <- cumsum(variance_explained)
-                        
-                        # Add results to table
-                        for (i in 1:min(length(eigenvalues), 3)) {  # Show first 3 dimensions
-                            self$results$correspondenceanalysis$addRow(
-                                rowKey = paste0(var, "_dim", i),
-                                values = list(
-                                    dimension = paste(.("Dimension"), i),
-                                    eigenvalue = eigenvalues[i],
-                                    variance_explained = variance_explained[i],
-                                    cumulative_variance = cumulative_variance[i],
-                                    inertia = eigenvalues[i] / total_inertia
-                                )
-                            )
-                        }
-                    }
-                }, error = function(e) {
-                    # Handle CA errors gracefully
-                })
-            },
-            
-            .prepareMosaicPlot = function() {
-                # Prepare data for mosaic plot
-                labelData <- private$.labelData()
-                plot_data <- list(
-                    data = labelData$mydata,
-                    vars = labelData$myvars,
-                    group = labelData$mygroup
-                )
-                
-                self$results$mosaicplot$setState(plot_data)
-            },
-            
-            .prepareCorrespondencePlot = function() {
-                # Prepare data for correspondence analysis plot
-                labelData <- private$.labelData()
-                plot_data <- list(
-                    data = labelData$mydata,
-                    vars = labelData$myvars,
-                    group = labelData$mygroup
-                )
-                
-                self$results$correspondenceplot$setState(plot_data)
-            },
-            
-            .interpretEffectSize = function(value, type) {
-                if (type == "cramers_v") {
-                    if (value < 0.1) return("Negligible")
-                    else if (value < 0.3) return("Small")
-                    else if (value < 0.5) return("Medium")
-                    else return("Large")
-                } else if (type == "phi") {
-                    if (abs(value) < 0.1) return("Negligible")
-                    else if (abs(value) < 0.3) return("Small")
-                    else if (abs(value) < 0.5) return("Medium")
-                    else return("Large")
-                }
-                return("Unknown")
-            },
-            
+            # .performResidualAnalysis = function(var, contingency_table) {
+                # # Calculate standardized and adjusted residuals
+                # chi_test <- chisq.test(contingency_table)
+                # expected <- chi_test$expected
+                # observed <- contingency_table
+                # 
+                # # Standardized residuals
+                # std_residuals <- (observed - expected) / sqrt(expected)
+                # 
+                # # Adjusted residuals
+                # row_totals <- rowSums(observed)
+                # col_totals <- colSums(observed)
+                # n <- sum(observed)
+                # 
+                # adj_residuals <- matrix(0, nrow = nrow(observed), ncol = ncol(observed))
+                # 
+                # for (i in 1:nrow(observed)) {
+                #     for (j in 1:ncol(observed)) {
+                #         variance <- expected[i,j] * (1 - row_totals[i]/n) * (1 - col_totals[j]/n)
+                #         adj_residuals[i,j] <- (observed[i,j] - expected[i,j]) / sqrt(variance)
+                #         
+                #         # Calculate contribution to chi-square
+                #         contribution <- ((observed[i,j] - expected[i,j])^2 / expected[i,j]) / chi_test$statistic * 100
+                #         
+                #         self$results$residuals$addRow(
+                #             rowKey = paste0(var, "_", i, "_", j),
+                #             values = list(
+                #                 variable = var,
+                #                 group_level = colnames(contingency_table)[j],
+                #                 var_level = rownames(contingency_table)[i],
+                #                 observed = observed[i,j],
+                #                 expected = expected[i,j],
+                #                 std_residual = std_residuals[i,j],
+                #                 adj_residual = adj_residuals[i,j],
+                #                 contribution = contribution
+                #             )
+                #         )
+                #     }
+                # # }
+            # },
+
+            # .performPosthocTests = function(var, contingency_table) {
+                # method <- self$options$posthoc_method
+                # 
+                # if (method == "standardized_residuals") {
+                #     # Test for significant standardized residuals
+                #     chi_test <- chisq.test(contingency_table)
+                #     
+                #     self$results$posthocstats$addRow(
+                #         rowKey = paste0(var, "_std_residuals"),
+                #         values = list(
+                #             variable = var,
+                #             method = .("Standardized Residuals"),
+                #             statistic = chi_test$statistic,
+                #             df = chi_test$parameter,
+                #             p_value = chi_test$p.value,
+                #             interpretation = ifelse(chi_test$p.value < 0.05,
+                #                 "Significant departure from independence",
+                #                 "No significant departure from independence")
+                #         )
+                #     )
+                #     
+                # } else if (method == "cramers_v") {
+                #     # Test significance of Cramér's V
+                #     chi_test <- chisq.test(contingency_table)
+                #     n <- sum(contingency_table)
+                #     k <- min(nrow(contingency_table), ncol(contingency_table))
+                #     cramers_v <- sqrt(chi_test$statistic / (n * (k - 1)))
+                #     
+                #     self$results$posthocstats$addRow(
+                #         rowKey = paste0(var, "_cramers_v_test"),
+                #         values = list(
+                #             variable = var,
+                #             method = .("Cramér's V Test"),
+                #             statistic = cramers_v,
+                #             df = chi_test$parameter,
+                #             p_value = chi_test$p.value,
+                #             interpretation = private$.interpretEffectSize(cramers_v, "cramers_v")
+                #         )
+                #     )
+                #     
+                # } else if (method == "freeman_halton") {
+                #     # Freeman-Halton extension of Fisher's exact test
+                #     if (self$options$exact_tests) {
+                #         tryCatch({
+                #             if (requireNamespace("RVAideMemoire", quietly = TRUE)) {
+                #                 fh_test <- RVAideMemoire::fisher.multcomp(contingency_table)
+                #                 
+                #                 self$results$posthocstats$addRow(
+                #                     rowKey = paste0(var, "_freeman_halton"),
+                #                     values = list(
+                #                         variable = var,
+                #                         method = .("Freeman-Halton Extension"),
+                #                         statistic = NA,
+                #                         df = NA,
+                #                         p_value = fh_test$p.value,
+                #                         interpretation = ifelse(fh_test$p.value < 0.05,
+                #                             "Significant association (exact test)",
+                #                             "No significant association (exact test)")
+                #                     )
+                #                 )
+                #             }
+                #         }, error = function(e) {
+                #             # Fallback to regular Fisher's test
+                #             fisher_test <- fisher.test(contingency_table, simulate.p.value = TRUE)
+                #             self$results$posthocstats$addRow(
+                #                 rowKey = paste0(var, "_fisher_simulated"),
+                #                 values = list(
+                #                     variable = var,
+                #                     method = .("Fisher's Exact (Simulated)"),
+                #                     statistic = NA,
+                #                     df = NA,
+                #                     p_value = fisher_test$p.value,
+                #                     interpretation = ifelse(fisher_test$p.value < 0.05,
+                #                         "Significant association (simulated)",
+                #                         "No significant association (simulated)")
+                #                 )
+                #             )
+                #         })
+                #     }
+                # # }
+            # },
+
+            # .performCorrespondenceAnalysis = function(var, contingency_table) {
+                # tryCatch({
+                #     if (requireNamespace("ca", quietly = TRUE)) {
+                #         ca_result <- ca::ca(contingency_table)
+                #         
+                #         # Extract eigenvalues and variance explained
+                #         eigenvalues <- ca_result$sv^2
+                #         total_inertia <- sum(eigenvalues)
+                #         variance_explained <- eigenvalues / total_inertia * 100
+                #         cumulative_variance <- cumsum(variance_explained)
+                #         
+                #         # Add results to table
+                #         for (i in 1:min(length(eigenvalues), 3)) {  # Show first 3 dimensions
+                #             self$results$correspondenceanalysis$addRow(
+                #                 rowKey = paste0(var, "_dim", i),
+                #                 values = list(
+                #                     dimension = paste(.("Dimension"), i),
+                #                     eigenvalue = eigenvalues[i],
+                #                     variance_explained = variance_explained[i],
+                #                     cumulative_variance = cumulative_variance[i],
+                #                     inertia = eigenvalues[i] / total_inertia
+                #                 )
+                #             )
+                #         }
+                #     }
+                # }, error = function(e) {
+                #     # Handle CA errors gracefully
+                # # })
+            # },
+
+            # .prepareMosaicPlot = function() {
+                # # Prepare data for mosaic plot
+                # labelData <- private$.labelData()
+                # plot_data <- list(
+                #     data = labelData$mydata,
+                #     vars = labelData$myvars,
+                #     group = labelData$mygroup
+                # )
+                # 
+                # # self$results$mosaicplot$setState(plot_data)
+            # },
+
+            # .prepareCorrespondencePlot = function() {
+                # # Prepare data for correspondence analysis plot
+                # labelData <- private$.labelData()
+                # plot_data <- list(
+                #     data = labelData$mydata,
+                #     vars = labelData$myvars,
+                #     group = labelData$mygroup
+                # )
+                # 
+                # # self$results$correspondenceplot$setState(plot_data)
+            # },
+
+            # .interpretEffectSize = function(value, type) {
+                # if (type == "cramers_v") {
+                #     if (value < 0.1) return("Negligible")
+                #     else if (value < 0.3) return("Small")
+                #     else if (value < 0.5) return("Medium")
+                #     else return("Large")
+                # } else if (type == "phi") {
+                #     if (abs(value) < 0.1) return("Negligible")
+                #     else if (abs(value) < 0.3) return("Small")
+                #     else if (abs(value) < 0.5) return("Medium")
+                #     else return("Large")
+                # }
+                # # return("Unknown")
+            # },
+
             # Plot rendering functions
-            .mosaicplot = function(image, ggtheme, theme, ...) {
-                if (is.null(image$state)) return(FALSE)
-                
-                plot_data <- image$state$data
-                vars <- image$state$vars
-                group <- image$state$group
-                
-                tryCatch({
-                    if (requireNamespace("vcd", quietly = TRUE) && length(vars) >= 1) {
-                        # Create mosaic plot using vcd package
-                        var <- vars[1]  # Use first variable
-                        
-                        # Create contingency table
-                        tbl <- table(plot_data[[var]], plot_data[[group]])
-                        
-                        # Generate mosaic plot
-                        vcd::mosaic(tbl, 
-                               main = paste(.("Mosaic Plot:"), var, .("by"), group),
-                               shade = TRUE,
-                               legend = TRUE)
-                        return(TRUE)
-                    }
-                }, error = function(e) {
-                    # Fallback: create a simple bar plot
-                    if (length(vars) >= 1) {
-                        var <- vars[1]
-                        tbl <- table(plot_data[[var]], plot_data[[group]])
-                        barplot(tbl, 
-                               main = paste(.("Association:"), var, .("by"), group),
-                               beside = TRUE,
-                               legend = TRUE,
-                               col = rainbow(nrow(tbl)))
-                        return(TRUE)
-                    }
-                })
-                
-                return(FALSE)
-            },
-            
-            .correspondenceplot = function(image, ggtheme, theme, ...) {
-                if (is.null(image$state)) return(FALSE)
-                
-                plot_data <- image$state$data
-                vars <- image$state$vars
-                group <- image$state$group
-                
-                tryCatch({
-                    if (requireNamespace("ca", quietly = TRUE) && length(vars) >= 1) {
-                        var <- vars[1]  # Use first variable
-                        
-                        # Create contingency table
-                        tbl <- table(plot_data[[var]], plot_data[[group]])
-                        
-                        # Perform correspondence analysis
-                        ca_result <- ca::ca(tbl)
-                        
-                        # Create biplot
-                        plot(ca_result, 
-                             main = paste(.("Correspondence Analysis:"), var, .("by"), group))
-                        return(TRUE)
-                    }
-                }, error = function(e) {
-                    # Handle errors gracefully
-                })
-                
-                return(FALSE)
+            # .mosaicplot = function(image, ggtheme, theme, ...) {
+                # if (is.null(image$state)) return(FALSE)
+                # 
+                # plot_data <- image$state$data
+                # vars <- image$state$vars
+                # group <- image$state$group
+                # 
+                # tryCatch({
+                #     if (requireNamespace("vcd", quietly = TRUE) && length(vars) >= 1) {
+                #         # Create mosaic plot using vcd package
+                #         var <- vars[1]  # Use first variable
+                #         
+                #         # Create contingency table
+                #         tbl <- table(plot_data[[var]], plot_data[[group]])
+                #         
+                #         # Generate mosaic plot
+                #         vcd::mosaic(tbl, 
+                #                main = paste(.("Mosaic Plot:"), var, .("by"), group),
+                #                shade = TRUE,
+                #                legend = TRUE)
+                #         return(TRUE)
+                #     }
+                # }, error = function(e) {
+                #     # Fallback: create a simple bar plot
+                #     if (length(vars) >= 1) {
+                #         var <- vars[1]
+                #         tbl <- table(plot_data[[var]], plot_data[[group]])
+                #         barplot(tbl, 
+                #                main = paste(.("Association:"), var, .("by"), group),
+                #                beside = TRUE,
+                #                legend = TRUE,
+                #                col = rainbow(nrow(tbl)))
+                #         return(TRUE)
+                #     }
+                # })
+                # 
+                # # return(FALSE)
+            # },
+
+            # .correspondenceplot = function(image, ggtheme, theme, ...) {
+                # if (is.null(image$state)) return(FALSE)
+                #
+                # plot_data <- image$state$data
+                # vars <- image$state$vars
+                # group <- image$state$group
+                #
+                # tryCatch({
+                #     if (requireNamespace("ca", quietly = TRUE) && length(vars) >= 1) {
+                #         var <- vars[1]  # Use first variable
+                #
+                #         # Create contingency table
+                #         tbl <- table(plot_data[[var]], plot_data[[group]])
+                #
+                #         # Perform correspondence analysis
+                #         ca_result <- ca::ca(tbl)
+                #
+                #         # Create biplot
+                #         plot(ca_result,
+                #              main = paste(.("Correspondence Analysis:"), var, .("by"), group))
+                #         return(TRUE)
+                #     }
+                # }, error = function(e) {
+                #     # Handle errors gracefully
+                # })
+                #
+                # # return(FALSE)
+            # },
+
+            # Dummy placeholder for last item in private list
+            .dummy = function() {
+                # This is a placeholder to maintain proper R6 syntax
+                return(invisible(NULL))
             }
         )
     )

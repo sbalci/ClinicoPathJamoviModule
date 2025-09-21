@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variable 1
+        label: "Variable 1"
         children:
           - type: VariablesListBox
             name: var1
@@ -19,7 +19,7 @@ children:
             name: var1true
             enable: (var1)
       - type: TargetLayoutBox
-        label: Variable 2
+        label: "Variable 2"
         children:
           - type: VariablesListBox
             name: var2
@@ -30,7 +30,7 @@ children:
             name: var2true
             enable: (var2)
       - type: TargetLayoutBox
-        label: Variable 3
+        label: "Variable 3 (Optional)"
         children:
           - type: VariablesListBox
             name: var3
@@ -41,7 +41,7 @@ children:
             name: var3true
             enable: (var3)
       - type: TargetLayoutBox
-        label: Variable 4
+        label: "Variable 4 (Optional)"
         children:
           - type: VariablesListBox
             name: var4
@@ -75,23 +75,4 @@ children:
     children:
       - type: CheckBox
         name: showAnnotations
-
-#   - type: LayoutBox
-#     margin: large
-#     children:
-#       - type: CheckBox
-#         name: showAnnotations
-
-
-
-# deneme
-...
-
-# deneme
-
-#   - type: LayoutBox
-#     margin: large
-#     children:
-#       - type: CheckBox
-#         name: showAnnotations
 

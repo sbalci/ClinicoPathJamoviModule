@@ -2,7 +2,7 @@ title: Continuous Variable Relationship Analysis
 name: continuousrelationship
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

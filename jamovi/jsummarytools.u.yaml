@@ -2,7 +2,7 @@ title: Summary Statistics with summarytools
 name: jsummarytools
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: LayoutBox
     margin: large

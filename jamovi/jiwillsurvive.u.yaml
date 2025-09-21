@@ -2,7 +2,7 @@ title: Intuitive Survival Analysis
 name: jiwillsurvive
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: LayoutBox
     margin: large

@@ -2,7 +2,7 @@ title: EM-Algorithm Frailty Models
 name: emfrailty
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

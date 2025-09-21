@@ -2,7 +2,7 @@ title: Cox Proportional Hazards Model Diagnostics
 name: coxdiagnostics
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

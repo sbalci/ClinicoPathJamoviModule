@@ -2,7 +2,7 @@ title: Clinical Random Forest Analysis
 name: treeensemble
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

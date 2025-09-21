@@ -57,37 +57,47 @@ options:
       permitted: [numeric, factor, id]
       description:
           R: >
-            Variable containing patient identifiers.
+            Variable containing patient identifiers (e.g., PT001, Patient_1, Study_ID).
+            Each patient should have a unique identifier for proper analysis.
           jamovi: >
-            Variable containing patient identifiers.
+            Variable containing patient identifiers (e.g., PT001, Patient_1, Study_ID).
+            Each patient should have a unique identifier for proper analysis.
 
     - name: responseVar
-      title: Response Value
+      title: Response Value (Raw or Percentage)
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
       description:
           R: >
-            Response variable: either raw tumor measurements or pre-calculated percentage changes.
-            For raw measurements, requires a time variable with baseline (time = 0).
-            For percentages, negative values indicate tumor shrinkage (improvement).
+            Response variable: either raw tumor measurements (mm, cm, sum of diameters) or
+            pre-calculated percentage changes from baseline.
+            For raw measurements: requires time variable with baseline at time = 0.
+            For percentages: negative values = tumor shrinkage (good response),
+            positive values = tumor growth (poor response). Example: -30 means 30% decrease.
           jamovi: >
-            Response variable: either raw tumor measurements or pre-calculated percentage changes.
-            For raw measurements, requires a time variable with baseline (time = 0).
-            For percentages, negative values indicate tumor shrinkage (improvement).
+            Response variable: tumor measurements or percentage changes from baseline.
+            • Raw measurements: actual tumor sizes (mm, cm, sum of diameters)
+            • Percentage changes: pre-calculated changes (-30 = 30% shrinkage = good response)
+            Tip: Use percentage format if changes already calculated, raw format for actual measurements.
 
 
     - name: timeVar
-      title: Time Variable
+      title: Time Variable (Required for Spider Plot)
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
       default: NULL
       description:
           R: >
-            Time point of measurement for spider plot (e.g., months from baseline)
+            Time point of measurement (e.g., months from baseline, days from treatment start).
+            Required for spider plot and raw measurement processing. Baseline should be time = 0.
           jamovi: >
-            Time point of measurement for spider plot (e.g., months from baseline)
+            Time point of measurement for tracking response over time.
+            • Examples: months from baseline, weeks from treatment start
+            • Required for: Spider plot visualization and raw measurement processing
+            • Format: Baseline = 0, follow-up = positive numbers (1, 2, 3, etc.)
+            Tip: Spider plots show treatment response trajectories over time.
 
     - name: groupVar
       title: Group Variable
@@ -105,21 +115,24 @@ options:
 
 
     - name: inputType
-      title: Input Type
+      title: Data Input Type
       type: List
       options:
-        - title: Raw Measurements
-          name: raw
-        - title: Percentage Changes
+        - title: "Percentage Changes"
           name: percentage
+        - title: "Raw Measurements"
+          name: raw
       default: percentage
       description:
           R: >
-            Specify data format: 'raw' for actual measurements (will calculate percent change)
-            or 'percentage' for pre-calculated percentage changes
+            Specify data format: 'raw' for actual tumor measurements (requires time variable)
+            or 'percentage' for pre-calculated percentage changes from baseline
           jamovi: >
-            Select 'Raw Measurements' if providing actual tumor measurements,
-            or 'Percentage Changes' if changes from baseline are pre-calculated
+            Choose your data format:
+            • Percentage Changes: Pre-calculated changes from baseline (-30 = 30% shrinkage)
+            • Raw Measurements: Actual tumor sizes (requires Time Variable for baseline calculation)
+            Most oncology studies use percentage changes. Use raw measurements only if you have
+            actual tumor measurements and want automatic percentage calculation.
 
 
     - name: sortBy
@@ -137,15 +150,46 @@ options:
           jamovi: >
             Sort the waterfall plot by best response or patient ID.
 
+    # Clinical Preset Options
+    - name: clinicalPreset
+      title: Clinical Study Preset
+      type: List
+      options:
+        - title: "Custom (Manual Settings)"
+          name: custom
+        - title: "Phase II Efficacy Study"
+          name: phase2
+        - title: "Phase I/II Dose Escalation"
+          name: phase1_2
+        - title: "Biomarker Correlation Study"
+          name: biomarker
+        - title: "Publication Ready"
+          name: publication
+      default: custom
+      description:
+          R: >
+            Choose a clinical study preset to automatically configure appropriate settings
+          jamovi: >
+            Choose a preset configuration for your study type:
+            • Custom: Manual control over all settings
+            • Phase II: Standard efficacy analysis with ORR/DCR focus
+            • Phase I/II: Safety and efficacy with detailed annotations
+            • Biomarker: Group-based analysis with statistical comparisons
+            • Publication: Clean, professional plots for manuscripts
+
     - name: showThresholds
       title: Show RECIST Thresholds
       type: Bool
-      default: false
+      default: true
       description:
           R: >
-            Show +20 percent and -30 percent RECIST thresholds.
+            Show +20% and -30% RECIST v1.1 thresholds as dashed lines.
+            Helps identify Progressive Disease (PD) and Partial Response (PR) cutoffs.
           jamovi: >
-            Show +20 percent and -30 percent RECIST thresholds.
+            Show RECIST v1.1 threshold lines on plots:
+            • -30% line: Partial Response (PR) cutoff - tumor shrinkage threshold
+            • +20% line: Progressive Disease (PD) cutoff - tumor growth threshold
+            Recommended: Keep enabled for clinical interpretation
 
     - name: labelOutliers
       title: Label Large Changes
@@ -303,14 +347,71 @@ options:
           jamovi: >
             Color scheme for spider plot lines and points.
 
+    # Clinical Reporting Options
+    - name: generateCopyReadyReport
+      title: Generate Copy-Ready Report
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate publication-ready result sentences with statistical details
+          jamovi: >
+            Generate copy-ready sentences for manuscripts and reports:
+            • Auto-filled with your results (ORR, DCR, confidence intervals)
+            • Publication-ready language following oncology standards
+            • Copy-paste directly into manuscripts or clinical reports
+            Recommended for publication or clinical documentation
+
+    - name: showClinicalSignificance
+      title: Show Clinical Significance Thresholds
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display clinical significance interpretations for ORR and DCR
+          jamovi: >
+            Add clinical significance context to results:
+            • ORR thresholds: <15% (low), 15-30% (moderate), >30% (promising)
+            • DCR interpretations with clinical relevance
+            • Sample size adequacy assessment
+            Helps interpret results in clinical context
+
+    - name: showConfidenceIntervals
+      title: Show Confidence Intervals for Clinical Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate and display exact binomial confidence intervals for ORR and DCR
+          jamovi: >
+            Add statistical confidence intervals to clinical metrics:
+            • Exact binomial CIs for ORR and DCR (more accurate than normal approximation)
+            • Helps assess precision of response rate estimates
+            • Essential for clinical trial reporting
+            Recommended: Keep enabled for statistical rigor
+
+    - name: enableGuidedMode
+      title: Enable Guided Analysis Mode
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable step-by-step guidance for new users
+          jamovi: >
+            Enable guided mode with step-by-step instructions:
+            • Walks through variable selection and options
+            • Provides contextual help and best practice recommendations
+            • Includes misuse detection and warnings
+            Recommended for new users or complex analyses
+
     - name: addResponseCategory
       title: Add Response Category to Data
       type: Output
       description:
           R: >
-            Add a new variable to the data frame indicating response category.
+            Add a new variable to the data frame indicating response category (CR/PR/SD/PD).
           jamovi: >
-            Add a new variable to the data frame indicating response category.
+            Add RECIST response categories (CR/PR/SD/PD) as a new variable to your dataset.
 
 
 

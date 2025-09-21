@@ -2,7 +2,7 @@ title: Frailty & Random Effects Survival Models
 name: frailtysurvival
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

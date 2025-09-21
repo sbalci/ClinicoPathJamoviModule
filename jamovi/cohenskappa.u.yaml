@@ -2,7 +2,7 @@ title: Cohen's Kappa Agreement
 name: cohenskappa
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

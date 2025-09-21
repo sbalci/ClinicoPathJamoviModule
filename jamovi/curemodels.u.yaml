@@ -2,7 +2,7 @@ title: Cure Models for Long-term Survivors
 name: curemodels
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

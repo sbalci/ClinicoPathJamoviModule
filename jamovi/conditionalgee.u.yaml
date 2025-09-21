@@ -2,7 +2,7 @@ title: Conditional GEE for Recurrent Events Gap Times
 name: conditionalgee
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

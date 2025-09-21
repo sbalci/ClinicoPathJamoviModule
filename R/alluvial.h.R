@@ -16,46 +16,7 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             usetitle = FALSE,
             mytitle = "Alluvial Plot",
             maxvars = 8,
-            custombinlabels = "",
-            time = NULL,
-            id = NULL,
-            weight = NULL,
-            sankeyStyle = FALSE,
-            curveType = "cubic",
-            engine = "easyalluvial",
-            labelNodes = TRUE,
-            showCounts = FALSE,
-            verbose = TRUE,
-            diagram_type = "alluvial",
-            value_var = NULL,
-            source_var = NULL,
-            target_var = NULL,
-            node_vars = NULL,
-            grouping_var = NULL,
-            time_var = NULL,
-            node_width = 0.5,
-            node_spacing = 0.1,
-            edge_alpha = 0.6,
-            color_palette = "default",
-            show_labels = TRUE,
-            label_size = 10,
-            iterations = 32,
-            show_values = TRUE,
-            value_format = "raw",
-            sort_nodes = "original",
-            flow_direction = "left_right",
-            plot_title = "",
-            plot_subtitle = "",
-            theme_style = "default",
-            show_statistics = FALSE,
-            show_interpretation = TRUE,
-            output_format = "plot_only",
-            clinical_mode = FALSE,
-            clinical_preset = "none",
-            enhanced_gradients = FALSE,
-            flow_optimization = FALSE,
-            advanced_diagnostics = FALSE,
-            export_compatibility = "standard", ...) {
+            custombinlabels = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -121,229 +82,6 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "custombinlabels",
                 custombinlabels,
                 default="")
-            private$..time <- jmvcore::OptionVariable$new(
-                "time",
-                time,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
-            private$..id <- jmvcore::OptionVariable$new(
-                "id",
-                id,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor"))
-            private$..weight <- jmvcore::OptionVariable$new(
-                "weight",
-                weight,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
-            private$..sankeyStyle <- jmvcore::OptionBool$new(
-                "sankeyStyle",
-                sankeyStyle,
-                default=FALSE)
-            private$..curveType <- jmvcore::OptionList$new(
-                "curveType",
-                curveType,
-                options=list(
-                    "linear",
-                    "cubic",
-                    "quintic",
-                    "sine",
-                    "arctangent",
-                    "sigmoid"),
-                default="cubic")
-            private$..engine <- jmvcore::OptionList$new(
-                "engine",
-                engine,
-                options=list(
-                    "easyalluvial",
-                    "ggalluvial"),
-                default="easyalluvial")
-            private$..labelNodes <- jmvcore::OptionBool$new(
-                "labelNodes",
-                labelNodes,
-                default=TRUE)
-            private$..showCounts <- jmvcore::OptionBool$new(
-                "showCounts",
-                showCounts,
-                default=FALSE)
-            private$..verbose <- jmvcore::OptionBool$new(
-                "verbose",
-                verbose,
-                default=TRUE)
-            private$..diagram_type <- jmvcore::OptionList$new(
-                "diagram_type",
-                diagram_type,
-                options=list(
-                    "sankey",
-                    "alluvial",
-                    "parallel_sets"),
-                default="alluvial")
-            private$..value_var <- jmvcore::OptionVariable$new(
-                "value_var",
-                value_var)
-            private$..source_var <- jmvcore::OptionVariable$new(
-                "source_var",
-                source_var)
-            private$..target_var <- jmvcore::OptionVariable$new(
-                "target_var",
-                target_var)
-            private$..node_vars <- jmvcore::OptionVariables$new(
-                "node_vars",
-                node_vars)
-            private$..grouping_var <- jmvcore::OptionVariable$new(
-                "grouping_var",
-                grouping_var)
-            private$..time_var <- jmvcore::OptionVariable$new(
-                "time_var",
-                time_var)
-            private$..node_width <- jmvcore::OptionNumber$new(
-                "node_width",
-                node_width,
-                min=0.1,
-                max=2,
-                default=0.5)
-            private$..node_spacing <- jmvcore::OptionNumber$new(
-                "node_spacing",
-                node_spacing,
-                min=0.1,
-                max=2,
-                default=0.1)
-            private$..edge_alpha <- jmvcore::OptionNumber$new(
-                "edge_alpha",
-                edge_alpha,
-                min=0.1,
-                max=1,
-                default=0.6)
-            private$..color_palette <- jmvcore::OptionList$new(
-                "color_palette",
-                color_palette,
-                options=list(
-                    "default",
-                    "viridis",
-                    "plasma",
-                    "set3",
-                    "pastel1",
-                    "dark2"),
-                default="default")
-            private$..show_labels <- jmvcore::OptionBool$new(
-                "show_labels",
-                show_labels,
-                default=TRUE)
-            private$..label_size <- jmvcore::OptionNumber$new(
-                "label_size",
-                label_size,
-                min=6,
-                max=20,
-                default=10)
-            private$..iterations <- jmvcore::OptionNumber$new(
-                "iterations",
-                iterations,
-                min=1,
-                max=100,
-                default=32)
-            private$..show_values <- jmvcore::OptionBool$new(
-                "show_values",
-                show_values,
-                default=TRUE)
-            private$..value_format <- jmvcore::OptionList$new(
-                "value_format",
-                value_format,
-                options=list(
-                    "raw",
-                    "percent",
-                    "rounded"),
-                default="raw")
-            private$..sort_nodes <- jmvcore::OptionList$new(
-                "sort_nodes",
-                sort_nodes,
-                options=list(
-                    "alphabetical",
-                    "by_value",
-                    "original"),
-                default="original")
-            private$..flow_direction <- jmvcore::OptionList$new(
-                "flow_direction",
-                flow_direction,
-                options=list(
-                    "left_right",
-                    "top_bottom",
-                    "right_left",
-                    "bottom_top"),
-                default="left_right")
-            private$..plot_title <- jmvcore::OptionString$new(
-                "plot_title",
-                plot_title,
-                default="")
-            private$..plot_subtitle <- jmvcore::OptionString$new(
-                "plot_subtitle",
-                plot_subtitle,
-                default="")
-            private$..theme_style <- jmvcore::OptionList$new(
-                "theme_style",
-                theme_style,
-                options=list(
-                    "default",
-                    "minimal",
-                    "classic",
-                    "void"),
-                default="default")
-            private$..show_statistics <- jmvcore::OptionBool$new(
-                "show_statistics",
-                show_statistics,
-                default=FALSE)
-            private$..show_interpretation <- jmvcore::OptionBool$new(
-                "show_interpretation",
-                show_interpretation,
-                default=TRUE)
-            private$..output_format <- jmvcore::OptionList$new(
-                "output_format",
-                output_format,
-                options=list(
-                    "plot_only",
-                    "data_table",
-                    "both"),
-                default="plot_only")
-            private$..clinical_mode <- jmvcore::OptionBool$new(
-                "clinical_mode",
-                clinical_mode,
-                default=FALSE)
-            private$..clinical_preset <- jmvcore::OptionList$new(
-                "clinical_preset",
-                clinical_preset,
-                options=list(
-                    "none",
-                    "patient_journey",
-                    "treatment_response",
-                    "disease_progression"),
-                default="none")
-            private$..enhanced_gradients <- jmvcore::OptionBool$new(
-                "enhanced_gradients",
-                enhanced_gradients,
-                default=FALSE)
-            private$..flow_optimization <- jmvcore::OptionBool$new(
-                "flow_optimization",
-                flow_optimization,
-                default=FALSE)
-            private$..advanced_diagnostics <- jmvcore::OptionBool$new(
-                "advanced_diagnostics",
-                advanced_diagnostics,
-                default=FALSE)
-            private$..export_compatibility <- jmvcore::OptionList$new(
-                "export_compatibility",
-                export_compatibility,
-                options=list(
-                    "standard",
-                    "riverplot",
-                    "both"),
-                default="standard")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..condensationvar)
@@ -356,45 +94,6 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..mytitle)
             self$.addOption(private$..maxvars)
             self$.addOption(private$..custombinlabels)
-            self$.addOption(private$..time)
-            self$.addOption(private$..id)
-            self$.addOption(private$..weight)
-            self$.addOption(private$..sankeyStyle)
-            self$.addOption(private$..curveType)
-            self$.addOption(private$..engine)
-            self$.addOption(private$..labelNodes)
-            self$.addOption(private$..showCounts)
-            self$.addOption(private$..verbose)
-            self$.addOption(private$..diagram_type)
-            self$.addOption(private$..value_var)
-            self$.addOption(private$..source_var)
-            self$.addOption(private$..target_var)
-            self$.addOption(private$..node_vars)
-            self$.addOption(private$..grouping_var)
-            self$.addOption(private$..time_var)
-            self$.addOption(private$..node_width)
-            self$.addOption(private$..node_spacing)
-            self$.addOption(private$..edge_alpha)
-            self$.addOption(private$..color_palette)
-            self$.addOption(private$..show_labels)
-            self$.addOption(private$..label_size)
-            self$.addOption(private$..iterations)
-            self$.addOption(private$..show_values)
-            self$.addOption(private$..value_format)
-            self$.addOption(private$..sort_nodes)
-            self$.addOption(private$..flow_direction)
-            self$.addOption(private$..plot_title)
-            self$.addOption(private$..plot_subtitle)
-            self$.addOption(private$..theme_style)
-            self$.addOption(private$..show_statistics)
-            self$.addOption(private$..show_interpretation)
-            self$.addOption(private$..output_format)
-            self$.addOption(private$..clinical_mode)
-            self$.addOption(private$..clinical_preset)
-            self$.addOption(private$..enhanced_gradients)
-            self$.addOption(private$..flow_optimization)
-            self$.addOption(private$..advanced_diagnostics)
-            self$.addOption(private$..export_compatibility)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -407,46 +106,7 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         usetitle = function() private$..usetitle$value,
         mytitle = function() private$..mytitle$value,
         maxvars = function() private$..maxvars$value,
-        custombinlabels = function() private$..custombinlabels$value,
-        time = function() private$..time$value,
-        id = function() private$..id$value,
-        weight = function() private$..weight$value,
-        sankeyStyle = function() private$..sankeyStyle$value,
-        curveType = function() private$..curveType$value,
-        engine = function() private$..engine$value,
-        labelNodes = function() private$..labelNodes$value,
-        showCounts = function() private$..showCounts$value,
-        verbose = function() private$..verbose$value,
-        diagram_type = function() private$..diagram_type$value,
-        value_var = function() private$..value_var$value,
-        source_var = function() private$..source_var$value,
-        target_var = function() private$..target_var$value,
-        node_vars = function() private$..node_vars$value,
-        grouping_var = function() private$..grouping_var$value,
-        time_var = function() private$..time_var$value,
-        node_width = function() private$..node_width$value,
-        node_spacing = function() private$..node_spacing$value,
-        edge_alpha = function() private$..edge_alpha$value,
-        color_palette = function() private$..color_palette$value,
-        show_labels = function() private$..show_labels$value,
-        label_size = function() private$..label_size$value,
-        iterations = function() private$..iterations$value,
-        show_values = function() private$..show_values$value,
-        value_format = function() private$..value_format$value,
-        sort_nodes = function() private$..sort_nodes$value,
-        flow_direction = function() private$..flow_direction$value,
-        plot_title = function() private$..plot_title$value,
-        plot_subtitle = function() private$..plot_subtitle$value,
-        theme_style = function() private$..theme_style$value,
-        show_statistics = function() private$..show_statistics$value,
-        show_interpretation = function() private$..show_interpretation$value,
-        output_format = function() private$..output_format$value,
-        clinical_mode = function() private$..clinical_mode$value,
-        clinical_preset = function() private$..clinical_preset$value,
-        enhanced_gradients = function() private$..enhanced_gradients$value,
-        flow_optimization = function() private$..flow_optimization$value,
-        advanced_diagnostics = function() private$..advanced_diagnostics$value,
-        export_compatibility = function() private$..export_compatibility$value),
+        custombinlabels = function() private$..custombinlabels$value),
     private = list(
         ..vars = NA,
         ..condensationvar = NA,
@@ -458,46 +118,7 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..usetitle = NA,
         ..mytitle = NA,
         ..maxvars = NA,
-        ..custombinlabels = NA,
-        ..time = NA,
-        ..id = NA,
-        ..weight = NA,
-        ..sankeyStyle = NA,
-        ..curveType = NA,
-        ..engine = NA,
-        ..labelNodes = NA,
-        ..showCounts = NA,
-        ..verbose = NA,
-        ..diagram_type = NA,
-        ..value_var = NA,
-        ..source_var = NA,
-        ..target_var = NA,
-        ..node_vars = NA,
-        ..grouping_var = NA,
-        ..time_var = NA,
-        ..node_width = NA,
-        ..node_spacing = NA,
-        ..edge_alpha = NA,
-        ..color_palette = NA,
-        ..show_labels = NA,
-        ..label_size = NA,
-        ..iterations = NA,
-        ..show_values = NA,
-        ..value_format = NA,
-        ..sort_nodes = NA,
-        ..flow_direction = NA,
-        ..plot_title = NA,
-        ..plot_subtitle = NA,
-        ..theme_style = NA,
-        ..show_statistics = NA,
-        ..show_interpretation = NA,
-        ..output_format = NA,
-        ..clinical_mode = NA,
-        ..clinical_preset = NA,
-        ..enhanced_gradients = NA,
-        ..flow_optimization = NA,
-        ..advanced_diagnostics = NA,
-        ..export_compatibility = NA)
+        ..custombinlabels = NA)
 )
 
 alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -505,67 +126,27 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        naturalSummary = function() private$.items[["naturalSummary"]],
-        reportSentence = function() private$.items[["reportSentence"]],
-        caveats = function() private$.items[["caveats"]],
         plot = function() private$.items[["plot"]],
-        plot2 = function() private$.items[["plot2"]],
-        datatab = function() private$.items[["datatab"]],
-        stats = function() private$.items[["stats"]],
-        interpretation = function() private$.items[["interpretation"]],
-        clinical_summary = function() private$.items[["clinical_summary"]],
-        diagnostics_report = function() private$.items[["diagnostics_report"]],
-        flow_metrics = function() private$.items[["flow_metrics"]],
-        transition_analysis = function() private$.items[["transition_analysis"]]),
+        plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Alluvial & Sankey Diagrams",
-                refs="ClinicoPath")
+                title="Alluvial Diagrams",
+                refs=list(
+                    "easyalluvial",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do",
                 clearWith=list(
                     "vars")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="naturalSummary",
-                title="Analysis Summary",
-                visible=TRUE,
-                clearWith=list(
-                    "vars",
-                    "source_var",
-                    "target_var",
-                    "node_vars",
-                    "value_var",
-                    "clinical_mode")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="reportSentence",
-                title="Copy-Ready Report",
-                visible=TRUE,
-                clearWith=list(
-                    "vars",
-                    "source_var",
-                    "target_var",
-                    "node_vars",
-                    "value_var",
-                    "clinical_mode")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="caveats",
-                title="Assumptions & Considerations",
-                visible=TRUE,
-                clearWith=list(
-                    "vars",
-                    "clinical_mode")))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="Alluvial & Sankey Diagrams",
+                title="Alluvial Diagrams",
                 name="plot",
                 width=600,
                 height=450,
@@ -573,9 +154,6 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "time",
-                    "id",
-                    "weight",
                     "excl",
                     "marg",
                     "fill",
@@ -584,43 +162,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "orient",
                     "usetitle",
                     "mytitle",
-                    "maxvars",
-                    "sankeyStyle",
-                    "curveType",
-                    "engine",
-                    "labelNodes",
-                    "showCounts",
-                    "verbose",
-                    "diagram_type",
-                    "value_var",
-                    "source_var",
-                    "target_var",
-                    "node_vars",
-                    "grouping_var",
-                    "time_var",
-                    "node_width",
-                    "node_spacing",
-                    "edge_alpha",
-                    "color_palette",
-                    "show_labels",
-                    "label_size",
-                    "iterations",
-                    "show_values",
-                    "value_format",
-                    "sort_nodes",
-                    "flow_direction",
-                    "plot_title",
-                    "plot_subtitle",
-                    "theme_style",
-                    "show_statistics",
-                    "show_interpretation",
-                    "output_format",
-                    "clinical_mode",
-                    "clinical_preset",
-                    "enhanced_gradients",
-                    "flow_optimization",
-                    "advanced_diagnostics",
-                    "export_compatibility")))
+                    "maxvars")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="`Condensation Plot ${condensationvar}`",
@@ -632,104 +174,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "condensationvar"),
-                visible="(condensationvar)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="datatab",
-                title="Flow Data",
-                rows=0,
-                visible="(output_format:data_table || output_format:both)",
-                columns=list(
-                    list(
-                        `name`="source", 
-                        `title`="Source", 
-                        `type`="text"),
-                    list(
-                        `name`="target", 
-                        `title`="Target", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Flow Value", 
-                        `type`="number"),
-                    list(
-                        `name`="percentage", 
-                        `title`="Percentage", 
-                        `type`="number", 
-                        `format`="pc"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stats",
-                title="Flow Statistics",
-                rows=0,
-                visible="(show_statistics)",
-                columns=list(
-                    list(
-                        `name`="metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="interpretation",
-                title="Interpretation",
-                visible="(show_interpretation)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="clinical_summary",
-                title="Clinical Analysis Summary",
-                visible="(clinical_mode)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="diagnostics_report",
-                title="Advanced Diagnostics",
-                visible="(advanced_diagnostics)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="flow_metrics",
-                title="Flow Quality Metrics",
-                rows=0,
-                visible="(advanced_diagnostics)",
-                columns=list(
-                    list(
-                        `name`="metric", 
-                        `title`="Quality Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="transition_analysis",
-                title="Transition Patterns",
-                rows=0,
-                visible="(advanced_diagnostics)",
-                columns=list(
-                    list(
-                        `name`="from_category", 
-                        `title`="From Category", 
-                        `type`="text"),
-                    list(
-                        `name`="to_category", 
-                        `title`="To Category", 
-                        `type`="text"),
-                    list(
-                        `name`="transition_rate", 
-                        `title`="Transition Rate", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="frequency", 
-                        `title`="Frequency", 
-                        `type`="integer"))))}))
+                visible="(condensationvar)"))}))
 
 alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "alluvialBase",
@@ -752,7 +197,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Alluvial & Sankey Diagrams
+#' Alluvial Diagrams
 #'
 #' 
 #' @param data The data as a data frame.
@@ -770,81 +215,12 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param maxvars Maximum number of variables to include in the alluvial plot.
 #' @param custombinlabels Custom labels for bins, separated by commas (e.g.,
 #'   "Low,Medium,High").  Leave empty to use bin option defaults.
-#' @param time Optional time or sequence variable for time-based flows.
-#' @param id Optional ID variable for tracking individual entities.
-#' @param weight Optional weight variable for flow thickness.
-#' @param sankeyStyle Apply Sankey diagram styling (narrow nodes, sigmoid
-#'   curves).
-#' @param curveType Curve style for flows. Use sigmoid for Sankey-style
-#'   appearance.
-#' @param engine Choose plotting engine: easyalluvial for automatic plots,
-#'   ggalluvial for manual control.
-#' @param labelNodes Show basic node labels. This is the primary label control
-#'   that works with all plot engines.
-#' @param showCounts Display count values on nodes.
-#' @param verbose Show detailed information about the plot generation process.
-#' @param diagram_type Type of flow diagram to generate.
-#' @param value_var Variable containing flow values/weights for source-target
-#'   format.
-#' @param source_var Variable defining source nodes for source-target format.
-#' @param target_var Variable defining target nodes for source-target format.
-#' @param node_vars Variables for multi-level node definitions in
-#'   source-target format.
-#' @param grouping_var Variable for grouping flows.
-#' @param time_var Variable for temporal flow analysis in source-target
-#'   format.
-#' @param node_width Width of nodes in the diagram.
-#' @param node_spacing Spacing between nodes.
-#' @param edge_alpha Transparency level for edges.
-#' @param color_palette Color palette for the diagram.
-#' @param show_labels Enable enhanced label styling with custom fonts and
-#'   positioning. Complements basic labeling.
-#' @param label_size Size of node labels.
-#' @param iterations Number of iterations for layout optimization.
-#' @param show_values Display flow values on diagram.
-#' @param value_format Format for displaying flow values.
-#' @param sort_nodes Method for sorting nodes.
-#' @param flow_direction Direction of flow in the diagram.
-#' @param plot_title Advanced plot title (overrides basic title when set).
-#' @param plot_subtitle Subtitle for the plot.
-#' @param theme_style Theme style for the plot.
-#' @param show_statistics Display statistical summary of flows.
-#' @param show_interpretation Display interpretation of the diagram.
-#' @param output_format Format for output display.
-#' @param clinical_mode Enable clinical-specific features and interpretations
-#'   for medical data analysis.
-#' @param clinical_preset Apply predefined settings optimized for common
-#'   clinical scenarios.
-#' @param enhanced_gradients Apply sophisticated color gradients to flow edges
-#'   for better visual appeal.
-#' @param flow_optimization Automatically optimize flow paths to reduce
-#'   crossings and improve readability.
-#' @param advanced_diagnostics Display detailed flow analysis, transition
-#'   patterns, and data quality metrics.
-#' @param export_compatibility Choose output format compatibility for
-#'   integration with other tools.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$caveats} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$datatab} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stats} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$diagnostics_report} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$flow_metrics} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$transition_analysis} \tab \tab \tab \tab \tab a table \cr
 #' }
-#'
-#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-#'
-#' \code{results$datatab$asDF}
-#'
-#' \code{as.data.frame(results$datatab)}
 #'
 #' @export
 alluvial <- function(
@@ -859,78 +235,19 @@ alluvial <- function(
     usetitle = FALSE,
     mytitle = "Alluvial Plot",
     maxvars = 8,
-    custombinlabels = "",
-    time,
-    id,
-    weight,
-    sankeyStyle = FALSE,
-    curveType = "cubic",
-    engine = "easyalluvial",
-    labelNodes = TRUE,
-    showCounts = FALSE,
-    verbose = TRUE,
-    diagram_type = "alluvial",
-    value_var,
-    source_var,
-    target_var,
-    node_vars,
-    grouping_var,
-    time_var,
-    node_width = 0.5,
-    node_spacing = 0.1,
-    edge_alpha = 0.6,
-    color_palette = "default",
-    show_labels = TRUE,
-    label_size = 10,
-    iterations = 32,
-    show_values = TRUE,
-    value_format = "raw",
-    sort_nodes = "original",
-    flow_direction = "left_right",
-    plot_title = "",
-    plot_subtitle = "",
-    theme_style = "default",
-    show_statistics = FALSE,
-    show_interpretation = TRUE,
-    output_format = "plot_only",
-    clinical_mode = FALSE,
-    clinical_preset = "none",
-    enhanced_gradients = FALSE,
-    flow_optimization = FALSE,
-    advanced_diagnostics = FALSE,
-    export_compatibility = "standard") {
+    custombinlabels = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("alluvial requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(condensationvar)) condensationvar <- jmvcore::resolveQuo(jmvcore::enquo(condensationvar))
-    if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
-    if ( ! missing(id)) id <- jmvcore::resolveQuo(jmvcore::enquo(id))
-    if ( ! missing(weight)) weight <- jmvcore::resolveQuo(jmvcore::enquo(weight))
-    if ( ! missing(value_var)) value_var <- jmvcore::resolveQuo(jmvcore::enquo(value_var))
-    if ( ! missing(source_var)) source_var <- jmvcore::resolveQuo(jmvcore::enquo(source_var))
-    if ( ! missing(target_var)) target_var <- jmvcore::resolveQuo(jmvcore::enquo(target_var))
-    if ( ! missing(node_vars)) node_vars <- jmvcore::resolveQuo(jmvcore::enquo(node_vars))
-    if ( ! missing(grouping_var)) grouping_var <- jmvcore::resolveQuo(jmvcore::enquo(grouping_var))
-    if ( ! missing(time_var)) time_var <- jmvcore::resolveQuo(jmvcore::enquo(time_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
-            `if`( ! missing(condensationvar), condensationvar, NULL),
-            `if`( ! missing(time), time, NULL),
-            `if`( ! missing(id), id, NULL),
-            `if`( ! missing(weight), weight, NULL),
-            `if`( ! missing(value_var), value_var, NULL),
-            `if`( ! missing(source_var), source_var, NULL),
-            `if`( ! missing(target_var), target_var, NULL),
-            `if`( ! missing(node_vars), node_vars, NULL),
-            `if`( ! missing(grouping_var), grouping_var, NULL),
-            `if`( ! missing(time_var), time_var, NULL))
+            `if`( ! missing(condensationvar), condensationvar, NULL))
 
-    for (v in time) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in id) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- alluvialOptions$new(
         vars = vars,
@@ -943,46 +260,7 @@ alluvial <- function(
         usetitle = usetitle,
         mytitle = mytitle,
         maxvars = maxvars,
-        custombinlabels = custombinlabels,
-        time = time,
-        id = id,
-        weight = weight,
-        sankeyStyle = sankeyStyle,
-        curveType = curveType,
-        engine = engine,
-        labelNodes = labelNodes,
-        showCounts = showCounts,
-        verbose = verbose,
-        diagram_type = diagram_type,
-        value_var = value_var,
-        source_var = source_var,
-        target_var = target_var,
-        node_vars = node_vars,
-        grouping_var = grouping_var,
-        time_var = time_var,
-        node_width = node_width,
-        node_spacing = node_spacing,
-        edge_alpha = edge_alpha,
-        color_palette = color_palette,
-        show_labels = show_labels,
-        label_size = label_size,
-        iterations = iterations,
-        show_values = show_values,
-        value_format = value_format,
-        sort_nodes = sort_nodes,
-        flow_direction = flow_direction,
-        plot_title = plot_title,
-        plot_subtitle = plot_subtitle,
-        theme_style = theme_style,
-        show_statistics = show_statistics,
-        show_interpretation = show_interpretation,
-        output_format = output_format,
-        clinical_mode = clinical_mode,
-        clinical_preset = clinical_preset,
-        enhanced_gradients = enhanced_gradients,
-        flow_optimization = flow_optimization,
-        advanced_diagnostics = advanced_diagnostics,
-        export_compatibility = export_compatibility)
+        custombinlabels = custombinlabels)
 
     analysis <- alluvialClass$new(
         options = options,

@@ -55,8 +55,8 @@ with more features).}
 
 \item{minSize}{Minimum size of intersections to display.}
 
-\item{showAnnotations}{Add statistical annotations to the ComplexUpset
-plot.}
+\item{showAnnotations}{Add percentage labels to intersection sizes in
+ComplexUpset plots or enhanced text scaling in UpSetR plots.}
 }
 \value{
 A results object containing:

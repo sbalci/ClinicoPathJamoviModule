@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.71
+version: 0.0.31.72
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-20'
+date: '2025-09-21'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -43,7 +43,7 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
@@ -69,18 +69,18 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
     category: analyses
-  - title: Alluvial & Sankey Diagrams
+  - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Alluvial & Sankey Diagrams
+    menuTitle: Alluvial Diagrams
     ribbon: analyses
     category: analyses
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -102,7 +102,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
@@ -618,8 +618,8 @@ analyses:
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
-    menuSubgroup: ClinicoPath Descriptive Plots
+    menuGroup: JJStatsPlotT
+    menuSubgroup: Continuous vs Continuous
     menuTitle: Hull Plot
     menuSubtitle: Cluster Visualization with ggforce
     description: >
@@ -4790,6 +4790,13 @@ analyses:
       complex study designs with accrual periods, variable follow-up, and
       dropout considerations. Essential for study planning, grant applications,
       and regulatory submissions.
+  - title: Alluvial & Sankey Diagrams
+    name: alluvial3
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Alluvial & Sankey Diagrams
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

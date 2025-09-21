@@ -91,6 +91,7 @@ options:
       type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: []
       description:
           R: >
             Variables containing the categories that flow between stages. For longitudinal

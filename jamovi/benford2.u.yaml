@@ -2,7 +2,7 @@ title: Benford Analysis 2
 name: benford2
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
