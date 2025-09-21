@@ -2,7 +2,7 @@ title: Non-parametric Regression Methods
 name: nonparametricregression
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

@@ -91,8 +91,17 @@ vennClass <- if (requireNamespace('jmvcore'))
                         "<br><strong>", .("Welcome to ClinicoPath Venn Diagram Tool"), "</strong>",
                         "<br><br>",
                         .("This tool helps you visualize overlaps between categorical variables using Venn and Upset diagrams."),
-                        "<br>",
-                        "<em>", .("Please select at least Variable 1 and Variable 2 to proceed."), "</em>",
+                        "<br><br>",
+                        "<div style='background-color: #e8f4f8; padding: 12px; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95em;'>",
+                        "<strong>📋 ", .("Step-by-Step Variable Selection:"), "</strong>",
+                        "<ol style='margin: 8px 0 0 0; padding-left: 20px;'>",
+                        "<li><strong>", .("Start with Variable 1"), "</strong> - ", .("Select your first categorical variable"), "</li>",
+                        "<li><strong>", .("Add Variable 2"), "</strong> - ", .("Choose a second variable (unlocks after Variable 1)"), "</li>",
+                        "<li><strong>", .("Optional: Variable 3"), "</strong> - ", .("Add a third variable for 3-way analysis"), "</li>",
+                        "<li><strong>", .("Optional: Variable 4"), "</strong> - ", .("Add a fourth variable for 4-way analysis"), "</li>",
+                        "</ol>",
+                        "<em>💡 ", .("Tip: Each variable must be categorical (factor) and you'll need to select which level represents 'true' for each."), "</em>",
+                        "</div>",
                         "<hr><br>"
                     )
                     self$results$todo$setContent(todo)
@@ -261,7 +270,28 @@ vennClass <- if (requireNamespace('jmvcore'))
                         "descending"  # default
                     )
                     
-                    # Create the base ComplexUpset plot
+                    # Create the base ComplexUpset plot with proper annotations
+                    base_annotations_list <- list(
+                        'Intersection size' = ComplexUpset::intersection_size(
+                            counts = TRUE,
+                            text = list(size = 3)
+                        )
+                    )
+
+                    # Add custom annotations if requested
+                    # Note: For ComplexUpset, showAnnotations adds percentage labels to intersection sizes
+                    annotations_list <- if (showAnnotations) {
+                        list(
+                            'Intersection percentages' = ComplexUpset::intersection_size(
+                                counts = FALSE,
+                                text = list(size = 3),
+                                text_mapping = ggplot2::aes(label = paste0(round(100 * !!rlang::sym('intersection_size') / sum(!!rlang::sym('intersection_size')), 1), '%'))
+                            )
+                        )
+                    } else {
+                        NULL
+                    }
+
                     plot2 <- ComplexUpset::upset(
                         data = upset_data,
                         intersect = names(upset_data),
@@ -272,6 +302,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                         width_ratio = 0.1,
                         height_ratio = 0.8,
                         wrap = TRUE,
+                        base_annotations = base_annotations_list,
+                        annotations = annotations_list,
                         themes = list(
                             'intersections_matrix' = ggplot2::theme(
                                 text = ggplot2::element_text(size = 10),
@@ -283,9 +315,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                             )
                         )
                     )
-                    
-                    # Note: ComplexUpset doesn't support annotate_text function
-                    # Annotations are built into the plot by default
                     
                     # Add title
                     plot2 <- plot2 + 
@@ -309,13 +338,26 @@ vennClass <- if (requireNamespace('jmvcore'))
                     )
                     
                     # Create UpSetR plot
-                    # Note: UpSetR shows intersection counts by default when showAnnotations is enabled
-                    plot2 <- UpSetR::upset(
-                        mydata2, 
-                        order.by = orderBy,
-                        cutoff = minSize,
-                        text.scale = if(showAnnotations) c(1.3, 1.3, 1, 1, 2, 0.75) else c(1, 1, 1, 1, 1, 1)
-                    )
+                    # Note: For UpSetR, showAnnotations controls text visibility and scaling
+                    if (showAnnotations) {
+                        # Enhanced visibility: larger text and show intersection sizes
+                        plot2 <- UpSetR::upset(
+                            mydata2,
+                            order.by = orderBy,
+                            cutoff = minSize,
+                            text.scale = c(1.5, 1.3, 1.2, 1.1, 2, 1),
+                            show.numbers = "yes"
+                        )
+                    } else {
+                        # Minimal text: smaller scaling and hide numbers
+                        plot2 <- UpSetR::upset(
+                            mydata2,
+                            order.by = orderBy,
+                            cutoff = minSize,
+                            text.scale = c(0.8, 0.8, 0.8, 0.8, 1, 0.6),
+                            show.numbers = "no"
+                        )
+                    }
                     
                     # Print the Upset Diagram.
                     print(plot2)
@@ -330,33 +372,101 @@ vennClass <- if (requireNamespace('jmvcore'))
             
             # Validation helper method
             .validateVariables = function() {
-                # Check that required variables have true levels selected
-                if (!is.null(self$options$var1) && is.null(self$options$var1true)) {
-                    return(paste0("<div class='alert alert-warning'>",
-                        "<strong>", .("Variable 1 Selected but True Level Missing"), "</strong><br>",
-                        .("Please select which level in Variable 1 represents the 'true' condition."),
+                # Check if dataset is empty
+                if (nrow(self$data) == 0) {
+                    return(paste0("<div class='alert alert-danger'>",
+                        "<strong>", .("Empty Dataset"), "</strong><br>",
+                        .("Dataset is empty. Please provide data with observations."),
                         "</div>"))
                 }
-                
-                if (!is.null(self$options$var2) && is.null(self$options$var2true)) {
-                    return(paste0("<div class='alert alert-warning'>",
-                        "<strong>", .("Variable 2 Selected but True Level Missing"), "</strong><br>",
-                        .("Please select which level in Variable 2 represents the 'true' condition."),
-                        "</div>"))
+
+                # Check that required variables have true levels selected and are valid
+                if (!is.null(self$options$var1)) {
+                    if (is.null(self$options$var1true)) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 1 Selected but True Level Missing"), "</strong><br>",
+                            .("Please select which level in Variable 1 represents the 'true' condition."),
+                            "</div>"))
+                    }
+
+                    # Check if variable exists and has data
+                    var1_data <- self$data[[self$options$var1]]
+                    if (all(is.na(var1_data))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 1 Contains Only Missing Values"), "</strong><br>",
+                            sprintf(.("Variable '%s' contains only missing values. Please select a different variable."), self$options$var1),
+                            "</div>"))
+                    }
+
+                    # Check if selected true level exists in the data
+                    if (!self$options$var1true %in% levels(as.factor(var1_data))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 1 True Level Not Found"), "</strong><br>",
+                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var1true, self$options$var1),
+                            "</div>"))
+                    }
                 }
-                
-                if (!is.null(self$options$var3) && is.null(self$options$var3true)) {
-                    return(paste0("<div class='alert alert-warning'>",
-                        "<strong>", .("Variable 3 Selected but True Level Missing"), "</strong><br>",
-                        .("Please select which level in Variable 3 represents the 'true' condition."),
-                        "</div>"))
+
+                if (!is.null(self$options$var2)) {
+                    if (is.null(self$options$var2true)) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 2 Selected but True Level Missing"), "</strong><br>",
+                            .("Please select which level in Variable 2 represents the 'true' condition."),
+                            "</div>"))
+                    }
+
+                    # Check if variable exists and has data
+                    var2_data <- self$data[[self$options$var2]]
+                    if (all(is.na(var2_data))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 2 Contains Only Missing Values"), "</strong><br>",
+                            sprintf(.("Variable '%s' contains only missing values. Please select a different variable."), self$options$var2),
+                            "</div>"))
+                    }
+
+                    # Check if selected true level exists in the data
+                    if (!self$options$var2true %in% levels(as.factor(var2_data))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 2 True Level Not Found"), "</strong><br>",
+                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var2true, self$options$var2),
+                            "</div>"))
+                    }
                 }
-                
-                if (!is.null(self$options$var4) && is.null(self$options$var4true)) {
-                    return(paste0("<div class='alert alert-warning'>",
-                        "<strong>", .("Variable 4 Selected but True Level Missing"), "</strong><br>",
-                        .("Please select which level in Variable 4 represents the 'true' condition."),
-                        "</div>"))
+
+                if (!is.null(self$options$var3)) {
+                    if (is.null(self$options$var3true)) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 3 Selected but True Level Missing"), "</strong><br>",
+                            .("Please select which level in Variable 3 represents the 'true' condition."),
+                            "</div>"))
+                    }
+
+                    # Check if variable exists and has data
+                    var3_data <- self$data[[self$options$var3]]
+                    if (all(is.na(var3_data))) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 3 Contains Only Missing Values"), "</strong><br>",
+                            sprintf(.("Variable '%s' contains only missing values. This variable will be skipped."), self$options$var3),
+                            "</div>"))
+                    }
+                }
+
+                if (!is.null(self$options$var4)) {
+                    if (is.null(self$options$var4true)) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 4 Selected but True Level Missing"), "</strong><br>",
+                            .("Please select which level in Variable 4 represents the 'true' condition."),
+                            "</div>"))
+                    }
+
+                    # Check if variable exists and has data
+                    var4_data <- self$data[[self$options$var4]]
+                    if (all(is.na(var4_data))) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 4 Contains Only Missing Values"), "</strong><br>",
+                            sprintf(.("Variable '%s' contains only missing values. This variable will be skipped."), self$options$var4),
+                            "</div>"))
+                    }
                 }
                 
                 return(NULL)  # No validation errors

@@ -85,219 +85,227 @@ items:
           - sty
       visible: (sty:gtsummary)
 
-    - name: pairwiseTable
-      title: Pairwise Comparisons
-      type: Table
-      visible: (pairwise)
-      clearWith:
-          - vars
-          - group
-          - pcat
-          - pairwise
-          - p_adjust
-      columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: group1
-          title: Group 1
-          type: text
-        - name: group2
-          title: Group 2
-          type: text
-        - name: test
-          title: Test
-          type: text
-        - name: statistic
-          title: Statistic
-          type: number
-        - name: df
-          title: df
-          type: integer
-        - name: p_value
-          title: P-value
-          type: number
-          format: zto,pvalue
-        - name: p_adjusted
-          title: Adjusted P-value
-          type: number
-          format: zto,pvalue
-          visible: (p_adjust:bonferroni || p_adjust:holm || p_adjust:BH || p_adjust:BY)
+    # TEMPORARILY DISABLED - pairwise option not available in .a.yaml
+    # - name: pairwiseTable
+    #   title: Pairwise Comparisons
+    #   type: Table
+    #   visible: (pairwise)
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - pcat
+    #       - pairwise
+    #       - p_adjust
+    #   columns:
+    #     - name: comparison
+    #       title: Comparison
+    #       type: text
+    #     - name: group1
+    #       title: Group 1
+    #       type: text
+    #     - name: group2
+    #       title: Group 2
+    #       type: text
+    #     - name: test
+    #       title: Test
+    #       type: text
+    #     - name: statistic
+    #       title: Statistic
+    #       type: number
+    #     - name: df
+    #       title: df
+    #       type: integer
+    #     - name: p_value
+    #       title: P-value
+    #       type: number
+    #       format: zto,pvalue
+    #     - name: p_adjusted
+    #       title: Adjusted P-value
+    #       type: number
+    #       format: zto,pvalue
+    #       visible: (p_adjust:bonferroni || p_adjust:holm || p_adjust:BH || p_adjust:BY)
 
-    - name: pairwiseNote
-      title: Note
-      type: Html
-      visible: (pairwise)
-      clearWith:
-          - vars
-          - group
-          - pcat
-          - pairwise
-          - p_adjust
+    # TEMPORARILY DISABLED - pairwise option not available in .a.yaml
+    # - name: pairwiseNote
+    #   title: Note
+    #   type: Html
+    #   visible: (pairwise)
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - pcat
+    #       - pairwise
+    #       - p_adjust
 
+    # TEMPORARILY DISABLED - effect_size_measures option not available in .a.yaml
     # Advanced Post-hoc Analysis Results
-    - name: effectsizes
-      title: Effect Size Measures
-      type: Table
-      visible: (effect_size_measures)
-      description: Comprehensive effect size measures for categorical associations
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: measure
-          title: Effect Size Measure
-          type: text
-        - name: value
-          title: Value
-          type: number
-          format: zto
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-          format: zto
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-          format: zto
-        - name: interpretation
-          title: Interpretation
-          type: text
-      clearWith:
-          - vars
-          - group
-          - effect_size_measures
-          - confidence_level
+    # - name: effectsizes
+    #   title: Effect Size Measures
+    #   type: Table
+    #   visible: (effect_size_measures)
+    #   description: Comprehensive effect size measures for categorical associations
+    #   columns:
+    #     - name: variable
+    #       title: Variable
+    #       type: text
+    #     - name: measure
+    #       title: Effect Size Measure
+    #       type: text
+    #     - name: value
+    #       title: Value
+    #       type: number
+    #       format: zto
+    #     - name: ci_lower
+    #       title: 95% CI Lower
+    #       type: number
+    #       format: zto
+    #     - name: ci_upper
+    #       title: 95% CI Upper
+    #       type: number
+    #       format: zto
+    #     - name: interpretation
+    #       title: Interpretation
+    #       type: text
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - effect_size_measures
+    #       - confidence_level
 
-    - name: residuals
-      title: Residual Analysis
-      type: Table
-      visible: (residual_analysis)
-      description: Standardized and adjusted residuals for cell contributions
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: group_level
-          title: Group Level
-          type: text
-        - name: var_level
-          title: Variable Level
-          type: text
-        - name: observed
-          title: Observed
-          type: integer
-        - name: expected
-          title: Expected
-          type: number
-          format: zto
-        - name: std_residual
-          title: Standardized Residual
-          type: number
-          format: zto
-        - name: adj_residual
-          title: Adjusted Residual
-          type: number
-          format: zto
-        - name: contribution
-          title: Contribution (%)
-          type: number
-          format: zto
-      clearWith:
-          - vars
-          - group
-          - residual_analysis
+    # TEMPORARILY DISABLED - residual_analysis option not available in .a.yaml
+    # - name: residuals
+    #   title: Residual Analysis
+    #   type: Table
+    #   visible: (residual_analysis)
+    #   description: Standardized and adjusted residuals for cell contributions
+    #   columns:
+    #     - name: variable
+    #       title: Variable
+    #       type: text
+    #     - name: group_level
+    #       title: Group Level
+    #       type: text
+    #     - name: var_level
+    #       title: Variable Level
+    #       type: text
+    #     - name: observed
+    #       title: Observed
+    #       type: integer
+    #     - name: expected
+    #       title: Expected
+    #       type: number
+    #       format: zto
+    #     - name: std_residual
+    #       title: Standardized Residual
+    #       type: number
+    #       format: zto
+    #     - name: adj_residual
+    #       title: Adjusted Residual
+    #       type: number
+    #       format: zto
+    #     - name: contribution
+    #       title: Contribution (%)
+    #       type: number
+    #       format: zto
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - residual_analysis
 
-    - name: posthocstats
-      title: Post-hoc Statistical Tests
-      type: Table
-      visible: (posthoc_method:standardized_residuals || posthoc_method:adjusted_residuals || posthoc_method:cramers_v || posthoc_method:phi_coefficient || posthoc_method:freeman_halton)
-      description: Advanced post-hoc statistical analysis results
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: method
-          title: Method
-          type: text
-        - name: statistic
-          title: Statistic
-          type: number
-          format: zto
-        - name: df
-          title: df
-          type: integer
-        - name: p_value
-          title: P-value
-          type: number
-          format: zto,pvalue
-        - name: interpretation
-          title: Interpretation
-          type: text
-      clearWith:
-          - vars
-          - group
-          - posthoc_method
-          - exact_tests
-          - simulation_based
+    # TEMPORARILY DISABLED - posthoc_method option not available in .a.yaml
+    # - name: posthocstats
+    #   title: Post-hoc Statistical Tests
+    #   type: Table
+    #   visible: (posthoc_method:standardized_residuals || posthoc_method:adjusted_residuals || posthoc_method:cramers_v || posthoc_method:phi_coefficient || posthoc_method:freeman_halton)
+    #   description: Advanced post-hoc statistical analysis results
+    #   columns:
+    #     - name: variable
+    #       title: Variable
+    #       type: text
+    #     - name: method
+    #       title: Method
+    #       type: text
+    #     - name: statistic
+    #       title: Statistic
+    #       type: number
+    #       format: zto
+    #     - name: df
+    #       title: df
+    #       type: integer
+    #     - name: p_value
+    #       title: P-value
+    #       type: number
+    #       format: zto,pvalue
+    #     - name: interpretation
+    #       title: Interpretation
+    #       type: text
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - posthoc_method
+    #       - exact_tests
+    #       - simulation_based
 
-    - name: correspondenceanalysis
-      title: Correspondence Analysis
-      type: Table
-      visible: (correspondence_analysis)
-      description: Correspondence analysis results for dimensional reduction
-      columns:
-        - name: dimension
-          title: Dimension
-          type: text
-        - name: eigenvalue
-          title: Eigenvalue
-          type: number
-          format: zto
-        - name: variance_explained
-          title: Variance Explained (%)
-          type: number
-          format: zto
-        - name: cumulative_variance
-          title: Cumulative Variance (%)
-          type: number
-          format: zto
-        - name: inertia
-          title: Inertia
-          type: number
-          format: zto
-      clearWith:
-          - vars
-          - group
-          - correspondence_analysis
+    # TEMPORARILY DISABLED - correspondence_analysis option not available in .a.yaml
+    # - name: correspondenceanalysis
+    #   title: Correspondence Analysis
+    #   type: Table
+    #   visible: (correspondence_analysis)
+    #   description: Correspondence analysis results for dimensional reduction
+    #   columns:
+    #     - name: dimension
+    #       title: Dimension
+    #       type: text
+    #     - name: eigenvalue
+    #       title: Eigenvalue
+    #       type: number
+    #       format: zto
+    #     - name: variance_explained
+    #       title: Variance Explained (%)
+    #       type: number
+    #       format: zto
+    #     - name: cumulative_variance
+    #       title: Cumulative Variance (%)
+    #       type: number
+    #       format: zto
+    #     - name: inertia
+    #       title: Inertia
+    #       type: number
+    #       format: zto
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - correspondence_analysis
 
-    - name: mosaicplot
-      title: Mosaic Plot
-      type: Image
-      visible: (mosaic_plot)
-      description: Mosaic plot visualization of association patterns
-      width: 600
-      height: 400
-      requiresData: true
-      renderFun: .mosaicplot
-      clearWith:
-          - vars
-          - group
-          - mosaic_plot
+    # TEMPORARILY DISABLED - mosaic_plot option not available in .a.yaml
+    # - name: mosaicplot
+    #   title: Mosaic Plot
+    #   type: Image
+    #   visible: (mosaic_plot)
+    #   description: Mosaic plot visualization of association patterns
+    #   width: 600
+    #   height: 400
+    #   requiresData: true
+    #   renderFun: .mosaicplot
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - mosaic_plot
 
-    - name: correspondenceplot
-      title: Correspondence Analysis Plot
-      type: Image
-      visible: (correspondence_analysis)
-      description: Correspondence analysis biplot
-      width: 600
-      height: 400
-      requiresData: true
-      renderFun: .correspondenceplot
-      clearWith:
-          - vars
-          - group
-          - correspondence_analysis
+    # TEMPORARILY DISABLED - correspondence_analysis option not available in .a.yaml
+    # - name: correspondenceplot
+    #   title: Correspondence Analysis Plot
+    #   type: Image
+    #   visible: (correspondence_analysis)
+    #   description: Correspondence analysis biplot
+    #   width: 600
+    #   height: 400
+    #   requiresData: true
+    #   renderFun: .correspondenceplot
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - correspondence_analysis
 
 refs:
     - ClinicoPathJamoviModule

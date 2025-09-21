@@ -1,0 +1,218 @@
+---
+name:  alluvial3
+title: Alluvial & Sankey Diagrams
+jrs:   '1.1'
+refs: ClinicoPath
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+    
+    - name: naturalSummary
+      title: Analysis Summary
+      type: Html
+      visible: true
+      clearWith:
+          - vars
+          - source_var
+          - target_var
+          - node_vars
+          - value_var
+          - clinical_mode
+      
+    - name: reportSentence
+      title: Copy-Ready Report
+      type: Html
+      visible: true
+      clearWith:
+          - vars
+          - source_var
+          - target_var
+          - node_vars
+          - value_var
+          - clinical_mode
+      
+    - name: caveats
+      title: Assumptions & Considerations
+      type: Html
+      visible: true
+      clearWith:
+          - vars
+          - clinical_mode
+
+    # - name:  plothtml
+    #   title: Plot html
+    #   type:  Html
+    #   clearWith:
+    #       - vars
+    #       - excl
+    #       - marg
+    #       - inter
+
+    - title: Alluvial & Sankey Diagrams
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - vars
+          - time
+          - id
+          - weight
+          - excl
+          - marg
+          - fill
+          - bin
+          - custombinlabels
+          - orient
+          - usetitle
+          - mytitle
+          - maxvars
+          - sankeyStyle
+          - curveType
+          - engine
+          - labelNodes
+          - showCounts
+          - verbose
+          # New jjsankeyfier parameters
+          - diagram_type
+          - value_var
+          - source_var
+          - target_var
+          - node_vars
+          - grouping_var
+          - time_var
+          - node_width
+          - node_spacing
+          - edge_alpha
+          - color_palette
+          - show_labels
+          - label_size
+          - iterations
+          - show_values
+          - value_format
+          - sort_nodes
+          - flow_direction
+          - plot_title
+          - plot_subtitle
+          - theme_style
+          - show_statistics
+          - show_interpretation
+          - output_format
+          # Enhanced features parameters
+          - clinical_mode
+          - clinical_preset
+          - enhanced_gradients
+          - flow_optimization
+          - advanced_diagnostics
+          - export_compatibility
+
+
+    - title: '`Condensation Plot ${condensationvar}`'
+      name: plot2
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - vars
+          - condensationvar
+          # - themex
+          # - originaltheme
+      visible: (condensationvar)
+
+    - name: datatab
+      title: Flow Data
+      type: Table
+      rows: 0
+      visible: (output_format:data_table || output_format:both)
+      columns:
+        - name: source
+          title: Source
+          type: text
+        - name: target
+          title: Target
+          type: text
+        - name: value
+          title: Flow Value
+          type: number
+        - name: percentage
+          title: Percentage
+          type: number
+          format: pc
+
+    - name: stats
+      title: Flow Statistics
+      type: Table
+      rows: 0
+      visible: (show_statistics)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: (show_interpretation)
+
+    - name: clinical_summary
+      title: Clinical Analysis Summary
+      type: Html
+      visible: (clinical_mode)
+
+    - name: diagnostics_report
+      title: Advanced Diagnostics
+      type: Html
+      visible: (advanced_diagnostics)
+
+    - name: flow_metrics
+      title: Flow Quality Metrics
+      type: Table
+      rows: 0
+      visible: (advanced_diagnostics)
+      columns:
+        - name: metric
+          title: Quality Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: transition_analysis
+      title: Transition Patterns
+      type: Table
+      rows: 0
+      visible: (advanced_diagnostics)
+      columns:
+        - name: from_category
+          title: From Category
+          type: text
+        - name: to_category
+          title: To Category
+          type: text
+        - name: transition_rate
+          title: Transition Rate
+          type: number
+          format: dp:3
+        - name: frequency
+          title: Frequency
+          type: integer
+
+
+
+
+...

@@ -1,0 +1,712 @@
+---
+name:  alluvial3
+title: Alluvial & Sankey Diagrams
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '0.0.31'
+jas: '1.2'
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables
+      type: Variables
+      description:
+          R: >
+            a string naming the variables from `data` that contains the
+            values used for the Alluvial Diagram.
+          jamovi: >
+            a string naming the variables from `data` that contains the
+            values used for the Alluvial Diagram.
+
+    - name: condensationvar
+      title: Condensation Variable
+      type: Variable
+      description:
+          R: >
+            The primary variable to be used for condensation.
+          jamovi: >
+            The primary variable to be used for condensation.
+
+    - name: excl
+      title: Exclude missing (NA)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Exclude missing values from the analysis.
+          jamovi: >
+            Exclude missing values from the analysis.
+
+    - name: marg
+      title: Marginal plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include marginal plots.
+          jamovi: >
+            Include marginal plots.
+
+
+    # - name: verb
+    #   title: Print plot summary
+    #   type: Bool
+    #   default: false
+
+
+    - name: fill
+      title: Fill by
+      type: List
+      options:
+        - title: First variable
+          name: first_variable
+        - title: Last variable
+          name: last_variable
+        - title: All flows
+          name: all_flows
+        - title: Values
+          name: values
+      default: first_variable
+      description:
+          R: >
+            A list for the argument fill for selecting the variable to be
+            represented by color. Default is 'first_variable'.
+          jamovi: >
+            A list for the argument fill for selecting the variable to be
+            represented by color. Default is 'first_variable'.
+
+    - name: bin
+      title: Bin labels
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Mean
+          name: mean
+        - title: Median
+          name: median
+        - title: Min-Max
+          name: min_max
+        - title: Cuts
+          name: cuts
+      default: default
+      description:
+          R: >
+            labels for the bins from low to high
+          jamovi: >
+            labels for the bins from low to high
+
+
+    - name: orient
+      title: Plot orientation
+      type: List
+      options:
+        - title: Horizontal
+          name: horr
+        - title: Vertical
+          name: vert
+      default: vert
+      description:
+          R: >
+            Orientation of the plot. Default is 'vertical'.
+          jamovi: >
+            Orientation of the plot. Default is 'vertical'.
+
+
+
+
+#     - name: flip
+#       title: Flip plot
+#       type: Bool
+#       default: false
+
+
+
+    - name: usetitle
+      title: Custom title
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use a custom title for the plot.
+          jamovi: >
+            Use a custom title for the plot.
+
+    - name: mytitle
+      title: Title
+      type: String
+      default: 'Alluvial Plot'
+      description:
+          R: >
+            Title for the plot.
+          jamovi: >
+            Title for the plot.
+
+    - name: maxvars
+      title: Maximum variables
+      type: Integer
+      min: 2
+      max: 20
+      default: 8
+      description:
+          R: >
+            Maximum number of variables to include in the alluvial plot.
+          jamovi: >
+            Maximum number of variables to include in the alluvial plot.
+
+    - name: custombinlabels
+      title: Custom bin labels
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom labels for bins, separated by commas (e.g., "Low,Medium,High"). 
+            Leave empty to use bin option defaults.
+          jamovi: >
+            Custom labels for bins, separated by commas (e.g., "Low,Medium,High"). 
+            Leave empty to use bin option defaults.
+
+    - name: time
+      title: Time/Sequence Variable (optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional time or sequence variable for time-based flows.
+          jamovi: >
+            Optional time or sequence variable for time-based flows.
+
+    - name: id
+      title: ID Variable (optional)
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional ID variable for tracking individual entities.
+          jamovi: >
+            Optional ID variable for tracking individual entities.
+
+    - name: weight
+      title: Weight Variable (optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Optional weight variable for flow thickness.
+          jamovi: >
+            Optional weight variable for flow thickness.
+
+    - name: sankeyStyle
+      title: Use Sankey Styling
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply Sankey diagram styling (narrow nodes, sigmoid curves).
+          jamovi: >
+            Apply Sankey diagram styling (narrow nodes, sigmoid curves).
+
+    - name: curveType
+      title: Curve Type
+      type: List
+      options:
+        - title: Linear
+          name: linear
+        - title: Cubic (smooth)
+          name: cubic
+        - title: Quintic (very smooth)
+          name: quintic
+        - title: Sine
+          name: sine
+        - title: Arctangent
+          name: arctangent
+        - title: Sigmoid (S-shaped, Sankey-style)
+          name: sigmoid
+      default: cubic
+      description:
+          R: >
+            Curve style for flows. Use sigmoid for Sankey-style appearance.
+          jamovi: >
+            Curve style for flows. Use sigmoid for Sankey-style appearance.
+
+    - name: engine
+      title: Plot Engine
+      type: List
+      options:
+        - title: Easy Alluvial (automatic)
+          name: easyalluvial
+        - title: GG Alluvial (manual control)
+          name: ggalluvial
+      default: easyalluvial
+      description:
+          R: >
+            Choose plotting engine: easyalluvial for automatic plots, ggalluvial for manual control.
+          jamovi: >
+            Choose plotting engine: easyalluvial for automatic plots, ggalluvial for manual control.
+
+    - name: labelNodes
+      title: Label Nodes (Basic)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show basic node labels. This is the primary label control that works with all plot engines.
+          jamovi: >
+            Show basic node labels. This is the primary label control that works with all plot engines.
+
+    - name: showCounts
+      title: Show Counts
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display count values on nodes.
+          jamovi: >
+            Display count values on nodes.
+
+    - name: verbose
+      title: Show plot summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed information about the plot generation process.
+          jamovi: >
+            Show detailed information about the plot generation process.
+
+    # === Data Format Options (from jjsankeyfier) ===
+    - name: diagram_type
+      title: Diagram Type
+      type: List
+      options:
+        - title: Sankey Diagram
+          name: sankey
+        - title: Alluvial Diagram
+          name: alluvial
+        - title: Parallel Sets
+          name: parallel_sets
+      default: alluvial
+      description:
+          R: >
+            Type of flow diagram to generate.
+          jamovi: >
+            Type of flow diagram to generate.
+
+    - name: value_var
+      title: Value Variable
+      type: Variable
+      description:
+          R: >
+            Variable containing flow values/weights for source-target format.
+          jamovi: >
+            Variable containing flow values/weights for source-target format.
+
+    - name: source_var
+      title: Source Variable
+      type: Variable
+      description:
+          R: >
+            Variable defining source nodes for source-target format.
+          jamovi: >
+            Variable defining source nodes for source-target format.
+
+    - name: target_var
+      title: Target Variable
+      type: Variable
+      description:
+          R: >
+            Variable defining target nodes for source-target format.
+          jamovi: >
+            Variable defining target nodes for source-target format.
+
+    - name: node_vars
+      title: Node Variables
+      type: Variables
+      description:
+          R: >
+            Variables for multi-level node definitions in source-target format.
+          jamovi: >
+            Variables for multi-level node definitions in source-target format.
+
+    - name: grouping_var
+      title: Grouping Variable
+      type: Variable
+      description:
+          R: >
+            Variable for grouping flows.
+          jamovi: >
+            Variable for grouping flows.
+
+    - name: time_var
+      title: Time Variable (advanced)
+      type: Variable
+      description:
+          R: >
+            Variable for temporal flow analysis in source-target format.
+          jamovi: >
+            Variable for temporal flow analysis in source-target format.
+
+    # === Advanced Styling Options (from jjsankeyfier) ===
+    - name: node_width
+      title: Node Width
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.5
+      description:
+          R: >
+            Width of nodes in the diagram.
+          jamovi: >
+            Width of nodes in the diagram.
+
+    - name: node_spacing
+      title: Node Spacing
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.1
+      description:
+          R: >
+            Spacing between nodes.
+          jamovi: >
+            Spacing between nodes.
+
+    - name: edge_alpha
+      title: Edge Transparency
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.6
+      description:
+          R: >
+            Transparency level for edges.
+          jamovi: >
+            Transparency level for edges.
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: Set3
+          name: set3
+        - title: Pastel1
+          name: pastel1
+        - title: Dark2
+          name: dark2
+      default: default
+      description:
+          R: >
+            Color palette for the diagram.
+          jamovi: >
+            Color palette for the diagram.
+
+    - name: show_labels
+      title: Enhanced Label Styling
+      type: Bool
+      default: true
+      description:
+          R: >
+            Enable enhanced label styling with custom fonts and positioning. Complements basic labeling.
+          jamovi: >
+            Enable enhanced label styling with custom fonts and positioning. Complements basic labeling.
+
+    - name: label_size
+      title: Label Size
+      type: Number
+      min: 6
+      max: 20
+      default: 10
+      description:
+          R: >
+            Size of node labels.
+          jamovi: >
+            Size of node labels.
+
+    - name: iterations
+      title: Layout Iterations
+      type: Number
+      min: 1
+      max: 100
+      default: 32
+      description:
+          R: >
+            Number of iterations for layout optimization.
+          jamovi: >
+            Number of iterations for layout optimization.
+
+    - name: show_values
+      title: Show Flow Values
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display flow values on diagram.
+          jamovi: >
+            Display flow values on diagram.
+
+    - name: value_format
+      title: Value Format
+      type: List
+      options:
+        - title: Raw Numbers
+          name: raw
+        - title: Percentages
+          name: percent
+        - title: Rounded
+          name: rounded
+      default: raw
+      description:
+          R: >
+            Format for displaying flow values.
+          jamovi: >
+            Format for displaying flow values.
+
+    - name: sort_nodes
+      title: Sort Nodes
+      type: List
+      options:
+        - title: Alphabetical
+          name: alphabetical
+        - title: By Value
+          name: by_value
+        - title: Original Order
+          name: original
+      default: original
+      description:
+          R: >
+            Method for sorting nodes.
+          jamovi: >
+            Method for sorting nodes.
+
+    - name: flow_direction
+      title: Flow Direction
+      type: List
+      options:
+        - title: Left to Right
+          name: left_right
+        - title: Top to Bottom
+          name: top_bottom
+        - title: Right to Left
+          name: right_left
+        - title: Bottom to Top
+          name: bottom_top
+      default: left_right
+      description:
+          R: >
+            Direction of flow in the diagram.
+          jamovi: >
+            Direction of flow in the diagram.
+
+    - name: plot_title
+      title: Plot Title (advanced)
+      type: String
+      default: ""
+      description:
+          R: >
+            Advanced plot title (overrides basic title when set).
+          jamovi: >
+            Advanced plot title (overrides basic title when set).
+
+    - name: plot_subtitle
+      title: Plot Subtitle
+      type: String
+      default: ""
+      description:
+          R: >
+            Subtitle for the plot.
+          jamovi: >
+            Subtitle for the plot.
+
+    - name: theme_style
+      title: Theme Style
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Void
+          name: void
+      default: default
+      description:
+          R: >
+            Theme style for the plot.
+          jamovi: >
+            Theme style for the plot.
+
+    - name: show_statistics
+      title: Show Flow Statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display statistical summary of flows.
+          jamovi: >
+            Display statistical summary of flows.
+
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display interpretation of the diagram.
+          jamovi: >
+            Display interpretation of the diagram.
+
+    - name: output_format
+      title: Output Format
+      type: List
+      options:
+        - title: Plot Only
+          name: plot_only
+        - title: Data Table
+          name: data_table
+        - title: Both
+          name: both
+      default: plot_only
+      description:
+          R: >
+            Format for output display.
+          jamovi: >
+            Format for output display.
+
+    # === Enhanced Features (inspired by riverplot) ===
+    - name: clinical_mode
+      title: Clinical Analysis Mode
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable clinical-specific features and interpretations for medical data analysis.
+          jamovi: >
+            Enable clinical-specific features and interpretations for medical data analysis.
+
+    - name: clinical_preset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: None (Custom Settings)
+          name: none
+        - title: Patient Journey
+          name: patient_journey
+        - title: Treatment Response
+          name: treatment_response
+        - title: Disease Progression
+          name: disease_progression
+      default: none
+      description:
+          R: >
+            Apply predefined settings optimized for common clinical scenarios.
+          jamovi: >
+            Apply predefined settings optimized for common clinical scenarios.
+
+    - name: enhanced_gradients
+      title: Enhanced Edge Gradients
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply sophisticated color gradients to flow edges for better visual appeal.
+          jamovi: >
+            Apply sophisticated color gradients to flow edges for better visual appeal.
+
+    - name: flow_optimization
+      title: Optimize Flow Layout
+      type: Bool
+      default: false
+      description:
+          R: >
+            Automatically optimize flow paths to reduce crossings and improve readability.
+          jamovi: >
+            Automatically optimize flow paths to reduce crossings and improve readability.
+
+    - name: advanced_diagnostics
+      title: Show Advanced Diagnostics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed flow analysis, transition patterns, and data quality metrics.
+          jamovi: >
+            Display detailed flow analysis, transition patterns, and data quality metrics.
+
+    - name: export_compatibility
+      title: Export Compatibility Mode
+      type: List
+      options:
+        - title: Standard
+          name: standard
+        - title: Riverplot Compatible
+          name: riverplot
+        - title: Both
+          name: both
+      default: standard
+      description:
+          R: >
+            Choose output format compatibility for integration with other tools.
+          jamovi: >
+            Choose output format compatibility for integration with other tools.
+
+    # - name: originaltheme
+    #   title: Easy Alluvial Theme
+    #   type: Bool
+    #   default: false
+
+
+    # - name: themex
+    #   title: Theme
+    #   type: List
+    #   options:
+    #     - title: jamovi
+    #       name: jamovi
+    #     - title: easyalluvial
+    #       name: easyalluvial
+    #     # - title: ipsum
+    #     #   name: ipsum
+    #     - title: grey
+    #       name: grey
+    #     - title: gray
+    #       name: gray
+    #     - title: bw
+    #       name: bw
+    #     - title: linedraw
+    #       name: linedraw
+    #     - title: light
+    #       name: light
+    #     - title: dark
+    #       name: dark
+    #     - title: minimal
+    #       name: minimal
+    #     - title: classic
+    #       name: classic
+    #     - title: void
+    #       name: void
+    #     - title: test
+    #       name: test
+    #   default: easyalluvial
+
+# - name: inter
+#   title: Interactive
+#   type: Bool
+#   default: false
+
+...

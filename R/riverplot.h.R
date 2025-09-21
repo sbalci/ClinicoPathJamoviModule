@@ -8,7 +8,7 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             id = NULL,
             time = NULL,
-            strata = NULL,
+            strata = list(),
             weight = NULL,
             plotType = "alluvial",
             fillType = "first",
@@ -85,7 +85,8 @@ riverplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=list())
             private$..weight <- jmvcore::OptionVariable$new(
                 "weight",
                 weight,
@@ -883,7 +884,7 @@ riverplot <- function(
     data,
     id = NULL,
     time = NULL,
-    strata,
+    strata = list(),
     weight = NULL,
     plotType = "alluvial",
     fillType = "first",

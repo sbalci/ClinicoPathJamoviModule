@@ -1,8 +1,8 @@
 ---
 name: hullplot
 title: Hull Plot
-menuGroup: JJStatsPlotD
-menuSubgroup: ClinicoPath Descriptive Plots
+menuGroup: JJStatsPlotT
+menuSubgroup: Continuous vs Continuous
 version: '0.0.31'
 jas: '1.2'
 
@@ -33,6 +33,7 @@ options:
     - name: x_var
       title: X-Axis Variable
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -44,6 +45,7 @@ options:
     - name: y_var
       title: Y-Axis Variable
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -55,6 +57,7 @@ options:
     - name: group_var
       title: Grouping Variable
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal

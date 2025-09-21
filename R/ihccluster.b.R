@@ -1221,7 +1221,9 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 plot(as.hclust(hc), main = "Hierarchical Clustering Dendrogram",
                      xlab = "Cases", ylab = "Height", cex = 0.6)
                 if (!is.null(usedK)) {
-                    rect.hclust(as.hclust(hc), k = usedK, border = "red", lwd = 2)
+                    par(lwd = 2)
+                    rect.hclust(as.hclust(hc), k = usedK, border = "red")
+                    par(lwd = 1)  # Reset to default
                 }
             }, error = function(e) {
                 error_msg <- private$.createUserFriendlyError(e, "dendrogram")

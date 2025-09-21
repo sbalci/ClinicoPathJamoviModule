@@ -7,7 +7,7 @@ items:
     - name: todo
       title: Instructions
       type: Html
-      visible: false
+      visible: true
 
     - name: plot
       title: Hull Plot

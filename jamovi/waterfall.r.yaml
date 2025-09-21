@@ -4,6 +4,20 @@ title: Treatment Response Analysis
 jrs:   '1.1'
 
 items:
+
+
+    - name: guidedAnalysis
+      title: Guided Analysis Steps
+      type: Html
+      visible: (enableGuidedMode)
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - enableGuidedMode
+
+
     - name: todo
       title: Treatment Response Analysis Guide
       type: Html
@@ -12,11 +26,23 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - enableGuidedMode
+      visible: (!enableGuidedMode)
+
+    - name: todo2
+      title: Validation Messages
+      type: Html
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - enableGuidedMode
+      visible: (!enableGuidedMode)
 
     - name: clinicalSummary
       title: Clinical Summary
       type: Html
-      visible: (patientID && responseVar)
       clearWith:
          - patientID
          - responseVar
@@ -28,12 +54,13 @@ items:
     - name: aboutAnalysis
       title: About This Analysis
       type: Html
-      visible: (patientID)
       clearWith:
          - patientID
          - responseVar
          - timeVar
          - inputType
+         - enableGuidedMode
+      visible: (!enableGuidedMode)
 
     - name: summaryTable
       title: Response Categories Based on RECIST v1.1 Criteria
@@ -94,7 +121,6 @@ items:
         - name: median_duration
           title: "Median Duration"
           type: text
-      visible: (timeVar && inputType == "raw")
 
 
     - name: clinicalMetrics
@@ -142,7 +168,8 @@ items:
       height: 500
       renderFun: .spiderplot
       requiresData: true
-      visible: (showSpiderPlot && timeVar)
+      visible: (showSpiderPlot)
+      # Note: Spider plot requires both showSpiderPlot=true AND a time variable for meaningful trajectories
       clearWith:
         - patientID
         - responseVar
@@ -158,6 +185,56 @@ items:
         - spiderColorScheme
         - showMedian
         - showCI
+
+    - name: copyReadyReport
+      title: Copy-Ready Report Sentences
+      type: Html
+      visible: (generateCopyReadyReport)
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - generateCopyReadyReport
+
+    - name: clinicalSignificance
+      title: Clinical Significance Assessment
+      type: Html
+      visible: (showClinicalSignificance)
+      clearWith:
+         - patientID
+         - responseVar
+         - showClinicalSignificance
+
+
+
+    - name: enhancedClinicalMetrics
+      title: Enhanced Clinical Response Metrics
+      type: Table
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+        - name: interpretation
+          title: "Clinical Interpretation"
+          type: text
+      visible: (showConfidenceIntervals)
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - showConfidenceIntervals
 
     - name: addResponseCategory
       title: Add Response Category to Data

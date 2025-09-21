@@ -11,18 +11,7 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sty = "nejm",
             excl = FALSE,
             cont = "mean",
-            pcat = "chisq",
-            pairwise = FALSE,
-            p_adjust = "none",
-            posthoc_method = "none",
-            effect_size_measures = FALSE,
-            residual_analysis = FALSE,
-            mosaic_plot = FALSE,
-            correspondence_analysis = FALSE,
-            exact_tests = TRUE,
-            confidence_level = 0.95,
-            simulation_based = FALSE,
-            monte_carlo_replicates = 10000, ...) {
+            pcat = "chisq", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -70,67 +59,6 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "chisq",
                     "fisher"),
                 default="chisq")
-            private$..pairwise <- jmvcore::OptionBool$new(
-                "pairwise",
-                pairwise,
-                default=FALSE)
-            private$..p_adjust <- jmvcore::OptionList$new(
-                "p_adjust",
-                p_adjust,
-                options=list(
-                    "none",
-                    "bonferroni",
-                    "holm",
-                    "BH",
-                    "BY"),
-                default="none")
-            private$..posthoc_method <- jmvcore::OptionList$new(
-                "posthoc_method",
-                posthoc_method,
-                options=list(
-                    "none",
-                    "standardized_residuals",
-                    "adjusted_residuals",
-                    "cramers_v",
-                    "phi_coefficient",
-                    "freeman_halton"),
-                default="none")
-            private$..effect_size_measures <- jmvcore::OptionBool$new(
-                "effect_size_measures",
-                effect_size_measures,
-                default=FALSE)
-            private$..residual_analysis <- jmvcore::OptionBool$new(
-                "residual_analysis",
-                residual_analysis,
-                default=FALSE)
-            private$..mosaic_plot <- jmvcore::OptionBool$new(
-                "mosaic_plot",
-                mosaic_plot,
-                default=FALSE)
-            private$..correspondence_analysis <- jmvcore::OptionBool$new(
-                "correspondence_analysis",
-                correspondence_analysis,
-                default=FALSE)
-            private$..exact_tests <- jmvcore::OptionBool$new(
-                "exact_tests",
-                exact_tests,
-                default=TRUE)
-            private$..confidence_level <- jmvcore::OptionNumber$new(
-                "confidence_level",
-                confidence_level,
-                min=0.8,
-                max=0.99,
-                default=0.95)
-            private$..simulation_based <- jmvcore::OptionBool$new(
-                "simulation_based",
-                simulation_based,
-                default=FALSE)
-            private$..monte_carlo_replicates <- jmvcore::OptionInteger$new(
-                "monte_carlo_replicates",
-                monte_carlo_replicates,
-                min=1000,
-                max=100000,
-                default=10000)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
@@ -138,17 +66,6 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..excl)
             self$.addOption(private$..cont)
             self$.addOption(private$..pcat)
-            self$.addOption(private$..pairwise)
-            self$.addOption(private$..p_adjust)
-            self$.addOption(private$..posthoc_method)
-            self$.addOption(private$..effect_size_measures)
-            self$.addOption(private$..residual_analysis)
-            self$.addOption(private$..mosaic_plot)
-            self$.addOption(private$..correspondence_analysis)
-            self$.addOption(private$..exact_tests)
-            self$.addOption(private$..confidence_level)
-            self$.addOption(private$..simulation_based)
-            self$.addOption(private$..monte_carlo_replicates)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -156,36 +73,14 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sty = function() private$..sty$value,
         excl = function() private$..excl$value,
         cont = function() private$..cont$value,
-        pcat = function() private$..pcat$value,
-        pairwise = function() private$..pairwise$value,
-        p_adjust = function() private$..p_adjust$value,
-        posthoc_method = function() private$..posthoc_method$value,
-        effect_size_measures = function() private$..effect_size_measures$value,
-        residual_analysis = function() private$..residual_analysis$value,
-        mosaic_plot = function() private$..mosaic_plot$value,
-        correspondence_analysis = function() private$..correspondence_analysis$value,
-        exact_tests = function() private$..exact_tests$value,
-        confidence_level = function() private$..confidence_level$value,
-        simulation_based = function() private$..simulation_based$value,
-        monte_carlo_replicates = function() private$..monte_carlo_replicates$value),
+        pcat = function() private$..pcat$value),
     private = list(
         ..vars = NA,
         ..group = NA,
         ..sty = NA,
         ..excl = NA,
         ..cont = NA,
-        ..pcat = NA,
-        ..pairwise = NA,
-        ..p_adjust = NA,
-        ..posthoc_method = NA,
-        ..effect_size_measures = NA,
-        ..residual_analysis = NA,
-        ..mosaic_plot = NA,
-        ..correspondence_analysis = NA,
-        ..exact_tests = NA,
-        ..confidence_level = NA,
-        ..simulation_based = NA,
-        ..monte_carlo_replicates = NA)
+        ..pcat = NA)
 )
 
 crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -200,15 +95,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tablestyle3 = function() private$.items[["tablestyle3"]],
         tablestyle4 = function() private$.items[["tablestyle4"]],
         qvalueExplanation = function() private$.items[["qvalueExplanation"]],
-        testInformation = function() private$.items[["testInformation"]],
-        pairwiseTable = function() private$.items[["pairwiseTable"]],
-        pairwiseNote = function() private$.items[["pairwiseNote"]],
-        effectsizes = function() private$.items[["effectsizes"]],
-        residuals = function() private$.items[["residuals"]],
-        posthocstats = function() private$.items[["posthocstats"]],
-        correspondenceanalysis = function() private$.items[["correspondenceanalysis"]],
-        mosaicplot = function() private$.items[["mosaicplot"]],
-        correspondenceplot = function() private$.items[["correspondenceplot"]]),
+        testInformation = function() private$.items[["testInformation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -297,247 +184,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "sty"),
-                visible="(sty:gtsummary)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="pairwiseTable",
-                title="Pairwise Comparisons",
-                visible="(pairwise)",
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "pcat",
-                    "pairwise",
-                    "p_adjust"),
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="group1", 
-                        `title`="Group 1", 
-                        `type`="text"),
-                    list(
-                        `name`="group2", 
-                        `title`="Group 2", 
-                        `type`="text"),
-                    list(
-                        `name`="test", 
-                        `title`="Test", 
-                        `type`="text"),
-                    list(
-                        `name`="statistic", 
-                        `title`="Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p_value", 
-                        `title`="P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="p_adjusted", 
-                        `title`="Adjusted P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue", 
-                        `visible`="(p_adjust:bonferroni || p_adjust:holm || p_adjust:BH || p_adjust:BY)"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="pairwiseNote",
-                title="Note",
-                visible="(pairwise)",
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "pcat",
-                    "pairwise",
-                    "p_adjust")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="effectsizes",
-                title="Effect Size Measures",
-                visible="(effect_size_measures)",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="measure", 
-                        `title`="Effect Size Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "effect_size_measures",
-                    "confidence_level")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="residuals",
-                title="Residual Analysis",
-                visible="(residual_analysis)",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="group_level", 
-                        `title`="Group Level", 
-                        `type`="text"),
-                    list(
-                        `name`="var_level", 
-                        `title`="Variable Level", 
-                        `type`="text"),
-                    list(
-                        `name`="observed", 
-                        `title`="Observed", 
-                        `type`="integer"),
-                    list(
-                        `name`="expected", 
-                        `title`="Expected", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="std_residual", 
-                        `title`="Standardized Residual", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="adj_residual", 
-                        `title`="Adjusted Residual", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="contribution", 
-                        `title`="Contribution (%)", 
-                        `type`="number", 
-                        `format`="zto")),
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "residual_analysis")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="posthocstats",
-                title="Post-hoc Statistical Tests",
-                visible="(posthoc_method:standardized_residuals || posthoc_method:adjusted_residuals || posthoc_method:cramers_v || posthoc_method:phi_coefficient || posthoc_method:freeman_halton)",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="statistic", 
-                        `title`="Statistic", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p_value", 
-                        `title`="P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "posthoc_method",
-                    "exact_tests",
-                    "simulation_based")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="correspondenceanalysis",
-                title="Correspondence Analysis",
-                visible="(correspondence_analysis)",
-                columns=list(
-                    list(
-                        `name`="dimension", 
-                        `title`="Dimension", 
-                        `type`="text"),
-                    list(
-                        `name`="eigenvalue", 
-                        `title`="Eigenvalue", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="variance_explained", 
-                        `title`="Variance Explained (%)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="cumulative_variance", 
-                        `title`="Cumulative Variance (%)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="inertia", 
-                        `title`="Inertia", 
-                        `type`="number", 
-                        `format`="zto")),
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "correspondence_analysis")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="mosaicplot",
-                title="Mosaic Plot",
-                visible="(mosaic_plot)",
-                width=600,
-                height=400,
-                requiresData=TRUE,
-                renderFun=".mosaicplot",
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "mosaic_plot")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="correspondenceplot",
-                title="Correspondence Analysis Plot",
-                visible="(correspondence_analysis)",
-                width=600,
-                height=400,
-                requiresData=TRUE,
-                renderFun=".correspondenceplot",
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "correspondence_analysis")))}))
+                visible="(sty:gtsummary)"))}))
 
 crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableBase",
@@ -587,27 +234,6 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param excl Exclude rows with missing values.
 #' @param cont .
 #' @param pcat .
-#' @param pairwise Perform all pairwise comparisons between groups when there
-#'   are more than 2 groups.
-#' @param p_adjust Method for adjusting p-values for multiple comparisons.
-#' @param posthoc_method Advanced post-hoc analysis methods for categorical
-#'   associations
-#' @param effect_size_measures Calculate comprehensive effect size measures
-#'   for categorical associations
-#' @param residual_analysis Analyze standardized and adjusted residuals for
-#'   cell contributions
-#' @param mosaic_plot Generate mosaic plot for visualizing association
-#'   patterns
-#' @param correspondence_analysis Perform correspondence analysis for
-#'   dimensional reduction
-#' @param exact_tests Use exact statistical tests for small sample sizes or
-#'   sparse tables
-#' @param confidence_level Confidence level for effect size confidence
-#'   intervals
-#' @param simulation_based Use Monte Carlo simulation for p-values when exact
-#'   computation is not feasible
-#' @param monte_carlo_replicates Number of Monte Carlo replicates for
-#'   simulation-based tests
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -619,21 +245,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$pairwiseNote} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$effectsizes} \tab \tab \tab \tab \tab Comprehensive effect size measures for categorical associations \cr
-#'   \code{results$residuals} \tab \tab \tab \tab \tab Standardized and adjusted residuals for cell contributions \cr
-#'   \code{results$posthocstats} \tab \tab \tab \tab \tab Advanced post-hoc statistical analysis results \cr
-#'   \code{results$correspondenceanalysis} \tab \tab \tab \tab \tab Correspondence analysis results for dimensional reduction \cr
-#'   \code{results$mosaicplot} \tab \tab \tab \tab \tab Mosaic plot visualization of association patterns \cr
-#'   \code{results$correspondenceplot} \tab \tab \tab \tab \tab Correspondence analysis biplot \cr
 #' }
-#'
-#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-#'
-#' \code{results$pairwiseTable$asDF}
-#'
-#' \code{as.data.frame(results$pairwiseTable)}
 #'
 #' @export
 crosstable <- function(
@@ -643,18 +255,7 @@ crosstable <- function(
     sty = "nejm",
     excl = FALSE,
     cont = "mean",
-    pcat = "chisq",
-    pairwise = FALSE,
-    p_adjust = "none",
-    posthoc_method = "none",
-    effect_size_measures = FALSE,
-    residual_analysis = FALSE,
-    mosaic_plot = FALSE,
-    correspondence_analysis = FALSE,
-    exact_tests = TRUE,
-    confidence_level = 0.95,
-    simulation_based = FALSE,
-    monte_carlo_replicates = 10000) {
+    pcat = "chisq") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("crosstable requires jmvcore to be installed (restart may be required)")
@@ -675,18 +276,7 @@ crosstable <- function(
         sty = sty,
         excl = excl,
         cont = cont,
-        pcat = pcat,
-        pairwise = pairwise,
-        p_adjust = p_adjust,
-        posthoc_method = posthoc_method,
-        effect_size_measures = effect_size_measures,
-        residual_analysis = residual_analysis,
-        mosaic_plot = mosaic_plot,
-        correspondence_analysis = correspondence_analysis,
-        exact_tests = exact_tests,
-        confidence_level = confidence_level,
-        simulation_based = simulation_based,
-        monte_carlo_replicates = monte_carlo_replicates)
+        pcat = pcat)
 
     analysis <- crosstableClass$new(
         options = options,

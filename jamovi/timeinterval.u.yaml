@@ -2,7 +2,7 @@ title: Comprehensive Time Interval Calculator
 name: timeinterval
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

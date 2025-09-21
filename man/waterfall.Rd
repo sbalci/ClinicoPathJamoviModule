@@ -12,7 +12,8 @@ waterfall(
   groupVar = NULL,
   inputType = "percentage",
   sortBy = "response",
-  showThresholds = FALSE,
+  clinicalPreset = "custom",
+  showThresholds = TRUE,
   labelOutliers = FALSE,
   showMedian = FALSE,
   showCI = FALSE,
@@ -24,33 +25,46 @@ waterfall(
   showWaterfallPlot = TRUE,
   showSpiderPlot = TRUE,
   spiderColorBy = "response",
-  spiderColorScheme = "classic"
+  spiderColorScheme = "classic",
+  generateCopyReadyReport = FALSE,
+  showClinicalSignificance = FALSE,
+  showConfidenceIntervals = TRUE,
+  enableGuidedMode = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{patientID}{Variable containing patient identifiers.}
+\item{patientID}{Variable containing patient identifiers (e.g., PT001,
+Patient_1, Study_ID). Each patient should have a unique identifier for
+proper analysis.}
 
-\item{responseVar}{Response variable: either raw tumor measurements or
-pre-calculated percentage changes. For raw measurements, requires a time
-variable with baseline (time = 0). For percentages, negative values
-indicate tumor shrinkage (improvement).}
+\item{responseVar}{Response variable: either raw tumor measurements (mm,
+cm, sum of diameters) or pre-calculated percentage changes from baseline.
+For raw measurements: requires time variable with baseline at time = 0. For
+percentages: negative values = tumor shrinkage (good response), positive
+values = tumor growth (poor response). Example: -30 means 30\\% decrease.}
 
-\item{timeVar}{Time point of measurement for spider plot (e.g., months from
-baseline)}
+\item{timeVar}{Time point of measurement (e.g., months from baseline, days
+from treatment start). Required for spider plot and raw measurement
+processing. Baseline should be time = 0.}
 
 \item{groupVar}{Optional grouping variable for coloring bars by patient
 groups (e.g., treatment arms, disease subtypes). When specified, overrides
 RECIST category coloring to show group-based colors.}
 
-\item{inputType}{Specify data format: 'raw' for actual measurements (will
-calculate percent change) or 'percentage' for pre-calculated percentage
-changes}
+\item{inputType}{Specify data format: 'raw' for actual tumor measurements
+(requires time variable) or 'percentage' for pre-calculated percentage
+changes from baseline}
 
 \item{sortBy}{Sort the waterfall plot by best response or patient ID.}
 
-\item{showThresholds}{Show +20 percent and -30 percent RECIST thresholds.}
+\item{clinicalPreset}{Choose a clinical study preset to automatically
+configure appropriate settings}
+
+\item{showThresholds}{Show +20\\% and -30\\% RECIST v1.1 thresholds as dashed
+lines. Helps identify Progressive Disease (PD) and Partial Response (PR)
+cutoffs.}
 
 \item{labelOutliers}{Label responses exceeding the specified threshold.}
 
@@ -82,11 +96,24 @@ patient groups. For backward compatibility, defaults to response status
 coloring.}
 
 \item{spiderColorScheme}{Color scheme for spider plot lines and points.}
+
+\item{generateCopyReadyReport}{Generate publication-ready result sentences
+with statistical details}
+
+\item{showClinicalSignificance}{Display clinical significance
+interpretations for ORR and DCR}
+
+\item{showConfidenceIntervals}{Calculate and display exact binomial
+confidence intervals for ORR and DCR}
+
+\item{enableGuidedMode}{Enable step-by-step guidance for new users}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$guidedAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
@@ -94,6 +121,9 @@ A results object containing:
 \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSignificance} \tab \tab \tab \tab \tab a html \cr
+\code{results$enhancedClinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
 }
 

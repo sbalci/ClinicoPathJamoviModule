@@ -2,7 +2,7 @@ title: Summary of Continuous Variables
 name: summarydata
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

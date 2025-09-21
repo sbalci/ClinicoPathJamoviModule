@@ -2,7 +2,7 @@ title: Comparing Survival Outcomes
 name: comparingSurvival
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

@@ -2,7 +2,7 @@ title: Joint Frailty Models for Recurrent Events
 name: jointfrailty
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

@@ -6,9 +6,9 @@
 \usage{
 hullplot(
   data,
-  x_var,
-  y_var,
-  group_var,
+  x_var = NULL,
+  y_var = NULL,
+  group_var = NULL,
   color_var = NULL,
   size_var = NULL,
   hull_concavity = 2,

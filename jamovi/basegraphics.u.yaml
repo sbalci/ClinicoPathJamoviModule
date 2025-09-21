@@ -2,7 +2,7 @@ title: Base Graphics Visualization
 name: basegraphics
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: LayoutBox
     margin: large

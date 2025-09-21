@@ -1,7 +1,7 @@
 ---
 name:  crosstable
 title: Cross Tables
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.31'
 jas: '1.2'
@@ -84,109 +84,109 @@ options:
         - title: fisher
           name: fisher
       default: chisq
-    - name: pairwise
-      title: Pairwise comparisons
-      type: Bool
-      default: false
-      description: >
-            Perform all pairwise comparisons between groups when there are more than 2 groups.
-    - name: p_adjust
-      title: P-value adjustment method
-      type: List
-      options:
-        - title: None
-          name: none
-        - title: Bonferroni
-          name: bonferroni
-        - title: Holm
-          name: holm
-        - title: Benjamini-Hochberg (FDR)
-          name: BH
-        - title: Benjamini-Yekutieli
-          name: BY
-      default: none
-      description: >
-            Method for adjusting p-values for multiple comparisons.
+    # - name: pairwise
+    #   title: Pairwise comparisons
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Perform all pairwise comparisons between groups when there are more than 2 groups.
+    # - name: p_adjust
+    #   title: P-value adjustment method
+    #   type: List
+    #   options:
+    #     - title: None
+    #       name: none
+    #     - title: Bonferroni
+    #       name: bonferroni
+    #     - title: Holm
+    #       name: holm
+    #     - title: Benjamini-Hochberg (FDR)
+    #       name: BH
+    #     - title: Benjamini-Yekutieli
+    #       name: BY
+    #   default: none
+    #   description: >
+    #         Method for adjusting p-values for multiple comparisons.
 
     # Advanced Post-hoc Testing Options
-    - name: posthoc_method
-      title: Post-hoc Analysis Method
-      type: List
-      options:
-        - title: None
-          name: none
-        - title: Standardized Residuals
-          name: standardized_residuals
-        - title: Adjusted Standardized Residuals
-          name: adjusted_residuals
-        - title: Cramér's V
-          name: cramers_v
-        - title: Phi Coefficient
-          name: phi_coefficient
-        - title: Freeman-Halton Extension
-          name: freeman_halton
-      default: none
-      description: >
-            Advanced post-hoc analysis methods for categorical associations
+    # - name: posthoc_method
+    #   title: Post-hoc Analysis Method
+    #   type: List
+    #   options:
+    #     - title: None
+    #       name: none
+    #     - title: Standardized Residuals
+    #       name: standardized_residuals
+    #     - title: Adjusted Standardized Residuals
+    #       name: adjusted_residuals
+    #     - title: Cramér's V
+    #       name: cramers_v
+    #     - title: Phi Coefficient
+    #       name: phi_coefficient
+    #     - title: Freeman-Halton Extension
+    #       name: freeman_halton
+    #   default: none
+    #   description: >
+    #         Advanced post-hoc analysis methods for categorical associations
 
-    - name: effect_size_measures
-      title: Calculate Effect Size Measures
-      type: Bool
-      default: false
-      description: >
-            Calculate comprehensive effect size measures for categorical associations
+    # - name: effect_size_measures
+    #   title: Calculate Effect Size Measures
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Calculate comprehensive effect size measures for categorical associations
 
-    - name: residual_analysis
-      title: Perform Residual Analysis
-      type: Bool
-      default: false
-      description: >
-            Analyze standardized and adjusted residuals for cell contributions
+    # - name: residual_analysis
+    #   title: Perform Residual Analysis
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Analyze standardized and adjusted residuals for cell contributions
 
-    - name: mosaic_plot
-      title: Generate Mosaic Plot
-      type: Bool
-      default: false
-      description: >
-            Generate mosaic plot for visualizing association patterns
+    # - name: mosaic_plot
+    #   title: Generate Mosaic Plot
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Generate mosaic plot for visualizing association patterns
 
-    - name: correspondence_analysis
-      title: Perform Correspondence Analysis
-      type: Bool
-      default: false
-      description: >
-            Perform correspondence analysis for dimensional reduction
+    # - name: correspondence_analysis
+    #   title: Perform Correspondence Analysis
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Perform correspondence analysis for dimensional reduction
 
-    - name: exact_tests
-      title: Use Exact Tests When Appropriate
-      type: Bool
-      default: true
-      description: >
-            Use exact statistical tests for small sample sizes or sparse tables
+    # - name: exact_tests
+    #   title: Use Exact Tests When Appropriate
+    #   type: Bool
+    #   default: true
+    #   description: >
+    #         Use exact statistical tests for small sample sizes or sparse tables
 
-    - name: confidence_level
-      title: Confidence Level for Intervals
-      type: Number
-      min: 0.80
-      max: 0.99
-      default: 0.95
-      description: >
-            Confidence level for effect size confidence intervals
+    # - name: confidence_level
+    #   title: Confidence Level for Intervals
+    #   type: Number
+    #   min: 0.80
+    #   max: 0.99
+    #   default: 0.95
+    #   description: >
+    #         Confidence level for effect size confidence intervals
 
-    - name: simulation_based
-      title: Use Simulation-Based Tests
-      type: Bool
-      default: false
-      description: >
-            Use Monte Carlo simulation for p-values when exact computation is not feasible
+    # - name: simulation_based
+    #   title: Use Simulation-Based Tests
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Use Monte Carlo simulation for p-values when exact computation is not feasible
 
-    - name: monte_carlo_replicates
-      title: Monte Carlo Replicates
-      type: Integer
-      min: 1000
-      max: 100000
-      default: 10000
-      description: >
-            Number of Monte Carlo replicates for simulation-based tests
+    # - name: monte_carlo_replicates
+    #   title: Monte Carlo Replicates
+    #   type: Integer
+    #   min: 1000
+    #   max: 100000
+    #   default: 10000
+    #   description: >
+    #         Number of Monte Carlo replicates for simulation-based tests
 
 ...

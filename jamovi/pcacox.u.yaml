@@ -2,7 +2,7 @@ title: Principal Component Cox Models
 name: pcacox
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

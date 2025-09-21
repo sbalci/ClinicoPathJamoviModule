@@ -2,7 +2,7 @@ title: High-Performance Scatter Plots
 name: jscattermore
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

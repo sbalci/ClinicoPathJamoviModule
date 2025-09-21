@@ -3064,7 +3064,7 @@ title: Independent Samples T-Test
 name: ttestIS
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 
 children:
 

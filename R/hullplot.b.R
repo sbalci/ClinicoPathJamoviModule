@@ -62,7 +62,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
             }
 
-            # Safely require ggforce
+            # Safely require ggforce and concaveman
             if (!requireNamespace("ggforce", quietly = TRUE)) {
                 error_msg <- "
                 <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
@@ -73,6 +73,23 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 self$results$interpretation$setContent(error_msg)
                 return()
             }
+            
+            # Check for V8/concaveman availability and prepare note
+            v8_available <- requireNamespace("V8", quietly = TRUE)
+            concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
+            fallback_note <- NULL
+            if (!(v8_available && concaveman_available)) {
+                fallback_note <- paste0(
+                    "<div style='color: #856404; background-color: #fff3cd; padding: 12px; border-radius: 6px; margin: 12px 0;'>",
+                    "<strong>Concave hulls unavailable:</strong> V8/concaveman not installed. Showing convex hulls. ",
+                    "Install with <code>install.packages('V8'); install.packages('concaveman')</code> for concave hulls.",
+                    "</div>")
+            }
+            # Force convex hulls when concaveman is not available and user requested concavity < 2
+            if (!concaveman_available && self$options$hull_concavity < 2)
+                hull_concavity <- 2
+            else
+                hull_concavity <- self$options$hull_concavity
 
             # Get data and variables
             dataset <- self$data
@@ -132,6 +149,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             
             # Generate interpretation guide
             interpretation_html <- private$.generate_interpretation_guide(plot_data, x_var, y_var, group_var)
+            if (!is.null(fallback_note))
+                interpretation_html <- paste0(interpretation_html, fallback_note)
             self$results$interpretation$setContent(interpretation_html)
 
         },
@@ -193,26 +212,73 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 plot_data[[color_mapping]] <- as.factor(plot_data[[color_mapping]])
             }
 
+            # Check for concaveman package availability and adjust concavity
+            concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
+            hull_concavity <- if (!concaveman_available && self$options$hull_concavity < 2) {
+                2  # Force convex hulls when concaveman is not available
+            } else {
+                self$options$hull_concavity
+            }
+
             # Create base plot
             p <- ggplot2::ggplot(plot_data, ggplot2::aes_string(x = x_var, y = y_var))
-            
-            # Add hull polygons - fix aes construction
-            if (self$options$show_labels) {
-                p <- p + ggforce::geom_mark_hull(
-                    ggplot2::aes_string(fill = group_var, label = group_var),
-                    concavity = self$options$hull_concavity,
-                    expand = ggplot2::unit(self$options$hull_expand, "mm"),
+
+            # If V8/concaveman are unavailable, avoid geom_mark_hull and draw convex hulls directly
+            v8_available <- requireNamespace("V8", quietly = TRUE)
+            concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
+            use_fallback_hull <- !(v8_available && concaveman_available)
+
+            if (use_fallback_hull) {
+                # Build convex hull polygons per group using chull
+                split_groups <- split(plot_data, plot_data[[group_var]])
+                hull_list <- lapply(split_groups, function(df) {
+                    if (nrow(df) < 3) return(df)
+                    idx <- grDevices::chull(df[[x_var]], df[[y_var]])
+                    df[idx, , drop = FALSE]
+                })
+                hull_df <- do.call(rbind, hull_list)
+
+                p <- p + ggplot2::geom_polygon(
+                    data = hull_df,
+                    ggplot2::aes_string(x = x_var, y = y_var, fill = group_var, group = group_var),
                     alpha = self$options$hull_alpha,
-                    show.legend = TRUE
+                    color = NA
                 )
+
+                if (self$options$show_labels) {
+                    # Label at group centroids
+                    centroids <- stats::aggregate(
+                        hull_df[c(x_var, y_var)],
+                        list(group = hull_df[[group_var]]),
+                        mean
+                    )
+                    names(centroids)[names(centroids) == "group"] <- group_var
+                    p <- p + ggplot2::geom_text(
+                        data = centroids,
+                        ggplot2::aes_string(x = x_var, y = y_var, label = group_var),
+                        fontface = "bold",
+                        color = "black"
+                    )
+                }
             } else {
-                p <- p + ggforce::geom_mark_hull(
-                    ggplot2::aes_string(fill = group_var),
-                    concavity = self$options$hull_concavity,
-                    expand = ggplot2::unit(self$options$hull_expand, "mm"),
-                    alpha = self$options$hull_alpha,
-                    show.legend = TRUE
-                )
+                # Add hull polygons via ggforce with proper concavity handling
+                if (self$options$show_labels) {
+                    p <- p + ggforce::geom_mark_hull(
+                        ggplot2::aes_string(fill = group_var, label = group_var),
+                        concavity = hull_concavity,
+                        expand = grid::unit(self$options$hull_expand, "mm"),
+                        alpha = self$options$hull_alpha,
+                        show.legend = TRUE
+                    )
+                } else {
+                    p <- p + ggforce::geom_mark_hull(
+                        ggplot2::aes_string(fill = group_var),
+                        concavity = hull_concavity,
+                        expand = grid::unit(self$options$hull_expand, "mm"),
+                        alpha = self$options$hull_alpha,
+                        show.legend = TRUE
+                    )
+                }
             }
             
             # Add confidence ellipses if requested
@@ -259,6 +325,13 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 fill = "Groups",
                 color = if (color_mapping == group_var) "Groups" else color_var
             )
+
+            # Add caption when falling back to convex hulls
+            if (use_fallback_hull) {
+                p <- p + ggplot2::labs(
+                    caption = "Concave hulls unavailable (install V8 + concaveman); showing convex hulls"
+                )
+            }
             
             # Handle size legend
             if (!is.null(size_var)) {
@@ -318,13 +391,13 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .generate_group_statistics = function(data, x_var, y_var, group_var) {
             # Calculate group statistics
             group_stats <- data %>%
-                dplyr::group_by(.data[[group_var]]) %>%
+                dplyr::group_by(rlang::.data[[group_var]]) %>%
                 dplyr::summarise(
                     n = dplyr::n(),
-                    x_mean = round(mean(.data[[x_var]], na.rm = TRUE), 2),
-                    x_sd = round(sd(.data[[x_var]], na.rm = TRUE), 2),
-                    y_mean = round(mean(.data[[y_var]], na.rm = TRUE), 2),
-                    y_sd = round(sd(.data[[y_var]], na.rm = TRUE), 2),
+                    x_mean = round(mean(rlang::.data[[x_var]], na.rm = TRUE), 2),
+                    x_sd = round(sd(rlang::.data[[x_var]], na.rm = TRUE), 2),
+                    y_mean = round(mean(rlang::.data[[y_var]], na.rm = TRUE), 2),
+                    y_sd = round(sd(rlang::.data[[y_var]], na.rm = TRUE), 2),
                     .groups = 'drop'
                 )
             
