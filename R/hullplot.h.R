@@ -24,7 +24,9 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             hull_expand = 0.05,
             show_statistics = FALSE,
             outlier_detection = FALSE,
-            confidence_ellipses = FALSE, ...) {
+            confidence_ellipses = FALSE,
+            show_summary = FALSE,
+            show_assumptions = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -155,6 +157,14 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "confidence_ellipses",
                 confidence_ellipses,
                 default=FALSE)
+            private$..show_summary <- jmvcore::OptionBool$new(
+                "show_summary",
+                show_summary,
+                default=FALSE)
+            private$..show_assumptions <- jmvcore::OptionBool$new(
+                "show_assumptions",
+                show_assumptions,
+                default=FALSE)
 
             self$.addOption(private$..x_var)
             self$.addOption(private$..y_var)
@@ -175,6 +185,8 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..show_statistics)
             self$.addOption(private$..outlier_detection)
             self$.addOption(private$..confidence_ellipses)
+            self$.addOption(private$..show_summary)
+            self$.addOption(private$..show_assumptions)
         }),
     active = list(
         x_var = function() private$..x_var$value,
@@ -195,7 +207,9 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         hull_expand = function() private$..hull_expand$value,
         show_statistics = function() private$..show_statistics$value,
         outlier_detection = function() private$..outlier_detection$value,
-        confidence_ellipses = function() private$..confidence_ellipses$value),
+        confidence_ellipses = function() private$..confidence_ellipses$value,
+        show_summary = function() private$..show_summary$value,
+        show_assumptions = function() private$..show_assumptions$value),
     private = list(
         ..x_var = NA,
         ..y_var = NA,
@@ -215,7 +229,9 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..hull_expand = NA,
         ..show_statistics = NA,
         ..outlier_detection = NA,
-        ..confidence_ellipses = NA)
+        ..confidence_ellipses = NA,
+        ..show_summary = NA,
+        ..show_assumptions = NA)
 )
 
 hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -226,7 +242,9 @@ hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot = function() private$.items[["plot"]],
         statistics = function() private$.items[["statistics"]],
         outliers = function() private$.items[["outliers"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        summary = function() private$.items[["summary"]],
+        assumptions = function() private$.items[["assumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -261,7 +279,17 @@ hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
-                title="Interpretation Guide"))}))
+                title="Interpretation Guide"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Natural Language Summary",
+                visible="(show_summary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Assumptions & Guidelines",
+                visible="(show_assumptions)"))}))
 
 hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "hullplotBase",
@@ -334,6 +362,10 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   outliers within groups.
 #' @param confidence_ellipses If TRUE, adds confidence ellipses in addition to
 #'   hull polygons.
+#' @param show_summary If TRUE, displays a plain-language summary of the
+#'   results with copy-ready text.
+#' @param show_assumptions If TRUE, displays data requirements, assumptions,
+#'   and usage guidelines.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -341,6 +373,8 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$outliers} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -364,7 +398,9 @@ hullplot <- function(
     hull_expand = 0.05,
     show_statistics = FALSE,
     outlier_detection = FALSE,
-    confidence_ellipses = FALSE) {
+    confidence_ellipses = FALSE,
+    show_summary = FALSE,
+    show_assumptions = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("hullplot requires jmvcore to be installed (restart may be required)")
@@ -403,7 +439,9 @@ hullplot <- function(
         hull_expand = hull_expand,
         show_statistics = show_statistics,
         outlier_detection = outlier_detection,
-        confidence_ellipses = confidence_ellipses)
+        confidence_ellipses = confidence_ellipses,
+        show_summary = show_summary,
+        show_assumptions = show_assumptions)
 
     analysis <- hullplotClass$new(
         options = options,

@@ -24,7 +24,9 @@ hullplot(
   hull_expand = 0.05,
   show_statistics = FALSE,
   outlier_detection = FALSE,
-  confidence_ellipses = FALSE
+  confidence_ellipses = FALSE,
+  show_summary = FALSE,
+  show_assumptions = FALSE
 )
 }
 \arguments{
@@ -77,6 +79,12 @@ outliers within groups.}
 
 \item{confidence_ellipses}{If TRUE, adds confidence ellipses in addition to
 hull polygons.}
+
+\item{show_summary}{If TRUE, displays a plain-language summary of the
+results with copy-ready text.}
+
+\item{show_assumptions}{If TRUE, displays data requirements, assumptions,
+and usage guidelines.}
 }
 \value{
 A results object containing:
@@ -86,6 +94,8 @@ A results object containing:
 \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
 \code{results$outliers} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

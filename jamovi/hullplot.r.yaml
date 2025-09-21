@@ -30,6 +30,16 @@ items:
       title: Interpretation Guide
       type: Html
 
+    - name: summary
+      title: Natural Language Summary
+      type: Html
+      visible: (show_summary)
+
+    - name: assumptions
+      title: Assumptions & Guidelines
+      type: Html
+      visible: (show_assumptions)
+
 
 refs:
     - ClinicoPathJamoviModule

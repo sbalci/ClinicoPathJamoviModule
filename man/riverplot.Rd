@@ -227,6 +227,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+\code{results$about_analysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$diagnostics} \tab \tab \tab \tab \tab a html \cr
 \code{results$flowTable} \tab \tab \tab \tab \tab a table \cr

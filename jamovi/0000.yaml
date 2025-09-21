@@ -1784,7 +1784,7 @@ analyses:
   - title: River Plots & Alluvial Diagrams
     name: riverplot
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: ExplorationD
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots & Alluvial Diagrams
     menuSubtitle: Flow, Stream, and Transition Visualization
