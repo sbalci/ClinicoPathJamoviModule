@@ -1,0 +1,368 @@
+---
+title: "Clinical Heatmap: Advanced Visualization for Biomedical Data"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Clinical Heatmap: Advanced Visualization for Biomedical Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 8,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE  # Set to FALSE to prevent execution during package build
+)
+```
+
+# Introduction
+
+The Clinical Heatmap module leverages the powerful `tidyheatmaps` package to create sophisticated visualizations of multivariate clinical and biomedical data. This comprehensive guide demonstrates how to create publication-ready heatmaps for various clinical research applications.
+
+**Key Features:**
+- **Tidy Data Integration**: Works directly with long-format clinical datasets
+- **Clinical Annotations**: Row and column annotations for patient/biomarker characteristics
+- **Flexible Scaling**: Multiple normalization methods for different data types
+- **Advanced Clustering**: Hierarchical clustering to reveal data patterns
+- **Publication Ready**: High-quality outputs with customizable aesthetics
+
+## When to Use Clinical Heatmaps
+
+Clinical heatmaps are particularly valuable for:
+
+1. **Biomarker Expression Profiling**: Visualizing multi-marker panels across patient cohorts
+2. **Genomic Data Analysis**: Gene expression matrices and mutation landscapes
+3. **Quality Control Assessment**: Batch effects and instrument performance monitoring
+4. **Treatment Response Patterns**: Longitudinal measurements and therapeutic outcomes
+5. **Precision Medicine Applications**: Molecular subtyping and therapeutic target identification
+
+```{r load-packages}
+library(ClinicoPath)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+# Data Format Requirements
+
+The Clinical Heatmap function expects data in **tidy (long) format** with three essential columns:
+
+- **Row Variable**: Defines heatmap rows (e.g., patient IDs, gene names, samples)
+- **Column Variable**: Defines heatmap columns (e.g., biomarkers, time points, treatments)
+- **Value Variable**: Numeric values to visualize (e.g., expression levels, scores, measurements)
+
+```{r data-format-example}
+# Example of proper tidy format for clinical heatmaps
+example_data <- data.frame(
+  patient_id = rep(paste0("Patient_", 1:20), each = 5),
+  biomarker = rep(c("ER", "PR", "HER2", "Ki67", "p53"), 20),
+  expression_score = rnorm(100, mean = 50, sd = 15),
+  tumor_stage = rep(c("I", "II", "III", "IV"), length.out = 100),
+  treatment = rep(c("ChemoA", "ChemoB", "Targeted"), length.out = 100)
+)
+
+head(example_data)
+```
+
+# Application 1: Biomarker Expression Profiling
+
+## Basic Biomarker Heatmap
+
+Let's start with a simple biomarker expression heatmap using clinical data:
+
+```{r biomarker-basic}
+# Create sample biomarker expression data
+set.seed(123)
+biomarker_data <- expand.grid(
+  patient_id = paste0("P", sprintf("%03d", 1:50)),
+  biomarker = c("ER", "PR", "HER2", "Ki67", "p53", "EGFR", "VEGF", "CD31")
+) %>%
+  mutate(
+    expression_level = case_when(
+      biomarker %in% c("ER", "PR") ~ rnorm(n(), mean = 75, sd = 20),
+      biomarker == "HER2" ~ rnorm(n(), mean = 25, sd = 15),
+      biomarker == "Ki67" ~ rnorm(n(), mean = 40, sd = 25),
+      TRUE ~ rnorm(n(), mean = 50, sd = 20)
+    ),
+    # Add clinical annotations
+    tumor_type = rep(c("Luminal A", "Luminal B", "HER2+", "Triple Negative", "Other"),
+                     length.out = n()),
+    grade = rep(c("Grade 1", "Grade 2", "Grade 3"), length.out = n())
+  ) %>%
+  # Ensure realistic expression ranges
+  mutate(expression_level = pmax(0, pmin(100, expression_level)))
+
+# Basic heatmap without scaling
+clinicalheatmap(
+  data = biomarker_data,
+  rowVar = "patient_id",
+  colVar = "biomarker",
+  valueVar = "expression_level",
+  colorPalette = "RdBu",
+  showDataSummary = TRUE
+)
+```
+
+## Enhanced Biomarker Heatmap with Annotations
+
+```{r biomarker-enhanced}
+# Enhanced heatmap with clinical annotations and scaling
+clinicalheatmap(
+  data = biomarker_data,
+  rowVar = "patient_id",
+  colVar = "biomarker",
+  valueVar = "expression_level",
+  annotationCols = c("tumor_type", "grade"),
+  scaleMethod = "row",  # Z-score scaling within each patient
+  clusterRows = TRUE,
+  clusterCols = TRUE,
+  colorPalette = "viridis",
+  showRownames = FALSE,  # Hide patient IDs for cleaner visualization
+  showColnames = TRUE,
+  showDataSummary = TRUE,
+  showInterpretation = TRUE
+)
+```
+
+# Application 2: Genomic Data Visualization
+
+## Gene Expression Heatmap
+
+```{r gene-expression}
+# Create sample gene expression data
+set.seed(456)
+gene_data <- expand.grid(
+  sample_id = paste0("Sample_", sprintf("%02d", 1:30)),
+  gene = paste0("Gene_", LETTERS[1:15])
+) %>%
+  mutate(
+    # Simulate different expression patterns
+    log2_expression = case_when(
+      gene %in% paste0("Gene_", c("A", "B", "C")) ~ rnorm(n(), mean = 8, sd = 1.5),
+      gene %in% paste0("Gene_", c("D", "E", "F")) ~ rnorm(n(), mean = 6, sd = 1),
+      gene %in% paste0("Gene_", c("G", "H", "I")) ~ rnorm(n(), mean = 4, sd = 2),
+      TRUE ~ rnorm(n(), mean = 5, sd = 1.5)
+    ),
+    # Add sample annotations
+    cancer_type = rep(c("Type A", "Type B", "Type C"), length.out = n()),
+    mutation_status = rep(c("Wild-type", "Mutated"), length.out = n()),
+    treatment_response = rep(c("Responder", "Non-responder"), length.out = n())
+  )
+
+# Gene expression heatmap with column scaling
+clinicalheatmap(
+  data = gene_data,
+  rowVar = "sample_id",
+  colVar = "gene",
+  valueVar = "log2_expression",
+  annotationCols = c("cancer_type", "mutation_status", "treatment_response"),
+  scaleMethod = "column",  # Z-score scaling within each gene
+  clusterRows = TRUE,
+  clusterCols = TRUE,
+  colorPalette = "plasma",
+  showDataSummary = TRUE
+)
+```
+
+# Application 3: Quality Control Monitoring
+
+## Batch Effect Visualization
+
+```{r quality-control}
+# Create sample quality control data showing batch effects
+set.seed(789)
+qc_data <- expand.grid(
+  sample_id = paste0("QC_", sprintf("%03d", 1:40)),
+  assay = c("Assay_1", "Assay_2", "Assay_3", "Assay_4", "Assay_5", "Assay_6")
+) %>%
+  mutate(
+    batch = rep(paste0("Batch_", 1:4), length.out = n()),
+    # Simulate batch effects
+    measurement = case_when(
+      batch == "Batch_1" ~ rnorm(n(), mean = 100, sd = 10),
+      batch == "Batch_2" ~ rnorm(n(), mean = 105, sd = 12),
+      batch == "Batch_3" ~ rnorm(n(), mean = 95, sd = 8),
+      batch == "Batch_4" ~ rnorm(n(), mean = 102, sd = 15)
+    ),
+    instrument = rep(c("Instrument_A", "Instrument_B"), length.out = n()),
+    technician = rep(c("Tech_1", "Tech_2", "Tech_3"), length.out = n())
+  )
+
+# QC heatmap to identify batch effects
+clinicalheatmap(
+  data = qc_data,
+  rowVar = "sample_id",
+  colVar = "assay",
+  valueVar = "measurement",
+  annotationCols = c("batch", "instrument", "technician"),
+  scaleMethod = "column",  # Standardize each assay
+  clusterRows = TRUE,
+  clusterCols = FALSE,  # Don't cluster assays to maintain order
+  colorPalette = "RdYlBu",
+  showDataSummary = TRUE,
+  showInterpretation = TRUE
+)
+```
+
+# Application 4: Treatment Response Analysis
+
+## Longitudinal Treatment Response
+
+```{r treatment-response}
+# Create longitudinal treatment response data
+set.seed(101112)
+response_data <- expand.grid(
+  patient_id = paste0("PT_", sprintf("%02d", 1:25)),
+  timepoint = c("Baseline", "Week_4", "Week_8", "Week_12", "Week_24")
+) %>%
+  mutate(
+    # Simulate different response patterns
+    response_score = case_when(
+      timepoint == "Baseline" ~ rnorm(n(), mean = 100, sd = 15),
+      timepoint == "Week_4" ~ rnorm(n(), mean = 85, sd = 20),
+      timepoint == "Week_8" ~ rnorm(n(), mean = 70, sd = 25),
+      timepoint == "Week_12" ~ rnorm(n(), mean = 60, sd = 30),
+      timepoint == "Week_24" ~ rnorm(n(), mean = 50, sd = 35)
+    ),
+    # Add patient characteristics
+    treatment_arm = rep(c("Treatment_A", "Treatment_B", "Placebo"), length.out = n()),
+    baseline_severity = rep(c("Mild", "Moderate", "Severe"), length.out = n()),
+    age_group = rep(c("Young", "Middle", "Elderly"), length.out = n())
+  ) %>%
+  # Ensure realistic score ranges
+  mutate(response_score = pmax(0, pmin(150, response_score)))
+
+# Treatment response heatmap
+clinicalheatmap(
+  data = response_data,
+  rowVar = "patient_id",
+  colVar = "timepoint",
+  valueVar = "response_score",
+  annotationCols = c("treatment_arm", "baseline_severity", "age_group"),
+  scaleMethod = "row",  # Show change from baseline for each patient
+  clusterRows = TRUE,
+  clusterCols = FALSE,  # Maintain temporal order
+  colorPalette = "inferno",
+  showDataSummary = TRUE,
+  showInterpretation = TRUE
+)
+```
+
+# Advanced Features
+
+## Missing Data Handling
+
+```{r missing-data}
+# Create data with missing values
+missing_data <- biomarker_data %>%
+  # Introduce random missing values
+  mutate(
+    expression_level = ifelse(runif(n()) < 0.15, NA, expression_level)
+  )
+
+# Heatmap with different missing data strategies
+clinicalheatmap(
+  data = missing_data,
+  rowVar = "patient_id",
+  colVar = "biomarker",
+  valueVar = "expression_level",
+  naHandling = "median",  # Replace with median values
+  scaleMethod = "column",
+  colorPalette = "Blues",
+  showDataSummary = TRUE
+)
+```
+
+## Custom Export Settings
+
+```{r export-settings}
+# Heatmap optimized for publication
+clinicalheatmap(
+  data = biomarker_data,
+  rowVar = "patient_id",
+  colVar = "biomarker",
+  valueVar = "expression_level",
+  annotationCols = "tumor_type",
+  scaleMethod = "row",
+  clusterRows = TRUE,
+  clusterCols = TRUE,
+  colorPalette = "RdBu",
+  showRownames = FALSE,
+  showColnames = TRUE,
+  exportWidth = 12,    # Wider for publication
+  exportHeight = 8,    # Taller for better readability
+  showDataSummary = FALSE,  # Clean output for publication
+  showInterpretation = FALSE
+)
+```
+
+# Interpretation Guidelines
+
+## Understanding Heatmap Patterns
+
+When interpreting clinical heatmaps, consider:
+
+### 1. Color Intensity
+- **High intensity**: Strong signal or high expression
+- **Low intensity**: Weak signal or low expression
+- **Scale-dependent**: Interpretation changes based on scaling method
+
+### 2. Clustering Patterns
+- **Row clusters**: Groups of patients/samples with similar profiles
+- **Column clusters**: Related biomarkers or measurements
+- **Block patterns**: Coordinated regulation or shared biology
+
+### 3. Missing Data Impact
+- **Random missingness**: Usually minimal impact on patterns
+- **Systematic missingness**: May indicate technical issues or biological differences
+- **Imputation effects**: Consider how missing value handling affects interpretation
+
+### 4. Clinical Context
+- **Biological plausibility**: Patterns should make biological sense
+- **Technical factors**: Consider batch effects, sample quality, assay performance
+- **Statistical significance**: Heatmaps show patterns, not statistical significance
+
+# Best Practices
+
+## Data Preparation
+1. **Quality Control**: Remove low-quality samples and unreliable measurements
+2. **Normalization**: Apply appropriate scaling based on data type and research question
+3. **Annotation**: Include relevant clinical and technical metadata
+4. **Documentation**: Record data processing steps for reproducibility
+
+## Visualization Design
+1. **Color Choice**: Use colorblind-friendly palettes for accessibility
+2. **Scale Selection**: Choose scaling method appropriate for your research question
+3. **Clustering**: Consider whether hierarchical clustering adds meaningful information
+4. **Annotation**: Balance information content with visual clarity
+
+## Statistical Considerations
+1. **Multiple Testing**: Consider correction for multiple comparisons if testing hypotheses
+2. **Effect Size**: Focus on clinically meaningful differences, not just statistical significance
+3. **Validation**: Confirm patterns in independent datasets when possible
+4. **Interpretation**: Remember that heatmaps show associations, not causation
+
+# Clinical Applications Summary
+
+The Clinical Heatmap module is particularly powerful for:
+
+- **Precision Medicine**: Identifying molecular subtypes and therapeutic targets
+- **Clinical Trials**: Visualizing treatment response patterns and biomarker changes
+- **Diagnostic Development**: Profiling biomarker panels for disease classification
+- **Quality Assurance**: Monitoring laboratory performance and identifying batch effects
+- **Research Publication**: Creating publication-ready visualizations of complex datasets
+
+## Citation
+
+When using the Clinical Heatmap module in publications, please cite:
+
+> ClinicoPath Clinical Heatmap module, powered by tidyheatmaps package for advanced
+> biomedical data visualization. Available at: https://github.com/sbalci/ClinicoPathJamoviModule
+
+For the underlying tidyheatmaps package, please also cite the original package documentation.

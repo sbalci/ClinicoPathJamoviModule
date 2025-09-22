@@ -18,7 +18,7 @@ classicalSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             alpha = 0.025,
             beta = 0.1,
             power = 0.9,
-            sided = "1",
+            sided = "one_sided",
             entry_type = "unif",
             gamma = 0,
             sample_size_input = 100,
@@ -118,9 +118,9 @@ classicalSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
                 "sided",
                 sided,
                 options=list(
-                    "1",
-                    "2"),
-                default="1")
+                    "one_sided",
+                    "two_sided"),
+                default="one_sided")
             private$..entry_type <- jmvcore::OptionList$new(
                 "entry_type",
                 entry_type,
@@ -518,7 +518,7 @@ classicalSurvivalPower <- function(
     alpha = 0.025,
     beta = 0.1,
     power = 0.9,
-    sided = "1",
+    sided = "one_sided",
     entry_type = "unif",
     gamma = 0,
     sample_size_input = 100,

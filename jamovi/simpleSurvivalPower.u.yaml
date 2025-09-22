@@ -12,6 +12,11 @@ children:
         margin: large
         children:
           - type: ComboBox
+            name: clinical_preset
+            label: "Clinical Study Preset (Quick Setup)"
+            events:
+              change: ./simpleSurvivalPower.events::onChange_clinicalPreset
+          - type: ComboBox
             name: analysis_type
           - type: ComboBox
             name: test_type
@@ -33,14 +38,17 @@ children:
             name: effect_size
             format: number
             suffix: "(HR < 1 favors treatment)"
+            label: "Effect Size (Hazard Ratio)"
           - type: TextBox
             name: alpha_level
             format: number
             suffix: "(typically 0.05)"
+            label: "Significance Level (Alpha)"
           - type: TextBox
             name: power_level
             format: number
             suffix: "(typically 0.80)"
+            label: "Statistical Power (1-Beta)"
           - type: TextBox
             name: allocation_ratio
             format: number
@@ -163,6 +171,7 @@ children:
             format: number
           - type: CheckBox
             name: sensitivity_analysis
+            label: "Perform Sensitivity Analysis"
           - type: TextBox
             name: simulation_runs
             format: number

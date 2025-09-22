@@ -13,7 +13,7 @@ description:
         Implements Latent Class Analysis (Hui & Walter, 1980), Bayesian methods (Joseph et al., 1995), 
         and composite reference standards for estimating test performance when no perfect reference test exists.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic example with simulated diagnostic test data
             set.seed(123)
@@ -129,6 +129,7 @@ options:
       description:
           R: >
             Third diagnostic test variable (optional).
+      default: NULL
 
     - name: test3Positive
       title: Positive Level
@@ -146,6 +147,8 @@ options:
       description:
           R: >
             Fourth diagnostic test variable (optional).
+      default: NULL
+
 
     - name: test4Positive
       title: Positive Level
@@ -163,6 +166,8 @@ options:
       description:
           R: >
             Fifth diagnostic test variable (optional).
+      default: NULL
+
 
     - name: test5Positive
       title: Positive Level

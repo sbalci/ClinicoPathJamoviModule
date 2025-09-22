@@ -1,0 +1,113 @@
+---
+name: clinicalheatmap
+title: Clinical Heatmap
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith: []
+
+    - name: aboutAnalysis
+      title: About This Analysis
+      type: Html
+      visible: true
+      clearWith: []
+
+    - name: dataSummary
+      title: Data Summary
+      type: Group
+      visible: (showDataSummary)
+      items:
+        - name: dataStructure
+          title: Data Structure
+          type: Table
+          columns:
+            - name: dimension
+              title: Dimension
+              type: text
+            - name: value
+              title: Value
+              type: text
+          clearWith: []
+
+        - name: valueSummary
+          title: Value Variable Summary
+          type: Table
+          columns:
+            - name: statistic
+              title: Statistic
+              type: text
+            - name: value
+              title: Value
+              type: number
+          clearWith: []
+
+        - name: missingData
+          title: Missing Data Report
+          type: Table
+          columns:
+            - name: variable
+              title: Variable
+              type: text
+            - name: missing_count
+              title: Missing Count
+              type: integer
+            - name: missing_pct
+              title: Missing %
+              type: number
+          clearWith: []
+
+    - name: heatmap
+      title: Clinical Heatmap
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotHeatmap
+      visible: true
+      clearWith: []
+
+    - name: annotations
+      title: Annotation Summary
+      type: Group
+      visible: (annotationCols || annotationRows)
+      items:
+        - name: columnAnnotations
+          title: Column Annotations
+          type: Html
+          visible: (annotationCols)
+          clearWith: []
+
+        - name: rowAnnotations
+          title: Row Annotations
+          type: Html
+          visible: (annotationRows)
+          clearWith: []
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: (showInterpretation)
+      clearWith: []
+
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      visible: true
+      clearWith: []
+
+    - name: reportSentences
+      title: Report Sentences
+      type: Html
+      visible: true
+      clearWith: []
+
+    - name: assumptions
+      title: Assumptions & Notes
+      type: Html
+      visible: true
+      clearWith: []
+
+...

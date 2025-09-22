@@ -5,6 +5,7 @@
 \title{Simple Survival Power Analysis (Basic)}
 \usage{
 simpleSurvivalPower(
+  clinicalPreset = "custom",
   analysis_type = "sample_size",
   test_type = "log_rank",
   study_design = "two_arm_parallel",
@@ -42,6 +43,10 @@ simpleSurvivalPower(
 )
 }
 \arguments{
+\item{clinicalPreset}{Pre-configured parameter sets for common clinical
+trial designs. Selecting a preset will automatically populate appropriate
+values.}
+
 \item{analysis_type}{Type of power analysis to perform}
 
 \item{test_type}{Type of statistical test for power calculation}

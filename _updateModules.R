@@ -637,86 +637,129 @@ copy_module_files_enhanced <- function(module_names, source_dir, dest_dir, file_
   return(list(copied = copied_count, skipped = skipped_count, failed = failed_count))
 }
 
-# Copy JavaScript and HTML files from jamovi/js and jamovi/html directories
+# Enhanced copy function for JavaScript and HTML files - detects files for any function
 copy_jamovi_assets <- function(module_names, source_base_dir, dest_base_dir, module_type = "unknown") {
   cat("\n🎯 Copying", module_type, "JavaScript and HTML assets...\n")
-  
+
   if (length(module_names) == 0) {
     cat("  ⏭️ No", module_type, "modules to process\n")
-    return(list(copied = 0, skipped = 0, failed = 0))
+    return(list(copied = 0, failed = 0))
   }
-  
+
+
   copied_count <- 0
-  skipped_count <- 0
   failed_count <- 0
-  
+
   # JavaScript files from jamovi/js/
   js_source_dir <- file.path(source_base_dir, "jamovi", "js")
   js_dest_dir <- file.path(dest_base_dir, "jamovi", "js")
-  
+
   if (dir.exists(js_source_dir)) {
     if (!dir.exists(js_dest_dir)) {
       dir.create(js_dest_dir, recursive = TRUE)
     }
-    
-    # Find JavaScript files related to our modules
+
+    # Enhanced detection: find ALL JavaScript files related to our modules
+    copied_files <- character(0)  # Track already copied files to avoid duplicates
+
     for (module_name in module_names) {
-      js_files <- list.files(js_source_dir, pattern = paste0("^", module_name, ".*\\.js$"), full.names = TRUE)
-      
-      for (js_file in js_files) {
-        dest_file <- file.path(js_dest_dir, basename(js_file))
-        
-        copy_result <- tryCatch({
-          file.copy(js_file, dest_file, overwrite = TRUE)
-          cat("  ✅ Copied JS:", basename(js_file), "\n")
-          copied_count <- copied_count + 1
-          TRUE
-        }, error = function(e) {
-          warning("⚠️ Failed to copy JS file ", basename(js_file), ": ", e$message)
-          failed_count <- failed_count + 1
-          FALSE
-        })
+      # Multiple patterns to catch various JavaScript file naming conventions:
+      # 1. Direct match: moduleName.js, moduleName.events.js
+      # 2. Prefix match: moduleName*.js (catches events, helpers, etc.)
+      # 3. Exact event files: moduleName.events.js, moduleName.handlers.js, etc.
+
+      js_patterns <- c(
+        paste0("^", module_name, "\\.js$"),                    # moduleName.js
+        paste0("^", module_name, "\\.events\\.js$"),          # moduleName.events.js
+        paste0("^", module_name, "\\.handlers\\.js$"),        # moduleName.handlers.js
+        paste0("^", module_name, "\\.helpers\\.js$"),         # moduleName.helpers.js
+        paste0("^", module_name, ".*\\.js$")                  # moduleName*.js (catch-all)
+      )
+
+      for (pattern in js_patterns) {
+        js_files <- list.files(js_source_dir, pattern = pattern, full.names = TRUE)
+
+        for (js_file in js_files) {
+          dest_file <- file.path(js_dest_dir, basename(js_file))
+
+          # Skip if we already copied this file (avoid duplicates from multiple patterns)
+          if (basename(js_file) %in% copied_files) {
+            next
+          }
+
+          copy_result <- tryCatch({
+            file.copy(js_file, dest_file, overwrite = TRUE)
+            cat("  ✅ Copied JS:", basename(js_file), "for", module_name, "\n")
+            copied_files <- c(copied_files, basename(js_file))
+            copied_count <- copied_count + 1
+            TRUE
+          }, error = function(e) {
+            warning("⚠️ Failed to copy JS file ", basename(js_file), ": ", e$message)
+            failed_count <- failed_count + 1
+            FALSE
+          })
+        }
       }
     }
+  } else {
+    cat("  ℹ️ No JavaScript source directory found:", js_source_dir, "\n")
   }
-  
+
   # HTML files from jamovi/html/ (less common but included for completeness)
   html_source_dir <- file.path(source_base_dir, "jamovi", "html")
   html_dest_dir <- file.path(dest_base_dir, "jamovi", "html")
-  
+
   if (dir.exists(html_source_dir)) {
     if (!dir.exists(html_dest_dir)) {
       dir.create(html_dest_dir, recursive = TRUE)
     }
-    
-    # Find HTML files related to our modules
+
+    # Enhanced detection for HTML files
+    copied_html_files <- character(0)  # Track already copied HTML files
+
     for (module_name in module_names) {
-      html_files <- list.files(html_source_dir, pattern = paste0("^", module_name, ".*\\.html$"), full.names = TRUE)
-      
-      for (html_file in html_files) {
-        dest_file <- file.path(html_dest_dir, basename(html_file))
-        
-        copy_result <- tryCatch({
-          file.copy(html_file, dest_file, overwrite = TRUE)
-          cat("  ✅ Copied HTML:", basename(html_file), "\n")
-          copied_count <- copied_count + 1
-          TRUE
-        }, error = function(e) {
-          warning("⚠️ Failed to copy HTML file ", basename(html_file), ": ", e$message)
-          failed_count <- failed_count + 1
-          FALSE
-        })
+      html_patterns <- c(
+        paste0("^", module_name, "\\.html$"),
+        paste0("^", module_name, ".*\\.html$")
+      )
+
+      for (pattern in html_patterns) {
+        html_files <- list.files(html_source_dir, pattern = pattern, full.names = TRUE)
+
+        for (html_file in html_files) {
+          dest_file <- file.path(html_dest_dir, basename(html_file))
+
+          # Skip if we already copied this file (avoid duplicates from multiple patterns)
+          if (basename(html_file) %in% copied_html_files) {
+            next
+          }
+
+          copy_result <- tryCatch({
+            file.copy(html_file, dest_file, overwrite = TRUE)
+            cat("  ✅ Copied HTML:", basename(html_file), "for", module_name, "\n")
+            copied_html_files <- c(copied_html_files, basename(html_file))
+            copied_count <- copied_count + 1
+            TRUE
+          }, error = function(e) {
+            warning("⚠️ Failed to copy HTML file ", basename(html_file), ": ", e$message)
+            failed_count <- failed_count + 1
+            FALSE
+          })
+        }
       }
     }
+  } else {
+    cat("  ℹ️ No HTML source directory found:", html_source_dir, "\n")
   }
-  
+
+
   if (copied_count > 0) {
     cat("  ✅", copied_count, "asset files copied successfully\n")
   } else if (failed_count == 0) {
     cat("  ℹ️ No JavaScript/HTML assets found for", module_type, "modules\n")
   }
-  
-  return(list(copied = copied_count, skipped = skipped_count, failed = failed_count))
+
+  return(list(copied = copied_count, failed = failed_count))
 }
 
 # Enhanced Git commit function with comprehensive validation
