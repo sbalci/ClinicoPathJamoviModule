@@ -67,7 +67,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..test3Positive <- jmvcore::OptionLevel$new(
                 "test3Positive",
                 test3Positive,
@@ -78,7 +79,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..test4Positive <- jmvcore::OptionLevel$new(
                 "test4Positive",
                 test4Positive,
@@ -89,7 +91,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..test5Positive <- jmvcore::OptionLevel$new(
                 "test5Positive",
                 test5Positive,
@@ -369,6 +372,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic example with simulated diagnostic test data
 #' set.seed(123)
 #' n <- 200
@@ -415,7 +419,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     nboot = 500,
 #'     verbose = TRUE
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param clinicalPreset Predefined clinical scenarios with optimized settings
 #'   and method recommendations.
@@ -461,11 +465,11 @@ nogoldstandard <- function(
     test1Positive,
     test2,
     test2Positive,
-    test3,
+    test3 = NULL,
     test3Positive,
-    test4,
+    test4 = NULL,
     test4Positive,
-    test5,
+    test5 = NULL,
     test5Positive,
     method = "all_positive",
     bootstrap = FALSE,

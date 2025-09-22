@@ -43,6 +43,9 @@ is it necessary to implement escapeVariableNames logic from modelbuilder to FUNC
 In tables and plots I see the modified names that is why I am asking
 can we apply labelled logic as in oddsratio
 
+check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js> and <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39>  to implement it for clinical presets
+https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R
+
 > implement welcome/introductory message styling of decisionpanel.
 
 ! Rscript -e "jmvtools::prepare()"
@@ -51,7 +54,7 @@ can we apply labelled logic as in oddsratio
 run jmvtools::prepare() to see if there are any errors
 run devtools::document() to see if there are any errors
 
-prepare a realistic data to test the features in detail 
+prepare a realistic data to test the features in detail
 move csv files under data folder.
 move data generation files under data-raw folder.
 move documentation files under vignettes folder.

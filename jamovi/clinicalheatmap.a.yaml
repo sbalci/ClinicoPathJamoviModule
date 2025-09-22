@@ -1,0 +1,222 @@
+---
+name: clinicalheatmap
+title: Clinical Heatmap
+menuGroup: OncoPathT
+menuSubgroup: Visualization
+menuSubtitle: Tidy Heatmaps for Clinical Data
+version: '0.0.31'
+jas: '1.2'
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The dataset as a data frame containing the variables for analysis.
+          jamovi: >
+            The data as a data frame.
+
+    - name: rowVar
+      title: 'Row Variable (Required)'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            A string naming the variable from `data` that will define the heatmap rows (e.g., patient IDs, gene names).
+          jamovi: >
+            A string naming the variable that will define the rows.
+
+    - name: colVar
+      title: 'Column Variable (Required)'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            A string naming the variable from `data` that will define the heatmap columns (e.g., biomarkers, time points).
+          jamovi: >
+            A string naming the variable that will define the columns.
+
+    - name: valueVar
+      title: 'Value Variable (Required)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            A string naming the numeric variable from `data` that will be visualized in the heatmap.
+          jamovi: >
+            A string naming the numeric variable to visualize.
+
+    - name: annotationCols
+      title: 'Column Annotations (Optional)'
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional variables to use as column annotations (e.g., treatment groups, clinical stages).
+          jamovi: >
+            Optional variables for column annotations.
+
+    - name: annotationRows
+      title: 'Row Annotations (Optional)'
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional variables to use as row annotations (e.g., patient characteristics, gene families).
+          jamovi: >
+            Optional variables for row annotations.
+
+    - name: scaleMethod
+      title: 'Scaling Method'
+      type: List
+      options:
+        - name: none
+          title: 'None'
+        - name: row
+          title: 'Scale by Row (Z-score)'
+        - name: column
+          title: 'Scale by Column (Z-score)'
+        - name: both
+          title: 'Scale Both'
+      default: none
+      description:
+          R: >
+            Method for scaling the data values before visualization.
+          jamovi: >
+            Choose how to scale the data values.
+
+    - name: clusterRows
+      title: 'Cluster Rows'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to perform hierarchical clustering on rows.
+          jamovi: >
+            Cluster rows using hierarchical clustering.
+
+    - name: clusterCols
+      title: 'Cluster Columns'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to perform hierarchical clustering on columns.
+          jamovi: >
+            Cluster columns using hierarchical clustering.
+
+    - name: colorPalette
+      title: 'Color Palette'
+      type: List
+      options:
+        - name: viridis
+          title: 'Viridis (Blue-Purple-Yellow)'
+        - name: plasma
+          title: 'Plasma (Purple-Pink-Yellow)'
+        - name: inferno
+          title: 'Inferno (Black-Red-Yellow)'
+        - name: RdYlBu
+          title: 'Red-Yellow-Blue'
+        - name: RdBu
+          title: 'Red-Blue'
+        - name: Blues
+          title: 'Blues'
+        - name: Reds
+          title: 'Reds'
+      default: viridis
+      description:
+          R: >
+            Color palette for the heatmap visualization.
+          jamovi: >
+            Choose the color scheme for the heatmap.
+
+    - name: showRownames
+      title: 'Show Row Names'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display row names in the heatmap.
+          jamovi: >
+            Display row names on the heatmap.
+
+    - name: showColnames
+      title: 'Show Column Names'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display column names in the heatmap.
+          jamovi: >
+            Display column names on the heatmap.
+
+    - name: naHandling
+      title: 'Missing Data Handling'
+      type: List
+      options:
+        - name: exclude
+          title: 'Exclude Missing'
+        - name: mean
+          title: 'Replace with Mean'
+        - name: median
+          title: 'Replace with Median'
+        - name: zero
+          title: 'Replace with Zero'
+      default: exclude
+      description:
+          R: >
+            How to handle missing values in the data.
+          jamovi: >
+            Choose how to handle missing values.
+
+    - name: showDataSummary
+      title: 'Show Data Summary'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display a summary of the data structure and values.
+          jamovi: >
+            Show summary statistics and data information.
+
+    - name: showInterpretation
+      title: 'Show Interpretation Guide'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display interpretation guidelines and clinical context.
+          jamovi: >
+            Show guidance on interpreting the heatmap.
+
+    - name: exportWidth
+      title: 'Export Width (inches)'
+      type: Number
+      min: 3
+      max: 20
+      default: 8
+      description:
+          R: >
+            Width of exported heatmap in inches.
+          jamovi: >
+            Width for exported plots.
+
+    - name: exportHeight
+      title: 'Export Height (inches)'
+      type: Number
+      min: 3
+      max: 20
+      default: 6
+      description:
+          R: >
+            Height of exported heatmap in inches.
+          jamovi: >
+            Height for exported plots.
+
+...

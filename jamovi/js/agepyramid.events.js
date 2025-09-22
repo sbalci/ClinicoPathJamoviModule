@@ -43,12 +43,13 @@ const events = {
         }
     },
 
-    // Color validation and feedback
+    // Color validation (validation only, no auto-reset to prevent recursive calls)
     onChange_color1: function(ui) {
         let color = ui.color1.value();
         // Basic color validation - ensure it's a valid hex color or named color
         if (color && !color.match(/^#[0-9A-Fa-f]{6}$/) && !color.match(/^[a-zA-Z]+$/)) {
-            // Could add validation feedback here in future
+            // Log validation issue but don't auto-reset to prevent onChange loops
+            console.warn("Invalid color format for color1:", color);
         }
     },
 
@@ -56,7 +57,8 @@ const events = {
         let color = ui.color2.value();
         // Basic color validation - ensure it's a valid hex color or named color
         if (color && !color.match(/^#[0-9A-Fa-f]{6}$/) && !color.match(/^[a-zA-Z]+$/)) {
-            // Could add validation feedback here in future
+            // Log validation issue but don't auto-reset to prevent onChange loops
+            console.warn("Invalid color format for color2:", color);
         }
     },
 

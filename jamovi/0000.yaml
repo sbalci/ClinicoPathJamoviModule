@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.72
+version: 0.0.31.73
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-21'
+date: '2025-09-22'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -133,6 +133,22 @@ analyses:
       patient timelines,  clinical events, milestones, and treatment responses.
       Features enhanced data validation  and complete ggswim integration for
       professional clinical visualization.
+    ribbon: analyses
+    category: analyses
+  - title: Clinical Heatmap
+    name: clinicalheatmap
+    ns: ClinicoPath
+    menuGroup: OncoPathT
+    menuSubgroup: Visualization
+    menuTitle: Clinical Heatmap
+    menuSubtitle: Tidy Heatmaps for Clinical Data
+    description: >
+      Advanced heatmap visualization for clinical and biomedical data using the
+      tidyheatmaps package. This function creates publication-ready heatmaps
+      from tidy data with support for clinical annotations, multiple scaling
+      methods, and comprehensive customization options. Perfect for visualizing
+      biomarker expression patterns, treatment responses, genomic data, and
+      quality control metrics in clinical research.
     ribbon: analyses
     category: analyses
   - title: Genomic Landscape Visualization
@@ -618,7 +634,7 @@ analyses:
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Continuous vs Continuous
     menuTitle: Hull Plot
     menuSubtitle: Cluster Visualization with ggforce
@@ -4277,7 +4293,7 @@ analyses:
     name: clinicalvalidationinteractive
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Interactive Clinical Model Validation
     menuSubtitle: Interactive validation with real-time parameter optimization

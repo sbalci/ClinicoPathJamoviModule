@@ -18,7 +18,7 @@ classicalSurvivalPower(
   alpha = 0.025,
   beta = 0.1,
   power = 0.9,
-  sided = "1",
+  sided = "one_sided",
   entry_type = "unif",
   gamma = 0,
   sample_size_input = 100,

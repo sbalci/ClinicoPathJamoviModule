@@ -8,12 +8,84 @@ items:
       title: Instructions
       type: Html
       visible: true
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - competing_risk_rate
+          - competing_risk_hr
+          - rmst_tau
+          - rmst_difference
+          - snp_maf
+          - genetic_model
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - stratification_factors
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - simulation_runs
 
     - name: power_summary
       title: 'Power Analysis Summary'
       type: Table
       rows: 1
       visible: true
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - competing_risk_rate
+          - competing_risk_hr
+          - rmst_tau
+          - rmst_difference
+          - snp_maf
+          - genetic_model
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - stratification_factors
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - simulation_runs
       columns:
           - name: analysis_type
             title: 'Analysis Type'
@@ -42,6 +114,42 @@ items:
       type: Table
       rows: 0
       visible: (analysis_type=="sample_size")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - competing_risk_rate
+          - competing_risk_hr
+          - rmst_tau
+          - rmst_difference
+          - snp_maf
+          - genetic_model
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - stratification_factors
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - simulation_runs
       columns:
           - name: parameter
             title: 'Parameter'
@@ -58,6 +166,42 @@ items:
       type: Table
       rows: 0
       visible: (analysis_type=="power")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - competing_risk_rate
+          - competing_risk_hr
+          - rmst_tau
+          - rmst_difference
+          - snp_maf
+          - genetic_model
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - stratification_factors
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - simulation_runs
       columns:
           - name: parameter
             title: 'Parameter'
@@ -74,6 +218,42 @@ items:
       type: Table
       rows: 0
       visible: (analysis_type=="effect_size")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - competing_risk_rate
+          - competing_risk_hr
+          - rmst_tau
+          - rmst_difference
+          - snp_maf
+          - genetic_model
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - stratification_factors
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - simulation_runs
       columns:
           - name: parameter
             title: 'Parameter'
@@ -90,6 +270,42 @@ items:
       type: Table
       rows: 0
       visible: (analysis_type=="duration")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - competing_risk_rate
+          - competing_risk_hr
+          - rmst_tau
+          - rmst_difference
+          - snp_maf
+          - genetic_model
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - stratification_factors
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - simulation_runs
       columns:
           - name: parameter
             title: 'Parameter'
@@ -106,6 +322,42 @@ items:
       type: Table
       rows: 0
       visible: true
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - competing_risk_rate
+          - competing_risk_hr
+          - rmst_tau
+          - rmst_difference
+          - snp_maf
+          - genetic_model
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - stratification_factors
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - simulation_runs
       columns:
           - name: assumption
             title: 'Assumption'
@@ -125,6 +377,20 @@ items:
       type: Table
       rows: 0
       visible: (test_type=="competing_risks")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - control_median_survival
+          - accrual_period
+          - follow_up_period
+          - dropout_rate
+          - competing_risk_rate
+          - competing_risk_hr
       columns:
           - name: risk_type
             title: 'Risk Type'
@@ -150,6 +416,16 @@ items:
       type: Table
       rows: 0
       visible: (test_type=="non_inferiority")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - ni_margin
+          - ni_type
       columns:
           - name: parameter
             title: 'Parameter'
@@ -169,6 +445,16 @@ items:
       type: Table
       rows: 0
       visible: (test_type=="rmst_test")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - control_median_survival
+          - rmst_tau
+          - rmst_difference
       columns:
           - name: parameter
             title: 'Parameter'
@@ -191,6 +477,16 @@ items:
       type: Table
       rows: 0
       visible: (test_type=="snp_survival")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - control_median_survival
+          - snp_maf
+          - genetic_model
       columns:
           - name: genetic_model
             title: 'Genetic Model'
@@ -213,6 +509,16 @@ items:
       type: Table
       rows: 0
       visible: (study_design=="multi_arm")
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - number_of_arms
+          - multiple_comparisons
+          - alpha_level
+          - power_level
+          - sample_size_input
       columns:
           - name: comparison
             title: 'Comparison'
@@ -235,6 +541,12 @@ items:
       type: Table
       rows: 0
       visible: (interim_analyses>0)
+      clearWith:
+          - clinical_preset
+          - interim_analyses
+          - alpha_spending
+          - alpha_level
+          - power_level
       columns:
           - name: analysis_number
             title: 'Analysis'
@@ -257,6 +569,14 @@ items:
       type: Table
       rows: 0
       visible: (sensitivity_analysis)
+      clearWith:
+          - clinical_preset
+          - sensitivity_analysis
+          - effect_size
+          - alpha_level
+          - power_level
+          - accrual_period
+          - control_median_survival
       columns:
           - name: parameter
             title: 'Parameter'
@@ -279,6 +599,12 @@ items:
       type: Table
       rows: 0
       visible: true
+      clearWith:
+          - clinical_preset
+          - study_design
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
       columns:
           - name: regulatory_aspect
             title: 'Regulatory Aspect'
@@ -301,6 +627,20 @@ items:
       visible: true
       requiresData: false
       renderFun: .plot_power_curves
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - dropout_rate
 
     - name: sample_size_plot
       title: Sample Size by Effect Size
@@ -310,6 +650,19 @@ items:
       visible: (analysis_type=="sample_size")
       requiresData: false
       renderFun: .plot_sample_size_curves
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - dropout_rate
 
     - name: survival_curves_plot
       title: Expected Survival Curves
@@ -319,6 +672,12 @@ items:
       visible: true
       requiresData: false
       renderFun: .plot_expected_survival
+      clearWith:
+          - clinical_preset
+          - effect_size
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
 
     - name: accrual_timeline_plot
       title: Accrual and Event Timeline
@@ -328,6 +687,12 @@ items:
       visible: true
       requiresData: false
       renderFun: .plot_study_timeline
+      clearWith:
+          - clinical_preset
+          - accrual_period
+          - follow_up_period
+          - dropout_rate
+          - control_median_survival
 
     - name: sensitivity_plot
       title: Sensitivity Analysis
@@ -337,13 +702,37 @@ items:
       visible: (sensitivity_analysis)
       requiresData: false
       renderFun: .plot_sensitivity_analysis
+      clearWith:
+          - clinical_preset
+          - sensitivity_analysis
+          - effect_size
+          - alpha_level
+          - power_level
+          - accrual_period
+          - control_median_survival
 
     - name: clinical_interpretation
       title: Clinical Interpretation and Recommendations
       type: Html
       visible: true
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - control_median_survival
 
 refs:
     - ClinicoPathJamoviModule
+    - powerSurvEpi
+    - gsDesign
+    - survival
+    - ggplot2
+    - scales
 
 ...

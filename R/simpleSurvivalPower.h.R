@@ -6,6 +6,7 @@ simpleSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            clinical_preset = "custom",
             analysis_type = "sample_size",
             test_type = "log_rank",
             study_design = "two_arm_parallel",
@@ -47,6 +48,17 @@ simpleSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 requiresData=FALSE,
                 ...)
 
+            private$..clinical_preset <- jmvcore::OptionList$new(
+                "clinical_preset",
+                clinical_preset,
+                options=list(
+                    "custom",
+                    "oncology_phase3",
+                    "cardio_prevention",
+                    "biomarker_study",
+                    "non_inferiority",
+                    "pilot_study"),
+                default="custom")
             private$..analysis_type <- jmvcore::OptionList$new(
                 "analysis_type",
                 analysis_type,
@@ -285,6 +297,7 @@ simpleSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 min=1000,
                 max=100000)
 
+            self$.addOption(private$..clinical_preset)
             self$.addOption(private$..analysis_type)
             self$.addOption(private$..test_type)
             self$.addOption(private$..study_design)
@@ -321,6 +334,7 @@ simpleSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..simulation_runs)
         }),
     active = list(
+        clinical_preset = function() private$..clinical_preset$value,
         analysis_type = function() private$..analysis_type$value,
         test_type = function() private$..test_type$value,
         study_design = function() private$..study_design$value,
@@ -356,6 +370,7 @@ simpleSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         sensitivity_analysis = function() private$..sensitivity_analysis$value,
         simulation_runs = function() private$..simulation_runs$value),
     private = list(
+        ..clinical_preset = NA,
         ..analysis_type = NA,
         ..test_type = NA,
         ..study_design = NA,
@@ -425,18 +440,95 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Power Analysis & Sample Size Calculation",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "powerSurvEpi",
+                    "gsDesign",
+                    "survival",
+                    "ggplot2",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
                 title="Instructions",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "accrual_pattern",
+                    "dropout_rate",
+                    "ni_margin",
+                    "ni_type",
+                    "competing_risk_rate",
+                    "competing_risk_hr",
+                    "rmst_tau",
+                    "rmst_difference",
+                    "snp_maf",
+                    "genetic_model",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "stratification_factors",
+                    "cluster_size",
+                    "icc",
+                    "sensitivity_analysis",
+                    "simulation_runs")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="power_summary",
                 title="Power Analysis Summary",
                 rows=1,
                 visible=TRUE,
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "accrual_pattern",
+                    "dropout_rate",
+                    "ni_margin",
+                    "ni_type",
+                    "competing_risk_rate",
+                    "competing_risk_hr",
+                    "rmst_tau",
+                    "rmst_difference",
+                    "snp_maf",
+                    "genetic_model",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "stratification_factors",
+                    "cluster_size",
+                    "icc",
+                    "sensitivity_analysis",
+                    "simulation_runs"),
                 columns=list(
                     list(
                         `name`="analysis_type", 
@@ -472,6 +564,42 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Sample Size Calculations",
                 rows=0,
                 visible="(analysis_type==\"sample_size\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "accrual_pattern",
+                    "dropout_rate",
+                    "ni_margin",
+                    "ni_type",
+                    "competing_risk_rate",
+                    "competing_risk_hr",
+                    "rmst_tau",
+                    "rmst_difference",
+                    "snp_maf",
+                    "genetic_model",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "stratification_factors",
+                    "cluster_size",
+                    "icc",
+                    "sensitivity_analysis",
+                    "simulation_runs"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -491,6 +619,42 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Power Analysis Results",
                 rows=0,
                 visible="(analysis_type==\"power\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "accrual_pattern",
+                    "dropout_rate",
+                    "ni_margin",
+                    "ni_type",
+                    "competing_risk_rate",
+                    "competing_risk_hr",
+                    "rmst_tau",
+                    "rmst_difference",
+                    "snp_maf",
+                    "genetic_model",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "stratification_factors",
+                    "cluster_size",
+                    "icc",
+                    "sensitivity_analysis",
+                    "simulation_runs"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -510,6 +674,42 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Detectable Effect Size",
                 rows=0,
                 visible="(analysis_type==\"effect_size\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "accrual_pattern",
+                    "dropout_rate",
+                    "ni_margin",
+                    "ni_type",
+                    "competing_risk_rate",
+                    "competing_risk_hr",
+                    "rmst_tau",
+                    "rmst_difference",
+                    "snp_maf",
+                    "genetic_model",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "stratification_factors",
+                    "cluster_size",
+                    "icc",
+                    "sensitivity_analysis",
+                    "simulation_runs"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -529,6 +729,42 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Study Duration Analysis",
                 rows=0,
                 visible="(analysis_type==\"duration\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "accrual_pattern",
+                    "dropout_rate",
+                    "ni_margin",
+                    "ni_type",
+                    "competing_risk_rate",
+                    "competing_risk_hr",
+                    "rmst_tau",
+                    "rmst_difference",
+                    "snp_maf",
+                    "genetic_model",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "stratification_factors",
+                    "cluster_size",
+                    "icc",
+                    "sensitivity_analysis",
+                    "simulation_runs"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -548,6 +784,42 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Statistical Assumptions",
                 rows=0,
                 visible=TRUE,
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "accrual_pattern",
+                    "dropout_rate",
+                    "ni_margin",
+                    "ni_type",
+                    "competing_risk_rate",
+                    "competing_risk_hr",
+                    "rmst_tau",
+                    "rmst_difference",
+                    "snp_maf",
+                    "genetic_model",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "stratification_factors",
+                    "cluster_size",
+                    "icc",
+                    "sensitivity_analysis",
+                    "simulation_runs"),
                 columns=list(
                     list(
                         `name`="assumption", 
@@ -571,6 +843,20 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Competing Risks Analysis",
                 rows=0,
                 visible="(test_type==\"competing_risks\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "control_median_survival",
+                    "accrual_period",
+                    "follow_up_period",
+                    "dropout_rate",
+                    "competing_risk_rate",
+                    "competing_risk_hr"),
                 columns=list(
                     list(
                         `name`="risk_type", 
@@ -602,6 +888,16 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Non-inferiority Analysis",
                 rows=0,
                 visible="(test_type==\"non_inferiority\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "ni_margin",
+                    "ni_type"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -625,6 +921,16 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="RMST Analysis Parameters",
                 rows=0,
                 visible="(test_type==\"rmst_test\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "control_median_survival",
+                    "rmst_tau",
+                    "rmst_difference"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -652,6 +958,16 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="SNP-based Survival Analysis",
                 rows=0,
                 visible="(test_type==\"snp_survival\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "control_median_survival",
+                    "snp_maf",
+                    "genetic_model"),
                 columns=list(
                     list(
                         `name`="genetic_model", 
@@ -679,6 +995,16 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Multi-arm Trial Analysis",
                 rows=0,
                 visible="(study_design==\"multi_arm\")",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "number_of_arms",
+                    "multiple_comparisons",
+                    "alpha_level",
+                    "power_level",
+                    "sample_size_input"),
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -706,6 +1032,12 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Interim Analysis Plan",
                 rows=0,
                 visible="(interim_analyses>0)",
+                clearWith=list(
+                    "clinical_preset",
+                    "interim_analyses",
+                    "alpha_spending",
+                    "alpha_level",
+                    "power_level"),
                 columns=list(
                     list(
                         `name`="analysis_number", 
@@ -733,6 +1065,14 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Sensitivity Analysis",
                 rows=0,
                 visible="(sensitivity_analysis)",
+                clearWith=list(
+                    "clinical_preset",
+                    "sensitivity_analysis",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "accrual_period",
+                    "control_median_survival"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -760,6 +1100,12 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Regulatory Considerations",
                 rows=0,
                 visible=TRUE,
+                clearWith=list(
+                    "clinical_preset",
+                    "study_design",
+                    "multiple_comparisons",
+                    "interim_analyses",
+                    "alpha_spending"),
                 columns=list(
                     list(
                         `name`="regulatory_aspect", 
@@ -785,7 +1131,21 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 height=450,
                 visible=TRUE,
                 requiresData=FALSE,
-                renderFun=".plot_power_curves"))
+                renderFun=".plot_power_curves",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "dropout_rate")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="sample_size_plot",
@@ -794,7 +1154,20 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 height=450,
                 visible="(analysis_type==\"sample_size\")",
                 requiresData=FALSE,
-                renderFun=".plot_sample_size_curves"))
+                renderFun=".plot_sample_size_curves",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "accrual_period",
+                    "follow_up_period",
+                    "dropout_rate")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survival_curves_plot",
@@ -803,7 +1176,13 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 height=450,
                 visible=TRUE,
                 requiresData=FALSE,
-                renderFun=".plot_expected_survival"))
+                renderFun=".plot_expected_survival",
+                clearWith=list(
+                    "clinical_preset",
+                    "effect_size",
+                    "control_median_survival",
+                    "survival_distribution",
+                    "weibull_shape")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="accrual_timeline_plot",
@@ -812,7 +1191,13 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 height=450,
                 visible=TRUE,
                 requiresData=FALSE,
-                renderFun=".plot_study_timeline"))
+                renderFun=".plot_study_timeline",
+                clearWith=list(
+                    "clinical_preset",
+                    "accrual_period",
+                    "follow_up_period",
+                    "dropout_rate",
+                    "control_median_survival")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="sensitivity_plot",
@@ -821,12 +1206,31 @@ simpleSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 height=450,
                 visible="(sensitivity_analysis)",
                 requiresData=FALSE,
-                renderFun=".plot_sensitivity_analysis"))
+                renderFun=".plot_sensitivity_analysis",
+                clearWith=list(
+                    "clinical_preset",
+                    "sensitivity_analysis",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "accrual_period",
+                    "control_median_survival")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_interpretation",
                 title="Clinical Interpretation and Recommendations",
-                visible=TRUE))}))
+                visible=TRUE,
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "study_design",
+                    "primary_endpoint",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "allocation_ratio",
+                    "control_median_survival")))}))
 
 simpleSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "simpleSurvivalPowerBase",
@@ -872,6 +1276,9 @@ simpleSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     follow_up_period = 36
 #' )
 #'
+#' @param clinical_preset Pre-configured parameter sets for common clinical
+#'   trial designs. Selecting a preset will automatically populate appropriate
+#'   values.
 #' @param analysis_type Type of power analysis to perform
 #' @param test_type Type of statistical test for power calculation
 #' @param study_design Overall study design type
@@ -941,6 +1348,7 @@ simpleSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'
 #' @export
 simpleSurvivalPower <- function(
+    clinical_preset = "custom",
     analysis_type = "sample_size",
     test_type = "log_rank",
     study_design = "two_arm_parallel",
@@ -981,6 +1389,7 @@ simpleSurvivalPower <- function(
 
 
     options <- simpleSurvivalPowerOptions$new(
+        clinical_preset = clinical_preset,
         analysis_type = analysis_type,
         test_type = test_type,
         study_design = study_design,

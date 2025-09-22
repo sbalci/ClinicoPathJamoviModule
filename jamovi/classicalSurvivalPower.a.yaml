@@ -166,10 +166,10 @@ options:
       type: List
       options:
         - title: "One-sided"
-          name: "1"
+          name: one_sided
         - title: "Two-sided"
-          name: "2"
-      default: "1"
+          name: two_sided
+      default: one_sided
       description:
         R: One-sided or two-sided statistical test.
         jamovi: Type of statistical test (one-sided more common in survival).

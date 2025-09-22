@@ -31,6 +31,29 @@ description:
 completeWhenFilled: false
 
 options:
+    # Clinical Presets
+    - name: clinical_preset
+      title: Clinical Study Preset
+      type: List
+      options:
+        - title: "Custom Design"
+          name: custom
+        - title: "Phase III Oncology Trial (HR=0.75, 80% power)"
+          name: oncology_phase3
+        - title: "Cardiovascular Prevention (HR=0.85, 90% power)"
+          name: cardio_prevention
+        - title: "Biomarker Study (HR=0.67, 2:1 allocation)"
+          name: biomarker_study
+        - title: "Non-inferiority Trial (1.25 margin)"
+          name: non_inferiority
+        - title: "Pilot/Feasibility Study (relaxed parameters)"
+          name: pilot_study
+      default: custom
+      description:
+        R: >
+          Pre-configured parameter sets for common clinical trial designs.
+          Selecting a preset will automatically populate appropriate values.
+
     # Analysis Type
     - name: analysis_type
       title: Analysis Type

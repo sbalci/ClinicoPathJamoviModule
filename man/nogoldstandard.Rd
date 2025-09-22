@@ -11,11 +11,11 @@ nogoldstandard(
   test1Positive,
   test2,
   test2Positive,
-  test3,
+  test3 = NULL,
   test3Positive,
-  test4,
+  test4 = NULL,
   test4Positive,
-  test5,
+  test5 = NULL,
   test5Positive,
   method = "all_positive",
   bootstrap = FALSE,
@@ -88,6 +88,7 @@ reference standards for estimating test performance when no perfect
 reference test exists.
 }
 \examples{
+\donttest{
 # Basic example with simulated diagnostic test data
 set.seed(123)
 n <- 200
@@ -134,5 +135,5 @@ nogoldstandard(
     nboot = 500,
     verbose = TRUE
 )
-
+}
 }
