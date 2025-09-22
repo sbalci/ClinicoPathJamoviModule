@@ -4330,7 +4330,7 @@ analyses:
     name: nonparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: Advanced Statistical Tests
     menuTitle: Non-Parametric Statistical Methods
     menuSubtitle: Comprehensive non-parametric analysis with effect sizes and robust methods
