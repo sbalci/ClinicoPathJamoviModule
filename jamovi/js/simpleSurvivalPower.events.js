@@ -3,12 +3,8 @@
 const events = {
 
     // Event handler for clinical preset selection
-    onChange_clinical_preset: function(ui) {
-        this.checkValue(ui, true, {});
-    },
-
-    // Apply clinical preset configurations
-    checkValue: function(ui, opt, calc) {
+    // Note: jamovi converts snake_case option names to camelCase for event handler names
+    onChange_clinicalPreset: function(ui) {
         // Get the clinical preset value
         var preset = ui.clinical_preset.value();
 

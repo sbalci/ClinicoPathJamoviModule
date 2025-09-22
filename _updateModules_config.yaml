@@ -13,11 +13,11 @@
 new_version: "0.0.31.73"
 new_date: "2025-09-22"
 quick: false
-TEST: false
+TEST: true
 meddecide: false
 jjstatsplot: false
 jsurvival: false
-ClinicoPathDescriptives: true
+ClinicoPathDescriptives: false
 OncoPath: false
 
 # ========================================
