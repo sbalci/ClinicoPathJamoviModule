@@ -17,7 +17,22 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             upsetType = "upsetR",
             sortBy = "freq",
             minSize = 0,
-            showAnnotations = FALSE, ...) {
+            showAnnotations = FALSE,
+            vennEngine = "ggvenn",
+            var5 = NULL,
+            var5true = NULL,
+            var6 = NULL,
+            var6true = NULL,
+            var7 = NULL,
+            var7true = NULL,
+            regionLabels = "count",
+            labelPrecisionDigits = 1,
+            setNameSize = 5,
+            labelSize = 4,
+            edgeSize = 1,
+            edgeColor = "black",
+            fillColorMapping = TRUE,
+            colorPalette = "default", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -97,6 +112,107 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showAnnotations",
                 showAnnotations,
                 default=FALSE)
+            private$..vennEngine <- jmvcore::OptionList$new(
+                "vennEngine",
+                vennEngine,
+                options=list(
+                    "ggvenn",
+                    "ggVennDiagram"),
+                default="ggvenn")
+            private$..var5 <- jmvcore::OptionVariable$new(
+                "var5",
+                var5,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..var5true <- jmvcore::OptionLevel$new(
+                "var5true",
+                var5true,
+                variable="(var5)")
+            private$..var6 <- jmvcore::OptionVariable$new(
+                "var6",
+                var6,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..var6true <- jmvcore::OptionLevel$new(
+                "var6true",
+                var6true,
+                variable="(var6)")
+            private$..var7 <- jmvcore::OptionVariable$new(
+                "var7",
+                var7,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..var7true <- jmvcore::OptionLevel$new(
+                "var7true",
+                var7true,
+                variable="(var7)")
+            private$..regionLabels <- jmvcore::OptionList$new(
+                "regionLabels",
+                regionLabels,
+                options=list(
+                    "count",
+                    "percent",
+                    "both",
+                    "none"),
+                default="count")
+            private$..labelPrecisionDigits <- jmvcore::OptionInteger$new(
+                "labelPrecisionDigits",
+                labelPrecisionDigits,
+                min=0,
+                max=3,
+                default=1)
+            private$..setNameSize <- jmvcore::OptionNumber$new(
+                "setNameSize",
+                setNameSize,
+                min=1,
+                max=20,
+                default=5)
+            private$..labelSize <- jmvcore::OptionNumber$new(
+                "labelSize",
+                labelSize,
+                min=1,
+                max=20,
+                default=4)
+            private$..edgeSize <- jmvcore::OptionNumber$new(
+                "edgeSize",
+                edgeSize,
+                min=0.1,
+                max=5,
+                default=1)
+            private$..edgeColor <- jmvcore::OptionString$new(
+                "edgeColor",
+                edgeColor,
+                default="black")
+            private$..fillColorMapping <- jmvcore::OptionBool$new(
+                "fillColorMapping",
+                fillColorMapping,
+                default=TRUE)
+            private$..colorPalette <- jmvcore::OptionList$new(
+                "colorPalette",
+                colorPalette,
+                options=list(
+                    "default",
+                    "Set1",
+                    "Set2",
+                    "Set3",
+                    "Pastel1",
+                    "Pastel2",
+                    "Dark2",
+                    "Accent",
+                    "viridis",
+                    "plasma",
+                    "magma",
+                    "inferno"),
+                default="default")
 
             self$.addOption(private$..var1)
             self$.addOption(private$..var1true)
@@ -110,6 +226,21 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sortBy)
             self$.addOption(private$..minSize)
             self$.addOption(private$..showAnnotations)
+            self$.addOption(private$..vennEngine)
+            self$.addOption(private$..var5)
+            self$.addOption(private$..var5true)
+            self$.addOption(private$..var6)
+            self$.addOption(private$..var6true)
+            self$.addOption(private$..var7)
+            self$.addOption(private$..var7true)
+            self$.addOption(private$..regionLabels)
+            self$.addOption(private$..labelPrecisionDigits)
+            self$.addOption(private$..setNameSize)
+            self$.addOption(private$..labelSize)
+            self$.addOption(private$..edgeSize)
+            self$.addOption(private$..edgeColor)
+            self$.addOption(private$..fillColorMapping)
+            self$.addOption(private$..colorPalette)
         }),
     active = list(
         var1 = function() private$..var1$value,
@@ -123,7 +254,22 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         upsetType = function() private$..upsetType$value,
         sortBy = function() private$..sortBy$value,
         minSize = function() private$..minSize$value,
-        showAnnotations = function() private$..showAnnotations$value),
+        showAnnotations = function() private$..showAnnotations$value,
+        vennEngine = function() private$..vennEngine$value,
+        var5 = function() private$..var5$value,
+        var5true = function() private$..var5true$value,
+        var6 = function() private$..var6$value,
+        var6true = function() private$..var6true$value,
+        var7 = function() private$..var7$value,
+        var7true = function() private$..var7true$value,
+        regionLabels = function() private$..regionLabels$value,
+        labelPrecisionDigits = function() private$..labelPrecisionDigits$value,
+        setNameSize = function() private$..setNameSize$value,
+        labelSize = function() private$..labelSize$value,
+        edgeSize = function() private$..edgeSize$value,
+        edgeColor = function() private$..edgeColor$value,
+        fillColorMapping = function() private$..fillColorMapping$value,
+        colorPalette = function() private$..colorPalette$value),
     private = list(
         ..var1 = NA,
         ..var1true = NA,
@@ -136,7 +282,22 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..upsetType = NA,
         ..sortBy = NA,
         ..minSize = NA,
-        ..showAnnotations = NA)
+        ..showAnnotations = NA,
+        ..vennEngine = NA,
+        ..var5 = NA,
+        ..var5true = NA,
+        ..var6 = NA,
+        ..var6true = NA,
+        ..var7 = NA,
+        ..var7true = NA,
+        ..regionLabels = NA,
+        ..labelPrecisionDigits = NA,
+        ..setNameSize = NA,
+        ..labelSize = NA,
+        ..edgeSize = NA,
+        ..edgeColor = NA,
+        ..fillColorMapping = NA,
+        ..colorPalette = NA)
 )
 
 vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -159,7 +320,10 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Venn Diagram",
                 refs=list(
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "ggvenn",
+                    "UpSetR",
+                    "ComplexUpset"),
                 clearWith=list(
                     "var1",
                     "var2",
@@ -289,6 +453,32 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param minSize Minimum size of intersections to display.
 #' @param showAnnotations Add percentage labels to intersection sizes in
 #'   ComplexUpset plots or enhanced text scaling in UpSetR plots.
+#' @param vennEngine Choose between ggvenn (classic, 2-4 sets) or
+#'   ggVennDiagram (advanced, 2-7 sets with enhanced customization).
+#' @param var5 Fifth variable for 5-set Venn diagrams (only available with
+#'   ggVennDiagram engine).
+#' @param var5true The level in \code{var5} that represents the positive
+#'   condition.
+#' @param var6 Sixth variable for 6-set Venn diagrams (only available with
+#'   ggVennDiagram engine).
+#' @param var6true The level in \code{var6} that represents the positive
+#'   condition.
+#' @param var7 Seventh variable for 7-set Venn diagrams (only available with
+#'   ggVennDiagram engine).
+#' @param var7true The level in \code{var7} that represents the positive
+#'   condition.
+#' @param regionLabels What to display in Venn diagram regions (ggVennDiagram
+#'   only).
+#' @param labelPrecisionDigits Number of decimal places for percentage labels
+#'   (ggVennDiagram only).
+#' @param setNameSize Font size for set names (ggVennDiagram only).
+#' @param labelSize Font size for region labels (ggVennDiagram only).
+#' @param edgeSize Width of set boundary lines (ggVennDiagram only).
+#' @param edgeColor Color of set boundary lines (ggVennDiagram only).
+#' @param fillColorMapping Map fill colors to intersection sizes
+#'   (ggVennDiagram only).
+#' @param colorPalette Color palette for Venn diagram regions (ggVennDiagram
+#'   only).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -321,7 +511,22 @@ venn <- function(
     upsetType = "upsetR",
     sortBy = "freq",
     minSize = 0,
-    showAnnotations = FALSE) {
+    showAnnotations = FALSE,
+    vennEngine = "ggvenn",
+    var5,
+    var5true,
+    var6,
+    var6true,
+    var7,
+    var7true,
+    regionLabels = "count",
+    labelPrecisionDigits = 1,
+    setNameSize = 5,
+    labelSize = 4,
+    edgeSize = 1,
+    edgeColor = "black",
+    fillColorMapping = TRUE,
+    colorPalette = "default") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("venn requires jmvcore to be installed (restart may be required)")
@@ -330,18 +535,27 @@ venn <- function(
     if ( ! missing(var2)) var2 <- jmvcore::resolveQuo(jmvcore::enquo(var2))
     if ( ! missing(var3)) var3 <- jmvcore::resolveQuo(jmvcore::enquo(var3))
     if ( ! missing(var4)) var4 <- jmvcore::resolveQuo(jmvcore::enquo(var4))
+    if ( ! missing(var5)) var5 <- jmvcore::resolveQuo(jmvcore::enquo(var5))
+    if ( ! missing(var6)) var6 <- jmvcore::resolveQuo(jmvcore::enquo(var6))
+    if ( ! missing(var7)) var7 <- jmvcore::resolveQuo(jmvcore::enquo(var7))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(var1), var1, NULL),
             `if`( ! missing(var2), var2, NULL),
             `if`( ! missing(var3), var3, NULL),
-            `if`( ! missing(var4), var4, NULL))
+            `if`( ! missing(var4), var4, NULL),
+            `if`( ! missing(var5), var5, NULL),
+            `if`( ! missing(var6), var6, NULL),
+            `if`( ! missing(var7), var7, NULL))
 
     for (v in var1) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in var2) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in var3) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in var4) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in var5) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in var6) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in var7) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- vennOptions$new(
         var1 = var1,
@@ -355,7 +569,22 @@ venn <- function(
         upsetType = upsetType,
         sortBy = sortBy,
         minSize = minSize,
-        showAnnotations = showAnnotations)
+        showAnnotations = showAnnotations,
+        vennEngine = vennEngine,
+        var5 = var5,
+        var5true = var5true,
+        var6 = var6,
+        var6true = var6true,
+        var7 = var7,
+        var7true = var7true,
+        regionLabels = regionLabels,
+        labelPrecisionDigits = labelPrecisionDigits,
+        setNameSize = setNameSize,
+        labelSize = labelSize,
+        edgeSize = edgeSize,
+        edgeColor = edgeColor,
+        fillColorMapping = fillColorMapping,
+        colorPalette = colorPalette)
 
     analysis <- vennClass$new(
         options = options,

@@ -22,7 +22,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Clinical preset context storage
         .preset_context = NULL,
         .preset_guidance = NULL,
-        
+
         # Enhanced clinical date parsing with contextual guidance
         .parseDatesWithClinicalContext = function(dates, format, variable_type = "time") {
             if (inherits(dates, c("Date", "POSIXct"))) return(dates)
@@ -57,6 +57,28 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 ))
             }
             return(parsed)
+        },
+
+        # Parse a single custom reference date string using selected dateFormat
+        .parseCustomReferenceDate = function(date_str) {
+            if (is.null(date_str)) return(NULL)
+            if (!is.character(date_str)) return(NULL)
+            if (length(date_str) == 0 || nchar(trimws(date_str)) == 0) return(NULL)
+            ds <- trimws(date_str)
+            parsed <- tryCatch({
+                switch(self$options$dateFormat,
+                    "ymdhms" = lubridate::ymd_hms(ds),
+                    "ymd"    = lubridate::ymd(ds),
+                    "ydm"    = lubridate::ydm(ds),
+                    "mdy"    = lubridate::mdy(ds),
+                    "myd"    = lubridate::myd(ds),
+                    "dmy"    = lubridate::dmy(ds),
+                    "dym"    = lubridate::dym(ds),
+                    suppressWarnings(lubridate::ymd(ds))
+                )
+            }, error = function(e) NA)
+            if (is.na(parsed)) return(NULL)
+            parsed
         },
         
         # Comprehensive clinical data validation
@@ -365,12 +387,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Process event markers with enhanced icon support
         .processEventMarkers = function(patient_data) {
             event_data <- NULL
-            
+
             if (self$options$showEventMarkers) {
                 # Smart event variable detection
                 event_var <- self$options$eventVar
                 event_time_var <- self$options$eventTimeVar %||% self$options$startTime
-                
+
                 if (!is.null(event_var)) {
                     event_data <- tryCatch({
                         data.frame(
@@ -422,21 +444,67 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         }
                         
                         # Filter valid events
-                        event_data <- event_data[!is.na(event_data$time) & 
-                                               !is.na(event_data$label) & 
-                                               event_data$time >= 0, ]
+                        if (inherits(event_data$time, c("Date", "POSIXct"))) {
+                            # Keep only events that fall within each patient's lane window when using absolute dates
+                            bounds <- unique(data.frame(
+                                patient_id = as.character(patient_data$patient_id),
+                                start_time = patient_data$start_time,
+                                end_time = patient_data$end_time,
+                                stringsAsFactors = FALSE
+                            ))
+                            event_data <- merge(event_data, bounds, by = "patient_id", all.x = TRUE)
+                            event_data <- event_data[!is.na(event_data$time) & !is.na(event_data$label), ]
+                            event_data <- event_data[event_data$time >= event_data$start_time & event_data$time <= event_data$end_time, ]
+                            event_data <- event_data[, c("patient_id", "time", "label")]
+                        } else {
+                            event_data <- event_data[!is.na(event_data$time) & 
+                                                   !is.na(event_data$label) & 
+                                                   event_data$time >= 0, ]
+                        }
                     }
                 }
             }
             
             return(event_data)
         },
-        
+
+        # Convert event or milestone times into numeric durations in the selected unit
+        .convertTimesToNumeric = function(times, patient_ids, patient_data, unit = self$options$timeUnit) {
+            if (!inherits(times, c("Date", "POSIXct", "POSIXlt"))) {
+                return(suppressWarnings(as.numeric(times)))
+            }
+
+            patient_lookup <- data.frame(
+                patient_id = as.character(patient_data$patient_id),
+                start_time = patient_data$start_time,
+                stringsAsFactors = FALSE
+            )
+
+            ids_chr <- as.character(patient_ids)
+            start_vals <- patient_lookup$start_time[match(ids_chr, patient_lookup$patient_id)]
+
+            if (!inherits(start_vals, c("Date", "POSIXct", "POSIXlt"))) {
+                return(suppressWarnings(as.numeric(times)))
+            }
+
+            intervals <- suppressWarnings(lubridate::interval(start_vals, times))
+            suppressWarnings(lubridate::time_length(intervals, unit = unit))
+        },
+
+        # Helper to obtain numeric durations between start and end times
+        .getDurations = function(patient_data, unit = self$options$timeUnit) {
+            if (inherits(patient_data$start_time, c("Date", "POSIXct", "POSIXlt"))) {
+                intervals <- suppressWarnings(lubridate::interval(patient_data$start_time, patient_data$end_time))
+                return(suppressWarnings(lubridate::time_length(intervals, unit = unit)))
+            }
+
+            as.numeric(patient_data$end_time - patient_data$start_time)
+        },
+
         # Calculate comprehensive summary statistics
         .calculateSummaryStats = function(patient_data) {
-            # Calculate durations
-            durations <- patient_data$end_time - patient_data$start_time
-            
+            durations <- private$.getDurations(patient_data)
+
             # Basic statistics
             stats <- list(
                 n_patients = length(unique(patient_data$patient_id)),
@@ -714,6 +782,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # Extract patient data and show warnings if present
                 patient_data <- if ("data" %in% names(validation_result)) validation_result$data else validation_result
                 
+                # Apply sorting (affects y-axis order only)
+                patient_data <- private$.applySorting(patient_data)
+                
                 # Display warnings if present
                 if (!is.null(validation_result$warnings) && length(validation_result$warnings) > 0) {
                     warning_msg <- paste0(
@@ -727,6 +798,35 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     )
                     self$results$instructions$setContent(warning_msg)
                 }
+                # Show note if absolute datetime with unsupported reference lines
+                is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
+                if (is_date_scale && identical(self$options$timeDisplay, "absolute")) {
+                    if (self$options$referenceLines %in% c("median", "protocol")) {
+                        note_html <- paste0(
+                            "<div style='background-color:#fff8e1; border:1px solid #f0c36d; color:#6d4c00; padding:12px; border-radius:6px; margin:10px 0;'>",
+                            "<strong>", .("Reference lines on absolute dates:"), "</strong> ",
+                            .("Median/Protocol reference lines are not shown for absolute date scales because patient timelines start on different calendar dates."),
+                            " ", .("Use 'Custom Time' with 'Custom Reference Date' or a time offset instead."),
+                            "</div>"
+                        )
+                        self$results$validationReport$setContent(note_html)
+                        try(self$results$validationReport$setVisible(TRUE), silent = TRUE)
+                    } else if (self$options$referenceLines %in% c("custom")) {
+                        # If custom selected but no date provided, we fall back to offset; inform the user once
+                        cref_str <- tryCatch(self$options$customReferenceDate, error = function(e) NULL)
+                        if (is.null(cref_str) || nchar(trimws(as.character(cref_str))) == 0) {
+                            note_html <- paste0(
+                                "<div style='background-color:#e8f5e9; border:1px solid #a5d6a7; color:#1b5e20; padding:12px; border-radius:6px; margin:10px 0;'>",
+                                "<strong>", .("Custom reference in absolute mode:"), "</strong> ",
+                                .("No 'Custom Reference Date' provided; using 'Custom Reference Time' as an offset from the earliest start date."),
+                                "</div>"
+                            )
+                            self$results$validationReport$setContent(note_html)
+                            try(self$results$validationReport$setVisible(TRUE), silent = TRUE)
+                        }
+                    }
+                }
+
                 milestone_data <- private$.processMilestones(patient_data)
                 event_data <- private$.processEventMarkers(patient_data)
                 arrow_data <- private$.processOngoingStatus(patient_data)
@@ -744,8 +844,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 
                 # Update all result tables
                 private$.updatePersonTimeTable(patient_data)
-                private$.updateMilestoneTable(milestone_data) 
-                private$.updateEventMarkerTable(event_data)
+                private$.updateMilestoneTable(patient_data, milestone_data) 
+                private$.updateEventMarkerTable(patient_data, event_data)
                 private$.updateAdvancedMetrics(patient_data, stats)
                 
                 # Handle export functionality
@@ -910,13 +1010,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .updatePersonTimeTable = function(patient_data) {
             if (!self$options$personTimeAnalysis) return()
             if (!"response" %in% names(patient_data)) return()
-            
+
             # Clear existing rows
             self$results$personTimeTable$deleteRows()
-            
+
             # Calculate person-time metrics by response type
-            durations <- patient_data$end_time - patient_data$start_time
-            
+            durations <- private$.getDurations(patient_data)
+
             person_time_data <- patient_data %>%
                 dplyr::group_by(response) %>%
                 dplyr::summarise(
@@ -942,20 +1042,32 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
         
         # Milestone table population
-        .updateMilestoneTable = function(milestone_data) {
+        .updateMilestoneTable = function(patient_data, milestone_data) {
             if (nrow(milestone_data) == 0) return()
-            
+
             # Clear existing rows
             self$results$milestoneTable$deleteRows()
-            
+
+            milestone_numeric <- private$.convertTimesToNumeric(
+                milestone_data$time,
+                milestone_data$patient_id,
+                patient_data
+            )
+
+            milestone_stats_data <- milestone_data %>%
+                dplyr::mutate(time_numeric = milestone_numeric) %>%
+                dplyr::filter(!is.na(time_numeric))
+
+            if (nrow(milestone_stats_data) == 0) return()
+
             # Calculate milestone statistics
-            milestone_stats <- milestone_data %>%
+            milestone_stats <- milestone_stats_data %>%
                 dplyr::group_by(label) %>%
                 dplyr::summarise(
                     n_events = dplyr::n(),
-                    median_time = median(time, na.rm = TRUE),
-                    min_time = min(time, na.rm = TRUE),
-                    max_time = max(time, na.rm = TRUE),
+                    median_time = median(time_numeric, na.rm = TRUE),
+                    min_time = min(time_numeric, na.rm = TRUE),
+                    max_time = max(time_numeric, na.rm = TRUE),
                     .groups = "drop"
                 ) %>%
                 dplyr::mutate(
@@ -977,19 +1089,32 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
         
         # Event marker table population
-        .updateEventMarkerTable = function(event_data) {
+        .updateEventMarkerTable = function(patient_data, event_data) {
             if (!self$options$showEventMarkers || is.null(event_data) || nrow(event_data) == 0) return()
-            
+
             # Clear existing rows
             self$results$eventMarkerTable$deleteRows()
-            
+
+            event_numeric <- private$.convertTimesToNumeric(
+                event_data$time,
+                event_data$patient_id,
+                patient_data
+            )
+
+            event_stats_data <- event_data %>%
+                dplyr::mutate(time_numeric = event_numeric) %>%
+                dplyr::filter(!is.na(time_numeric))
+
+            if (nrow(event_stats_data) == 0) return()
+
+            total_events <- nrow(event_stats_data)
+
             # Calculate event statistics
-            total_events <- nrow(event_data)
-            event_stats <- event_data %>%
+            event_stats <- event_stats_data %>%
                 dplyr::group_by(label) %>%
                 dplyr::summarise(
                     n_events = dplyr::n(),
-                    median_time = median(time, na.rm = TRUE),
+                    median_time = median(time_numeric, na.rm = TRUE),
                     .groups = "drop"
                 ) %>%
                 dplyr::mutate(
@@ -1010,11 +1135,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Advanced metrics table population
         .updateAdvancedMetrics = function(patient_data, stats) {
             if (!self$options$personTimeAnalysis) return()
-            
+
             # Clear existing rows
             self$results$advancedMetrics$deleteRows()
-            
-            durations <- patient_data$end_time - patient_data$start_time
+
+            durations <- private$.getDurations(patient_data)
             
             # Calculate advanced clinical metrics
             metrics <- list(
@@ -1038,7 +1163,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 ),
                 list(
                     name = .("Person-Time Incidence Rate"),
-                    value = round(length(durations) / stats$total_person_time * 100, 3),
+                    value = if (isTRUE(stats$total_person_time > 0)) round(length(durations) / stats$total_person_time * 100, 3) else NA_real_,
                     unit = paste0("per 100 ", self$options$timeUnit),
                     interpretation = .("Rate of patient inclusion per time unit")
                 )
@@ -1240,8 +1365,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 
                 # Enhanced clinical glyphs with medical symbols
                 clinical_glyphs <- private$.getEnhancedClinicalGlyphs(unique_labels)
-                clinical_colors <- RColorBrewer::brewer.pal(max(3, min(length(unique_labels), 9)), "Set2")
-                
+                base_n <- max(3, min(length(unique_labels), 8))
+                base_palette <- RColorBrewer::brewer.pal(base_n, "Set2")
+                clinical_colors <- grDevices::colorRampPalette(base_palette)(length(unique_labels))
+
                 names(clinical_colors) <- unique_labels
                 
                 p <- p + ggswim::geom_swim_marker(
@@ -1307,7 +1434,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             # Add reference lines
             if (!is.null(opts$referenceLines) && opts$referenceLines != "none") {
-                p <- private$.addReferenceLines(p, opts, stats)
+                p <- private$.addReferenceLines(p, opts, stats, patient_data)
             }
             
             # Apply theme and styling
@@ -1320,12 +1447,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
             
             # Add labels with clinical context
+            is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
+            x_label <- if (is_date_scale) .("Date") else paste0(.("Time ("), self$options$timeUnit, .(")"))
             p <- p + ggplot2::labs(
                 title = .("Patient Timeline Analysis"),
                 subtitle = sprintf(.("N=%d patients | Median follow-up: %.1f %s | Total person-time: %.1f %s"),
                                  stats$n_patients, stats$median_duration, self$options$timeUnit,
                                  stats$total_person_time, self$options$timeUnit),
-                x = paste0(.("Time ("), self$options$timeUnit, .(")")),
+                x = x_label,
                 y = .("Patient ID")
             )
             
@@ -1337,47 +1466,117 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             return(p)
         },
         
-        .addReferenceLines = function(p, opts, stats) {
+        .addReferenceLines = function(p, opts, stats, patient_data) {
+            is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
             if (opts$referenceLines == "median") {
-                p <- p + ggplot2::geom_vline(
-                    xintercept = stats$median_duration,
-                    linetype = "dashed",
-                    color = "darkgray",
-                    alpha = 0.7
-                ) +
-                ggplot2::annotate(
-                    "text",
-                    x = stats$median_duration,
-                    y = 1,
-                    label = paste("Median:", round(stats$median_duration, 1)),
-                    hjust = -0.1,
-                    vjust = 0,
-                    angle = 90,
-                    size = 3
-                )
-            } else if (opts$referenceLines == "protocol") {
-                protocol_times <- c(6, 12, 24, 36)
-                max_time <- max(stats$max_duration, na.rm = TRUE)
-                protocol_times <- protocol_times[protocol_times <= max_time * 1.1]
-                
-                for (t in protocol_times) {
+                if (!is_date_scale) {
                     p <- p + ggplot2::geom_vline(
-                        xintercept = t,
-                        linetype = "dotted",
+                        xintercept = stats$median_duration,
+                        linetype = "dashed",
                         color = "darkgray",
-                        alpha = 0.5
+                        alpha = 0.7
+                    ) +
+                    ggplot2::annotate(
+                        "text",
+                        x = stats$median_duration,
+                        y = 1,
+                        label = paste("Median:", round(stats$median_duration, 1)),
+                        hjust = -0.1,
+                        vjust = 0,
+                        angle = 90,
+                        size = 3
                     )
                 }
-            } else if (opts$referenceLines == "custom" && !is.null(opts$customReferenceTime)) {
-                p <- p + ggplot2::geom_vline(
-                    xintercept = opts$customReferenceTime,
-                    linetype = "dashed",
-                    color = "red",
-                    alpha = 0.7
-                )
+            } else if (opts$referenceLines == "protocol") {
+                if (!is_date_scale) {
+                    protocol_times <- c(6, 12, 24, 36)
+                    max_time <- max(stats$max_duration, na.rm = TRUE)
+                    protocol_times <- protocol_times[protocol_times <= max_time * 1.1]
+                    for (t in protocol_times) {
+                        p <- p + ggplot2::geom_vline(
+                            xintercept = t,
+                            linetype = "dotted",
+                            color = "darkgray",
+                            alpha = 0.5
+                        )
+                    }
+                }
+            } else if (opts$referenceLines == "custom") {
+                if (is_date_scale) {
+                    # Prefer an explicit custom reference date if provided (string)
+                    cref <- NULL
+                    cref_str <- tryCatch(self$options$customReferenceDate, error = function(e) NULL)
+                    if (!is.null(cref_str)) {
+                        cref <- private$.parseCustomReferenceDate(cref_str)
+                    }
+                    if (is.null(cref) && !is.null(opts$customReferenceTime)) {
+                        # Fallback: numeric offset from earliest start in selected time unit
+                        anchor <- suppressWarnings(min(patient_data$start_time, na.rm = TRUE))
+                        per <- switch(opts$timeUnit,
+                            days   = lubridate::days(opts$customReferenceTime),
+                            weeks  = lubridate::weeks(opts$customReferenceTime),
+                            months = lubridate::months(opts$customReferenceTime),
+                            years  = lubridate::years(opts$customReferenceTime),
+                            lubridate::days(opts$customReferenceTime)
+                        )
+                        cref <- anchor + per
+                    }
+                    if (!is.null(cref)) {
+                        p <- p + ggplot2::geom_vline(
+                            xintercept = cref,
+                            linetype = "dashed",
+                            color = "red",
+                            alpha = 0.7
+                        )
+                    }
+                } else if (!is.null(opts$customReferenceTime)) {
+                    p <- p + ggplot2::geom_vline(
+                        xintercept = opts$customReferenceTime,
+                        linetype = "dashed",
+                        color = "red",
+                        alpha = 0.7
+                    )
+                }
             }
-            
             return(p)
+        },
+
+        # Apply patient sorting based on options (affects y-axis order)
+        .applySorting = function(patient_data) {
+            if (nrow(patient_data) == 0) return(patient_data)
+            # Compute numeric durations for sorting when needed
+            if (inherits(patient_data$start_time, c("Date", "POSIXct"))) {
+                intervals <- lubridate::interval(patient_data$start_time, patient_data$end_time)
+                sort_durations <- lubridate::time_length(intervals, unit = self$options$timeUnit)
+            } else {
+                sort_durations <- patient_data$end_time - patient_data$start_time
+            }
+
+            ord <- seq_len(nrow(patient_data))
+            if (!is.null(self$options$sortVariable)) {
+                sv <- self$options$sortVariable
+                df <- self$data
+                tmp <- data.frame(
+                    patient_id = as.character(df[[self$options$patientID]]),
+                    sort_val = df[[sv]],
+                    stringsAsFactors = FALSE
+                )
+                tmp <- tmp[!is.na(tmp$patient_id) & !duplicated(tmp$patient_id), ]
+                map <- stats::setNames(tmp$sort_val, tmp$patient_id)
+                key <- unname(map[as.character(patient_data$patient_id)])
+                ord <- order(key, na.last = TRUE, method = "auto")
+            } else if (self$options$sortOrder == "patient_id") {
+                ord <- order(patient_data$patient_id, method = "auto")
+            } else if (self$options$sortOrder == "response" && "response" %in% names(patient_data)) {
+                ord <- order(patient_data$response, patient_data$patient_id, method = "auto")
+            } else {
+                dec <- identical(self$options$sortOrder, "duration_desc")
+                ord <- order(sort_durations, decreasing = dec, method = "auto")
+            }
+
+            ordered_ids <- as.character(patient_data$patient_id[ord])
+            patient_data$patient_id <- factor(as.character(patient_data$patient_id), levels = unique(ordered_ids))
+            patient_data
         },
         
         .createFallbackPlot = function(patient_data, error_message) {

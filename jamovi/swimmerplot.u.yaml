@@ -54,6 +54,10 @@ children:
                 name: customReferenceTime
                 format: number
                 enable: (referenceLines:custom)
+              - type: TextBox
+                name: customReferenceDate
+                format: string
+                enable: (referenceLines:custom && timeType:datetime && timeDisplay:absolute)
       - type: LayoutBox
         margin: large
         children:

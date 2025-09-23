@@ -11,6 +11,7 @@
 #' @import jmvcore
 #' @importFrom dplyr inner_join
 #' @import ggvenn
+#' @import ggVennDiagram
 #' @import UpSetR
 #' @import ComplexUpset
 #' @importFrom grid grid.text
@@ -68,6 +69,32 @@
 #'      sortBy = "freq",
 #'      minSize = 5,
 #'      showAnnotations = TRUE)
+#'
+#' # Example 5: Using ggVennDiagram for advanced customization
+#' venn(data = clinical_data,
+#'      var1 = "diabetes", var1true = "Yes",
+#'      var2 = "hypertension", var2true = "Yes",
+#'      var3 = "obesity", var3true = "Yes",
+#'      vennEngine = "ggVennDiagram",
+#'      regionLabels = "both",
+#'      colorPalette = "Set1",
+#'      labelSize = 3.5,
+#'      setNameSize = 4.5)
+#'
+#' # Example 6: 5-variable Venn diagram with ggVennDiagram
+#' # Add more clinical variables
+#' clinical_data$smoking <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.2, 0.8))
+#' clinical_data$family_history <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.35, 0.65))
+#'
+#' venn(data = clinical_data,
+#'      var1 = "diabetes", var1true = "Yes",
+#'      var2 = "hypertension", var2true = "Yes",
+#'      var3 = "obesity", var3true = "Yes",
+#'      var4 = "smoking", var4true = "Yes",
+#'      var5 = "family_history", var5true = "Yes",
+#'      vennEngine = "ggVennDiagram",
+#'      regionLabels = "percent",
+#'      colorPalette = "viridis")
 #' }
 #'
 
@@ -128,6 +155,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                     var3true <- self$options$var3true
                     var4 <- self$options$var4
                     var4true <- self$options$var4true
+                    var5 <- self$options$var5
+                    var5true <- self$options$var5true
+                    var6 <- self$options$var6
+                    var6true <- self$options$var6true
+                    var7 <- self$options$var7
+                    var7true <- self$options$var7true
 
                     # Convert each selected variable to logical values (TRUE if equal to the selected true level).
                     if (!is.null(self$options$var1)) {
@@ -141,6 +174,15 @@ vennClass <- if (requireNamespace('jmvcore'))
                     }
                     if (!is.null(self$options$var4)) {
                         mydata[[var4]] <- ifelse(mydata[[var4]] == var4true, TRUE, FALSE)
+                    }
+                    if (!is.null(self$options$var5)) {
+                        mydata[[var5]] <- ifelse(mydata[[var5]] == var5true, TRUE, FALSE)
+                    }
+                    if (!is.null(self$options$var6)) {
+                        mydata[[var6]] <- ifelse(mydata[[var6]] == var6true, TRUE, FALSE)
+                    }
+                    if (!is.null(self$options$var7)) {
+                        mydata[[var7]] <- ifelse(mydata[[var7]] == var7true, TRUE, FALSE)
                     }
 
                     # Prepare data for the Venn diagram.
@@ -166,7 +208,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     )
                     
                     # Process each variable that was selected using helper function
-                    variables <- list(var1, var2, var3, var4)
+                    variables <- list(var1, var2, var3, var4, var5, var6, var7)
                     for (var in variables) {
                         if (!is.null(var)) {
                             varStats <- private$.calculateSummaryStats(mydata, var)
@@ -190,7 +232,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     }
                     
                     # Generate clinical interpretations
-                    private$.generateClinicalSummary(mydata, list(var1, var2, var3, var4), summaryData)
+                    private$.generateClinicalSummary(mydata, list(var1, var2, var3, var4, var5, var6, var7), summaryData)
                     private$.generateReportSentences(summaryData)
                     private$.generateAssumptions()
                 }
@@ -208,27 +250,17 @@ vennClass <- if (requireNamespace('jmvcore'))
                 mydata2 <- results$mydata
                 namescolumn2 <- results$names
 
-                # Generate the Venn Diagram using ggvenn.
-                plot <- ggvenn::ggvenn(
-                    data = mydata2,
-                    columns = namescolumn2
-                )
+                # Get the selected Venn engine
+                vennEngine <- self$options$vennEngine
 
-                # Enhance the plot with a title and a refined theme for improved presentation.
-                plot <- plot +
-                    ggtheme +
-                    ggplot2::ggtitle(.("Venn Diagram of Selected Variables")) +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
-                        axis.line.x = ggplot2::element_blank(),
-                        axis.text.x = ggplot2::element_blank(),
-                        axis.ticks.x = ggplot2::element_blank(),
-                        axis.title.x = ggplot2::element_blank(),
-                        axis.line.y = ggplot2::element_blank(),
-                        axis.text.y = ggplot2::element_blank(),
-                        axis.ticks.y = ggplot2::element_blank(),
-                        axis.title.y = ggplot2::element_blank()
-                    )
+                # Generate the Venn Diagram based on selected engine
+                if (vennEngine == "ggVennDiagram") {
+                    # Use ggVennDiagram for advanced features
+                    plot <- private$.plotGgVennDiagram(mydata2, namescolumn2, ggtheme)
+                } else {
+                    # Use ggvenn (default/classic)
+                    plot <- private$.plotGgVenn(mydata2, namescolumn2, ggtheme)
+                }
 
                 # Print the Venn Diagram.
                 print(plot)
@@ -468,6 +500,52 @@ vennClass <- if (requireNamespace('jmvcore'))
                             "</div>"))
                     }
                 }
+
+                # Check variables 5-7 (ggVennDiagram only)
+                if (!is.null(self$options$var5)) {
+                    if (self$options$vennEngine != "ggVennDiagram") {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 5 Requires ggVennDiagram Engine"), "</strong><br>",
+                            .("Variable 5 is only supported with ggVennDiagram engine. Please change the engine or remove Variable 5."),
+                            "</div>"))
+                    }
+                    if (is.null(self$options$var5true)) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 5 Selected but True Level Missing"), "</strong><br>",
+                            .("Please select which level in Variable 5 represents the 'true' condition."),
+                            "</div>"))
+                    }
+                }
+
+                if (!is.null(self$options$var6)) {
+                    if (self$options$vennEngine != "ggVennDiagram") {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 6 Requires ggVennDiagram Engine"), "</strong><br>",
+                            .("Variable 6 is only supported with ggVennDiagram engine. Please change the engine or remove Variable 6."),
+                            "</div>"))
+                    }
+                    if (is.null(self$options$var6true)) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 6 Selected but True Level Missing"), "</strong><br>",
+                            .("Please select which level in Variable 6 represents the 'true' condition."),
+                            "</div>"))
+                    }
+                }
+
+                if (!is.null(self$options$var7)) {
+                    if (self$options$vennEngine != "ggVennDiagram") {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 7 Requires ggVennDiagram Engine"), "</strong><br>",
+                            .("Variable 7 is only supported with ggVennDiagram engine. Please change the engine or remove Variable 7."),
+                            "</div>"))
+                    }
+                    if (is.null(self$options$var7true)) {
+                        return(paste0("<div class='alert alert-warning'>",
+                            "<strong>", .("Variable 7 Selected but True Level Missing"), "</strong><br>",
+                            .("Please select which level in Variable 7 represents the 'true' condition."),
+                            "</div>"))
+                    }
+                }
                 
                 return(NULL)  # No validation errors
             },
@@ -505,11 +583,17 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "</ul>",
                     "<p><strong>", .("How to Use:"), "</strong></p>",
                     "<ol style='margin-left: 20px;'>",
-                    "<li>", .("Select 2-4 categorical variables"), "</li>",
+                    "<li>", .("Select 2-7 categorical variables (2-4 for ggvenn, 2-7 for ggVennDiagram)"), "</li>",
                     "<li>", .("Choose the 'true' level for each variable (e.g., 'Positive', 'Present', 'Yes')"), "</li>",
+                    "<li>", .("Select Venn engine: ggvenn (classic) or ggVennDiagram (advanced with more customization)"), "</li>",
                     "<li>", .("Adjust visualization options as needed"), "</li>",
                     "<li>", .("Interpret intersections - larger overlaps indicate stronger associations"), "</li>",
                     "</ol>",
+                    "<p><strong>", .("Engine Comparison:"), "</strong></p>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li><strong>ggvenn:</strong> ", .("Simple, fast, supports 2-4 variables"), "</li>",
+                    "<li><strong>ggVennDiagram:</strong> ", .("Advanced features, supports 2-7 variables, extensive customization, publication-ready"), "</li>",
+                    "</ul>",
                     "</div>"
                 )
                 self$results$aboutAnalysis$setContent(about_content)
@@ -622,6 +706,100 @@ vennClass <- if (requireNamespace('jmvcore'))
                 )
                 
                 self$results$assumptions$setContent(assumptions_content)
+            },
+
+            # Helper function for ggvenn plotting (classic)
+            .plotGgVenn = function(mydata2, namescolumn2, ggtheme) {
+                # Generate the Venn Diagram using ggvenn.
+                plot <- ggvenn::ggvenn(
+                    data = mydata2,
+                    columns = namescolumn2
+                )
+
+                # Enhance the plot with a title and a refined theme for improved presentation.
+                plot <- plot +
+                    ggtheme +
+                    ggplot2::ggtitle(.("Venn Diagram of Selected Variables")) +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                        axis.line.x = ggplot2::element_blank(),
+                        axis.text.x = ggplot2::element_blank(),
+                        axis.ticks.x = ggplot2::element_blank(),
+                        axis.title.x = ggplot2::element_blank(),
+                        axis.line.y = ggplot2::element_blank(),
+                        axis.text.y = ggplot2::element_blank(),
+                        axis.ticks.y = ggplot2::element_blank(),
+                        axis.title.y = ggplot2::element_blank()
+                    )
+
+                return(plot)
+            },
+
+            # Helper function for ggVennDiagram plotting (advanced)
+            .plotGgVennDiagram = function(mydata2, namescolumn2, ggtheme) {
+                # Get user options for ggVennDiagram
+                regionLabels <- self$options$regionLabels
+                labelPrecisionDigits <- self$options$labelPrecisionDigits
+                setNameSize <- self$options$setNameSize
+                labelSize <- self$options$labelSize
+                edgeSize <- self$options$edgeSize
+                edgeColor <- self$options$edgeColor
+                fillColorMapping <- self$options$fillColorMapping
+                colorPalette <- self$options$colorPalette
+
+                # Create the base ggVennDiagram plot
+                plot <- ggVennDiagram::ggVennDiagram(
+                    mydata2,
+                    category.names = namescolumn2,
+                    label = regionLabels,
+                    label_percent_digit = labelPrecisionDigits,
+                    label_size = labelSize,
+                    set_name_size = setNameSize,
+                    edge_size = edgeSize
+                )
+
+                # Apply color palette if specified
+                if (colorPalette != "default" && fillColorMapping) {
+                    if (colorPalette %in% c("viridis", "plasma", "magma", "inferno")) {
+                        # Use viridis-type palettes
+                        plot <- plot +
+                            ggplot2::scale_fill_gradientn(colors = get(colorPalette)(100))
+                    } else {
+                        # Use RColorBrewer palettes
+                        if (requireNamespace("RColorBrewer", quietly = TRUE)) {
+                            n_colors <- length(unique(ggplot2::layer_data(plot)$fill))
+                            colors <- RColorBrewer::brewer.pal(n = min(max(n_colors, 3),
+                                RColorBrewer::brewer.pal.info[colorPalette, "maxcolors"]),
+                                name = colorPalette)
+                            plot <- plot +
+                                ggplot2::scale_fill_manual(values = colors)
+                        }
+                    }
+                }
+
+                # Apply edge color
+                if (edgeColor != "black") {
+                    plot <- plot +
+                        ggplot2::theme(panel.border = ggplot2::element_rect(color = edgeColor))
+                }
+
+                # Add title and theme
+                plot <- plot +
+                    ggtheme +
+                    ggplot2::ggtitle(.("Advanced Venn Diagram of Selected Variables")) +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                        axis.line.x = ggplot2::element_blank(),
+                        axis.text.x = ggplot2::element_blank(),
+                        axis.ticks.x = ggplot2::element_blank(),
+                        axis.title.x = ggplot2::element_blank(),
+                        axis.line.y = ggplot2::element_blank(),
+                        axis.text.y = ggplot2::element_blank(),
+                        axis.ticks.y = ggplot2::element_blank(),
+                        axis.title.y = ggplot2::element_blank()
+                    )
+
+                return(plot)
             }
         )
     )

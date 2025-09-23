@@ -62,6 +62,32 @@ venn(data = clinical_data,
      sortBy = "freq",
      minSize = 5,
      showAnnotations = TRUE)
+
+# Example 5: Using ggVennDiagram for advanced customization
+venn(data = clinical_data,
+     var1 = "diabetes", var1true = "Yes",
+     var2 = "hypertension", var2true = "Yes",
+     var3 = "obesity", var3true = "Yes",
+     vennEngine = "ggVennDiagram",
+     regionLabels = "both",
+     colorPalette = "Set1",
+     labelSize = 3.5,
+     setNameSize = 4.5)
+
+# Example 6: 5-variable Venn diagram with ggVennDiagram
+# Add more clinical variables
+clinical_data$smoking <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.2, 0.8))
+clinical_data$family_history <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.35, 0.65))
+
+venn(data = clinical_data,
+     var1 = "diabetes", var1true = "Yes",
+     var2 = "hypertension", var2true = "Yes",
+     var3 = "obesity", var3true = "Yes",
+     var4 = "smoking", var4true = "Yes",
+     var5 = "family_history", var5true = "Yes",
+     vennEngine = "ggVennDiagram",
+     regionLabels = "percent",
+     colorPalette = "viridis")
 }
 
 }

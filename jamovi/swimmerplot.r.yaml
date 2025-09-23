@@ -38,6 +38,7 @@ items:
           - showLegend
           - referenceLines
           - customReferenceTime
+          - customReferenceDate
           - sortVariable
           - sortOrder
 

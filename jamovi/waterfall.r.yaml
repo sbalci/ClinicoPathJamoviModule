@@ -183,6 +183,7 @@ items:
         - colorScheme
         - spiderColorBy
         - spiderColorScheme
+        - timeUnitLabel
         - showMedian
         - showCI
 
@@ -199,6 +200,15 @@ items:
 
     - name: clinicalSignificance
       title: Clinical Significance Assessment
+      type: Html
+      visible: (showClinicalSignificance)
+      clearWith:
+         - patientID
+         - responseVar
+         - showClinicalSignificance
+
+    - name: clinicalGlossary
+      title: Clinical Terms & Definitions
       type: Html
       visible: (showClinicalSignificance)
       clearWith:
@@ -235,6 +245,60 @@ items:
          - timeVar
          - inputType
          - showConfidenceIntervals
+
+    - name: groupComparisonTable
+      title: Group Comparison Analysis
+      type: Table
+      rows: 0
+      columns:
+        - name: group
+          title: "Group"
+          type: text
+        - name: n_patients
+          title: "N"
+          type: integer
+        - name: orr
+          title: "ORR (%)"
+          type: number
+        - name: orr_ci
+          title: "95% CI"
+          type: text
+        - name: dcr
+          title: "DCR (%)"
+          type: number
+        - name: dcr_ci
+          title: "95% CI"
+          type: text
+      visible: (groupVar)
+      clearWith:
+         - patientID
+         - responseVar
+         - groupVar
+         - inputType
+
+    - name: groupComparisonTest
+      title: Group Comparison Statistical Test
+      type: Table
+      rows: 0
+      columns:
+        - name: comparison
+          title: "Comparison"
+          type: text
+        - name: test_statistic
+          title: "Test Statistic"
+          type: text
+        - name: p_value
+          title: "p-value"
+          type: number
+        - name: interpretation
+          title: "Clinical Interpretation"
+          type: text
+      visible: (groupVar)
+      clearWith:
+         - patientID
+         - responseVar
+         - groupVar
+         - inputType
 
     - name: addResponseCategory
       title: Add Response Category to Data

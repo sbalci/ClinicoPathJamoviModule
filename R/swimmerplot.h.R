@@ -36,6 +36,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             showLegend = TRUE,
             referenceLines = "none",
             customReferenceTime = 12,
+            customReferenceDate = "",
             sortVariable = NULL,
             sortOrder = "duration_desc",
             showInterpretation = TRUE,
@@ -267,6 +268,10 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "customReferenceTime",
                 customReferenceTime,
                 default=12)
+            private$..customReferenceDate <- jmvcore::OptionString$new(
+                "customReferenceDate",
+                customReferenceDate,
+                default="")
             private$..sortVariable <- jmvcore::OptionVariable$new(
                 "sortVariable",
                 sortVariable,
@@ -332,6 +337,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..showLegend)
             self$.addOption(private$..referenceLines)
             self$.addOption(private$..customReferenceTime)
+            self$.addOption(private$..customReferenceDate)
             self$.addOption(private$..sortVariable)
             self$.addOption(private$..sortOrder)
             self$.addOption(private$..showInterpretation)
@@ -371,6 +377,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         showLegend = function() private$..showLegend$value,
         referenceLines = function() private$..referenceLines$value,
         customReferenceTime = function() private$..customReferenceTime$value,
+        customReferenceDate = function() private$..customReferenceDate$value,
         sortVariable = function() private$..sortVariable$value,
         sortOrder = function() private$..sortOrder$value,
         showInterpretation = function() private$..showInterpretation$value,
@@ -409,6 +416,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..showLegend = NA,
         ..referenceLines = NA,
         ..customReferenceTime = NA,
+        ..customReferenceDate = NA,
         ..sortVariable = NA,
         ..sortOrder = NA,
         ..showInterpretation = NA,
@@ -484,6 +492,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "showLegend",
                     "referenceLines",
                     "customReferenceTime",
+                    "customReferenceDate",
                     "sortVariable",
                     "sortOrder")))
             self$add(jmvcore::Table$new(
@@ -794,6 +803,10 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   context.
 #' @param customReferenceTime Custom time point to mark with a reference line
 #'   (only used when Reference Lines is set to Custom).
+#' @param customReferenceDate When using Date/Time with Absolute display,
+#'   provide a calendar date (e.g., 2023-06-01) to draw a custom reference line.
+#'   If left blank, the Custom Reference Time is used as an offset from the
+#'   earliest start date.
 #' @param sortVariable Optional variable to sort patient timelines (defaults
 #'   to duration-based sorting).
 #' @param sortOrder How to order patients in the visualization.
@@ -861,6 +874,7 @@ swimmerplot <- function(
     showLegend = TRUE,
     referenceLines = "none",
     customReferenceTime = 12,
+    customReferenceDate = "",
     sortVariable = NULL,
     sortOrder = "duration_desc",
     showInterpretation = TRUE,
@@ -934,6 +948,7 @@ swimmerplot <- function(
         showLegend = showLegend,
         referenceLines = referenceLines,
         customReferenceTime = customReferenceTime,
+        customReferenceDate = customReferenceDate,
         sortVariable = sortVariable,
         sortOrder = sortOrder,
         showInterpretation = showInterpretation,

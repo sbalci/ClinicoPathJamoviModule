@@ -162,6 +162,13 @@ test_that("swimmerplot handles different sorting options", {
     sortOrder = "duration_desc"
   )
   expect_s3_class(result1, "swimmerplotResults")
+  # Verify order by duration (desc)
+  pd1 <- result1$plot$state$patient_data
+  durs1 <- pd1$end_time - pd1$start_time
+  # Factor levels reflect desired order
+  lev1 <- levels(pd1$patient_id)
+  ord_expected <- lev1[order(durs1[match(lev1, as.character(pd1$patient_id))], decreasing = TRUE)]
+  expect_identical(lev1, ord_expected)
   
   # Test custom variable sorting
   result2 <- swimmerplot(
@@ -173,6 +180,42 @@ test_that("swimmerplot handles different sorting options", {
     sortVariable = "priority"
   )
   expect_s3_class(result2, "swimmerplotResults")
+  # Verify order by priority (ascending)
+  pd2 <- result2$plot$state$patient_data
+  df <- test_data[!duplicated(test_data$patient_id), c("patient_id", "priority")]
+  rownames(df) <- df$patient_id
+  lev2 <- levels(pd2$patient_id)
+  ord_expected2 <- lev2[order(df[lev2, "priority"])]
+  expect_identical(lev2, ord_expected2)
+})
+
+test_that("swimmerplot handles absolute datetime with custom reference", {
+  skip_if_not_installed("ggswim")
+  skip_if_not_installed("lubridate")
+  
+  test_data <- data.frame(
+    patient_id = paste0("PT", 1:3),
+    start_date = as.Date(c("2023-01-01", "2023-01-08", "2023-01-15")),
+    end_date = as.Date(c("2023-03-01", "2023-02-15", "2023-04-01")),
+    stringsAsFactors = FALSE
+  )
+  
+  result <- swimmerplot(
+    data = test_data,
+    patientID = "patient_id",
+    startTime = "start_date",
+    endTime = "end_date",
+    timeType = "datetime",
+    dateFormat = "ymd",
+    timeUnit = "weeks",
+    timeDisplay = "absolute",
+    referenceLines = "custom",
+    customReferenceTime = 10
+  )
+  expect_s3_class(result, "swimmerplotResults")
+  expect_true(result$plot$visible)
+  # Ensure absolute dates are used internally
+  expect_true(inherits(result$plot$state$patient_data$start_time, c("Date", "POSIXct")))
 })
 
 test_that("swimmerplot person-time analysis works", {
@@ -590,4 +633,46 @@ test_that("swimmerplot fallback plot works on errors", {
       responseVar = "response"
     )
   })
+})
+
+test_that("customReferenceDate parses in absolute datetime mode", {
+  skip_if_not_installed("ggswim")
+  skip_if_not_installed("lubridate")
+  # Skip until codegen adds the new option to the function signature
+  if (!("customReferenceDate" %in% names(formals(swimmerplot)))) {
+    skip("customReferenceDate not available until options are regenerated")
+  }
+
+  # Try both ymd and ymdhms formats
+  formats <- list(
+    list(dateFormat = "ymd",    value = "2023-06-01"),
+    list(dateFormat = "ymdhms", value = "2023-06-01 12:34:56")
+  )
+
+  for (cfg in formats) {
+    test_data <- data.frame(
+      patient_id = paste0("PT", 1:3),
+      start_date = as.Date(c("2023-01-01", "2023-01-08", "2023-01-15")),
+      end_date = as.Date(c("2023-03-01", "2023-02-15", "2023-04-01")),
+      stringsAsFactors = FALSE
+    )
+
+    expect_no_error({
+      res <- swimmerplot(
+        data = test_data,
+        patientID = "patient_id",
+        startTime = "start_date",
+        endTime = "end_date",
+        timeType = "datetime",
+        dateFormat = cfg$dateFormat,
+        timeUnit = "weeks",
+        timeDisplay = "absolute",
+        referenceLines = "custom",
+        customReferenceDate = cfg$value
+      )
+      expect_s3_class(res, "swimmerplotResults")
+      expect_true(res$plot$visible)
+      expect_true(inherits(res$plot$state$patient_data$start_time, c("Date", "POSIXct")))
+    })
+  }
 })

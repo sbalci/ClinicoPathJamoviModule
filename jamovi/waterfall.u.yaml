@@ -120,6 +120,10 @@ children:
                 name: spiderColorBy
               - type: ComboBox
                 name: spiderColorScheme
+              - type: ComboBox
+                name: timeUnitLabel
+              - type: Label
+                label: "Note: This only changes the x-axis label; data values are not rescaled."
   - type: CollapseBox
     label: Clinical Reporting Options
     collapsed: true
