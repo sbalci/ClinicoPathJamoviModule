@@ -26,6 +26,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showSpiderPlot = TRUE,
             spiderColorBy = "response",
             spiderColorScheme = "classic",
+            timeUnitLabel = "generic",
             generateCopyReadyReport = FALSE,
             showClinicalSignificance = FALSE,
             showConfidenceIntervals = TRUE,
@@ -131,7 +132,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "jamovi",
                     "recist",
                     "simple",
-                    "colorful"),
+                    "colorful",
+                    "colorblind"),
                 default="jamovi")
             private$..barAlpha <- jmvcore::OptionNumber$new(
                 "barAlpha",
@@ -166,8 +168,19 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "classic",
                     "jamovi",
-                    "colorful"),
+                    "colorful",
+                    "colorblind"),
                 default="classic")
+            private$..timeUnitLabel <- jmvcore::OptionList$new(
+                "timeUnitLabel",
+                timeUnitLabel,
+                options=list(
+                    "generic",
+                    "days",
+                    "weeks",
+                    "months",
+                    "years"),
+                default="generic")
             private$..generateCopyReadyReport <- jmvcore::OptionBool$new(
                 "generateCopyReadyReport",
                 generateCopyReadyReport,
@@ -207,6 +220,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showSpiderPlot)
             self$.addOption(private$..spiderColorBy)
             self$.addOption(private$..spiderColorScheme)
+            self$.addOption(private$..timeUnitLabel)
             self$.addOption(private$..generateCopyReadyReport)
             self$.addOption(private$..showClinicalSignificance)
             self$.addOption(private$..showConfidenceIntervals)
@@ -234,6 +248,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showSpiderPlot = function() private$..showSpiderPlot$value,
         spiderColorBy = function() private$..spiderColorBy$value,
         spiderColorScheme = function() private$..spiderColorScheme$value,
+        timeUnitLabel = function() private$..timeUnitLabel$value,
         generateCopyReadyReport = function() private$..generateCopyReadyReport$value,
         showClinicalSignificance = function() private$..showClinicalSignificance$value,
         showConfidenceIntervals = function() private$..showConfidenceIntervals$value,
@@ -260,6 +275,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showSpiderPlot = NA,
         ..spiderColorBy = NA,
         ..spiderColorScheme = NA,
+        ..timeUnitLabel = NA,
         ..generateCopyReadyReport = NA,
         ..showClinicalSignificance = NA,
         ..showConfidenceIntervals = NA,
@@ -283,7 +299,10 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         spiderplot = function() private$.items[["spiderplot"]],
         copyReadyReport = function() private$.items[["copyReadyReport"]],
         clinicalSignificance = function() private$.items[["clinicalSignificance"]],
+        clinicalGlossary = function() private$.items[["clinicalGlossary"]],
         enhancedClinicalMetrics = function() private$.items[["enhancedClinicalMetrics"]],
+        groupComparisonTable = function() private$.items[["groupComparisonTable"]],
+        groupComparisonTest = function() private$.items[["groupComparisonTest"]],
         addResponseCategory = function() private$.items[["addResponseCategory"]]),
     private = list(),
     public=list(
@@ -470,6 +489,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "colorScheme",
                     "spiderColorBy",
                     "spiderColorScheme",
+                    "timeUnitLabel",
                     "showMedian",
                     "showCI")))
             self$add(jmvcore::Html$new(
@@ -487,6 +507,15 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="clinicalSignificance",
                 title="Clinical Significance Assessment",
+                visible="(showClinicalSignificance)",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "showClinicalSignificance")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalGlossary",
+                title="Clinical Terms & Definitions",
                 visible="(showClinicalSignificance)",
                 clearWith=list(
                     "patientID",
@@ -525,6 +554,70 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timeVar",
                     "inputType",
                     "showConfidenceIntervals")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="groupComparisonTable",
+                title="Group Comparison Analysis",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n_patients", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="orr", 
+                        `title`="ORR (%)", 
+                        `type`="number"),
+                    list(
+                        `name`="orr_ci", 
+                        `title`="95% CI", 
+                        `type`="text"),
+                    list(
+                        `name`="dcr", 
+                        `title`="DCR (%)", 
+                        `type`="number"),
+                    list(
+                        `name`="dcr_ci", 
+                        `title`="95% CI", 
+                        `type`="text")),
+                visible="(groupVar)",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "groupVar",
+                    "inputType")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="groupComparisonTest",
+                title="Group Comparison Statistical Test",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="test_statistic", 
+                        `title`="Test Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text")),
+                visible="(groupVar)",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "groupVar",
+                    "inputType")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addResponseCategory",
@@ -638,6 +731,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   patient groups. For backward compatibility, defaults to response status
 #'   coloring.
 #' @param spiderColorScheme Color scheme for spider plot lines and points.
+#' @param timeUnitLabel Label to use for the spider plot time axis. Does not
+#'   rescale data; only affects axis labeling.
 #' @param generateCopyReadyReport Generate publication-ready result sentences
 #'   with statistical details
 #' @param showClinicalSignificance Display clinical significance
@@ -659,7 +754,10 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSignificance} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$enhancedClinicalMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$groupComparisonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
@@ -692,6 +790,7 @@ waterfall <- function(
     showSpiderPlot = TRUE,
     spiderColorBy = "response",
     spiderColorScheme = "classic",
+    timeUnitLabel = "generic",
     generateCopyReadyReport = FALSE,
     showClinicalSignificance = FALSE,
     showConfidenceIntervals = TRUE,
@@ -734,6 +833,7 @@ waterfall <- function(
         showSpiderPlot = showSpiderPlot,
         spiderColorBy = spiderColorBy,
         spiderColorScheme = spiderColorScheme,
+        timeUnitLabel = timeUnitLabel,
         generateCopyReadyReport = generateCopyReadyReport,
         showClinicalSignificance = showClinicalSignificance,
         showConfidenceIntervals = showConfidenceIntervals,

@@ -72,7 +72,11 @@
       "Bash(else)",
       "Bash(do echo -n \"$opt: \")",
       "Bash(do echo -n \"$opt (via options): \")",
-      "WebFetch(domain:krassowski.github.io)"
+      "WebFetch(domain:krassowski.github.io)",
+      "Bash(node:*)",
+      "WebFetch(domain:forum.jamovi.org)",
+      "WebFetch(domain:gaospecial.github.io)",
+      "WebFetch(domain:rpubs.com)"
     ],
     "deny": [],
     "ask": [],

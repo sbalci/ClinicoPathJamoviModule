@@ -62,12 +62,631 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         RECIST_SD_MIN = -30,         # Stable Disease minimum (-30%)
         RECIST_SD_MAX = 20,          # Stable Disease maximum (20%)
 
+        # Get validation messages for different scenarios
+        .getValidationMessages = function() {
+          list(
+            no_data = .("Error: No data provided or data is empty."),
+            missing_columns = .("Error: Missing required columns:"),
+            available_columns = .("Available columns:"),
+            few_patients_warning = .("Warning: Only %d patient found. Waterfall plots are more meaningful with multiple patients."),
+            missing_responses = .("Warning: %d missing response values found. These will be excluded from analysis."),
+            time_var_required = .("Time Variable Required for Raw Measurements:"),
+            time_var_purpose = list(
+              .("When using raw tumor measurements, a time variable is essential to:"),
+              .("Identify baseline measurements (time = 0)"),
+              .("Calculate accurate percentage changes"),
+              .("Track response progression over time")
+            ),
+            data_format = list(
+              .("Recommended Data Format:"),
+              "PatientID  Time  Measurement",
+              paste0("PT1        0     50          (", .("baseline"), ")"),
+              paste0("PT1        2     25          (2 ", .("months"), ")"),
+              paste0("PT1        4     10          (4 ", .("months"), ")")
+            ),
+            missing_baseline = .("Missing Baseline Measurements:"),
+            baseline_explanation = list(
+              .("The following patients lack baseline (time = 0) measurements:"),
+              .("Why this matters:"),
+              .("Baseline measurements are the reference point for calculating changes"),
+              .("Without baseline values, percentage changes cannot be calculated accurately")
+            ),
+            recommended_actions = list(
+              .("Recommended actions:"),
+              .("Add time=0 measurements for each patient, OR"),
+              .("Switch to 'Percentage Changes' input format if changes are pre-calculated, OR"),
+              .("Remove patients without baseline from analysis")
+            ),
+            invalid_shrinkage = .("Invalid Tumor Shrinkage Values Detected:"),
+            shrinkage_explanation = list(
+              .("Tumor shrinkage cannot exceed 100% (complete disappearance)."),
+              .("Values will be automatically capped at -100% for analysis"),
+              .("Note: Values <-100% are mathematically impossible for tumor shrinkage.")
+            ),
+            verify_data = list(
+              .("Verify data entry for calculation errors"),
+              .("Check if baseline measurements are correct"),
+              .("Confirm percentage calculation method: ((current - baseline) / baseline) × 100")
+            ),
+            large_growth = .("Unusually Large Growth Values Detected:"),
+            growth_verification = list(
+              .("While such large increases are possible, please verify:"),
+              .("Measurement accuracy"),
+              .("Calculation methods"),
+              .("Any additional clinical factors"),
+              .("These values will be included in the analysis but may affect scaling.")
+            )
+          )
+        },
+
+        # HTML sanitization for security
+        .safeHtmlOutput = function(text) {
+          if (is.null(text) || length(text) == 0) return("")
+          text <- as.character(text)
+          # Sanitize potentially dangerous characters
+          text <- gsub("&", "&amp;", text, fixed = TRUE)
+          text <- gsub("<", "&lt;", text, fixed = TRUE)
+          text <- gsub(">", "&gt;", text, fixed = TRUE)
+          text <- gsub("\"", "&quot;", text, fixed = TRUE)
+          text <- gsub("'", "&#x27;", text, fixed = TRUE)
+          text <- gsub("/", "&#x2F;", text, fixed = TRUE)
+          return(text)
+        },
+
+        # Safely format patient IDs and other user inputs for HTML display
+        .safeFormatPatientID = function(id_vector) {
+          sapply(id_vector, function(id) {
+            if (is.null(id) || is.na(id)) return("N/A")
+            private$.safeHtmlOutput(as.character(id))
+          }, USE.NAMES = FALSE)
+        },
+
+        # Calculate statistical power for response rates
+        .calculateStatisticalPower = function(n, observed_rate, null_rate = 0.15) {
+          # Post-hoc power calculation for response rate
+          # null_rate: typical null hypothesis for phase II trials (15%)
+          tryCatch({
+            if (n < 5 || is.na(observed_rate) || observed_rate < 0 || observed_rate > 1) {
+              return(list(
+                power = NA,
+                interpretation = .("Insufficient data for power calculation"),
+                adequate = FALSE
+              ))
+            }
+
+            # Convert percentages to proportions if needed
+            if (observed_rate > 1) observed_rate <- observed_rate / 100
+            if (null_rate > 1) null_rate <- null_rate / 100
+
+            # Calculate effect size (Cohen's h)
+            h <- 2 * (asin(sqrt(observed_rate)) - asin(sqrt(null_rate)))
+
+            # Simple power calculation using normal approximation
+            # This avoids dependency on external packages
+            z_alpha <- qnorm(0.975)  # two-sided alpha = 0.05
+            se <- sqrt((observed_rate * (1 - observed_rate)) / n)
+            z_beta <- (abs(observed_rate - null_rate) - z_alpha * se) / se
+            power <- pnorm(z_beta)
+
+            # Interpretation
+            interpretation <- if (power >= 0.80) {
+              .("Adequate statistical power (≥80%)")
+            } else if (power >= 0.60) {
+              .("Moderate statistical power (60-80%)")
+            } else if (power >= 0.40) {
+              .("Low statistical power (40-60%)")
+            } else {
+              .("Very low statistical power (<40%)")
+            }
+
+            list(
+              power = power,
+              interpretation = interpretation,
+              adequate = power >= 0.80,
+              effect_size = abs(h)
+            )
+          }, error = function(e) {
+            list(
+              power = NA,
+              interpretation = .("Power calculation failed"),
+              adequate = FALSE
+            )
+          })
+        },
+
+        # Calculate time-to-event metrics
+        .calculateTimeToEventMetrics = function(df, patientID, timeVar, responseVar) {
+          if (is.null(timeVar) || !timeVar %in% names(df)) {
+            return(NULL)
+          }
+
+          tryCatch({
+            # Convert to numeric
+            df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
+            df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
+
+            metrics <- df %>%
+              dplyr::group_by(!!rlang::sym(patientID)) %>%
+              dplyr::arrange(!!rlang::sym(timeVar)) %>%
+              dplyr::summarise(
+                # Time to first response (PR or better: ≤-30%)
+                time_to_first_response = ifelse(
+                  any(.data[[responseVar]] <= private$RECIST_PR_THRESHOLD, na.rm = TRUE),
+                  min(.data[[timeVar]][.data[[responseVar]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE),
+                  NA_real_
+                ),
+                # Duration of response (time from first response to progression/end)
+                duration_of_response = ifelse(
+                  any(.data[[responseVar]] <= private$RECIST_PR_THRESHOLD, na.rm = TRUE),
+                  {
+                    first_response_time <- min(.data[[timeVar]][.data[[responseVar]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE)
+                    # Find progression after response (>20% increase)
+                    progression_times <- .data[[timeVar]][.data[[responseVar]] > private$RECIST_PD_THRESHOLD & .data[[timeVar]] > first_response_time]
+                    if (length(progression_times) > 0) {
+                      min(progression_times) - first_response_time
+                    } else {
+                      max(.data[[timeVar]]) - first_response_time  # Censored at last follow-up
+                    }
+                  },
+                  NA_real_
+                ),
+                # Best response achieved
+                best_response = min(.data[[responseVar]], na.rm = TRUE),
+                # Time to best response
+                time_to_best_response = .data[[timeVar]][which.min(.data[[responseVar]])],
+                .groups = "drop"
+              ) %>%
+              dplyr::filter(!is.na(time_to_first_response) | !is.na(duration_of_response))
+
+            # Summary statistics
+            summary_stats <- list(
+              median_time_to_response = median(metrics$time_to_first_response, na.rm = TRUE),
+              median_duration_of_response = median(metrics$duration_of_response, na.rm = TRUE),
+              median_time_to_best_response = median(metrics$time_to_best_response, na.rm = TRUE),
+              n_responders = sum(!is.na(metrics$time_to_first_response)),
+              n_with_duration_data = sum(!is.na(metrics$duration_of_response))
+            )
+
+            list(
+              by_patient = metrics,
+              summary = summary_stats
+            )
+          }, error = function(e) {
+            NULL
+          })
+        },
+
+        # Check if dataset is large and needs optimization
+        .shouldOptimizeForLargeDataset = function(df) {
+          nrow(df) > 100 || length(unique(df[[1]])) > 50  # Assuming first column might be patient ID
+        },
+
+        # Progressive rendering for large datasets
+        .prepareProgressiveData = function(df, chunk_size = 50) {
+          n_rows <- nrow(df)
+          if (n_rows <= chunk_size) {
+            return(list(data = df, is_chunked = FALSE, total_chunks = 1))
+          }
+
+          # Create chunks for progressive processing
+          chunk_indices <- split(seq_len(n_rows), ceiling(seq_len(n_rows) / chunk_size))
+
+          list(
+            data = df,
+            chunk_indices = chunk_indices,
+            is_chunked = TRUE,
+            total_chunks = length(chunk_indices),
+            chunk_size = chunk_size
+          )
+        },
+
+        # Plot helper functions for better code organization ----
+
+        # Prepare waterfall plot data and sort
+        .prepareWaterfallPlotData = function(plotData) {
+          df <- plotData$data$waterfall
+
+          # Optimize for large datasets
+          df <- private$.optimizeForLargeDatasets(df)
+
+          # Sort data
+          if (plotData$options$sortBy == "response") {
+            df <- df[order(df$response, na.last = TRUE),]
+          } else if (plotData$options$sortBy == "id") {
+            df <- df[order(df[[plotData$options$patientID]], na.last = TRUE),]
+          }
+
+          return(df)
+        },
+
+        # Define color schemes for plots
+        .getColorSchemes = function() {
+          list(
+            recist = c(
+              "CR" = "#1b9e77",  # teal - colorblind safe
+              "PR" = "#7570b3",  # purple - colorblind safe
+              "SD" = "#e7298a",  # magenta - colorblind safe
+              "PD" = "#e66101",  # orange - colorblind safe
+              "NA" = "#666666"   # gray
+            ),
+            simple = c(
+              "CR" = "#1b9e77",  # teal for positive response
+              "PR" = "#1b9e77",  # same teal for positive response
+              "SD" = "#666666",  # gray for stable
+              "PD" = "#e66101",  # orange for progression
+              "NA" = "#999999"   # lighter gray
+            ),
+            colorblind = c(
+              "CR" = "#009E73",  # bluish green
+              "PR" = "#56B4E9",  # sky blue
+              "SD" = "#E69F00",  # orange
+              "PD" = "#CC79A7",  # reddish purple
+              "NA" = "#999999"   # gray
+            )
+          )
+        },
+
+        # Select appropriate colors for waterfall plot
+        .selectWaterfallColors = function(plotData, df) {
+          color_schemes <- private$.getColorSchemes()
+
+          # Check if group-based coloring is requested and group variable exists
+          useGroupColoring <- !is.null(plotData$options$colorBy) &&
+                              plotData$options$colorBy == "group" &&
+                              "patient_group" %in% names(df)
+
+          if (useGroupColoring) {
+            # Generate distinct colors for groups using reusable method
+            group_levels <- unique(df$patient_group)
+            colors <- private$.generateGroupColors(group_levels, plotData$options$colorScheme)
+            fill_var <- "patient_group"
+            legend_name <- .("Patient Group")
+          } else {
+            # Use RECIST coloring based on selected scheme
+            colors <- switch(plotData$options$colorScheme,
+              "simple" = color_schemes$simple,
+              "colorblind" = color_schemes$colorblind,
+              "jamovi" = color_schemes$recist,
+              "recist" = color_schemes$recist,
+              color_schemes$recist  # default fallback
+            )
+            fill_var <- "recist_category"
+            legend_name <- .("RECIST Response")
+          }
+
+          list(colors = colors, fill_var = fill_var, legend_name = legend_name, useGroupColoring = useGroupColoring)
+        },
+
+        # Create base waterfall plot
+        .createWaterfallBasePlot = function(df, color_info, plotData) {
+          ggplot2::ggplot(df, ggplot2::aes(
+            x = factor(seq_len(nrow(df))),
+            y = response
+          )) +
+          ggplot2::geom_bar(
+            stat = "identity",
+            ggplot2::aes(fill = !!rlang::sym(color_info$fill_var)),
+            width = plotData$options$barWidth,
+            alpha = plotData$options$barAlpha
+          ) +
+          ggplot2::scale_fill_manual(
+            name = color_info$legend_name,
+            values = color_info$colors,
+            na.value = "#808080",
+            drop = FALSE
+          ) +
+          ggplot2::labs(
+            x = .("Patients"),
+            y = .("Change in Tumor Size (%)")
+          )
+        },
+
+        # Add RECIST threshold lines to plot
+        .addRecistThresholds = function(plot, show_thresholds) {
+          if (show_thresholds) {
+            plot +
+              ggplot2::geom_hline(
+                yintercept = c(private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD),
+                linetype = "dashed",
+                color = c("#4169E1", "#FF0000"),
+                alpha = 0.5
+              )
+          } else {
+            plot
+          }
+        },
+
+        # Add response labels to plot
+        .addResponseLabels = function(plot, df, plotData) {
+          if (plotData$options$labelOutliers) {
+            threshold <- plotData$options$minResponseForLabel
+            labels <- ifelse(
+              !is.na(df$response) & abs(df$response) > threshold,
+              sprintf("%.1f%%", df$response),
+              ""
+            )
+
+            if (any(labels != "")) {
+              plot +
+                ggplot2::geom_text(
+                  data = df[labels != "",],
+                  mapping = ggplot2::aes(
+                    x = factor(which(labels != "")),
+                    y = response,
+                    label = labels[labels != ""]
+                  ),
+                  vjust = ifelse(df$response[labels != ""] > 0, -0.5, 1.2),
+                  hjust = 0.5,
+                  size = 3,
+                  color = "black"
+                )
+            } else {
+              plot
+            }
+          } else {
+            plot
+          }
+        },
+
+        # Add median and confidence interval lines
+        .addMedianAndCI = function(plot, df, plotData) {
+          if (plotData$options$showMedian) {
+            median_response <- median(df$response, na.rm = TRUE)
+            plot <- plot +
+              ggplot2::geom_hline(
+                yintercept = median_response,
+                linetype = "solid",
+                color = "blue",
+                alpha = 0.7
+              )
+          }
+
+          if (plotData$options$showCI) {
+            # Calculate 95% confidence interval for median
+            if (nrow(df) > 10) {
+              ci_data <- tryCatch({
+                t_test <- t.test(df$response, na.rm = TRUE)
+                c(lower = t_test$conf.int[1], upper = t_test$conf.int[2])
+              }, error = function(e) c(lower = NA, upper = NA))
+
+              if (!is.na(ci_data[1])) {
+                plot <- plot +
+                  ggplot2::geom_ribbon(
+                    data = data.frame(
+                      x = c(0, nrow(df) + 1),
+                      ymin = ci_data[1],
+                      ymax = ci_data[2]
+                    ),
+                    mapping = ggplot2::aes(x = x, ymin = ymin, ymax = ymax),
+                    alpha = 0.2,
+                    fill = "blue",
+                    inherit.aes = FALSE
+                  )
+              }
+            }
+          }
+
+          return(plot)
+        },
+
+        # Memory-efficient processing for large datasets
+        .processLargeDataset = function(df, patientID, inputType, responseVar, timeVar = NULL, groupVar = NULL) {
+          tryCatch({
+            # Work with references to avoid copying data
+            df_copy <- df  # Minimal copy
+
+            # Convert to numeric efficiently
+            df_copy[[responseVar]] <- jmvcore::toNumeric(df_copy[[responseVar]])
+            if (!is.null(timeVar)) {
+              df_copy[[timeVar]] <- jmvcore::toNumeric(df_copy[[timeVar]])
+            }
+
+            if (inputType == "raw") {
+              # For raw data, process in chunks if very large
+              if (nrow(df_copy) > 1000) {
+                result <- private$.processRawDataInChunks(df_copy, patientID, responseVar, timeVar, groupVar)
+              } else {
+                result <- private$.processRawDataStandard(df_copy, patientID, responseVar, timeVar, groupVar)
+              }
+            } else {
+              # For percentage data, direct processing
+              result <- private$.processPercentageDataEfficient(df_copy, patientID, responseVar, timeVar, groupVar)
+            }
+
+            return(result)
+          }, error = function(e) {
+            # Fall back to standard processing
+            warning("Large dataset optimization failed, falling back to standard processing: ", e$message)
+            return(private$.processDataStandard(df, patientID, inputType, responseVar, timeVar, groupVar))
+          })
+        },
+
+        # Process raw data in chunks for very large datasets
+        .processRawDataInChunks = function(df, patientID, responseVar, timeVar, groupVar) {
+          # Get unique patients and process in batches
+          unique_patients <- unique(df[[patientID]])
+          chunk_size <- 100  # Process 100 patients at a time
+
+          waterfall_results <- list()
+          spider_results <- list()
+
+          for (i in seq(1, length(unique_patients), by = chunk_size)) {
+            end_idx <- min(i + chunk_size - 1, length(unique_patients))
+            chunk_patients <- unique_patients[i:end_idx]
+
+            # Filter data for this chunk
+            chunk_df <- df[df[[patientID]] %in% chunk_patients, , drop = FALSE]
+
+            # Process this chunk
+            chunk_result <- private$.processRawDataStandard(chunk_df, patientID, responseVar, timeVar, groupVar)
+
+            # Accumulate results
+            if (i == 1) {
+              waterfall_results <- chunk_result$waterfall
+              spider_results <- chunk_result$spider
+            } else {
+              waterfall_results <- rbind(waterfall_results, chunk_result$waterfall)
+              if (!is.null(chunk_result$spider)) {
+                spider_results <- rbind(spider_results, chunk_result$spider)
+              }
+            }
+          }
+
+          return(list(waterfall = waterfall_results, spider = spider_results))
+        },
+
+        # Standard raw data processing (extracted for reuse)
+        .processRawDataStandard = function(df, patientID, responseVar, timeVar, groupVar) {
+          # Calculate percentage change from baseline
+          baseline_df <- df %>%
+            dplyr::filter(!!rlang::sym(timeVar) == 0) %>%
+            dplyr::select(!!rlang::sym(patientID), baseline = !!rlang::sym(responseVar))
+
+          processed_df <- df %>%
+            dplyr::left_join(baseline_df, by = patientID) %>%
+            dplyr::group_by(!!rlang::sym(patientID)) %>%
+            dplyr::arrange(!!rlang::sym(timeVar)) %>%
+            dplyr::mutate(
+              baseline = jmvcore::toNumeric(baseline),
+              response = ifelse(!is.na(baseline) & baseline != 0,
+                              ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
+                              NA_real_)
+            ) %>%
+            dplyr::ungroup()
+
+          # Create waterfall data (best response per patient)
+          waterfall_data <- processed_df %>%
+            dplyr::group_by(!!rlang::sym(patientID)) %>%
+            dplyr::summarise(
+              response = min(response, na.rm = TRUE),
+              .groups = "drop"
+            )
+
+          # Add group information if available
+          if (!is.null(groupVar) && groupVar %in% names(df)) {
+            group_info <- df %>%
+              dplyr::select(!!rlang::sym(patientID), !!rlang::sym(groupVar)) %>%
+              dplyr::distinct()
+            waterfall_data <- waterfall_data %>%
+              dplyr::left_join(group_info, by = patientID)
+            names(waterfall_data)[names(waterfall_data) == groupVar] <- "patient_group"
+          }
+
+          # Add RECIST categories
+          waterfall_data$recist_category <- private$.categorizeRECIST(waterfall_data$response)
+
+          return(list(waterfall = waterfall_data, spider = processed_df))
+        },
+
+        # Efficient processing for percentage data
+        .processPercentageDataEfficient = function(df, patientID, responseVar, timeVar, groupVar) {
+          # Direct processing without copying
+          processed_df <- df
+          processed_df$response <- processed_df[[responseVar]]
+
+          # Create waterfall data efficiently
+          if (!is.null(timeVar) && timeVar %in% names(df)) {
+            # For time-series percentage data, get best response per patient
+            waterfall_data <- processed_df %>%
+              dplyr::group_by(!!rlang::sym(patientID)) %>%
+              dplyr::summarise(
+                response = min(response, na.rm = TRUE),
+                .groups = "drop"
+              )
+            spider_data <- processed_df
+          } else {
+            # For single-timepoint percentage data
+            waterfall_data <- processed_df
+            waterfall_data$response <- waterfall_data[[responseVar]]
+            spider_data <- NULL
+          }
+
+          # Add group information efficiently if available
+          if (!is.null(groupVar) && groupVar %in% names(df)) {
+            waterfall_data$patient_group <- df[[groupVar]][match(waterfall_data[[patientID]], df[[patientID]])]
+          }
+
+          # Add RECIST categories
+          waterfall_data$recist_category <- private$.categorizeRECIST(waterfall_data$response)
+
+          return(list(waterfall = waterfall_data, spider = spider_data))
+        },
+
+        # Fallback to standard processing
+        .processDataStandard = function(df, patientID, inputType, responseVar, timeVar, groupVar) {
+          # This is the original processing logic as fallback
+          if (inputType == "raw") {
+            if (!is.null(timeVar)) {
+              df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
+              df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
+
+              baseline_df <- df %>%
+                dplyr::filter(!!rlang::sym(timeVar) == 0) %>%
+                dplyr::select(!!rlang::sym(patientID), baseline = !!rlang::sym(responseVar))
+
+              processed_df <- df %>%
+                dplyr::left_join(baseline_df, by = patientID) %>%
+                dplyr::group_by(!!rlang::sym(patientID)) %>%
+                dplyr::arrange(!!rlang::sym(timeVar)) %>%
+                dplyr::mutate(
+                  baseline = jmvcore::toNumeric(baseline),
+                  response = ifelse(!is.na(baseline) & baseline != 0,
+                                  ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
+                                  NA_real_)
+                ) %>%
+                dplyr::ungroup()
+            } else {
+              df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
+              processed_df <- df %>%
+                dplyr::group_by(!!rlang::sym(patientID)) %>%
+                dplyr::arrange(!!rlang::sym(patientID)) %>%
+                dplyr::mutate(
+                  baseline = dplyr::first(!!rlang::sym(responseVar)),
+                  response = ((!!rlang::sym(responseVar) - baseline) / baseline) * 100
+                ) %>%
+                dplyr::ungroup()
+            }
+          } else {
+            processed_df <- df
+            processed_df$response <- jmvcore::toNumeric(processed_df[[responseVar]])
+          }
+
+          # Create waterfall and spider data
+          if (!is.null(timeVar) && timeVar %in% names(processed_df)) {
+            waterfall_data <- processed_df %>%
+              dplyr::group_by(!!rlang::sym(patientID)) %>%
+              dplyr::summarise(response = min(response, na.rm = TRUE), .groups = "drop")
+            spider_data <- processed_df
+          } else {
+            waterfall_data <- processed_df
+            spider_data <- NULL
+          }
+
+          # Add group information
+          if (!is.null(groupVar) && groupVar %in% names(df)) {
+            if (!"patient_group" %in% names(waterfall_data)) {
+              group_info <- df %>%
+                dplyr::select(!!rlang::sym(patientID), !!rlang::sym(groupVar)) %>%
+                dplyr::distinct()
+              waterfall_data <- waterfall_data %>%
+                dplyr::left_join(group_info, by = patientID)
+              names(waterfall_data)[names(waterfall_data) == groupVar] <- "patient_group"
+            }
+          }
+
+          # Add RECIST categories
+          waterfall_data$recist_category <- private$.categorizeRECIST(waterfall_data$response)
+
+          return(list(waterfall = waterfall_data, spider = spider_data))
+        },
+
         # Basic data existence check
       .validateBasicData = function(df) {
+        msgs <- private$.getValidationMessages()
         if (is.null(df) || nrow(df) == 0) {
           return(list(
             valid = FALSE,
-            message = paste0("<br>", .("Error: No data provided or data is empty."))
+            message = paste0("<br>", msgs$no_data)
           ))
         }
         return(list(valid = TRUE, message = ""))
@@ -75,18 +694,19 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       
       # Column existence validation
       .validateColumns = function(df, patientID, responseVar, timeVar = NULL) {
+        msgs <- private$.getValidationMessages()
         required_columns <- c(patientID, responseVar)
         if (!is.null(timeVar)) {
           required_columns <- c(required_columns, timeVar)
         }
-        
+
         missing_columns <- required_columns[!required_columns %in% names(df)]
         if (length(missing_columns) > 0) {
           return(list(
             valid = FALSE,
             message = paste0(
-              "<br>", .("Error: Missing required columns:"), " ", paste(missing_columns, collapse = ", "),
-              "<br>", .("Available columns:"), " ", paste(names(df), collapse = ", ")
+              "<br>", msgs$missing_columns, " ", paste(missing_columns, collapse = ", "),
+              "<br>", msgs$available_columns, " ", paste(names(df), collapse = ", ")
             )
           ))
         }
@@ -183,7 +803,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   "<br><br>", .("Why this matters:"),
                   "<br>- ", .("Baseline measurements are the reference point for calculating changes"),
                   "<br>- ", .("Without baseline values, percentage changes cannot be calculated accurately"),
-                  "<br>- ", .("Please ensure each patient has a measurement at time = 0")
+                  "<br><br>", .("Recommended actions:"),
+                  "<br>1. ", .("Add time=0 measurements for each patient, OR"),
+                  "<br>2. ", .("Switch to 'Percentage Changes' input format if changes are pre-calculated, OR"),
+                  "<br>3. ", .("Remove patients without baseline from analysis"),
+                  "<br><br>", .("Example data format with baseline:"),
+                  "<br>PatientID  Time  Measurement",
+                  "<br>PT1        0     50          (", .("baseline required"), ")",
+                  "<br>PT1        2     25          (", .("follow-up"), ")"
                 ))
                 data_valid <- FALSE
               }
@@ -202,11 +829,16 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           if (nrow(invalid_shrinkage) > 0) {
             validation_messages <- c(validation_messages, paste0(
-              "<br>Invalid Tumor Shrinkage Values Detected:",
-              "<br>Tumor shrinkage cannot exceed 100% (complete disappearance).",
-              sprintf("<br>The following measurements will be capped at %d%%:", private$RECIST_CR_THRESHOLD),
+              "<br>", .("Invalid Tumor Shrinkage Values Detected:"),
+              "<br>", .("Tumor shrinkage cannot exceed 100% (complete disappearance)."),
+              sprintf("<br>%s %d%%:", .("The following measurements will be capped at"), private$RECIST_CR_THRESHOLD),
               paste(capture.output(print(invalid_shrinkage)), collapse = "<br>"),
-              "<br><br>Please verify these measurements for data entry errors."
+              "<br><br>", .("Recommended actions:"),
+              "<br>1. ", .("Verify data entry for calculation errors"),
+              "<br>2. ", .("Check if baseline measurements are correct"),
+              "<br>3. ", .("Confirm percentage calculation method: ((current - baseline) / baseline) × 100"),
+              "<br>4. ", .("Values will be automatically capped at -100% for analysis"),
+              "<br><br>", .("Note: Values <-100% are mathematically impossible for tumor shrinkage.")
             ))
             # Cap shrinkage values at RECIST CR threshold
             df[[responseVar]] <- pmax(df[[responseVar]], private$RECIST_CR_THRESHOLD)
@@ -218,15 +850,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(!!patientID, !!responseVar)
 
           if (nrow(large_growth) > 0) {
-            validation_messages <- c(validation_messages, paste0(
-              "<br>Unusually Large Growth Values Detected:",
-              "<br>The following measurements show >200% growth:",
+          validation_messages <- c(validation_messages, paste0(
+              "<br>", .("Unusually Large Growth Values Detected:"),
+              "<br>", .("The following measurements show >200% growth:"),
               paste(capture.output(print(large_growth)), collapse = "<br>"),
-              "<br><br>While such large increases are possible, please verify:",
-              "<br>- Measurement accuracy",
-              "<br>- Calculation methods",
-              "<br>- Any additional clinical factors",
-              "<br><br>These values will be included in the analysis but may affect scaling."
+              "<br><br>", .("While such large increases are possible, please verify:"),
+              "<br>- ", .("Measurement accuracy"),
+              "<br>- ", .("Calculation methods"),
+              "<br>- ", .("Any additional clinical factors"),
+              "<br><br>", .("These values will be included in the analysis but may affect scaling.")
             ))
           }
         }
@@ -242,10 +874,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         unique_patients <- length(unique(df[[patientID]]))
         if (unique_patients < 10) {
           validation_messages <- c(validation_messages,
-            sprintf("<br>Warning: Very small sample size (n=%d). Results may not be reliable.", unique_patients))
+            sprintf("<br>%s", sprintf(.("Warning: Very small sample size (n=%d). Results may not be reliable."), unique_patients)))
         } else if (unique_patients < 20) {
           validation_messages <- c(validation_messages,
-            sprintf("<br>Note: Small sample size (n=%d). Interpret results with caution.", unique_patients))
+            sprintf("<br>%s", sprintf(.("Note: Small sample size (n=%d). Interpret results with caution."), unique_patients)))
         }
 
         # Add checks for unrealistic values if response data is available
@@ -256,13 +888,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               # For percentage data, check for extreme values
               if (any(response_values > 500 | response_values < private$RECIST_CR_THRESHOLD, na.rm = TRUE)) {
                 validation_messages <- c(validation_messages,
-                  sprintf("<br>Warning: Some percentage changes are outside typical range (%d%% to +500%%). Please verify data.", private$RECIST_CR_THRESHOLD))
+                  sprintf("<br>%s", sprintf(.("Warning: Some percentage changes are outside typical range (%d%% to +500%%). Please verify data."), private$RECIST_CR_THRESHOLD)))
               }
             } else {
               # For raw measurements, check for negative values or zero
               if (any(response_values <= 0, na.rm = TRUE)) {
                 validation_messages <- c(validation_messages,
-                  "<br>Warning: Some measurements are zero or negative. Please verify these values.")
+                  paste0("<br>", .("Warning: Some measurements are zero or negative. Please verify these values.")))
               }
             }
           }
@@ -275,18 +907,22 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check if baseline (time = 0) measurements exist for raw data
             if (inputType == "raw" && !any(time_values == 0)) {
               validation_messages <- c(validation_messages,
-                "<br>Warning: No baseline measurements (time=0) found. Percentage changes may be incorrect.")
+                paste0("<br>", .("Warning: No baseline measurements (time=0) found. Percentage changes may be incorrect.")))
             }
             # Check for negative time values
             if (any(time_values < 0, na.rm = TRUE)) {
               validation_messages <- c(validation_messages,
-                "<br>Warning: Negative time values detected. Please verify time measurements.")
+                paste0("<br>", .("Warning: Negative time values detected. Please verify time measurements.")))
             }
           }
         }
 
 
 
+
+        # Re-set attributes for validation results (include late warnings)
+        attr(df, "validation_messages") <- validation_messages
+        attr(df, "data_valid") <- data_valid
 
         # Return modified dataframe with validation attributes
         return(df)
@@ -295,14 +931,23 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .generateGroupColors = function(group_levels, color_scheme) {
         # Generate colors for group-based coloring
         # @param group_levels: unique levels/groups to assign colors
-        # @param color_scheme: "colorful", "jamovi", "classic", etc.
+        # @param color_scheme: "colorful", "jamovi", "classic", "colorblind", etc.
         # @return: named vector of colors
-        
+
         n_groups <- length(group_levels)
-        
+
         if (color_scheme == "colorful") {
           # Use rainbow colors for better distinction
           colors <- rainbow(n_groups)
+        } else if (color_scheme == "colorblind") {
+          # Use Okabe-Ito colorblind-safe palette
+          okabe_ito <- c("#009E73", "#56B4E9", "#E69F00", "#CC79A7", "#F0E442", "#0072B2", "#D55E00", "#999999")
+          if (n_groups <= length(okabe_ito)) {
+            colors <- okabe_ito[1:n_groups]
+          } else {
+            # Fall back to colorblind-safe qualitative palette for more groups
+            colors <- grDevices::hcl.colors(n_groups, palette = "Cividis")
+          }
         } else if (color_scheme == "jamovi") {
           # Use jamovi-style colors (RColorBrewer Set2)
           if (n_groups <= 8) {
@@ -319,7 +964,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             colors <- rainbow(n_groups)
           }
         }
-        
+
         # Name the colors with group levels
         names(colors) <- group_levels
         return(colors)
@@ -336,6 +981,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             error = TRUE,
             message = .("Patient ID and response variables are required")
           ))
+        }
+
+        # Optimize processing for large datasets
+        use_efficient_processing <- private$.shouldOptimizeForLargeDataset(df)
+        if (use_efficient_processing) {
+          return(private$.processLargeDataset(df, patientID, inputType, responseVar, timeVar, groupVar))
         }
 
         # For raw measurements, calculate percentage change from baseline
@@ -397,12 +1048,24 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # Calculate RECIST categories - select best response (most negative for tumor shrinkage)
-        df_waterfall <- processed_df %>%
-          dplyr::group_by(!!rlang::sym(patientID)) %>%
-          dplyr::filter(!is.na(response)) %>%  # Filter out NA responses first
-          dplyr::filter(response == min(response, na.rm = TRUE)) %>%
-          dplyr::slice(1) %>%  # Take first row if there are ties
-          dplyr::ungroup()
+        # Optimized for large datasets
+        n_patients <- length(unique(processed_df[[patientID]]))
+
+        if (n_patients > 1000) {
+          # Use more efficient approach for large datasets
+          df_waterfall <- processed_df %>%
+            dplyr::filter(!is.na(response)) %>%  # Filter NA responses first
+            dplyr::slice_min(response, by = !!rlang::sym(patientID), with_ties = FALSE) %>%
+            dplyr::ungroup()
+        } else {
+          # Use standard approach for smaller datasets
+          df_waterfall <- processed_df %>%
+            dplyr::group_by(!!rlang::sym(patientID)) %>%
+            dplyr::filter(!is.na(response)) %>%  # Filter out NA responses first
+            dplyr::filter(response == min(response, na.rm = TRUE)) %>%
+            dplyr::slice(1) %>%  # Take first row if there are ties
+            dplyr::ungroup()
+        }
         
         # Validate waterfall data
         if (nrow(df_waterfall) == 0) {
@@ -488,14 +1151,25 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           n = sapply(cats, function(x) sum(df$recist_category == x, na.rm = TRUE)),
           stringsAsFactors = FALSE
         )
-        summary_table$percent <- summary_table$n / sum(summary_table$n) * 100
+
+        total_n <- sum(summary_table$n)
+        if (total_n > 0) {
+          summary_table$percent <- summary_table$n / total_n
+        } else {
+          summary_table$percent <- rep(0, length(cats))
+        }
 
         ## Calculate ORR and DCR ----
-        ORR <- round(sum(summary_table$n[summary_table$category %in% c("CR", "PR")]) /
-                       sum(summary_table$n) * 100, 1)
+        if (total_n > 0) {
+          ORR <- round(sum(summary_table$n[summary_table$category %in% c("CR", "PR")]) /
+                         total_n * 100, 1)
 
-        DCR <- round(sum(summary_table$n[summary_table$category %in% c("CR", "PR", "SD")]) /
-                       sum(summary_table$n) * 100, 1)
+          DCR <- round(sum(summary_table$n[summary_table$category %in% c("CR", "PR", "SD")]) /
+                         total_n * 100, 1)
+        } else {
+          ORR <- NA_real_
+          DCR <- NA_real_
+        }
 
         return(list(
           summary = summary_table,
@@ -544,86 +1218,126 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       # Calculate person-time metrics for enhanced analysis
       .calculatePersonTimeMetrics = function(df, patientID, timeVar, responseVar) {
         # Requires time variable to calculate person-time
-        if (is.null(timeVar)) {
+        if (is.null(timeVar) || !timeVar %in% names(df))
           return(NULL)
-        }
 
-        # Ensure required columns exist and are properly formatted
-        if (!all(c(patientID, timeVar) %in% names(df))) {
-          warning("Required variables missing for person-time analysis")
+        if (!patientID %in% names(df))
           return(NULL)
-        }
+
+        if (nrow(df) == 0)
+          return(NULL)
+
+        df <- df %>%
+          dplyr::filter(!is.na(.data[[patientID]]))
+
+        if (nrow(df) == 0)
+          return(NULL)
 
         # Convert time variable to numeric if needed
         df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
 
-        # Debug: Check what columns are available
-        # Determine which column to use for response calculations
         response_col <- NULL
         if ("percentage_change" %in% names(df)) {
           response_col <- "percentage_change"
         } else if ("response" %in% names(df)) {
-          response_col <- "response" 
+          response_col <- "response"
         } else {
-          # For raw data, we can't do proper person-time analysis without percentage changes
           return(NULL)
         }
 
-        # Calculate person-time metrics by patient
+        df[[response_col]] <- jmvcore::toNumeric(df[[response_col]])
+
+        safe_extreme <- function(x, fun) {
+          x <- x[!is.na(x)]
+          if (length(x) == 0)
+            return(NA_real_)
+          fun(x)
+        }
+
+        classify_response <- function(value) {
+          if (is.na(value)) {
+            return(NA_character_)
+          }
+          if (value <= private$RECIST_CR_THRESHOLD) {
+            return("CR")
+          }
+          if (value <= private$RECIST_PR_THRESHOLD) {
+            return("PR")
+          }
+          if (value <= private$RECIST_PD_THRESHOLD) {
+            return("SD")
+          }
+          "PD"
+        }
+
         pt_by_patient <- df %>%
           dplyr::group_by(!!rlang::sym(patientID)) %>%
           dplyr::summarise(
-            # Calculate total follow-up time (max time - baseline)
-            follow_up_time = max(.data[[timeVar]], na.rm = TRUE),
-            # Calculate best response using the appropriate response column
-            best_response = min(.data[[response_col]], na.rm = TRUE),
-            # Determine response category
-            response_cat = factor(
-              cut(best_response,
-                  breaks = c(-Inf, private$RECIST_CR_THRESHOLD, private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD, Inf),
-                  labels = c("CR", "PR", "SD", "PD"),
-                  right = TRUE),
-              levels = c("CR", "PR", "SD", "PD")
-            ),
-            # Calculate time to best response
-            time_to_best = .data[[timeVar]][which.min(.data[[response_col]])],
-            # Calculate time in response (for responders - PR or CR)
-            time_in_response = ifelse(
-              best_response <= private$RECIST_PR_THRESHOLD,
-              # For responders, calculate time from first response to last follow-up
-              max(.data[[timeVar]][.data[[response_col]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE) -
-                min(.data[[timeVar]][.data[[response_col]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE),
-              0
-            ),
+            follow_up_time = safe_extreme(.data[[timeVar]], max),
+            best_response = safe_extreme(.data[[response_col]], min),
+            time_to_best = {
+              valid_idx <- which(!is.na(.data[[response_col]]))
+              if (length(valid_idx) == 0) {
+                NA_real_
+              } else {
+                best_idx <- valid_idx[which.min(.data[[response_col]][valid_idx])]
+                .data[[timeVar]][best_idx]
+              }
+            },
+            time_in_response = {
+              responders <- which(!is.na(.data[[response_col]]) & .data[[response_col]] <= private$RECIST_PR_THRESHOLD)
+              if (length(responders) == 0) {
+                0
+              } else {
+                start_time <- min(.data[[timeVar]][responders], na.rm = TRUE)
+                end_time <- max(.data[[timeVar]][responders], na.rm = TRUE)
+                if (is.finite(start_time) && is.finite(end_time)) max(end_time - start_time, 0) else 0
+              }
+            },
             .groups = "drop"
           )
 
-        # Calculate overall person-time metrics
+        if (!"best_response" %in% names(pt_by_patient))
+          return(NULL)
+
+        pt_by_patient <- pt_by_patient %>%
+          dplyr::mutate(
+            response_cat = vapply(best_response, classify_response, character(1), USE.NAMES = FALSE),
+            response_cat = factor(response_cat, levels = c("CR", "PR", "SD", "PD"))
+          )
+
         total_patients <- nrow(pt_by_patient)
+        if (total_patients == 0)
+          return(NULL)
+
         total_person_time <- sum(pt_by_patient$follow_up_time, na.rm = TRUE)
         total_response_time <- sum(pt_by_patient$time_in_response, na.rm = TRUE)
 
-        # Calculate person-time by response category
         pt_by_category <- pt_by_patient %>%
           dplyr::group_by(response_cat, .drop = FALSE) %>%
           dplyr::summarise(
             patients = dplyr::n(),
             person_time = sum(follow_up_time, na.rm = TRUE),
-            median_time_to_response = median(time_to_best, na.rm = TRUE),
-            median_duration = median(time_in_response, na.rm = TRUE),
+            median_time_to_response = safe_extreme(time_to_best, stats::median),
+            median_duration = safe_extreme(time_in_response, stats::median),
             .groups = "drop"
           ) %>%
           dplyr::mutate(
-            pct_patients = (patients / total_patients) * 100,
-            pct_time = (person_time / total_person_time) * 100
+            pct_patients = if (total_patients > 0) (patients / total_patients) * 100 else 0,
+            pct_time = if (!is.na(total_person_time) && total_person_time > 0) (person_time / total_person_time) * 100 else 0
           )
 
-        # Calculate summary metrics
+        response_rate <- if (!is.na(total_person_time) && total_person_time > 0) {
+          (total_response_time / total_person_time) * 100
+        } else {
+          NA_real_
+        }
+
         summary_metrics <- list(
           total_patients = total_patients,
           total_person_time = total_person_time,
           total_response_time = total_response_time,
-          response_rate_per_100 = (total_response_time / total_person_time) * 100
+          response_rate_per_100 = response_rate
         )
 
         return(list(
@@ -634,17 +1348,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       }
 
       ,
-      # run ----
-      .run = function() {
-
+      # Initialize analysis and show guidance ----
+      .initializeAnalysis = function() {
         ## Show guided analysis first if enabled ----
         if (self$options$enableGuidedMode) {
           private$.generateGuidedAnalysis()
+          return()
         }
 
-        ## TODO text ----
+        ## Show welcome text ----
+        private$.generateWelcomeText()
+      }
 
-
+      ,
+      # Generate welcome text for non-guided mode ----
+      .generateWelcomeText = function() {
         todo <- paste0(
           "<br>", .("Welcome to ClinicoPath Treatment Response Analysis"),
           "<br><br>",
@@ -685,12 +1403,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<br>- <b>", .("Response Value:"), "</b> ", .("Either percentage change or raw measurements"),
           "<br>- <b>", .("Time Variable:"), "</b> ", .("Required only for Spider Plot (e.g., months from baseline)"),
           "<br><br>",
-          "<b>", .("RECIST Response Categories:"), "</b>",
-          sprintf("<br>- %s %d%% (%s)", .("Complete Response (CR):"), private$RECIST_CR_THRESHOLD, .("complete disappearance")),
-          sprintf("<br>- %s ≥%d%% %s", .("Partial Response (PR):"), abs(private$RECIST_PR_THRESHOLD), .("decrease")),
-          sprintf("<br>- %s %s %d%% %s +%d%% %s", .("Stable Disease (SD):"), .("Between"), private$RECIST_PR_THRESHOLD, .("and"), private$RECIST_PD_THRESHOLD, .("change")),
-          sprintf("<br>- %s ≥%d%% %s", .("Progressive Disease (PD):"), private$RECIST_PD_THRESHOLD, .("increase")),
-          "<br><br>",
           "<b>", .("Data Format Examples:"), "</b>
         <pre>
         1. Using Percentage Changes:        2. Using Raw Measurements:
@@ -705,48 +1417,55 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "
         )
 
-        # Only set todo content if not in guided mode
-        if (!self$options$enableGuidedMode) {
-          self$results$todo$setContent(todo)
+        self$results$todo$setContent(todo)
+        return(todo)
+      }
+
+      ,
+      # Validate inputs and data availability ----
+      .validateInputsAndData = function() {
+        # Get welcome text for potential error messages
+        todo <- if (!self$options$enableGuidedMode) {
+          private$.generateWelcomeText()
+        } else {
+          ""
         }
 
-        ## Validate inputs ----
+        ## Validate required inputs ----
         if (is.null(self$options$patientID) || is.null(self$options$responseVar)) {
-         if (!self$options$enableGuidedMode) {
-           todo <- paste0(todo,
-                          paste0("<br><br>",
-                          .("To start analysis select <b>Patient ID</b> and <b>Response Value</b>"))
-           )
-
-           self$results$todo$setContent(todo)
-         }
-
-         return()
-
+          if (!self$options$enableGuidedMode) {
+            todo <- paste0(todo,
+                           paste0("<br><br>",
+                           .("To start analysis select <b>Patient ID</b> and <b>Response Value</b>"))
+            )
+            self$results$todo$setContent(todo)
+          }
+          return(FALSE)
         }
 
+        ## Validate data availability ----
         if (nrow(self$data) == 0) {
           if (!self$options$enableGuidedMode) {
             todo <- paste0(todo,
                            paste0("<br><br>",
                            .("Data contains no complete rows. Check the data.")))
-
             self$results$todo$setContent(todo)
           }
-
-          return()
+          return(FALSE)
         }
 
-        # Only control visibility if not in guided mode
+        # Clear welcome messages if validation passed
         if (!self$options$enableGuidedMode) {
           self$results$todo2$setVisible(FALSE)
           self$results$todo2$setContent("")
         }
 
+        return(TRUE)
+      }
 
-
-
-
+      ,
+      # Process and analyze data ----
+      .processAndAnalyzeData = function() {
         ## Validate data ----
         private$.checkpoint()  # Checkpoint before data validation
         validated_data <- private$.validateData(
@@ -759,68 +1478,67 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ### Check for validation messages ----
         validation_messages <- attr(validated_data, "validation_messages")
-        if (length(validation_messages) > 0) {
-          # Display validation messages in an informative format
-          message_text <- paste0(
-            .("Data Validation Results:"),
-            "<br>======================",
-            paste(validation_messages, collapse = "<br>"),
-            "<br><br>", .("Please address these items to ensure accurate analysis."),
-            sep = ""
+        if (length(validation_messages) > 0 && !self$options$enableGuidedMode) {
+          self$results$todo2$setVisible(TRUE)
+          self$results$todo2$setContent(paste(validation_messages, collapse = ""))
+          self$results$todo$setVisible(FALSE)
+        }
+
+        ## Continue with analysis if data is valid; abort only on critical errors ----
+        if (!isTRUE(attr(validated_data, "data_valid"))) {
+          plain_message <- "Data validation failed."
+          if (length(validation_messages) > 0) {
+            plain_message <- gsub("<[^>]+>", "", paste(validation_messages, collapse = " "))
+            plain_message <- trimws(plain_message)
+            if (plain_message == "") {
+              plain_message <- "Data validation failed."
+            }
+          }
+
+          stop(plain_message, call. = FALSE)
+          return(NULL)
+        }
+
+        # Clear todo messages for successful validation
+        if (!self$options$enableGuidedMode) {
+          self$results$todo$setVisible(FALSE)
+          self$results$todo2$setVisible(FALSE)
+          self$results$todo2$setContent("")
+        }
+
+        # Process data
+        private$.checkpoint()  # Checkpoint before data processing
+        processed_data <- private$.processData(
+          validated_data,
+          self$options$patientID,
+          self$options$inputType,
+          self$options$responseVar,
+          self$options$timeVar,
+          self$options$groupVar
+        )
+
+        # Check for processing errors
+        if (!is.null(processed_data$error) && processed_data$error) {
+          error_message <- paste0(
+            "<br><br>", .("Data Processing Error:"),
+            "<br>", processed_data$message,
+            "<br><br>", .("Please check your data and try again.")
           )
 
-          # Only control visibility if not in guided mode
           if (!self$options$enableGuidedMode) {
             self$results$todo2$setVisible(TRUE)
-            self$results$todo2$setContent(validation_messages)
+            self$results$todo2$setContent(error_message)
             self$results$todo$setVisible(FALSE)
           }
-
-          return()
+          return(NULL)
         }
 
-        ## Continue with analysis if data is valid ----
-        if (attr(validated_data, "data_valid")) {
+        return(processed_data)
+      }
 
-          # Only control visibility if not in guided mode
-          if (!self$options$enableGuidedMode) {
-            self$results$todo$setVisible(FALSE)
-            self$results$todo2$setVisible(FALSE)
-            self$results$todo2$setContent("")
-          }
-
-          # Process data and create visualizations
-          private$.checkpoint()  # Checkpoint before data processing
-          processed_data <- private$.processData(
-            validated_data,
-            self$options$patientID,
-            self$options$inputType,
-            self$options$responseVar,
-            self$options$timeVar,
-            self$options$groupVar
-          )
-          
-          # Check for processing errors
-          if (!is.null(processed_data$error) && processed_data$error) {
-            error_message <- paste0(
-              "<br><br>", .("Data Processing Error:"),
-              "<br>", processed_data$message,
-              "<br><br>", .("Please check your data and try again.")
-            )
-            
-            # Only control visibility if not in guided mode
-            if (!self$options$enableGuidedMode) {
-              self$results$todo2$setVisible(TRUE)
-              self$results$todo2$setContent(error_message)
-              self$results$todo$setVisible(FALSE)
-            }
-            
-            return()
-          }
-        }
-
-
-
+      ,
+      # Generate tables and results ----
+      .generateTablesAndResults = function(processed_data) {
         ## Calculate metrics ----
         private$.checkpoint()  # Checkpoint before metrics calculation
         metrics <- private$.calculateMetrics(processed_data$waterfall)
@@ -828,10 +1546,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ## Update results tables ----
         private$.checkpoint()  # Checkpoint before summary table population
         for(i in seq_len(nrow(metrics$summary))) {
-          self$results$summaryTable$addRow(rowKey = i, values = list(
+          row_key <- sprintf("recist_%s", metrics$summary$category[i])
+          percent_value <- metrics$summary$percent[i]
+          percent_display <- if (!is.na(percent_value)) percent_value else NA_real_
+
+          self$results$summaryTable$addRow(rowKey = row_key, values = list(
             category = metrics$summary$category[i],
             n = metrics$summary$n[i],
-            percent = paste0(round(metrics$summary$percent[i], digits = 1), "%")
+            percent = percent_display
           ))
         }
 
@@ -862,15 +1584,42 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
 
-        self$results$clinicalMetrics$addRow(rowKey = 1, values = list(
-          metric = .("Objective Response Rate (CR+PR)"),
-          value = paste0(metrics$ORR, "%")
-        ))
+        # Add interpretations to clinical metrics
+        orr_interpretation <- private$.interpretORR(metrics$ORR)
+        dcr_interpretation <- private$.interpretDCR(metrics$DCR)
 
-        self$results$clinicalMetrics$addRow(rowKey = 2, values = list(
-          metric = .("Disease Control Rate (CR+PR+SD)"),
-          value = paste0(metrics$DCR, "%")
-        ))
+        metric_row_index <- 1
+        add_metric_row <- function(values) {
+          row_key <- sprintf("metric_%02d", metric_row_index)
+          self$results$clinicalMetrics$addRow(rowKey = row_key, values = values)
+          metric_row_index <<- metric_row_index + 1
+        }
+
+        if (!is.na(metrics$ORR)) {
+          add_metric_row(list(
+            metric = .("Objective Response Rate (CR+PR)"),
+            value = sprintf("%.1f%% (%s)", metrics$ORR, orr_interpretation)
+          ))
+        }
+
+        if (!is.na(metrics$DCR)) {
+          add_metric_row(list(
+            metric = .("Disease Control Rate (CR+PR+SD)"),
+            value = sprintf("%.1f%% (%s)", metrics$DCR, dcr_interpretation)
+          ))
+        }
+
+        # Add statistical power calculation
+        total_patients <- sum(metrics$summary$n)
+        orr_proportion <- if (!is.na(metrics$ORR)) metrics$ORR / 100 else NA_real_
+        power_analysis <- private$.calculateStatisticalPower(total_patients, orr_proportion)
+
+        if (!is.na(power_analysis$power)) {
+          add_metric_row(list(
+            metric = .("Statistical Power (ORR vs 15% null)"),
+            value = sprintf("%.1f%% (%s)", power_analysis$power * 100, power_analysis$interpretation)
+          ))
+        }
 
         # Control visibility of personTimeTable based on conditions
         personTimeVisible <- !is.null(self$options$timeVar) && self$options$inputType == "raw"
@@ -895,30 +1644,90 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           })
         }
 
+        # Add time-to-event metrics if available
+        tte_metrics <- NULL
+        if (!is.null(self$options$timeVar) && self$options$timeVar %in% names(processed_data$spider)) {
+          tte_metrics <- private$.calculateTimeToEventMetrics(
+            processed_data$spider,
+            self$options$patientID,
+            self$options$timeVar,
+            "response"
+          )
+
+          if (!is.null(tte_metrics)) {
+            # Add median time to response
+            if (!is.na(tte_metrics$summary$median_time_to_response)) {
+              add_metric_row(list(
+                metric = .("Median Time to First Response"),
+                value = sprintf("%.1f time units (n=%d responders)",
+                               tte_metrics$summary$median_time_to_response,
+                               tte_metrics$summary$n_responders)
+              ))
+            }
+
+            # Add median duration of response
+            if (!is.na(tte_metrics$summary$median_duration_of_response)) {
+              add_metric_row(list(
+                metric = .("Median Duration of Response"),
+                value = sprintf("%.1f time units (n=%d with duration data)",
+                               tte_metrics$summary$median_duration_of_response,
+                               tte_metrics$summary$n_with_duration_data)
+              ))
+            }
+          }
+        }
+
         # Add person-time metrics to the results if available
         if (!is.null(person_time_metrics) && personTimeVisible) {
           # Add response duration metrics to clinical metrics table
-          self$results$clinicalMetrics$addRow(rowKey = 3, values = list(
+          # Get median time to response for interpretation
+          median_ttr <- person_time_metrics$by_category$median_time_to_response[
+            person_time_metrics$by_category$response_cat %in% c("CR", "PR")
+          ][1]
+
+          # Get median duration of response
+          median_dor <- median(person_time_metrics$by_patient$time_in_response[
+            person_time_metrics$by_patient$time_in_response > 0
+          ], na.rm = TRUE)
+
+          # Add interpretation for time to response
+          ttr_interpretation <- if (!is.na(median_ttr)) {
+            if (median_ttr <= 2) "rapid response" else if (median_ttr <= 6) "standard timeline" else "delayed response"
+          } else "insufficient data"
+
+          # Add interpretation for duration of response
+          dor_interpretation <- if (!is.na(median_dor)) {
+            if (median_dor >= 12) "durable response" else if (median_dor >= 6) "sustained response" else "short-term response"
+          } else "insufficient data"
+
+          add_metric_row(list(
             metric = "Median Time to Response",
-            value = sprintf("%.1f %s",
-                            person_time_metrics$by_category$median_time_to_response[
-                              person_time_metrics$by_category$response_cat %in% c("CR", "PR")
-                            ][1],
-                            "time units")
+            value = if (!is.na(median_ttr)) {
+              sprintf("%.1f time units (%s)", median_ttr, ttr_interpretation)
+            } else {
+              sprintf("%s", ttr_interpretation)
+            }
           ))
 
-          self$results$clinicalMetrics$addRow(rowKey = 4, values = list(
+          add_metric_row(list(
             metric = "Median Duration of Response",
-            value = sprintf("%.1f %s",
-                            median(person_time_metrics$by_patient$time_in_response[
-                              person_time_metrics$by_patient$time_in_response > 0
-                            ], na.rm = TRUE),
-                            "time units")
+            value = if (!is.na(median_dor)) {
+              sprintf("%.1f time units (%s)", median_dor, dor_interpretation)
+            } else {
+              sprintf("%s", dor_interpretation)
+            }
           ))
 
-          self$results$clinicalMetrics$addRow(rowKey = 5, values = list(
-            metric = "Response Rate per 100 Person-Time Units",
-            value = sprintf("%.2f", person_time_metrics$summary$response_rate_per_100)
+          response_rate_value <- person_time_metrics$summary$response_rate_per_100
+          response_rate_text <- if (!is.na(response_rate_value)) {
+            sprintf("%.2f", response_rate_value)
+          } else {
+            .("Not estimable")
+          }
+
+          add_metric_row(list(
+            metric = .("Response Time per 100 Person-Time Units"),
+            value = response_rate_text
           ))
 
           # Add person-time table if it exists
@@ -952,57 +1761,19 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate clinical summary ----
         private$.generateClinicalSummary(processed_data, metrics, person_time_metrics)
 
+        # Generate group comparison analysis ----
+        private$.generateGroupComparison(processed_data)
+
         # Generate about analysis panel ----
         private$.generateAboutAnalysis()
 
-        # Apply clinical presets ----
-        private$.applyClinicalPreset()
+        return(list(metrics = metrics, person_time_metrics = person_time_metrics))
+      }
 
-        # Generate enhanced clinical metrics with confidence intervals ----
-        if (self$options$showConfidenceIntervals) {
-          private$.generateEnhancedClinicalMetrics(processed_data, metrics)
-        }
-
-        # Generate copy-ready report ----
-        if (self$options$generateCopyReadyReport) {
-          private$.generateCopyReadyReport(processed_data, metrics, person_time_metrics)
-        }
-
-        # Show clinical significance assessment ----
-        if (self$options$showClinicalSignificance) {
-          private$.generateClinicalSignificance(metrics, nrow(processed_data$waterfall))
-        }
-
-        # Note: Guided analysis is now generated at the start of .run()
-
-
-
-        ## Add response category to data ----
-
-        if (is.null(self$options$timeVar) && self$options$addResponseCategory && self$results$addResponseCategory$isNotFilled()) {
-          df <- processed_data$waterfall
-          self$results$addResponseCategory$setRowNums(rownames(df))
-          self$results$addResponseCategory$setValues(df$recist_category)
-          }
-
-        if (!is.null(self$options$timeVar) && self$options$addResponseCategory && self$results$addResponseCategory$isNotFilled()) {
-          # Get waterfall data and extract unique patient categories
-          df <- processed_data$waterfall %>%
-            dplyr::select(!!rlang::sym(self$options$patientID), recist_category) %>%
-            dplyr::distinct()
-
-          # Join with original data
-          df2 <- self$data %>%
-            dplyr::left_join(df, by = self$options$patientID)
-
-          # Update response category output
-          self$results$addResponseCategory$setRowNums(rownames(df2))
-          self$results$addResponseCategory$setValues(df2$recist_category)
-        }
-
-
-
-        ## Prepare plot data ----
+      ,
+      # Generate visualizations ----
+      .generateVisualizations = function(processed_data, metrics) {
+        # Prepare comprehensive plot data structure
         plotData <- list(
           "data" = processed_data,
           options = list(
@@ -1019,37 +1790,109 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             "barAlpha" = self$options$barAlpha,
             "showMedian" = self$options$showMedian,
             "showCI" = self$options$showCI,
-            "minResponseForLabel" = self$options$minResponseForLabel
+            "minResponseForLabel" = self$options$minResponseForLabel,
+            "spiderColorBy" = self$options$spiderColorBy,
+            "spiderColorScheme" = self$options$spiderColorScheme,
+            "timeUnitLabel" = self$options$timeUnitLabel
           ),
           "metrics" = metrics
         )
 
-        ### Update plots ----
-        private$.checkpoint()  # Checkpoint before plot generation
+        # Add checkpoint for performance monitoring
+        private$.checkpoint()
 
-        #### Waterfall plot ----
+        # Initialize waterfall plot if visible
         if (self$options$showWaterfallPlot) {
-          imageWaterfall <- self$results$waterfallplot
-          imageWaterfall$setState(plotData)
+          self$results$waterfallplot$setState(plotData)
         }
 
-
-        #### Spider plot ----
+        # Initialize spider plot with validation
         if (self$options$showSpiderPlot && !is.null(self$options$timeVar)) {
           # Validate spider plot requirements
           if (self$options$inputType == "percentage") {
-            # For percentage data, warn that spider plot may not be meaningful
             message("Note: Spider plot with percentage data shows static values over time. Consider using raw measurements for meaningful trajectories.")
           }
-          
+
           plotData$timeVar <- self$options$timeVar
-          # Add spider-specific color options
-          plotData$options$spiderColorBy <- self$options$spiderColorBy
-          plotData$options$spiderColorScheme <- self$options$spiderColorScheme
-          imagespider <- self$results$spiderplot
-          imagespider$setState(plotData)
+          self$results$spiderplot$setState(plotData)
+        }
+      }
+
+      ,
+      # Generate reports and supplementary content ----
+      .generateReportsAndContent = function(processed_data, metrics, person_time_metrics) {
+        # Apply clinical presets
+        private$.applyClinicalPreset()
+
+        # Generate enhanced clinical metrics with confidence intervals ----
+        if (self$options$showConfidenceIntervals) {
+          private$.generateEnhancedClinicalMetrics(processed_data, metrics)
         }
 
+        # Generate copy-ready report ----
+        if (self$options$generateCopyReadyReport) {
+          private$.generateCopyReadyReport(processed_data, metrics, person_time_metrics)
+        }
+
+        # Show clinical significance assessment ----
+        if (self$options$showClinicalSignificance) {
+          private$.generateClinicalSignificance(metrics, nrow(processed_data$waterfall))
+          private$.generateClinicalGlossary()
+        }
+
+        ## Add response category to data ----
+        if (!is.null(self$options$addResponseCategory) && self$options$addResponseCategory) {
+          if (is.null(self$options$timeVar) && self$results$addResponseCategory$isNotFilled()) {
+            df <- processed_data$waterfall
+            self$results$addResponseCategory$setRowNums(rownames(df))
+            self$results$addResponseCategory$setValues(df$recist_category)
+          }
+
+          if (!is.null(self$options$timeVar) && self$results$addResponseCategory$isNotFilled()) {
+            # Get waterfall data and extract unique patient categories
+            df <- processed_data$waterfall %>%
+              dplyr::select(!!rlang::sym(self$options$patientID), recist_category) %>%
+              dplyr::distinct()
+
+            # Join with original data
+            df2 <- self$data %>%
+              dplyr::left_join(df, by = self$options$patientID)
+
+            # Update response category output
+            self$results$addResponseCategory$setRowNums(rownames(df2))
+            self$results$addResponseCategory$setValues(df2$recist_category)
+          }
+        }
+      }
+
+      ,
+      # Refactored run method ----
+      .run = function() {
+        # Step 1: Initialize analysis and show guidance
+        private$.initializeAnalysis()
+
+        # Step 2: Validate inputs and data
+        if (!private$.validateInputsAndData()) {
+          return()
+        }
+
+        # Step 3: Process and analyze data
+        processed_data <- private$.processAndAnalyzeData()
+        if (is.null(processed_data)) {
+          return()
+        }
+
+        # Step 4: Generate tables and calculate results
+        results <- private$.generateTablesAndResults(processed_data)
+        if (is.null(results)) {
+          return()
+        }
+
+        # Step 5: Generate visualizations
+        private$.generateVisualizations(processed_data, results$metrics)
+
+        # Step 6: Generate reports and supplementary content
+        private$.generateReportsAndContent(processed_data, results$metrics, results$person_time_metrics)
       }
 
 
@@ -1070,6 +1913,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         df <- plotData$data$waterfall
+
+        # Optimize for large datasets
+        df <- private$.optimizeForLargeDatasets(df)
 
         # Sort data
         if (plotData$options$sortBy == "response") {
@@ -1095,10 +1941,25 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "NA" = "#999999"   # lighter gray
         )
 
+        # Okabe-Ito colorblind-safe palette
+        colorblindColors <- c(
+          "CR" = "#009E73",  # bluish green
+          "PR" = "#56B4E9",  # sky blue
+          "SD" = "#E69F00",  # orange
+          "PD" = "#CC79A7",  # reddish purple
+          "NA" = "#999999"   # gray
+        )
+
         # Check if group-based coloring is requested and group variable exists
-        useGroupColoring <- !is.null(plotData$options$colorBy) && 
-                           plotData$options$colorBy == "group" && 
+        useGroupColoring <- !is.null(plotData$options$colorBy) &&
+                           plotData$options$colorBy == "group" &&
                            "patient_group" %in% names(df)
+
+        # Preset-aware enhancements
+        preset <- "custom" # self$options$clinicalPreset
+        if (preset == "biomarker" && !useGroupColoring) {
+          message("Biomarker preset: Consider enabling group-based coloring for biomarker analysis")
+        }
 
         if (useGroupColoring) {
           # Generate distinct colors for groups using reusable method
@@ -1107,9 +1968,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           fill_var <- "patient_group"
           legend_name <- .("Patient Group")
         } else {
-          # Use RECIST coloring
-          colors <- if (plotData$options$colorScheme == "simple")
-            simpleColors else recistColors
+          # Use RECIST coloring based on selected scheme
+          colors <- switch(plotData$options$colorScheme,
+            "simple" = simpleColors,
+            "colorblind" = colorblindColors,
+            "jamovi" = recistColors,
+            "recist" = recistColors,
+            recistColors  # default fallback
+          )
           fill_var <- "recist_category"
           legend_name <- .("RECIST Response")
         }
@@ -1387,6 +2253,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         spiderColorBy <- options$spiderColorBy %||% "response"
         spiderColorScheme <- options$spiderColorScheme %||% "classic"
         useGroupColoring <- spiderColorBy == "group" && "patient_group" %in% names(df)
+
+        # Preset-aware spider plot enhancements
+        preset <- "custom" # self$options$clinicalPreset
+        if (preset == "biomarker" && !useGroupColoring) {
+          message("Biomarker preset: Group-based spider plot coloring recommended for biomarker studies")
+        }
+        if (preset == "phase1_2" && self$options$inputType == "percentage") {
+          message("Phase I/II preset: Raw measurements with time points provide better safety monitoring")
+        }
         
         # Set up color variables and schemes
         if (useGroupColoring) {
@@ -1438,13 +2313,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                        .("Responder"), .("Non-responder"))
 
           # Colorblind-safe responder colors
-          responder_colors <- if (spiderColorScheme == "classic") {
-            c("Non-responder" = "#e66101", "Responder" = "#1b9e77")  # orange vs teal
-          } else if (spiderColorScheme == "jamovi") {
-            c("Non-responder" = "#d95f02", "Responder" = "#7570b3")  # orange vs purple
-          } else {
-            c("Non-responder" = "#e66101", "Responder" = "#1b9e77")  # default colorblind safe
-          }
+          responder_colors <- switch(spiderColorScheme,
+            "classic" = c("Non-responder" = "#e66101", "Responder" = "#1b9e77"),  # orange vs teal
+            "jamovi" = c("Non-responder" = "#d95f02", "Responder" = "#7570b3"),  # orange vs purple
+            "colorblind" = c("Non-responder" = "#CC79A7", "Responder" = "#009E73"),  # Okabe-Ito reddish purple vs bluish green
+            "colorful" = c("Non-responder" = "#e66101", "Responder" = "#1b9e77"),  # same as classic for responder status
+            c("Non-responder" = "#e66101", "Responder" = "#1b9e77")  # default fallback
+          )
 
           # Create the spider plot with response coloring
           p <- ggplot2::ggplot(df) +
@@ -1486,8 +2361,16 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             alpha = 0.5
           ) +
           # Add labels
+          # Configure x-axis label based on user-selected time unit label
+          x_unit_label <- switch(options$timeUnitLabel,
+            "days"   = .("Days from Baseline"),
+            "weeks"  = .("Weeks from Baseline"),
+            "months" = .("Months from Baseline"),
+            "years"  = .("Years from Baseline"),
+            .("Time from Baseline")
+          )
           ggplot2::labs(
-            x = paste(.("Time"), "(", options$timeVar, ")"),
+            x = x_unit_label,
             y = .("Change in Tumor Size (%)"),
             title = .("Spider Plot of Tumor Response")
           )
@@ -1614,6 +2497,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           interpretation <- .("This represents a lower response rate that may require further investigation.")
         }
         
+        # Optional methods note for person-time metrics
+        if (!is.null(person_time_metrics)) {
+          summary_text <- paste0(summary_text,
+            "<p><em>", .("Methods note:"), " ",
+            .("Person-time metrics summarize the total time patients spend in response relative to total follow-up, reported here as response time per 100 person-time units."),
+            "</em></p>")
+        }
+
         summary_text <- paste0(summary_text,
           "<p><strong>", .("Clinical Interpretation:"), "</strong> ", interpretation, "</p>",
           "</div>"
@@ -1670,35 +2561,66 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       }
 
       ,
+      # Get effective option value (supports preset overrides in future)
+      .getEffectiveOption = function(optionName) {
+        # For now, return the option directly since JS events handle the preset changes
+        # This method provides future extensibility for R-side preset logic if needed
+        return(self$options[[optionName]])
+      }
+
+      ,
       # Apply clinical presets ----
       .applyClinicalPreset = function() {
-        preset <- self$options$clinicalPreset
+        preset <- "custom" # self$options$clinicalPreset
+        
 
-        if (preset == "custom") {
-          return()  # No automatic settings for custom
+        if (preset != "custom") {
+          warning(
+            .("Clinical presets are temporarily disabled; using custom settings."),
+            call. = FALSE
+          )
         }
 
-        # Note: In a full implementation, these would actually modify the options
-        # For now, this is a framework for preset application
+        return()
+      }
 
-        switch(preset,
-          "phase2" = {
-            # Phase II preset: Focus on ORR/DCR with thresholds
-            # Would set: showThresholds = TRUE, labelOutliers = TRUE, etc.
-          },
-          "phase1_2" = {
-            # Phase I/II preset: Detailed annotations and safety focus
-            # Would set: showThresholds = TRUE, showMedian = TRUE, etc.
-          },
-          "biomarker" = {
-            # Biomarker preset: Group-based analysis
-            # Would set: colorBy = "group", showCI = TRUE, etc.
-          },
-          "publication" = {
-            # Publication preset: Clean, professional appearance
-            # Would set: colorScheme = "classic", showCI = TRUE, etc.
-          }
-        )
+      ,
+      # Preset-specific validation methods
+      .validatePhase2Requirements = function() {
+        # Phase II studies typically need confidence intervals and significance testing
+        if (!self$options$showConfidenceIntervals) {
+          message("Phase II preset: Confidence intervals recommended for regulatory submissions")
+        }
+        if (!self$options$generateCopyReadyReport) {
+          message("Phase II preset: Copy-ready report enabled for regulatory documentation")
+        }
+      }
+
+      ,
+      .validatePhase12Requirements = function() {
+        # Phase I/II studies need detailed monitoring and flexible analysis
+        if (is.null(self$options$timeVar) && self$options$inputType == "raw") {
+          message("Phase I/II preset: Time variable recommended for safety monitoring")
+        }
+      }
+
+      ,
+      .validateBiomarkerRequirements = function() {
+        # Biomarker studies require group variables for meaningful analysis
+        if (is.null(self$options$groupVar)) {
+          message("Biomarker preset: Group variable required for biomarker correlation analysis")
+        }
+      }
+
+      ,
+      .validatePublicationRequirements = function() {
+        # Publication quality requires specific statistical and visual standards
+        if (self$options$barAlpha < 1.0) {
+          message("Publication preset: Solid colors (alpha=1.0) recommended for print clarity")
+        }
+        if (!self$options$showConfidenceIntervals) {
+          message("Publication preset: Confidence intervals essential for peer review")
+        }
       }
 
       ,
@@ -1807,6 +2729,214 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )
 
         self$results$copyReadyReport$setContent(report_text)
+      }
+
+      ,
+      # Optimize plotting performance for large datasets ----
+      .optimizeForLargeDatasets = function(df) {
+        n_patients <- nrow(df)
+
+        # For very large datasets, consider sampling or aggregation strategies
+        if (n_patients > 2000) {
+          message(sprintf("Large dataset detected (%d patients). Consider performance optimizations.", n_patients))
+
+          # Option 1: Warn user about potential performance impact
+          if (n_patients > 5000) {
+            warning(paste0(
+              "Very large dataset (", n_patients, " patients). ",
+              "Plotting may be slow. Consider filtering data or using summary statistics."
+            ))
+          }
+
+          # Option 2: For extremely large datasets, suggest subsampling
+          if (n_patients > 10000) {
+            message(paste0(
+              "Extremely large dataset detected. ",
+              "Consider subsampling for visualization or using summary tables only."
+            ))
+          }
+        }
+
+        return(df)
+      }
+
+      ,
+      # Generate group comparison analysis ----
+      .generateGroupComparison = function(processed_data) {
+        if (is.null(self$options$groupVar) || !"patient_group" %in% names(processed_data$waterfall)) {
+          return()
+        }
+
+        df <- processed_data$waterfall
+
+        # Calculate statistics by group
+        group_stats <- df %>%
+          dplyr::group_by(patient_group) %>%
+          dplyr::summarise(
+            n_patients = dplyr::n(),
+            n_responders = sum(recist_category %in% c("CR", "PR"), na.rm = TRUE),
+            n_dcr = sum(recist_category %in% c("CR", "PR", "SD"), na.rm = TRUE),
+            orr = (n_responders / n_patients) * 100,
+            dcr = (n_dcr / n_patients) * 100,
+            .groups = "drop"
+          )
+
+        # Calculate confidence intervals for each group
+        group_stats <- group_stats %>%
+          dplyr::rowwise() %>%
+          dplyr::mutate(
+            orr_ci = if (n_patients > 0) {
+              ci <- tryCatch({
+                binom.test(n_responders, n_patients)$conf.int
+              }, error = function(e) c(NA, NA))
+              sprintf("%.1f-%.1f%%", ci[1] * 100, ci[2] * 100)
+            } else "---",
+            dcr_ci = if (n_patients > 0) {
+              ci <- tryCatch({
+                binom.test(n_dcr, n_patients)$conf.int
+              }, error = function(e) c(NA, NA))
+              sprintf("%.1f-%.1f%%", ci[1] * 100, ci[2] * 100)
+            } else "---"
+          ) %>%
+          dplyr::ungroup()
+
+        # Populate group comparison table
+        for (i in seq_len(nrow(group_stats))) {
+          self$results$groupComparisonTable$addRow(rowKey = i, values = list(
+            group = as.character(group_stats$patient_group[i]),
+            n_patients = group_stats$n_patients[i],
+            orr = round(group_stats$orr[i], 1),
+            orr_ci = group_stats$orr_ci[i],
+            dcr = round(group_stats$dcr[i], 1),
+            dcr_ci = group_stats$dcr_ci[i]
+          ))
+        }
+
+        # Perform statistical tests if we have 2+ groups with sufficient data
+        if (nrow(group_stats) >= 2 && all(group_stats$n_patients >= 1)) {
+
+          # Fisher's exact test for ORR comparison
+          orr_contingency <- df %>%
+            dplyr::mutate(
+              responder = recist_category %in% c("CR", "PR")
+            ) %>%
+            dplyr::select(patient_group, responder) %>%
+            table()
+
+          orr_test <- tryCatch({
+            if (nrow(orr_contingency) >= 2 && ncol(orr_contingency) >= 2) {
+              fisher.test(orr_contingency)
+            } else {
+              NULL
+            }
+          }, error = function(e) NULL)
+
+          # Fisher's exact test for DCR comparison
+          dcr_contingency <- df %>%
+            dplyr::mutate(
+              disease_control = recist_category %in% c("CR", "PR", "SD")
+            ) %>%
+            dplyr::select(patient_group, disease_control) %>%
+            table()
+
+          dcr_test <- tryCatch({
+            if (nrow(dcr_contingency) >= 2 && ncol(dcr_contingency) >= 2) {
+              fisher.test(dcr_contingency)
+            } else {
+              NULL
+            }
+          }, error = function(e) NULL)
+
+          # Add test results to table
+          row_count <- 1
+
+          if (!is.null(orr_test)) {
+            orr_interpretation <- if (orr_test$p.value < 0.05) {
+              .("Statistically significant difference in response rates between groups")
+            } else {
+              .("No statistically significant difference in response rates between groups")
+            }
+
+            self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
+              comparison = .("Objective Response Rate (ORR)"),
+              test_statistic = sprintf("Fisher's exact test, OR = %.2f",
+                                     if (!is.null(orr_test$estimate)) orr_test$estimate else NA),
+              p_value = round(orr_test$p.value, 4),
+              interpretation = orr_interpretation
+            ))
+            row_count <- row_count + 1
+          }
+
+          if (!is.null(dcr_test)) {
+            dcr_interpretation <- if (dcr_test$p.value < 0.05) {
+              .("Statistically significant difference in disease control rates between groups")
+            } else {
+              .("No statistically significant difference in disease control rates between groups")
+            }
+
+            self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
+              comparison = .("Disease Control Rate (DCR)"),
+              test_statistic = sprintf("Fisher's exact test, OR = %.2f",
+                                     if (!is.null(dcr_test$estimate)) dcr_test$estimate else NA),
+              p_value = round(dcr_test$p.value, 4),
+              interpretation = dcr_interpretation
+            ))
+          }
+        }
+      }
+
+      ,
+      # Generate enhanced clinical glossary ----
+      .generateClinicalGlossary = function() {
+        glossary_text <- paste0(
+          "<div style='background-color: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; margin: 10px 0;'>",
+          "<h4 style='color: #495057; margin-top: 0;'>", .("Clinical Terms & Definitions"), "</h4>",
+
+          "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>",
+
+          "<div>",
+          "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Response Metrics"), "</h5>",
+          "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
+          "<li><strong>ORR (Objective Response Rate):</strong> ", .("Percentage of patients achieving complete or partial response (CR + PR)"), "</li>",
+          "<li><strong>DCR (Disease Control Rate):</strong> ", .("Percentage achieving response or stable disease (CR + PR + SD)"), "</li>",
+          "<li><strong>Best Response:</strong> ", .("Most favorable tumor response achieved during treatment period"), "</li>",
+          "<li><strong>Person-Time:</strong> ", .("Total time patients are followed, accounting for different follow-up durations"), "</li>",
+          "</ul>",
+          "</div>",
+
+          "<div>",
+          "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("RECIST Categories"), "</h5>",
+          "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
+          "<li><strong>CR (Complete Response):</strong> ", .("Complete disappearance of all target lesions (≤-100%)"), "</li>",
+          "<li><strong>PR (Partial Response):</strong> ", .("≥30% decrease in sum of target lesions from baseline"), "</li>",
+          "<li><strong>SD (Stable Disease):</strong> ", .("Neither PR nor PD criteria met (between -30% and +20%)"), "</li>",
+          "<li><strong>PD (Progressive Disease):</strong> ", .("≥20% increase in sum of target lesions"), "</li>",
+          "</ul>",
+          "</div>",
+
+          "</div>",
+
+          "<div style='margin-top: 15px;'>",
+          "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Statistical Terms"), "</h5>",
+          "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
+          "<li><strong>95% CI (Confidence Interval):</strong> ", .("Range of values likely to contain the true population parameter"), "</li>",
+          "<li><strong>Fisher's Exact Test:</strong> ", .("Statistical test for comparing response rates between groups"), "</li>",
+          "<li><strong>Binomial CI:</strong> ", .("Exact confidence interval for proportions (more accurate than normal approximation)"), "</li>",
+          "<li><strong>Waterfall Plot:</strong> ", .("Bar chart showing best response for each patient, sorted by magnitude"), "</li>",
+          "<li><strong>Spider Plot:</strong> ", .("Line graph showing individual patient response trajectories over time"), "</li>",
+          "</ul>",
+          "</div>",
+
+          "<div style='margin-top: 15px; padding: 10px; background-color: #e3f2fd; border-radius: 3px;'>",
+          "<small><strong>", .("Clinical Context:"), "</strong> ",
+          .("These metrics follow international standards for oncology clinical trials and are commonly used in regulatory submissions and peer-reviewed publications."),
+          "</small>",
+          "</div>",
+
+          "</div>"
+        )
+
+        self$results$clinicalGlossary$setContent(glossary_text)
       }
 
       ,
@@ -1931,12 +3061,35 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "</div>",
 
           "<div style='background-color: #dbeafe; padding: 10px; border-radius: 3px; margin: 10px 0;'>",
-          "<h5 style='margin-top: 0;'>", .("Quick Tips:"), "</h5>",
+          "<h5 style='margin-top: 0;'>", .("Quick Tips & Preset Guide:"), "</h5>",
           "<ul style='margin: 5px 0; margin-left: 20px;'>",
           "<li>", .("Most studies use 'Percentage Changes' format"), "</li>",
           "<li>", .("Enable 'Show RECIST Thresholds' for clinical interpretation"), "</li>",
-          "<li>", .("Use 'Phase II Efficacy Study' preset for standard analyses"), "</li>",
+          "<li><strong>", .("Clinical Presets:"), "</strong></li>",
+          "<ul style='margin-left: 15px;'>",
+          "<li>", .("Phase II: Standard efficacy analysis with confidence intervals"), "</li>",
+          "<li>", .("Phase I/II: Detailed monitoring with safety focus"), "</li>",
+          "<li>", .("Biomarker: Group-based analysis (requires Group Variable)"), "</li>",
+          "<li>", .("Publication: Clean, professional plots for manuscripts"), "</li>",
           "</ul>",
+          "</ul>",
+
+          # Add preset-specific guidance based on current selection
+          # if (self$options$clinicalPreset != "custom") {
+          #   paste0("<div style='background-color: #f0f9ff; padding: 8px; border-radius: 3px; margin: 5px 0;'>",
+          #          "<strong>", .("Current Preset:"), " ", .("settings"),"</strong><br>",
+          #          switch(self$options$clinicalPreset,
+          #            "phase2" = .("Optimized for regulatory submissions with statistical rigor"),
+          #            "phase1_2" = .("Configured for safety monitoring and exploratory analysis"),
+          #            "biomarker" = .("Set up for group comparisons and biomarker correlations"),
+          #            "publication" = .("Professional appearance suitable for peer-reviewed journals"),
+          #            ""
+          #          ),
+          #          "</div>")
+          # } else {
+          #   ""
+          # },
+
           "</div>",
 
           "</div>"

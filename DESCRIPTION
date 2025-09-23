@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.31.73
-Date: 2025-09-22
+Version: 0.0.31.74
+Date: 2025-09-23
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -109,6 +109,7 @@ Imports:
     labelled,
     chisq.posthoc.test,
     ggvenn,
+    ggVennDiagram,
     benford.analysis,
     DiagrammeR,
     rsvg,

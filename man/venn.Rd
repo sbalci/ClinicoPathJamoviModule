@@ -17,7 +17,22 @@ venn(
   upsetType = "upsetR",
   sortBy = "freq",
   minSize = 0,
-  showAnnotations = FALSE
+  showAnnotations = FALSE,
+  vennEngine = "ggvenn",
+  var5,
+  var5true,
+  var6,
+  var6true,
+  var7,
+  var7true,
+  regionLabels = "count",
+  labelPrecisionDigits = 1,
+  setNameSize = 5,
+  labelSize = 4,
+  edgeSize = 1,
+  edgeColor = "black",
+  fillColorMapping = TRUE,
+  colorPalette = "default"
 )
 }
 \arguments{
@@ -57,6 +72,47 @@ with more features).}
 
 \item{showAnnotations}{Add percentage labels to intersection sizes in
 ComplexUpset plots or enhanced text scaling in UpSetR plots.}
+
+\item{vennEngine}{Choose between ggvenn (classic, 2-4 sets) or
+ggVennDiagram (advanced, 2-7 sets with enhanced customization).}
+
+\item{var5}{Fifth variable for 5-set Venn diagrams (only available with
+ggVennDiagram engine).}
+
+\item{var5true}{The level in \code{var5} that represents the positive
+condition.}
+
+\item{var6}{Sixth variable for 6-set Venn diagrams (only available with
+ggVennDiagram engine).}
+
+\item{var6true}{The level in \code{var6} that represents the positive
+condition.}
+
+\item{var7}{Seventh variable for 7-set Venn diagrams (only available with
+ggVennDiagram engine).}
+
+\item{var7true}{The level in \code{var7} that represents the positive
+condition.}
+
+\item{regionLabels}{What to display in Venn diagram regions (ggVennDiagram
+only).}
+
+\item{labelPrecisionDigits}{Number of decimal places for percentage labels
+(ggVennDiagram only).}
+
+\item{setNameSize}{Font size for set names (ggVennDiagram only).}
+
+\item{labelSize}{Font size for region labels (ggVennDiagram only).}
+
+\item{edgeSize}{Width of set boundary lines (ggVennDiagram only).}
+
+\item{edgeColor}{Color of set boundary lines (ggVennDiagram only).}
+
+\item{fillColorMapping}{Map fill colors to intersection sizes
+(ggVennDiagram only).}
+
+\item{colorPalette}{Color palette for Venn diagram regions (ggVennDiagram
+only).}
 }
 \value{
 A results object containing:

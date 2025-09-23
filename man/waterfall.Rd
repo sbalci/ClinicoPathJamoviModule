@@ -26,6 +26,7 @@ waterfall(
   showSpiderPlot = TRUE,
   spiderColorBy = "response",
   spiderColorScheme = "classic",
+  timeUnitLabel = "generic",
   generateCopyReadyReport = FALSE,
   showClinicalSignificance = FALSE,
   showConfidenceIntervals = TRUE,
@@ -97,6 +98,9 @@ coloring.}
 
 \item{spiderColorScheme}{Color scheme for spider plot lines and points.}
 
+\item{timeUnitLabel}{Label to use for the spider plot time axis. Does not
+rescale data; only affects axis labeling.}
+
 \item{generateCopyReadyReport}{Generate publication-ready result sentences
 with statistical details}
 
@@ -123,7 +127,10 @@ A results object containing:
 \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSignificance} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$enhancedClinicalMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$groupComparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
 }
 

@@ -36,6 +36,7 @@ swimmerplot(
   showLegend = TRUE,
   referenceLines = "none",
   customReferenceTime = 12,
+  customReferenceDate = "",
   sortVariable = NULL,
   sortOrder = "duration_desc",
   showInterpretation = TRUE,
@@ -119,6 +120,11 @@ context.}
 
 \item{customReferenceTime}{Custom time point to mark with a reference line
 (only used when Reference Lines is set to Custom).}
+
+\item{customReferenceDate}{When using Date/Time with Absolute display,
+provide a calendar date (e.g., 2023-06-01) to draw a custom reference line.
+If left blank, the Custom Reference Time is used as an offset from the
+earliest start date.}
 
 \item{sortVariable}{Optional variable to sort patient timelines (defaults
 to duration-based sorting).}

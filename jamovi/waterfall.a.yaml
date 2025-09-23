@@ -1,7 +1,7 @@
 ---
 name: waterfall
 title: Treatment Response Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
 version: '0.0.31'
@@ -151,31 +151,31 @@ options:
             Sort the waterfall plot by best response or patient ID.
 
     # Clinical Preset Options
-    - name: clinicalPreset
-      title: Clinical Study Preset
-      type: List
-      options:
-        - title: "Custom (Manual Settings)"
-          name: custom
-        - title: "Phase II Efficacy Study"
-          name: phase2
-        - title: "Phase I/II Dose Escalation"
-          name: phase1_2
-        - title: "Biomarker Correlation Study"
-          name: biomarker
-        - title: "Publication Ready"
-          name: publication
-      default: custom
-      description:
-          R: >
-            Choose a clinical study preset to automatically configure appropriate settings
-          jamovi: >
-            Choose a preset configuration for your study type:
-            • Custom: Manual control over all settings
-            • Phase II: Standard efficacy analysis with ORR/DCR focus
-            • Phase I/II: Safety and efficacy with detailed annotations
-            • Biomarker: Group-based analysis with statistical comparisons
-            • Publication: Clean, professional plots for manuscripts
+    # - name: clinicalPreset
+    #   title: Clinical Study Preset
+    #   type: List
+    #   options:
+    #     - title: "Custom (Manual Settings)"
+    #       name: custom
+    #     - title: "Phase II Efficacy Study"
+    #       name: phase2
+    #     - title: "Phase I/II Dose Escalation"
+    #       name: phase1_2
+    #     - title: "Biomarker Correlation Study"
+    #       name: biomarker
+    #     - title: "Publication Ready"
+    #       name: publication
+    #   default: custom
+    #   description:
+    #       R: >
+    #         Choose a clinical study preset to automatically configure appropriate settings
+    #       jamovi: >
+    #         Choose a preset configuration for your study type:
+    #         • Custom: Manual control over all settings
+    #         • Phase II: Standard efficacy analysis with ORR/DCR focus
+    #         • Phase I/II: Safety and efficacy with detailed annotations
+    #         • Biomarker: Group-based analysis with statistical comparisons
+    #         • Publication: Clean, professional plots for manuscripts
 
     - name: showThresholds
       title: Show RECIST Thresholds
@@ -261,6 +261,8 @@ options:
           name: simple
         - title: Colorful (Group Colors)
           name: colorful
+        - title: Colorblind-Safe (Okabe–Ito)
+          name: colorblind
       default: jamovi
       description:
           R: >
@@ -340,12 +342,35 @@ options:
           name: jamovi
         - title: Colorful (for groups)
           name: colorful
+        - title: Colorblind-Safe (Okabe–Ito)
+          name: colorblind
       default: classic
       description:
           R: >
             Color scheme for spider plot lines and points.
           jamovi: >
             Color scheme for spider plot lines and points.
+
+    - name: timeUnitLabel
+      title: Spider Plot Time Unit Label
+      type: List
+      options:
+        - title: Generic (Time)
+          name: generic
+        - title: Days
+          name: days
+        - title: Weeks
+          name: weeks
+        - title: Months
+          name: months
+        - title: Years
+          name: years
+      default: generic
+      description:
+          R: >
+            Label to use for the spider plot time axis. Does not rescale data; only affects axis labeling.
+          jamovi: >
+            Choose the time unit label for the spider plot x-axis (for display only). Does not change your data values.
 
     # Clinical Reporting Options
     - name: generateCopyReadyReport

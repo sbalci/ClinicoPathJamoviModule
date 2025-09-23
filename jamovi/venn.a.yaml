@@ -1,7 +1,7 @@
 ---
 name:  venn
 title: Venn Diagram
-menuGroup: Exploration
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Descriptive Plots
 menuSubtitle: Venn Diagram, UpSet Plot
 version: '0.0.31'
@@ -153,4 +153,204 @@ options:
             Add percentage labels to intersection sizes in ComplexUpset plots or enhanced text scaling in UpSetR plots.
           jamovi: >
             Add percentage labels and enhanced text formatting to the plot.
+
+    - name: vennEngine
+      title: 'Venn Diagram Engine'
+      type: List
+      options:
+        - name: ggvenn
+          title: 'ggvenn (Classic)'
+        - name: ggVennDiagram
+          title: 'ggVennDiagram (Advanced)'
+      default: ggvenn
+      description:
+          R: >
+            Choose between ggvenn (classic, 2-4 sets) or ggVennDiagram (advanced, 2-7 sets with enhanced customization).
+          jamovi: >
+            Choose the Venn diagram engine. ggVennDiagram supports more sets and customization options.
+
+    - name: var5
+      title: 'Variable 5 (ggVennDiagram only)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Fifth variable for 5-set Venn diagrams (only available with ggVennDiagram engine).
+          jamovi: >
+            Fifth variable (requires ggVennDiagram engine).
+
+    - name: var5true
+      title: 'Select True Level'
+      type: Level
+      variable: (var5)
+      description:
+          R: >
+            The level in `var5` that represents the positive condition.
+          jamovi: >
+            The level in `var5` that represents the true condition.
+
+    - name: var6
+      title: 'Variable 6 (ggVennDiagram only)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Sixth variable for 6-set Venn diagrams (only available with ggVennDiagram engine).
+          jamovi: >
+            Sixth variable (requires ggVennDiagram engine).
+
+    - name: var6true
+      title: 'Select True Level'
+      type: Level
+      variable: (var6)
+      description:
+          R: >
+            The level in `var6` that represents the positive condition.
+          jamovi: >
+            The level in `var6` that represents the true condition.
+
+    - name: var7
+      title: 'Variable 7 (ggVennDiagram only)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Seventh variable for 7-set Venn diagrams (only available with ggVennDiagram engine).
+          jamovi: >
+            Seventh variable (requires ggVennDiagram engine).
+
+    - name: var7true
+      title: 'Select True Level'
+      type: Level
+      variable: (var7)
+      description:
+          R: >
+            The level in `var7` that represents the positive condition.
+          jamovi: >
+            The level in `var7` that represents the true condition.
+
+    - name: regionLabels
+      title: 'Region Labels'
+      type: List
+      options:
+        - name: count
+          title: 'Count'
+        - name: percent
+          title: 'Percent'
+        - name: both
+          title: 'Both Count and Percent'
+        - name: none
+          title: 'None'
+      default: count
+      description:
+          R: >
+            What to display in Venn diagram regions (ggVennDiagram only).
+          jamovi: >
+            Choose what to display in diagram regions (ggVennDiagram only).
+
+    - name: labelPrecisionDigits
+      title: 'Percentage Decimal Places'
+      type: Integer
+      min: 0
+      max: 3
+      default: 1
+      description:
+          R: >
+            Number of decimal places for percentage labels (ggVennDiagram only).
+          jamovi: >
+            Decimal precision for percentages (ggVennDiagram only).
+
+    - name: setNameSize
+      title: 'Set Name Size'
+      type: Number
+      min: 1
+      max: 20
+      default: 5
+      description:
+          R: >
+            Font size for set names (ggVennDiagram only).
+          jamovi: >
+            Size of set name labels (ggVennDiagram only).
+
+    - name: labelSize
+      title: 'Region Label Size'
+      type: Number
+      min: 1
+      max: 20
+      default: 4
+      description:
+          R: >
+            Font size for region labels (ggVennDiagram only).
+          jamovi: >
+            Size of region labels (ggVennDiagram only).
+
+    - name: edgeSize
+      title: 'Edge Line Width'
+      type: Number
+      min: 0.1
+      max: 5
+      default: 1
+      description:
+          R: >
+            Width of set boundary lines (ggVennDiagram only).
+          jamovi: >
+            Width of boundary lines (ggVennDiagram only).
+
+    - name: edgeColor
+      title: 'Edge Color'
+      type: String
+      default: 'black'
+      description:
+          R: >
+            Color of set boundary lines (ggVennDiagram only).
+          jamovi: >
+            Color of boundary lines (ggVennDiagram only).
+
+    - name: fillColorMapping
+      title: 'Fill Color Mapping'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Map fill colors to intersection sizes (ggVennDiagram only).
+          jamovi: >
+            Use color gradient based on intersection sizes (ggVennDiagram only).
+
+    - name: colorPalette
+      title: 'Color Palette'
+      type: List
+      options:
+        - name: default
+          title: 'Default'
+        - name: Set1
+          title: 'Set1 (Qualitative)'
+        - name: Set2
+          title: 'Set2 (Qualitative)'
+        - name: Set3
+          title: 'Set3 (Qualitative)'
+        - name: Pastel1
+          title: 'Pastel1'
+        - name: Pastel2
+          title: 'Pastel2'
+        - name: Dark2
+          title: 'Dark2'
+        - name: Accent
+          title: 'Accent'
+        - name: viridis
+          title: 'Viridis'
+        - name: plasma
+          title: 'Plasma'
+        - name: magma
+          title: 'Magma'
+        - name: inferno
+          title: 'Inferno'
+      default: default
+      description:
+          R: >
+            Color palette for Venn diagram regions (ggVennDiagram only).
+          jamovi: >
+            Choose color palette for regions (ggVennDiagram only).
 ...
