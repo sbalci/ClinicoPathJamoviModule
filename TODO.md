@@ -47,8 +47,7 @@ check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/
 <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R>
 
 update .u.yaml to make it user friendly. make all relevant features to be together.
-remove all dummy code and hardcoded values. make them all work with inputs.
-implement real function instead of placeholders. 
+remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders. 
 prepare comprehensive test data generator under data-raw and prepare the data  as csv under data folder
 To lower the computation make all default checkboxes to be false in .a.yaml
 implement welcome/introductory message styling of decisionpanel.

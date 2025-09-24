@@ -1,7 +1,7 @@
 ---
 name: competingRisksPower
 title: Competing Risks Power Analysis (Specialized)
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: Design and Power Analysis
 menuSubtitle: "Specialized for competing events scenarios"
 version: '0.0.1'

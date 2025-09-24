@@ -1,24 +1,24 @@
 ---
-name: simpleSurvivalPower
-title: Simple Survival Power Analysis (Basic)
+name: survivalPower
+title: Survival Power Analysis
 menuGroup: SurvivalD
 menuSubgroup: Design and Power Analysis
 menuTitle: Power Analysis
-menuSubtitle: Basic power analysis - Easy to use for beginners
+menuSubtitle: Power analysis
 version: '1.0.0'
 jas: '1.2'
 
 description:
     main: |
-        Simple power analysis and sample size calculation for survival studies.
-        User-friendly interface for basic survival power calculations with multiple statistical methods.
+        Power analysis and sample size calculation for survival studies.
+        User-friendly interface for survival power calculations with multiple statistical methods.
 
         This function provides a streamlined approach to survival power analysis. For specialized needs,
         consider the other power analysis functions: Classical, Competing Risks, Advanced, or Comprehensive.
     R:
         dontrun: false
         usage: |
-            simpleSurvivalPower(
+            survivalPower(
                 test_type = "log_rank",
                 effect_size = 0.75,
                 alpha = 0.05,
@@ -450,4 +450,33 @@ options:
       max: 100000
       description:
           R: Number of simulation runs for complex calculations
+
+    # Clinical-Friendly Output Options
+    - name: show_summary
+      title: Show Natural Language Summary
+      type: Bool
+      default: false
+      description:
+          R: Display plain-language summary of results
+
+    - name: show_explanations
+      title: Show Educational Explanations
+      type: Bool
+      default: false
+      description:
+          R: Display educational notes and guidance
+
+    - name: show_glossary
+      title: Show Statistical Glossary
+      type: Bool
+      default: false
+      description:
+          R: Display glossary of statistical terms
+
+    - name: guided_mode
+      title: Enable Guided Workflow
+      type: Bool
+      default: false
+      description:
+          R: Step-by-step guided analysis workflow
 ...

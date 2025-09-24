@@ -2221,7 +2221,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                 new_auc = new_auc,
                                 auc_improvement = new_auc - old_auc,
                                 old_ci = if(!is.null(old_roc_obj$ci)) as.numeric(old_roc_obj$ci) else c(old_auc - 1.96*sqrt(old_auc*(1-old_auc)/length(old_risk)), old_auc + 1.96*sqrt(old_auc*(1-old_auc)/length(old_risk))),
-                                new_ci = if(!is.null(new_roc_obj$ci)) as.numeric(new_roc_obj$ci) else c(new_auc - 1.96*sqrt(new_auc*(1-new_auc)/length(new_risk)), new_auc + 1.96*sqrt(new_auc*(1-new_auc)/length(new_risk)))
+                                new_ci = if(!is.null(new_roc_obj$ci)) as.numeric(new_roc_obj$ci) else c(new_auc - 1.96*sqrt(new_auc*(1-new_auc)/length(new_risk)), new_auc + 1.96*sqrt(new_auc*(1-new_auc)/length(new_risk))),
                                 old_roc = old_roc_obj,
                                 new_roc = new_roc_obj
                             )

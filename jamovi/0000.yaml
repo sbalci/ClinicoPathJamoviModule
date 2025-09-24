@@ -1070,7 +1070,7 @@ analyses:
   - title: Advanced Survival Power Analysis (Advanced)
     name: advancedSurvivalPower
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuTitle: Advanced Survival Power Analysis (Advanced)
     menuSubgroup: Design and Power Analysis
     menuSubtitle: Advanced options - Multiple design types
@@ -1096,7 +1096,7 @@ analyses:
   - title: Classical Survival Power Analysis (Intermediate)
     name: classicalSurvivalPower
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuTitle: Classical Survival Power Analysis (Intermediate)
     menuSubgroup: Design and Power Analysis
     menuSubtitle: Traditional methods - Lachin-Foulkes & Schoenfeld
@@ -4079,19 +4079,19 @@ analyses:
       state-of-the-art
 
       methodology and regulatory compliance.
-  - title: Simple Survival Power Analysis (Basic)
-    name: simpleSurvivalPower
+  - title: Survival Power Analysis
+    name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Design and Power Analysis
     menuTitle: Power Analysis
-    menuSubtitle: Basic power analysis - Easy to use for beginners
+    menuSubtitle: Power analysis
     description: >-
-      Simple power analysis and sample size calculation for survival studies.
+      Power analysis and sample size calculation for survival studies.
 
-      User-friendly interface for basic survival power calculations with
-      multiple statistical methods.
+      User-friendly interface for survival power calculations with multiple
+      statistical methods.
   - title: Smoothly Clipped Absolute Deviation Cox Regression
     name: ncvregcox
     ns: ClinicoPath
@@ -4579,7 +4579,7 @@ analyses:
     name: competingRisksPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Design and Power Analysis
     menuTitle: Competing Risks Power Analysis (Specialized)
     description: >-
@@ -4738,7 +4738,7 @@ analyses:
     name: comprehensiveSurvivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Design and Power Analysis
     menuTitle: Comprehensive Survival Power Analysis (Expert)
     menuSubtitle: All-in-one expert tool - All methods & study types
@@ -4813,6 +4813,19 @@ analyses:
     menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial & Sankey Diagrams
+  - title: Simple Survival Power Analysis (Basic)
+    name: simpleSurvivalPower
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Design and Power Analysis
+    menuTitle: Power Analysis
+    menuSubtitle: Basic power analysis - Easy to use for beginners
+    description: >-
+      Simple power analysis and sample size calculation for survival studies.
+
+      User-friendly interface for basic survival power calculations with
+      multiple statistical methods.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

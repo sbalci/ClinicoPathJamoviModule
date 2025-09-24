@@ -1,0 +1,197 @@
+title: Power Analysis & Sample Size Calculation
+name: survivalPower
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: CollapseBox
+    label: Analysis Configuration
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: clinical_preset
+            label: "Clinical Study Preset (Quick Setup)"
+            events:
+              change: ./survivalPower.events::onChange_clinicalPreset
+          - type: ComboBox
+            name: analysis_type
+          - type: ComboBox
+            name: test_type
+          - type: ComboBox
+            name: study_design
+          - type: ComboBox
+            name: primary_endpoint
+
+  - type: CollapseBox
+    label: Statistical Parameters
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: effect_size_type
+          - type: TextBox
+            name: effect_size
+            format: number
+            suffix: "(HR < 1 favors treatment)"
+            label: "Effect Size (Hazard Ratio)"
+          - type: TextBox
+            name: alpha_level
+            format: number
+            suffix: "(typically 0.05)"
+            label: "Significance Level (Alpha)"
+          - type: TextBox
+            name: power_level
+            format: number
+            suffix: "(typically 0.80)"
+            label: "Statistical Power (1-Beta)"
+          - type: TextBox
+            name: allocation_ratio
+            format: number
+            suffix: "(1 = equal groups)"
+          - type: TextBox
+            name: sample_size_input
+            format: number
+            suffix: "(for power/effect calculations)"
+            enable: (analysis_type != "sample_size")
+
+  - type: CollapseBox
+    label: Survival Distribution Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: control_median_survival
+            format: number
+            suffix: "(months)"
+          - type: ComboBox
+            name: survival_distribution
+          - type: TextBox
+            name: weibull_shape
+            format: number
+            suffix: "(1 = exponential)"
+            enable: (survival_distribution=="weibull")
+
+  - type: CollapseBox
+    label: Study Timeline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: accrual_period
+            format: number
+            suffix: "(months)"
+          - type: TextBox
+            name: follow_up_period
+            format: number
+            suffix: "(months)"
+          - type: ComboBox
+            name: accrual_pattern
+          - type: TextBox
+            name: dropout_rate
+            format: number
+            suffix: "(0-1, e.g., 0.05 = 5%)"
+
+  - type: CollapseBox
+    label: Specialized Methods
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: ni_margin
+            format: number
+            enable: (test_type=="non_inferiority")
+          - type: ComboBox
+            name: ni_type
+            enable: (test_type=="non_inferiority")
+          - type: TextBox
+            name: competing_risk_rate
+            format: number
+            enable: (test_type=="competing_risks")
+          - type: TextBox
+            name: competing_risk_hr
+            format: number
+            enable: (test_type=="competing_risks")
+          - type: TextBox
+            name: rmst_tau
+            format: number
+            enable: (test_type=="rmst_test")
+          - type: TextBox
+            name: rmst_difference
+            format: number
+            enable: (test_type=="rmst_test")
+          - type: TextBox
+            name: snp_maf
+            format: number
+            enable: (test_type=="snp_survival")
+          - type: ComboBox
+            name: genetic_model
+            enable: (test_type=="snp_survival")
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: number_of_arms
+            format: number
+            enable: (study_design=="multi_arm")
+          - type: ComboBox
+            name: multiple_comparisons
+            enable: (study_design=="multi_arm")
+          - type: TextBox
+            name: cluster_size
+            format: number
+            enable: (study_design=="cluster_randomized")
+          - type: TextBox
+            name: icc
+            format: number
+            enable: (study_design=="cluster_randomized")
+          - type: TextBox
+            name: interim_analyses
+            format: number
+          - type: ComboBox
+            name: alpha_spending
+            enable: (interim_analyses>0)
+          - type: TextBox
+            name: stratification_factors
+            format: number
+          - type: CheckBox
+            name: sensitivity_analysis
+            label: "Perform Sensitivity Analysis"
+          - type: TextBox
+            name: simulation_runs
+            format: number
+
+  - type: CollapseBox
+    label: Clinical-Friendly Output Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_summary
+            label: "Show Plain Language Summary"
+          - type: CheckBox
+            name: show_explanations
+            label: "Show Educational Explanations"
+          - type: CheckBox
+            name: show_glossary
+            label: "Show Statistical Glossary"
+          - type: CheckBox
+            name: guided_mode
+            label: "Enable Guided Workflow"
