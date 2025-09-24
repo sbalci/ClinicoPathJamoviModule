@@ -6,8 +6,6 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            clinicalPreset = "none",
-            guidedMode = FALSE,
             patientID = NULL,
             startTime = NULL,
             endTime = NULL,
@@ -42,6 +40,9 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             showInterpretation = TRUE,
             personTimeAnalysis = TRUE,
             responseAnalysis = TRUE,
+            showGlossary = FALSE,
+            showCopyReady = FALSE,
+            showAbout = FALSE,
             exportTimeline = FALSE,
             exportSummary = FALSE, ...) {
 
@@ -51,21 +52,6 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 requiresData=TRUE,
                 ...)
 
-            private$..clinicalPreset <- jmvcore::OptionList$new(
-                "clinicalPreset",
-                clinicalPreset,
-                options=list(
-                    "none",
-                    "oncology_immunotherapy",
-                    "oncology_chemotherapy",
-                    "surgery_outcomes",
-                    "clinical_trial",
-                    "longitudinal_followup"),
-                default="none")
-            private$..guidedMode <- jmvcore::OptionBool$new(
-                "guidedMode",
-                guidedMode,
-                default=FALSE)
             private$..patientID <- jmvcore::OptionVariable$new(
                 "patientID",
                 patientID,
@@ -298,6 +284,18 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "responseAnalysis",
                 responseAnalysis,
                 default=TRUE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
+            private$..showCopyReady <- jmvcore::OptionBool$new(
+                "showCopyReady",
+                showCopyReady,
+                default=FALSE)
+            private$..showAbout <- jmvcore::OptionBool$new(
+                "showAbout",
+                showAbout,
+                default=FALSE)
             private$..exportTimeline <- jmvcore::OptionBool$new(
                 "exportTimeline",
                 exportTimeline,
@@ -307,8 +305,6 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 exportSummary,
                 default=FALSE)
 
-            self$.addOption(private$..clinicalPreset)
-            self$.addOption(private$..guidedMode)
             self$.addOption(private$..patientID)
             self$.addOption(private$..startTime)
             self$.addOption(private$..endTime)
@@ -343,12 +339,13 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..showInterpretation)
             self$.addOption(private$..personTimeAnalysis)
             self$.addOption(private$..responseAnalysis)
+            self$.addOption(private$..showGlossary)
+            self$.addOption(private$..showCopyReady)
+            self$.addOption(private$..showAbout)
             self$.addOption(private$..exportTimeline)
             self$.addOption(private$..exportSummary)
         }),
     active = list(
-        clinicalPreset = function() private$..clinicalPreset$value,
-        guidedMode = function() private$..guidedMode$value,
         patientID = function() private$..patientID$value,
         startTime = function() private$..startTime$value,
         endTime = function() private$..endTime$value,
@@ -383,11 +380,12 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         showInterpretation = function() private$..showInterpretation$value,
         personTimeAnalysis = function() private$..personTimeAnalysis$value,
         responseAnalysis = function() private$..responseAnalysis$value,
+        showGlossary = function() private$..showGlossary$value,
+        showCopyReady = function() private$..showCopyReady$value,
+        showAbout = function() private$..showAbout$value,
         exportTimeline = function() private$..exportTimeline$value,
         exportSummary = function() private$..exportSummary$value),
     private = list(
-        ..clinicalPreset = NA,
-        ..guidedMode = NA,
         ..patientID = NA,
         ..startTime = NA,
         ..endTime = NA,
@@ -422,6 +420,9 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..showInterpretation = NA,
         ..personTimeAnalysis = NA,
         ..responseAnalysis = NA,
+        ..showGlossary = NA,
+        ..showCopyReady = NA,
+        ..showAbout = NA,
         ..exportTimeline = NA,
         ..exportSummary = NA)
 )
@@ -441,7 +442,10 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         summaryData = function() private$.items[["summaryData"]],
         exportInfo = function() private$.items[["exportInfo"]],
         validationReport = function() private$.items[["validationReport"]],
-        advancedMetrics = function() private$.items[["advancedMetrics"]]),
+        advancedMetrics = function() private$.items[["advancedMetrics"]],
+        clinicalGlossary = function() private$.items[["clinicalGlossary"]],
+        copyReadyReport = function() private$.items[["copyReadyReport"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -703,7 +707,31 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "timeUnit",
-                    "personTimeAnalysis")))}))
+                    "personTimeAnalysis")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalGlossary",
+                title="Clinical Glossary",
+                visible="(showGlossary)",
+                clearWith=list()))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="copyReadyReport",
+                title="Copy-Ready Manuscript Text",
+                visible="(showCopyReady)",
+                clearWith=list(
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "timeUnit",
+                    "showCopyReady")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(showAbout)",
+                clearWith=list()))}))
 
 swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "swimmerplotBase",
@@ -760,11 +788,6 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     showInterpretation = TRUE
 #' )
 #'}
-#' @param clinicalPreset Pre-configured analysis templates for common clinical
-#'   scenarios.  Selecting a preset automatically configures appropriate options
-#'   for typical research use cases.
-#' @param guidedMode Enable step-by-step guidance through the analysis process
-#'   with contextual help and recommendations.
 #' @param data The data as a data frame containing patient timeline
 #'   information.
 #' @param patientID Variable containing unique patient identifiers.
@@ -816,6 +839,12 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   metrics in the analysis.
 #' @param responseAnalysis Whether to analyze response patterns when response
 #'   variable is provided.
+#' @param showGlossary Display a glossary of clinical terms and statistical
+#'   concepts used in the analysis.
+#' @param showCopyReady Generate copy-ready text suitable for manuscripts and
+#'   clinical reports.
+#' @param showAbout Display information about when and how to use swimmer plot
+#'   analysis.
 #' @param exportTimeline Export processed timeline data for external analysis.
 #' @param exportSummary Export comprehensive summary statistics and clinical
 #'   metrics.
@@ -833,6 +862,9 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -843,8 +875,6 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 swimmerplot <- function(
-    clinicalPreset = "none",
-    guidedMode = FALSE,
     data,
     patientID,
     startTime,
@@ -880,6 +910,9 @@ swimmerplot <- function(
     showInterpretation = TRUE,
     personTimeAnalysis = TRUE,
     responseAnalysis = TRUE,
+    showGlossary = FALSE,
+    showCopyReady = FALSE,
+    showAbout = FALSE,
     exportTimeline = FALSE,
     exportSummary = FALSE) {
 
@@ -918,8 +951,6 @@ swimmerplot <- function(
     for (v in eventVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- swimmerplotOptions$new(
-        clinicalPreset = clinicalPreset,
-        guidedMode = guidedMode,
         patientID = patientID,
         startTime = startTime,
         endTime = endTime,
@@ -954,6 +985,9 @@ swimmerplot <- function(
         showInterpretation = showInterpretation,
         personTimeAnalysis = personTimeAnalysis,
         responseAnalysis = responseAnalysis,
+        showGlossary = showGlossary,
+        showCopyReady = showCopyReady,
+        showAbout = showAbout,
         exportTimeline = exportTimeline,
         exportSummary = exportSummary)
 

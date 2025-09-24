@@ -23,14 +23,41 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .preset_context = NULL,
         .preset_guidance = NULL,
 
+        # Auto-detection variables (simplified since we now stop analysis)
+        .auto_detected_dates = FALSE,
+        .detected_format = NULL,
+
         # Enhanced clinical date parsing with contextual guidance
         .parseDatesWithClinicalContext = function(dates, format, variable_type = "time") {
-            if (inherits(dates, c("Date", "POSIXct"))) return(dates)
-            
+            if (inherits(dates, c("Date", "POSIXct", "POSIXlt"))) {
+                return(list(value = dates, error = FALSE, message = NULL))
+            }
+
+            # Check if data appears to be numeric when Date/Time is selected
+            sample_data <- as.character(dates[!is.na(dates)][1:min(5, sum(!is.na(dates)))])
+            is_numeric_like <- length(sample_data) > 0 && all(grepl("^-?\\d*\\.?\\d+$", sample_data))
+
+            if (is_numeric_like) {
+                # User selected Date/Time but data is numeric - provide guidance
+                return(list(
+                    value = NULL,
+                    error = TRUE,
+                    data_type_mismatch = TRUE,
+                    detected_type = "numeric",
+                    examples = sample_data[1:min(3, length(sample_data))],
+                    message = paste(
+                        "Data type mismatch detected:",
+                        paste0("Your ", variable_type, " variables contain numeric values (",
+                               paste(sample_data[1:min(3, length(sample_data))], collapse = ", "), ")"),
+                        "but you have selected 'Date/Time' as the Time Input Type."
+                    )
+                ))
+            }
+
             parsed <- tryCatch({
                 switch(format,
                     "ymdhms" = lubridate::ymd_hms(dates),
-                    "ymd"    = lubridate::ymd(dates), 
+                    "ymd"    = lubridate::ymd(dates),
                     "ydm"    = lubridate::ydm(dates),
                     "mdy"    = lubridate::mdy(dates),
                     "myd"    = lubridate::myd(dates),
@@ -39,24 +66,32 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     lubridate::ymd(dates)
                 )
             }, error = function(e) NULL)
-            
+
             if (is.null(parsed)) {
                 clinical_guidance <- switch(variable_type,
                     "start" = .("Common formats: 2023-01-15 (treatment start), 15/01/2023 (surgery date), or numeric days from study start"),
-                    "end" = .("Common formats: 2023-06-15 (treatment end), 15/06/2023 (last follow-up), or numeric days from treatment start"), 
+                    "end" = .("Common formats: 2023-06-15 (treatment end), 15/06/2023 (last follow-up), or numeric days from treatment start"),
                     "milestone" = .("Common formats: 2023-03-15 (response assessment), 15/03/2023 (progression date), or numeric days from treatment start"),
                     .("Please check date format - use YYYY-MM-DD, DD/MM/YYYY, or numeric values")
                 )
-                
+
+                na_value <- if (format %in% c("ymdhms")) {
+                    as.POSIXct(rep(NA_character_, length(dates)))
+                } else {
+                    as.Date(rep(NA_character_, length(dates)))
+                }
+
                 return(list(
+                    value = na_value,
                     error = TRUE,
                     message = paste(
-                        .("Error parsing"), variable_type, .("dates with format"), format, ".", 
+                        .("Error parsing"), variable_type, .("dates with format"), format, ".",
                         clinical_guidance
                     )
                 ))
             }
-            return(parsed)
+
+            list(value = parsed, error = FALSE, message = NULL)
         },
 
         # Parse a single custom reference date string using selected dateFormat
@@ -210,26 +245,37 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Enhanced time processing
             if (self$options$timeType == "datetime") {
                 start_parsed <- private$.parseDatesWithClinicalContext(
-                    as.character(patient_data$start_time), 
+                    patient_data$start_time, 
                     self$options$dateFormat,
                     "start"
                 )
                 end_parsed <- private$.parseDatesWithClinicalContext(
-                    as.character(patient_data$end_time), 
+                    patient_data$end_time, 
                     self$options$dateFormat,
                     "end"
                 )
                 
-                # Check for parsing errors
-                if (!is.null(start_parsed$error) && start_parsed$error) {
+                # Check for data type mismatch first (user selected Date/Time but data is numeric)
+                if (isTRUE(start_parsed$data_type_mismatch) || isTRUE(end_parsed$data_type_mismatch)) {
+                    mismatch_info <- if (isTRUE(start_parsed$data_type_mismatch)) start_parsed else end_parsed
+                    return(list(
+                        data_type_mismatch = TRUE,
+                        detected_type = mismatch_info$detected_type,
+                        examples = mismatch_info$examples,
+                        message = mismatch_info$message
+                    ))
+                }
+
+                # Check for other parsing errors
+                if (isTRUE(start_parsed$error)) {
                     return(list(error = TRUE, message = paste(.("Start time parsing:"), start_parsed$message)))
                 }
-                if (!is.null(end_parsed$error) && end_parsed$error) {
+                if (isTRUE(end_parsed$error)) {
                     return(list(error = TRUE, message = paste(.("End time parsing:"), end_parsed$message)))
                 }
                 
-                patient_data$start_time <- start_parsed
-                patient_data$end_time <- end_parsed
+                patient_data$start_time <- start_parsed$value
+                patient_data$end_time <- end_parsed$value
                 
                 # Handle relative vs absolute time display
                 if (self$options$timeDisplay == "relative") {
@@ -242,9 +288,47 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     patient_data$end_time <- durations
                 }
             } else {
-                # Raw numeric processing with robust conversion
-                patient_data$start_time <- suppressWarnings(as.numeric(as.character(patient_data$start_time)))
-                patient_data$end_time <- suppressWarnings(as.numeric(as.character(patient_data$end_time)))
+                # Enhanced date format detection
+                start_sample <- as.character(patient_data$start_time[1:min(3, nrow(patient_data))])
+
+                # Detect various date formats
+                date_patterns <- list(
+                    "YYYY-MM-DD" = "^\\d{4}-\\d{2}-\\d{2}",
+                    "MM/DD/YYYY" = "^\\d{2}/\\d{2}/\\d{4}",
+                    "DD/MM/YYYY" = "^\\d{2}/\\d{2}/\\d{4}",
+                    "YYYY/MM/DD" = "^\\d{4}/\\d{2}/\\d{2}"
+                )
+
+                detected_format <- NULL
+                parse_function <- NULL
+
+                for (format_name in names(date_patterns)) {
+                    if (any(grepl(date_patterns[[format_name]], start_sample))) {
+                        detected_format <- format_name
+                        parse_function <- switch(format_name,
+                            "YYYY-MM-DD" = "ymd",
+                            "MM/DD/YYYY" = "mdy",
+                            "DD/MM/YYYY" = "dmy",
+                            "YYYY/MM/DD" = "ymd"
+                        )
+                        break
+                    }
+                }
+
+                is_date_like <- !is.null(detected_format)
+
+                if (is_date_like) {
+                    # Return special flag to indicate date detection (not an error)
+                    return(list(
+                        date_detected = TRUE,
+                        format = detected_format,
+                        examples = start_sample[1:min(2, length(start_sample))]
+                    ))
+                } else {
+                    # Raw numeric processing with robust conversion
+                    patient_data$start_time <- suppressWarnings(as.numeric(as.character(patient_data$start_time)))
+                    patient_data$end_time <- suppressWarnings(as.numeric(as.character(patient_data$end_time)))
+                }
             }
             
             # Add response/status variable if provided
@@ -310,11 +394,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     
                     # Process dates
                     if (self$options$timeType == "datetime") {
-                        milestone_dates <- private$.parseDatesWithClinicalContext(
-                            as.character(milestone_dates),
-                            self$options$dateFormat,
-                            "milestone"
-                        )
+                    parsed_dates <- private$.parseDatesWithClinicalContext(
+                        milestone_dates,
+                        self$options$dateFormat,
+                        "milestone"
+                    )
+                    milestone_dates <- parsed_dates$value
                         
                         # Adjust for relative display (vectorized for performance)
                         if (self$options$timeDisplay == "relative" && "original_start" %in% names(patient_data)) {
@@ -331,22 +416,74 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             }
                         }
                     } else {
-                        milestone_dates <- suppressWarnings(as.numeric(as.character(milestone_dates)))
-                        
-                        # Adjust for relative display
-                        if (self$options$timeDisplay == "relative" && "start_time" %in% names(patient_data)) {
-                            milestone_dates <- milestone_dates - patient_data$start_time[seq_along(milestone_dates)]
+                        # Check if milestone dates are date-like even in raw mode
+                        sample_dates <- as.character(milestone_dates[1:min(3, length(milestone_dates))])
+                        is_milestone_date_like <- any(grepl("^\\d{4}-\\d{2}-\\d{2}", sample_dates[!is.na(sample_dates)]))
+
+                        if (is_milestone_date_like && "original_start" %in% names(patient_data)) {
+                            # Parse as dates and convert to relative time
+                            # Use the same format detected for main timeline data
+                            milestone_parse_function <- if (!is.null(private$.detected_format)) {
+                                switch(private$.detected_format,
+                                    "YYYY-MM-DD" = "ymd",
+                                    "MM/DD/YYYY" = "mdy",
+                                    "DD/MM/YYYY" = "dmy",
+                                    "YYYY/MM/DD" = "ymd"
+                                )
+                            } else "ymd"
+
+                            parsed_dates <- private$.parseDatesWithClinicalContext(
+                                milestone_dates,
+                                milestone_parse_function,
+                                "milestone"
+                            )
+
+                            if (!isTRUE(parsed_dates$error)) {
+                                # Calculate relative time from start dates
+                                valid_indices <- which(!is.na(parsed_dates$value) & seq_along(parsed_dates$value) <= nrow(patient_data))
+                                if (length(valid_indices) > 0) {
+                                    intervals <- lubridate::interval(
+                                        patient_data$original_start[valid_indices],
+                                        parsed_dates$value[valid_indices]
+                                    )
+                                    milestone_dates <- rep(NA_real_, length(parsed_dates$value))
+                                    milestone_dates[valid_indices] <- lubridate::time_length(intervals, unit = self$options$timeUnit)
+                                }
+                            } else {
+                                milestone_dates <- suppressWarnings(as.numeric(as.character(milestone_dates)))
+                            }
+                        } else {
+                            milestone_dates <- suppressWarnings(as.numeric(as.character(milestone_dates)))
+
+                            # Adjust for relative display
+                            if (self$options$timeDisplay == "relative" && "start_time" %in% names(patient_data)) {
+                                milestone_dates <- milestone_dates - patient_data$start_time[seq_along(milestone_dates)]
+                            }
                         }
                     }
                     
-                    # Create milestone dataframe
-                    temp_milestone <- data.frame(
-                        patient_id = patient_data$patient_id[seq_along(milestone_dates)],
-                        time = milestone_dates,
-                        label = self$options[[name_opt]],
-                        milestone_type = paste0("milestone_", i),
-                        stringsAsFactors = FALSE
-                    )
+                    # Create milestone dataframe - ensure consistent lengths
+                    # Handle case where milestone_dates might have different length than patient_data
+                    max_length <- min(length(milestone_dates), nrow(patient_data))
+
+                    if (max_length > 0) {
+                        temp_milestone <- data.frame(
+                            patient_id = patient_data$patient_id[1:max_length],
+                            time = milestone_dates[1:max_length],
+                            label = self$options[[name_opt]],
+                            milestone_type = paste0("milestone_", i),
+                            stringsAsFactors = FALSE
+                        )
+                    } else {
+                        # Create empty data frame with correct structure
+                        temp_milestone <- data.frame(
+                            patient_id = character(0),
+                            time = numeric(0),
+                            label = character(0),
+                            milestone_type = character(0),
+                            stringsAsFactors = FALSE
+                        )
+                    }
                     
                     # Remove NA rows
                     temp_milestone <- temp_milestone[!is.na(temp_milestone$time), ]
@@ -395,12 +532,30 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 if (!is.null(event_var)) {
                     event_data <- tryCatch({
-                        data.frame(
-                            patient_id = as.character(self$data[[self$options$patientID]]),
-                            time = self$data[[event_time_var]],
-                            label = as.character(self$data[[event_var]]),
-                            stringsAsFactors = FALSE
-                        )
+                        # Ensure all variables exist and get their lengths
+                        patient_ids <- as.character(self$data[[self$options$patientID]])
+                        event_times <- self$data[[event_time_var]]
+                        event_labels <- as.character(self$data[[event_var]])
+
+                        # Find the minimum length to avoid row mismatch
+                        min_length <- min(length(patient_ids), length(event_times), length(event_labels))
+
+                        if (min_length > 0) {
+                            data.frame(
+                                patient_id = patient_ids[1:min_length],
+                                time = event_times[1:min_length],
+                                label = event_labels[1:min_length],
+                                stringsAsFactors = FALSE
+                            )
+                        } else {
+                            # Return empty data frame with correct structure
+                            data.frame(
+                                patient_id = character(0),
+                                time = numeric(0),
+                                label = character(0),
+                                stringsAsFactors = FALSE
+                            )
+                        }
                     }, error = function(e) {
                         warning(paste("Error processing event markers:", e$message))
                         return(NULL)
@@ -409,11 +564,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     if (!is.null(event_data)) {
                         # Process event times
                         if (self$options$timeType == "datetime") {
-                            event_data$time <- private$.parseDatesWithClinicalContext(
-                                as.character(event_data$time),
+                            parsed_event_times <- private$.parseDatesWithClinicalContext(
+                                event_data$time,
                                 self$options$dateFormat,
                                 "milestone"
                             )
+                            event_data$time <- parsed_event_times$value
                             
                             # Adjust for relative display (vectorized for performance)
                             if (self$options$timeDisplay == "relative" && "original_start" %in% names(patient_data)) {
@@ -440,7 +596,47 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                 }
                             }
                         } else {
-                            event_data$time <- suppressWarnings(as.numeric(as.character(event_data$time)))
+                            # Check if event times are date-like even in raw mode
+                            sample_times <- as.character(event_data$time[1:min(3, nrow(event_data))])
+                            is_event_date_like <- any(grepl("^\\d{4}-\\d{2}-\\d{2}", sample_times[!is.na(sample_times)]))
+
+                            if (is_event_date_like && "original_start" %in% names(patient_data)) {
+                                # Parse as dates and convert to relative time
+                                # Use the same format detected for main timeline data
+                                event_parse_function <- if (!is.null(private$.detected_format)) {
+                                    switch(private$.detected_format,
+                                        "YYYY-MM-DD" = "ymd",
+                                        "MM/DD/YYYY" = "mdy",
+                                        "DD/MM/YYYY" = "dmy",
+                                        "YYYY/MM/DD" = "ymd"
+                                    )
+                                } else "ymd"
+
+                                parsed_event_times <- private$.parseDatesWithClinicalContext(
+                                    event_data$time,
+                                    event_parse_function,
+                                    "event"
+                                )
+
+                                if (!isTRUE(parsed_event_times$error)) {
+                                    # Calculate relative time from patient start dates
+                                    patient_indices <- match(event_data$patient_id, patient_data$patient_id)
+                                    valid_matches <- which(!is.na(patient_indices) & !is.na(parsed_event_times$value))
+
+                                    if (length(valid_matches) > 0) {
+                                        intervals <- lubridate::interval(
+                                            patient_data$original_start[patient_indices[valid_matches]],
+                                            parsed_event_times$value[valid_matches]
+                                        )
+                                        event_data$time <- rep(NA_real_, nrow(event_data))
+                                        event_data$time[valid_matches] <- lubridate::time_length(intervals, unit = self$options$timeUnit)
+                                    }
+                                } else {
+                                    event_data$time <- suppressWarnings(as.numeric(as.character(event_data$time)))
+                                }
+                            } else {
+                                event_data$time <- suppressWarnings(as.numeric(as.character(event_data$time)))
+                            }
                         }
                         
                         # Filter valid events
@@ -526,9 +722,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if ("response" %in% names(patient_data)) {
                 response_summary <- table(patient_data$response)
                 response_pct <- prop.table(response_summary) * 100
-                
-                stats$response_counts <- as.list(response_summary)
-                stats$response_percentages <- as.list(response_pct)
+
+                stats$response_counts <- as.numeric(response_summary)
+                names(stats$response_counts) <- names(response_summary)
+
+                stats$response_percentages <- as.numeric(response_pct)
+                names(stats$response_percentages) <- names(response_pct)
             }
             
             return(stats)
@@ -744,7 +943,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         
         .run = function() {
             # Apply clinical preset configurations if selected
-            private$.applyClinicalPreset()
+            # DISABLED: Clinical presets only affect text interpretation, not calculations
+            # private$.applyClinicalPreset()
             
             # Enhanced instructions with comprehensive guidance
             if (is.null(self$options$patientID) || 
@@ -757,11 +957,104 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
             
             # Validate and process data with comprehensive error handling
+            debug_mode <- isTRUE(getOption("swimmerplot.debug"))
+
             tryCatch({
                 validation_result <- private$.validateAndProcessData()
-                
+
+                # Check for data type mismatch (Date/Time selected but numeric data)
+                if (isTRUE(validation_result$data_type_mismatch)) {
+                    mismatch_guidance <- paste0(
+                        "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+
+                        # Main mismatch notice
+                        "<div style='background: #f5f5f5; border: 2px solid #d63384; padding: 20px; margin-bottom: 20px;'>",
+                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #d63384;'>⚠️ Data Type Mismatch</h2>",
+                        "<p style='margin: 0; font-size: 14px; color: #666;'>",
+                        "You selected <strong style='color: #333;'>Date/Time</strong> input type, but your data contains <strong style='color: #333;'>numeric values</strong>",
+                        "</p>",
+                        "<p style='margin: 10px 0 0 0; font-size: 14px; color: #666;'>",
+                        "Examples: <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>",
+                        paste(validation_result$examples, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
+                        "</code>",
+                        "</p>",
+                        "</div>",
+
+                        # Required action section
+                        "<div style='background: #f9f9f9; border-left: 4px solid #d63384; padding: 15px; margin-bottom: 20px;'>",
+                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>📋 Required Action</h3>",
+                        "<ol style='margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;'>",
+                        "<li><strong>Go to 'Time & Date Settings'</strong> section (click to expand)</li>",
+                        "<li><strong>Change 'Time Input Type'</strong> from 'Date/Time' to <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>Raw Values</span></li>",
+                        "<li><strong>Select appropriate 'Time Unit'</strong> (Days, Weeks, Months, or Years)</li>",
+                        "<li><strong>Choose your preferred 'Time Display'</strong> mode</li>",
+                        "<li><strong>Re-run the analysis</strong></li>",
+                        "</ol>",
+                        "</div>",
+
+                        # Helpful tip section
+                        "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
+                        "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>💡 Data Type Guide</h4>",
+                        "<p style='margin: 0; font-size: 14px; color: #666;'>",
+                        "<strong>Use Date/Time for:</strong> 2023-01-15, 15/01/2023, 2023-01-15 14:30:00<br>",
+                        "<strong>Use Raw Values for:</strong> 0, 30, 90.5, 365 (numeric days/months/years)",
+                        "</p>",
+                        "</div>",
+
+                        "</div>"
+                    )
+                    self$results$instructions$setContent(mismatch_guidance)
+                    return()  # Stop here, don't process further
+                }
+
+                # Check if dates were detected (not an error, just guidance needed)
+                if (isTRUE(validation_result$date_detected)) {
+                    date_guidance <- paste0(
+                        "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+
+                        # Main detection notice with clean styling like decisionpanel
+                        "<div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>",
+                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'>🔍 Date Format Detected</h2>",
+                        "<p style='margin: 0; font-size: 14px; color: #666;'>",
+                        "Found date format: <strong style='color: #333;'>", validation_result$format, "</strong> in your time variables",
+                        "</p>",
+                        "<p style='margin: 10px 0 0 0; font-size: 14px; color: #666;'>",
+                        "Examples: <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>",
+                        paste(validation_result$examples, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
+                        "</code>",
+                        "</p>",
+                        "</div>",
+
+                        # Required action section with clean border styling
+                        "<div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>",
+                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>📋 Required Action</h3>",
+                        "<ol style='margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;'>",
+                        "<li><strong>Go to 'Time & Date Settings'</strong> section (click to expand)</li>",
+                        "<li><strong>Change 'Time Input Type'</strong> from 'Raw Values' to <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>Date/Time</span></li>",
+                        "<li><strong>Select 'Date Format':</strong> <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>",
+                        validation_result$format, "</span></li>",
+                        "<li><strong>Choose your preferred 'Time Display'</strong> mode (Relative or Absolute)</li>",
+                        "<li><strong>The analysis will be re-run with your settings.</strong></li>",
+                        "</ol>",
+                        "</div>",
+
+                        # Helpful tip section with subtle styling
+                        "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
+                        "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>💡 Important Note</h4>",
+                        "<p style='margin: 0; font-size: 14px; color: #666;'>",
+                        "Configuring the date settings properly ensures accurate timeline calculations ",
+                        "and gives you full control over how dates are displayed in your swimmer plot.",
+                        "</p>",
+                        "</div>",
+
+                        "</div>"
+                    )
+                    self$results$instructions$setContent(date_guidance)
+                    return()  # Stop here, don't process further
+                }
+
                 # Check for validation errors
-                if (!is.null(validation_result$error) && validation_result$error) {
+                if (isTRUE(validation_result$error)) {
                     error_msg <- paste0(
                         "<div style='color: red; padding: 15px; border: 1px solid red; border-radius: 5px; margin: 10px;'>",
                         .("<h4>Data Validation Error</h4>"),
@@ -776,7 +1069,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "</div>"
                     )
                     self$results$instructions$setContent(error_msg)
-                    return()
+                    stop(validation_result$message)
                 }
                 
                 # Extract patient data and show warnings if present
@@ -786,14 +1079,22 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 patient_data <- private$.applySorting(patient_data)
                 
                 # Display warnings if present
+                warning_messages <- c()
+
                 if (!is.null(validation_result$warnings) && length(validation_result$warnings) > 0) {
+                    warning_messages <- c(warning_messages, validation_result$warnings)
+                }
+
+                # Note: Auto-detection warning removed since we now stop analysis
+                # when dates are detected and ask user to configure manually
+
+                if (length(warning_messages) > 0) {
                     warning_msg <- paste0(
                         "<div style='color: #8a6d00; background-color: #fff8e1; padding: 15px; border: 1px solid #ffc107; border-radius: 5px; margin: 10px;'>",
-                        .("<h4>Data Quality Warnings</h4>"),
+                        .("<h4>Analysis Information</h4>"),
                         "<ul>",
-                        paste0("<li>", validation_result$warnings, "</li>", collapse = ""),
+                        paste0("<li>", warning_messages, "</li>", collapse = ""),
                         "</ul>",
-                        .("<p><em>These warnings do not prevent analysis but may affect interpretation.</em></p>"),
                         "</div>"
                     )
                     self$results$instructions$setContent(warning_msg)
@@ -876,6 +1177,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (self$options$showInterpretation) {
                     private$.generateInterpretationOutput(interpretation)
                 }
+
+                # Generate clinical guidance outputs if requested
+                if (self$options$showGlossary) {
+                    private$.generateClinicalGlossary()
+                }
+
+                if (self$options$showCopyReady) {
+                    private$.generateCopyReadyReport(stats, patient_data)
+                }
+
+                if (self$options$showAbout) {
+                    private$.generateAboutAnalysis()
+                }
                 
             }, error = function(e) {
                 error_msg <- paste(
@@ -892,6 +1206,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "</div>"
                 )
                 self$results$instructions$setContent(error_msg)
+                stop(e)
             })
         },
         
@@ -1218,13 +1533,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     timeline_export <- timeline_export %>%
                         dplyr::left_join(milestone_wide, by = "patient_id")
                 }
-                
-                self$results$timelineData$setRowNums(rownames(timeline_export))
-                for (col in names(timeline_export)) {
-                    self$results$timelineData$setValues(column = col, values = timeline_export[[col]])
-                }
+
+                self$results$timelineData$setState(timeline_export)
             }
-            
+
             # Export summary statistics if requested  
             if (self$options$exportSummary) {
                 summary_export <- data.frame(
@@ -1250,10 +1562,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         ))
                     }
                 }
-                
-                self$results$summaryData$setRowNums(rownames(summary_export))
-                self$results$summaryData$setValues(column = "metric", values = summary_export$metric)
-                self$results$summaryData$setValues(column = "value", values = summary_export$value)
+
+                self$results$summaryData$setState(summary_export)
             }
             
             # Update export information panel
@@ -1649,6 +1959,167 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
             
             return(glyphs)
+        },
+
+        # Generate clinical glossary
+        .generateClinicalGlossary = function() {
+            glossary_html <- paste0(
+                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
+                "<h3 style='color: #007bff; margin-top: 0;'>📚 Clinical Glossary</h3>",
+
+                "<div style='margin: 10px 0;'>",
+                "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>Response Categories</h4>",
+                "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                "<li><strong>CR (Complete Response):</strong> Complete disappearance of all target lesions</li>",
+                "<li><strong>PR (Partial Response):</strong> ≥30% decrease in sum of target lesion diameters</li>",
+                "<li><strong>SD (Stable Disease):</strong> Neither sufficient shrinkage for PR nor sufficient increase for PD</li>",
+                "<li><strong>PD (Progressive Disease):</strong> ≥20% increase in sum of target lesion diameters</li>",
+                "</ul>",
+                "</div>",
+
+                "<div style='margin: 10px 0;'>",
+                "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>Clinical Metrics</h4>",
+                "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                "<li><strong>ORR (Objective Response Rate):</strong> Proportion of patients with CR or PR</li>",
+                "<li><strong>DCR (Disease Control Rate):</strong> Proportion of patients with CR, PR, or SD</li>",
+                "<li><strong>Person-Time:</strong> Total observation time across all patients in the study</li>",
+                "<li><strong>Median Follow-up:</strong> Time point at which half of patients have been followed longer</li>",
+                "<li><strong>Incidence Rate:</strong> Number of events per unit of person-time</li>",
+                "</ul>",
+                "</div>",
+
+                "<div style='margin: 10px 0;'>",
+                "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>Timeline Elements</h4>",
+                "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                "<li><strong>Swim Lanes:</strong> Horizontal bars representing individual patient treatment courses</li>",
+                "<li><strong>Milestones:</strong> Key clinical events (surgery, assessment, progression)</li>",
+                "<li><strong>Event Markers:</strong> Specific events occurring during treatment</li>",
+                "<li><strong>Status Arrows:</strong> Indicate ongoing treatment at data cutoff</li>",
+                "</ul>",
+                "</div>",
+
+                "</div>"
+            )
+
+            self$results$clinicalGlossary$setContent(glossary_html)
+        },
+
+        # Generate copy-ready manuscript text
+        .generateCopyReadyReport = function(stats, patient_data) {
+            # Basic study description
+            basic_text <- sprintf(
+                "Patient timelines were analyzed using swimmer plots to visualize treatment courses and clinical outcomes. The study included %d patients with a median follow-up of %.1f %s (range: %.1f to %.1f %s). Total person-time was %.1f %s.",
+                stats$n_patients,
+                stats$median_duration,
+                self$options$timeUnit,
+                stats$min_duration,
+                stats$max_duration,
+                self$options$timeUnit,
+                stats$total_person_time,
+                self$options$timeUnit
+            )
+
+            # Add response analysis if available
+            response_text <- ""
+            if ("response" %in% names(patient_data) && !is.null(stats$response_counts)) {
+                orr_count <- sum(stats$response_counts[names(stats$response_counts) %in% c("CR", "PR")])
+                orr_pct <- orr_count / sum(stats$response_counts) * 100
+
+                dcr_count <- sum(stats$response_counts[names(stats$response_counts) %in% c("CR", "PR", "SD")])
+                dcr_pct <- dcr_count / sum(stats$response_counts) * 100
+
+                response_text <- sprintf(
+                    " Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients) and disease control rate (DCR) of %.1f%% (%d/%d patients).",
+                    orr_pct, orr_count, sum(stats$response_counts),
+                    dcr_pct, dcr_count, sum(stats$response_counts)
+                )
+            }
+
+            # Methodology note
+            methods_text <- " Timeline visualization was created using the ggswim package, providing comprehensive swimmer plots suitable for clinical research reporting and regulatory submissions."
+
+            full_text <- paste0(basic_text, response_text, methods_text)
+
+            copy_ready_html <- paste0(
+                "<div style='background-color: #e8f5e8; padding: 20px; border-left: 4px solid #28a745; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
+                "<h3 style='color: #155724; margin-top: 0; display: flex; align-items: center;'>",
+                "<span style='margin-right: 8px;'>📄</span>",
+                "Copy-Ready Manuscript Text",
+                "</h3>",
+                "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
+                "<p style='margin: 0; line-height: 1.6; color: #333; font-size: 0.95em; text-align: justify;'>", full_text, "</p>",
+                "</div>",
+                "<div style='margin-top: 15px; padding: 10px; background-color: #d1ecf1; border-radius: 4px; border: 1px dashed #0c5460;'>",
+                "<p style='margin: 0; font-size: 0.85em; color: #0c5460;'>",
+                "<strong>Usage:</strong> This text is formatted for direct use in manuscripts, clinical reports, and regulatory submissions. Copy and paste into your document and adjust as needed for your specific requirements.",
+                "</p>",
+                "</div>",
+                "</div>"
+            )
+
+            self$results$copyReadyReport$setContent(copy_ready_html)
+        },
+
+        # Generate about analysis information
+        .generateAboutAnalysis = function() {
+            about_html <- paste0(
+                "<div style='background-color: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
+                "<h3 style='color: #856404; margin-top: 0; display: flex; align-items: center;'>",
+                "<span style='margin-right: 8px;'>ℹ️</span>",
+                "About Swimmer Plot Analysis",
+                "</h3>",
+
+                "<div style='margin: 15px 0;'>",
+                "<h4 style='color: #856404; margin: 10px 0 5px 0;'>What is a Swimmer Plot?</h4>",
+                "<p style='margin: 5px 0; line-height: 1.6;'>",
+                "Swimmer plots are timeline visualizations that display individual patient treatment courses, clinical events, and outcomes in a single comprehensive graph. Each horizontal 'swim lane' represents one patient's journey through treatment.",
+                "</p>",
+                "</div>",
+
+                "<div style='margin: 15px 0;'>",
+                "<h4 style='color: #856404; margin: 10px 0 5px 0;'>When to Use Swimmer Plots</h4>",
+                "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
+                "<li>Clinical trial data visualization and regulatory submissions</li>",
+                "<li>Treatment response assessment and duration analysis</li>",
+                "<li>Patient outcome tracking in longitudinal studies</li>",
+                "<li>Safety event monitoring and adverse event reporting</li>",
+                "<li>Milestone-based clinical pathway analysis</li>",
+                "</ul>",
+                "</div>",
+
+                "<div style='margin: 15px 0;'>",
+                "<h4 style='color: #856404; margin: 10px 0 5px 0;'>Required Data</h4>",
+                "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
+                "<li><strong>Patient ID:</strong> Unique identifier for each patient</li>",
+                "<li><strong>Start Time:</strong> Treatment or observation start date/time</li>",
+                "<li><strong>End Time:</strong> Treatment or observation end date/time</li>",
+                "<li><strong>Response Variable (optional):</strong> Treatment response categories</li>",
+                "<li><strong>Milestone Events (optional):</strong> Key clinical events with dates</li>",
+                "</ul>",
+                "</div>",
+
+                "<div style='margin: 15px 0;'>",
+                "<h4 style='color: #856404; margin: 10px 0 5px 0;'>Key Assumptions</h4>",
+                "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
+                "<li>Each row represents one patient episode or treatment course</li>",
+                "<li>Time variables are either numeric (days/months) or valid date formats</li>",
+                "<li>End times should be greater than or equal to start times</li>",
+                "<li>Missing data is handled appropriately (excluded from calculations)</li>",
+                "<li>Response categories follow standard clinical criteria (RECIST, etc.)</li>",
+                "</ul>",
+                "</div>",
+
+                "<div style='margin: 15px 0;'>",
+                "<h4 style='color: #856404; margin: 10px 0 5px 0;'>Output Interpretation</h4>",
+                "<p style='margin: 5px 0; line-height: 1.6;'>",
+                "The swimmer plot displays individual patient timelines with optional color coding for response categories. Milestone markers show key events, and summary statistics provide overall study metrics including person-time analysis and response rates suitable for clinical reporting.",
+                "</p>",
+                "</div>",
+
+                "</div>"
+            )
+
+            self$results$aboutAnalysis$setContent(about_html)
         }
     )
 )

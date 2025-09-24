@@ -760,21 +760,39 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Apply color palette if specified
                 if (colorPalette != "default" && fillColorMapping) {
-                    if (colorPalette %in% c("viridis", "plasma", "magma", "inferno")) {
-                        # Use viridis-type palettes
-                        plot <- plot +
-                            ggplot2::scale_fill_gradientn(colors = get(colorPalette)(100))
-                    } else {
-                        # Use RColorBrewer palettes
-                        if (requireNamespace("RColorBrewer", quietly = TRUE)) {
-                            n_colors <- length(unique(ggplot2::layer_data(plot)$fill))
-                            colors <- RColorBrewer::brewer.pal(n = min(max(n_colors, 3),
-                                RColorBrewer::brewer.pal.info[colorPalette, "maxcolors"]),
-                                name = colorPalette)
+                    tryCatch({
+                        if (colorPalette %in% c("viridis", "plasma", "magma", "inferno")) {
+                            # Use viridis-type palettes for continuous scales
                             plot <- plot +
-                                ggplot2::scale_fill_manual(values = colors)
+                                ggplot2::scale_fill_viridis_c(option = substr(colorPalette, 1, 1))
+                        } else {
+                            # Use RColorBrewer palettes
+                            if (requireNamespace("RColorBrewer", quietly = TRUE)) {
+                                # Get the data layer to determine how many unique values we have
+                                plot_data <- ggplot2::ggplot_build(plot)
+                                if (length(plot_data$data) > 0 && "fill" %in% names(plot_data$data[[1]])) {
+                                    fill_values <- plot_data$data[[1]]$fill
+                                    n_colors <- length(unique(fill_values[!is.na(fill_values)]))
+
+                                    if (n_colors > 0) {
+                                        max_colors <- RColorBrewer::brewer.pal.info[colorPalette, "maxcolors"]
+                                        n_colors <- min(max(n_colors, 3), max_colors)
+                                        colors <- RColorBrewer::brewer.pal(n = n_colors, name = colorPalette)
+
+                                        # Check if we have discrete or continuous values
+                                        if (all(is.numeric(fill_values))) {
+                                            plot <- plot + ggplot2::scale_fill_gradientn(colors = colors)
+                                        } else {
+                                            plot <- plot + ggplot2::scale_fill_manual(values = colors)
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    }
+                    }, error = function(e) {
+                        # If color palette application fails, continue without custom colors
+                        warning("Failed to apply color palette: ", e$message)
+                    })
                 }
 
                 # Apply edge color

@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.74
+version: 0.0.31.75
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-23'
+date: '2025-09-24'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot

@@ -232,6 +232,30 @@ items:
           - timeUnit
           - personTimeAnalysis
 
+    - name: clinicalGlossary
+      title: "Clinical Glossary"
+      type: Html
+      visible: (showGlossary)
+      clearWith: []
+
+    - name: copyReadyReport
+      title: "Copy-Ready Manuscript Text"
+      type: Html
+      visible: (showCopyReady)
+      clearWith:
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - timeUnit
+          - showCopyReady
+
+    - name: aboutAnalysis
+      title: "About This Analysis"
+      type: Html
+      visible: (showAbout)
+      clearWith: []
+
 refs:
     - ClinicoPathJamoviModule
     - ggswim

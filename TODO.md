@@ -44,9 +44,14 @@ In tables and plots I see the modified names that is why I am asking
 can we apply labelled logic as in oddsratio
 
 check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js> and <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39>  to implement it for clinical presets
-https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R
+<https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R>
 
-> implement welcome/introductory message styling of decisionpanel.
+update .u.yaml to make it user friendly. make all relevant features to be together.
+remove all dummy code and hardcoded values. make them all work with inputs.
+implement real function instead of placeholders. 
+prepare comprehensive test data generator under data-raw and prepare the data  as csv under data folder
+To lower the computation make all default checkboxes to be false in .a.yaml
+implement welcome/introductory message styling of decisionpanel.
 
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"

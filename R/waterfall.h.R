@@ -12,7 +12,6 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             groupVar = NULL,
             inputType = "percentage",
             sortBy = "response",
-            clinicalPreset = "custom",
             showThresholds = TRUE,
             labelOutliers = FALSE,
             showMedian = FALSE,
@@ -86,16 +85,6 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "response",
                     "id"),
                 default="response")
-            private$..clinicalPreset <- jmvcore::OptionList$new(
-                "clinicalPreset",
-                clinicalPreset,
-                options=list(
-                    "custom",
-                    "phase2",
-                    "phase1_2",
-                    "biomarker",
-                    "publication"),
-                default="custom")
             private$..showThresholds <- jmvcore::OptionBool$new(
                 "showThresholds",
                 showThresholds,
@@ -206,7 +195,6 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..groupVar)
             self$.addOption(private$..inputType)
             self$.addOption(private$..sortBy)
-            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..showThresholds)
             self$.addOption(private$..labelOutliers)
             self$.addOption(private$..showMedian)
@@ -234,7 +222,6 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         groupVar = function() private$..groupVar$value,
         inputType = function() private$..inputType$value,
         sortBy = function() private$..sortBy$value,
-        clinicalPreset = function() private$..clinicalPreset$value,
         showThresholds = function() private$..showThresholds$value,
         labelOutliers = function() private$..labelOutliers$value,
         showMedian = function() private$..showMedian$value,
@@ -261,7 +248,6 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..groupVar = NA,
         ..inputType = NA,
         ..sortBy = NA,
-        ..clinicalPreset = NA,
         ..showThresholds = NA,
         ..labelOutliers = NA,
         ..showMedian = NA,
@@ -707,8 +693,6 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (requires time variable) or 'percentage' for pre-calculated percentage
 #'   changes from baseline
 #' @param sortBy Sort the waterfall plot by best response or patient ID.
-#' @param clinicalPreset Choose a clinical study preset to automatically
-#'   configure appropriate settings
 #' @param showThresholds Show +20\% and -30\% RECIST v1.1 thresholds as dashed
 #'   lines. Helps identify Progressive Disease (PD) and Partial Response (PR)
 #'   cutoffs.
@@ -776,7 +760,6 @@ waterfall <- function(
     groupVar = NULL,
     inputType = "percentage",
     sortBy = "response",
-    clinicalPreset = "custom",
     showThresholds = TRUE,
     labelOutliers = FALSE,
     showMedian = FALSE,
@@ -819,7 +802,6 @@ waterfall <- function(
         groupVar = groupVar,
         inputType = inputType,
         sortBy = sortBy,
-        clinicalPreset = clinicalPreset,
         showThresholds = showThresholds,
         labelOutliers = labelOutliers,
         showMedian = showMedian,

@@ -1,0 +1,31 @@
+PatientID,StartTime,EndTime,ResponseCategory,Surgery,FirstAssessment,Progression,Death,AdverseEvent,EventTime
+PT001,0,365,CR,30,90,NA,NA,Grade 2 Fatigue,60
+PT002,0,300,PR,45,90,240,NA,Grade 1 Nausea,30
+PT003,0,210,SD,30,90,NA,NA,Grade 3 Diarrhea,120
+PT004,0,180,PD,NA,90,120,180,Grade 2 Rash,90
+PT005,0,240,PR,60,90,NA,NA,Grade 1 Headache,30
+PT006,0,270,CR,30,90,NA,NA,NA,NA
+PT007,0,210,SD,90,90,180,NA,Grade 2 Anemia,60
+PT008,0,240,PR,45,90,NA,NA,Grade 1 Insomnia,30
+PT009,0,150,PD,NA,90,120,150,Grade 3 Neutropenia,60
+PT010,0,240,CR,30,90,NA,NA,NA,NA
+PT011,0,210,PR,60,90,NA,NA,Grade 2 Appetite Loss,90
+PT012,0,150,SD,30,90,NA,NA,Grade 1 Constipation,60
+PT013,0,210,PR,90,90,NA,NA,Grade 2 Neuropathy,90
+PT014,0,120,PD,NA,90,90,120,Grade 3 Vomiting,60
+PT015,0,180,CR,30,90,NA,NA,NA,NA
+PT016,0,150,SD,45,90,NA,NA,Grade 1 Dry Skin,60
+PT017,0,120,PR,30,90,NA,NA,Grade 2 Joint Pain,90
+PT018,0,150,PD,NA,90,120,NA,Grade 3 Hypertension,30
+PT019,0,150,CR,60,90,NA,NA,NA,NA
+PT020,0,120,SD,30,90,NA,NA,Grade 1 Muscle Weakness,60
+PT021,0,120,PR,90,90,NA,NA,Grade 2 Memory Issues,30
+PT022,0,90,PD,NA,90,60,90,Grade 3 Liver Toxicity,30
+PT023,0,120,CR,30,60,NA,NA,NA,NA
+PT024,0,90,SD,45,60,NA,NA,Grade 1 Dizziness,30
+PT025,0,90,PR,30,60,NA,NA,Grade 2 Sleep Disorder,30
+PT026,0,90,PD,NA,60,60,NA,Grade 3 Cardiac Toxicity,30
+PT027,0,60,CR,30,60,NA,NA,NA,NA
+PT028,0,60,SD,45,60,NA,NA,Grade 1 Hair Loss,30
+PT029,0,60,PR,30,60,NA,NA,Grade 2 Skin Changes,30
+PT030,0,30,PD,NA,30,30,NA,Grade 3 Kidney Toxicity,30
