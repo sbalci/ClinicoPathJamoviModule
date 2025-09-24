@@ -13,7 +13,6 @@
 #' @importFrom tibble tibble
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom scales pretty_breaks
-#' @importFrom gridExtra grid.arrange
 
 swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "swimmerplotClass",
@@ -498,27 +497,40 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
         
         # Process ongoing status arrows
-        .processOngoingStatus = function(patient_data) {
-            arrow_data <- NULL
-            
-            # Detect ongoing treatments (those with missing end times or end at study cutoff)
+        .processOngoingStatus = function(patient_data, stats) {
+            if (nrow(patient_data) == 0 || is.null(stats)) return(NULL)
+
+            end_numeric <- private$.asNumericTime(patient_data$end_time)
+            if (all(is.na(end_numeric))) return(NULL)
+
+            max_end <- suppressWarnings(max(end_numeric, na.rm = TRUE))
+            if (!is.finite(max_end)) return(NULL)
+
+            tolerance <- max(abs(max_end) * 1e-6, 1e-6)
+            is_at_cutoff <- !is.na(end_numeric) & abs(end_numeric - max_end) <= tolerance
+
+            ongoing_flag <- is_at_cutoff
             if ("response" %in% names(patient_data)) {
-                ongoing_patients <- patient_data[
-                    !is.na(patient_data$patient_id) & 
-                    !is.na(patient_data$end_time) &
-                    patient_data$response %in% c("CR", "PR", "SD"), # Responding patients more likely ongoing
-                ]
-                
-                if (nrow(ongoing_patients) > 0) {
-                    arrow_data <- data.frame(
-                        patient_id = ongoing_patients$patient_id,
-                        xend = ongoing_patients$end_time,
-                        stringsAsFactors = FALSE
-                    )
-                }
+                response_labels <- tolower(as.character(patient_data$response))
+                ongoing_labels <- c("cr", "complete response", "pr", "partial response",
+                                    "sd", "stable disease", "ongoing", "on treatment")
+                ongoing_flag <- ongoing_flag | response_labels %in% ongoing_labels
             }
-            
-            return(arrow_data)
+
+            ongoing_patients <- patient_data[ongoing_flag & !is.na(patient_data$patient_id) & !is.na(patient_data$end_time), , drop = FALSE]
+            if (nrow(ongoing_patients) == 0) return(NULL)
+
+            ongoing_patients <- ongoing_patients[!duplicated(ongoing_patients$patient_id), , drop = FALSE]
+
+            arrow_extension <- private$.computeArrowExtension(stats$max_duration)
+            arrow_end <- private$.extendTimeValue(ongoing_patients$end_time, arrow_extension)
+
+            data.frame(
+                patient_id = ongoing_patients$patient_id,
+                x = ongoing_patients$end_time,
+                xend = arrow_end,
+                stringsAsFactors = FALSE
+            )
         },
         
         # Process event markers with enhanced icon support
@@ -687,7 +699,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             suppressWarnings(lubridate::time_length(intervals, unit = unit))
         },
 
-        # Helper to obtain numeric durations between start and end times
+        # Helper to obtain numeric durations between start and end times (per row)
         .getDurations = function(patient_data, unit = self$options$timeUnit) {
             if (inherits(patient_data$start_time, c("Date", "POSIXct", "POSIXlt"))) {
                 intervals <- suppressWarnings(lubridate::interval(patient_data$start_time, patient_data$end_time))
@@ -697,40 +709,183 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             as.numeric(patient_data$end_time - patient_data$start_time)
         },
 
-        # Calculate comprehensive summary statistics
-        .calculateSummaryStats = function(patient_data) {
-            durations <- private$.getDurations(patient_data)
-
-            # Basic statistics
-            stats <- list(
-                n_patients = length(unique(patient_data$patient_id)),
-                n_observations = nrow(patient_data),
-                median_duration = median(durations, na.rm = TRUE),
-                mean_duration = mean(durations, na.rm = TRUE),
-                sd_duration = sd(durations, na.rm = TRUE),
-                min_duration = min(durations, na.rm = TRUE),
-                max_duration = max(durations, na.rm = TRUE),
-                q1_duration = quantile(durations, 0.25, na.rm = TRUE),
-                q3_duration = quantile(durations, 0.75, na.rm = TRUE)
-            )
-            
-            # Person-time analysis
-            stats$total_person_time <- sum(durations, na.rm = TRUE)
-            stats$mean_follow_up <- stats$total_person_time / stats$n_patients
-            
-            # Response analysis if available
-            if ("response" %in% names(patient_data)) {
-                response_summary <- table(patient_data$response)
-                response_pct <- prop.table(response_summary) * 100
-
-                stats$response_counts <- as.numeric(response_summary)
-                names(stats$response_counts) <- names(response_summary)
-
-                stats$response_percentages <- as.numeric(response_pct)
-                names(stats$response_percentages) <- names(response_pct)
+        # Summarise timelines at the patient level to avoid double counting
+        .summarizeByPatient = function(patient_data) {
+            if (nrow(patient_data) == 0) {
+                return(tibble::tibble(
+                    patient_id = character(),
+                    start_time = numeric(),
+                    end_time = numeric(),
+                    follow_up = numeric(),
+                    person_time = numeric(),
+                    response = character()
+                ))
             }
-            
-            return(stats)
+
+            patient_data$segment_duration <- private$.getDurations(patient_data)
+            split_data <- split(patient_data, patient_data$patient_id)
+
+            summary_list <- lapply(split_data, function(df) {
+                follow_up <- private$.calculateFollowUp(df$start_time, df$end_time)
+                person_time <- sum(df$segment_duration, na.rm = TRUE)
+                if (is.na(person_time) || !is.finite(person_time)) person_time <- follow_up
+
+                response_value <- NA_character_
+                if ("response" %in% names(df)) {
+                    non_missing <- as.character(df$response[!is.na(df$response)])
+                    if (length(non_missing) > 0) {
+                        response_value <- non_missing[1]
+                    }
+                }
+
+                start_val <- suppressWarnings(min(df$start_time, na.rm = TRUE))
+                if (!is.finite(as.numeric(start_val))) start_val <- NA
+
+                end_val <- suppressWarnings(max(df$end_time, na.rm = TRUE))
+                if (!is.finite(as.numeric(end_val))) end_val <- NA
+
+                tibble::tibble(
+                    patient_id = df$patient_id[1],
+                    start_time = start_val,
+                    end_time = end_val,
+                    follow_up = follow_up,
+                    person_time = person_time,
+                    response = response_value
+                )
+            })
+
+            patient_data$segment_duration <- NULL
+            dplyr::bind_rows(summary_list)
+        },
+
+        # Compute follow-up duration between earliest start and latest end for one patient
+        .calculateFollowUp = function(start_vals, end_vals, unit = self$options$timeUnit) {
+            if (length(start_vals) == 0 || length(end_vals) == 0) return(NA_real_)
+
+            is_date <- inherits(start_vals, c("Date", "POSIXct", "POSIXlt")) ||
+                       inherits(end_vals, c("Date", "POSIXct", "POSIXlt"))
+
+            if (is_date) {
+                start_min <- suppressWarnings(min(start_vals, na.rm = TRUE))
+                end_max <- suppressWarnings(max(end_vals, na.rm = TRUE))
+                if (!is.finite(as.numeric(start_min)) || !is.finite(as.numeric(end_max))) return(NA_real_)
+
+                interval <- suppressWarnings(lubridate::interval(start_min, end_max))
+                return(suppressWarnings(lubridate::time_length(interval, unit = unit)))
+            }
+
+            start_min <- suppressWarnings(min(as.numeric(start_vals), na.rm = TRUE))
+            end_max <- suppressWarnings(max(as.numeric(end_vals), na.rm = TRUE))
+
+            if (!is.finite(start_min) || !is.finite(end_max)) return(NA_real_)
+            end_max - start_min
+        },
+
+        # Convert time-like objects to numeric for comparisons
+        .asNumericTime = function(x) {
+            if (inherits(x, "Date")) {
+                return(as.numeric(x))
+            }
+            if (inherits(x, c("POSIXct", "POSIXlt"))) {
+                return(as.numeric(x))
+            }
+            suppressWarnings(as.numeric(x))
+        },
+
+        # Extend a time value by a numeric offset based on the configured unit
+        .extendTimeValue = function(values, extension, unit = self$options$timeUnit) {
+            if (length(values) == 0) return(values)
+
+            if (inherits(values, "Date")) {
+                offset_days <- switch(unit,
+                    days = extension,
+                    weeks = extension * 7,
+                    months = extension * 30.4375,
+                    years = extension * 365.25,
+                    extension
+                )
+                return(values + offset_days)
+            }
+
+            if (inherits(values, c("POSIXct", "POSIXlt"))) {
+                offset_seconds <- switch(unit,
+                    days = extension * 86400,
+                    weeks = extension * 7 * 86400,
+                    months = extension * 30.4375 * 86400,
+                    years = extension * 365.25 * 86400,
+                    extension
+                )
+                return(values + offset_seconds)
+            }
+
+            values + extension
+        },
+
+        # Derive a sensible arrow extension based on observed timelines
+        .computeArrowExtension = function(max_duration) {
+            if (is.null(max_duration) || is.na(max_duration) || !is.finite(max_duration)) {
+                return(1)
+            }
+
+            extension <- max_duration * 0.1
+            if (!is.finite(extension) || extension <= 0) extension <- 1
+            extension
+        },
+
+        .getProtocolReferenceTimes = function(max_duration, unit) {
+            if (is.null(max_duration) || is.na(max_duration) || !is.finite(max_duration)) {
+                return(numeric(0))
+            }
+
+            base_months <- c(3, 6, 9, 12, 18, 24, 36)
+            reference_values <- switch(unit,
+                days = base_months * 30.4375,
+                weeks = base_months * 4.34524,
+                years = base_months / 12,
+                base_months
+            )
+
+            reference_values[reference_values <= max_duration * 1.1]
+        },
+
+        # Calculate comprehensive summary statistics using patient-level data
+        .calculateSummaryStats = function(patient_data) {
+            patient_summary <- private$.summarizeByPatient(patient_data)
+            follow_up_durations <- patient_summary$follow_up
+            valid_follow_up <- follow_up_durations[!is.na(follow_up_durations)]
+
+            stats <- list(
+                n_patients = nrow(patient_summary),
+                n_observations = nrow(patient_data),
+                median_duration = if (length(valid_follow_up) > 0) stats::median(valid_follow_up) else NA_real_,
+                mean_duration = if (length(valid_follow_up) > 0) mean(valid_follow_up) else NA_real_,
+                sd_duration = if (length(valid_follow_up) > 1) stats::sd(valid_follow_up) else NA_real_,
+                min_duration = if (length(valid_follow_up) > 0) min(valid_follow_up) else NA_real_,
+                max_duration = if (length(valid_follow_up) > 0) max(valid_follow_up) else NA_real_,
+                q1_duration = if (length(valid_follow_up) > 0) stats::quantile(valid_follow_up, 0.25) else NA_real_,
+                q3_duration = if (length(valid_follow_up) > 0) stats::quantile(valid_follow_up, 0.75) else NA_real_,
+                patient_summary = patient_summary
+            )
+
+            # Person-time analysis
+            stats$total_person_time <- sum(patient_summary$person_time, na.rm = TRUE)
+            stats$mean_follow_up <- if (length(valid_follow_up) > 0) mean(valid_follow_up) else NA_real_
+
+            # Response analysis if available
+            if ("response" %in% names(patient_summary)) {
+                response_summary <- table(patient_summary$response, useNA = "no")
+                if (length(response_summary) > 0) {
+                    response_pct <- prop.table(response_summary) * 100
+
+                    stats$response_counts <- as.numeric(response_summary)
+                    names(stats$response_counts) <- names(response_summary)
+
+                    stats$response_percentages <- as.numeric(response_pct)
+                    names(stats$response_percentages) <- names(response_pct)
+                }
+            }
+
+            stats
         },
         
         # Generate comprehensive clinical interpretation
@@ -1130,7 +1285,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 milestone_data <- private$.processMilestones(patient_data)
                 event_data <- private$.processEventMarkers(patient_data)
-                arrow_data <- private$.processOngoingStatus(patient_data)
+                arrow_data <- private$.processOngoingStatus(patient_data, stats)
                 
                 # Calculate comprehensive statistics
                 stats <- private$.calculateSummaryStats(patient_data)
@@ -1144,7 +1299,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 private$.updateSummaryTable(stats)
                 
                 # Update all result tables
-                private$.updatePersonTimeTable(patient_data)
+                private$.updatePersonTimeTable(patient_data, stats)
                 private$.updateMilestoneTable(patient_data, milestone_data) 
                 private$.updateEventMarkerTable(patient_data, event_data)
                 private$.updateAdvancedMetrics(patient_data, stats)
@@ -1322,29 +1477,33 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
         
         # Person-time analysis table population
-        .updatePersonTimeTable = function(patient_data) {
+        .updatePersonTimeTable = function(patient_data, stats) {
             if (!self$options$personTimeAnalysis) return()
-            if (!"response" %in% names(patient_data)) return()
 
-            # Clear existing rows
+            patient_summary <- stats$patient_summary
+            if (is.null(patient_summary)) {
+                patient_summary <- private$.summarizeByPatient(patient_data)
+            }
+
+            if (!"response" %in% names(patient_summary)) return()
+
+            patient_summary <- patient_summary[!is.na(patient_summary$response), , drop = FALSE]
+            if (nrow(patient_summary) == 0) return()
+
             self$results$personTimeTable$deleteRows()
 
-            # Calculate person-time metrics by response type
-            durations <- private$.getDurations(patient_data)
-
-            person_time_data <- patient_data %>%
+            person_time_data <- patient_summary %>%
                 dplyr::group_by(response) %>%
                 dplyr::summarise(
                     n_patients = dplyr::n(),
-                    total_time = sum(durations, na.rm = TRUE),
-                    mean_time = mean(durations, na.rm = TRUE),
+                    total_time = sum(person_time, na.rm = TRUE),
+                    mean_time = mean(person_time, na.rm = TRUE),
                     .groups = "drop"
                 ) %>%
                 dplyr::mutate(
-                    incidence_rate = ifelse(total_time > 0, n_patients / total_time * 100, 0)
+                    incidence_rate = ifelse(total_time > 0, n_patients / total_time * 100, NA_real_)
                 )
-            
-            # Populate the table
+
             for (i in seq_len(nrow(person_time_data))) {
                 self$results$personTimeTable$addRow(rowKey = i, values = list(
                     response_type = as.character(person_time_data$response[i]),
@@ -1454,8 +1613,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Clear existing rows
             self$results$advancedMetrics$deleteRows()
 
-            durations <- private$.getDurations(patient_data)
-            
+            patient_summary <- stats$patient_summary
+            if (is.null(patient_summary)) {
+                patient_summary <- private$.summarizeByPatient(patient_data)
+            }
+
+            n_patients_summary <- nrow(patient_summary)
+
             # Calculate advanced clinical metrics
             metrics <- list(
                 list(
@@ -1478,34 +1642,42 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 ),
                 list(
                     name = .("Person-Time Incidence Rate"),
-                    value = if (isTRUE(stats$total_person_time > 0)) round(length(durations) / stats$total_person_time * 100, 3) else NA_real_,
+                    value = if (isTRUE(stats$total_person_time > 0)) round(n_patients_summary / stats$total_person_time * 100, 3) else NA_real_,
                     unit = paste0("per 100 ", self$options$timeUnit),
                     interpretation = .("Rate of patient inclusion per time unit")
                 )
             )
             
             # Add response-specific metrics if available
-            if ("response" %in% names(patient_data)) {
-                response_rates <- table(patient_data$response)
-                orr <- sum(response_rates[names(response_rates) %in% c("CR", "PR")]) / sum(response_rates) * 100
-                dcr <- sum(response_rates[names(response_rates) %in% c("CR", "PR", "SD")]) / sum(response_rates) * 100
-                
-                metrics <- append(metrics, list(
-                    list(
-                        name = .("Objective Response Rate (ORR)"),
-                        value = round(orr, 1),
-                        unit = "percent",
-                        interpretation = .("Proportion with complete or partial response")
-                    ),
-                    list(
-                        name = .("Disease Control Rate (DCR)"),
-                        value = round(dcr, 1),
-                        unit = "percent",
-                        interpretation = .("Proportion with response or stable disease")
-                    )
-                ))
+            if (!is.null(stats$response_counts)) {
+                response_counts <- stats$response_counts
+                total_responses <- sum(response_counts)
+
+                if (total_responses > 0) {
+                    response_names <- tolower(names(response_counts))
+                    orr_count <- sum(response_counts[response_names %in% c("cr", "pr")])
+                    dcr_count <- sum(response_counts[response_names %in% c("cr", "pr", "sd")])
+
+                    orr <- if (total_responses > 0) orr_count / total_responses * 100 else NA_real_
+                    dcr <- if (total_responses > 0) dcr_count / total_responses * 100 else NA_real_
+
+                    metrics <- append(metrics, list(
+                        list(
+                            name = .("Objective Response Rate (ORR)"),
+                            value = if (!is.na(orr)) round(orr, 1) else NA_real_,
+                            unit = "percent",
+                            interpretation = .("Proportion with complete or partial response")
+                        ),
+                        list(
+                            name = .("Disease Control Rate (DCR)"),
+                            value = if (!is.na(dcr)) round(dcr, 1) else NA_real_,
+                            unit = "percent",
+                            interpretation = .("Proportion with response or stable disease")
+                        )
+                    ))
+                }
             }
-            
+
             # Populate the table
             for (i in seq_along(metrics)) {
                 metric <- metrics[[i]]
@@ -1733,6 +1905,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 p <- p + ggswim::geom_swim_arrow(
                     data = arrow_data,
                     mapping = ggplot2::aes(
+                        x = x,
                         xend = xend,
                         y = patient_id
                     ),
@@ -1799,16 +1972,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
             } else if (opts$referenceLines == "protocol") {
                 if (!is_date_scale) {
-                    protocol_times <- c(6, 12, 24, 36)
-                    max_time <- max(stats$max_duration, na.rm = TRUE)
-                    protocol_times <- protocol_times[protocol_times <= max_time * 1.1]
-                    for (t in protocol_times) {
-                        p <- p + ggplot2::geom_vline(
-                            xintercept = t,
-                            linetype = "dotted",
-                            color = "darkgray",
-                            alpha = 0.5
-                        )
+                    protocol_times <- private$.getProtocolReferenceTimes(stats$max_duration, opts$timeUnit)
+                    if (length(protocol_times) > 0) {
+                        for (t in protocol_times) {
+                            p <- p + ggplot2::geom_vline(
+                                xintercept = t,
+                                linetype = "dotted",
+                                color = "darkgray",
+                                alpha = 0.5
+                            )
+                        }
                     }
                 }
             } else if (opts$referenceLines == "custom") {

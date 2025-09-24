@@ -1,7 +1,7 @@
 ---
 name: classicalSurvivalPower
 title: "Classical Survival Power Analysis (Intermediate)"
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: Design and Power Analysis
 menuSubtitle: "Traditional methods - Lachin-Foulkes & Schoenfeld"
 version: '0.0.3'

@@ -5,8 +5,6 @@
 \title{Swimmer Plot}
 \usage{
 swimmerplot(
-  clinicalPreset = "none",
-  guidedMode = FALSE,
   data,
   patientID,
   startTime,
@@ -42,18 +40,14 @@ swimmerplot(
   showInterpretation = TRUE,
   personTimeAnalysis = TRUE,
   responseAnalysis = TRUE,
+  showGlossary = FALSE,
+  showCopyReady = FALSE,
+  showAbout = FALSE,
   exportTimeline = FALSE,
   exportSummary = FALSE
 )
 }
 \arguments{
-\item{clinicalPreset}{Pre-configured analysis templates for common clinical
-scenarios.  Selecting a preset automatically configures appropriate options
-for typical research use cases.}
-
-\item{guidedMode}{Enable step-by-step guidance through the analysis process
-with contextual help and recommendations.}
-
 \item{data}{The data as a data frame containing patient timeline
 information.}
 
@@ -140,6 +134,15 @@ metrics in the analysis.}
 \item{responseAnalysis}{Whether to analyze response patterns when response
 variable is provided.}
 
+\item{showGlossary}{Display a glossary of clinical terms and statistical
+concepts used in the analysis.}
+
+\item{showCopyReady}{Generate copy-ready text suitable for manuscripts and
+clinical reports.}
+
+\item{showAbout}{Display information about when and how to use swimmer plot
+analysis.}
+
 \item{exportTimeline}{Export processed timeline data for external analysis.}
 
 \item{exportSummary}{Export comprehensive summary statistics and clinical
@@ -160,6 +163,9 @@ A results object containing:
 \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr
+\code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -5,6 +5,7 @@
 JavaScript in jamovi modules provides dynamic UI interactions, intelligent defaults, and real-time validation. This guide covers when to use JavaScript, how to implement event handlers, and best practices based on successful implementations in the ClinicoPath module.
 
 ## Table of Contents
+
 1. [When to Use JavaScript](#when-to-use-javascript)
 2. [File Structure and Naming](#file-structure-and-naming)
 3. [Event System Architecture](#event-system-architecture)
@@ -18,26 +19,31 @@ JavaScript in jamovi modules provides dynamic UI interactions, intelligent defau
 JavaScript is essential for:
 
 ### 1. **Dynamic UI Updates**
+
 - Changing UI element values based on user selections
 - Enabling/disabling options conditionally
 - Updating dependent controls
 
 ### 2. **Preset Systems**
+
 - Clinical presets that configure multiple parameters
 - Study design templates
 - Analysis workflows
 
 ### 3. **Input Validation**
+
 - Range checking with automatic correction
 - Format validation
 - Consistency checks between related inputs
 
 ### 4. **Intelligent Defaults**
+
 - Context-aware parameter suggestions
 - Adaptive thresholds based on study type
 - Performance optimization hints
 
 ### 5. **User Guidance**
+
 - Real-time feedback on parameter choices
 - Warning messages for invalid combinations
 - Clinical interpretation helpers
@@ -45,6 +51,7 @@ JavaScript is essential for:
 ## File Structure and Naming
 
 ### Standard Convention
+
 ```
 jamovi/
 ├── js/                            # MUST be in this exact location
@@ -54,11 +61,13 @@ jamovi/
 ```
 
 ### Important Requirements
+
 - **Location**: JavaScript files MUST be placed in the `jamovi/js/` folder
 - **No manifest registration**: Unlike other jamovi files, JS files are NOT listed in 0000.yaml
 - **Direct reference**: Files are referenced directly from .u.yaml files
 
 ### Naming Patterns
+
 - **Complex analyses**: `{analysisname}.events.js`
 - **Simple handlers**: `{analysisname}.js`
 - Use `.events.js` suffix for analyses with multiple event handlers
@@ -471,12 +480,14 @@ onChange_presetDV: function(ui) {
 ## UI Object Reference
 
 ### Getting Values
+
 ```javascript
 // Get current value of UI element
 let value = ui.element_name.value();
 ```
 
 ### Setting Values
+
 ```javascript
 // Set value of UI element
 ui.element_name.setValue(newValue);
@@ -503,6 +514,7 @@ ui.combo_box.setValue("option_key");
 ## Best Practices
 
 ### 1. Error Handling
+
 Always wrap UI updates in try-catch for optional elements:
 
 ```javascript
@@ -514,6 +526,7 @@ try {
 ```
 
 ### 2. Avoid Recursive Calls
+
 Prevent infinite loops by checking if value actually changed:
 
 ```javascript
@@ -528,6 +541,7 @@ onChange_element: function(ui) {
 ```
 
 ### 3. Helper Functions
+
 Extract common logic to helper functions:
 
 ```javascript
@@ -548,6 +562,7 @@ const events = {
 ```
 
 ### 4. Complex Data Factories
+
 Create factory functions for generating complex configuration objects:
 
 ```javascript
@@ -601,6 +616,7 @@ let makeVar = function(name) {
 ```
 
 ### 5. Range Update Systems
+
 Create systematic range update functions for exploration:
 
 ```javascript
@@ -621,11 +637,13 @@ let updateRange = function(value) {
 ```
 
 ### 4. Consistent Naming
+
 - Use camelCase for JavaScript functions
 - Prefix event handlers with `onChange_`
 - Match option names from .yaml files
 
 ### 5. User Feedback
+
 Provide clear feedback for user actions:
 
 ```javascript
@@ -649,6 +667,7 @@ onChange_parameter: function(ui) {
 ```
 
 ### 6. Clinical Context
+
 For medical/clinical modules, provide interpretation:
 
 ```javascript
@@ -671,6 +690,7 @@ onChange_costRatio: function(ui) {
 ```
 
 ### 7. Advanced Demo State Management
+
 For complex demo systems with state tracking:
 
 ```javascript
@@ -711,6 +731,7 @@ let demo1SetUp = function(ui, show) {
 ```
 
 ### 8. Multi-Level Cascading Updates
+
 For hierarchical option dependencies:
 
 ```javascript
@@ -738,11 +759,13 @@ onChange_metaDefaultNullp: function(ui) {
 ## Debugging and Testing
 
 ### Developer Console Access
+
 - **Windows/Linux**: Press F10 in jamovi to open developer console
 - **Mac**: Use Cmd+Option+I or enable Developer menu in jamovi preferences
 - Check console for JavaScript errors and log messages
 
 ### 1. Console Logging
+
 Use console statements during development:
 
 ```javascript
@@ -757,6 +780,7 @@ onChange_option: function(ui) {
 ```
 
 ### 2. Validation Testing
+
 Test edge cases:
 
 ```javascript
@@ -780,6 +804,7 @@ onChange_numeric: function(ui) {
 ```
 
 ### 3. Event Chaining
+
 Track event cascades:
 
 ```javascript
@@ -806,7 +831,7 @@ onChange_primary: function(ui) {
    - Engine-specific color adaptation
    - Validation without recursive calls
 
-3. **simpleSurvivalPower.events.js**: Clinical trial presets
+3. **survivalPower.events.js**: Clinical trial presets
    - Phase-specific configurations
    - Comprehensive parameter updates
    - Context-aware defaults
@@ -832,8 +857,10 @@ onChange_primary: function(ui) {
 ### Known Issues and Solutions
 
 #### JavaScript Not Loading
+
 **Symptoms**: Events not firing, no console errors
 **Solutions**:
+
 1. Verify file is in `jamovi/js/` folder
 2. Check .u.yaml references are correct (path and function name)
 3. Test with a portable jamovi installation
@@ -841,19 +868,25 @@ onChange_primary: function(ui) {
 5. Check for syntax errors using external JS validator
 
 #### Intermittent Loading (Desktop Version)
+
 **Issue**: JS handlers may not load consistently in custom modules on Windows
 **Workaround**:
+
 1. Use portable jamovi version for development
 2. Test on multiple systems
 3. Consider implementing fallback R-based event handling
 
 #### Event Reference Syntax
+
 **Correct**:
+
 ```yaml
 events:
   change: ./filename::functionName    # Note: no .js extension
 ```
+
 **Incorrect**:
+
 ```yaml
 events:
   change: ./filename.js::functionName  # Don't include .js

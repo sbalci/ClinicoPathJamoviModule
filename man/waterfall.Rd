@@ -12,7 +12,6 @@ waterfall(
   groupVar = NULL,
   inputType = "percentage",
   sortBy = "response",
-  clinicalPreset = "custom",
   showThresholds = TRUE,
   labelOutliers = FALSE,
   showMedian = FALSE,
@@ -59,9 +58,6 @@ RECIST category coloring to show group-based colors.}
 changes from baseline}
 
 \item{sortBy}{Sort the waterfall plot by best response or patient ID.}
-
-\item{clinicalPreset}{Choose a clinical study preset to automatically
-configure appropriate settings}
 
 \item{showThresholds}{Show +20\\% and -30\\% RECIST v1.1 thresholds as dashed
 lines. Helps identify Progressive Disease (PD) and Partial Response (PR)

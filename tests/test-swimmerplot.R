@@ -1,26 +1,13 @@
+
 library(testthat)
+library(ClinicoPathJamoviModule)
 
-if (requireNamespace("devtools", quietly = TRUE)) {
-    devtools::load_all()
-} else {
-    library(ClinicoPathJamoviModule)
-}
-
-# Load data using here::here() to construct the path
-if (requireNamespace("here", quietly = TRUE)) {
-    load(here::here("data", "swimmer_unified_basic.rda"))
-    load(here::here("data", "swimmer_unified_comprehensive.rda"))
-    load(here::here("data", "swimmer_unified_datetime.rda"))
-    load(here::here("data", "swimmer_unified_events.rda"))
-    load(here::here("data", "swimmer_unified_oncology.rda"))
-} else {
-    # Fallback for when here is not installed
-    load("data/swimmer_unified_basic.rda")
-    load("data/swimmer_unified_comprehensive.rda")
-    load("data/swimmer_unified_datetime.rda")
-    load("data/swimmer_unified_events.rda")
-    load("data/swimmer_unified_oncology.rda")
-}
+# Load the data required for the tests
+data("swimmer_unified_basic", package = "ClinicoPathJamoviModule")
+data("swimmer_unified_comprehensive", package = "ClinicoPathJamoviModule")
+data("swimmer_unified_datetime", package = "ClinicoPathJamoviModule")
+data("swimmer_unified_events", package = "ClinicoPathJamoviModule")
+data("swimmer_unified_oncology", package = "ClinicoPathJamoviModule")
 
 
 test_that("swimmerplot runs with minimal options", {
@@ -135,14 +122,13 @@ test_that("swimmerplot handles export options", {
         patientID = "PatientID",
         startTime = "StartTime",
         endTime = "EndTime",
-        responseVar = "BestResponse",
         exportTimeline = TRUE,
         exportSummary = TRUE
     )
     
     # Check if the exported data is available
-    timeline_df <- results$timelineData$state
-    summary_df <- results$summaryData$state
+    timeline_df <- results$timelineData$asDF
+    summary_df <- results$summaryData$asDF
     
     expect_true(is.data.frame(timeline_df))
     expect_true(is.data.frame(summary_df))
@@ -174,3 +160,4 @@ test_that("swimmerplot handles invalid data gracefully", {
     expect_true(!is.null(results))
     
 })
+
