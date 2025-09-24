@@ -123,7 +123,9 @@ children:
               - type: ComboBox
                 name: timeUnitLabel
               - type: Label
-                label: "Note: This only changes the x-axis label; data values are not rescaled."
+                label: >-
+                  Note: This only changes the x-axis label; data values are not
+                  rescaled.
   - type: CollapseBox
     label: Clinical Reporting Options
     collapsed: true
@@ -137,8 +139,3 @@ children:
             name: showClinicalSignificance
           - type: CheckBox
             name: showConfidenceIntervals
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: clinicalPreset

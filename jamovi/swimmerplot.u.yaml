@@ -4,49 +4,222 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  # === QUICK SETUP & PRESETS ===
+  # DISABLED: Clinical presets only affect text interpretation, not calculations
+  # Will be re-enabled after enhanced implementation
+  # - type: CollapseBox
+  #   label: "🚀 Quick Setup & Clinical Presets"
+  #   collapsed: false
+  #   children:
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: ComboBox
+  #           name: clinicalPreset
+  #         - type: CheckBox
+  #           name: guidedMode
+
+  # === CORE DATA VARIABLES ===
   - type: CollapseBox
-    label: Clinical Presets & Quick Setup
+    label: "📊 Core Data Variables"
     collapsed: false
     children:
-      - type: LayoutBox
-        margin: large
+      - type: VariableSupplier
+        persistentItems: true
+        stretchFactor: 1
         children:
-          - type: ComboBox
-            name: clinicalPreset
-            label: Clinical Analysis Preset
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: guidedMode
-            label: Use Guided Analysis Mode
-  - type: VariableSupplier
-    persistentItems: true
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Patient ID (Required)
-        children:
-          - type: VariablesListBox
-            name: patientID
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Sort By (optional)
-        children:
-          - type: VariablesListBox
-            name: sortVariable
-            maxItemCount: 1
-            isTarget: true
+          - type: TargetLayoutBox
+            label: "Patient ID (Required)"
+            children:
+              - type: VariablesListBox
+                name: patientID
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Start Time (Required)"
+            children:
+              - type: VariablesListBox
+                name: startTime
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "End Time (Required)"
+            children:
+              - type: VariablesListBox
+                name: endTime
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Response/Status Variable (Optional)"
+            children:
+              - type: VariablesListBox
+                name: responseVar
+                maxItemCount: 1
+                isTarget: true
+
+  # === TIME & DATE SETTINGS ===
   - type: CollapseBox
-    label: Time Settings
-    collapsed: false
+    label: "⏰ Time & Date Settings"
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Display Options
+            label: "Time Input Configuration"
+            children:
+              - type: ComboBox
+                name: timeType
+              - type: ComboBox
+                name: dateFormat
+                enable: (timeType:datetime)
+              - type: ComboBox
+                name: timeUnit
+              - type: ComboBox
+                name: timeDisplay
+
+  # === MILESTONES ===
+  - type: CollapseBox
+    label: "🎯 Clinical Milestones"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: maxMilestones
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "<b>Milestone Names</b>"
+            format: html
+            children:
+              - type: TextBox
+                name: milestone1Name
+                format: string
+                width: largest
+              - type: TextBox
+                name: milestone2Name
+                format: string
+                width: largest
+              - type: TextBox
+                name: milestone3Name
+                format: string
+                width: largest
+              - type: TextBox
+                name: milestone4Name
+                format: string
+                width: largest
+              - type: TextBox
+                name: milestone5Name
+                format: string
+                width: largest
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "<b>Milestone Times/Dates</b>"
+            format: html
+            fitToGrid: true
+            stretchFactor: 1
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        fitToGrid: true
+        children:
+          - type: TargetLayoutBox
+            label: "Milestone 1 Date"
+            children:
+              - type: VariablesListBox
+                name: milestone1Date
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Milestone 2 Date"
+            children:
+              - type: VariablesListBox
+                name: milestone2Date
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Milestone 3 Date"
+            children:
+              - type: VariablesListBox
+                name: milestone3Date
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Milestone 4 Date"
+            children:
+              - type: VariablesListBox
+                name: milestone4Date
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Milestone 5 Date"
+            children:
+              - type: VariablesListBox
+                name: milestone5Date
+                maxItemCount: 1
+                isTarget: true
+
+  # === EVENT MARKERS ===
+  - type: CollapseBox
+    label: "🔵 Event Markers"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showEventMarkers
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: "Event Type Variable"
+            children:
+              - type: VariablesListBox
+                name: eventVar
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Event Time Variable"
+            children:
+              - type: VariablesListBox
+                name: eventTimeVar
+                maxItemCount: 1
+                isTarget: true
+
+  # === VISUALIZATION OPTIONS ===
+  - type: CollapseBox
+    label: "🎨 Visualization Options"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Plot Appearance"
+            children:
+              - type: ComboBox
+                name: plotTheme
+              - type: CheckBox
+                name: showLegend
+              - type: TextBox
+                name: laneWidth
+                format: number
+              - type: TextBox
+                name: markerSize
+                format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Reference Lines"
             children:
               - type: ComboBox
                 name: referenceLines
@@ -58,208 +231,65 @@ children:
                 name: customReferenceDate
                 format: string
                 enable: (referenceLines:custom && timeType:datetime && timeDisplay:absolute)
+
+  # === SORTING & DISPLAY ===
+  - type: CollapseBox
+    label: "📋 Sorting & Display Options"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: sortOrder
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: "Sort By Variable (Optional)"
+            children:
+              - type: VariablesListBox
+                name: sortVariable
+                maxItemCount: 1
+                isTarget: true
+
+  # === ANALYSIS OPTIONS ===
+  - type: CollapseBox
+    label: "📈 Analysis & Interpretation"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showInterpretation
+          - type: CheckBox
+            name: personTimeAnalysis
+          - type: CheckBox
+            name: responseAnalysis
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: ggswim Integration
-            children: []
-  - type: LayoutBox
-    margin: large
+            label: "Clinical Guidance & Documentation"
+            children:
+              - type: CheckBox
+                name: showGlossary
+              - type: CheckBox
+                name: showCopyReady
+              - type: CheckBox
+                name: showAbout
+
+  # === EXPORT OPTIONS ===
+  - type: CollapseBox
+    label: "💾 Export Options"
+    collapsed: true
     children:
-      - type: ComboBox
-        name: sortOrder
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Start Time (Required)
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: startTime
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: End Time (Required)
-        children:
-          - type: VariablesListBox
-            name: endTime
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Response/Status Variable (Optional)
-        children:
-          - type: VariablesListBox
-            name: responseVar
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showInterpretation
-      - type: CheckBox
-        name: personTimeAnalysis
-      - type: CheckBox
-        name: responseAnalysis
-      - type: CheckBox
-        name: exportTimeline
-      - type: CheckBox
-        name: exportSummary
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: markerSize
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: timeType
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: plotTheme
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: dateFormat
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showLegend
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: timeUnit
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: timeDisplay
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: maxMilestones
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: milestone1Name
-        format: string
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Milestone 1 Date
-        children:
-          - type: VariablesListBox
-            name: milestone1Date
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: milestone2Name
-        format: string
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Milestone 2 Date
-        children:
-          - type: VariablesListBox
-            name: milestone2Date
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: milestone3Name
-        format: string
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Milestone 3 Date
-        children:
-          - type: VariablesListBox
-            name: milestone3Date
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: milestone4Name
-        format: string
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Milestone 4 Date
-        children:
-          - type: VariablesListBox
-            name: milestone4Date
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: milestone5Name
-        format: string
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Milestone 5 Date
-        children:
-          - type: VariablesListBox
-            name: milestone5Date
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showEventMarkers
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Event Type Variable
-        children:
-          - type: VariablesListBox
-            name: eventVar
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Event Time Variable
-        children:
-          - type: VariablesListBox
-            name: eventTimeVar
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: laneWidth
-        format: number
+          - type: CheckBox
+            name: exportTimeline
+          - type: CheckBox
+            name: exportSummary

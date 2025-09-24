@@ -124,7 +124,7 @@ options:
     - name: enableGuidedMode
       title: '🧭 Guided Analysis Mode'
       type: Bool
-      default: true
+      default: false
       description: >-
         Enable step-by-step guidance for clinical users. Provides contextual help, 
         assumption checking, and clinical interpretation assistance throughout the analysis.
@@ -133,7 +133,7 @@ options:
     - name: generateCopyReadyReport
       title: '📄 Generate Copy-Ready Clinical Summary'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate plain-language clinical summary paragraphs that can be copied directly 
         into reports or manuscripts. Includes key findings, statistical significance, 
@@ -165,7 +165,7 @@ options:
     - name: enableProgressIndicators
       title: '⏱️ Show Progress Indicators'
       type: Bool
-      default: true
+      default: false
       description: >-
         Show progress bars and status updates for long-running analyses such as 
         bootstrap validation and cross-validation. Helps users track analysis progress.
@@ -364,7 +364,7 @@ options:
     - name: calculatePseudoR2
       title: 'Pseudo R-squared Measures'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate multiple pseudo R-squared measures for model comparison
         (Nagelkerke, McFadden, Cox-Snell).
@@ -373,7 +373,7 @@ options:
     - name: showMigrationOverview
       title: 'Migration Overview Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display overview table showing the fundamental migration statistics including:
         total number of patients, number and percentage of patients who migrated stages,
@@ -384,7 +384,7 @@ options:
     - name: showMigrationSummary
       title: 'Migration Summary Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display statistical summary of migration patterns including overall migration
         rate and formal statistical tests. Shows Chi-square test results for
@@ -395,7 +395,7 @@ options:
     - name: showStageDistribution
       title: 'Stage Distribution Comparison Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display side-by-side comparison of how patients are distributed across stages
         in both the original and new staging systems. Shows the count and percentage
@@ -406,7 +406,7 @@ options:
     - name: showMigrationMatrix
       title: 'Migration Matrix Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display detailed cross-tabulation matrix showing exactly how patients moved
         between stages. Rows represent the original staging system and columns represent
@@ -418,14 +418,14 @@ options:
     - name: showStatisticalComparison
       title: 'Statistical Comparison Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display table with C-index comparisons and other statistical metrics.
 
     - name: showConcordanceComparison
       title: 'Concordance Comparison Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display detailed concordance comparison between staging systems.
 
@@ -753,7 +753,7 @@ options:
     - name: showExplanations
       title: 'Explanations for Results'
       type: Bool
-      default: true
+      default: false
       description: >-
         Include detailed explanations for results.
 
@@ -1007,7 +1007,7 @@ options:
     - name: generateSHAPPlots
       title: 'Generate SHAP Plots'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate SHAP visualization plots including summary plots, bar plots, 
         and dependence plots for model interpretability.
@@ -1105,7 +1105,7 @@ options:
     - name: generateCIFPlots
       title: 'Generate CIF Plots'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate Cumulative Incidence Function plots showing probability of 
         each event type over time. Essential for visualizing competing risks 
@@ -1114,7 +1114,7 @@ options:
     - name: performGrayTest
       title: 'Gray Test for CIF Equality'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform Gray's test for equality of cumulative incidence functions 
         across staging groups. Tests whether CIF curves differ significantly 
@@ -1143,7 +1143,7 @@ options:
     - name: stratifyByStaging
       title: 'Stratify Analysis by Staging System'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform separate competing risks analysis for each staging system 
         (original vs new) to compare their performance in the presence of 
@@ -1152,7 +1152,7 @@ options:
     - name: calculateCRCIndex
       title: 'Competing Risks C-Index'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate C-index specifically adapted for competing risks analysis. 
         Provides discrimination metrics that properly account for competing 
@@ -1161,7 +1161,7 @@ options:
     - name: generateCRSummary
       title: 'Competing Risks Summary Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate comprehensive summary table with Fine-Gray regression results, 
         cumulative incidence estimates, and staging system comparisons in 
@@ -1254,7 +1254,7 @@ options:
     - name: calculateTransitionProbabilities
       title: 'Calculate Transition Probabilities'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate state transition probabilities between all possible state 
         pairs. Provides insight into likelihood of disease progression, 
@@ -1272,7 +1272,7 @@ options:
     - name: generateTransitionMatrix
       title: 'Generate Transition Matrix'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate comprehensive transition intensity matrix showing hazard 
         rates for all possible state transitions. Essential for understanding 
@@ -1281,7 +1281,7 @@ options:
     - name: multiStateGraphics
       title: 'Multi-State Visualizations'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate multi-state model visualizations including state transition 
         diagrams, probability plots, and Aalen-Johansen estimator curves for 
@@ -1290,7 +1290,7 @@ options:
     - name: msStratifyByStaging
       title: 'Stratify by Staging System'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform separate multi-state analysis for each staging system to 
         compare their ability to predict disease transitions and progression 
@@ -1308,7 +1308,7 @@ options:
     - name: generateMSMSummary
       title: 'Multi-State Summary Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate comprehensive summary table with transition intensities, 
         hazard ratios, and state occupancy probabilities comparing staging 
@@ -1388,7 +1388,7 @@ options:
     - name: calculateVariableImportance
       title: 'Calculate Variable Importance'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate variable importance measures using permutation-based methods. 
         Shows which variables contribute most to survival predictions, 
@@ -1433,7 +1433,7 @@ options:
     - name: generateSurvivalPredictions
       title: 'Generate Survival Predictions'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate individual patient survival probability predictions at 
         specified time points. Provides personalized risk assessments 
@@ -1442,7 +1442,7 @@ options:
     - name: forestDiscriminationMetrics
       title: 'Forest Discrimination Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate discrimination metrics specifically for random forest models 
         including C-index, Integrated Brier Score, and time-dependent AUC. 
@@ -1451,7 +1451,7 @@ options:
     - name: forestStagingComparison
       title: 'Forest-Based Staging Comparison'
       type: Bool
-      default: true
+      default: false
       description: >-
         Use random forest models to compare staging systems through 
         non-parametric ensemble methods. Provides robust staging comparison 
@@ -1479,7 +1479,7 @@ options:
     - name: generateForestSummary
       title: 'Forest Analysis Summary'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate comprehensive summary of random forest analysis including 
         model performance, variable importance, staging comparison, and 
@@ -1535,7 +1535,7 @@ options:
     - name: cureAnalyzeOldStage
       title: 'Analyze Original Staging'
       type: Bool
-      default: true
+      default: false
       description: >-
         Fit cure models to original staging system to estimate cure fractions 
         and survival patterns for susceptible patients in each stage.
@@ -1543,7 +1543,7 @@ options:
     - name: cureAnalyzeNewStage
       title: 'Analyze New Staging'
       type: Bool
-      default: true
+      default: false
       description: >-
         Fit cure models to new staging system to estimate cure fractions and 
         survival patterns, enabling comparison of staging discrimination for 
@@ -1579,7 +1579,7 @@ options:
     - name: cureBootstrapCI
       title: 'Bootstrap Confidence Intervals'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate bootstrap confidence intervals for cure fractions and model 
         parameters. Provides robust uncertainty quantification especially for 
@@ -1631,7 +1631,7 @@ options:
     - name: cureModelComparison
       title: 'Model Comparison Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Compare cure models between staging systems using likelihood ratio tests, 
         AIC/BIC criteria, and cure fraction differences. Assesses which staging 
@@ -1640,7 +1640,7 @@ options:
     - name: cureStageSpecificAnalysis
       title: 'Stage-Specific Cure Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform separate cure model analysis for each stage group to understand 
         stage-specific cure patterns and survival of susceptible patients. 
@@ -1649,7 +1649,7 @@ options:
     - name: cureGoodnessOfFit
       title: 'Goodness-of-Fit Testing'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform goodness-of-fit tests for cure models including Kolmogorov-Smirnov 
         tests and visual diagnostic plots. Validates model assumptions and 
@@ -1658,7 +1658,7 @@ options:
     - name: generateCureSummary
       title: 'Cure Model Summary'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate comprehensive summary of cure model analysis including cure 
         fractions by stage, model comparison results, and clinical interpretation 
@@ -1742,7 +1742,7 @@ options:
     - name: intervalCensoringBootstrap
       title: 'Bootstrap Confidence Intervals'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Calculate bootstrap confidence intervals for non-parametric estimates.
@@ -1763,7 +1763,7 @@ options:
     - name: intervalCensoringCompareStages
       title: 'Compare Staging Systems'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Compare survival functions between different staging systems
@@ -1773,7 +1773,7 @@ options:
     - name: intervalCensoringPlots
       title: 'Generate Survival Plots'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Generate survival plots specifically designed for interval-censored data,
@@ -1783,7 +1783,7 @@ options:
     - name: intervalCensoringDiagnostics
       title: 'Model Diagnostics'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Perform model diagnostics including convergence assessment,
@@ -1938,7 +1938,7 @@ options:
     - name: informativeCensoringBootstrap
       title: 'Bootstrap Confidence Intervals'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Calculate bootstrap confidence intervals for adjusted survival
@@ -1972,7 +1972,7 @@ options:
     - name: informativeCensoringPlots
       title: 'Generate Diagnostic Plots'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Generate diagnostic plots for informative censoring assessment
@@ -1982,7 +1982,7 @@ options:
     - name: informativeCensoringCompareStages
       title: 'Compare Censoring Across Stages'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Compare censoring patterns across different staging groups to
@@ -2061,7 +2061,7 @@ options:
     - name: concordanceProbabilityBootstrap
       title: 'Bootstrap Confidence Intervals'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Calculate bootstrap confidence intervals for concordance probability
@@ -2096,7 +2096,7 @@ options:
     - name: concordanceProbabilityCompareStages
       title: 'Compare Staging Systems'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Compare concordance probabilities between different staging systems
@@ -2124,7 +2124,7 @@ options:
     - name: concordanceProbabilityRobustnessAnalysis
       title: 'Robustness Analysis'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Perform robustness analysis for concordance probability estimates
@@ -2148,7 +2148,7 @@ options:
     - name: concordanceProbabilityDiagnostics
       title: 'Diagnostic Assessment'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Perform diagnostic assessment of concordance probability estimates
@@ -2325,7 +2325,7 @@ options:
     - name: winRatioSensitivityAnalysis
       title: 'Sensitivity Analysis'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Perform sensitivity analysis for win ratio including assessment of
@@ -2385,7 +2385,7 @@ options:
     - name: frailtyBootstrap
       title: 'Bootstrap Validation'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Perform bootstrap validation for frailty model parameters and 
@@ -2407,7 +2407,7 @@ options:
     - name: frailtyVarianceComponents
       title: 'Variance Components Analysis'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Analyze variance components to quantify the proportion of 
@@ -2417,7 +2417,7 @@ options:
     - name: frailtyHeterogeneityTest
       title: 'Heterogeneity Testing'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Test for significant frailty/heterogeneity using likelihood 
@@ -2437,7 +2437,7 @@ options:
     - name: frailtyModelSelection
       title: 'Model Selection'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Perform systematic model selection comparing different frailty 
@@ -2457,7 +2457,7 @@ options:
     - name: frailtyDiagnostics
       title: 'Model Diagnostics'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Comprehensive model diagnostics including residual analysis, 
@@ -2531,7 +2531,7 @@ options:
     - name: clinicalUtilityNNT
       title: 'Number Needed to Treat Analysis'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Calculate Number Needed to Treat (NNT) and Number Needed to Harm (NNH) 
@@ -2553,7 +2553,7 @@ options:
     - name: clinicalUtilityComparison
       title: 'Comparative Utility Assessment'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Compare clinical utility between staging systems using net benefit 
@@ -2585,7 +2585,7 @@ options:
     - name: clinicalUtilityBootstrap
       title: 'Bootstrap Validation'
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Perform bootstrap validation for clinical utility metrics including 

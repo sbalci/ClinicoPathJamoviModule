@@ -17,7 +17,8 @@ test_that("swimmerplot function exists and basic functionality works", {
       data = test_data,
       patientID = "patient_id",
       startTime = "start_time",
-      endTime = "end_time"
+      endTime = "end_time",
+      responseVar = NULL
     )
   })
 })
@@ -205,6 +206,7 @@ test_that("swimmerplot handles absolute datetime with custom reference", {
     patientID = "patient_id",
     startTime = "start_date",
     endTime = "end_date",
+    responseVar = NULL,
     timeType = "datetime",
     dateFormat = "ymd",
     timeUnit = "weeks",
@@ -260,6 +262,7 @@ test_that("swimmerplot handles reference lines correctly", {
     patientID = "patient_id",
     startTime = "start_time",
     endTime = "end_time",
+    responseVar = NULL,
     referenceLines = "median"
   )
   expect_s3_class(result1, "swimmerplotResults")
@@ -270,6 +273,7 @@ test_that("swimmerplot handles reference lines correctly", {
     patientID = "patient_id",
     startTime = "start_time",
     endTime = "end_time",
+    responseVar = NULL,
     referenceLines = "protocol"
   )
   expect_s3_class(result2, "swimmerplotResults")
@@ -280,6 +284,7 @@ test_that("swimmerplot handles reference lines correctly", {
     patientID = "patient_id",
     startTime = "start_time",
     endTime = "end_time",
+    responseVar = NULL,
     referenceLines = "custom",
     customReferenceTime = 10
   )
@@ -302,6 +307,7 @@ test_that("swimmerplot theme options work", {
     patientID = "patient_id",
     startTime = "start_time",
     endTime = "end_time",
+    responseVar = NULL,
     plotTheme = "ggswim"
   )
   expect_s3_class(result1, "swimmerplotResults")
@@ -312,6 +318,7 @@ test_that("swimmerplot theme options work", {
     patientID = "patient_id",
     startTime = "start_time",
     endTime = "end_time",
+    responseVar = NULL,
     plotTheme = "ggswim_dark"
   )
   expect_s3_class(result2, "swimmerplotResults")
@@ -322,6 +329,7 @@ test_that("swimmerplot theme options work", {
     patientID = "patient_id",
     startTime = "start_time",
     endTime = "end_time",
+    responseVar = NULL,
     plotTheme = "minimal"
   )
   expect_s3_class(result3, "swimmerplotResults")
@@ -360,7 +368,8 @@ test_that("swimmerplot handles data validation correctly", {
     test_data <- data.frame(patient_id = 1:3)
     swimmerplot(
       data = test_data,
-      patientID = "patient_id"
+      patientID = "patient_id",
+      responseVar = NULL
       # Missing startTime and endTime
     )
   })
@@ -376,7 +385,8 @@ test_that("swimmerplot handles data validation correctly", {
       data = test_data,
       patientID = "patient_id",
       startTime = "start_time",
-      endTime = "end_time"
+      endTime = "end_time",
+      responseVar = NULL
     )
   })
 })
@@ -397,7 +407,8 @@ test_that("swimmerplot handles edge cases", {
       data = test_data,
       patientID = "patient_id",
       startTime = "start_time",
-      endTime = "end_time"
+      endTime = "end_time",
+      responseVar = NULL
     )
   })
   
@@ -414,7 +425,8 @@ test_that("swimmerplot handles edge cases", {
       data = test_data2,
       patientID = "patient_id",
       startTime = "start_time",
-      endTime = "end_time"
+      endTime = "end_time",
+      responseVar = NULL
     )
   })
 })
@@ -466,7 +478,8 @@ test_that("swimmerplot handles missing milestone data gracefully", {
       milestone1Name = "Event1",
       milestone1Date = "milestone1",
       milestone2Name = "Event2",
-      milestone2Date = "milestone2"
+      milestone2Date = "milestone2",
+      responseVar = NULL
     )
   })
 })
@@ -529,6 +542,93 @@ test_that("swimmerplot enhanced clinical glyphs work correctly", {
   expect_s3_class(result, "swimmerplotResults")
   expect_true(result$eventMarkerTable$visible)
   expect_true(result$plot$visible)
+})
+
+test_that("swimmerplot absolute datetime summaries produce numeric durations", {
+  skip_if_not_installed("ggswim")
+  skip_if_not_installed("lubridate")
+
+  start_dates <- as.Date("2023-01-01") + c(0, 4, 9, 15)
+  test_data <- data.frame(
+    patient_id = paste0("AP", 1:4),
+    start_date = start_dates,
+    end_date = start_dates + c(120, 95, 140, 110),
+    response = c("CR", "PR", "SD", "CR"),
+    surgery_date = start_dates + c(28, 35, 32, 30),
+    progression_date = start_dates + c(85, 70, 95, 88),
+    event_type = c("baseline scan", "assessment", "adverse event", "follow-up"),
+    event_date = start_dates + c(40, 55, 60, 58),
+    stringsAsFactors = FALSE
+  )
+
+  result <- swimmerplot(
+    data = test_data,
+    patientID = "patient_id",
+    startTime = "start_date",
+    endTime = "end_date",
+    responseVar = "response",
+    timeType = "datetime",
+    dateFormat = "ymd",
+    timeUnit = "days",
+    timeDisplay = "absolute",
+    milestone1Name = "Surgery",
+    milestone1Date = "surgery_date",
+    milestone2Name = "Progression",
+    milestone2Date = "progression_date",
+    showEventMarkers = TRUE,
+    eventVar = "event_type",
+    eventTimeVar = "event_date",
+    personTimeAnalysis = TRUE
+  )
+
+  expect_s3_class(result, "swimmerplotResults")
+  expect_true(result$milestoneTable$visible)
+  expect_true(result$eventMarkerTable$visible)
+  expect_true(result$personTimeTable$visible)
+
+  milestone_df <- result$milestoneTable$asDF
+  expect_gt(nrow(milestone_df), 0)
+  expect_false(any(is.na(milestone_df$median_time)))
+
+  event_df <- result$eventMarkerTable$asDF
+  expect_gt(nrow(event_df), 0)
+  expect_false(any(is.na(event_df$median_time)))
+
+  person_time_df <- result$personTimeTable$asDF
+  expect_gt(nrow(person_time_df), 0)
+  expect_true(all(is.finite(person_time_df$total_time)))
+})
+
+test_that("swimmerplot handles many event labels without palette errors", {
+  skip_if_not_installed("ggswim")
+
+  n_patients <- 12
+  set.seed(123)
+  test_data <- data.frame(
+    patient_id = paste0("EV", seq_len(n_patients)),
+    start_time = rep(0, n_patients),
+    end_time = seq(12, by = 2, length.out = n_patients),
+    response = sample(c("CR", "PR", "SD", "PD"), n_patients, replace = TRUE),
+    event_type = paste0("event_", seq_len(n_patients)),
+    event_time = seq(1, by = 1.5, length.out = n_patients),
+    stringsAsFactors = FALSE
+  )
+
+  result <- swimmerplot(
+    data = test_data,
+    patientID = "patient_id",
+    startTime = "start_time",
+    endTime = "end_time",
+    responseVar = "response",
+    showEventMarkers = TRUE,
+    eventVar = "event_type",
+    eventTimeVar = "event_time",
+    timeType = "raw"
+  )
+
+  expect_s3_class(result, "swimmerplotResults")
+  expect_true(result$plot$visible)
+  expect_equal(length(unique(result$plot$state$event_data$label)), n_patients)
 })
 
 test_that("swimmerplot ongoing treatment arrows work", {
@@ -663,6 +763,7 @@ test_that("customReferenceDate parses in absolute datetime mode", {
         patientID = "patient_id",
         startTime = "start_date",
         endTime = "end_date",
+        responseVar = NULL,
         timeType = "datetime",
         dateFormat = cfg$dateFormat,
         timeUnit = "weeks",

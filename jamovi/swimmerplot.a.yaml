@@ -40,35 +40,37 @@ description:
 
 options:
     # === Clinical Presets & Guidance ===
-    - name: clinicalPreset
-      title: "Clinical Analysis Preset"
-      type: List
-      options:
-        - name: none
-          title: "Custom Configuration"
-        - name: oncology_immunotherapy
-          title: "Oncology - Immunotherapy Timeline"
-        - name: oncology_chemotherapy
-          title: "Oncology - Chemotherapy Cycles"  
-        - name: surgery_outcomes
-          title: "Surgery - Perioperative Timeline"
-        - name: clinical_trial
-          title: "Clinical Trial - Standard Timeline"
-        - name: longitudinal_followup
-          title: "Longitudinal Follow-up Study"
-      default: none
-      description:
-          R: >
-            Pre-configured analysis templates for common clinical scenarios. 
-            Selecting a preset automatically configures appropriate options for typical research use cases.
-    
-    - name: guidedMode
-      title: "Use Guided Analysis Mode"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Enable step-by-step guidance through the analysis process with contextual help and recommendations.
+    # DISABLED: Clinical presets only affect text interpretation, not calculations
+    # Will be re-enabled after enhanced implementation with calculation effects
+    # - name: clinicalPreset
+    #   title: "Clinical Analysis Preset"
+    #   type: List
+    #   options:
+    #     - name: none
+    #       title: "Custom Configuration"
+    #     - name: oncology_immunotherapy
+    #       title: "Oncology - Immunotherapy Timeline"
+    #     - name: oncology_chemotherapy
+    #       title: "Oncology - Chemotherapy Cycles"
+    #     - name: surgery_outcomes
+    #       title: "Surgery - Perioperative Timeline"
+    #     - name: clinical_trial
+    #       title: "Clinical Trial - Standard Timeline"
+    #     - name: longitudinal_followup
+    #       title: "Longitudinal Follow-up Study"
+    #   default: none
+    #   description:
+    #       R: >
+    #         Pre-configured analysis templates for common clinical scenarios.
+    #         Selecting a preset automatically configures appropriate options for typical research use cases.
+
+    # - name: guidedMode
+    #   title: "Use Guided Analysis Mode"
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Enable step-by-step guidance through the analysis process with contextual help and recommendations.
             
     # === Core Data Variables ===
     - name: data
@@ -442,6 +444,31 @@ options:
       description:
           R: >
             Whether to analyze response patterns when response variable is provided.
+
+    # === Clinical Guidance Options ===
+    - name: showGlossary
+      title: "Show Clinical Glossary"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a glossary of clinical terms and statistical concepts used in the analysis.
+
+    - name: showCopyReady
+      title: "Show Copy-Ready Manuscript Text"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate copy-ready text suitable for manuscripts and clinical reports.
+
+    - name: showAbout
+      title: "Show About This Analysis"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display information about when and how to use swimmer plot analysis.
 
     # === Export Options ===
     - name: exportTimeline
