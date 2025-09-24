@@ -21,6 +21,18 @@ items:
       visible: true
       description: Analysis assumptions, data requirements, and methodological considerations
 
+    - name: summary
+      title: Summary (Plain-Language)
+      type: Html
+      visible: false
+      description: Natural-language summary of heterogeneity analysis results
+
+    - name: glossary
+      title: Statistical Glossary
+      type: Html
+      visible: false
+      description: Definitions of key statistical terms used in the analysis
+
     - name: reproducibilitytable
       title: Reproducibility Assessment
       type: Table
@@ -138,9 +150,9 @@ items:
           type: text
 
     - name: biopsyplot
-      title: Biopsy vs Whole Section Comparison
+      title: Regional Measurements Comparison
       type: Image
-      description: Distribution comparison across methods
+      description: Distribution comparison across regional measurements and reference (if provided)
       width: 700
       height: 500
       visible: (show_variability_plots)

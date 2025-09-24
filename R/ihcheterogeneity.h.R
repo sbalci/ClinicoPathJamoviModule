@@ -17,10 +17,12 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             sampling_strategy = "unknown",
             cv_threshold = 20,
             correlation_threshold = 0.8,
-            show_variability_plots = TRUE,
-            variance_components = TRUE,
+            show_variability_plots = FALSE,
+            variance_components = FALSE,
             power_analysis = FALSE,
-            generate_recommendations = TRUE, ...) {
+            generate_recommendations = FALSE,
+            showSummary = FALSE,
+            showGlossary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -34,7 +36,8 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..biopsy1 <- jmvcore::OptionVariable$new(
                 "biopsy1",
                 biopsy1,
@@ -48,35 +51,40 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..biopsy3 <- jmvcore::OptionVariable$new(
                 "biopsy3",
                 biopsy3,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..biopsy4 <- jmvcore::OptionVariable$new(
                 "biopsy4",
                 biopsy4,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..biopsies <- jmvcore::OptionVariables$new(
                 "biopsies",
                 biopsies,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..spatial_id <- jmvcore::OptionVariable$new(
                 "spatial_id",
                 spatial_id,
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..analysis_type <- jmvcore::OptionList$new(
                 "analysis_type",
                 analysis_type,
@@ -110,11 +118,11 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..show_variability_plots <- jmvcore::OptionBool$new(
                 "show_variability_plots",
                 show_variability_plots,
-                default=TRUE)
+                default=FALSE)
             private$..variance_components <- jmvcore::OptionBool$new(
                 "variance_components",
                 variance_components,
-                default=TRUE)
+                default=FALSE)
             private$..power_analysis <- jmvcore::OptionBool$new(
                 "power_analysis",
                 power_analysis,
@@ -122,7 +130,15 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..generate_recommendations <- jmvcore::OptionBool$new(
                 "generate_recommendations",
                 generate_recommendations,
-                default=TRUE)
+                default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
 
             self$.addOption(private$..wholesection)
             self$.addOption(private$..biopsy1)
@@ -139,6 +155,8 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..variance_components)
             self$.addOption(private$..power_analysis)
             self$.addOption(private$..generate_recommendations)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showGlossary)
         }),
     active = list(
         wholesection = function() private$..wholesection$value,
@@ -155,7 +173,9 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         show_variability_plots = function() private$..show_variability_plots$value,
         variance_components = function() private$..variance_components$value,
         power_analysis = function() private$..power_analysis$value,
-        generate_recommendations = function() private$..generate_recommendations$value),
+        generate_recommendations = function() private$..generate_recommendations$value,
+        showSummary = function() private$..showSummary$value,
+        showGlossary = function() private$..showGlossary$value),
     private = list(
         ..wholesection = NA,
         ..biopsy1 = NA,
@@ -171,7 +191,9 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..show_variability_plots = NA,
         ..variance_components = NA,
         ..power_analysis = NA,
-        ..generate_recommendations = NA)
+        ..generate_recommendations = NA,
+        ..showSummary = NA,
+        ..showGlossary = NA)
 )
 
 ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -181,6 +203,8 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         interpretation = function() private$.items[["interpretation"]],
         report_sentences = function() private$.items[["report_sentences"]],
         assumptions = function() private$.items[["assumptions"]],
+        summary = function() private$.items[["summary"]],
+        glossary = function() private$.items[["glossary"]],
         reproducibilitytable = function() private$.items[["reproducibilitytable"]],
         samplingbiastable = function() private$.items[["samplingbiastable"]],
         variancetable = function() private$.items[["variancetable"]],
@@ -213,6 +237,16 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="assumptions",
                 title="Methodology & Assumptions",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Summary (Plain-Language)",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Statistical Glossary",
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="reproducibilitytable",
@@ -351,7 +385,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$add(jmvcore::Image$new(
                 options=options,
                 name="biopsyplot",
-                title="Biopsy vs Whole Section Comparison",
+                title="Regional Measurements Comparison",
                 width=700,
                 height=500,
                 visible="(show_variability_plots)",
@@ -398,16 +432,19 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'
 #' 
 #' @param data the data as a data frame
-#' @param wholesection Biomarker measurement from entire tissue section.
-#'   Example: Ki67 proliferation index (0-100\%), ER/PR expression (0-8 Allred
-#'   score), HER2 expression (0-3+ intensity), or quantitative molecular
-#'   biomarker values.
-#' @param biopsy1 Biomarker measurement from first simulated core biopsy
-#'   sample. Should represent same biomarker as whole section measurement.
-#'   Example: Ki67 \% from 2mm core biopsy #1.
-#' @param biopsy2 second simulated biopsy measurement
-#' @param biopsy3 third simulated biopsy measurement
-#' @param biopsy4 fourth simulated biopsy measurement
+#' @param wholesection Optional reference measurement for comparison with
+#'   regional measurements. Can be whole section average, hotspot area, or
+#'   overall tumor measurement. Leave empty for inter-regional comparison
+#'   studies. Example: Ki67 proliferation index (0-100\%), ER H-score (0-300),
+#'   PR percentage (0-100\%).
+#' @param biopsy1 Continuous biomarker measurement from first tissue region or
+#'   area. Should represent same biomarker as reference measurement for
+#'   heterogeneity comparison. Example: Ki67 \% from tumor periphery, ER H-score
+#'   from invasive front.
+#' @param biopsy2 Second tissue region biomarker measurement for heterogeneity
+#'   analysis
+#' @param biopsy3 Third tissue region biomarker measurement
+#' @param biopsy4 Fourth tissue region biomarker measurement
 #' @param biopsies additional simulated biopsy measurements
 #' @param spatial_id identifier for spatial regions or tissue areas
 #' @param analysis_type primary focus of biopsy simulation analysis
@@ -427,18 +464,24 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param power_analysis perform power analysis for sample size
 #'   recommendations
 #' @param generate_recommendations provide recommendations for optimal
-#'   sampling strategy
+#'   heterogeneity assessment strategy
+#' @param showSummary Display natural-language summary of heterogeneity
+#'   analysis results
+#' @param showGlossary Display definitions of statistical terms (ICC, CV,
+#'   correlation)
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences ready for clinical reports and publications \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab Analysis assumptions, data requirements, and methodological considerations \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab Natural-language summary of heterogeneity analysis results \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab Definitions of key statistical terms used in the analysis \cr
 #'   \code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
 #'   \code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
 #'   \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
 #'   \code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
 #'   \code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
-#'   \code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across methods \cr
+#'   \code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across regional measurements and reference (if provided) \cr
 #'   \code{results$variabilityplot} \tab \tab \tab \tab \tab Coefficient of variation by case \cr
 #'   \code{results$spatialplot} \tab \tab \tab \tab \tab Spatial distribution of biomarker values \cr
 #' }
@@ -452,21 +495,23 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @export
 ihcheterogeneity <- function(
     data,
-    wholesection,
+    wholesection = NULL,
     biopsy1,
-    biopsy2,
-    biopsy3,
-    biopsy4,
-    biopsies,
-    spatial_id,
+    biopsy2 = NULL,
+    biopsy3 = NULL,
+    biopsy4 = NULL,
+    biopsies = NULL,
+    spatial_id = NULL,
     analysis_type = "comprehensive",
     sampling_strategy = "unknown",
     cv_threshold = 20,
     correlation_threshold = 0.8,
-    show_variability_plots = TRUE,
-    variance_components = TRUE,
+    show_variability_plots = FALSE,
+    variance_components = FALSE,
     power_analysis = FALSE,
-    generate_recommendations = TRUE) {
+    generate_recommendations = FALSE,
+    showSummary = FALSE,
+    showGlossary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcheterogeneity requires jmvcore to be installed (restart may be required)")
@@ -506,7 +551,9 @@ ihcheterogeneity <- function(
         show_variability_plots = show_variability_plots,
         variance_components = variance_components,
         power_analysis = power_analysis,
-        generate_recommendations = generate_recommendations)
+        generate_recommendations = generate_recommendations,
+        showSummary = showSummary,
+        showGlossary = showGlossary)
 
     analysis <- ihcheterogeneityClass$new(
         options = options,

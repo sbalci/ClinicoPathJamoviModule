@@ -7162,18 +7162,7 @@ For questions or contributions, please refer to the GitHub repository and commun
 <!-- flatpak install flathub org.freedesktop.Sdk//21.08 -->
 
 
-<!-- Serdar Balci -->
-<!--   2 months ago -->
-<!-- Thank you, seems to work now. -->
-<!-- You have a warning message: -->
 
-<!-- (node:4706) [DEP0128] DeprecationWarning: Invalid 'main' field in '/home/parallels/R/x86_64-pc-linux-gnu-library/4.1/jmvtools/node_modules/jamovi-compiler/node_modules/po2json/package.json' of './lib/po2json'. Please either fix that or report it to the module author -->
-<!-- (Use `node --trace-deprecation ...` to show where the warning was created) -->
-
-
-<!-- jonathon -->
-<!-- :whale2:  2 months ago -->
-<!-- oh yeah, i’ve got enough on my plate, to worry about warnings :stuck_out_tongue: -->
 
 
 ---
