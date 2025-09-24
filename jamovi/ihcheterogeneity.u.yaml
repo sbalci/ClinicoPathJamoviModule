@@ -9,40 +9,42 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Whole Section Biomarker Value
+        label: Overall / Whole Slide / HotSpot (Optional) 
         children:
           - type: VariablesListBox
             name: wholesection
             maxItemCount: 1
             isTarget: true
-            label: Whole Section Biomarker Value
+      - type: TargetLayoutBox
+        label: Regional Measurement 1
+        children:
           - type: VariablesListBox
             name: biopsy1
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Biopsy Sample 2 (Optional)
+        label: Regional Measurement 2 (Optional)
         children:
           - type: VariablesListBox
             name: biopsy2
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Biopsy Sample 3 (Optional)
+        label: Regional Measurement 3 (Optional)
         children:
           - type: VariablesListBox
             name: biopsy3
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Biopsy Sample 4 (Optional)
+        label: Regional Measurement 4 (Optional)
         children:
           - type: VariablesListBox
             name: biopsy4
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Additional Biopsy Samples
+        label: Additional Regional Measurements
         children:
           - type: VariablesListBox
             name: biopsies
@@ -54,36 +56,52 @@ children:
             name: spatial_id
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Analysis Configuration
     children:
       - type: ComboBox
         name: analysis_type
-  - type: LayoutBox
-    margin: large
-    children:
+        label: Analysis Type
       - type: ComboBox
         name: sampling_strategy
-  - type: LayoutBox
-    margin: large
+        label: Sampling Strategy
+
+  - type: CollapseBox
+    label: Clinical Thresholds
     children:
       - type: TextBox
         name: cv_threshold
         format: number
-  - type: LayoutBox
-    margin: large
-    children:
+        label: CV Threshold (%)
       - type: TextBox
         name: correlation_threshold
         format: number
-  - type: LayoutBox
-    margin: large
+        label: Correlation Threshold
+
+  - type: CollapseBox
+    label: Additional Analyses
     children:
       - type: CheckBox
         name: show_variability_plots
+        label: Show Variability Plots
       - type: CheckBox
         name: variance_components
+        label: Variance Components Analysis
       - type: CheckBox
         name: power_analysis
+        label: Power Analysis
       - type: CheckBox
         name: generate_recommendations
+        label: Generate Clinical Recommendations
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showSummary
+        label: Show Plain-Language Summary
+      - type: CheckBox
+        name: showGlossary
+        label: Show Statistical Glossary

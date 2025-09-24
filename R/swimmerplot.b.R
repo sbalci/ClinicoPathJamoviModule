@@ -26,6 +26,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .auto_detected_dates = FALSE,
         .detected_format = NULL,
 
+        # Escape variable names for safe handling
+        .escapeVar = function(x) {
+            # Handle variables with spaces/special characters
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         # Enhanced clinical date parsing with contextual guidance
         .parseDatesWithClinicalContext = function(dates, format, variable_type = "time") {
             if (inherits(dates, c("Date", "POSIXct", "POSIXlt"))) {
@@ -224,9 +230,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Extract and process core variables
             patient_data <- tryCatch({
                 data.frame(
-                    patient_id = as.character(df[[self$options$patientID]]),
-                    start_time = df[[self$options$startTime]],
-                    end_time = df[[self$options$endTime]],
+                    patient_id = as.character(df[[private$.escapeVar(self$options$patientID)]]),
+                    start_time = df[[private$.escapeVar(self$options$startTime)]],
+                    end_time = df[[private$.escapeVar(self$options$endTime)]],
                     stringsAsFactors = FALSE
                 )
             }, error = function(e) {
@@ -332,7 +338,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             # Add response/status variable if provided
             if (!is.null(self$options$responseVar)) {
-                patient_data$response <- as.factor(df[[self$options$responseVar]])
+                patient_data$response <- as.factor(df[[private$.escapeVar(self$options$responseVar)]])
             }
             
             # Data validation
@@ -386,7 +392,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     !is.null(self$options[[name_opt]]) && 
                     self$options[[name_opt]] != "") {
                     
-                    milestone_dates <- self$data[[self$options[[date_opt]]]]
+                    milestone_dates <- self$data[[private$.escapeVar(self$options[[date_opt]])]]
                     
                     # Skip if all NA
                     if (all(is.na(milestone_dates))) next
@@ -545,9 +551,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (!is.null(event_var)) {
                     event_data <- tryCatch({
                         # Ensure all variables exist and get their lengths
-                        patient_ids <- as.character(self$data[[self$options$patientID]])
-                        event_times <- self$data[[event_time_var]]
-                        event_labels <- as.character(self$data[[event_var]])
+                        patient_ids <- as.character(self$data[[private$.escapeVar(self$options$patientID)]])
+                        event_times <- self$data[[private$.escapeVar(event_time_var)]]
+                        event_labels <- as.character(self$data[[private$.escapeVar(event_var)]])
 
                         # Find the minimum length to avoid row mismatch
                         min_length <- min(length(patient_ids), length(event_times), length(event_labels))
@@ -872,7 +878,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             stats$mean_follow_up <- if (length(valid_follow_up) > 0) mean(valid_follow_up) else NA_real_
 
             # Response analysis if available
-            if ("response" %in% names(patient_summary)) {
+            if (self$options$responseAnalysis && "response" %in% names(patient_summary)) {
                 response_summary <- table(patient_summary$response, useNA = "no")
                 if (length(response_summary) > 0) {
                     response_pct <- prop.table(response_summary) * 100
@@ -956,7 +962,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
             
             # Add response analysis if available
-            if (!is.null(stats$response_counts) && length(stats$response_counts) > 0) {
+            if (self$options$responseAnalysis && !is.null(stats$response_counts) && length(stats$response_counts) > 0) {
                 best_response <- names(stats$response_counts)[which.max(stats$response_counts)]
                 best_pct <- stats$response_percentages[[best_response]]
                 
@@ -1095,7 +1101,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 private$.preset_guidance <- preset_guidance
             }
         },
-        
+
+        .init = function() {
+            # Initialize instructions when no variables selected
+            if (is.null(self$options$patientID) ||
+                is.null(self$options$startTime) ||
+                is.null(self$options$endTime)) {
+                instructions <- private$.generateInstructions()
+                self$results$instructions$setContent(instructions)
+            }
+        },
+
         .run = function() {
             # Apply clinical preset configurations if selected
             # DISABLED: Clinical presets only affect text interpretation, not calculations
@@ -1769,7 +1785,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</div>"
             )
             
-            if (!is.null(interpretation$response)) {
+            if (self$options$responseAnalysis && !is.null(interpretation$response)) {
                 interp_html <- paste0(interp_html,
                     "<div style='margin: 10px 0;'>",
                     "<h5 style='color: #2e7d32;'>Response Pattern Analysis:</h5>",
@@ -1812,12 +1828,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
         
         .createGgswimPlot = function(patient_data, milestone_data, event_data, arrow_data, opts, stats) {
+            # Check if ggswim is available
+            if (!requireNamespace("ggswim", quietly = TRUE)) {
+                warning("ggswim package not available, using fallback visualization")
+                return(private$.createFallbackPlot(patient_data, milestone_data, event_data, opts, stats))
+            }
+
             # Create base plot with swim lanes
             p <- ggplot2::ggplot()
-            
-            # Add swim lanes with enhanced styling
+
+            # Add swim lanes with enhanced styling and error boundary
             if ("response" %in% names(patient_data)) {
-                p <- p + ggswim::geom_swim_lane(
+                p <- tryCatch({
+                    p + ggswim::geom_swim_lane(
                     data = patient_data,
                     mapping = ggplot2::aes(
                         x = start_time,
@@ -1826,18 +1849,47 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         colour = response
                     ),
                     linewidth = opts$laneWidth
-                )
+                    )
+                }, error = function(e) {
+                    # Fallback to basic ggplot2 segments
+                    p + ggplot2::geom_segment(
+                        data = patient_data,
+                        mapping = ggplot2::aes(
+                            x = start_time,
+                            xend = end_time,
+                            y = patient_id,
+                            yend = patient_id,
+                            color = response
+                        ),
+                        size = opts$laneWidth
+                    )
+                })
             } else {
-                p <- p + ggswim::geom_swim_lane(
-                    data = patient_data,
-                    mapping = ggplot2::aes(
-                        x = start_time,
-                        xend = end_time,
-                        y = patient_id
-                    ),
-                    linewidth = opts$laneWidth,
-                    colour = "steelblue"
-                )
+                p <- tryCatch({
+                    p + ggswim::geom_swim_lane(
+                        data = patient_data,
+                        mapping = ggplot2::aes(
+                            x = start_time,
+                            xend = end_time,
+                            y = patient_id
+                        ),
+                        linewidth = opts$laneWidth,
+                        colour = "steelblue"
+                    )
+                }, error = function(e) {
+                    # Fallback to basic ggplot2 segments
+                    p + ggplot2::geom_segment(
+                        data = patient_data,
+                        mapping = ggplot2::aes(
+                            x = start_time,
+                            xend = end_time,
+                            y = patient_id,
+                            yend = patient_id
+                        ),
+                        color = "steelblue",
+                        size = opts$laneWidth
+                    )
+                })
             }
             
             # Add event markers if available
@@ -2040,8 +2092,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 sv <- self$options$sortVariable
                 df <- self$data
                 tmp <- data.frame(
-                    patient_id = as.character(df[[self$options$patientID]]),
-                    sort_val = df[[sv]],
+                    patient_id = as.character(df[[private$.escapeVar(self$options$patientID)]]),
+                    sort_val = df[[private$.escapeVar(sv)]],
                     stringsAsFactors = FALSE
                 )
                 tmp <- tmp[!is.na(tmp$patient_id) & !duplicated(tmp$patient_id), ]
@@ -2062,7 +2114,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             patient_data
         },
         
-        .createFallbackPlot = function(patient_data, error_message) {
+        .createFallbackPlot = function(patient_data, milestone_data = NULL, event_data = NULL, opts = NULL, stats = NULL, error_message = "ggswim unavailable") {
             ggplot2::ggplot(patient_data, ggplot2::aes(x = start_time, y = patient_id)) +
                 ggplot2::geom_point(size = 2, color = "steelblue") +
                 ggplot2::labs(
@@ -2194,7 +2246,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Add response analysis if available
             response_text <- ""
-            if ("response" %in% names(patient_data) && !is.null(stats$response_counts)) {
+            if (self$options$responseAnalysis && "response" %in% names(patient_data) && !is.null(stats$response_counts)) {
                 orr_count <- sum(stats$response_counts[names(stats$response_counts) %in% c("CR", "PR")])
                 orr_pct <- orr_count / sum(stats$response_counts) * 100
 

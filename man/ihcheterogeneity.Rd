@@ -6,40 +6,45 @@
 \usage{
 ihcheterogeneity(
   data,
-  wholesection,
+  wholesection = NULL,
   biopsy1,
-  biopsy2,
-  biopsy3,
-  biopsy4,
-  biopsies,
-  spatial_id,
+  biopsy2 = NULL,
+  biopsy3 = NULL,
+  biopsy4 = NULL,
+  biopsies = NULL,
+  spatial_id = NULL,
   analysis_type = "comprehensive",
   sampling_strategy = "unknown",
   cv_threshold = 20,
   correlation_threshold = 0.8,
-  show_variability_plots = TRUE,
-  variance_components = TRUE,
+  show_variability_plots = FALSE,
+  variance_components = FALSE,
   power_analysis = FALSE,
-  generate_recommendations = TRUE
+  generate_recommendations = FALSE,
+  showSummary = FALSE,
+  showGlossary = FALSE
 )
 }
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{wholesection}{Biomarker measurement from entire tissue section.
-Example: Ki67 proliferation index (0-100\\%), ER/PR expression (0-8 Allred
-score), HER2 expression (0-3+ intensity), or quantitative molecular
-biomarker values.}
+\item{wholesection}{Optional reference measurement for comparison with
+regional measurements. Can be whole section average, hotspot area, or
+overall tumor measurement. Leave empty for inter-regional comparison
+studies. Example: Ki67 proliferation index (0-100\\%), ER H-score (0-300),
+PR percentage (0-100\\%).}
 
-\item{biopsy1}{Biomarker measurement from first simulated core biopsy
-sample. Should represent same biomarker as whole section measurement.
-Example: Ki67 \\% from 2mm core biopsy #1.}
+\item{biopsy1}{Continuous biomarker measurement from first tissue region or
+area. Should represent same biomarker as reference measurement for
+heterogeneity comparison. Example: Ki67 \\% from tumor periphery, ER H-score
+from invasive front.}
 
-\item{biopsy2}{second simulated biopsy measurement}
+\item{biopsy2}{Second tissue region biomarker measurement for heterogeneity
+analysis}
 
-\item{biopsy3}{third simulated biopsy measurement}
+\item{biopsy3}{Third tissue region biomarker measurement}
 
-\item{biopsy4}{fourth simulated biopsy measurement}
+\item{biopsy4}{Fourth tissue region biomarker measurement}
 
 \item{biopsies}{additional simulated biopsy measurements}
 
@@ -69,7 +74,13 @@ samples.}
 recommendations}
 
 \item{generate_recommendations}{provide recommendations for optimal
-sampling strategy}
+heterogeneity assessment strategy}
+
+\item{showSummary}{Display natural-language summary of heterogeneity
+analysis results}
+
+\item{showGlossary}{Display definitions of statistical terms (ICC, CV,
+correlation)}
 }
 \value{
 A results object containing:
@@ -77,12 +88,14 @@ A results object containing:
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences ready for clinical reports and publications \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab Analysis assumptions, data requirements, and methodological considerations \cr
+\code{results$summary} \tab \tab \tab \tab \tab Natural-language summary of heterogeneity analysis results \cr
+\code{results$glossary} \tab \tab \tab \tab \tab Definitions of key statistical terms used in the analysis \cr
 \code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
 \code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
 \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
 \code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
 \code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
-\code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across methods \cr
+\code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across regional measurements and reference (if provided) \cr
 \code{results$variabilityplot} \tab \tab \tab \tab \tab Coefficient of variation by case \cr
 \code{results$spatialplot} \tab \tab \tab \tab \tab Spatial distribution of biomarker values \cr
 }

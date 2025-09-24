@@ -1,9 +1,9 @@
 ---
 name: ihcheterogeneity
 title: IHC Heterogeneity Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPath
 menuSubgroup: IHC Analysis
-version: '1.0.0'
+version: '0.0.31'
 jas: '1.2'
 
 options:
@@ -13,7 +13,7 @@ options:
           R: the data as a data frame
 
     - name: wholesection
-      title: Whole Section Biomarker Value
+      title: "Overall / Whole Slide / HotSpot (Optional)"
       type: Variable
       suggested:
         - continuous
@@ -21,12 +21,12 @@ options:
         - numeric
       description:
           R: >
-            Biomarker measurement from entire tissue section.
-            Example: Ki67 proliferation index (0-100%), ER/PR expression (0-8 Allred score),
-            HER2 expression (0-3+ intensity), or quantitative molecular biomarker values.
-
+            Optional reference measurement for comparison with regional measurements. Can be whole section average,
+            hotspot area, or overall tumor measurement. Leave empty for inter-regional comparison studies.
+            Example: Ki67 proliferation index (0-100%), ER H-score (0-300), PR percentage (0-100%).
+      default: NULL
     - name: biopsy1
-      title: Biopsy Sample 1 (Required)
+      title: Regional Measurement 1 (Required)
       type: Variable
       suggested:
         - continuous
@@ -34,12 +34,12 @@ options:
         - numeric
       description:
           R: >
-            Biomarker measurement from first simulated core biopsy sample.
-            Should represent same biomarker as whole section measurement.
-            Example: Ki67 % from 2mm core biopsy #1.
+            Continuous biomarker measurement from first tissue region or area.
+            Should represent same biomarker as reference measurement for heterogeneity comparison.
+            Example: Ki67 % from tumor periphery, ER H-score from invasive front.
 
     - name: biopsy2
-      title: Biopsy Sample 2 (Optional)
+      title: Regional Measurement 2 (Optional)
       type: Variable
       suggested:
         - continuous
@@ -47,10 +47,11 @@ options:
         - numeric
       description:
           R: >
-            second simulated biopsy measurement
+            Second tissue region biomarker measurement for heterogeneity analysis
+      default: NULL
 
     - name: biopsy3
-      title: Biopsy Sample 3 (Optional)
+      title: Regional Measurement 3 (Optional)
       type: Variable
       suggested:
         - continuous
@@ -58,10 +59,11 @@ options:
         - numeric
       description:
           R: >
-            third simulated biopsy measurement
+            Third tissue region biomarker measurement
+      default: NULL
 
     - name: biopsy4
-      title: Biopsy Sample 4 (Optional)
+      title: Regional Measurement 4 (Optional)
       type: Variable
       suggested:
         - continuous
@@ -69,10 +71,11 @@ options:
         - numeric
       description:
           R: >
-            fourth simulated biopsy measurement
+            Fourth tissue region biomarker measurement
+      default: NULL
 
     - name: biopsies
-      title: Additional Biopsy Samples
+      title: Additional Regional Measurements
       type: Variables
       suggested:
         - continuous
@@ -81,6 +84,7 @@ options:
       description:
           R: >
             additional simulated biopsy measurements
+      default: NULL
 
     - name: spatial_id
       title: Spatial Region ID (Optional)
@@ -92,6 +96,7 @@ options:
       description:
           R: >
             identifier for spatial regions or tissue areas
+      default: NULL
 
     - name: analysis_type
       title: Analysis Focus
@@ -156,7 +161,7 @@ options:
     - name: show_variability_plots
       title: Show Variability Plots
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             display plots showing sampling variability
@@ -164,7 +169,7 @@ options:
     - name: variance_components
       title: Variance Component Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             perform variance component decomposition
@@ -178,11 +183,27 @@ options:
             perform power analysis for sample size recommendations
 
     - name: generate_recommendations
-      title: Generate Sampling Recommendations
+      title: Generate Clinical Recommendations
       type: Bool
-      default: true
+      default: false
       description:
           R: >
-            provide recommendations for optimal sampling strategy
+            provide recommendations for optimal heterogeneity assessment strategy
+
+    - name: showSummary
+      title: Show Plain-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display natural-language summary of heterogeneity analysis results
+
+    - name: showGlossary
+      title: Show Statistical Glossary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display definitions of statistical terms (ICC, CV, correlation)
 
 ...

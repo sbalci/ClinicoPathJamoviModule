@@ -7,7 +7,7 @@ This project is a jamovi module for clinicopathological research. It provides a 
 *   **Survival Analysis:** `survival`, `comparingsurvival`, `multisurvival`, `onesurvival`
 *   **Diagnostic Tests:** `roc`, `decisioncurve`, `screeningcalculator`
 *   **Data Visualization:** `advancedbarplot`, `raincloud`, `waterfall`, `swimmerplot`
-*   **Data Quality and Preprocessing:** `checkdata`, `missingdata`, `datecorrection`
+*   **Data Quality and Preprocessing:** `checkdata`, `missingdata`, `datecorrection`, `ihcheterogeneity`
 
 The project is well-structured and appears to be actively maintained. The use of `jamovi` suggests a focus on providing a user-friendly interface for these complex analyses.
 

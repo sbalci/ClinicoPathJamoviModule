@@ -431,7 +431,7 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (requireNamespace('psych', quietly = TRUE)) {
                     icc_data <- data.frame(Hscore = hscore, Allred = allred_total)
                     tryCatch({
-                        icc_result <- psych::ICC(icc_data, type = "consistency")
+                        icc_result <- psych::ICC(icc_data)
                         icc_value <- icc_result$results$ICC[6]  # ICC(3,1)
                         icc_lower <- icc_result$results$`lower bound`[6]
                         icc_upper <- icc_result$results$`upper bound`[6]
