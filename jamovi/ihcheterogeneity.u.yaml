@@ -15,9 +15,7 @@ children:
             name: wholesection
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: Biopsy Sample 1 (Required)
-        children:
+            label: Whole Section Biomarker Value
           - type: VariablesListBox
             name: biopsy1
             maxItemCount: 1
