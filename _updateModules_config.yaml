@@ -10,8 +10,8 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.31.75"
-new_date: "2025-09-24"
+new_version: "0.0.31.78"
+new_date: "2025-09-27"
 quick: false
 TEST: true
 meddecide: false
@@ -59,6 +59,7 @@ modules:
       - "utils.R"
       - "decisiongraph_utils.R"
       - "psychopdaROC_utilities.R"
+      - "nomogrammer.R"
   jsurvival:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     r_files:
@@ -83,11 +84,12 @@ modules:
       - "menuGroup: OncoPathT$"
     data_files:
       - "histopathology.rda"
-    r_files: 
+    r_files:
       - "utils.R"
       - "decisiongraph_utils.R"
       - "ihc_utilities.R"
       - "psychopdaROC_utilities.R"
+      - "nomogrammer.R"
     vignette_files: []
     test_files: []
     required_directories:

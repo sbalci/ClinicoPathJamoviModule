@@ -56,7 +56,7 @@ items:
     - name: migrationOverviewExplanation
       title: Understanding the Migration Overview
       type: Html
-      visible: () # (showMigrationOverview && showExplanations)
+      visible: (showMigrationOverview && showExplanations)
       clearWith:
           - showMigrationOverview
 
@@ -87,7 +87,7 @@ items:
     - name: migrationMatrixExplanation
       title: Understanding the Migration Matrix
       type: Html
-      visible: () # (showMigrationMatrix && showExplanations)
+      visible: (showMigrationMatrix && showExplanations)
       clearWith:
           - showMigrationMatrix
 
@@ -111,7 +111,7 @@ items:
     - name: stageDistributionExplanation
       title: Understanding Stage Distribution Changes
       type: Html
-      visible: () # (showStageDistribution && showExplanations)
+      visible: (showStageDistribution && showExplanations)
       clearWith:
           - showStageDistribution
 
@@ -150,7 +150,7 @@ items:
     - name: migrationSummaryExplanation
       title: Understanding Statistical Tests for Migration
       type: Html
-      visible: () # (showMigrationSummary && showExplanations)
+      visible: (showMigrationSummary && showExplanations)
       clearWith:
           - showMigrationSummary
 
@@ -179,7 +179,7 @@ items:
     - name: statisticalComparisonExplanation
       title: Understanding Statistical Comparison Metrics
       type: Html
-      visible: () # (showStatisticalComparison && showExplanations)
+      visible: (showStatisticalComparison && showExplanations)
       clearWith:
           - showStatisticalComparison
 
@@ -215,7 +215,7 @@ items:
     - name: concordanceComparisonExplanation
       title: Understanding Concordance (C-Index) Analysis
       type: Html
-      visible: () # (showConcordanceComparison && showExplanations)
+      visible: (showConcordanceComparison && showExplanations)
       clearWith:
           - showConcordanceComparison
 
@@ -263,7 +263,7 @@ items:
     - name: nriResultsExplanation
       title: Understanding Net Reclassification Improvement (NRI)
       type: Html
-      visible: () # (calculateNRI && showExplanations)
+      visible: (calculateNRI && showExplanations)
       clearWith:
           - calculateNRI
 
@@ -313,7 +313,7 @@ items:
     - name: idiResultsExplanation
       title: Understanding Integrated Discrimination Improvement (IDI)
       type: Html
-      visible: () # (calculateIDI && showExplanations)
+      visible: (calculateIDI && showExplanations)
       clearWith:
           - calculateIDI
 
@@ -531,7 +531,7 @@ items:
       visible: () # (enableMultifactorialAnalysis && performInteractionTests)
       clearWith:
           - enableMultifactorialAnalysis
-          # - performInteractionTests  # Option commented out
+          - performInteractionTests
           - continuousCovariates
           - categoricalCovariates
       columns:
@@ -560,7 +560,7 @@ items:
       visible: () # (enableMultifactorialAnalysis && performInteractionTests && showExplanations)
       clearWith:
           - enableMultifactorialAnalysis
-          # - performInteractionTests  # Option commented out
+          - performInteractionTests
 
     # Stratified Analysis Results
     - name: stratifiedAnalysis
@@ -687,7 +687,7 @@ items:
     - name: dcaResultsExplanation
       title: Understanding Decision Curve Analysis (DCA)
       type: Html
-      visible: () # (performDCA && showExplanations)
+      visible: (performDCA && showExplanations)
       clearWith:
           - performDCA
 
@@ -724,7 +724,7 @@ items:
     - name: pseudoR2ResultsExplanation
       title: Understanding Pseudo R-squared Measures
       type: Html
-      visible: () # (calculatePseudoR2 && showExplanations)
+      visible: (calculatePseudoR2 && showExplanations)
       clearWith:
           - calculatePseudoR2
 
@@ -764,7 +764,7 @@ items:
     - name: decisionCurvesExplanation
       title: Understanding Decision Curve Analysis
       type: Html
-      visible: () # (showDecisionCurves && showExplanations)
+      visible: (showDecisionCurves && showExplanations)
       clearWith:
           - showDecisionCurves
 
@@ -849,7 +849,7 @@ items:
     - name: willRogersAnalysisExplanation
       title: Understanding Will Rogers Phenomenon Analysis
       type: Html
-      visible: () # (showWillRogersAnalysis && showExplanations)
+      visible: (showWillRogersAnalysis && showExplanations)
       clearWith:
           - showWillRogersAnalysis
 
@@ -892,7 +892,7 @@ items:
     - name: likelihoodTestsExplanation
       title: Understanding Likelihood Ratio Tests
       type: Html
-      visible: () # (performLikelihoodTests && showExplanations)
+      visible: (performLikelihoodTests && showExplanations)
       clearWith:
           - performLikelihoodTests
 
@@ -928,7 +928,7 @@ items:
     - name: linearTrendTestExplanation
       title: Understanding Linear Trend Chi-square Tests
       type: Html
-      visible: () # (performLikelihoodTests && showExplanations)
+      visible: (performLikelihoodTests && showExplanations)
       clearWith:
           - performLikelihoodTests
 
@@ -974,7 +974,7 @@ items:
     - name: homogeneityTestsExplanation
       title: Understanding Stage Homogeneity Tests
       type: Html
-      visible: () # (performHomogeneityTests && showExplanations)
+      visible: (performHomogeneityTests && showExplanations)
       clearWith:
           - performHomogeneityTests
 
@@ -1010,7 +1010,7 @@ items:
     - name: trendTestsExplanation
       title: Understanding Stage Trend Analysis
       type: Html
-      visible: () # (performTrendTests && showExplanations)
+      visible: (performTrendTests && showExplanations)
       clearWith:
           - performTrendTests
 
@@ -1049,7 +1049,7 @@ items:
     - name: clinicalInterpretationExplanation
       title: Understanding Clinical Interpretation Guide
       type: Html
-      visible: () # (showClinicalInterpretation && showExplanations)
+      visible: (showClinicalInterpretation && showExplanations)
       clearWith:
           - showClinicalInterpretation
 
@@ -1084,7 +1084,7 @@ items:
     - name: executiveSummaryExplanation
       title: Understanding the Executive Summary
       type: Html
-      visible: () # (generateExecutiveSummary && showExplanations)
+      visible: (generateExecutiveSummary && showExplanations)
       clearWith:
           - generateExecutiveSummary
 
@@ -1118,7 +1118,7 @@ items:
     - name: statisticalSummaryExplanation
       title: Understanding the Statistical Summary
       type: Html
-      visible: () # (showStatisticalSummary && showExplanations)
+      visible: (showStatisticalSummary && showExplanations)
       clearWith:
           - showStatisticalSummary
 
@@ -1156,7 +1156,7 @@ items:
     - name: effectSizesExplanation
       title: Understanding Effect Sizes
       type: Html
-      visible: () # (includeEffectSizes && showExplanations)
+      visible: (includeEffectSizes && showExplanations)
       clearWith:
           - includeEffectSizes
 
@@ -1204,7 +1204,7 @@ items:
     - name: migrationHeatmapExplanation
       title: Interpreting the Migration Heatmap
       type: Html
-      visible: () # (showMigrationHeatmap && showExplanations)
+      visible: (showMigrationHeatmap && showExplanations)
       clearWith:
           - showMigrationHeatmap
 
@@ -1226,7 +1226,7 @@ items:
     # - name: sankeyDiagramExplanation
     #   title: Understanding Stage Migration Flow Diagram
     #   type: Html
-    #   visible: () # (showSankeyDiagram && showExplanations)
+    #   visible: (showSankeyDiagram && showExplanations)
     #   clearWith:
     #       - showSankeyDiagram
 
@@ -1252,7 +1252,7 @@ items:
     - name: rocComparisonExplanation
       title: Understanding Time-dependent ROC Curves
       type: Html
-      visible: () # (showROCComparison && showExplanations)
+      visible: (showROCComparison && showExplanations)
       clearWith:
           - showROCComparison
 
@@ -1277,7 +1277,7 @@ items:
     - name: forestPlotExplanation
       title: Understanding Hazard Ratio Forest Plots
       type: Html
-      visible: () # (showForestPlot && showExplanations)
+      visible: (showForestPlot && showExplanations)
       clearWith:
           - showForestPlot
 
@@ -1301,7 +1301,7 @@ items:
     - name: calibrationAnalysisExplanation
       title: Understanding Calibration Analysis
       type: Html
-      visible: () # (performCalibration && showExplanations)
+      visible: (performCalibration && showExplanations)
       clearWith:
           - performCalibration
 
@@ -1356,7 +1356,7 @@ items:
     - name: calibrationPlotsExplanation
       title: Understanding Calibration Plots
       type: Html
-      visible: () # (performCalibration && showCalibrationPlots && showExplanations)
+      visible: (performCalibration && showCalibrationPlots && showExplanations)
       clearWith:
           - showCalibrationPlots
 
@@ -1381,7 +1381,7 @@ items:
     - name: advancedMigrationExplanation
       title: Understanding Advanced Migration Analysis
       type: Html
-      visible: () # (advancedMigrationAnalysis && showExplanations)
+      visible: (advancedMigrationAnalysis && showExplanations)
       clearWith:
           - advancedMigrationAnalysis
 
@@ -1767,7 +1767,7 @@ items:
     - name: survivalCurvesExplanation
       title: Understanding Survival Curves Comparison
       type: Html
-      visible: () # (showSurvivalCurves && showExplanations)
+      visible: (showSurvivalCurves && showExplanations)
       clearWith:
           - showSurvivalCurves
 
@@ -1797,7 +1797,7 @@ items:
     - name: dashboardExplanation
       title: Understanding the Comparative Analysis Dashboard
       type: Html
-      visible: () # (advancedMigrationAnalysis && showExplanations)
+      visible: (advancedMigrationAnalysis && showExplanations)
       clearWith:
           - advancedMigrationAnalysis
 
@@ -1847,7 +1847,7 @@ items:
     - name: willRogersEvidenceSummaryExplanation
       title: Understanding Will Rogers Evidence Assessment Framework
       type: Html
-      visible: () # (advancedMigrationAnalysis && showExplanations)
+      visible: (advancedMigrationAnalysis && showExplanations)
       clearWith:
           - advancedMigrationAnalysis
 
@@ -2013,22 +2013,22 @@ items:
     - name: crossValidationExplanation
       title: Understanding Cross-Validation Results
       type: Html
-      visible: () # (performCrossValidation && showExplanations)
+      visible: (performCrossValidation && showExplanations)
       clearWith:
-          # - performCrossValidation  # Option commented out
+          - performCrossValidation
 
     # Cross-Validation Results
     - name: crossValidationResults
       title: K-Fold Cross-Validation Results
       type: Table
-      visible: () # (performCrossValidation)  # Option commented out
+      visible: (performCrossValidation)
       clearWith:
           - oldStage
           - newStage
           - survivalTime
           - event
           - eventLevel
-          # - performCrossValidation  # Option commented out
+          - performCrossValidation
           - cvFolds
       columns:
           - name: Fold
@@ -2094,14 +2094,14 @@ items:
       title: Cross-Validation Performance Visualization
       type: Image
       renderFun: .plotCrossValidation
-      visible: () # (performCrossValidation)  # Option commented out
+      visible: (performCrossValidation)
       clearWith:
           - oldStage
           - newStage
           - survivalTime
           - event
           - eventLevel
-          # - performCrossValidation  # Option commented out
+          - performCrossValidation
           - cvFolds
           - institutionVariable
       width: 600
@@ -2145,7 +2145,7 @@ items:
     # - name: stageMigrationEffectExplanation
     #   title: Understanding Stage Migration Effect Formula (SME)
     #   type: Html
-    #   visible: () # (calculateSME && showExplanations)
+    #   visible: (calculateSME && showExplanations)
     #   clearWith:
     #       - calculateSME
 
@@ -2200,7 +2200,7 @@ items:
     # - name: rmstAnalysisExplanation
     #   title: Understanding Restricted Mean Survival Time (RMST) Analysis
     #   type: Html
-    #   visible: () # (calculateRMST && showExplanations)
+    #   visible: (calculateRMST && showExplanations)
     #   clearWith:
     #       - calculateRMST
 

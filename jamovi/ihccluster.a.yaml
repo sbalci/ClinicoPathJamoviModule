@@ -309,7 +309,7 @@ options:
       title: 'Apply Preset Configuration'
       type: Bool
       default: false
-      description: 'Apply the selected tumor-specific preset settings'
+      description: 'Apply the selected tumor-specific preset settings. Note: This will provide recommendations, you may need to manually adjust the settings.'
 
     # Internationalization Options
     - name: language

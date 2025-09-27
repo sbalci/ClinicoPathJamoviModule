@@ -15,7 +15,11 @@ decision(
   od = FALSE,
   fnote = FALSE,
   ci = FALSE,
-  fagan = FALSE
+  fagan = FALSE,
+  showNaturalLanguage = TRUE,
+  showClinicalInterpretation = TRUE,
+  showReportTemplate = FALSE,
+  showAboutAnalysis = FALSE
 )
 }
 \arguments{
@@ -49,16 +53,24 @@ footnotes.}
 confidence intervals.}
 
 \item{fagan}{Boolean selection whether to generate a Fagan nomogram plot.}
+
+\item{showNaturalLanguage}{Boolean selection whether to show the natural
+language clinical summary.}
+
+\item{showClinicalInterpretation}{Boolean selection whether to show the
+clinical interpretation guide.}
+
+\item{showReportTemplate}{Boolean selection whether to show the copy-ready
+report template.}
+
+\item{showAboutAnalysis}{Boolean selection whether to show the about
+analysis section.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2} \tab \tab \tab \tab \tab a html \cr
-\code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
-\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
-\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rawContingency} \tab \tab \tab \tab \tab a table \cr
+\code{results$rawCounts} \tab \tab \tab \tab \tab a table \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
@@ -66,17 +78,21 @@ A results object containing:
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+\code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$cTable$asDF}
+\code{results$rawContingency$asDF}
 
-\code{as.data.frame(results$cTable)}
+\code{as.data.frame(results$rawContingency)}
 }
 \description{
-Function for Medical Decision Analysis. Sensitivity, specificity, positive
-predictive value, negative predictive value.
+Function for Medical Decision Analysis. Sensitivity, Specificity, Positive
+Predictive Value, Negative Predictive Value.
 }
 \examples{
 \donttest{

@@ -4,6 +4,16 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Clinical Presets
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: preset
+        stretchFactor: 1
+        events:
+          change: ./sequentialtests.events::onChange_preset
+
   - type: Label
     label: First Test (Screening)
     children:
@@ -13,14 +23,24 @@ children:
           - type: TextBox
             name: test1_name
             format: string
+            width: largest
+            enable: (preset == 'custom')
+            events:
+              change: ./sequentialtests.events::onChange_test1_name
           - type: TextBox
             name: test1_sens
             format: number
             label: 'Sensitivity'
+            enable: (preset == 'custom')
+            events:
+              change: ./sequentialtests.events::onChange_test1_sens
           - type: TextBox
             name: test1_spec
             format: number
             label: 'Specificity'
+            enable: (preset == 'custom')
+            events:
+              change: ./sequentialtests.events::onChange_test1_spec
   
   - type: Label
     label: Second Test (Confirmatory)
@@ -31,20 +51,33 @@ children:
           - type: TextBox
             name: test2_name
             format: string
+            width: largest
+            enable: (preset == 'custom')
+            events:
+              change: ./sequentialtests.events::onChange_test2_name
           - type: TextBox
             name: test2_sens
             format: number
             label: 'Sensitivity'
+            enable: (preset == 'custom')
+            events:
+              change: ./sequentialtests.events::onChange_test2_sens
           - type: TextBox
             name: test2_spec
             format: number
             label: 'Specificity'
+            enable: (preset == 'custom')
+            events:
+              change: ./sequentialtests.events::onChange_test2_spec
   
   - type: Label
     label: Testing Strategy
     children:
       - type: ComboBox
         name: strategy
+        enable: (preset == 'custom')
+        events:
+          change: ./sequentialtests.events::onChange_strategy
   
   - type: Label
     label: Disease Parameters
@@ -56,6 +89,9 @@ children:
             name: prevalence
             format: number
             label: 'Prevalence'
+            enable: (preset == 'custom')
+            events:
+              change: ./sequentialtests.events::onChange_prevalence
   
   - type: Label
     label: Display Options

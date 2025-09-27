@@ -4,26 +4,13 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # About This Analysis Panel
-  - type: CollapseBox
-    label: "📚 About This Analysis"
-    collapsed: true
-    children:
-      - type: Label
-        label: "DIAGNOSTIC TEST EVALUATION: Compare test accuracy to gold standard reference"
-      - type: Label
-        label: "When to use: Validating new tests, clinical validation studies, test comparisons"
-      - type: Label
-        label: "Required data: Cases with both test results and true disease status (gold standard)"
-      - type: Label  
-        label: "Key outputs: Sensitivity, specificity, predictive values, likelihood ratios"
 
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: "🏆 Gold Standard (Reference Test) - Most reliable diagnostic method"
+        label: "Gold Standard (Reference Test)" # " - Most reliable diagnostic method"
         children:
           - type: VariablesListBox
             name: gold
@@ -34,7 +21,7 @@ children:
             enable: (gold)
             
       - type: TargetLayoutBox
-        label: "🧪 Test Under Evaluation - Diagnostic test to validate"
+        label: "New Test" # "Test Under Evaluation - Diagnostic test to validate"
         children:
           - type: VariablesListBox
             name: newtest
@@ -44,7 +31,7 @@ children:
             name: testPositive
             enable: (newtest)
   - type: CollapseBox
-    label: "📊 Analysis Options"
+    label: "Analysis Options"
     collapsed: false
     children:
       - type: LayoutBox
@@ -52,48 +39,103 @@ children:
         children:
           - type: CheckBox
             name: ci
-            label: "📈 95% Confidence Intervals (Recommended)"
+            label: "95% Confidence Intervals" #  (Recommended)"
             enable: (!pp)
+          # - type: Label
+          #   label: "Provides uncertainty estimates using epiR package. Cannot be used with population prevalence."
+          #   margin: small
           - type: CheckBox
             name: fnote
-            label: "📝 Show Explanatory Footnotes"
+            label: "Show Explanatory Footnotes"
+          # - type: Label
+          #   label: "Adds detailed clinical interpretation help to all result tables."
+          #   margin: small
           - type: CheckBox
             name: od
-            label: "🔍 Show Raw Data Tables"
+            label: "Show Raw Data Tables"
+          # - type: Label
+          #   label: "Displays original contingency tables and missing data summaries for verification."
+          #   margin: small
             
   - type: CollapseBox
-    label: "🌍 Population Prevalence Settings"
+    label: "Population Prevalence Settings"
     collapsed: true
     children:
       - type: Label
         label: "Use when sample doesn't represent target population disease prevalence"
       - type: CheckBox
         name: pp
-        label: "📊 Use Known Population Prevalence"
+        label: "Use Known Population Prevalence"
         enable: (!ci)
+      # - type: Label
+      #   label: "Use when your study sample doesn't represent the target population prevalence. Affects PPV/NPV calculations using Bayes' theorem."
+      #   margin: small
       - type: TextBox
         name: pprob
         label: "Disease Prevalence in Target Population (0.0-1.0)"
         format: number
         enable: (!ci && pp)
+      # - type: Label
+      #   label: "Enter as proportion (e.g., 0.05 for 5%, 0.15 for 15%). Common ranges: rare diseases (0.001-0.01), common conditions (0.05-0.30)."
+      #   enable: (!ci && pp)
+      #   margin: small
         
   - type: CollapseBox
-    label: "📈 Visualization"
+    label: "Visualization"
     collapsed: true
     children:
       - type: CheckBox
         name: fagan
-        label: "📊 Fagan Nomogram"
-        
+        label: "Fagan Nomogram"
+      # - type: Label
+      #   label: |
+      #        Visual tool showing how test results change disease probability.
+      #        Shows relationship between pre-test probability, likelihood ratios, and post-test probability.
+      #   margin: small
+
   - type: CollapseBox
-    label: "⚠️ Important Notes"
-    collapsed: true
+    label: "Output Options"
+    collapsed: false
     children:
-      - type: Label
-        label: "Data Requirements: Both variables must be categorical (factor), each with exactly 2 levels, minimum 4 cases (preferably 30+)"
-      - type: Label
-        label: "Clinical Guidelines: Sensitivity >90% excellent for ruling OUT disease, Specificity >90% excellent for ruling IN disease"
-      - type: Label
-        label: "Likelihood Ratios: LR+ >10 strong evidence FOR disease, LR- <0.1 strong evidence AGAINST disease"
-      - type: Label
-        label: "Common Issues: Small cell counts (<5) may cause unstable results, extreme prevalence affects predictive values"
+      - type: CheckBox
+        name: showNaturalLanguage
+        label: "Clinical Summary"
+      - type: CheckBox
+        name: showClinicalInterpretation
+        label: "Clinical Interpretation Guide"
+      - type: CheckBox
+        name: showReportTemplate
+        label: "Copy-Ready Report"
+      - type: CheckBox
+        name: showAboutAnalysis
+        label: "About This Analysis"
+
+
+  # About This Analysis Panel
+  # - type: CollapseBox
+  #   label: "About This Analysis"
+  #   collapsed: true
+  #   children:
+  #     - type: Label
+  #       label: "DIAGNOSTIC TEST EVALUATION: Compare test accuracy to gold standard reference"
+  #     - type: Label
+  #       label: "When to use: Validating new tests, clinical validation studies, test comparisons"
+  #     - type: Label
+  #       label: "Required data: Cases with both test results and true disease status (gold standard)"
+  #     - type: Label  
+  #       label: "Key outputs: Sensitivity, specificity, predictive values, likelihood ratios"
+
+
+
+  # - type: CollapseBox
+  #   label: "Important Notes"
+  #   collapsed: true
+  #   children:
+  #     - type: Label
+  #       label: "Data Requirements: Both variables must be categorical (factor), each with exactly 2 levels, minimum 4 cases (preferably 30+)"
+  #     - type: Label
+  #       label: "Clinical Guidelines: Sensitivity >90% excellent for ruling OUT disease, Specificity >90% excellent for ruling IN disease"
+  #     - type: Label
+  #       label: "Likelihood Ratios: LR+ >10 strong evidence FOR disease, LR+ 5-10 moderate, LR+ 2-5 weak but useful; LR- <0.1 strong evidence AGAINST disease, LR- 0.1-0.2 moderate, LR- 0.2-0.5 weak"
+  #     - type: Label
+  #       label: "Common Issues: Small cell counts (<5) may cause unstable results, extreme prevalence affects predictive values"

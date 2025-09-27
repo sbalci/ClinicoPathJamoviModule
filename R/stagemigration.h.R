@@ -11,26 +11,14 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             survivalTime = NULL,
             event = NULL,
             eventLevel = NULL,
-            clinicalPreset = "routine_clinical",
-            enableGuidedMode = FALSE,
-            generateCopyReadyReport = FALSE,
-            enableAccessibilityFeatures = FALSE,
-            preferredLanguage = "en",
-            enableProgressIndicators = FALSE,
-            optimizeForLargeDatasets = FALSE,
-            analysisType = "comprehensive",
             confidenceLevel = 0.95,
-            calculateNRI = FALSE,
+            calculateNRI = TRUE,
             nriTimePoints = "12, 24, 60",
-            calculateIDI = FALSE,
-            performROCAnalysis = FALSE,
+            calculateIDI = TRUE,
+            performROCAnalysis = TRUE,
             rocTimePoints = "12, 24, 36, 60",
             performDCA = FALSE,
             performCalibration = FALSE,
-            performBootstrap = FALSE,
-            bootstrapReps = 1000,
-            performCrossValidation = FALSE,
-            cvFolds = 5,
             institutionVariable = NULL,
             clinicalSignificanceThreshold = 0.02,
             nriClinicalThreshold = 0.2,
@@ -38,22 +26,22 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             performTrendTests = FALSE,
             performLikelihoodTests = FALSE,
             calculatePseudoR2 = FALSE,
-            showMigrationOverview = FALSE,
+            showMigrationOverview = TRUE,
             showMigrationSummary = FALSE,
             showStageDistribution = FALSE,
-            showMigrationMatrix = FALSE,
-            showStatisticalComparison = FALSE,
+            showMigrationMatrix = TRUE,
+            showStatisticalComparison = TRUE,
             showConcordanceComparison = FALSE,
-            showMigrationHeatmap = FALSE,
+            showMigrationHeatmap = TRUE,
             showSankeyDiagram = FALSE,
-            showROCComparison = FALSE,
+            showROCComparison = TRUE,
             showCalibrationPlots = FALSE,
             showDecisionCurves = FALSE,
             showForestPlot = FALSE,
             showWillRogersAnalysis = FALSE,
             showWillRogersVisualization = FALSE,
             showMigrationSurvivalComparison = FALSE,
-            showSurvivalCurves = FALSE,
+            showSurvivalCurves = TRUE,
             survivalPlotType = "separate",
             showConfidenceIntervals = FALSE,
             showRiskTables = FALSE,
@@ -64,177 +52,8 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             includeEffectSizes = FALSE,
             advancedMigrationAnalysis = FALSE,
             generateExecutiveSummary = FALSE,
-            cancerType = "general",
-            useOptimismCorrection = FALSE,
-            enableMultifactorialAnalysis = FALSE,
-            continuousCovariates = NULL,
-            categoricalCovariates = NULL,
-            multifactorialComparisonType = "comprehensive",
-            baselineModel = "covariates_only",
-            performInteractionTests = FALSE,
-            stratifiedAnalysis = FALSE,
-            showMultifactorialTables = FALSE,
-            showAdjustedCIndexComparison = FALSE,
-            showNestedModelTests = FALSE,
-            showStepwiseResults = FALSE,
-            showExplanations = FALSE,
-            showAbbreviationGlossary = FALSE,
-            calculateSME = FALSE,
-            calculateRMST = FALSE,
-            performCompetingRisks = FALSE,
-            competingEventVar = NULL,
-            performOptimalCutpoint = FALSE,
-            continuousStageVariable = NULL,
-            cutpointMethod = "maxstat",
-            cutpointRange = "0.1, 0.9",
-            multipleTestingCorrection = "bonferroni",
-            validateCutpoint = FALSE,
-            cutpointBootstrap = FALSE,
-            cutpointBootstrapReps = 500,
-            generateStagingSystem = FALSE,
-            stagingSystemLevels = 3,
-            performSHAPAnalysis = FALSE,
-            shapAnalysisType = "comprehensive",
-            shapCovariates = NULL,
-            shapSampleSize = 100,
-            shapBackgroundSamples = 50,
-            shapExplanationType = "auto",
-            generateSHAPPlots = FALSE,
-            shapPatientProfiles = "representative",
-            shapInteractionAnalysis = FALSE,
-            shapClinicalThresholds = "0.25, 0.50, 0.75",
-            performCompetingRisksAdvanced = FALSE,
-            competingRisksMethod = "comprehensive",
-            cifTimePoints = "12, 24, 36, 60",
-            competingEventLevels = "cancer_death, other_death, censored",
-            primaryEventLevel = "cancer_death",
-            generateCIFPlots = FALSE,
-            performGrayTest = FALSE,
-            cifConfidenceLevel = 0.95,
-            competingRisksCovariates = NULL,
-            stratifyByStaging = FALSE,
-            calculateCRCIndex = FALSE,
-            generateCRSummary = FALSE,
-            performMultiStateAnalysis = FALSE,
-            multiStateModel = "illness_death",
-            stateVariable = NULL,
-            transitionTimeVariable = NULL,
-            multiStateStates = "healthy, disease, death",
-            absorptionStates = "death",
-            multiStateCovariates = NULL,
-            calculateTransitionProbabilities = FALSE,
-            multiStateTimePoints = "6, 12, 24, 36, 60",
-            generateTransitionMatrix = FALSE,
-            multiStateGraphics = FALSE,
-            msStratifyByStaging = FALSE,
-            multiStateValidation = FALSE,
-            generateMSMSummary = FALSE,
-            performRandomForestAnalysis = FALSE,
-            forestModelType = "rsf",
-            forestNTrees = 500,
-            forestMTry = "auto",
-            forestMinNodeSize = 3,
-            forestCovariates = NULL,
-            calculateVariableImportance = FALSE,
-            forestImportanceType = "permutation",
-            performForestValidation = FALSE,
-            forestPredictionTimePoints = "12, 24, 36, 60",
-            generateSurvivalPredictions = FALSE,
-            forestDiscriminationMetrics = FALSE,
-            forestStagingComparison = FALSE,
-            forestBootstrap = FALSE,
-            forestBootstrapSamples = 100,
-            generateForestSummary = FALSE,
-            performCureModelAnalysis = FALSE,
-            cureModelType = "mixture",
-            cureDistribution = "weibull",
-            cureAnalyzeOldStage = FALSE,
-            cureAnalyzeNewStage = FALSE,
-            cureFractionEstimation = "parametric",
-            cureConfidenceLevel = 0.95,
-            cureBootstrapCI = FALSE,
-            cureBootstrapReps = 500,
-            cureTimeHorizon = 120,
-            curePlateauThreshold = 0.05,
-            cureCovariates = NULL,
-            cureModelComparison = FALSE,
-            cureStageSpecificAnalysis = FALSE,
-            cureGoodnessOfFit = FALSE,
-            generateCureSummary = FALSE,
-            performIntervalCensoringAnalysis = FALSE,
-            intervalCensoringLeftTime = NULL,
-            intervalCensoringRightTime = NULL,
-            intervalCensoringDistribution = "weibull",
-            intervalCensoringModel = "both",
-            intervalCensoringBootstrap = FALSE,
-            intervalCensoringBootstrapSamples = 1000,
-            intervalCensoringCompareStages = FALSE,
-            intervalCensoringPlots = FALSE,
-            intervalCensoringDiagnostics = FALSE,
-            intervalCensoringPredictionTime = "12, 24, 36, 60",
-            intervalCensoringConfidenceLevel = 0.95,
-            intervalCensoringAdjustVariables = NULL,
-            performInformativeCensoringAnalysis = FALSE,
-            informativeCensoringTestMethod = "all_tests",
-            informativeCensoringCovariates = NULL,
-            informativeCensoringLandmarkTimes = "12, 24, 36, 60",
-            informativeCensoringAdjustmentMethod = "sensitivity_analysis",
-            informativeCensoringIPWVariables = NULL,
-            informativeCensoringSensitivityRange = "0.8, 0.9, 1.0, 1.1, 1.2",
-            informativeCensoringBootstrap = FALSE,
-            informativeCensoringBootstrapSamples = 1000,
-            informativeCensoringAlpha = 0.05,
-            informativeCensoringPlots = FALSE,
-            informativeCensoringCompareStages = FALSE,
-            performConcordanceProbabilityAnalysis = FALSE,
-            concordanceProbabilityMethods = "all_methods",
-            concordanceProbabilityTimePoints = "12, 24, 36, 60, 120",
-            concordanceProbabilityWeighting = "uniform",
-            concordanceProbabilityBootstrap = FALSE,
-            concordanceProbabilityBootstrapSamples = 1000,
-            concordanceProbabilityConfidenceLevel = 0.95,
-            concordanceProbabilityCompareStages = FALSE,
-            concordanceProbabilityAdjustVariables = NULL,
-            concordanceProbabilityRobustnessAnalysis = FALSE,
-            concordanceProbabilityAlpha = 0.05,
-            concordanceProbabilityDiagnostics = FALSE,
-            performWinRatioAnalysis = FALSE,
-            winRatioEndpoints = "death_progression_response",
-            winRatioDeathVariable = NULL,
-            winRatioSecondaryEndpoint = NULL,
-            winRatioTertiaryEndpoint = NULL,
-            winRatioTimeVariables = NULL,
-            winRatioMatchingStrategy = "all_pairs",
-            winRatioConfidenceMethod = "bootstrap",
-            winRatioBootstrapSamples = 1000,
-            winRatioConfidenceLevel = 0.95,
-            winRatioHandleTies = "next_endpoint",
-            winRatioSensitivityAnalysis = FALSE,
-            winRatioGeneralizedPairwise = FALSE,
-            performFrailtyModelsAnalysis = FALSE,
-            frailtyClusterVariable = NULL,
-            frailtyDistribution = "gamma",
-            frailtyBootstrap = FALSE,
-            frailtyBootstrapSamples = 500,
-            frailtyVarianceComponents = FALSE,
-            frailtyHeterogeneityTest = FALSE,
-            frailtyClusterComparison = FALSE,
-            frailtyModelSelection = FALSE,
-            frailtyPredictiveAccuracy = FALSE,
-            frailtyDiagnostics = FALSE,
-            frailtyAdvancedInference = FALSE,
-            performClinicalUtilityAnalysis = FALSE,
-            clinicalUtilityPrevalence = 0.2,
-            clinicalUtilityTimePoint = 60,
-            clinicalUtilityThresholds = "standard",
-            clinicalUtilityNNT = FALSE,
-            clinicalUtilityTreatmentEffect = 0.7,
-            clinicalUtilityComparison = FALSE,
-            clinicalUtilityCostEffectiveness = FALSE,
-            clinicalUtilityCostPerIntervention = 5000,
-            clinicalUtilityBootstrap = FALSE,
-            clinicalUtilityBootstrapSamples = 500,
-            clinicalUtilityTimeVarying = FALSE, ...) {
+            enableMultifactorialAnalysis = TRUE,
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -283,51 +102,6 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "eventLevel",
                 eventLevel,
                 variable="(event)")
-            private$..clinicalPreset <- jmvcore::OptionList$new(
-                "clinicalPreset",
-                clinicalPreset,
-                options=list(
-                    "routine_clinical",
-                    "research_study",
-                    "publication_ready",
-                    "custom"),
-                default="routine_clinical")
-            private$..enableGuidedMode <- jmvcore::OptionBool$new(
-                "enableGuidedMode",
-                enableGuidedMode,
-                default=FALSE)
-            private$..generateCopyReadyReport <- jmvcore::OptionBool$new(
-                "generateCopyReadyReport",
-                generateCopyReadyReport,
-                default=FALSE)
-            private$..enableAccessibilityFeatures <- jmvcore::OptionBool$new(
-                "enableAccessibilityFeatures",
-                enableAccessibilityFeatures,
-                default=FALSE)
-            private$..preferredLanguage <- jmvcore::OptionList$new(
-                "preferredLanguage",
-                preferredLanguage,
-                options=list(
-                    "en",
-                    "tr"),
-                default="en")
-            private$..enableProgressIndicators <- jmvcore::OptionBool$new(
-                "enableProgressIndicators",
-                enableProgressIndicators,
-                default=FALSE)
-            private$..optimizeForLargeDatasets <- jmvcore::OptionBool$new(
-                "optimizeForLargeDatasets",
-                optimizeForLargeDatasets,
-                default=FALSE)
-            private$..analysisType <- jmvcore::OptionList$new(
-                "analysisType",
-                analysisType,
-                options=list(
-                    "basic",
-                    "standard",
-                    "comprehensive",
-                    "publication"),
-                default="comprehensive")
             private$..confidenceLevel <- jmvcore::OptionNumber$new(
                 "confidenceLevel",
                 confidenceLevel,
@@ -337,7 +111,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..calculateNRI <- jmvcore::OptionBool$new(
                 "calculateNRI",
                 calculateNRI,
-                default=FALSE)
+                default=TRUE)
             private$..nriTimePoints <- jmvcore::OptionString$new(
                 "nriTimePoints",
                 nriTimePoints,
@@ -345,11 +119,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..calculateIDI <- jmvcore::OptionBool$new(
                 "calculateIDI",
                 calculateIDI,
-                default=FALSE)
+                default=TRUE)
             private$..performROCAnalysis <- jmvcore::OptionBool$new(
                 "performROCAnalysis",
                 performROCAnalysis,
-                default=FALSE)
+                default=TRUE)
             private$..rocTimePoints <- jmvcore::OptionString$new(
                 "rocTimePoints",
                 rocTimePoints,
@@ -362,26 +136,6 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "performCalibration",
                 performCalibration,
                 default=FALSE)
-            private$..performBootstrap <- jmvcore::OptionBool$new(
-                "performBootstrap",
-                performBootstrap,
-                default=FALSE)
-            private$..bootstrapReps <- jmvcore::OptionNumber$new(
-                "bootstrapReps",
-                bootstrapReps,
-                min=100,
-                max=2000,
-                default=1000)
-            private$..performCrossValidation <- jmvcore::OptionBool$new(
-                "performCrossValidation",
-                performCrossValidation,
-                default=FALSE)
-            private$..cvFolds <- jmvcore::OptionNumber$new(
-                "cvFolds",
-                cvFolds,
-                min=3,
-                max=10,
-                default=5)
             private$..institutionVariable <- jmvcore::OptionVariable$new(
                 "institutionVariable",
                 institutionVariable,
@@ -423,7 +177,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..showMigrationOverview <- jmvcore::OptionBool$new(
                 "showMigrationOverview",
                 showMigrationOverview,
-                default=FALSE)
+                default=TRUE)
             private$..showMigrationSummary <- jmvcore::OptionBool$new(
                 "showMigrationSummary",
                 showMigrationSummary,
@@ -435,11 +189,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..showMigrationMatrix <- jmvcore::OptionBool$new(
                 "showMigrationMatrix",
                 showMigrationMatrix,
-                default=FALSE)
+                default=TRUE)
             private$..showStatisticalComparison <- jmvcore::OptionBool$new(
                 "showStatisticalComparison",
                 showStatisticalComparison,
-                default=FALSE)
+                default=TRUE)
             private$..showConcordanceComparison <- jmvcore::OptionBool$new(
                 "showConcordanceComparison",
                 showConcordanceComparison,
@@ -447,7 +201,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..showMigrationHeatmap <- jmvcore::OptionBool$new(
                 "showMigrationHeatmap",
                 showMigrationHeatmap,
-                default=FALSE)
+                default=TRUE)
             private$..showSankeyDiagram <- jmvcore::OptionBool$new(
                 "showSankeyDiagram",
                 showSankeyDiagram,
@@ -455,7 +209,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..showROCComparison <- jmvcore::OptionBool$new(
                 "showROCComparison",
                 showROCComparison,
-                default=FALSE)
+                default=TRUE)
             private$..showCalibrationPlots <- jmvcore::OptionBool$new(
                 "showCalibrationPlots",
                 showCalibrationPlots,
@@ -483,7 +237,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..showSurvivalCurves <- jmvcore::OptionBool$new(
                 "showSurvivalCurves",
                 showSurvivalCurves,
-                default=FALSE)
+                default=TRUE)
             private$..survivalPlotType <- jmvcore::OptionList$new(
                 "survivalPlotType",
                 survivalPlotType,
@@ -528,1003 +282,13 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "generateExecutiveSummary",
                 generateExecutiveSummary,
                 default=FALSE)
-            private$..cancerType <- jmvcore::OptionList$new(
-                "cancerType",
-                cancerType,
-                options=list(
-                    "general",
-                    "lung",
-                    "breast",
-                    "colorectal",
-                    "prostate",
-                    "headneck",
-                    "melanoma",
-                    "other"),
-                default="general")
-            private$..useOptimismCorrection <- jmvcore::OptionBool$new(
-                "useOptimismCorrection",
-                useOptimismCorrection,
-                default=FALSE)
             private$..enableMultifactorialAnalysis <- jmvcore::OptionBool$new(
                 "enableMultifactorialAnalysis",
                 enableMultifactorialAnalysis,
-                default=FALSE)
-            private$..continuousCovariates <- jmvcore::OptionVariables$new(
-                "continuousCovariates",
-                continuousCovariates,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..categoricalCovariates <- jmvcore::OptionVariables$new(
-                "categoricalCovariates",
-                categoricalCovariates,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"),
-                default=NULL)
-            private$..multifactorialComparisonType <- jmvcore::OptionList$new(
-                "multifactorialComparisonType",
-                multifactorialComparisonType,
-                options=list(
-                    "adjusted_cindex",
-                    "nested_models",
-                    "stepwise",
-                    "comprehensive"),
-                default="comprehensive")
-            private$..baselineModel <- jmvcore::OptionList$new(
-                "baselineModel",
-                baselineModel,
-                options=list(
-                    "covariates_only",
-                    "original_plus_covariates",
-                    "new_plus_covariates"),
-                default="covariates_only")
-            private$..performInteractionTests <- jmvcore::OptionBool$new(
-                "performInteractionTests",
-                performInteractionTests,
-                default=FALSE)
-            private$..stratifiedAnalysis <- jmvcore::OptionBool$new(
-                "stratifiedAnalysis",
-                stratifiedAnalysis,
-                default=FALSE)
-            private$..showMultifactorialTables <- jmvcore::OptionBool$new(
-                "showMultifactorialTables",
-                showMultifactorialTables,
-                default=FALSE)
-            private$..showAdjustedCIndexComparison <- jmvcore::OptionBool$new(
-                "showAdjustedCIndexComparison",
-                showAdjustedCIndexComparison,
-                default=FALSE)
-            private$..showNestedModelTests <- jmvcore::OptionBool$new(
-                "showNestedModelTests",
-                showNestedModelTests,
-                default=FALSE)
-            private$..showStepwiseResults <- jmvcore::OptionBool$new(
-                "showStepwiseResults",
-                showStepwiseResults,
-                default=FALSE)
+                default=TRUE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
-                default=FALSE)
-            private$..showAbbreviationGlossary <- jmvcore::OptionBool$new(
-                "showAbbreviationGlossary",
-                showAbbreviationGlossary,
-                default=FALSE)
-            private$..calculateSME <- jmvcore::OptionBool$new(
-                "calculateSME",
-                calculateSME,
-                default=FALSE)
-            private$..calculateRMST <- jmvcore::OptionBool$new(
-                "calculateRMST",
-                calculateRMST,
-                default=FALSE)
-            private$..performCompetingRisks <- jmvcore::OptionBool$new(
-                "performCompetingRisks",
-                performCompetingRisks,
-                default=FALSE)
-            private$..competingEventVar <- jmvcore::OptionVariable$new(
-                "competingEventVar",
-                competingEventVar,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor",
-                    "numeric"),
-                default=NULL)
-            private$..performOptimalCutpoint <- jmvcore::OptionBool$new(
-                "performOptimalCutpoint",
-                performOptimalCutpoint,
-                default=FALSE)
-            private$..continuousStageVariable <- jmvcore::OptionVariable$new(
-                "continuousStageVariable",
-                continuousStageVariable,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..cutpointMethod <- jmvcore::OptionList$new(
-                "cutpointMethod",
-                cutpointMethod,
-                options=list(
-                    "maxstat",
-                    "minpvalue",
-                    "surv_cutpoint",
-                    "comprehensive"),
-                default="maxstat")
-            private$..cutpointRange <- jmvcore::OptionString$new(
-                "cutpointRange",
-                cutpointRange,
-                default="0.1, 0.9")
-            private$..multipleTestingCorrection <- jmvcore::OptionList$new(
-                "multipleTestingCorrection",
-                multipleTestingCorrection,
-                options=list(
-                    "bonferroni",
-                    "BH",
-                    "holm",
-                    "none"),
-                default="bonferroni")
-            private$..validateCutpoint <- jmvcore::OptionBool$new(
-                "validateCutpoint",
-                validateCutpoint,
-                default=FALSE)
-            private$..cutpointBootstrap <- jmvcore::OptionBool$new(
-                "cutpointBootstrap",
-                cutpointBootstrap,
-                default=FALSE)
-            private$..cutpointBootstrapReps <- jmvcore::OptionNumber$new(
-                "cutpointBootstrapReps",
-                cutpointBootstrapReps,
-                min=100,
-                max=1000,
-                default=500)
-            private$..generateStagingSystem <- jmvcore::OptionBool$new(
-                "generateStagingSystem",
-                generateStagingSystem,
-                default=FALSE)
-            private$..stagingSystemLevels <- jmvcore::OptionNumber$new(
-                "stagingSystemLevels",
-                stagingSystemLevels,
-                min=2,
-                max=6,
-                default=3)
-            private$..performSHAPAnalysis <- jmvcore::OptionBool$new(
-                "performSHAPAnalysis",
-                performSHAPAnalysis,
-                default=FALSE)
-            private$..shapAnalysisType <- jmvcore::OptionList$new(
-                "shapAnalysisType",
-                shapAnalysisType,
-                options=list(
-                    "global",
-                    "individual",
-                    "comprehensive"),
-                default="comprehensive")
-            private$..shapCovariates <- jmvcore::OptionVariables$new(
-                "shapCovariates",
-                shapCovariates,
-                suggested=list(
-                    "continuous",
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..shapSampleSize <- jmvcore::OptionNumber$new(
-                "shapSampleSize",
-                shapSampleSize,
-                min=50,
-                max=1000,
-                default=100)
-            private$..shapBackgroundSamples <- jmvcore::OptionNumber$new(
-                "shapBackgroundSamples",
-                shapBackgroundSamples,
-                min=10,
-                max=500,
-                default=50)
-            private$..shapExplanationType <- jmvcore::OptionList$new(
-                "shapExplanationType",
-                shapExplanationType,
-                options=list(
-                    "tree",
-                    "kernel",
-                    "linear",
-                    "auto"),
-                default="auto")
-            private$..generateSHAPPlots <- jmvcore::OptionBool$new(
-                "generateSHAPPlots",
-                generateSHAPPlots,
-                default=FALSE)
-            private$..shapPatientProfiles <- jmvcore::OptionList$new(
-                "shapPatientProfiles",
-                shapPatientProfiles,
-                options=list(
-                    "high_risk",
-                    "low_risk",
-                    "representative",
-                    "all"),
-                default="representative")
-            private$..shapInteractionAnalysis <- jmvcore::OptionBool$new(
-                "shapInteractionAnalysis",
-                shapInteractionAnalysis,
-                default=FALSE)
-            private$..shapClinicalThresholds <- jmvcore::OptionString$new(
-                "shapClinicalThresholds",
-                shapClinicalThresholds,
-                default="0.25, 0.50, 0.75")
-            private$..performCompetingRisksAdvanced <- jmvcore::OptionBool$new(
-                "performCompetingRisksAdvanced",
-                performCompetingRisksAdvanced,
-                default=FALSE)
-            private$..competingRisksMethod <- jmvcore::OptionList$new(
-                "competingRisksMethod",
-                competingRisksMethod,
-                options=list(
-                    "finegray",
-                    "causespecific",
-                    "comprehensive"),
-                default="comprehensive")
-            private$..cifTimePoints <- jmvcore::OptionString$new(
-                "cifTimePoints",
-                cifTimePoints,
-                default="12, 24, 36, 60")
-            private$..competingEventLevels <- jmvcore::OptionString$new(
-                "competingEventLevels",
-                competingEventLevels,
-                default="cancer_death, other_death, censored")
-            private$..primaryEventLevel <- jmvcore::OptionString$new(
-                "primaryEventLevel",
-                primaryEventLevel,
-                default="cancer_death")
-            private$..generateCIFPlots <- jmvcore::OptionBool$new(
-                "generateCIFPlots",
-                generateCIFPlots,
-                default=FALSE)
-            private$..performGrayTest <- jmvcore::OptionBool$new(
-                "performGrayTest",
-                performGrayTest,
-                default=FALSE)
-            private$..cifConfidenceLevel <- jmvcore::OptionNumber$new(
-                "cifConfidenceLevel",
-                cifConfidenceLevel,
-                min=0.8,
-                max=0.99,
-                default=0.95)
-            private$..competingRisksCovariates <- jmvcore::OptionVariables$new(
-                "competingRisksCovariates",
-                competingRisksCovariates,
-                suggested=list(
-                    "continuous",
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..stratifyByStaging <- jmvcore::OptionBool$new(
-                "stratifyByStaging",
-                stratifyByStaging,
-                default=FALSE)
-            private$..calculateCRCIndex <- jmvcore::OptionBool$new(
-                "calculateCRCIndex",
-                calculateCRCIndex,
-                default=FALSE)
-            private$..generateCRSummary <- jmvcore::OptionBool$new(
-                "generateCRSummary",
-                generateCRSummary,
-                default=FALSE)
-            private$..performMultiStateAnalysis <- jmvcore::OptionBool$new(
-                "performMultiStateAnalysis",
-                performMultiStateAnalysis,
-                default=FALSE)
-            private$..multiStateModel <- jmvcore::OptionList$new(
-                "multiStateModel",
-                multiStateModel,
-                options=list(
-                    "illness_death",
-                    "progression",
-                    "relapse_death",
-                    "custom",
-                    "comprehensive"),
-                default="illness_death")
-            private$..stateVariable <- jmvcore::OptionVariable$new(
-                "stateVariable",
-                stateVariable,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor",
-                    "numeric"),
-                default=NULL)
-            private$..transitionTimeVariable <- jmvcore::OptionVariable$new(
-                "transitionTimeVariable",
-                transitionTimeVariable,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..multiStateStates <- jmvcore::OptionString$new(
-                "multiStateStates",
-                multiStateStates,
-                default="healthy, disease, death")
-            private$..absorptionStates <- jmvcore::OptionString$new(
-                "absorptionStates",
-                absorptionStates,
-                default="death")
-            private$..multiStateCovariates <- jmvcore::OptionVariables$new(
-                "multiStateCovariates",
-                multiStateCovariates,
-                suggested=list(
-                    "continuous",
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..calculateTransitionProbabilities <- jmvcore::OptionBool$new(
-                "calculateTransitionProbabilities",
-                calculateTransitionProbabilities,
-                default=FALSE)
-            private$..multiStateTimePoints <- jmvcore::OptionString$new(
-                "multiStateTimePoints",
-                multiStateTimePoints,
-                default="6, 12, 24, 36, 60")
-            private$..generateTransitionMatrix <- jmvcore::OptionBool$new(
-                "generateTransitionMatrix",
-                generateTransitionMatrix,
-                default=FALSE)
-            private$..multiStateGraphics <- jmvcore::OptionBool$new(
-                "multiStateGraphics",
-                multiStateGraphics,
-                default=FALSE)
-            private$..msStratifyByStaging <- jmvcore::OptionBool$new(
-                "msStratifyByStaging",
-                msStratifyByStaging,
-                default=FALSE)
-            private$..multiStateValidation <- jmvcore::OptionBool$new(
-                "multiStateValidation",
-                multiStateValidation,
-                default=FALSE)
-            private$..generateMSMSummary <- jmvcore::OptionBool$new(
-                "generateMSMSummary",
-                generateMSMSummary,
-                default=FALSE)
-            private$..performRandomForestAnalysis <- jmvcore::OptionBool$new(
-                "performRandomForestAnalysis",
-                performRandomForestAnalysis,
-                default=FALSE)
-            private$..forestModelType <- jmvcore::OptionList$new(
-                "forestModelType",
-                forestModelType,
-                options=list(
-                    "rsf",
-                    "cforest",
-                    "extraTrees",
-                    "ensemble"),
-                default="rsf")
-            private$..forestNTrees <- jmvcore::OptionNumber$new(
-                "forestNTrees",
-                forestNTrees,
-                min=50,
-                max=2000,
-                default=500)
-            private$..forestMTry <- jmvcore::OptionString$new(
-                "forestMTry",
-                forestMTry,
-                default="auto")
-            private$..forestMinNodeSize <- jmvcore::OptionNumber$new(
-                "forestMinNodeSize",
-                forestMinNodeSize,
-                min=1,
-                max=50,
-                default=3)
-            private$..forestCovariates <- jmvcore::OptionVariables$new(
-                "forestCovariates",
-                forestCovariates,
-                suggested=list(
-                    "continuous",
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..calculateVariableImportance <- jmvcore::OptionBool$new(
-                "calculateVariableImportance",
-                calculateVariableImportance,
-                default=FALSE)
-            private$..forestImportanceType <- jmvcore::OptionList$new(
-                "forestImportanceType",
-                forestImportanceType,
-                options=list(
-                    "permutation",
-                    "vimp",
-                    "minimal_depth",
-                    "comprehensive"),
-                default="permutation")
-            private$..performForestValidation <- jmvcore::OptionBool$new(
-                "performForestValidation",
-                performForestValidation,
-                default=FALSE)
-            private$..forestPredictionTimePoints <- jmvcore::OptionString$new(
-                "forestPredictionTimePoints",
-                forestPredictionTimePoints,
-                default="12, 24, 36, 60")
-            private$..generateSurvivalPredictions <- jmvcore::OptionBool$new(
-                "generateSurvivalPredictions",
-                generateSurvivalPredictions,
-                default=FALSE)
-            private$..forestDiscriminationMetrics <- jmvcore::OptionBool$new(
-                "forestDiscriminationMetrics",
-                forestDiscriminationMetrics,
-                default=FALSE)
-            private$..forestStagingComparison <- jmvcore::OptionBool$new(
-                "forestStagingComparison",
-                forestStagingComparison,
-                default=FALSE)
-            private$..forestBootstrap <- jmvcore::OptionBool$new(
-                "forestBootstrap",
-                forestBootstrap,
-                default=FALSE)
-            private$..forestBootstrapSamples <- jmvcore::OptionNumber$new(
-                "forestBootstrapSamples",
-                forestBootstrapSamples,
-                min=50,
-                max=500,
-                default=100)
-            private$..generateForestSummary <- jmvcore::OptionBool$new(
-                "generateForestSummary",
-                generateForestSummary,
-                default=FALSE)
-            private$..performCureModelAnalysis <- jmvcore::OptionBool$new(
-                "performCureModelAnalysis",
-                performCureModelAnalysis,
-                default=FALSE)
-            private$..cureModelType <- jmvcore::OptionList$new(
-                "cureModelType",
-                cureModelType,
-                options=list(
-                    "mixture",
-                    "promotion",
-                    "both"),
-                default="mixture")
-            private$..cureDistribution <- jmvcore::OptionList$new(
-                "cureDistribution",
-                cureDistribution,
-                options=list(
-                    "weibull",
-                    "exponential",
-                    "lognormal",
-                    "loglogistic"),
-                default="weibull")
-            private$..cureAnalyzeOldStage <- jmvcore::OptionBool$new(
-                "cureAnalyzeOldStage",
-                cureAnalyzeOldStage,
-                default=FALSE)
-            private$..cureAnalyzeNewStage <- jmvcore::OptionBool$new(
-                "cureAnalyzeNewStage",
-                cureAnalyzeNewStage,
-                default=FALSE)
-            private$..cureFractionEstimation <- jmvcore::OptionList$new(
-                "cureFractionEstimation",
-                cureFractionEstimation,
-                options=list(
-                    "parametric",
-                    "nonparametric",
-                    "both"),
-                default="parametric")
-            private$..cureConfidenceLevel <- jmvcore::OptionNumber$new(
-                "cureConfidenceLevel",
-                cureConfidenceLevel,
-                min=0.8,
-                max=0.99,
-                default=0.95)
-            private$..cureBootstrapCI <- jmvcore::OptionBool$new(
-                "cureBootstrapCI",
-                cureBootstrapCI,
-                default=FALSE)
-            private$..cureBootstrapReps <- jmvcore::OptionNumber$new(
-                "cureBootstrapReps",
-                cureBootstrapReps,
-                min=100,
-                max=2000,
-                default=500)
-            private$..cureTimeHorizon <- jmvcore::OptionNumber$new(
-                "cureTimeHorizon",
-                cureTimeHorizon,
-                min=12,
-                max=240,
-                default=120)
-            private$..curePlateauThreshold <- jmvcore::OptionNumber$new(
-                "curePlateauThreshold",
-                curePlateauThreshold,
-                min=0.01,
-                max=0.1,
-                default=0.05)
-            private$..cureCovariates <- jmvcore::OptionVariables$new(
-                "cureCovariates",
-                cureCovariates,
-                suggested=list(
-                    "continuous",
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..cureModelComparison <- jmvcore::OptionBool$new(
-                "cureModelComparison",
-                cureModelComparison,
-                default=FALSE)
-            private$..cureStageSpecificAnalysis <- jmvcore::OptionBool$new(
-                "cureStageSpecificAnalysis",
-                cureStageSpecificAnalysis,
-                default=FALSE)
-            private$..cureGoodnessOfFit <- jmvcore::OptionBool$new(
-                "cureGoodnessOfFit",
-                cureGoodnessOfFit,
-                default=FALSE)
-            private$..generateCureSummary <- jmvcore::OptionBool$new(
-                "generateCureSummary",
-                generateCureSummary,
-                default=FALSE)
-            private$..performIntervalCensoringAnalysis <- jmvcore::OptionBool$new(
-                "performIntervalCensoringAnalysis",
-                performIntervalCensoringAnalysis,
-                default=FALSE)
-            private$..intervalCensoringLeftTime <- jmvcore::OptionVariable$new(
-                "intervalCensoringLeftTime",
-                intervalCensoringLeftTime,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..intervalCensoringRightTime <- jmvcore::OptionVariable$new(
-                "intervalCensoringRightTime",
-                intervalCensoringRightTime,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..intervalCensoringDistribution <- jmvcore::OptionList$new(
-                "intervalCensoringDistribution",
-                intervalCensoringDistribution,
-                options=list(
-                    "weibull",
-                    "loglogistic",
-                    "lognormal",
-                    "exponential",
-                    "gamma"),
-                default="weibull")
-            private$..intervalCensoringModel <- jmvcore::OptionList$new(
-                "intervalCensoringModel",
-                intervalCensoringModel,
-                options=list(
-                    "nonparametric",
-                    "parametric",
-                    "both"),
-                default="both")
-            private$..intervalCensoringBootstrap <- jmvcore::OptionBool$new(
-                "intervalCensoringBootstrap",
-                intervalCensoringBootstrap,
-                default=FALSE)
-            private$..intervalCensoringBootstrapSamples <- jmvcore::OptionInteger$new(
-                "intervalCensoringBootstrapSamples",
-                intervalCensoringBootstrapSamples,
-                default=1000,
-                min=100,
-                max=10000)
-            private$..intervalCensoringCompareStages <- jmvcore::OptionBool$new(
-                "intervalCensoringCompareStages",
-                intervalCensoringCompareStages,
-                default=FALSE)
-            private$..intervalCensoringPlots <- jmvcore::OptionBool$new(
-                "intervalCensoringPlots",
-                intervalCensoringPlots,
-                default=FALSE)
-            private$..intervalCensoringDiagnostics <- jmvcore::OptionBool$new(
-                "intervalCensoringDiagnostics",
-                intervalCensoringDiagnostics,
-                default=FALSE)
-            private$..intervalCensoringPredictionTime <- jmvcore::OptionString$new(
-                "intervalCensoringPredictionTime",
-                intervalCensoringPredictionTime,
-                default="12, 24, 36, 60")
-            private$..intervalCensoringConfidenceLevel <- jmvcore::OptionNumber$new(
-                "intervalCensoringConfidenceLevel",
-                intervalCensoringConfidenceLevel,
-                default=0.95,
-                min=0.8,
-                max=0.99)
-            private$..intervalCensoringAdjustVariables <- jmvcore::OptionVariables$new(
-                "intervalCensoringAdjustVariables",
-                intervalCensoringAdjustVariables,
-                suggested=list(
-                    "continuous",
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..performInformativeCensoringAnalysis <- jmvcore::OptionBool$new(
-                "performInformativeCensoringAnalysis",
-                performInformativeCensoringAnalysis,
-                default=FALSE)
-            private$..informativeCensoringTestMethod <- jmvcore::OptionList$new(
-                "informativeCensoringTestMethod",
-                informativeCensoringTestMethod,
-                options=list(
-                    "all_tests",
-                    "correlation_test",
-                    "regression_test",
-                    "competing_risks",
-                    "landmark_analysis"),
-                default="all_tests")
-            private$..informativeCensoringCovariates <- jmvcore::OptionVariables$new(
-                "informativeCensoringCovariates",
-                informativeCensoringCovariates,
-                suggested=list(
-                    "continuous",
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..informativeCensoringLandmarkTimes <- jmvcore::OptionString$new(
-                "informativeCensoringLandmarkTimes",
-                informativeCensoringLandmarkTimes,
-                default="12, 24, 36, 60")
-            private$..informativeCensoringAdjustmentMethod <- jmvcore::OptionList$new(
-                "informativeCensoringAdjustmentMethod",
-                informativeCensoringAdjustmentMethod,
-                options=list(
-                    "none",
-                    "ipw",
-                    "multiple_imputation",
-                    "sensitivity_analysis"),
-                default="sensitivity_analysis")
-            private$..informativeCensoringIPWVariables <- jmvcore::OptionVariables$new(
-                "informativeCensoringIPWVariables",
-                informativeCensoringIPWVariables,
-                suggested=list(
-                    "continuous",
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..informativeCensoringSensitivityRange <- jmvcore::OptionString$new(
-                "informativeCensoringSensitivityRange",
-                informativeCensoringSensitivityRange,
-                default="0.8, 0.9, 1.0, 1.1, 1.2")
-            private$..informativeCensoringBootstrap <- jmvcore::OptionBool$new(
-                "informativeCensoringBootstrap",
-                informativeCensoringBootstrap,
-                default=FALSE)
-            private$..informativeCensoringBootstrapSamples <- jmvcore::OptionInteger$new(
-                "informativeCensoringBootstrapSamples",
-                informativeCensoringBootstrapSamples,
-                default=1000,
-                min=100,
-                max=5000)
-            private$..informativeCensoringAlpha <- jmvcore::OptionNumber$new(
-                "informativeCensoringAlpha",
-                informativeCensoringAlpha,
-                default=0.05,
-                min=0.01,
-                max=0.1)
-            private$..informativeCensoringPlots <- jmvcore::OptionBool$new(
-                "informativeCensoringPlots",
-                informativeCensoringPlots,
-                default=FALSE)
-            private$..informativeCensoringCompareStages <- jmvcore::OptionBool$new(
-                "informativeCensoringCompareStages",
-                informativeCensoringCompareStages,
-                default=FALSE)
-            private$..performConcordanceProbabilityAnalysis <- jmvcore::OptionBool$new(
-                "performConcordanceProbabilityAnalysis",
-                performConcordanceProbabilityAnalysis,
-                default=FALSE)
-            private$..concordanceProbabilityMethods <- jmvcore::OptionList$new(
-                "concordanceProbabilityMethods",
-                concordanceProbabilityMethods,
-                options=list(
-                    "all_methods",
-                    "harrell_c",
-                    "uno_c",
-                    "time_dependent",
-                    "ipcw_concordance",
-                    "weighted_concordance"),
-                default="all_methods")
-            private$..concordanceProbabilityTimePoints <- jmvcore::OptionString$new(
-                "concordanceProbabilityTimePoints",
-                concordanceProbabilityTimePoints,
-                default="12, 24, 36, 60, 120")
-            private$..concordanceProbabilityWeighting <- jmvcore::OptionList$new(
-                "concordanceProbabilityWeighting",
-                concordanceProbabilityWeighting,
-                options=list(
-                    "uniform",
-                    "sample_size",
-                    "event_rate",
-                    "follow_up",
-                    "inverse_variance"),
-                default="uniform")
-            private$..concordanceProbabilityBootstrap <- jmvcore::OptionBool$new(
-                "concordanceProbabilityBootstrap",
-                concordanceProbabilityBootstrap,
-                default=FALSE)
-            private$..concordanceProbabilityBootstrapSamples <- jmvcore::OptionInteger$new(
-                "concordanceProbabilityBootstrapSamples",
-                concordanceProbabilityBootstrapSamples,
-                default=1000,
-                min=100,
-                max=5000)
-            private$..concordanceProbabilityConfidenceLevel <- jmvcore::OptionNumber$new(
-                "concordanceProbabilityConfidenceLevel",
-                concordanceProbabilityConfidenceLevel,
-                default=0.95,
-                min=0.8,
-                max=0.99)
-            private$..concordanceProbabilityCompareStages <- jmvcore::OptionBool$new(
-                "concordanceProbabilityCompareStages",
-                concordanceProbabilityCompareStages,
-                default=FALSE)
-            private$..concordanceProbabilityAdjustVariables <- jmvcore::OptionVariables$new(
-                "concordanceProbabilityAdjustVariables",
-                concordanceProbabilityAdjustVariables,
-                suggested=list(
-                    "continuous",
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..concordanceProbabilityRobustnessAnalysis <- jmvcore::OptionBool$new(
-                "concordanceProbabilityRobustnessAnalysis",
-                concordanceProbabilityRobustnessAnalysis,
-                default=FALSE)
-            private$..concordanceProbabilityAlpha <- jmvcore::OptionNumber$new(
-                "concordanceProbabilityAlpha",
-                concordanceProbabilityAlpha,
-                default=0.05,
-                min=0.01,
-                max=0.1)
-            private$..concordanceProbabilityDiagnostics <- jmvcore::OptionBool$new(
-                "concordanceProbabilityDiagnostics",
-                concordanceProbabilityDiagnostics,
-                default=FALSE)
-            private$..performWinRatioAnalysis <- jmvcore::OptionBool$new(
-                "performWinRatioAnalysis",
-                performWinRatioAnalysis,
-                default=FALSE)
-            private$..winRatioEndpoints <- jmvcore::OptionList$new(
-                "winRatioEndpoints",
-                winRatioEndpoints,
-                options=list(
-                    "death_progression_response",
-                    "death_recurrence_remission",
-                    "death_hospitalization_qol",
-                    "custom"),
-                default="death_progression_response")
-            private$..winRatioDeathVariable <- jmvcore::OptionVariable$new(
-                "winRatioDeathVariable",
-                winRatioDeathVariable,
-                suggested=list(
-                    "nominal"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..winRatioSecondaryEndpoint <- jmvcore::OptionVariable$new(
-                "winRatioSecondaryEndpoint",
-                winRatioSecondaryEndpoint,
-                suggested=list(
-                    "nominal",
-                    "continuous"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..winRatioTertiaryEndpoint <- jmvcore::OptionVariable$new(
-                "winRatioTertiaryEndpoint",
-                winRatioTertiaryEndpoint,
-                suggested=list(
-                    "nominal",
-                    "continuous"),
-                permitted=list(
-                    "numeric",
-                    "factor"),
-                default=NULL)
-            private$..winRatioTimeVariables <- jmvcore::OptionVariables$new(
-                "winRatioTimeVariables",
-                winRatioTimeVariables,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..winRatioMatchingStrategy <- jmvcore::OptionList$new(
-                "winRatioMatchingStrategy",
-                winRatioMatchingStrategy,
-                options=list(
-                    "all_pairs",
-                    "matched_pairs",
-                    "stratified",
-                    "propensity_matched"),
-                default="all_pairs")
-            private$..winRatioConfidenceMethod <- jmvcore::OptionList$new(
-                "winRatioConfidenceMethod",
-                winRatioConfidenceMethod,
-                options=list(
-                    "bootstrap",
-                    "asymptotic",
-                    "permutation"),
-                default="bootstrap")
-            private$..winRatioBootstrapSamples <- jmvcore::OptionInteger$new(
-                "winRatioBootstrapSamples",
-                winRatioBootstrapSamples,
-                default=1000,
-                min=100,
-                max=5000)
-            private$..winRatioConfidenceLevel <- jmvcore::OptionNumber$new(
-                "winRatioConfidenceLevel",
-                winRatioConfidenceLevel,
-                default=0.95,
-                min=0.8,
-                max=0.99)
-            private$..winRatioHandleTies <- jmvcore::OptionList$new(
-                "winRatioHandleTies",
-                winRatioHandleTies,
-                options=list(
-                    "split",
-                    "ignore",
-                    "next_endpoint"),
-                default="next_endpoint")
-            private$..winRatioSensitivityAnalysis <- jmvcore::OptionBool$new(
-                "winRatioSensitivityAnalysis",
-                winRatioSensitivityAnalysis,
-                default=FALSE)
-            private$..winRatioGeneralizedPairwise <- jmvcore::OptionBool$new(
-                "winRatioGeneralizedPairwise",
-                winRatioGeneralizedPairwise,
-                default=FALSE)
-            private$..performFrailtyModelsAnalysis <- jmvcore::OptionBool$new(
-                "performFrailtyModelsAnalysis",
-                performFrailtyModelsAnalysis,
-                default=FALSE)
-            private$..frailtyClusterVariable <- jmvcore::OptionVariable$new(
-                "frailtyClusterVariable",
-                frailtyClusterVariable,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                default=NULL)
-            private$..frailtyDistribution <- jmvcore::OptionList$new(
-                "frailtyDistribution",
-                frailtyDistribution,
-                options=list(
-                    "gamma",
-                    "gaussian",
-                    "log-normal"),
-                default="gamma")
-            private$..frailtyBootstrap <- jmvcore::OptionBool$new(
-                "frailtyBootstrap",
-                frailtyBootstrap,
-                default=FALSE)
-            private$..frailtyBootstrapSamples <- jmvcore::OptionInteger$new(
-                "frailtyBootstrapSamples",
-                frailtyBootstrapSamples,
-                min=100,
-                max=2000,
-                default=500)
-            private$..frailtyVarianceComponents <- jmvcore::OptionBool$new(
-                "frailtyVarianceComponents",
-                frailtyVarianceComponents,
-                default=FALSE)
-            private$..frailtyHeterogeneityTest <- jmvcore::OptionBool$new(
-                "frailtyHeterogeneityTest",
-                frailtyHeterogeneityTest,
-                default=FALSE)
-            private$..frailtyClusterComparison <- jmvcore::OptionBool$new(
-                "frailtyClusterComparison",
-                frailtyClusterComparison,
-                default=FALSE)
-            private$..frailtyModelSelection <- jmvcore::OptionBool$new(
-                "frailtyModelSelection",
-                frailtyModelSelection,
-                default=FALSE)
-            private$..frailtyPredictiveAccuracy <- jmvcore::OptionBool$new(
-                "frailtyPredictiveAccuracy",
-                frailtyPredictiveAccuracy,
-                default=FALSE)
-            private$..frailtyDiagnostics <- jmvcore::OptionBool$new(
-                "frailtyDiagnostics",
-                frailtyDiagnostics,
-                default=FALSE)
-            private$..frailtyAdvancedInference <- jmvcore::OptionBool$new(
-                "frailtyAdvancedInference",
-                frailtyAdvancedInference,
-                default=FALSE)
-            private$..performClinicalUtilityAnalysis <- jmvcore::OptionBool$new(
-                "performClinicalUtilityAnalysis",
-                performClinicalUtilityAnalysis,
-                default=FALSE)
-            private$..clinicalUtilityPrevalence <- jmvcore::OptionNumber$new(
-                "clinicalUtilityPrevalence",
-                clinicalUtilityPrevalence,
-                min=0.01,
-                max=0.99,
-                default=0.2)
-            private$..clinicalUtilityTimePoint <- jmvcore::OptionInteger$new(
-                "clinicalUtilityTimePoint",
-                clinicalUtilityTimePoint,
-                min=1,
-                max=240,
-                default=60)
-            private$..clinicalUtilityThresholds <- jmvcore::OptionList$new(
-                "clinicalUtilityThresholds",
-                clinicalUtilityThresholds,
-                options=list(
-                    "conservative",
-                    "standard",
-                    "aggressive",
-                    "comprehensive"),
-                default="standard")
-            private$..clinicalUtilityNNT <- jmvcore::OptionBool$new(
-                "clinicalUtilityNNT",
-                clinicalUtilityNNT,
-                default=FALSE)
-            private$..clinicalUtilityTreatmentEffect <- jmvcore::OptionNumber$new(
-                "clinicalUtilityTreatmentEffect",
-                clinicalUtilityTreatmentEffect,
-                min=0.1,
-                max=2,
-                default=0.7)
-            private$..clinicalUtilityComparison <- jmvcore::OptionBool$new(
-                "clinicalUtilityComparison",
-                clinicalUtilityComparison,
-                default=FALSE)
-            private$..clinicalUtilityCostEffectiveness <- jmvcore::OptionBool$new(
-                "clinicalUtilityCostEffectiveness",
-                clinicalUtilityCostEffectiveness,
-                default=FALSE)
-            private$..clinicalUtilityCostPerIntervention <- jmvcore::OptionInteger$new(
-                "clinicalUtilityCostPerIntervention",
-                clinicalUtilityCostPerIntervention,
-                min=100,
-                max=100000,
-                default=5000)
-            private$..clinicalUtilityBootstrap <- jmvcore::OptionBool$new(
-                "clinicalUtilityBootstrap",
-                clinicalUtilityBootstrap,
-                default=FALSE)
-            private$..clinicalUtilityBootstrapSamples <- jmvcore::OptionInteger$new(
-                "clinicalUtilityBootstrapSamples",
-                clinicalUtilityBootstrapSamples,
-                min=100,
-                max=2000,
-                default=500)
-            private$..clinicalUtilityTimeVarying <- jmvcore::OptionBool$new(
-                "clinicalUtilityTimeVarying",
-                clinicalUtilityTimeVarying,
                 default=FALSE)
 
             self$.addOption(private$..oldStage)
@@ -1532,14 +296,6 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..survivalTime)
             self$.addOption(private$..event)
             self$.addOption(private$..eventLevel)
-            self$.addOption(private$..clinicalPreset)
-            self$.addOption(private$..enableGuidedMode)
-            self$.addOption(private$..generateCopyReadyReport)
-            self$.addOption(private$..enableAccessibilityFeatures)
-            self$.addOption(private$..preferredLanguage)
-            self$.addOption(private$..enableProgressIndicators)
-            self$.addOption(private$..optimizeForLargeDatasets)
-            self$.addOption(private$..analysisType)
             self$.addOption(private$..confidenceLevel)
             self$.addOption(private$..calculateNRI)
             self$.addOption(private$..nriTimePoints)
@@ -1548,10 +304,6 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..rocTimePoints)
             self$.addOption(private$..performDCA)
             self$.addOption(private$..performCalibration)
-            self$.addOption(private$..performBootstrap)
-            self$.addOption(private$..bootstrapReps)
-            self$.addOption(private$..performCrossValidation)
-            self$.addOption(private$..cvFolds)
             self$.addOption(private$..institutionVariable)
             self$.addOption(private$..clinicalSignificanceThreshold)
             self$.addOption(private$..nriClinicalThreshold)
@@ -1585,177 +337,8 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..includeEffectSizes)
             self$.addOption(private$..advancedMigrationAnalysis)
             self$.addOption(private$..generateExecutiveSummary)
-            self$.addOption(private$..cancerType)
-            self$.addOption(private$..useOptimismCorrection)
             self$.addOption(private$..enableMultifactorialAnalysis)
-            self$.addOption(private$..continuousCovariates)
-            self$.addOption(private$..categoricalCovariates)
-            self$.addOption(private$..multifactorialComparisonType)
-            self$.addOption(private$..baselineModel)
-            self$.addOption(private$..performInteractionTests)
-            self$.addOption(private$..stratifiedAnalysis)
-            self$.addOption(private$..showMultifactorialTables)
-            self$.addOption(private$..showAdjustedCIndexComparison)
-            self$.addOption(private$..showNestedModelTests)
-            self$.addOption(private$..showStepwiseResults)
             self$.addOption(private$..showExplanations)
-            self$.addOption(private$..showAbbreviationGlossary)
-            self$.addOption(private$..calculateSME)
-            self$.addOption(private$..calculateRMST)
-            self$.addOption(private$..performCompetingRisks)
-            self$.addOption(private$..competingEventVar)
-            self$.addOption(private$..performOptimalCutpoint)
-            self$.addOption(private$..continuousStageVariable)
-            self$.addOption(private$..cutpointMethod)
-            self$.addOption(private$..cutpointRange)
-            self$.addOption(private$..multipleTestingCorrection)
-            self$.addOption(private$..validateCutpoint)
-            self$.addOption(private$..cutpointBootstrap)
-            self$.addOption(private$..cutpointBootstrapReps)
-            self$.addOption(private$..generateStagingSystem)
-            self$.addOption(private$..stagingSystemLevels)
-            self$.addOption(private$..performSHAPAnalysis)
-            self$.addOption(private$..shapAnalysisType)
-            self$.addOption(private$..shapCovariates)
-            self$.addOption(private$..shapSampleSize)
-            self$.addOption(private$..shapBackgroundSamples)
-            self$.addOption(private$..shapExplanationType)
-            self$.addOption(private$..generateSHAPPlots)
-            self$.addOption(private$..shapPatientProfiles)
-            self$.addOption(private$..shapInteractionAnalysis)
-            self$.addOption(private$..shapClinicalThresholds)
-            self$.addOption(private$..performCompetingRisksAdvanced)
-            self$.addOption(private$..competingRisksMethod)
-            self$.addOption(private$..cifTimePoints)
-            self$.addOption(private$..competingEventLevels)
-            self$.addOption(private$..primaryEventLevel)
-            self$.addOption(private$..generateCIFPlots)
-            self$.addOption(private$..performGrayTest)
-            self$.addOption(private$..cifConfidenceLevel)
-            self$.addOption(private$..competingRisksCovariates)
-            self$.addOption(private$..stratifyByStaging)
-            self$.addOption(private$..calculateCRCIndex)
-            self$.addOption(private$..generateCRSummary)
-            self$.addOption(private$..performMultiStateAnalysis)
-            self$.addOption(private$..multiStateModel)
-            self$.addOption(private$..stateVariable)
-            self$.addOption(private$..transitionTimeVariable)
-            self$.addOption(private$..multiStateStates)
-            self$.addOption(private$..absorptionStates)
-            self$.addOption(private$..multiStateCovariates)
-            self$.addOption(private$..calculateTransitionProbabilities)
-            self$.addOption(private$..multiStateTimePoints)
-            self$.addOption(private$..generateTransitionMatrix)
-            self$.addOption(private$..multiStateGraphics)
-            self$.addOption(private$..msStratifyByStaging)
-            self$.addOption(private$..multiStateValidation)
-            self$.addOption(private$..generateMSMSummary)
-            self$.addOption(private$..performRandomForestAnalysis)
-            self$.addOption(private$..forestModelType)
-            self$.addOption(private$..forestNTrees)
-            self$.addOption(private$..forestMTry)
-            self$.addOption(private$..forestMinNodeSize)
-            self$.addOption(private$..forestCovariates)
-            self$.addOption(private$..calculateVariableImportance)
-            self$.addOption(private$..forestImportanceType)
-            self$.addOption(private$..performForestValidation)
-            self$.addOption(private$..forestPredictionTimePoints)
-            self$.addOption(private$..generateSurvivalPredictions)
-            self$.addOption(private$..forestDiscriminationMetrics)
-            self$.addOption(private$..forestStagingComparison)
-            self$.addOption(private$..forestBootstrap)
-            self$.addOption(private$..forestBootstrapSamples)
-            self$.addOption(private$..generateForestSummary)
-            self$.addOption(private$..performCureModelAnalysis)
-            self$.addOption(private$..cureModelType)
-            self$.addOption(private$..cureDistribution)
-            self$.addOption(private$..cureAnalyzeOldStage)
-            self$.addOption(private$..cureAnalyzeNewStage)
-            self$.addOption(private$..cureFractionEstimation)
-            self$.addOption(private$..cureConfidenceLevel)
-            self$.addOption(private$..cureBootstrapCI)
-            self$.addOption(private$..cureBootstrapReps)
-            self$.addOption(private$..cureTimeHorizon)
-            self$.addOption(private$..curePlateauThreshold)
-            self$.addOption(private$..cureCovariates)
-            self$.addOption(private$..cureModelComparison)
-            self$.addOption(private$..cureStageSpecificAnalysis)
-            self$.addOption(private$..cureGoodnessOfFit)
-            self$.addOption(private$..generateCureSummary)
-            self$.addOption(private$..performIntervalCensoringAnalysis)
-            self$.addOption(private$..intervalCensoringLeftTime)
-            self$.addOption(private$..intervalCensoringRightTime)
-            self$.addOption(private$..intervalCensoringDistribution)
-            self$.addOption(private$..intervalCensoringModel)
-            self$.addOption(private$..intervalCensoringBootstrap)
-            self$.addOption(private$..intervalCensoringBootstrapSamples)
-            self$.addOption(private$..intervalCensoringCompareStages)
-            self$.addOption(private$..intervalCensoringPlots)
-            self$.addOption(private$..intervalCensoringDiagnostics)
-            self$.addOption(private$..intervalCensoringPredictionTime)
-            self$.addOption(private$..intervalCensoringConfidenceLevel)
-            self$.addOption(private$..intervalCensoringAdjustVariables)
-            self$.addOption(private$..performInformativeCensoringAnalysis)
-            self$.addOption(private$..informativeCensoringTestMethod)
-            self$.addOption(private$..informativeCensoringCovariates)
-            self$.addOption(private$..informativeCensoringLandmarkTimes)
-            self$.addOption(private$..informativeCensoringAdjustmentMethod)
-            self$.addOption(private$..informativeCensoringIPWVariables)
-            self$.addOption(private$..informativeCensoringSensitivityRange)
-            self$.addOption(private$..informativeCensoringBootstrap)
-            self$.addOption(private$..informativeCensoringBootstrapSamples)
-            self$.addOption(private$..informativeCensoringAlpha)
-            self$.addOption(private$..informativeCensoringPlots)
-            self$.addOption(private$..informativeCensoringCompareStages)
-            self$.addOption(private$..performConcordanceProbabilityAnalysis)
-            self$.addOption(private$..concordanceProbabilityMethods)
-            self$.addOption(private$..concordanceProbabilityTimePoints)
-            self$.addOption(private$..concordanceProbabilityWeighting)
-            self$.addOption(private$..concordanceProbabilityBootstrap)
-            self$.addOption(private$..concordanceProbabilityBootstrapSamples)
-            self$.addOption(private$..concordanceProbabilityConfidenceLevel)
-            self$.addOption(private$..concordanceProbabilityCompareStages)
-            self$.addOption(private$..concordanceProbabilityAdjustVariables)
-            self$.addOption(private$..concordanceProbabilityRobustnessAnalysis)
-            self$.addOption(private$..concordanceProbabilityAlpha)
-            self$.addOption(private$..concordanceProbabilityDiagnostics)
-            self$.addOption(private$..performWinRatioAnalysis)
-            self$.addOption(private$..winRatioEndpoints)
-            self$.addOption(private$..winRatioDeathVariable)
-            self$.addOption(private$..winRatioSecondaryEndpoint)
-            self$.addOption(private$..winRatioTertiaryEndpoint)
-            self$.addOption(private$..winRatioTimeVariables)
-            self$.addOption(private$..winRatioMatchingStrategy)
-            self$.addOption(private$..winRatioConfidenceMethod)
-            self$.addOption(private$..winRatioBootstrapSamples)
-            self$.addOption(private$..winRatioConfidenceLevel)
-            self$.addOption(private$..winRatioHandleTies)
-            self$.addOption(private$..winRatioSensitivityAnalysis)
-            self$.addOption(private$..winRatioGeneralizedPairwise)
-            self$.addOption(private$..performFrailtyModelsAnalysis)
-            self$.addOption(private$..frailtyClusterVariable)
-            self$.addOption(private$..frailtyDistribution)
-            self$.addOption(private$..frailtyBootstrap)
-            self$.addOption(private$..frailtyBootstrapSamples)
-            self$.addOption(private$..frailtyVarianceComponents)
-            self$.addOption(private$..frailtyHeterogeneityTest)
-            self$.addOption(private$..frailtyClusterComparison)
-            self$.addOption(private$..frailtyModelSelection)
-            self$.addOption(private$..frailtyPredictiveAccuracy)
-            self$.addOption(private$..frailtyDiagnostics)
-            self$.addOption(private$..frailtyAdvancedInference)
-            self$.addOption(private$..performClinicalUtilityAnalysis)
-            self$.addOption(private$..clinicalUtilityPrevalence)
-            self$.addOption(private$..clinicalUtilityTimePoint)
-            self$.addOption(private$..clinicalUtilityThresholds)
-            self$.addOption(private$..clinicalUtilityNNT)
-            self$.addOption(private$..clinicalUtilityTreatmentEffect)
-            self$.addOption(private$..clinicalUtilityComparison)
-            self$.addOption(private$..clinicalUtilityCostEffectiveness)
-            self$.addOption(private$..clinicalUtilityCostPerIntervention)
-            self$.addOption(private$..clinicalUtilityBootstrap)
-            self$.addOption(private$..clinicalUtilityBootstrapSamples)
-            self$.addOption(private$..clinicalUtilityTimeVarying)
         }),
     active = list(
         oldStage = function() private$..oldStage$value,
@@ -1763,14 +346,6 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         survivalTime = function() private$..survivalTime$value,
         event = function() private$..event$value,
         eventLevel = function() private$..eventLevel$value,
-        clinicalPreset = function() private$..clinicalPreset$value,
-        enableGuidedMode = function() private$..enableGuidedMode$value,
-        generateCopyReadyReport = function() private$..generateCopyReadyReport$value,
-        enableAccessibilityFeatures = function() private$..enableAccessibilityFeatures$value,
-        preferredLanguage = function() private$..preferredLanguage$value,
-        enableProgressIndicators = function() private$..enableProgressIndicators$value,
-        optimizeForLargeDatasets = function() private$..optimizeForLargeDatasets$value,
-        analysisType = function() private$..analysisType$value,
         confidenceLevel = function() private$..confidenceLevel$value,
         calculateNRI = function() private$..calculateNRI$value,
         nriTimePoints = function() private$..nriTimePoints$value,
@@ -1779,10 +354,6 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         rocTimePoints = function() private$..rocTimePoints$value,
         performDCA = function() private$..performDCA$value,
         performCalibration = function() private$..performCalibration$value,
-        performBootstrap = function() private$..performBootstrap$value,
-        bootstrapReps = function() private$..bootstrapReps$value,
-        performCrossValidation = function() private$..performCrossValidation$value,
-        cvFolds = function() private$..cvFolds$value,
         institutionVariable = function() private$..institutionVariable$value,
         clinicalSignificanceThreshold = function() private$..clinicalSignificanceThreshold$value,
         nriClinicalThreshold = function() private$..nriClinicalThreshold$value,
@@ -1816,191 +387,14 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         includeEffectSizes = function() private$..includeEffectSizes$value,
         advancedMigrationAnalysis = function() private$..advancedMigrationAnalysis$value,
         generateExecutiveSummary = function() private$..generateExecutiveSummary$value,
-        cancerType = function() private$..cancerType$value,
-        useOptimismCorrection = function() private$..useOptimismCorrection$value,
         enableMultifactorialAnalysis = function() private$..enableMultifactorialAnalysis$value,
-        continuousCovariates = function() private$..continuousCovariates$value,
-        categoricalCovariates = function() private$..categoricalCovariates$value,
-        multifactorialComparisonType = function() private$..multifactorialComparisonType$value,
-        baselineModel = function() private$..baselineModel$value,
-        performInteractionTests = function() private$..performInteractionTests$value,
-        stratifiedAnalysis = function() private$..stratifiedAnalysis$value,
-        showMultifactorialTables = function() private$..showMultifactorialTables$value,
-        showAdjustedCIndexComparison = function() private$..showAdjustedCIndexComparison$value,
-        showNestedModelTests = function() private$..showNestedModelTests$value,
-        showStepwiseResults = function() private$..showStepwiseResults$value,
-        showExplanations = function() private$..showExplanations$value,
-        showAbbreviationGlossary = function() private$..showAbbreviationGlossary$value,
-        calculateSME = function() private$..calculateSME$value,
-        calculateRMST = function() private$..calculateRMST$value,
-        performCompetingRisks = function() private$..performCompetingRisks$value,
-        competingEventVar = function() private$..competingEventVar$value,
-        performOptimalCutpoint = function() private$..performOptimalCutpoint$value,
-        continuousStageVariable = function() private$..continuousStageVariable$value,
-        cutpointMethod = function() private$..cutpointMethod$value,
-        cutpointRange = function() private$..cutpointRange$value,
-        multipleTestingCorrection = function() private$..multipleTestingCorrection$value,
-        validateCutpoint = function() private$..validateCutpoint$value,
-        cutpointBootstrap = function() private$..cutpointBootstrap$value,
-        cutpointBootstrapReps = function() private$..cutpointBootstrapReps$value,
-        generateStagingSystem = function() private$..generateStagingSystem$value,
-        stagingSystemLevels = function() private$..stagingSystemLevels$value,
-        performSHAPAnalysis = function() private$..performSHAPAnalysis$value,
-        shapAnalysisType = function() private$..shapAnalysisType$value,
-        shapCovariates = function() private$..shapCovariates$value,
-        shapSampleSize = function() private$..shapSampleSize$value,
-        shapBackgroundSamples = function() private$..shapBackgroundSamples$value,
-        shapExplanationType = function() private$..shapExplanationType$value,
-        generateSHAPPlots = function() private$..generateSHAPPlots$value,
-        shapPatientProfiles = function() private$..shapPatientProfiles$value,
-        shapInteractionAnalysis = function() private$..shapInteractionAnalysis$value,
-        shapClinicalThresholds = function() private$..shapClinicalThresholds$value,
-        performCompetingRisksAdvanced = function() private$..performCompetingRisksAdvanced$value,
-        competingRisksMethod = function() private$..competingRisksMethod$value,
-        cifTimePoints = function() private$..cifTimePoints$value,
-        competingEventLevels = function() private$..competingEventLevels$value,
-        primaryEventLevel = function() private$..primaryEventLevel$value,
-        generateCIFPlots = function() private$..generateCIFPlots$value,
-        performGrayTest = function() private$..performGrayTest$value,
-        cifConfidenceLevel = function() private$..cifConfidenceLevel$value,
-        competingRisksCovariates = function() private$..competingRisksCovariates$value,
-        stratifyByStaging = function() private$..stratifyByStaging$value,
-        calculateCRCIndex = function() private$..calculateCRCIndex$value,
-        generateCRSummary = function() private$..generateCRSummary$value,
-        performMultiStateAnalysis = function() private$..performMultiStateAnalysis$value,
-        multiStateModel = function() private$..multiStateModel$value,
-        stateVariable = function() private$..stateVariable$value,
-        transitionTimeVariable = function() private$..transitionTimeVariable$value,
-        multiStateStates = function() private$..multiStateStates$value,
-        absorptionStates = function() private$..absorptionStates$value,
-        multiStateCovariates = function() private$..multiStateCovariates$value,
-        calculateTransitionProbabilities = function() private$..calculateTransitionProbabilities$value,
-        multiStateTimePoints = function() private$..multiStateTimePoints$value,
-        generateTransitionMatrix = function() private$..generateTransitionMatrix$value,
-        multiStateGraphics = function() private$..multiStateGraphics$value,
-        msStratifyByStaging = function() private$..msStratifyByStaging$value,
-        multiStateValidation = function() private$..multiStateValidation$value,
-        generateMSMSummary = function() private$..generateMSMSummary$value,
-        performRandomForestAnalysis = function() private$..performRandomForestAnalysis$value,
-        forestModelType = function() private$..forestModelType$value,
-        forestNTrees = function() private$..forestNTrees$value,
-        forestMTry = function() private$..forestMTry$value,
-        forestMinNodeSize = function() private$..forestMinNodeSize$value,
-        forestCovariates = function() private$..forestCovariates$value,
-        calculateVariableImportance = function() private$..calculateVariableImportance$value,
-        forestImportanceType = function() private$..forestImportanceType$value,
-        performForestValidation = function() private$..performForestValidation$value,
-        forestPredictionTimePoints = function() private$..forestPredictionTimePoints$value,
-        generateSurvivalPredictions = function() private$..generateSurvivalPredictions$value,
-        forestDiscriminationMetrics = function() private$..forestDiscriminationMetrics$value,
-        forestStagingComparison = function() private$..forestStagingComparison$value,
-        forestBootstrap = function() private$..forestBootstrap$value,
-        forestBootstrapSamples = function() private$..forestBootstrapSamples$value,
-        generateForestSummary = function() private$..generateForestSummary$value,
-        performCureModelAnalysis = function() private$..performCureModelAnalysis$value,
-        cureModelType = function() private$..cureModelType$value,
-        cureDistribution = function() private$..cureDistribution$value,
-        cureAnalyzeOldStage = function() private$..cureAnalyzeOldStage$value,
-        cureAnalyzeNewStage = function() private$..cureAnalyzeNewStage$value,
-        cureFractionEstimation = function() private$..cureFractionEstimation$value,
-        cureConfidenceLevel = function() private$..cureConfidenceLevel$value,
-        cureBootstrapCI = function() private$..cureBootstrapCI$value,
-        cureBootstrapReps = function() private$..cureBootstrapReps$value,
-        cureTimeHorizon = function() private$..cureTimeHorizon$value,
-        curePlateauThreshold = function() private$..curePlateauThreshold$value,
-        cureCovariates = function() private$..cureCovariates$value,
-        cureModelComparison = function() private$..cureModelComparison$value,
-        cureStageSpecificAnalysis = function() private$..cureStageSpecificAnalysis$value,
-        cureGoodnessOfFit = function() private$..cureGoodnessOfFit$value,
-        generateCureSummary = function() private$..generateCureSummary$value,
-        performIntervalCensoringAnalysis = function() private$..performIntervalCensoringAnalysis$value,
-        intervalCensoringLeftTime = function() private$..intervalCensoringLeftTime$value,
-        intervalCensoringRightTime = function() private$..intervalCensoringRightTime$value,
-        intervalCensoringDistribution = function() private$..intervalCensoringDistribution$value,
-        intervalCensoringModel = function() private$..intervalCensoringModel$value,
-        intervalCensoringBootstrap = function() private$..intervalCensoringBootstrap$value,
-        intervalCensoringBootstrapSamples = function() private$..intervalCensoringBootstrapSamples$value,
-        intervalCensoringCompareStages = function() private$..intervalCensoringCompareStages$value,
-        intervalCensoringPlots = function() private$..intervalCensoringPlots$value,
-        intervalCensoringDiagnostics = function() private$..intervalCensoringDiagnostics$value,
-        intervalCensoringPredictionTime = function() private$..intervalCensoringPredictionTime$value,
-        intervalCensoringConfidenceLevel = function() private$..intervalCensoringConfidenceLevel$value,
-        intervalCensoringAdjustVariables = function() private$..intervalCensoringAdjustVariables$value,
-        performInformativeCensoringAnalysis = function() private$..performInformativeCensoringAnalysis$value,
-        informativeCensoringTestMethod = function() private$..informativeCensoringTestMethod$value,
-        informativeCensoringCovariates = function() private$..informativeCensoringCovariates$value,
-        informativeCensoringLandmarkTimes = function() private$..informativeCensoringLandmarkTimes$value,
-        informativeCensoringAdjustmentMethod = function() private$..informativeCensoringAdjustmentMethod$value,
-        informativeCensoringIPWVariables = function() private$..informativeCensoringIPWVariables$value,
-        informativeCensoringSensitivityRange = function() private$..informativeCensoringSensitivityRange$value,
-        informativeCensoringBootstrap = function() private$..informativeCensoringBootstrap$value,
-        informativeCensoringBootstrapSamples = function() private$..informativeCensoringBootstrapSamples$value,
-        informativeCensoringAlpha = function() private$..informativeCensoringAlpha$value,
-        informativeCensoringPlots = function() private$..informativeCensoringPlots$value,
-        informativeCensoringCompareStages = function() private$..informativeCensoringCompareStages$value,
-        performConcordanceProbabilityAnalysis = function() private$..performConcordanceProbabilityAnalysis$value,
-        concordanceProbabilityMethods = function() private$..concordanceProbabilityMethods$value,
-        concordanceProbabilityTimePoints = function() private$..concordanceProbabilityTimePoints$value,
-        concordanceProbabilityWeighting = function() private$..concordanceProbabilityWeighting$value,
-        concordanceProbabilityBootstrap = function() private$..concordanceProbabilityBootstrap$value,
-        concordanceProbabilityBootstrapSamples = function() private$..concordanceProbabilityBootstrapSamples$value,
-        concordanceProbabilityConfidenceLevel = function() private$..concordanceProbabilityConfidenceLevel$value,
-        concordanceProbabilityCompareStages = function() private$..concordanceProbabilityCompareStages$value,
-        concordanceProbabilityAdjustVariables = function() private$..concordanceProbabilityAdjustVariables$value,
-        concordanceProbabilityRobustnessAnalysis = function() private$..concordanceProbabilityRobustnessAnalysis$value,
-        concordanceProbabilityAlpha = function() private$..concordanceProbabilityAlpha$value,
-        concordanceProbabilityDiagnostics = function() private$..concordanceProbabilityDiagnostics$value,
-        performWinRatioAnalysis = function() private$..performWinRatioAnalysis$value,
-        winRatioEndpoints = function() private$..winRatioEndpoints$value,
-        winRatioDeathVariable = function() private$..winRatioDeathVariable$value,
-        winRatioSecondaryEndpoint = function() private$..winRatioSecondaryEndpoint$value,
-        winRatioTertiaryEndpoint = function() private$..winRatioTertiaryEndpoint$value,
-        winRatioTimeVariables = function() private$..winRatioTimeVariables$value,
-        winRatioMatchingStrategy = function() private$..winRatioMatchingStrategy$value,
-        winRatioConfidenceMethod = function() private$..winRatioConfidenceMethod$value,
-        winRatioBootstrapSamples = function() private$..winRatioBootstrapSamples$value,
-        winRatioConfidenceLevel = function() private$..winRatioConfidenceLevel$value,
-        winRatioHandleTies = function() private$..winRatioHandleTies$value,
-        winRatioSensitivityAnalysis = function() private$..winRatioSensitivityAnalysis$value,
-        winRatioGeneralizedPairwise = function() private$..winRatioGeneralizedPairwise$value,
-        performFrailtyModelsAnalysis = function() private$..performFrailtyModelsAnalysis$value,
-        frailtyClusterVariable = function() private$..frailtyClusterVariable$value,
-        frailtyDistribution = function() private$..frailtyDistribution$value,
-        frailtyBootstrap = function() private$..frailtyBootstrap$value,
-        frailtyBootstrapSamples = function() private$..frailtyBootstrapSamples$value,
-        frailtyVarianceComponents = function() private$..frailtyVarianceComponents$value,
-        frailtyHeterogeneityTest = function() private$..frailtyHeterogeneityTest$value,
-        frailtyClusterComparison = function() private$..frailtyClusterComparison$value,
-        frailtyModelSelection = function() private$..frailtyModelSelection$value,
-        frailtyPredictiveAccuracy = function() private$..frailtyPredictiveAccuracy$value,
-        frailtyDiagnostics = function() private$..frailtyDiagnostics$value,
-        frailtyAdvancedInference = function() private$..frailtyAdvancedInference$value,
-        performClinicalUtilityAnalysis = function() private$..performClinicalUtilityAnalysis$value,
-        clinicalUtilityPrevalence = function() private$..clinicalUtilityPrevalence$value,
-        clinicalUtilityTimePoint = function() private$..clinicalUtilityTimePoint$value,
-        clinicalUtilityThresholds = function() private$..clinicalUtilityThresholds$value,
-        clinicalUtilityNNT = function() private$..clinicalUtilityNNT$value,
-        clinicalUtilityTreatmentEffect = function() private$..clinicalUtilityTreatmentEffect$value,
-        clinicalUtilityComparison = function() private$..clinicalUtilityComparison$value,
-        clinicalUtilityCostEffectiveness = function() private$..clinicalUtilityCostEffectiveness$value,
-        clinicalUtilityCostPerIntervention = function() private$..clinicalUtilityCostPerIntervention$value,
-        clinicalUtilityBootstrap = function() private$..clinicalUtilityBootstrap$value,
-        clinicalUtilityBootstrapSamples = function() private$..clinicalUtilityBootstrapSamples$value,
-        clinicalUtilityTimeVarying = function() private$..clinicalUtilityTimeVarying$value),
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..oldStage = NA,
         ..newStage = NA,
         ..survivalTime = NA,
         ..event = NA,
         ..eventLevel = NA,
-        ..clinicalPreset = NA,
-        ..enableGuidedMode = NA,
-        ..generateCopyReadyReport = NA,
-        ..enableAccessibilityFeatures = NA,
-        ..preferredLanguage = NA,
-        ..enableProgressIndicators = NA,
-        ..optimizeForLargeDatasets = NA,
-        ..analysisType = NA,
         ..confidenceLevel = NA,
         ..calculateNRI = NA,
         ..nriTimePoints = NA,
@@ -2009,10 +403,6 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..rocTimePoints = NA,
         ..performDCA = NA,
         ..performCalibration = NA,
-        ..performBootstrap = NA,
-        ..bootstrapReps = NA,
-        ..performCrossValidation = NA,
-        ..cvFolds = NA,
         ..institutionVariable = NA,
         ..clinicalSignificanceThreshold = NA,
         ..nriClinicalThreshold = NA,
@@ -2046,177 +436,8 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..includeEffectSizes = NA,
         ..advancedMigrationAnalysis = NA,
         ..generateExecutiveSummary = NA,
-        ..cancerType = NA,
-        ..useOptimismCorrection = NA,
         ..enableMultifactorialAnalysis = NA,
-        ..continuousCovariates = NA,
-        ..categoricalCovariates = NA,
-        ..multifactorialComparisonType = NA,
-        ..baselineModel = NA,
-        ..performInteractionTests = NA,
-        ..stratifiedAnalysis = NA,
-        ..showMultifactorialTables = NA,
-        ..showAdjustedCIndexComparison = NA,
-        ..showNestedModelTests = NA,
-        ..showStepwiseResults = NA,
-        ..showExplanations = NA,
-        ..showAbbreviationGlossary = NA,
-        ..calculateSME = NA,
-        ..calculateRMST = NA,
-        ..performCompetingRisks = NA,
-        ..competingEventVar = NA,
-        ..performOptimalCutpoint = NA,
-        ..continuousStageVariable = NA,
-        ..cutpointMethod = NA,
-        ..cutpointRange = NA,
-        ..multipleTestingCorrection = NA,
-        ..validateCutpoint = NA,
-        ..cutpointBootstrap = NA,
-        ..cutpointBootstrapReps = NA,
-        ..generateStagingSystem = NA,
-        ..stagingSystemLevels = NA,
-        ..performSHAPAnalysis = NA,
-        ..shapAnalysisType = NA,
-        ..shapCovariates = NA,
-        ..shapSampleSize = NA,
-        ..shapBackgroundSamples = NA,
-        ..shapExplanationType = NA,
-        ..generateSHAPPlots = NA,
-        ..shapPatientProfiles = NA,
-        ..shapInteractionAnalysis = NA,
-        ..shapClinicalThresholds = NA,
-        ..performCompetingRisksAdvanced = NA,
-        ..competingRisksMethod = NA,
-        ..cifTimePoints = NA,
-        ..competingEventLevels = NA,
-        ..primaryEventLevel = NA,
-        ..generateCIFPlots = NA,
-        ..performGrayTest = NA,
-        ..cifConfidenceLevel = NA,
-        ..competingRisksCovariates = NA,
-        ..stratifyByStaging = NA,
-        ..calculateCRCIndex = NA,
-        ..generateCRSummary = NA,
-        ..performMultiStateAnalysis = NA,
-        ..multiStateModel = NA,
-        ..stateVariable = NA,
-        ..transitionTimeVariable = NA,
-        ..multiStateStates = NA,
-        ..absorptionStates = NA,
-        ..multiStateCovariates = NA,
-        ..calculateTransitionProbabilities = NA,
-        ..multiStateTimePoints = NA,
-        ..generateTransitionMatrix = NA,
-        ..multiStateGraphics = NA,
-        ..msStratifyByStaging = NA,
-        ..multiStateValidation = NA,
-        ..generateMSMSummary = NA,
-        ..performRandomForestAnalysis = NA,
-        ..forestModelType = NA,
-        ..forestNTrees = NA,
-        ..forestMTry = NA,
-        ..forestMinNodeSize = NA,
-        ..forestCovariates = NA,
-        ..calculateVariableImportance = NA,
-        ..forestImportanceType = NA,
-        ..performForestValidation = NA,
-        ..forestPredictionTimePoints = NA,
-        ..generateSurvivalPredictions = NA,
-        ..forestDiscriminationMetrics = NA,
-        ..forestStagingComparison = NA,
-        ..forestBootstrap = NA,
-        ..forestBootstrapSamples = NA,
-        ..generateForestSummary = NA,
-        ..performCureModelAnalysis = NA,
-        ..cureModelType = NA,
-        ..cureDistribution = NA,
-        ..cureAnalyzeOldStage = NA,
-        ..cureAnalyzeNewStage = NA,
-        ..cureFractionEstimation = NA,
-        ..cureConfidenceLevel = NA,
-        ..cureBootstrapCI = NA,
-        ..cureBootstrapReps = NA,
-        ..cureTimeHorizon = NA,
-        ..curePlateauThreshold = NA,
-        ..cureCovariates = NA,
-        ..cureModelComparison = NA,
-        ..cureStageSpecificAnalysis = NA,
-        ..cureGoodnessOfFit = NA,
-        ..generateCureSummary = NA,
-        ..performIntervalCensoringAnalysis = NA,
-        ..intervalCensoringLeftTime = NA,
-        ..intervalCensoringRightTime = NA,
-        ..intervalCensoringDistribution = NA,
-        ..intervalCensoringModel = NA,
-        ..intervalCensoringBootstrap = NA,
-        ..intervalCensoringBootstrapSamples = NA,
-        ..intervalCensoringCompareStages = NA,
-        ..intervalCensoringPlots = NA,
-        ..intervalCensoringDiagnostics = NA,
-        ..intervalCensoringPredictionTime = NA,
-        ..intervalCensoringConfidenceLevel = NA,
-        ..intervalCensoringAdjustVariables = NA,
-        ..performInformativeCensoringAnalysis = NA,
-        ..informativeCensoringTestMethod = NA,
-        ..informativeCensoringCovariates = NA,
-        ..informativeCensoringLandmarkTimes = NA,
-        ..informativeCensoringAdjustmentMethod = NA,
-        ..informativeCensoringIPWVariables = NA,
-        ..informativeCensoringSensitivityRange = NA,
-        ..informativeCensoringBootstrap = NA,
-        ..informativeCensoringBootstrapSamples = NA,
-        ..informativeCensoringAlpha = NA,
-        ..informativeCensoringPlots = NA,
-        ..informativeCensoringCompareStages = NA,
-        ..performConcordanceProbabilityAnalysis = NA,
-        ..concordanceProbabilityMethods = NA,
-        ..concordanceProbabilityTimePoints = NA,
-        ..concordanceProbabilityWeighting = NA,
-        ..concordanceProbabilityBootstrap = NA,
-        ..concordanceProbabilityBootstrapSamples = NA,
-        ..concordanceProbabilityConfidenceLevel = NA,
-        ..concordanceProbabilityCompareStages = NA,
-        ..concordanceProbabilityAdjustVariables = NA,
-        ..concordanceProbabilityRobustnessAnalysis = NA,
-        ..concordanceProbabilityAlpha = NA,
-        ..concordanceProbabilityDiagnostics = NA,
-        ..performWinRatioAnalysis = NA,
-        ..winRatioEndpoints = NA,
-        ..winRatioDeathVariable = NA,
-        ..winRatioSecondaryEndpoint = NA,
-        ..winRatioTertiaryEndpoint = NA,
-        ..winRatioTimeVariables = NA,
-        ..winRatioMatchingStrategy = NA,
-        ..winRatioConfidenceMethod = NA,
-        ..winRatioBootstrapSamples = NA,
-        ..winRatioConfidenceLevel = NA,
-        ..winRatioHandleTies = NA,
-        ..winRatioSensitivityAnalysis = NA,
-        ..winRatioGeneralizedPairwise = NA,
-        ..performFrailtyModelsAnalysis = NA,
-        ..frailtyClusterVariable = NA,
-        ..frailtyDistribution = NA,
-        ..frailtyBootstrap = NA,
-        ..frailtyBootstrapSamples = NA,
-        ..frailtyVarianceComponents = NA,
-        ..frailtyHeterogeneityTest = NA,
-        ..frailtyClusterComparison = NA,
-        ..frailtyModelSelection = NA,
-        ..frailtyPredictiveAccuracy = NA,
-        ..frailtyDiagnostics = NA,
-        ..frailtyAdvancedInference = NA,
-        ..performClinicalUtilityAnalysis = NA,
-        ..clinicalUtilityPrevalence = NA,
-        ..clinicalUtilityTimePoint = NA,
-        ..clinicalUtilityThresholds = NA,
-        ..clinicalUtilityNNT = NA,
-        ..clinicalUtilityTreatmentEffect = NA,
-        ..clinicalUtilityComparison = NA,
-        ..clinicalUtilityCostEffectiveness = NA,
-        ..clinicalUtilityCostPerIntervention = NA,
-        ..clinicalUtilityBootstrap = NA,
-        ..clinicalUtilityBootstrapSamples = NA,
-        ..clinicalUtilityTimeVarying = NA)
+        ..showExplanations = NA)
 )
 
 stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -2323,86 +544,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         crossValidationExplanation = function() private$.items[["crossValidationExplanation"]],
         crossValidationResults = function() private$.items[["crossValidationResults"]],
         crossValidationPlot = function() private$.items[["crossValidationPlot"]],
-        enhancedLRComparison = function() private$.items[["enhancedLRComparison"]],
-        stageMigrationEffectExplanation = function() private$.items[["stageMigrationEffectExplanation"]],
-        stageMigrationEffect = function() private$.items[["stageMigrationEffect"]],
-        stageMigrationEffectAssessment = function() private$.items[["stageMigrationEffectAssessment"]],
-        rmstAnalysisExplanation = function() private$.items[["rmstAnalysisExplanation"]],
-        rmstByStage = function() private$.items[["rmstByStage"]],
-        rmstComparison = function() private$.items[["rmstComparison"]],
-        competingRisksExplanation = function() private$.items[["competingRisksExplanation"]],
-        competingRisksEventDistribution = function() private$.items[["competingRisksEventDistribution"]],
-        competingRisksComparison = function() private$.items[["competingRisksComparison"]],
-        optimalCutpointAnalysis = function() private$.items[["optimalCutpointAnalysis"]],
-        cutpointValidation = function() private$.items[["cutpointValidation"]],
-        generatedStagingSystem = function() private$.items[["generatedStagingSystem"]],
-        shapGlobalImportance = function() private$.items[["shapGlobalImportance"]],
-        shapIndividualExplanations = function() private$.items[["shapIndividualExplanations"]],
-        shapInteractions = function() private$.items[["shapInteractions"]],
-        shapSummaryStats = function() private$.items[["shapSummaryStats"]],
-        fineGrayResults = function() private$.items[["fineGrayResults"]],
-        causeSpecificResults = function() private$.items[["causeSpecificResults"]],
-        cifSummary = function() private$.items[["cifSummary"]],
-        competingRisksCIndex = function() private$.items[["competingRisksCIndex"]],
-        competingRisksSummary = function() private$.items[["competingRisksSummary"]],
-        transitionIntensities = function() private$.items[["transitionIntensities"]],
-        transitionProbabilities = function() private$.items[["transitionProbabilities"]],
-        stateOccupancy = function() private$.items[["stateOccupancy"]],
-        multiStateComparison = function() private$.items[["multiStateComparison"]],
-        multiStateSummary = function() private$.items[["multiStateSummary"]],
-        forestVariableImportance = function() private$.items[["forestVariableImportance"]],
-        forestModelPerformance = function() private$.items[["forestModelPerformance"]],
-        forestSurvivalPredictions = function() private$.items[["forestSurvivalPredictions"]],
-        forestCoxComparison = function() private$.items[["forestCoxComparison"]],
-        forestStagingComparison = function() private$.items[["forestStagingComparison"]],
-        forestAnalysisSummary = function() private$.items[["forestAnalysisSummary"]],
-        cureFractionEstimates = function() private$.items[["cureFractionEstimates"]],
-        cureModelParameters = function() private$.items[["cureModelParameters"]],
-        cureModelComparison = function() private$.items[["cureModelComparison"]],
-        stageSpecificCureAnalysis = function() private$.items[["stageSpecificCureAnalysis"]],
-        cureModelBootstrap = function() private$.items[["cureModelBootstrap"]],
-        cureAnalysisSummary = function() private$.items[["cureAnalysisSummary"]],
-        intervalCensoringOverview = function() private$.items[["intervalCensoringOverview"]],
-        intervalCensoringNonparametric = function() private$.items[["intervalCensoringNonparametric"]],
-        intervalCensoringParametric = function() private$.items[["intervalCensoringParametric"]],
-        intervalCensoringComparison = function() private$.items[["intervalCensoringComparison"]],
-        intervalCensoringDiagnosticsTable = function() private$.items[["intervalCensoringDiagnosticsTable"]],
-        intervalCensoringSummary = function() private$.items[["intervalCensoringSummary"]],
-        informativeCensoringOverview = function() private$.items[["informativeCensoringOverview"]],
-        informativeCensoringTests = function() private$.items[["informativeCensoringTests"]],
-        informativeCensoringByStage = function() private$.items[["informativeCensoringByStage"]],
-        informativeCensoringAdjustment = function() private$.items[["informativeCensoringAdjustment"]],
-        informativeCensoringSensitivity = function() private$.items[["informativeCensoringSensitivity"]],
-        informativeCensoringDiagnostics = function() private$.items[["informativeCensoringDiagnostics"]],
-        informativeCensoringSummary = function() private$.items[["informativeCensoringSummary"]],
-        concordanceProbabilityOverview = function() private$.items[["concordanceProbabilityOverview"]],
-        concordanceProbabilityEstimates = function() private$.items[["concordanceProbabilityEstimates"]],
-        concordanceProbabilityTimeDependentComplex = function() private$.items[["concordanceProbabilityTimeDependentComplex"]],
-        concordanceProbabilityComparison = function() private$.items[["concordanceProbabilityComparison"]],
-        concordanceProbabilityRobustness = function() private$.items[["concordanceProbabilityRobustness"]],
-        concordanceProbabilityDiagnosticsTable = function() private$.items[["concordanceProbabilityDiagnosticsTable"]],
-        concordanceProbabilitySummary = function() private$.items[["concordanceProbabilitySummary"]],
-        winRatioOverview = function() private$.items[["winRatioOverview"]],
-        winRatioPrimaryResults = function() private$.items[["winRatioPrimaryResults"]],
-        winRatioEndpointContributions = function() private$.items[["winRatioEndpointContributions"]],
-        winRatioStageSpecific = function() private$.items[["winRatioStageSpecific"]],
-        winRatioSensitivityResults = function() private$.items[["winRatioSensitivityResults"]],
-        winRatioGeneralizedPairwiseResults = function() private$.items[["winRatioGeneralizedPairwiseResults"]],
-        winRatioSummary = function() private$.items[["winRatioSummary"]],
-        frailtyModelsOverview = function() private$.items[["frailtyModelsOverview"]],
-        frailtyModelsComparison = function() private$.items[["frailtyModelsComparison"]],
-        frailtyModelsVarianceComponents = function() private$.items[["frailtyModelsVarianceComponents"]],
-        frailtyModelsClusterSpecific = function() private$.items[["frailtyModelsClusterSpecific"]],
-        frailtyModelsBootstrap = function() private$.items[["frailtyModelsBootstrap"]],
-        frailtyModelsDiagnostics = function() private$.items[["frailtyModelsDiagnostics"]],
-        frailtyModelsSummary = function() private$.items[["frailtyModelsSummary"]],
-        clinicalUtilityOverview = function() private$.items[["clinicalUtilityOverview"]],
-        clinicalUtilityComparison = function() private$.items[["clinicalUtilityComparison"]],
-        clinicalUtilityNNT = function() private$.items[["clinicalUtilityNNT"]],
-        clinicalUtilityNetBenefit = function() private$.items[["clinicalUtilityNetBenefit"]],
-        clinicalUtilityTimeVarying = function() private$.items[["clinicalUtilityTimeVarying"]],
-        clinicalUtilityBootstrap = function() private$.items[["clinicalUtilityBootstrap"]],
-        clinicalUtilitySummary = function() private$.items[["clinicalUtilitySummary"]]),
+        enhancedLRComparison = function() private$.items[["enhancedLRComparison"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -2435,7 +577,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="copyReadyReport",
                 title="\uD83D\uDCC4 Copy-Ready Clinical Summary",
-                visible="(generateCopyReadyReport)",
+                visible=FALSE,
                 clearWith=list(
                     "oldStage",
                     "newStage",
@@ -2448,7 +590,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="guidedModeProgress",
                 title="\uD83E\uDDED Analysis Progress",
-                visible="(enableGuidedMode)",
+                visible="()",
                 clearWith=list(
                     "oldStage",
                     "newStage",
@@ -2469,7 +611,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationOverviewExplanation",
                 title="Understanding the Migration Overview",
-                visible="(showMigrationOverview && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showMigrationOverview")))
             self$add(jmvcore::Table$new(
@@ -2500,7 +642,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationMatrixExplanation",
                 title="Understanding the Migration Matrix",
-                visible="(showMigrationMatrix && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showMigrationMatrix")))
             self$add(jmvcore::Table$new(
@@ -2520,7 +662,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="stageDistributionExplanation",
                 title="Understanding Stage Distribution Changes",
-                visible="(showStageDistribution && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showStageDistribution")))
             self$add(jmvcore::Table$new(
@@ -2560,7 +702,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationSummaryExplanation",
                 title="Understanding Statistical Tests for Migration",
-                visible="(showMigrationSummary && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showMigrationSummary")))
             self$add(jmvcore::Table$new(
@@ -2587,7 +729,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="statisticalComparisonExplanation",
                 title="Understanding Statistical Comparison Metrics",
-                visible="(showStatisticalComparison && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showStatisticalComparison")))
             self$add(jmvcore::Table$new(
@@ -2622,7 +764,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceComparisonExplanation",
                 title="Understanding Concordance (C-Index) Analysis",
-                visible="(showConcordanceComparison && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showConcordanceComparison")))
             self$add(jmvcore::Table$new(
@@ -2675,7 +817,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="nriResultsExplanation",
                 title="Understanding Net Reclassification Improvement (NRI)",
-                visible="(calculateNRI && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "calculateNRI")))
             self$add(jmvcore::Table$new(
@@ -2730,7 +872,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="idiResultsExplanation",
                 title="Understanding Integrated Discrimination Improvement (IDI)",
-                visible="(calculateIDI && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "calculateIDI")))
             self$add(jmvcore::Table$new(
@@ -2774,14 +916,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="multifactorialAnalysisExplanation",
                 title="Understanding Multifactorial Stage Migration Analysis",
-                visible="(enableMultifactorialAnalysis && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="multifactorialResults",
                 title="Multifactorial Model Results",
-                visible="(enableMultifactorialAnalysis && showMultifactorialTables)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "continuousCovariates",
@@ -2827,7 +969,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="multifactorialResultsExplanation",
                 title="Understanding Multifactorial Model Results",
-                visible="(enableMultifactorialAnalysis && showMultifactorialTables && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "showMultifactorialTables")))
@@ -2835,7 +977,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="adjustedCIndexComparison",
                 title="Adjusted C-Index Comparison (Multifactorial)",
-                visible="(enableMultifactorialAnalysis && showAdjustedCIndexComparison)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "continuousCovariates",
@@ -2874,7 +1016,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="adjustedCIndexComparisonExplanation",
                 title="Understanding Adjusted C-Index Comparison",
-                visible="(enableMultifactorialAnalysis && showAdjustedCIndexComparison && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "showAdjustedCIndexComparison")))
@@ -2882,7 +1024,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="nestedModelTests",
                 title="Nested Model Tests",
-                visible="(enableMultifactorialAnalysis && showNestedModelTests)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "continuousCovariates",
@@ -2914,7 +1056,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="nestedModelTestsExplanation",
                 title="Understanding Nested Model Tests",
-                visible="(enableMultifactorialAnalysis && showNestedModelTests && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "showNestedModelTests")))
@@ -2922,7 +1064,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="stepwiseResults",
                 title="Stepwise Model Selection Results",
-                visible="(enableMultifactorialAnalysis && showStepwiseResults)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "continuousCovariates",
@@ -2954,7 +1096,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="stepwiseResultsExplanation",
                 title="Understanding Stepwise Selection Results",
-                visible="(enableMultifactorialAnalysis && showStepwiseResults && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "showStepwiseResults")))
@@ -2962,10 +1104,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="interactionTests",
                 title="Stage-Covariate Interaction Tests",
-                visible="(enableMultifactorialAnalysis && performInteractionTests)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
-                    "performInteractionTests",
                     "continuousCovariates",
                     "categoricalCovariates"),
                 columns=list(
@@ -2995,15 +1136,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="interactionTestsExplanation",
                 title="Understanding Stage-Covariate Interaction Tests",
-                visible="(enableMultifactorialAnalysis && performInteractionTests && showExplanations)",
+                visible="()",
                 clearWith=list(
-                    "enableMultifactorialAnalysis",
-                    "performInteractionTests")))
+                    "enableMultifactorialAnalysis")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="stratifiedAnalysis",
                 title="Stratified Analysis Results",
-                visible="(enableMultifactorialAnalysis && stratifiedAnalysis)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "stratifiedAnalysis",
@@ -3041,7 +1181,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="stratifiedAnalysisExplanation",
                 title="Understanding Stratified Analysis",
-                visible="(enableMultifactorialAnalysis && stratifiedAnalysis && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "stratifiedAnalysis")))
@@ -3139,7 +1279,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="dcaResultsExplanation",
                 title="Understanding Decision Curve Analysis (DCA)",
-                visible="(performDCA && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "performDCA")))
             self$add(jmvcore::Table$new(
@@ -3179,7 +1319,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="pseudoR2ResultsExplanation",
                 title="Understanding Pseudo R-squared Measures",
-                visible="(calculatePseudoR2 && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "calculatePseudoR2")))
             self$add(jmvcore::Table$new(
@@ -3222,7 +1362,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="decisionCurvesExplanation",
                 title="Understanding Decision Curve Analysis",
-                visible="(showDecisionCurves && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showDecisionCurves")))
             self$add(jmvcore::Image$new(
@@ -3245,7 +1385,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="bootstrapResults",
                 title="Bootstrap Validation Results",
-                visible="(performBootstrap)",
+                visible="()",
                 clearWith=list(
                     "oldStage",
                     "newStage",
@@ -3306,14 +1446,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="bootstrapValidationExplanation",
                 title="Understanding Bootstrap Validation Results",
-                visible="(performBootstrap && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "performBootstrap")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="willRogersAnalysisExplanation",
                 title="Understanding Will Rogers Phenomenon Analysis",
-                visible="(showWillRogersAnalysis && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showWillRogersAnalysis")))
             self$add(jmvcore::Table$new(
@@ -3360,7 +1500,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="likelihoodTestsExplanation",
                 title="Understanding Likelihood Ratio Tests",
-                visible="(performLikelihoodTests && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "performLikelihoodTests")))
             self$add(jmvcore::Table$new(
@@ -3398,7 +1538,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="linearTrendTestExplanation",
                 title="Understanding Linear Trend Chi-square Tests",
-                visible="(performLikelihoodTests && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "performLikelihoodTests")))
             self$add(jmvcore::Table$new(
@@ -3449,7 +1589,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="homogeneityTestsExplanation",
                 title="Understanding Stage Homogeneity Tests",
-                visible="(performHomogeneityTests && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "performHomogeneityTests")))
             self$add(jmvcore::Table$new(
@@ -3487,7 +1627,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="trendTestsExplanation",
                 title="Understanding Stage Trend Analysis",
-                visible="(performTrendTests && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "performTrendTests")))
             self$add(jmvcore::Table$new(
@@ -3529,7 +1669,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="clinicalInterpretationExplanation",
                 title="Understanding Clinical Interpretation Guide",
-                visible="(showClinicalInterpretation && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showClinicalInterpretation")))
             self$add(jmvcore::Table$new(
@@ -3566,7 +1706,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="executiveSummaryExplanation",
                 title="Understanding the Executive Summary",
-                visible="(generateExecutiveSummary && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "generateExecutiveSummary")))
             self$add(jmvcore::Table$new(
@@ -3602,7 +1742,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="statisticalSummaryExplanation",
                 title="Understanding the Statistical Summary",
-                visible="(showStatisticalSummary && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showStatisticalSummary")))
             self$add(jmvcore::Table$new(
@@ -3643,7 +1783,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="effectSizesExplanation",
                 title="Understanding Effect Sizes",
-                visible="(includeEffectSizes && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "includeEffectSizes")))
             self$add(jmvcore::Table$new(
@@ -3691,7 +1831,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationHeatmapExplanation",
                 title="Interpreting the Migration Heatmap",
-                visible="(showMigrationHeatmap && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showMigrationHeatmap")))
             self$add(jmvcore::Image$new(
@@ -3722,7 +1862,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="rocComparisonExplanation",
                 title="Understanding Time-dependent ROC Curves",
-                visible="(showROCComparison && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showROCComparison")))
             self$add(jmvcore::Image$new(
@@ -3745,7 +1885,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="forestPlotExplanation",
                 title="Understanding Hazard Ratio Forest Plots",
-                visible="(showForestPlot && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showForestPlot")))
             self$add(jmvcore::Image$new(
@@ -3767,7 +1907,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="calibrationAnalysisExplanation",
                 title="Understanding Calibration Analysis",
-                visible="(performCalibration && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "performCalibration")))
             self$add(jmvcore::Table$new(
@@ -3829,7 +1969,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="calibrationPlotsExplanation",
                 title="Understanding Calibration Plots",
-                visible="(performCalibration && showCalibrationPlots && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showCalibrationPlots")))
             self$add(jmvcore::Image$new(
@@ -3852,7 +1992,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="advancedMigrationExplanation",
                 title="Understanding Advanced Migration Analysis",
-                visible="(advancedMigrationAnalysis && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "advancedMigrationAnalysis")))
             self$add(jmvcore::Table$new(
@@ -4287,7 +2427,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="survivalCurvesExplanation",
                 title="Understanding Survival Curves Comparison",
-                visible="(showSurvivalCurves && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "showSurvivalCurves")))
             self$add(jmvcore::Image$new(
@@ -4313,7 +2453,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="dashboardExplanation",
                 title="Understanding the Comparative Analysis Dashboard",
-                visible="(advancedMigrationAnalysis && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "advancedMigrationAnalysis")))
             self$add(jmvcore::Table$new(
@@ -4365,7 +2505,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="willRogersEvidenceSummaryExplanation",
                 title="Understanding Will Rogers Evidence Assessment Framework",
-                visible="(advancedMigrationAnalysis && showExplanations)",
+                visible="()",
                 clearWith=list(
                     "advancedMigrationAnalysis")))
             self$add(jmvcore::Table$new(
@@ -4543,28 +2683,26 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="abbreviationGlossary",
                 title="Comprehensive Abbreviation Glossary and Statistical Terms",
-                visible="(showAbbreviationGlossary)",
+                visible="()",
                 clearWith=list(
                     "showAbbreviationGlossary")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="crossValidationExplanation",
                 title="Understanding Cross-Validation Results",
-                visible="(performCrossValidation && showExplanations)",
-                clearWith=list(
-                    "performCrossValidation")))
+                visible="()",
+                clearWith=NULL))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="crossValidationResults",
                 title="K-Fold Cross-Validation Results",
-                visible="(performCrossValidation)",
+                visible="()",
                 clearWith=list(
                     "oldStage",
                     "newStage",
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performCrossValidation",
                     "cvFolds"),
                 columns=list(
                     list(
@@ -4645,14 +2783,13 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="crossValidationPlot",
                 title="Cross-Validation Performance Visualization",
                 renderFun=".plotCrossValidation",
-                visible="(performCrossValidation)",
+                visible="()",
                 clearWith=list(
                     "oldStage",
                     "newStage",
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performCrossValidation",
                     "cvFolds",
                     "institutionVariable"),
                 width=600,
@@ -4695,3184 +2832,6 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="Model_Quality", 
                         `title`="Model Quality", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="stageMigrationEffectExplanation",
-                title="Understanding Stage Migration Effect Formula (SME)",
-                visible="(calculateSME && showExplanations)",
-                clearWith=list(
-                    "calculateSME")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stageMigrationEffect",
-                title="Stage Migration Effect Formula (SME) Results",
-                visible="(calculateSME)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "calculateSME"),
-                columns=list(
-                    list(
-                        `name`="Timepoint", 
-                        `title`="Timepoint", 
-                        `type`="text"),
-                    list(
-                        `name`="SME_Value", 
-                        `title`="SME Value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Valid_Comparisons", 
-                        `title`="Valid Comparisons", 
-                        `type`="integer"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stageMigrationEffectAssessment",
-                title="Overall Stage Migration Effect Assessment",
-                visible="(calculateSME)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "calculateSME"),
-                columns=list(
-                    list(
-                        `name`="Metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="rmstAnalysisExplanation",
-                title="Understanding Restricted Mean Survival Time (RMST) Analysis",
-                visible="(calculateRMST && showExplanations)",
-                clearWith=list(
-                    "calculateRMST")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="rmstByStage",
-                title="RMST Analysis by Stage",
-                visible="(calculateRMST)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "calculateRMST"),
-                columns=list(
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="N", 
-                        `title`="N", 
-                        `type`="integer"),
-                    list(
-                        `name`="Events", 
-                        `title`="Events", 
-                        `type`="integer"),
-                    list(
-                        `name`="RMST_Months", 
-                        `title`="RMST (months)", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Median_Survival", 
-                        `title`="Median Survival", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="rmstComparison",
-                title="RMST Discrimination Comparison",
-                visible="(calculateRMST)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "calculateRMST"),
-                columns=list(
-                    list(
-                        `name`="System", 
-                        `title`="System", 
-                        `type`="text"),
-                    list(
-                        `name`="RMST_Range", 
-                        `title`="RMST Range", 
-                        `type`="text"),
-                    list(
-                        `name`="Discrimination", 
-                        `title`="Discrimination", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="competingRisksExplanation",
-                title="Understanding Competing Risks Analysis",
-                visible="(performCompetingRisks && showExplanations)",
-                clearWith=list(
-                    "performCompetingRisks")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="competingRisksEventDistribution",
-                title="Competing Risks Event Distribution by Stage",
-                visible="(performCompetingRisks)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performCompetingRisks",
-                    "competingEventVar"),
-                columns=list(
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="N_Total", 
-                        `title`="N Total", 
-                        `type`="integer"),
-                    list(
-                        `name`="N_Primary", 
-                        `title`="N Primary", 
-                        `type`="integer"),
-                    list(
-                        `name`="N_Competing", 
-                        `title`="N Competing", 
-                        `type`="integer"),
-                    list(
-                        `name`="N_Censored", 
-                        `title`="N Censored", 
-                        `type`="integer"),
-                    list(
-                        `name`="Primary_Rate", 
-                        `title`="Primary Rate", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Competing_Rate", 
-                        `title`="Competing Rate", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="competingRisksComparison",
-                title="Competing Risks Analysis Comparison",
-                visible="(performCompetingRisks)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performCompetingRisks",
-                    "competingEventVar"),
-                columns=list(
-                    list(
-                        `name`="System", 
-                        `title`="System", 
-                        `type`="text"),
-                    list(
-                        `name`="Metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="Primary_Events", 
-                        `title`="Primary Events", 
-                        `type`="text"),
-                    list(
-                        `name`="Competing_Events", 
-                        `title`="Competing Events", 
-                        `type`="text"),
-                    list(
-                        `name`="Assessment", 
-                        `title`="Assessment", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="optimalCutpointAnalysis",
-                title="Optimal Cut-point Determination Results",
-                visible="(performOptimalCutpoint)",
-                clearWith=list(
-                    "continuousStageVariable",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performOptimalCutpoint",
-                    "cutpointMethod",
-                    "cutpointRange",
-                    "multipleTestingCorrection"),
-                columns=list(
-                    list(
-                        `name`="Method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="Optimal_Cutpoint", 
-                        `title`="Optimal Cut-point", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="P_Value", 
-                        `title`="P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Adjusted_P_Value", 
-                        `title`="Adjusted P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Log_Rank_Statistic", 
-                        `title`="Log-rank \u03C7\u00B2", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Hazard_Ratio", 
-                        `title`="Hazard Ratio", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="HR_CI", 
-                        `title`="95% CI", 
-                        `type`="text"),
-                    list(
-                        `name`="Group_Sizes", 
-                        `title`="Group Sizes", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cutpointValidation",
-                title="Cut-point Validation Results",
-                visible="(performOptimalCutpoint && (validateCutpoint || cutpointBootstrap))",
-                clearWith=list(
-                    "continuousStageVariable",
-                    "performOptimalCutpoint",
-                    "validateCutpoint",
-                    "cutpointBootstrap",
-                    "cutpointBootstrapReps"),
-                columns=list(
-                    list(
-                        `name`="Validation_Method", 
-                        `title`="Validation Method", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistic", 
-                        `title`="Statistic", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="text"),
-                    list(
-                        `name`="Confidence_Interval", 
-                        `title`="95% CI", 
-                        `type`="text"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="generatedStagingSystem",
-                title="Generated Staging System Statistics",
-                visible="(performOptimalCutpoint && generateStagingSystem)",
-                clearWith=list(
-                    "continuousStageVariable",
-                    "performOptimalCutpoint",
-                    "generateStagingSystem",
-                    "stagingSystemLevels"),
-                columns=list(
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="N", 
-                        `title`="N", 
-                        `type`="integer"),
-                    list(
-                        `name`="Events", 
-                        `title`="Events", 
-                        `type`="integer"),
-                    list(
-                        `name`="Event_Rate", 
-                        `title`="Event Rate (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Median_Survival", 
-                        `title`="Median Survival", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Hazard_Ratio", 
-                        `title`="Hazard Ratio", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="HR_CI", 
-                        `title`="95% CI", 
-                        `type`="text"),
-                    list(
-                        `name`="P_Value", 
-                        `title`="P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="shapGlobalImportance",
-                title="SHAP Global Feature Importance",
-                visible="(performSHAPAnalysis)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performSHAPAnalysis",
-                    "shapCovariates",
-                    "shapAnalysisType"),
-                columns=list(
-                    list(
-                        `name`="Feature", 
-                        `title`="Feature", 
-                        `type`="text"),
-                    list(
-                        `name`="Mean_SHAP_Value", 
-                        `title`="Mean |SHAP|", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Importance_Rank", 
-                        `title`="Rank", 
-                        `type`="integer"),
-                    list(
-                        `name`="Feature_Type", 
-                        `title`="Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Impact", 
-                        `title`="Clinical Impact", 
-                        `type`="text"),
-                    list(
-                        `name`="Direction", 
-                        `title`="Primary Effect", 
-                        `type`="text"),
-                    list(
-                        `name`="Interaction_Score", 
-                        `title`="Interaction Score", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Stability", 
-                        `title`="Stability", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="shapIndividualExplanations",
-                title="SHAP Individual Patient Explanations",
-                visible="(performSHAPAnalysis && (shapAnalysisType:individual || shapAnalysisType:comprehensive))",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performSHAPAnalysis",
-                    "shapPatientProfiles",
-                    "shapSampleSize"),
-                columns=list(
-                    list(
-                        `name`="Patient_ID", 
-                        `title`="Patient", 
-                        `type`="text"),
-                    list(
-                        `name`="Profile_Type", 
-                        `title`="Profile", 
-                        `type`="text"),
-                    list(
-                        `name`="Predicted_Risk", 
-                        `title`="Predicted Risk", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Risk_Category", 
-                        `title`="Risk Category", 
-                        `type`="text"),
-                    list(
-                        `name`="Top_Feature_1", 
-                        `title`="Top Feature 1", 
-                        `type`="text"),
-                    list(
-                        `name`="SHAP_Value_1", 
-                        `title`="SHAP Value 1", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Top_Feature_2", 
-                        `title`="Top Feature 2", 
-                        `type`="text"),
-                    list(
-                        `name`="SHAP_Value_2", 
-                        `title`="SHAP Value 2", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Top_Feature_3", 
-                        `title`="Top Feature 3", 
-                        `type`="text"),
-                    list(
-                        `name`="SHAP_Value_3", 
-                        `title`="SHAP Value 3", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="shapInteractions",
-                title="SHAP Feature Interactions",
-                visible="(performSHAPAnalysis && shapInteractionAnalysis)",
-                clearWith=list(
-                    "performSHAPAnalysis",
-                    "shapInteractionAnalysis",
-                    "shapCovariates"),
-                columns=list(
-                    list(
-                        `name`="Feature_1", 
-                        `title`="Feature 1", 
-                        `type`="text"),
-                    list(
-                        `name`="Feature_2", 
-                        `title`="Feature 2", 
-                        `type`="text"),
-                    list(
-                        `name`="Interaction_Strength", 
-                        `title`="Interaction Strength", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Interaction_Rank", 
-                        `title`="Rank", 
-                        `type`="integer"),
-                    list(
-                        `name`="Clinical_Relevance", 
-                        `title`="Clinical Relevance", 
-                        `type`="text"),
-                    list(
-                        `name`="Effect_Direction", 
-                        `title`="Effect Direction", 
-                        `type`="text"),
-                    list(
-                        `name`="Population_Frequency", 
-                        `title`="Frequency (%)", 
-                        `type`="number", 
-                        `format`="dp:1"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="shapSummaryStats",
-                title="SHAP Analysis Summary",
-                visible="(performSHAPAnalysis)",
-                clearWith=list(
-                    "performSHAPAnalysis",
-                    "shapAnalysisType",
-                    "shapSampleSize"),
-                columns=list(
-                    list(
-                        `name`="Metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="text"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="fineGrayResults",
-                title="Fine-Gray Subdistribution Hazard Models",
-                visible="(performCompetingRisksAdvanced && (competingRisksMethod:finegray || competingRisksMethod:comprehensive))",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performCompetingRisksAdvanced",
-                    "competingRisksCovariates"),
-                columns=list(
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="SHR", 
-                        `title`="Subdistribution HR", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="SHR_Lower", 
-                        `title`="SHR Lower CI", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="SHR_Upper", 
-                        `title`="SHR Upper CI", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="P_Value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Cumulative_Incidence_12m", 
-                        `title`="CIF 12m (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Cumulative_Incidence_24m", 
-                        `title`="CIF 24m (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Cumulative_Incidence_60m", 
-                        `title`="CIF 60m (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Clinical_Significance", 
-                        `title`="Clinical Significance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="causeSpecificResults",
-                title="Cause-Specific Hazard Models",
-                visible="(performCompetingRisksAdvanced && (competingRisksMethod:causespecific || competingRisksMethod:comprehensive))",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performCompetingRisksAdvanced"),
-                columns=list(
-                    list(
-                        `name`="Event_Type", 
-                        `title`="Event Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="HR", 
-                        `title`="Hazard Ratio", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="HR_Lower", 
-                        `title`="HR Lower CI", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="HR_Upper", 
-                        `title`="HR Upper CI", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="P_Value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Model_Fit", 
-                        `title`="Model Quality", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cifSummary",
-                title="Cumulative Incidence Function Summary",
-                visible="(performCompetingRisksAdvanced)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performCompetingRisksAdvanced",
-                    "cifTimePoints"),
-                columns=list(
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time (months)", 
-                        `type`="integer"),
-                    list(
-                        `name`="Event_Type", 
-                        `title`="Event Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_System_CIF", 
-                        `title`="Original CIF (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Original_System_CI_Lower", 
-                        `title`="Original Lower CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Original_System_CI_Upper", 
-                        `title`="Original Upper CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="New_System_CIF", 
-                        `title`="New CIF (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="New_System_CI_Lower", 
-                        `title`="New Lower CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="New_System_CI_Upper", 
-                        `title`="New Upper CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Difference", 
-                        `title`="Difference (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Gray_Test_P", 
-                        `title`="Gray Test p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="competingRisksCIndex",
-                title="Competing Risks Discrimination (C-Index)",
-                visible="(performCompetingRisksAdvanced && calculateCRCIndex)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performCompetingRisksAdvanced"),
-                columns=list(
-                    list(
-                        `name`="Event_Type", 
-                        `title`="Event Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_CIndex", 
-                        `title`="Original C-Index", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Original_CI_Lower", 
-                        `title`="Original Lower CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Original_CI_Upper", 
-                        `title`="Original Upper CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="New_CIndex", 
-                        `title`="New C-Index", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="New_CI_Lower", 
-                        `title`="New Lower CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="New_CI_Upper", 
-                        `title`="New Upper CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Improvement", 
-                        `title`="Improvement", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="P_Value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Clinical_Significance", 
-                        `title`="Clinical Significance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="competingRisksSummary",
-                title="Competing Risks Analysis Summary",
-                visible="(performCompetingRisksAdvanced && generateCRSummary)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "eventLevel",
-                    "performCompetingRisksAdvanced"),
-                columns=list(
-                    list(
-                        `name`="Analysis_Component", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_System", 
-                        `title`="Original System", 
-                        `type`="text"),
-                    list(
-                        `name`="New_System", 
-                        `title`="New System", 
-                        `type`="text"),
-                    list(
-                        `name`="Comparison_Result", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Significance", 
-                        `title`="Statistical Significance", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="transitionIntensities",
-                title="Multi-State Transition Intensities",
-                visible="(performMultiStateAnalysis && generateTransitionMatrix)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "stateVariable",
-                    "transitionTimeVariable",
-                    "performMultiStateAnalysis",
-                    "multiStateModel"),
-                columns=list(
-                    list(
-                        `name`="From_State", 
-                        `title`="From State", 
-                        `type`="text"),
-                    list(
-                        `name`="To_State", 
-                        `title`="To State", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Hazard_Rate", 
-                        `title`="Hazard Rate", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="HR_Lower", 
-                        `title`="HR Lower CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="HR_Upper", 
-                        `title`="HR Upper CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="P_Value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Transition_Type", 
-                        `title`="Transition Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Significance", 
-                        `title`="Clinical Significance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="transitionProbabilities",
-                title="State Transition Probabilities",
-                visible="(performMultiStateAnalysis && calculateTransitionProbabilities)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "stateVariable",
-                    "performMultiStateAnalysis",
-                    "multiStateTimePoints"),
-                columns=list(
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time (months)", 
-                        `type`="integer"),
-                    list(
-                        `name`="From_State", 
-                        `title`="From State", 
-                        `type`="text"),
-                    list(
-                        `name`="To_State", 
-                        `title`="To State", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_Probability", 
-                        `title`="Original Prob (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Original_CI_Lower", 
-                        `title`="Original Lower CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Original_CI_Upper", 
-                        `title`="Original Upper CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="New_Probability", 
-                        `title`="New Prob (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="New_CI_Lower", 
-                        `title`="New Lower CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="New_CI_Upper", 
-                        `title`="New Upper CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Probability_Difference", 
-                        `title`="Difference (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Statistical_Test", 
-                        `title`="Test p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stateOccupancy",
-                title="State Occupancy Probabilities",
-                visible="(performMultiStateAnalysis)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "stateVariable",
-                    "performMultiStateAnalysis",
-                    "multiStateTimePoints"),
-                columns=list(
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time (months)", 
-                        `type`="integer"),
-                    list(
-                        `name`="State", 
-                        `title`="State", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Occupancy_Probability", 
-                        `title`="Occupancy Prob (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="CI_Lower", 
-                        `title`="Lower CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="CI_Upper", 
-                        `title`="Upper CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Prediction_Quality", 
-                        `title`="Prediction Quality", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Relevance", 
-                        `title`="Clinical Relevance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="multiStateComparison",
-                title="Multi-State Model Comparison",
-                visible="(performMultiStateAnalysis)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "stateVariable",
-                    "performMultiStateAnalysis",
-                    "multiStateModel"),
-                columns=list(
-                    list(
-                        `name`="Model_Component", 
-                        `title`="Model Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_System", 
-                        `title`="Original System", 
-                        `type`="text"),
-                    list(
-                        `name`="New_System", 
-                        `title`="New System", 
-                        `type`="text"),
-                    list(
-                        `name`="Improvement_Metric", 
-                        `title`="Improvement", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Significance", 
-                        `title`="Significance", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Impact", 
-                        `title`="Clinical Impact", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="multiStateSummary",
-                title="Multi-State Analysis Summary",
-                visible="(performMultiStateAnalysis && generateMSMSummary)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "stateVariable",
-                    "performMultiStateAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Analysis_Component", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_vs_New", 
-                        `title`="System Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Evidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Recommendation", 
-                        `title`="Clinical Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="forestVariableImportance",
-                title="Random Forest Variable Importance",
-                visible="(performRandomForestAnalysis && calculateVariableImportance)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "survivalTime",
-                    "event",
-                    "performRandomForestAnalysis",
-                    "forestCovariates",
-                    "forestImportanceType"),
-                columns=list(
-                    list(
-                        `name`="Variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="Importance_Score", 
-                        `title`="Importance Score", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Importance_Rank", 
-                        `title`="Rank", 
-                        `type`="integer"),
-                    list(
-                        `name`="Permutation_Pvalue", 
-                        `title`="Permutation p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Importance_Type", 
-                        `title`="Importance Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Variable_Type", 
-                        `title`="Variable Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Relevance", 
-                        `title`="Clinical Relevance", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_Contribution", 
-                        `title`="Staging Contribution", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="forestModelPerformance",
-                title="Random Forest Model Performance",
-                visible="(performRandomForestAnalysis)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performRandomForestAnalysis",
-                    "forestModelType",
-                    "forestNTrees"),
-                columns=list(
-                    list(
-                        `name`="Model_Type", 
-                        `title`="Model Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="C_Index", 
-                        `title`="C-Index", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="C_Index_CI_Lower", 
-                        `title`="C-Index Lower CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="C_Index_CI_Upper", 
-                        `title`="C-Index Upper CI", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="OOB_Error", 
-                        `title`="OOB Error Rate", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Brier_Score", 
-                        `title`="Integrated Brier Score", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Model_Complexity", 
-                        `title`="Model Complexity", 
-                        `type`="text"),
-                    list(
-                        `name`="Performance_Grade", 
-                        `title`="Performance Grade", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="forestSurvivalPredictions",
-                title="Forest Survival Predictions",
-                visible="(performRandomForestAnalysis && generateSurvivalPredictions)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performRandomForestAnalysis",
-                    "forestPredictionTimePoints"),
-                columns=list(
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time (months)", 
-                        `type`="integer"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="Survival_Probability", 
-                        `title`="Survival Prob (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Prediction_CI_Lower", 
-                        `title`="Prediction Lower CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Prediction_CI_Upper", 
-                        `title`="Prediction Upper CI", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Risk_Category", 
-                        `title`="Risk Category", 
-                        `type`="text"),
-                    list(
-                        `name`="Prediction_Quality", 
-                        `title`="Prediction Quality", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="forestCoxComparison",
-                title="Random Forest vs Cox Model Comparison",
-                visible="(performRandomForestAnalysis && forestDiscriminationMetrics)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performRandomForestAnalysis",
-                    "forestStagingComparison"),
-                columns=list(
-                    list(
-                        `name`="Metric", 
-                        `title`="Performance Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="Cox_Original", 
-                        `title`="Cox Original", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Cox_New", 
-                        `title`="Cox New", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Forest_Original", 
-                        `title`="Forest Original", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Forest_New", 
-                        `title`="Forest New", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Best_Method", 
-                        `title`="Best Method", 
-                        `type`="text"),
-                    list(
-                        `name`="Improvement", 
-                        `title`="Improvement", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Statistical_Significance", 
-                        `title`="Significance", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Impact", 
-                        `title`="Clinical Impact", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="forestStagingComparison",
-                title="Forest-Based Staging System Comparison",
-                visible="(performRandomForestAnalysis && forestStagingComparison)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performRandomForestAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Analysis_Component", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_System", 
-                        `title`="Original System", 
-                        `type`="text"),
-                    list(
-                        `name`="New_System", 
-                        `title`="New System", 
-                        `type`="text"),
-                    list(
-                        `name`="Forest_Assessment", 
-                        `title`="Forest Assessment", 
-                        `type`="text"),
-                    list(
-                        `name`="Improvement_Magnitude", 
-                        `title`="Improvement", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Evidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Recommendation", 
-                        `title`="Clinical Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="forestAnalysisSummary",
-                title="Random Forest Analysis Summary",
-                visible="(performRandomForestAnalysis && generateForestSummary)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performRandomForestAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Summary_Component", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Key_Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Result", 
-                        `title`="Statistical Result", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Implication", 
-                        `title`="Clinical Implication", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cureFractionEstimates",
-                title="Cure Fraction Estimates by Staging System",
-                visible="(performCureModelAnalysis)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performCureModelAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Stage_Group", 
-                        `title`="Stage Group", 
-                        `type`="text"),
-                    list(
-                        `name`="Sample_Size", 
-                        `title`="N", 
-                        `type`="integer"),
-                    list(
-                        `name`="Cure_Fraction", 
-                        `title`="Cure Fraction", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="CF_Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="CF_Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Median_Survival_Susceptible", 
-                        `title`="Median Survival (Susceptible)", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="Model_Type", 
-                        `title`="Model Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Convergence_Status", 
-                        `title`="Convergence", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cureModelParameters",
-                title="Cure Model Parameters and Fit Statistics",
-                visible="(performCureModelAnalysis)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performCureModelAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Model_Type", 
-                        `title`="Model Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Distribution", 
-                        `title`="Distribution", 
-                        `type`="text"),
-                    list(
-                        `name`="Log_Likelihood", 
-                        `title`="Log-Likelihood", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="AIC", 
-                        `title`="AIC", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="BIC", 
-                        `title`="BIC", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="Overall_Cure_Fraction", 
-                        `title`="Overall Cure Fraction", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Shape_Parameter", 
-                        `title`="Shape Parameter", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Scale_Parameter", 
-                        `title`="Scale Parameter", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Goodness_of_Fit_p", 
-                        `title`="GoF p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cureModelComparison",
-                title="Cure Model Staging System Comparison",
-                visible="(performCureModelAnalysis && cureModelComparison)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performCureModelAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Comparison_Metric", 
-                        `title`="Comparison Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_System", 
-                        `title`="Original System", 
-                        `type`="text"),
-                    list(
-                        `name`="New_System", 
-                        `title`="New System", 
-                        `type`="text"),
-                    list(
-                        `name`="Difference", 
-                        `title`="Difference", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="LR_Test_Statistic", 
-                        `title`="LR Test Statistic", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="Statistical_Significance", 
-                        `title`="Statistical Significance", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stageSpecificCureAnalysis",
-                title="Stage-Specific Cure Patterns Analysis",
-                visible="(performCureModelAnalysis && cureStageSpecificAnalysis)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performCureModelAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Analysis_Component", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Stage_Specific_Finding", 
-                        `title`="Stage-Specific Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Cure_Fraction_Range", 
-                        `title`="Cure Fraction Range", 
-                        `type`="text"),
-                    list(
-                        `name`="Discrimination_Quality", 
-                        `title`="Discrimination Quality", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Utility", 
-                        `title`="Clinical Utility", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cureModelBootstrap",
-                title="Cure Model Bootstrap Validation",
-                visible="(performCureModelAnalysis && cureBootstrapCI)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performCureModelAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Parameter", 
-                        `title`="Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Original_Estimate", 
-                        `title`="Original Estimate", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Bootstrap_Mean", 
-                        `title`="Bootstrap Mean", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Bootstrap_SD", 
-                        `title`="Bootstrap SD", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Bootstrap_Lower_CI", 
-                        `title`="Bootstrap 95% CI Lower", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Bootstrap_Upper_CI", 
-                        `title`="Bootstrap 95% CI Upper", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Bias", 
-                        `title`="Bias", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Coverage_Probability", 
-                        `title`="Coverage", 
-                        `type`="number", 
-                        `format`="dp:4"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cureAnalysisSummary",
-                title="Cure Model Analysis Summary",
-                visible="(performCureModelAnalysis && generateCureSummary)",
-                clearWith=list(
-                    "oldStage",
-                    "newStage",
-                    "performCureModelAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Analysis_Component", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Key_Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Evidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="intervalCensoringOverview",
-                title="Interval Censoring Analysis Overview",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performIntervalCensoringAnalysis",
-                    "intervalCensoringLeftTime",
-                    "intervalCensoringRightTime",
-                    "intervalCensoringModel",
-                    "intervalCensoringDistribution"),
-                columns=list(
-                    list(
-                        `name`="Characteristic", 
-                        `title`="Characteristic", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="text"),
-                    list(
-                        `name`="Description", 
-                        `title`="Description", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="intervalCensoringNonparametric",
-                title="Non-parametric Survival Estimates (NPMLE)",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performIntervalCensoringAnalysis",
-                    "intervalCensoringModel",
-                    "intervalCensoringBootstrap",
-                    "intervalCensoringPredictionTime"),
-                columns=list(
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time (months)", 
-                        `type`="number"),
-                    list(
-                        `name`="Survival_Probability", 
-                        `title`="Survival Probability", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="n_at_risk", 
-                        `title`="At Risk", 
-                        `type`="integer"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="intervalCensoringParametric",
-                title="Parametric Interval-Censored Regression",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performIntervalCensoringAnalysis",
-                    "intervalCensoringModel",
-                    "intervalCensoringDistribution",
-                    "intervalCensoringAdjustVariables"),
-                columns=list(
-                    list(
-                        `name`="Parameter", 
-                        `title`="Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="Coefficient", 
-                        `title`="Coefficient", 
-                        `type`="number"),
-                    list(
-                        `name`="SE", 
-                        `title`="Standard Error", 
-                        `type`="number"),
-                    list(
-                        `name`="Z_value", 
-                        `title`="Z-value", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="intervalCensoringComparison",
-                title="Staging System Comparison (Interval-Censored)",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performIntervalCensoringAnalysis",
-                    "intervalCensoringCompareStages",
-                    "intervalCensoringModel"),
-                columns=list(
-                    list(
-                        `name`="Model", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Log_Likelihood", 
-                        `title`="Log-Likelihood", 
-                        `type`="number"),
-                    list(
-                        `name`="AIC", 
-                        `title`="AIC", 
-                        `type`="number"),
-                    list(
-                        `name`="BIC", 
-                        `title`="BIC", 
-                        `type`="number"),
-                    list(
-                        `name`="LR_Test_Statistic", 
-                        `title`="LR Test", 
-                        `type`="number"),
-                    list(
-                        `name`="LR_P_value", 
-                        `title`="LR P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Preferred_Model", 
-                        `title`="Preferred", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="intervalCensoringDiagnosticsTable",
-                title="Interval Censoring Model Diagnostics",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performIntervalCensoringAnalysis",
-                    "intervalCensoringDiagnostics",
-                    "intervalCensoringModel"),
-                columns=list(
-                    list(
-                        `name`="Diagnostic", 
-                        `title`="Diagnostic Test", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistic", 
-                        `title`="Test Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="intervalCensoringSummary",
-                title="Interval Censoring Analysis Summary",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performIntervalCensoringAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Evidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="informativeCensoringOverview",
-                title="Informative Censoring Analysis Overview",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performInformativeCensoringAnalysis",
-                    "informativeCensoringTestMethod",
-                    "informativeCensoringAdjustmentMethod"),
-                columns=list(
-                    list(
-                        `name`="Characteristic", 
-                        `title`="Characteristic", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="text"),
-                    list(
-                        `name`="Description", 
-                        `title`="Description", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="informativeCensoringTests",
-                title="Informative Censoring Detection Tests",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performInformativeCensoringAnalysis",
-                    "informativeCensoringTestMethod",
-                    "informativeCensoringAlpha"),
-                columns=list(
-                    list(
-                        `name`="Test_Method", 
-                        `title`="Test Method", 
-                        `type`="text"),
-                    list(
-                        `name`="Test_Statistic", 
-                        `title`="Test Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Critical_Value", 
-                        `title`="Critical Value", 
-                        `type`="number"),
-                    list(
-                        `name`="Conclusion", 
-                        `title`="Conclusion", 
-                        `type`="text"),
-                    list(
-                        `name`="Evidence_Strength", 
-                        `title`="Evidence Strength", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="informativeCensoringByStage",
-                title="Censoring Patterns by Stage",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performInformativeCensoringAnalysis",
-                    "informativeCensoringCompareStages"),
-                columns=list(
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="Total_N", 
-                        `title`="Total N", 
-                        `type`="integer"),
-                    list(
-                        `name`="Events", 
-                        `title`="Events", 
-                        `type`="integer"),
-                    list(
-                        `name`="Censored", 
-                        `title`="Censored", 
-                        `type`="integer"),
-                    list(
-                        `name`="Censoring_Rate", 
-                        `title`="Censoring Rate (%)", 
-                        `type`="number"),
-                    list(
-                        `name`="Median_Censoring_Time", 
-                        `title`="Median Censoring Time", 
-                        `type`="number"),
-                    list(
-                        `name`="Test_Statistic", 
-                        `title`="Test Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="informativeCensoringAdjustment",
-                title="Adjusted Survival Estimates",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performInformativeCensoringAnalysis",
-                    "informativeCensoringAdjustmentMethod",
-                    "informativeCensoringBootstrap"),
-                columns=list(
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time (months)", 
-                        `type`="number"),
-                    list(
-                        `name`="Unadjusted_Survival", 
-                        `title`="Unadjusted Survival", 
-                        `type`="number"),
-                    list(
-                        `name`="Adjusted_Survival", 
-                        `title`="Adjusted Survival", 
-                        `type`="number"),
-                    list(
-                        `name`="Bias_Estimate", 
-                        `title`="Bias Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="informativeCensoringSensitivity",
-                title="Sensitivity Analysis Results",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performInformativeCensoringAnalysis",
-                    "informativeCensoringSensitivityRange",
-                    "informativeCensoringAdjustmentMethod"),
-                columns=list(
-                    list(
-                        `name`="Sensitivity_Parameter", 
-                        `title`="Sensitivity Parameter", 
-                        `type`="number"),
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time (months)", 
-                        `type`="number"),
-                    list(
-                        `name`="Adjusted_Survival", 
-                        `title`="Adjusted Survival", 
-                        `type`="number"),
-                    list(
-                        `name`="Bias_Direction", 
-                        `title`="Bias Direction", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Impact", 
-                        `title`="Clinical Impact", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="informativeCensoringDiagnostics",
-                title="Informative Censoring Diagnostics",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performInformativeCensoringAnalysis",
-                    "informativeCensoringTestMethod"),
-                columns=list(
-                    list(
-                        `name`="Diagnostic", 
-                        `title`="Diagnostic Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="informativeCensoringSummary",
-                title="Informative Censoring Analysis Summary",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performInformativeCensoringAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Evidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceProbabilityOverview",
-                title="Concordance Probability Analysis Overview",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityMethods",
-                    "concordanceProbabilityWeighting"),
-                columns=list(
-                    list(
-                        `name`="Characteristic", 
-                        `title`="Characteristic", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="text"),
-                    list(
-                        `name`="Description", 
-                        `title`="Description", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceProbabilityEstimates",
-                title="Concordance Probability Estimates",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityMethods",
-                    "concordanceProbabilityBootstrap"),
-                columns=list(
-                    list(
-                        `name`="Method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Concordance", 
-                        `title`="Concordance", 
-                        `type`="number"),
-                    list(
-                        `name`="Standard_Error", 
-                        `title`="Standard Error", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="Sample_Size", 
-                        `title`="Sample Size", 
-                        `type`="integer"),
-                    list(
-                        `name`="Events", 
-                        `title`="Events", 
-                        `type`="integer"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceProbabilityTimeDependentComplex",
-                title="Time-Dependent Concordance Analysis",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityTimePoints",
-                    "concordanceProbabilityMethods"),
-                columns=list(
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Time_Point", 
-                        `title`="Time Point (months)", 
-                        `type`="number"),
-                    list(
-                        `name`="Method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="Concordance", 
-                        `title`="Concordance", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="At_Risk", 
-                        `title`="At Risk", 
-                        `type`="integer"),
-                    list(
-                        `name`="Events_Period", 
-                        `title`="Events in Period", 
-                        `type`="integer"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceProbabilityComparison",
-                title="Staging System Concordance Comparison",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityCompareStages",
-                    "concordanceProbabilityAlpha"),
-                columns=list(
-                    list(
-                        `name`="Method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="System_1", 
-                        `title`="System 1", 
-                        `type`="text"),
-                    list(
-                        `name`="Concordance_1", 
-                        `title`="Concordance 1", 
-                        `type`="number"),
-                    list(
-                        `name`="System_2", 
-                        `title`="System 2", 
-                        `type`="text"),
-                    list(
-                        `name`="Concordance_2", 
-                        `title`="Concordance 2", 
-                        `type`="number"),
-                    list(
-                        `name`="Difference", 
-                        `title`="Difference", 
-                        `type`="number"),
-                    list(
-                        `name`="Test_Statistic", 
-                        `title`="Test Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceProbabilityRobustness",
-                title="Robustness Analysis Results",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityRobustnessAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Analysis_Type", 
-                        `title`="Analysis Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Scenario", 
-                        `title`="Scenario", 
-                        `type`="text"),
-                    list(
-                        `name`="Concordance", 
-                        `title`="Concordance", 
-                        `type`="number"),
-                    list(
-                        `name`="Change_from_Base", 
-                        `title`="Change from Base", 
-                        `type`="number"),
-                    list(
-                        `name`="Robustness_Assessment", 
-                        `title`="Robustness", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceProbabilityDiagnosticsTable",
-                title="Concordance Analysis Diagnostics",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityDiagnostics"),
-                columns=list(
-                    list(
-                        `name`="Diagnostic", 
-                        `title`="Diagnostic Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceProbabilitySummary",
-                title="Concordance Probability Analysis Summary",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performConcordanceProbabilityAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Evidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="winRatioOverview",
-                title="Win Ratio Analysis Overview",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performWinRatioAnalysis",
-                    "winRatioEndpoints",
-                    "winRatioMatchingStrategy"),
-                columns=list(
-                    list(
-                        `name`="Characteristic", 
-                        `title`="Characteristic", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="text"),
-                    list(
-                        `name`="Description", 
-                        `title`="Description", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="winRatioPrimaryResults",
-                title="Win Ratio Primary Results",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performWinRatioAnalysis",
-                    "winRatioDeathVariable",
-                    "winRatioSecondaryEndpoint"),
-                columns=list(
-                    list(
-                        `name`="Comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="Win_Ratio", 
-                        `title`="Win Ratio", 
-                        `type`="number"),
-                    list(
-                        `name`="Wins", 
-                        `title`="Wins", 
-                        `type`="integer"),
-                    list(
-                        `name`="Losses", 
-                        `title`="Losses", 
-                        `type`="integer"),
-                    list(
-                        `name`="Ties", 
-                        `title`="Ties", 
-                        `type`="integer"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="winRatioEndpointContributions",
-                title="Endpoint-Specific Contributions",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performWinRatioAnalysis",
-                    "winRatioEndpoints"),
-                columns=list(
-                    list(
-                        `name`="Endpoint", 
-                        `title`="Endpoint", 
-                        `type`="text"),
-                    list(
-                        `name`="Staging_System", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Wins", 
-                        `title`="Wins", 
-                        `type`="integer"),
-                    list(
-                        `name`="Losses", 
-                        `title`="Losses", 
-                        `type`="integer"),
-                    list(
-                        `name`="Ties", 
-                        `title`="Ties", 
-                        `type`="integer"),
-                    list(
-                        `name`="Win_Proportion", 
-                        `title`="Win Proportion", 
-                        `type`="number"),
-                    list(
-                        `name`="Contribution_Percent", 
-                        `title`="Contribution (%)", 
-                        `type`="number"),
-                    list(
-                        `name`="Cumulative_Percent", 
-                        `title`="Cumulative (%)", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="winRatioStageSpecific",
-                title="Stage-Specific Win Ratios",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performWinRatioAnalysis",
-                    "winRatioMatchingStrategy"),
-                columns=list(
-                    list(
-                        `name`="Stage", 
-                        `title`="Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="N_Pairs", 
-                        `title`="Number of Pairs", 
-                        `type`="integer"),
-                    list(
-                        `name`="Win_Ratio", 
-                        `title`="Win Ratio", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Weight", 
-                        `title`="Weight", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="winRatioSensitivityResults",
-                title="Win Ratio Sensitivity Analysis",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performWinRatioAnalysis",
-                    "winRatioSensitivityAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Analysis_Type", 
-                        `title`="Analysis Type", 
-                        `type`="text"),
-                    list(
-                        `name`="Scenario", 
-                        `title`="Scenario", 
-                        `type`="text"),
-                    list(
-                        `name`="Win_Ratio", 
-                        `title`="Win Ratio", 
-                        `type`="number"),
-                    list(
-                        `name`="Change_from_Primary", 
-                        `title`="Change from Primary", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="Robustness", 
-                        `title`="Robustness", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="winRatioGeneralizedPairwiseResults",
-                title="Generalized Pairwise Comparison Results",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performWinRatioAnalysis",
-                    "winRatioGeneralizedPairwise"),
-                columns=list(
-                    list(
-                        `name`="Metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="Value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="Lower_CI", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="Upper_CI", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="P_value", 
-                        `title`="P-value", 
-                        `type`="number"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="winRatioSummary",
-                title="Win Ratio Analysis Summary",
-                clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
-                    "performWinRatioAnalysis"),
-                columns=list(
-                    list(
-                        `name`="Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="Statistical_Evidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="Clinical_Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frailtyModelsOverview",
-                title="Frailty Models Analysis Overview",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage",
-                    "frailtyClusterVariable"),
-                columns=list(
-                    list(
-                        `name`="Analysis", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Status", 
-                        `title`="Analysis Status", 
-                        `type`="text"),
-                    list(
-                        `name`="ClusterCount", 
-                        `title`="Number of Clusters", 
-                        `type`="integer"),
-                    list(
-                        `name`="AverageClusterSize", 
-                        `title`="Average Cluster Size", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="TotalObservations", 
-                        `title`="Total Observations", 
-                        `type`="integer"),
-                    list(
-                        `name`="FrailtyVariance", 
-                        `title`="Frailty Variance", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="ICC", 
-                        `title`="Intracluster Correlation", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frailtyModelsComparison",
-                title="Frailty Models - Staging System Comparison",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage",
-                    "frailtyClusterVariable"),
-                columns=list(
-                    list(
-                        `name`="StagingSystem", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Model", 
-                        `title`="Model Type", 
-                        `type`="text"),
-                    list(
-                        `name`="LogLikelihood", 
-                        `title`="Log-Likelihood", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="AIC", 
-                        `title`="AIC", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="BIC", 
-                        `title`="BIC", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="FrailtyVariance", 
-                        `title`="Frailty Variance", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="HeterogeneityTest", 
-                        `title`="Heterogeneity Test P-value", 
-                        `type`="text"),
-                    list(
-                        `name`="ConcordanceIndex", 
-                        `title`="C-index (Cluster-Adjusted)", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Improvement", 
-                        `title`="Improvement", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frailtyModelsVarianceComponents",
-                title="Frailty Models - Variance Components Analysis",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage",
-                    "frailtyClusterVariable"),
-                columns=list(
-                    list(
-                        `name`="Component", 
-                        `title`="Variance Component", 
-                        `type`="text"),
-                    list(
-                        `name`="OldStaging", 
-                        `title`="Original Staging", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="NewStaging", 
-                        `title`="New Staging", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Difference", 
-                        `title`="Difference", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="PercentChange", 
-                        `title`="% Change", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Significance", 
-                        `title`="Statistical Significance", 
-                        `type`="text"),
-                    list(
-                        `name`="ClinicalRelevance", 
-                        `title`="Clinical Relevance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frailtyModelsClusterSpecific",
-                title="Frailty Models - Cluster-Specific Analysis",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage",
-                    "frailtyClusterVariable"),
-                columns=list(
-                    list(
-                        `name`="Cluster", 
-                        `title`="Cluster/Institution", 
-                        `type`="text"),
-                    list(
-                        `name`="ClusterSize", 
-                        `title`="Sample Size", 
-                        `type`="integer"),
-                    list(
-                        `name`="EventRate", 
-                        `title`="Event Rate (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="OldStaging_Cindex", 
-                        `title`="Original C-index", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="NewStaging_Cindex", 
-                        `title`="New C-index", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="CindexImprovement", 
-                        `title`="C-index Improvement", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="PValue", 
-                        `title`="P-value", 
-                        `type`="text"),
-                    list(
-                        `name`="ClusterEffect", 
-                        `title`="Cluster Effect Size", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Consistency", 
-                        `title`="Consistency Rating", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frailtyModelsBootstrap",
-                title="Frailty Models - Bootstrap Validation Results",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage",
-                    "frailtyClusterVariable"),
-                columns=list(
-                    list(
-                        `name`="Parameter", 
-                        `title`="Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="OriginalEstimate", 
-                        `title`="Original Estimate", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="BootstrapMean", 
-                        `title`="Bootstrap Mean", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="BootstrapSE", 
-                        `title`="Bootstrap SE", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="LowerCI", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="UpperCI", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="BiasEstimate", 
-                        `title`="Bias Estimate", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="CoverageRate", 
-                        `title`="Coverage Rate (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Stability", 
-                        `title`="Parameter Stability", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frailtyModelsDiagnostics",
-                title="Frailty Models - Model Diagnostics",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage",
-                    "frailtyClusterVariable"),
-                columns=list(
-                    list(
-                        `name`="Diagnostic", 
-                        `title`="Diagnostic Test", 
-                        `type`="text"),
-                    list(
-                        `name`="OldStaging", 
-                        `title`="Original Staging", 
-                        `type`="text"),
-                    list(
-                        `name`="NewStaging", 
-                        `title`="New Staging", 
-                        `type`="text"),
-                    list(
-                        `name`="TestStatistic", 
-                        `title`="Test Statistic", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="PValue", 
-                        `title`="P-value", 
-                        `type`="text"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frailtyModelsSummary",
-                title="Frailty Models - Comprehensive Summary",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage",
-                    "frailtyClusterVariable"),
-                columns=list(
-                    list(
-                        `name`="Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="OriginalStaging", 
-                        `title`="Original Staging", 
-                        `type`="text"),
-                    list(
-                        `name`="NewStaging", 
-                        `title`="New Staging", 
-                        `type`="text"),
-                    list(
-                        `name`="StatisticalEvidence", 
-                        `title`="Statistical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="ClinicalSignificance", 
-                        `title`="Clinical Significance", 
-                        `type`="text"),
-                    list(
-                        `name`="ClusteringImpact", 
-                        `title`="Clustering Impact", 
-                        `type`="text"),
-                    list(
-                        `name`="Recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clinicalUtilityOverview",
-                title="Clinical Utility Index Analysis Overview",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage"),
-                columns=list(
-                    list(
-                        `name`="Analysis", 
-                        `title`="Analysis Component", 
-                        `type`="text"),
-                    list(
-                        `name`="Status", 
-                        `title`="Analysis Status", 
-                        `type`="text"),
-                    list(
-                        `name`="TimePoint", 
-                        `title`="Time Point (months)", 
-                        `type`="integer"),
-                    list(
-                        `name`="Prevalence", 
-                        `title`="Disease Prevalence", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="ThresholdRange", 
-                        `title`="Risk Threshold Range", 
-                        `type`="text"),
-                    list(
-                        `name`="TreatmentEffect", 
-                        `title`="Treatment Effect (HR)", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="CostPerIntervention", 
-                        `title`="Cost Per Intervention ($)", 
-                        `type`="integer"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clinicalUtilityComparison",
-                title="Clinical Utility Index - Staging System Comparison",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage"),
-                columns=list(
-                    list(
-                        `name`="StagingSystem", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="RiskThreshold", 
-                        `title`="Risk Threshold (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="Sensitivity", 
-                        `title`="Sensitivity", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Specificity", 
-                        `title`="Specificity", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="PPV", 
-                        `title`="Positive Predictive Value", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="NPV", 
-                        `title`="Negative Predictive Value", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="NetBenefit", 
-                        `title`="Net Benefit", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="ClinicalUtilityIndex", 
-                        `title`="Clinical Utility Index", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="Interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clinicalUtilityNNT",
-                title="Clinical Utility Index - Number Needed to Treat Analysis",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage"),
-                columns=list(
-                    list(
-                        `name`="StagingSystem", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="RiskThreshold", 
-                        `title`="Risk Threshold (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="NNT", 
-                        `title`="Number Needed to Treat", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="NNH", 
-                        `title`="Number Needed to Harm", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="NNT_LowerCI", 
-                        `title`="NNT 95% CI Lower", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="NNT_UpperCI", 
-                        `title`="NNT 95% CI Upper", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="TreatmentBenefit", 
-                        `title`="Treatment Benefit (%)", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="CostPerQALY", 
-                        `title`="Cost Per QALY ($)", 
-                        `type`="integer"),
-                    list(
-                        `name`="CostEffectiveness", 
-                        `title`="Cost-Effectiveness", 
-                        `type`="text"),
-                    list(
-                        `name`="ClinicalRecommendation", 
-                        `title`="Clinical Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clinicalUtilityNetBenefit",
-                title="Clinical Utility Index - Net Benefit Analysis",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage"),
-                columns=list(
-                    list(
-                        `name`="RiskThreshold", 
-                        `title`="Risk Threshold (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="OldStaging_NetBenefit", 
-                        `title`="Original Net Benefit", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="NewStaging_NetBenefit", 
-                        `title`="New Net Benefit", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="NetBenefitDifference", 
-                        `title`="Net Benefit Difference", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="PercentImprovement", 
-                        `title`="% Improvement", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="TreatAll_NetBenefit", 
-                        `title`="Treat All Net Benefit", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="TreatNone_NetBenefit", 
-                        `title`="Treat None Net Benefit", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="OptimalStrategy", 
-                        `title`="Optimal Strategy", 
-                        `type`="text"),
-                    list(
-                        `name`="ClinicalSignificance", 
-                        `title`="Clinical Significance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clinicalUtilityTimeVarying",
-                title="Clinical Utility Index - Time-Varying Analysis",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage"),
-                columns=list(
-                    list(
-                        `name`="TimePoint", 
-                        `title`="Time Point (months)", 
-                        `type`="integer"),
-                    list(
-                        `name`="StagingSystem", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="Prevalence", 
-                        `title`="Event Rate at Time", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="OptimalThreshold", 
-                        `title`="Optimal Threshold (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="MaxNetBenefit", 
-                        `title`="Maximum Net Benefit", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="ClinicalUtilityIndex", 
-                        `title`="Clinical Utility Index", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="NNT_Optimal", 
-                        `title`="NNT at Optimal Threshold", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="UtilityTrend", 
-                        `title`="Utility Trend", 
-                        `type`="text"),
-                    list(
-                        `name`="DecisionTiming", 
-                        `title`="Decision Timing Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clinicalUtilityBootstrap",
-                title="Clinical Utility Index - Bootstrap Validation Results",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage"),
-                columns=list(
-                    list(
-                        `name`="Metric", 
-                        `title`="Clinical Utility Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="StagingSystem", 
-                        `title`="Staging System", 
-                        `type`="text"),
-                    list(
-                        `name`="OriginalEstimate", 
-                        `title`="Original Estimate", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="BootstrapMean", 
-                        `title`="Bootstrap Mean", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="BootstrapSE", 
-                        `title`="Bootstrap SE", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="LowerCI", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="UpperCI", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="BiasEstimate", 
-                        `title`="Bias Estimate", 
-                        `type`="number", 
-                        `format`="dp:4"),
-                    list(
-                        `name`="Stability", 
-                        `title`="Metric Stability", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clinicalUtilitySummary",
-                title="Clinical Utility Index - Comprehensive Summary",
-                clearWith=list(
-                    "timeVar",
-                    "eventVar",
-                    "oldStage",
-                    "newStage"),
-                columns=list(
-                    list(
-                        `name`="Finding", 
-                        `title`="Key Finding", 
-                        `type`="text"),
-                    list(
-                        `name`="OriginalStaging", 
-                        `title`="Original Staging", 
-                        `type`="text"),
-                    list(
-                        `name`="NewStaging", 
-                        `title`="New Staging", 
-                        `type`="text"),
-                    list(
-                        `name`="ClinicalEvidence", 
-                        `title`="Clinical Evidence", 
-                        `type`="text"),
-                    list(
-                        `name`="UtilityImprovement", 
-                        `title`="Utility Improvement", 
-                        `type`="text"),
-                    list(
-                        `name`="CostEffectiveness", 
-                        `title`="Cost-Effectiveness", 
-                        `type`="text"),
-                    list(
-                        `name`="ClinicalRecommendation", 
-                        `title`="Clinical Recommendation", 
                         `type`="text"))))}))
 
 stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -7953,36 +2912,6 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   the specific disease being studied.
 #' @param eventLevel The level indicating event occurrence when using factor
 #'   variables.
-#' @param clinicalPreset Choose a preset tailored to your clinical workflow.
-#'   'Routine Clinical' provides essential  validation metrics for daily
-#'   practice. 'Research Study' adds advanced statistics for  academic research.
-#'   'Publication Ready' includes all methods and visualizations for
-#'   manuscripts. Choose 'Custom' to manually configure all options.
-#' @param enableGuidedMode Enable step-by-step guidance for clinical users.
-#'   Provides contextual help,  assumption checking, and clinical interpretation
-#'   assistance throughout the analysis. Highly recommended for users new to
-#'   staging validation methods.
-#' @param generateCopyReadyReport Generate plain-language clinical summary
-#'   paragraphs that can be copied directly  into reports or manuscripts.
-#'   Includes key findings, statistical significance,  clinical interpretation,
-#'   and implementation recommendations.
-#' @param enableAccessibilityFeatures Enable accessibility features including
-#'   color-blind safe palettes,  high contrast visualizations, larger font
-#'   sizes, and enhanced table readability. Ensures outputs are accessible to
-#'   users with visual impairments.
-#' @param preferredLanguage Choose the language for explanations, labels, and
-#'   clinical interpretations. Scientific terminology and statistical results
-#'   remain standardized.
-#' @param enableProgressIndicators Show progress bars and status updates for
-#'   long-running analyses such as  bootstrap validation and cross-validation.
-#'   Helps users track analysis progress.
-#' @param optimizeForLargeDatasets Enable memory-efficient processing for
-#'   large datasets (>10,000 patients).  Uses chunked processing and optimized
-#'   algorithms to reduce memory usage  and improve performance while
-#'   maintaining statistical accuracy.
-#' @param analysisType Determines the scope of statistical analysis performed.
-#'   Comprehensive analysis includes all available methods for thorough staging
-#'   system validation.
 #' @param confidenceLevel Confidence level for all confidence intervals and
 #'   hypothesis tests.
 #' @param calculateNRI Calculate Net Reclassification Improvement to quantify
@@ -8002,15 +2931,6 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   making.
 #' @param performCalibration Assess calibration of risk predictions from both
 #'   staging systems. Important for validating accuracy of survival predictions.
-#' @param performBootstrap Perform bootstrap validation with optimism
-#'   correction to assess internal validity of results. Recommended for all
-#'   staging validation studies.
-#' @param bootstrapReps Number of bootstrap repetitions for internal
-#'   validation.  1000 repetitions recommended for stable results.
-#' @param performCrossValidation Perform k-fold cross-validation for
-#'   additional validation. Computationally intensive but provides robust
-#'   validation.
-#' @param cvFolds Number of folds for cross-validation when enabled.
 #' @param institutionVariable Optional variable indicating institution or
 #'   study center for  multi-institutional validation. When provided, performs
 #'   internal-external cross-validation using k-1 centers for development and
@@ -8115,590 +3035,8 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   detailed assessment of  staging system quality and migration patterns.
 #' @param generateExecutiveSummary Generate executive summary with key
 #'   findings and recommendations for clinical and research stakeholders.
-#' @param cancerType Optional cancer type specification for customized
-#'   thresholds and  interpretation guidelines based on cancer-specific
-#'   literature.
-#' @param useOptimismCorrection Apply optimism correction to performance
-#'   metrics using bootstrap validation to avoid overly optimistic estimates.
-#' @param enableMultifactorialAnalysis Enable advanced multifactorial stage
-#'   migration analysis that includes additional covariates in the comparison.
-#'   This allows for adjusted comparisons between staging systems after
-#'   accounting for other prognostic factors.
-#' @param continuousCovariates Continuous variables to include as covariates
-#'   in the multifactorial analysis (e.g., age, tumor size, biomarker levels).
-#'   These will be included in Cox regression models for both staging systems.
-#' @param categoricalCovariates Categorical variables to include as covariates
-#'   in the multifactorial analysis (e.g., sex, histology, treatment type).
-#'   These will be included in Cox regression models for both staging systems.
-#' @param multifactorialComparisonType Type of multifactorial comparison to
-#'   perform. Comprehensive includes all methods for thorough evaluation of
-#'   staging systems in the context of other prognostic factors.
-#' @param baselineModel Baseline model for multifactorial comparisons. This
-#'   determines the reference model against which staging systems are compared.
-#' @param performInteractionTests Test for interactions between staging
-#'   systems and covariates. This helps identify if the staging system
-#'   performance varies across different patient subgroups.
-#' @param stratifiedAnalysis Perform stratified analysis by categorical
-#'   covariates to evaluate staging system performance within subgroups.
-#' @param showMultifactorialTables Display detailed tables showing
-#'   multifactorial model results, including adjusted hazard ratios and model
-#'   comparison statistics.
-#' @param showAdjustedCIndexComparison Display comparison of C-indices for
-#'   staging systems adjusted for covariates. This shows the discriminative
-#'   ability of each staging system after accounting for other prognostic
-#'   factors.
-#' @param showNestedModelTests Display likelihood ratio tests comparing nested
-#'   models to formally test the added value of each staging system over the
-#'   baseline model.
-#' @param showStepwiseResults Display results of stepwise model selection
-#'   showing which variables (including staging systems) are selected in the
-#'   final model.
+#' @param enableMultifactorialAnalysis .
 #' @param showExplanations Include detailed explanations for results.
-#' @param showAbbreviationGlossary Display a comprehensive glossary of all
-#'   abbreviations, statistical terms,  and technical terminology used in the
-#'   stage migration analysis. This  provides a quick reference for interpreting
-#'   dashboard values and  understanding statistical outputs.
-#' @param calculateSME Calculate Stage Migration Effect Formula (SME) to
-#'   quantify the cumulative  difference in survival between corresponding
-#'   stages of old and new staging  systems. SME = Σ(S_new_i - S_old_i) where S
-#'   represents stage-specific  survival rates. Positive values indicate Will
-#'   Rogers phenomenon (apparent  improvement in new system), while negative
-#'   values suggest understaging.
-#' @param calculateRMST Calculate Restricted Mean Survival Time (RMST) metrics
-#'   for robust  discrimination assessment. RMST provides clinically
-#'   interpretable  survival measures that are independent of proportional
-#'   hazards assumptions.  Particularly valuable when median survival is not
-#'   reached or when comparing  absolute survival benefits between staging
-#'   systems.
-#' @param performCompetingRisks Perform competing risks analysis for scenarios
-#'   with multiple event types  (e.g., cancer-specific death vs. other causes).
-#'   Implements Fine-Gray  subdistribution hazard models and Cumulative
-#'   Incidence Function (CIF)  analysis. Essential when competing events prevent
-#'   observation of primary  outcome and standard survival analysis may be
-#'   biased.
-#' @param competingEventVar Optional variable indicating competing events
-#'   (events other than primary  outcome). If not specified, the analysis will
-#'   attempt to detect competing  risks from multi-level event variables. For
-#'   cancer studies, this typically  represents non-cancer deaths when primary
-#'   outcome is cancer-specific death.
-#' @param performOptimalCutpoint Determine optimal cut-points for continuous
-#'   variables that create the most  statistically significant separation in
-#'   survival outcomes. Uses maximal  selected rank statistics with appropriate
-#'   multiple testing corrections.  Essential for developing new staging
-#'   criteria from continuous biomarkers  or measurements.
-#' @param continuousStageVariable Continuous variable (e.g., tumor size,
-#'   biomarker level, age) for optimal  cut-point determination. The analysis
-#'   will find the cut-point that maximizes  the separation in survival outcomes
-#'   while controlling for multiple testing.
-#' @param cutpointMethod Method for optimal cut-point determination. Maximal
-#'   selected rank statistics  provides the most rigorous approach with proper
-#'   multiple testing correction.
-#' @param cutpointRange Proportion range for cut-point search (e.g., "0.1,
-#'   0.9" excludes outer  10\% to maintain statistical power). Prevents extreme
-#'   cut-points that  create unbalanced groups.
-#' @param multipleTestingCorrection Multiple testing correction method for
-#'   cut-point determination.  Bonferroni is most conservative; use when testing
-#'   many cut-points.
-#' @param validateCutpoint Perform cross-validation to assess stability of
-#'   optimal cut-point.  Helps identify robust cut-points that are not dependent
-#'   on specific  data characteristics.
-#' @param cutpointBootstrap Use bootstrap validation to assess cut-point
-#'   stability and derive  confidence intervals. Provides robust assessment of
-#'   cut-point reliability.
-#' @param cutpointBootstrapReps Number of bootstrap repetitions for cut-point
-#'   validation.
-#' @param generateStagingSystem Automatically generate a new staging system
-#'   based on optimal cut-points.  Creates categorical staging variable from
-#'   continuous measurements using  determined cut-points with appropriate stage
-#'   labeling.
-#' @param stagingSystemLevels Number of staging levels to create from optimal
-#'   cut-points (e.g., 3 for  Low/Intermediate/High or 4 for Stages I-IV).
-#' @param performSHAPAnalysis Perform Shapley Additive Explanations (SHAP)
-#'   analysis to explain which  factors are driving the predictions of staging
-#'   models. SHAP provides  both global feature importance and individual
-#'   patient-level explanations  for complex staging decisions.
-#' @param shapAnalysisType Type of SHAP analysis to perform. Global analysis
-#'   shows overall feature  importance across all patients, individual analysis
-#'   explains specific  patient predictions, comprehensive includes both
-#'   approaches.
-#' @param shapCovariates Additional variables to include in SHAP
-#'   interpretability analysis  alongside staging variables. Include key
-#'   clinical variables that  might influence staging decisions or patient
-#'   outcomes.
-#' @param shapSampleSize Number of patients to use for SHAP analysis. Larger
-#'   samples provide  more comprehensive explanations but require more
-#'   computation time.  Recommended: 100-200 for routine analysis, 500+ for
-#'   detailed research.
-#' @param shapBackgroundSamples Number of background samples for SHAP baseline
-#'   calculation. More  samples provide more stable explanations but increase
-#'   computation time.
-#' @param shapExplanationType SHAP explanation method to use. Auto-detect
-#'   chooses the most appropriate  method based on the model type. TreeSHAP is
-#'   fastest for tree models,  Kernel SHAP works with any model but is slower.
-#' @param generateSHAPPlots Generate SHAP visualization plots including
-#'   summary plots, bar plots,  and dependence plots for model interpretability.
-#' @param shapPatientProfiles Types of patient profiles to include in
-#'   individual SHAP explanations.  Helps understand how different patient
-#'   characteristics influence  staging-based predictions.
-#' @param shapInteractionAnalysis Perform SHAP interaction analysis to
-#'   identify important feature  interactions. Shows how combinations of
-#'   features affect predictions  beyond individual feature effects.
-#' @param shapClinicalThresholds Comma-separated risk thresholds for clinical
-#'   decision boundaries in  SHAP analysis (e.g., "0.25, 0.50, 0.75" for
-#'   low/moderate/high risk).  Used to interpret SHAP values in clinical
-#'   context.
-#' @param performCompetingRisksAdvanced Perform comprehensive competing risks
-#'   analysis using Fine-Gray  subdistribution hazard models and Cumulative
-#'   Incidence Function (CIF)  analysis. Essential when competing events prevent
-#'   observation of primary  outcome and standard survival analysis may be
-#'   biased.
-#' @param competingRisksMethod Method for competing risks analysis. Fine-Gray
-#'   models cumulative  incidence, cause-specific models instantaneous hazard
-#'   rates.  Comprehensive includes both approaches for complete assessment.
-#' @param cifTimePoints Time points for Cumulative Incidence Function analysis
-#'   (e.g.,  "12, 24, 36, 60" for 1, 2, 3, and 5-year analysis). Use clinically
-#'   relevant time points for the specific cancer type.
-#' @param competingEventLevels Comma-separated list of event categories for
-#'   competing risks analysis.  Typically includes primary event (cancer death),
-#'   competing events  (other causes), and censoring indicator.
-#' @param primaryEventLevel Specify the primary event of interest for
-#'   competing risks analysis  (e.g., "cancer_death", "disease_progression",
-#'   "cardiovascular_death").  Must match one of the competing event categories.
-#' @param generateCIFPlots Generate Cumulative Incidence Function plots
-#'   showing probability of  each event type over time. Essential for
-#'   visualizing competing risks  patterns and staging system comparisons.
-#' @param performGrayTest Perform Gray's test for equality of cumulative
-#'   incidence functions  across staging groups. Tests whether CIF curves differ
-#'   significantly  between stages for each event type.
-#' @param cifConfidenceLevel Confidence level for Cumulative Incidence
-#'   Function confidence intervals  and statistical tests.
-#' @param competingRisksCovariates Additional variables to include in
-#'   competing risks regression models.  Include important prognostic factors
-#'   that may influence both primary  and competing events.
-#' @param stratifyByStaging Perform separate competing risks analysis for each
-#'   staging system  (original vs new) to compare their performance in the
-#'   presence of  competing events.
-#' @param calculateCRCIndex Calculate C-index specifically adapted for
-#'   competing risks analysis.  Provides discrimination metrics that properly
-#'   account for competing  events when evaluating staging system performance.
-#' @param generateCRSummary Generate comprehensive summary table with
-#'   Fine-Gray regression results,  cumulative incidence estimates, and staging
-#'   system comparisons in  competing risks context.
-#' @param performMultiStateAnalysis Perform multi-state survival analysis for
-#'   complex disease progression  scenarios where patients can transition
-#'   between multiple health states  over time. Essential for modeling disease
-#'   progression, remission,  relapse, and death in oncology.
-#' @param multiStateModel Type of multi-state model to fit. Illness-Death
-#'   models progression  from healthy to disease to death. Progression models
-#'   include stable,  progressive, terminal states. Comprehensive fits multiple
-#'   models for  comparison.
-#' @param stateVariable Variable indicating patient disease states (e.g.,
-#'   stable, progressive,  deceased, remission). Should contain all possible
-#'   states that patients  can transition between during follow-up.
-#' @param transitionTimeVariable Time variable indicating when state
-#'   transitions occurred. For multiple  transitions per patient, use
-#'   comma-separated times or separate records  for each transition.
-#' @param multiStateStates Comma-separated list of all possible states in
-#'   order of progression  (e.g., "healthy, disease, death" or "stable,
-#'   progressive, remission, death").  Must match levels in the state variable.
-#' @param absorptionStates Comma-separated list of absorbing states that
-#'   patients cannot leave  once entered (e.g., "death", "terminal"). These
-#'   represent final  outcomes in the disease process.
-#' @param multiStateCovariates Additional variables to include in multi-state
-#'   models as covariates.  Include important prognostic factors that may
-#'   influence transition  rates between states.
-#' @param calculateTransitionProbabilities Calculate state transition
-#'   probabilities between all possible state  pairs. Provides insight into
-#'   likelihood of disease progression,  remission, and mortality transitions.
-#' @param multiStateTimePoints Time points for transition probability
-#'   calculations (e.g.,  "6, 12, 24, 36, 60" for 6-month intervals up to 5
-#'   years). Use  clinically relevant time points for disease monitoring.
-#' @param generateTransitionMatrix Generate comprehensive transition intensity
-#'   matrix showing hazard  rates for all possible state transitions. Essential
-#'   for understanding  disease progression dynamics.
-#' @param multiStateGraphics Generate multi-state model visualizations
-#'   including state transition  diagrams, probability plots, and Aalen-Johansen
-#'   estimator curves for  state occupancy probabilities.
-#' @param msStratifyByStaging Perform separate multi-state analysis for each
-#'   staging system to  compare their ability to predict disease transitions and
-#'   progression  patterns.
-#' @param multiStateValidation Perform model validation including
-#'   goodness-of-fit testing, residual  analysis, and cross-validation for
-#'   multi-state models. Computationally  intensive but provides robust model
-#'   assessment.
-#' @param generateMSMSummary Generate comprehensive summary table with
-#'   transition intensities,  hazard ratios, and state occupancy probabilities
-#'   comparing staging  systems in multi-state framework.
-#' @param performRandomForestAnalysis Perform Random Survival Forest analysis
-#'   as a non-parametric alternative  to Cox proportional hazards models.
-#'   Provides robust predictions through  ensemble methods without proportional
-#'   hazards assumptions, ideal for  complex interactions and non-linear
-#'   relationships.
-#' @param forestModelType Type of random forest model to fit. RSF is the
-#'   standard approach,  conditional inference forests handle categorical
-#'   variables better,  extra trees provide additional randomization. Ensemble
-#'   combines  multiple approaches for maximum robustness.
-#' @param forestNTrees Number of trees in the random forest. More trees
-#'   generally improve  performance but increase computation time. 500 trees
-#'   provide good  balance between accuracy and speed for most applications.
-#' @param forestMTry Number of variables randomly selected at each split. Use
-#'   "auto" for  automatic selection (sqrt of total variables), or specify a
-#'   number.  Lower values increase randomization, higher values may improve
-#'   accuracy.
-#' @param forestMinNodeSize Minimum number of observations in terminal nodes.
-#'   Larger values prevent  overfitting but may reduce model flexibility.
-#'   Recommended: 3-10 for  survival data depending on sample size.
-#' @param forestCovariates Additional variables to include in random forest
-#'   models alongside  staging variables. Include important clinical variables
-#'   for  comprehensive non-parametric survival modeling.
-#' @param calculateVariableImportance Calculate variable importance measures
-#'   using permutation-based methods.  Shows which variables contribute most to
-#'   survival predictions,  complementing SHAP analysis with forest-specific
-#'   importance metrics.
-#' @param forestImportanceType Type of variable importance measure.
-#'   Permutation importance is most  interpretable, VIMP is RF-specific, minimal
-#'   depth shows variable  selection frequency. Comprehensive provides all
-#'   measures.
-#' @param performForestValidation Perform out-of-bag validation and
-#'   cross-validation for random forest  models. Provides robust assessment of
-#'   model performance including  prediction error rates and concordance
-#'   indices.
-#' @param forestPredictionTimePoints Time points for survival probability
-#'   predictions from random forest  models (e.g., "12, 24, 36, 60" for 1, 2, 3,
-#'   and 5-year predictions).  Use clinically relevant time points for staging
-#'   comparison.
-#' @param generateSurvivalPredictions Generate individual patient survival
-#'   probability predictions at  specified time points. Provides personalized
-#'   risk assessments  based on random forest ensemble predictions.
-#' @param forestDiscriminationMetrics Calculate discrimination metrics
-#'   specifically for random forest models  including C-index, Integrated Brier
-#'   Score, and time-dependent AUC.  Compares forest performance with
-#'   traditional Cox models.
-#' @param forestStagingComparison Use random forest models to compare staging
-#'   systems through  non-parametric ensemble methods. Provides robust staging
-#'   comparison  without proportional hazards assumptions.
-#' @param forestBootstrap Perform bootstrap validation of random forest models
-#'   with multiple  bootstrap samples. Provides confidence intervals for
-#'   forest-based  predictions and importance measures.
-#' @param forestBootstrapSamples Number of bootstrap samples for forest
-#'   validation. More samples  provide more stable confidence intervals but
-#'   increase computation time.
-#' @param generateForestSummary Generate comprehensive summary of random
-#'   forest analysis including  model performance, variable importance, staging
-#'   comparison, and  clinical recommendations based on ensemble predictions.
-#' @param performCureModelAnalysis Perform cure model analysis for populations
-#'   where a fraction of patients  may be effectively cured. Uses mixture models
-#'   to separate susceptible  and cured populations, particularly relevant for
-#'   cancer staging analysis.
-#' @param cureModelType Type of cure model to fit. Mixture models assume a
-#'   cured fraction with  infinite survival, promotion time models use
-#'   biological mechanisms,  and both provides comprehensive comparison.
-#' @param cureDistribution Underlying survival distribution for the
-#'   susceptible population in  cure models. Weibull is most flexible,
-#'   exponential is simplest,  log-normal and log-logistic provide alternative
-#'   hazard shapes.
-#' @param cureAnalyzeOldStage Fit cure models to original staging system to
-#'   estimate cure fractions  and survival patterns for susceptible patients in
-#'   each stage.
-#' @param cureAnalyzeNewStage Fit cure models to new staging system to
-#'   estimate cure fractions and  survival patterns, enabling comparison of
-#'   staging discrimination for  both cured and susceptible populations.
-#' @param cureFractionEstimation Method for estimating cure fractions.
-#'   Parametric uses maximum likelihood  with specified distributions,
-#'   non-parametric uses Kaplan-Meier plateau  detection, both provides
-#'   validation.
-#' @param cureConfidenceLevel Confidence level for cure model parameter
-#'   estimates and cure fraction  confidence intervals. Standard 95\% provides
-#'   balance between precision  and coverage.
-#' @param cureBootstrapCI Calculate bootstrap confidence intervals for cure
-#'   fractions and model  parameters. Provides robust uncertainty quantification
-#'   especially for  small samples or complex models.
-#' @param cureBootstrapReps Number of bootstrap replications for confidence
-#'   interval calculation.  More replications provide more stable intervals but
-#'   increase  computation time.
-#' @param cureTimeHorizon Time horizon for cure assessment in months. Patients
-#'   surviving beyond  this time without events are considered potentially
-#'   cured. Typical  values: 60-120 months for most cancers.
-#' @param curePlateauThreshold Threshold for detecting survival curve plateau
-#'   in non-parametric cure  fraction estimation. Lower values detect smaller
-#'   plateaus but may be  more sensitive to noise.
-#' @param cureCovariates Additional variables to include in cure model
-#'   analysis alongside staging  variables. Can affect both cure probability and
-#'   survival of susceptible  patients.
-#' @param cureModelComparison Compare cure models between staging systems
-#'   using likelihood ratio tests,  AIC/BIC criteria, and cure fraction
-#'   differences. Assesses which staging  system better identifies cured
-#'   patients.
-#' @param cureStageSpecificAnalysis Perform separate cure model analysis for
-#'   each stage group to understand  stage-specific cure patterns and survival
-#'   of susceptible patients.  Essential for staging validation.
-#' @param cureGoodnessOfFit Perform goodness-of-fit tests for cure models
-#'   including Kolmogorov-Smirnov  tests and visual diagnostic plots. Validates
-#'   model assumptions and  identifies potential misspecification.
-#' @param generateCureSummary Generate comprehensive summary of cure model
-#'   analysis including cure  fractions by stage, model comparison results, and
-#'   clinical interpretation  for staging system evaluation.
-#' @param performIntervalCensoringAnalysis Perform interval censoring analysis
-#'   for events detected between visits. This handles cases where the exact
-#'   event time is unknown but falls  within a known interval (e.g., between
-#'   clinic visits). Uses icenReg  package for non-parametric and parametric
-#'   interval-censored survival  analysis.
-#' @param intervalCensoringLeftTime Variable containing the left endpoint of
-#'   the censoring interval. For exact observations, this should equal the right
-#'   endpoint. For left-censored observations, use 0 or NA.
-#' @param intervalCensoringRightTime Variable containing the right endpoint of
-#'   the censoring interval. For right-censored observations, use Inf or a large
-#'   value. For exact observations, this should equal the left endpoint.
-#' @param intervalCensoringDistribution Distribution assumption for parametric
-#'   interval-censored regression. Weibull is most commonly used and provides
-#'   good flexibility.
-#' @param intervalCensoringModel Type of interval censoring model to fit.
-#'   Non-parametric uses non-parametric maximum likelihood estimation (NPMLE).
-#'   Parametric fits accelerated failure time models with specified
-#'   distribution.
-#' @param intervalCensoringBootstrap Calculate bootstrap confidence intervals
-#'   for non-parametric estimates. This provides uncertainty quantification for
-#'   the survival function estimates with interval-censored data.
-#' @param intervalCensoringBootstrapSamples Number of bootstrap samples for
-#'   confidence interval calculation. More samples provide more accurate
-#'   intervals but increase computation time.
-#' @param intervalCensoringCompareStages Compare survival functions between
-#'   different staging systems accounting for interval censoring. Provides
-#'   likelihood ratio tests and information criteria for model comparison.
-#' @param intervalCensoringPlots Generate survival plots specifically designed
-#'   for interval-censored data, including non-parametric survival function
-#'   estimates and comparison plots between staging systems.
-#' @param intervalCensoringDiagnostics Perform model diagnostics including
-#'   convergence assessment, residual analysis for parametric models, and
-#'   goodness-of-fit tests for interval-censored regression models.
-#' @param intervalCensoringPredictionTime Comma-separated list of time points
-#'   (in months) for survival probability predictions. These will be used for
-#'   staging system comparison and clinical interpretation of interval-censored
-#'   survival estimates.
-#' @param intervalCensoringConfidenceLevel Confidence level for interval
-#'   estimates and hypothesis tests. Standard choices are 0.90, 0.95, or 0.99.
-#' @param intervalCensoringAdjustVariables Additional variables to include in
-#'   parametric interval-censored regression models for adjusted survival
-#'   analysis. These will be included as covariates in the accelerated failure
-#'   time model.
-#' @param performInformativeCensoringAnalysis Perform tests for informative
-#'   censoring to validate the assumption that censoring is non-informative.
-#'   Informative censoring occurs when the censoring mechanism is related to the
-#'   failure time, potentially biasing survival estimates. This analysis
-#'   provides tests and adjustments for non-random censoring patterns.
-#' @param informativeCensoringTestMethod Method for testing informative
-#'   censoring. Correlation tests examine relationship between censoring and
-#'   survival times. Regression tests model censoring as outcome. Competing
-#'   risks treats censoring as competing event. Landmark analysis examines
-#'   censoring patterns.
-#' @param informativeCensoringCovariates Variables that may be associated with
-#'   the censoring mechanism. These could include clinical factors, treatment
-#'   decisions, or administrative factors that might influence when patients are
-#'   censored from the study.
-#' @param informativeCensoringLandmarkTimes Comma-separated list of landmark
-#'   time points (in months) for landmark analysis of censoring patterns.
-#'   Analysis examines whether censoring probabilities differ across staging
-#'   groups at these specific time points.
-#' @param informativeCensoringAdjustmentMethod Method for adjusting survival
-#'   estimates when informative censoring is detected. IPW uses inverse
-#'   probability weighting. Multiple imputation imputes censored failure times.
-#'   Sensitivity analysis explores range of possible bias effects.
-#' @param informativeCensoringIPWVariables Variables to include in inverse
-#'   probability weighting model for censoring probability estimation. Should
-#'   include factors that predict censoring but are not affected by the outcome.
-#' @param informativeCensoringSensitivityRange Comma-separated list of
-#'   sensitivity parameters for bias analysis. These represent hazard ratio
-#'   multipliers for exploring potential bias from informative censoring (1.0 =
-#'   no bias assumption).
-#' @param informativeCensoringBootstrap Calculate bootstrap confidence
-#'   intervals for adjusted survival estimates and bias-corrected parameters.
-#'   Provides uncertainty quantification for informative censoring adjustments.
-#' @param informativeCensoringBootstrapSamples Number of bootstrap samples for
-#'   confidence interval calculation in informative censoring analysis. More
-#'   samples provide more accurate intervals but increase computation time.
-#' @param informativeCensoringAlpha Significance level for testing informative
-#'   censoring hypotheses. Used for determining whether censoring appears to be
-#'   informative and for confidence interval construction.
-#' @param informativeCensoringPlots Generate diagnostic plots for informative
-#'   censoring assessment including censoring probability over time, correlation
-#'   plots, and sensitivity analysis visualizations.
-#' @param informativeCensoringCompareStages Compare censoring patterns across
-#'   different staging groups to assess whether censoring differs by stage,
-#'   which could indicate stage-related informative censoring that affects
-#'   staging system evaluation.
-#' @param performConcordanceProbabilityAnalysis Perform advanced concordance
-#'   probability analysis for heavily censored data. This provides alternative
-#'   concordance measures beyond traditional C-index, including Harrell's
-#'   C-index modifications, Uno's C-index for heavily censored data, and
-#'   time-dependent concordance measures specifically designed for staging
-#'   system evaluation with high censoring rates.
-#' @param concordanceProbabilityMethods Concordance probability estimation
-#'   methods. Harrell C-index is traditional but may be biased with heavy
-#'   censoring. Uno C-index uses inverse probability weighting for censoring.
-#'   Time-dependent measures evaluate concordance at specific time points. IPCW
-#'   and weighted methods provide robust alternatives.
-#' @param concordanceProbabilityTimePoints Comma-separated list of time points
-#'   (in months) for time-dependent concordance assessment. These will be used
-#'   for evaluating staging system discrimination at clinically relevant time
-#'   horizons.
-#' @param concordanceProbabilityWeighting Weighting strategy for concordance
-#'   probability estimation. Uniform gives equal weight to all pairs. Sample
-#'   size weights by stage frequency. Event rate weights by observed events.
-#'   Follow-up weights by observation time. Inverse variance uses precision
-#'   weighting.
-#' @param concordanceProbabilityBootstrap Calculate bootstrap confidence
-#'   intervals for concordance probability estimates. This provides uncertainty
-#'   quantification for discrimination measures, especially important for
-#'   heavily censored data where traditional standard errors may be unreliable.
-#' @param concordanceProbabilityBootstrapSamples Number of bootstrap samples
-#'   for confidence interval calculation. More samples provide more accurate
-#'   intervals but increase computation time. Recommended minimum 500 for
-#'   reliable confidence intervals.
-#' @param concordanceProbabilityConfidenceLevel Confidence level for
-#'   concordance probability confidence intervals. Standard choices are 0.90,
-#'   0.95, or 0.99 for 90\%, 95\%, or 99\% confidence intervals respectively.
-#' @param concordanceProbabilityCompareStages Compare concordance
-#'   probabilities between different staging systems using hypothesis tests and
-#'   confidence interval overlap assessment. Provides statistical evidence for
-#'   staging system discrimination differences accounting for heavy censoring.
-#' @param concordanceProbabilityAdjustVariables Additional variables to
-#'   include in adjusted concordance analysis. These variables will be included
-#'   alongside staging in multivariable models to assess staging contribution to
-#'   discrimination beyond other prognostic factors.
-#' @param concordanceProbabilityRobustnessAnalysis Perform robustness analysis
-#'   for concordance probability estimates including sensitivity to censoring
-#'   assumptions, outlier influence, and temporal stability assessment for
-#'   comprehensive validation of staging system discrimination.
-#' @param concordanceProbabilityAlpha Significance level for concordance
-#'   probability hypothesis tests and confidence interval construction. Used for
-#'   testing differences between staging systems and assessing statistical
-#'   significance of discrimination improvements.
-#' @param concordanceProbabilityDiagnostics Perform diagnostic assessment of
-#'   concordance probability estimates including convergence checks, influence
-#'   diagnostics, and sensitivity analysis to ensure reliable discrimination
-#'   assessment for staging system evaluation.
-#' @param performWinRatioAnalysis Perform win ratio analysis for composite
-#'   endpoint analysis in staging comparison. The win ratio is a novel method
-#'   for analyzing composite endpoints that respects the clinical hierarchy of
-#'   outcomes and provides intuitive interpretation for staging system
-#'   evaluation.
-#' @param winRatioEndpoints Clinical hierarchy of endpoints for win ratio
-#'   analysis. More important outcomes are prioritized in the analysis. Death is
-#'   typically the most important endpoint, followed by disease-specific
-#'   outcomes. The hierarchy determines how patient pairs are compared.
-#' @param winRatioDeathVariable Variable indicating death or primary endpoint
-#'   occurrence (1 = event, 0 = no event). This is typically the most important
-#'   outcome in the hierarchy and is compared first when evaluating patient
-#'   pairs.
-#' @param winRatioSecondaryEndpoint Variable for secondary endpoint (e.g.,
-#'   disease progression, recurrence). This endpoint is evaluated when the
-#'   primary endpoint comparison is tied. Can be binary (event/no event) or
-#'   continuous (time to event).
-#' @param winRatioTertiaryEndpoint Variable for tertiary endpoint (e.g.,
-#'   response, quality of life). This endpoint is evaluated when both primary
-#'   and secondary comparisons are tied. Can be binary or continuous.
-#' @param winRatioTimeVariables Time variables corresponding to each endpoint
-#'   in the hierarchy. Should be provided in the same order as the endpoints.
-#'   Used for time-to-event comparisons when endpoints are not binary.
-#' @param winRatioMatchingStrategy Strategy for forming patient pairs for
-#'   comparison. All pairs compares every patient from one group with every
-#'   patient from another. Matched pairs uses pre-specified matching. Stratified
-#'   performs within-stage comparisons. Propensity matching balances baseline
-#'   characteristics.
-#' @param winRatioConfidenceMethod Method for calculating confidence intervals
-#'   for the win ratio. Bootstrap is most robust but computationally intensive.
-#'   Asymptotic uses large sample theory. Permutation provides exact p-values.
-#' @param winRatioBootstrapSamples Number of bootstrap samples for confidence
-#'   interval calculation when using bootstrap method. More samples provide more
-#'   accurate intervals but increase computation time.
-#' @param winRatioConfidenceLevel Confidence level for win ratio confidence
-#'   intervals and hypothesis tests. Standard choices are 0.90, 0.95, or 0.99
-#'   for 90\%, 95\%, or 99\% confidence intervals respectively.
-#' @param winRatioHandleTies Strategy for handling tied comparisons. Split
-#'   assigns 0.5 wins to each. Ignore excludes tied pairs from analysis. Next
-#'   endpoint proceeds to compare the next outcome in the hierarchy for tied
-#'   pairs.
-#' @param winRatioSensitivityAnalysis Perform sensitivity analysis for win
-#'   ratio including assessment of endpoint ordering impact, missing data
-#'   influence, and robustness to matching strategy choices.
-#' @param winRatioGeneralizedPairwise Use generalized pairwise comparison
-#'   (GPC) framework which extends win ratio to include continuous outcomes and
-#'   provides additional metrics like net benefit and win odds.
-#' @param performFrailtyModelsAnalysis Perform frailty models analysis for
-#'   clustered survival data using  mixed-effects Cox models (coxme) for
-#'   multi-institutional data with  center-specific random effects and
-#'   clustering adjustments.
-#' @param frailtyClusterVariable Variable defining clusters/institutions for
-#'   frailty modeling (e.g.,  hospital, center, surgeon). Used to account for
-#'   unobserved  heterogeneity and clustering effects in survival analysis.
-#' @param frailtyDistribution Distribution assumption for the frailty (random
-#'   effects) terms. Gamma distribution is most common and provides
-#'   multiplicative  frailty effects on the hazard function.
-#' @param frailtyBootstrap Perform bootstrap validation for frailty model
-#'   parameters and  variance components to assess model stability and provide
-#'   robust confidence intervals.
-#' @param frailtyBootstrapSamples Number of bootstrap samples for frailty
-#'   model validation.  Higher values provide more stable estimates but increase
-#'   computational time.
-#' @param frailtyVarianceComponents Analyze variance components to quantify
-#'   the proportion of  total variation explained by cluster-level random
-#'   effects  vs individual-level factors.
-#' @param frailtyHeterogeneityTest Test for significant frailty/heterogeneity
-#'   using likelihood  ratio tests comparing frailty models to standard Cox
-#'   models  without random effects.
-#' @param frailtyClusterComparison Perform cluster-specific survival analysis
-#'   comparing staging  systems within each cluster/institution to assess
-#'   consistency  of staging performance across centers.
-#' @param frailtyModelSelection Perform systematic model selection comparing
-#'   different frailty  distributions and model specifications using AIC/BIC
-#'   criteria  and likelihood ratio tests.
-#' @param frailtyPredictiveAccuracy Assess predictive accuracy of frailty
-#'   models using cross-validation  and concordance measures accounting for
-#'   clustering structure in  the data.
-#' @param frailtyDiagnostics Comprehensive model diagnostics including
-#'   residual analysis,  influence detection, and goodness-of-fit assessment for
-#'   frailty  models with clustering adjustments.
-#' @param frailtyAdvancedInference Advanced statistical inference including
-#'   profile likelihood  confidence intervals, score tests, and robust variance
-#'   estimation for complex frailty model specifications.
-#' @param performClinicalUtilityAnalysis Perform clinical utility index
-#'   analysis combining sensitivity/specificity  with disease prevalence to
-#'   assess clinical decision-making value of  staging systems beyond
-#'   statistical discrimination.
-#' @param clinicalUtilityPrevalence Disease prevalence (proportion with
-#'   events) for clinical utility  calculations. Can be estimated from study
-#'   data or specified based  on population characteristics.
-#' @param clinicalUtilityTimePoint Time point (in months) for clinical utility
-#'   assessment. Should  represent clinically relevant decision-making horizon
-#'   for the  specific cancer type and staging system.
-#' @param clinicalUtilityThresholds Range of risk thresholds for clinical
-#'   utility assessment. Different  ranges appropriate for different clinical
-#'   decision contexts and  treatment aggressiveness preferences.
-#' @param clinicalUtilityNNT Calculate Number Needed to Treat (NNT) and Number
-#'   Needed to Harm (NNH)  based on staging-guided interventions with
-#'   configurable treatment  effect assumptions.
-#' @param clinicalUtilityTreatmentEffect Assumed treatment effect (hazard
-#'   ratio) for calculating NNT/NNH.  Should reflect realistic treatment
-#'   benefits for staging-guided  interventions in the specific clinical
-#'   context.
-#' @param clinicalUtilityComparison Compare clinical utility between staging
-#'   systems using net benefit  difference analysis and utility improvement
-#'   quantification across  different risk thresholds.
-#' @param clinicalUtilityCostEffectiveness Include basic cost-effectiveness
-#'   considerations in clinical utility  assessment with configurable cost
-#'   assumptions for staging-guided  interventions and outcomes.
-#' @param clinicalUtilityCostPerIntervention Estimated cost per staging-guided
-#'   intervention for cost-effectiveness  analysis. Should reflect realistic
-#'   healthcare costs in the relevant  healthcare system and setting.
-#' @param clinicalUtilityBootstrap Perform bootstrap validation for clinical
-#'   utility metrics including  confidence intervals for NNT, net benefit
-#'   differences, and utility  improvement measures.
-#' @param clinicalUtilityBootstrapSamples Number of bootstrap samples for
-#'   clinical utility validation. Higher  values provide more stable estimates
-#'   but increase computational time.
-#' @param clinicalUtilityTimeVarying Assess clinical utility across multiple
-#'   time points to understand  how staging system value changes over time
-#'   horizon and identify  optimal decision timing.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcomeMessage} \tab \tab \tab \tab \tab a html \cr
@@ -8802,85 +3140,6 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$crossValidationPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$enhancedLRComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stageMigrationEffectExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$stageMigrationEffect} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stageMigrationEffectAssessment} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$rmstAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$rmstByStage} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$rmstComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$competingRisksExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$competingRisksEventDistribution} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$competingRisksComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$optimalCutpointAnalysis} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cutpointValidation} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$generatedStagingSystem} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$shapGlobalImportance} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$shapIndividualExplanations} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$shapInteractions} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$shapSummaryStats} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$fineGrayResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$causeSpecificResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cifSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$competingRisksCIndex} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$competingRisksSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$transitionIntensities} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$transitionProbabilities} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stateOccupancy} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$multiStateComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$multiStateSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$forestVariableImportance} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$forestModelPerformance} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$forestSurvivalPredictions} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$forestCoxComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$forestStagingComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$forestAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cureFractionEstimates} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cureModelParameters} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cureModelComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stageSpecificCureAnalysis} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cureModelBootstrap} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cureAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$intervalCensoringOverview} \tab \tab \tab \tab \tab Summary of interval-censored data characteristics and model selection \cr
-#'   \code{results$intervalCensoringNonparametric} \tab \tab \tab \tab \tab Non-parametric maximum likelihood survival estimates for interval-censored data \cr
-#'   \code{results$intervalCensoringParametric} \tab \tab \tab \tab \tab Parametric survival regression results for interval-censored data \cr
-#'   \code{results$intervalCensoringComparison} \tab \tab \tab \tab \tab Model comparison between staging systems accounting for interval censoring \cr
-#'   \code{results$intervalCensoringDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for interval-censored survival models \cr
-#'   \code{results$intervalCensoringSummary} \tab \tab \tab \tab \tab Clinical interpretation and recommendations for interval-censored survival analysis \cr
-#'   \code{results$informativeCensoringOverview} \tab \tab \tab \tab \tab Summary of informative censoring detection analysis and data characteristics \cr
-#'   \code{results$informativeCensoringTests} \tab \tab \tab \tab \tab Statistical tests for detecting informative censoring patterns \cr
-#'   \code{results$informativeCensoringByStage} \tab \tab \tab \tab \tab Comparison of censoring patterns across staging groups \cr
-#'   \code{results$informativeCensoringAdjustment} \tab \tab \tab \tab \tab Survival estimates adjusted for informative censoring effects \cr
-#'   \code{results$informativeCensoringSensitivity} \tab \tab \tab \tab \tab Sensitivity analysis exploring range of potential bias from informative censoring \cr
-#'   \code{results$informativeCensoringDiagnostics} \tab \tab \tab \tab \tab Diagnostic measures for informative censoring assessment \cr
-#'   \code{results$informativeCensoringSummary} \tab \tab \tab \tab \tab Summary of informative censoring findings and recommendations \cr
-#'   \code{results$concordanceProbabilityOverview} \tab \tab \tab \tab \tab Summary of concordance probability analysis for staging system discrimination assessment \cr
-#'   \code{results$concordanceProbabilityEstimates} \tab \tab \tab \tab \tab Concordance probability estimates using multiple methods for robust discrimination assessment \cr
-#'   \code{results$concordanceProbabilityTimeDependentComplex} \tab \tab \tab \tab \tab Time-dependent concordance probability estimates at clinically relevant time points \cr
-#'   \code{results$concordanceProbabilityComparison} \tab \tab \tab \tab \tab Statistical comparison of concordance probabilities between staging systems \cr
-#'   \code{results$concordanceProbabilityRobustness} \tab \tab \tab \tab \tab Robustness analysis for concordance probability estimates under different assumptions \cr
-#'   \code{results$concordanceProbabilityDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for concordance probability analysis validation \cr
-#'   \code{results$concordanceProbabilitySummary} \tab \tab \tab \tab \tab Summary of concordance probability findings and clinical interpretation \cr
-#'   \code{results$winRatioOverview} \tab \tab \tab \tab \tab Summary of win ratio analysis configuration and data characteristics \cr
-#'   \code{results$winRatioPrimaryResults} \tab \tab \tab \tab \tab Primary win ratio analysis results comparing staging systems \cr
-#'   \code{results$winRatioEndpointContributions} \tab \tab \tab \tab \tab Contribution of each endpoint to the overall win ratio \cr
-#'   \code{results$winRatioStageSpecific} \tab \tab \tab \tab \tab Win ratio analysis stratified by staging categories \cr
-#'   \code{results$winRatioSensitivityResults} \tab \tab \tab \tab \tab Sensitivity analysis results for win ratio estimates \cr
-#'   \code{results$winRatioGeneralizedPairwiseResults} \tab \tab \tab \tab \tab Extended metrics from generalized pairwise comparison framework \cr
-#'   \code{results$winRatioSummary} \tab \tab \tab \tab \tab Summary of win ratio findings and clinical interpretation \cr
-#'   \code{results$frailtyModelsOverview} \tab \tab \tab \tab \tab Overview of frailty models analysis for clustered survival data \cr
-#'   \code{results$frailtyModelsComparison} \tab \tab \tab \tab \tab Comparison of staging systems using frailty models with clustering adjustments \cr
-#'   \code{results$frailtyModelsVarianceComponents} \tab \tab \tab \tab \tab Detailed variance components analysis for frailty models \cr
-#'   \code{results$frailtyModelsClusterSpecific} \tab \tab \tab \tab \tab Cluster-specific survival analysis comparing staging systems within institutions \cr
-#'   \code{results$frailtyModelsBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for frailty model parameters and variance components \cr
-#'   \code{results$frailtyModelsDiagnostics} \tab \tab \tab \tab \tab Comprehensive model diagnostics for frailty models including residual analysis and goodness-of-fit \cr
-#'   \code{results$frailtyModelsSummary} \tab \tab \tab \tab \tab Executive summary of frailty models analysis with evidence-based recommendations \cr
-#'   \code{results$clinicalUtilityOverview} \tab \tab \tab \tab \tab Overview of clinical utility index analysis combining discrimination with clinical decision-making value \cr
-#'   \code{results$clinicalUtilityComparison} \tab \tab \tab \tab \tab Comparison of clinical utility between staging systems across different risk thresholds \cr
-#'   \code{results$clinicalUtilityNNT} \tab \tab \tab \tab \tab Number Needed to Treat (NNT) and Number Needed to Harm (NNH) analysis for staging-guided interventions \cr
-#'   \code{results$clinicalUtilityNetBenefit} \tab \tab \tab \tab \tab Net benefit analysis across risk thresholds with comparative utility assessment \cr
-#'   \code{results$clinicalUtilityTimeVarying} \tab \tab \tab \tab \tab Time-varying clinical utility analysis showing how staging system value changes over time \cr
-#'   \code{results$clinicalUtilityBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for clinical utility metrics with confidence intervals \cr
-#'   \code{results$clinicalUtilitySummary} \tab \tab \tab \tab \tab Executive summary of clinical utility analysis with evidence-based recommendations \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -8897,26 +3156,14 @@ stagemigration <- function(
     survivalTime = NULL,
     event = NULL,
     eventLevel,
-    clinicalPreset = "routine_clinical",
-    enableGuidedMode = FALSE,
-    generateCopyReadyReport = FALSE,
-    enableAccessibilityFeatures = FALSE,
-    preferredLanguage = "en",
-    enableProgressIndicators = FALSE,
-    optimizeForLargeDatasets = FALSE,
-    analysisType = "comprehensive",
     confidenceLevel = 0.95,
-    calculateNRI = FALSE,
+    calculateNRI = TRUE,
     nriTimePoints = "12, 24, 60",
-    calculateIDI = FALSE,
-    performROCAnalysis = FALSE,
+    calculateIDI = TRUE,
+    performROCAnalysis = TRUE,
     rocTimePoints = "12, 24, 36, 60",
     performDCA = FALSE,
     performCalibration = FALSE,
-    performBootstrap = FALSE,
-    bootstrapReps = 1000,
-    performCrossValidation = FALSE,
-    cvFolds = 5,
     institutionVariable = NULL,
     clinicalSignificanceThreshold = 0.02,
     nriClinicalThreshold = 0.2,
@@ -8924,22 +3171,22 @@ stagemigration <- function(
     performTrendTests = FALSE,
     performLikelihoodTests = FALSE,
     calculatePseudoR2 = FALSE,
-    showMigrationOverview = FALSE,
+    showMigrationOverview = TRUE,
     showMigrationSummary = FALSE,
     showStageDistribution = FALSE,
-    showMigrationMatrix = FALSE,
-    showStatisticalComparison = FALSE,
+    showMigrationMatrix = TRUE,
+    showStatisticalComparison = TRUE,
     showConcordanceComparison = FALSE,
-    showMigrationHeatmap = FALSE,
+    showMigrationHeatmap = TRUE,
     showSankeyDiagram = FALSE,
-    showROCComparison = FALSE,
+    showROCComparison = TRUE,
     showCalibrationPlots = FALSE,
     showDecisionCurves = FALSE,
     showForestPlot = FALSE,
     showWillRogersAnalysis = FALSE,
     showWillRogersVisualization = FALSE,
     showMigrationSurvivalComparison = FALSE,
-    showSurvivalCurves = FALSE,
+    showSurvivalCurves = TRUE,
     survivalPlotType = "separate",
     showConfidenceIntervals = FALSE,
     showRiskTables = FALSE,
@@ -8950,177 +3197,8 @@ stagemigration <- function(
     includeEffectSizes = FALSE,
     advancedMigrationAnalysis = FALSE,
     generateExecutiveSummary = FALSE,
-    cancerType = "general",
-    useOptimismCorrection = FALSE,
-    enableMultifactorialAnalysis = FALSE,
-    continuousCovariates = NULL,
-    categoricalCovariates = NULL,
-    multifactorialComparisonType = "comprehensive",
-    baselineModel = "covariates_only",
-    performInteractionTests = FALSE,
-    stratifiedAnalysis = FALSE,
-    showMultifactorialTables = FALSE,
-    showAdjustedCIndexComparison = FALSE,
-    showNestedModelTests = FALSE,
-    showStepwiseResults = FALSE,
-    showExplanations = FALSE,
-    showAbbreviationGlossary = FALSE,
-    calculateSME = FALSE,
-    calculateRMST = FALSE,
-    performCompetingRisks = FALSE,
-    competingEventVar = NULL,
-    performOptimalCutpoint = FALSE,
-    continuousStageVariable = NULL,
-    cutpointMethod = "maxstat",
-    cutpointRange = "0.1, 0.9",
-    multipleTestingCorrection = "bonferroni",
-    validateCutpoint = FALSE,
-    cutpointBootstrap = FALSE,
-    cutpointBootstrapReps = 500,
-    generateStagingSystem = FALSE,
-    stagingSystemLevels = 3,
-    performSHAPAnalysis = FALSE,
-    shapAnalysisType = "comprehensive",
-    shapCovariates = NULL,
-    shapSampleSize = 100,
-    shapBackgroundSamples = 50,
-    shapExplanationType = "auto",
-    generateSHAPPlots = FALSE,
-    shapPatientProfiles = "representative",
-    shapInteractionAnalysis = FALSE,
-    shapClinicalThresholds = "0.25, 0.50, 0.75",
-    performCompetingRisksAdvanced = FALSE,
-    competingRisksMethod = "comprehensive",
-    cifTimePoints = "12, 24, 36, 60",
-    competingEventLevels = "cancer_death, other_death, censored",
-    primaryEventLevel = "cancer_death",
-    generateCIFPlots = FALSE,
-    performGrayTest = FALSE,
-    cifConfidenceLevel = 0.95,
-    competingRisksCovariates = NULL,
-    stratifyByStaging = FALSE,
-    calculateCRCIndex = FALSE,
-    generateCRSummary = FALSE,
-    performMultiStateAnalysis = FALSE,
-    multiStateModel = "illness_death",
-    stateVariable = NULL,
-    transitionTimeVariable = NULL,
-    multiStateStates = "healthy, disease, death",
-    absorptionStates = "death",
-    multiStateCovariates = NULL,
-    calculateTransitionProbabilities = FALSE,
-    multiStateTimePoints = "6, 12, 24, 36, 60",
-    generateTransitionMatrix = FALSE,
-    multiStateGraphics = FALSE,
-    msStratifyByStaging = FALSE,
-    multiStateValidation = FALSE,
-    generateMSMSummary = FALSE,
-    performRandomForestAnalysis = FALSE,
-    forestModelType = "rsf",
-    forestNTrees = 500,
-    forestMTry = "auto",
-    forestMinNodeSize = 3,
-    forestCovariates = NULL,
-    calculateVariableImportance = FALSE,
-    forestImportanceType = "permutation",
-    performForestValidation = FALSE,
-    forestPredictionTimePoints = "12, 24, 36, 60",
-    generateSurvivalPredictions = FALSE,
-    forestDiscriminationMetrics = FALSE,
-    forestStagingComparison = FALSE,
-    forestBootstrap = FALSE,
-    forestBootstrapSamples = 100,
-    generateForestSummary = FALSE,
-    performCureModelAnalysis = FALSE,
-    cureModelType = "mixture",
-    cureDistribution = "weibull",
-    cureAnalyzeOldStage = FALSE,
-    cureAnalyzeNewStage = FALSE,
-    cureFractionEstimation = "parametric",
-    cureConfidenceLevel = 0.95,
-    cureBootstrapCI = FALSE,
-    cureBootstrapReps = 500,
-    cureTimeHorizon = 120,
-    curePlateauThreshold = 0.05,
-    cureCovariates = NULL,
-    cureModelComparison = FALSE,
-    cureStageSpecificAnalysis = FALSE,
-    cureGoodnessOfFit = FALSE,
-    generateCureSummary = FALSE,
-    performIntervalCensoringAnalysis = FALSE,
-    intervalCensoringLeftTime = NULL,
-    intervalCensoringRightTime = NULL,
-    intervalCensoringDistribution = "weibull",
-    intervalCensoringModel = "both",
-    intervalCensoringBootstrap = FALSE,
-    intervalCensoringBootstrapSamples = 1000,
-    intervalCensoringCompareStages = FALSE,
-    intervalCensoringPlots = FALSE,
-    intervalCensoringDiagnostics = FALSE,
-    intervalCensoringPredictionTime = "12, 24, 36, 60",
-    intervalCensoringConfidenceLevel = 0.95,
-    intervalCensoringAdjustVariables = NULL,
-    performInformativeCensoringAnalysis = FALSE,
-    informativeCensoringTestMethod = "all_tests",
-    informativeCensoringCovariates = NULL,
-    informativeCensoringLandmarkTimes = "12, 24, 36, 60",
-    informativeCensoringAdjustmentMethod = "sensitivity_analysis",
-    informativeCensoringIPWVariables = NULL,
-    informativeCensoringSensitivityRange = "0.8, 0.9, 1.0, 1.1, 1.2",
-    informativeCensoringBootstrap = FALSE,
-    informativeCensoringBootstrapSamples = 1000,
-    informativeCensoringAlpha = 0.05,
-    informativeCensoringPlots = FALSE,
-    informativeCensoringCompareStages = FALSE,
-    performConcordanceProbabilityAnalysis = FALSE,
-    concordanceProbabilityMethods = "all_methods",
-    concordanceProbabilityTimePoints = "12, 24, 36, 60, 120",
-    concordanceProbabilityWeighting = "uniform",
-    concordanceProbabilityBootstrap = FALSE,
-    concordanceProbabilityBootstrapSamples = 1000,
-    concordanceProbabilityConfidenceLevel = 0.95,
-    concordanceProbabilityCompareStages = FALSE,
-    concordanceProbabilityAdjustVariables = NULL,
-    concordanceProbabilityRobustnessAnalysis = FALSE,
-    concordanceProbabilityAlpha = 0.05,
-    concordanceProbabilityDiagnostics = FALSE,
-    performWinRatioAnalysis = FALSE,
-    winRatioEndpoints = "death_progression_response",
-    winRatioDeathVariable = NULL,
-    winRatioSecondaryEndpoint = NULL,
-    winRatioTertiaryEndpoint = NULL,
-    winRatioTimeVariables = NULL,
-    winRatioMatchingStrategy = "all_pairs",
-    winRatioConfidenceMethod = "bootstrap",
-    winRatioBootstrapSamples = 1000,
-    winRatioConfidenceLevel = 0.95,
-    winRatioHandleTies = "next_endpoint",
-    winRatioSensitivityAnalysis = FALSE,
-    winRatioGeneralizedPairwise = FALSE,
-    performFrailtyModelsAnalysis = FALSE,
-    frailtyClusterVariable = NULL,
-    frailtyDistribution = "gamma",
-    frailtyBootstrap = FALSE,
-    frailtyBootstrapSamples = 500,
-    frailtyVarianceComponents = FALSE,
-    frailtyHeterogeneityTest = FALSE,
-    frailtyClusterComparison = FALSE,
-    frailtyModelSelection = FALSE,
-    frailtyPredictiveAccuracy = FALSE,
-    frailtyDiagnostics = FALSE,
-    frailtyAdvancedInference = FALSE,
-    performClinicalUtilityAnalysis = FALSE,
-    clinicalUtilityPrevalence = 0.2,
-    clinicalUtilityTimePoint = 60,
-    clinicalUtilityThresholds = "standard",
-    clinicalUtilityNNT = FALSE,
-    clinicalUtilityTreatmentEffect = 0.7,
-    clinicalUtilityComparison = FALSE,
-    clinicalUtilityCostEffectiveness = FALSE,
-    clinicalUtilityCostPerIntervention = 5000,
-    clinicalUtilityBootstrap = FALSE,
-    clinicalUtilityBootstrapSamples = 500,
-    clinicalUtilityTimeVarying = FALSE) {
+    enableMultifactorialAnalysis = TRUE,
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("stagemigration requires jmvcore to be installed (restart may be required)")
@@ -9130,28 +3208,6 @@ stagemigration <- function(
     if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
     if ( ! missing(institutionVariable)) institutionVariable <- jmvcore::resolveQuo(jmvcore::enquo(institutionVariable))
-    if ( ! missing(continuousCovariates)) continuousCovariates <- jmvcore::resolveQuo(jmvcore::enquo(continuousCovariates))
-    if ( ! missing(categoricalCovariates)) categoricalCovariates <- jmvcore::resolveQuo(jmvcore::enquo(categoricalCovariates))
-    if ( ! missing(competingEventVar)) competingEventVar <- jmvcore::resolveQuo(jmvcore::enquo(competingEventVar))
-    if ( ! missing(continuousStageVariable)) continuousStageVariable <- jmvcore::resolveQuo(jmvcore::enquo(continuousStageVariable))
-    if ( ! missing(shapCovariates)) shapCovariates <- jmvcore::resolveQuo(jmvcore::enquo(shapCovariates))
-    if ( ! missing(competingRisksCovariates)) competingRisksCovariates <- jmvcore::resolveQuo(jmvcore::enquo(competingRisksCovariates))
-    if ( ! missing(stateVariable)) stateVariable <- jmvcore::resolveQuo(jmvcore::enquo(stateVariable))
-    if ( ! missing(transitionTimeVariable)) transitionTimeVariable <- jmvcore::resolveQuo(jmvcore::enquo(transitionTimeVariable))
-    if ( ! missing(multiStateCovariates)) multiStateCovariates <- jmvcore::resolveQuo(jmvcore::enquo(multiStateCovariates))
-    if ( ! missing(forestCovariates)) forestCovariates <- jmvcore::resolveQuo(jmvcore::enquo(forestCovariates))
-    if ( ! missing(cureCovariates)) cureCovariates <- jmvcore::resolveQuo(jmvcore::enquo(cureCovariates))
-    if ( ! missing(intervalCensoringLeftTime)) intervalCensoringLeftTime <- jmvcore::resolveQuo(jmvcore::enquo(intervalCensoringLeftTime))
-    if ( ! missing(intervalCensoringRightTime)) intervalCensoringRightTime <- jmvcore::resolveQuo(jmvcore::enquo(intervalCensoringRightTime))
-    if ( ! missing(intervalCensoringAdjustVariables)) intervalCensoringAdjustVariables <- jmvcore::resolveQuo(jmvcore::enquo(intervalCensoringAdjustVariables))
-    if ( ! missing(informativeCensoringCovariates)) informativeCensoringCovariates <- jmvcore::resolveQuo(jmvcore::enquo(informativeCensoringCovariates))
-    if ( ! missing(informativeCensoringIPWVariables)) informativeCensoringIPWVariables <- jmvcore::resolveQuo(jmvcore::enquo(informativeCensoringIPWVariables))
-    if ( ! missing(concordanceProbabilityAdjustVariables)) concordanceProbabilityAdjustVariables <- jmvcore::resolveQuo(jmvcore::enquo(concordanceProbabilityAdjustVariables))
-    if ( ! missing(winRatioDeathVariable)) winRatioDeathVariable <- jmvcore::resolveQuo(jmvcore::enquo(winRatioDeathVariable))
-    if ( ! missing(winRatioSecondaryEndpoint)) winRatioSecondaryEndpoint <- jmvcore::resolveQuo(jmvcore::enquo(winRatioSecondaryEndpoint))
-    if ( ! missing(winRatioTertiaryEndpoint)) winRatioTertiaryEndpoint <- jmvcore::resolveQuo(jmvcore::enquo(winRatioTertiaryEndpoint))
-    if ( ! missing(winRatioTimeVariables)) winRatioTimeVariables <- jmvcore::resolveQuo(jmvcore::enquo(winRatioTimeVariables))
-    if ( ! missing(frailtyClusterVariable)) frailtyClusterVariable <- jmvcore::resolveQuo(jmvcore::enquo(frailtyClusterVariable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -9159,33 +3215,10 @@ stagemigration <- function(
             `if`( ! missing(newStage), newStage, NULL),
             `if`( ! missing(survivalTime), survivalTime, NULL),
             `if`( ! missing(event), event, NULL),
-            `if`( ! missing(institutionVariable), institutionVariable, NULL),
-            `if`( ! missing(continuousCovariates), continuousCovariates, NULL),
-            `if`( ! missing(categoricalCovariates), categoricalCovariates, NULL),
-            `if`( ! missing(competingEventVar), competingEventVar, NULL),
-            `if`( ! missing(continuousStageVariable), continuousStageVariable, NULL),
-            `if`( ! missing(shapCovariates), shapCovariates, NULL),
-            `if`( ! missing(competingRisksCovariates), competingRisksCovariates, NULL),
-            `if`( ! missing(stateVariable), stateVariable, NULL),
-            `if`( ! missing(transitionTimeVariable), transitionTimeVariable, NULL),
-            `if`( ! missing(multiStateCovariates), multiStateCovariates, NULL),
-            `if`( ! missing(forestCovariates), forestCovariates, NULL),
-            `if`( ! missing(cureCovariates), cureCovariates, NULL),
-            `if`( ! missing(intervalCensoringLeftTime), intervalCensoringLeftTime, NULL),
-            `if`( ! missing(intervalCensoringRightTime), intervalCensoringRightTime, NULL),
-            `if`( ! missing(intervalCensoringAdjustVariables), intervalCensoringAdjustVariables, NULL),
-            `if`( ! missing(informativeCensoringCovariates), informativeCensoringCovariates, NULL),
-            `if`( ! missing(informativeCensoringIPWVariables), informativeCensoringIPWVariables, NULL),
-            `if`( ! missing(concordanceProbabilityAdjustVariables), concordanceProbabilityAdjustVariables, NULL),
-            `if`( ! missing(winRatioDeathVariable), winRatioDeathVariable, NULL),
-            `if`( ! missing(winRatioSecondaryEndpoint), winRatioSecondaryEndpoint, NULL),
-            `if`( ! missing(winRatioTertiaryEndpoint), winRatioTertiaryEndpoint, NULL),
-            `if`( ! missing(winRatioTimeVariables), winRatioTimeVariables, NULL),
-            `if`( ! missing(frailtyClusterVariable), frailtyClusterVariable, NULL))
+            `if`( ! missing(institutionVariable), institutionVariable, NULL))
 
     for (v in oldStage) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in newStage) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in categoricalCovariates) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- stagemigrationOptions$new(
         oldStage = oldStage,
@@ -9193,14 +3226,6 @@ stagemigration <- function(
         survivalTime = survivalTime,
         event = event,
         eventLevel = eventLevel,
-        clinicalPreset = clinicalPreset,
-        enableGuidedMode = enableGuidedMode,
-        generateCopyReadyReport = generateCopyReadyReport,
-        enableAccessibilityFeatures = enableAccessibilityFeatures,
-        preferredLanguage = preferredLanguage,
-        enableProgressIndicators = enableProgressIndicators,
-        optimizeForLargeDatasets = optimizeForLargeDatasets,
-        analysisType = analysisType,
         confidenceLevel = confidenceLevel,
         calculateNRI = calculateNRI,
         nriTimePoints = nriTimePoints,
@@ -9209,10 +3234,6 @@ stagemigration <- function(
         rocTimePoints = rocTimePoints,
         performDCA = performDCA,
         performCalibration = performCalibration,
-        performBootstrap = performBootstrap,
-        bootstrapReps = bootstrapReps,
-        performCrossValidation = performCrossValidation,
-        cvFolds = cvFolds,
         institutionVariable = institutionVariable,
         clinicalSignificanceThreshold = clinicalSignificanceThreshold,
         nriClinicalThreshold = nriClinicalThreshold,
@@ -9246,177 +3267,8 @@ stagemigration <- function(
         includeEffectSizes = includeEffectSizes,
         advancedMigrationAnalysis = advancedMigrationAnalysis,
         generateExecutiveSummary = generateExecutiveSummary,
-        cancerType = cancerType,
-        useOptimismCorrection = useOptimismCorrection,
         enableMultifactorialAnalysis = enableMultifactorialAnalysis,
-        continuousCovariates = continuousCovariates,
-        categoricalCovariates = categoricalCovariates,
-        multifactorialComparisonType = multifactorialComparisonType,
-        baselineModel = baselineModel,
-        performInteractionTests = performInteractionTests,
-        stratifiedAnalysis = stratifiedAnalysis,
-        showMultifactorialTables = showMultifactorialTables,
-        showAdjustedCIndexComparison = showAdjustedCIndexComparison,
-        showNestedModelTests = showNestedModelTests,
-        showStepwiseResults = showStepwiseResults,
-        showExplanations = showExplanations,
-        showAbbreviationGlossary = showAbbreviationGlossary,
-        calculateSME = calculateSME,
-        calculateRMST = calculateRMST,
-        performCompetingRisks = performCompetingRisks,
-        competingEventVar = competingEventVar,
-        performOptimalCutpoint = performOptimalCutpoint,
-        continuousStageVariable = continuousStageVariable,
-        cutpointMethod = cutpointMethod,
-        cutpointRange = cutpointRange,
-        multipleTestingCorrection = multipleTestingCorrection,
-        validateCutpoint = validateCutpoint,
-        cutpointBootstrap = cutpointBootstrap,
-        cutpointBootstrapReps = cutpointBootstrapReps,
-        generateStagingSystem = generateStagingSystem,
-        stagingSystemLevels = stagingSystemLevels,
-        performSHAPAnalysis = performSHAPAnalysis,
-        shapAnalysisType = shapAnalysisType,
-        shapCovariates = shapCovariates,
-        shapSampleSize = shapSampleSize,
-        shapBackgroundSamples = shapBackgroundSamples,
-        shapExplanationType = shapExplanationType,
-        generateSHAPPlots = generateSHAPPlots,
-        shapPatientProfiles = shapPatientProfiles,
-        shapInteractionAnalysis = shapInteractionAnalysis,
-        shapClinicalThresholds = shapClinicalThresholds,
-        performCompetingRisksAdvanced = performCompetingRisksAdvanced,
-        competingRisksMethod = competingRisksMethod,
-        cifTimePoints = cifTimePoints,
-        competingEventLevels = competingEventLevels,
-        primaryEventLevel = primaryEventLevel,
-        generateCIFPlots = generateCIFPlots,
-        performGrayTest = performGrayTest,
-        cifConfidenceLevel = cifConfidenceLevel,
-        competingRisksCovariates = competingRisksCovariates,
-        stratifyByStaging = stratifyByStaging,
-        calculateCRCIndex = calculateCRCIndex,
-        generateCRSummary = generateCRSummary,
-        performMultiStateAnalysis = performMultiStateAnalysis,
-        multiStateModel = multiStateModel,
-        stateVariable = stateVariable,
-        transitionTimeVariable = transitionTimeVariable,
-        multiStateStates = multiStateStates,
-        absorptionStates = absorptionStates,
-        multiStateCovariates = multiStateCovariates,
-        calculateTransitionProbabilities = calculateTransitionProbabilities,
-        multiStateTimePoints = multiStateTimePoints,
-        generateTransitionMatrix = generateTransitionMatrix,
-        multiStateGraphics = multiStateGraphics,
-        msStratifyByStaging = msStratifyByStaging,
-        multiStateValidation = multiStateValidation,
-        generateMSMSummary = generateMSMSummary,
-        performRandomForestAnalysis = performRandomForestAnalysis,
-        forestModelType = forestModelType,
-        forestNTrees = forestNTrees,
-        forestMTry = forestMTry,
-        forestMinNodeSize = forestMinNodeSize,
-        forestCovariates = forestCovariates,
-        calculateVariableImportance = calculateVariableImportance,
-        forestImportanceType = forestImportanceType,
-        performForestValidation = performForestValidation,
-        forestPredictionTimePoints = forestPredictionTimePoints,
-        generateSurvivalPredictions = generateSurvivalPredictions,
-        forestDiscriminationMetrics = forestDiscriminationMetrics,
-        forestStagingComparison = forestStagingComparison,
-        forestBootstrap = forestBootstrap,
-        forestBootstrapSamples = forestBootstrapSamples,
-        generateForestSummary = generateForestSummary,
-        performCureModelAnalysis = performCureModelAnalysis,
-        cureModelType = cureModelType,
-        cureDistribution = cureDistribution,
-        cureAnalyzeOldStage = cureAnalyzeOldStage,
-        cureAnalyzeNewStage = cureAnalyzeNewStage,
-        cureFractionEstimation = cureFractionEstimation,
-        cureConfidenceLevel = cureConfidenceLevel,
-        cureBootstrapCI = cureBootstrapCI,
-        cureBootstrapReps = cureBootstrapReps,
-        cureTimeHorizon = cureTimeHorizon,
-        curePlateauThreshold = curePlateauThreshold,
-        cureCovariates = cureCovariates,
-        cureModelComparison = cureModelComparison,
-        cureStageSpecificAnalysis = cureStageSpecificAnalysis,
-        cureGoodnessOfFit = cureGoodnessOfFit,
-        generateCureSummary = generateCureSummary,
-        performIntervalCensoringAnalysis = performIntervalCensoringAnalysis,
-        intervalCensoringLeftTime = intervalCensoringLeftTime,
-        intervalCensoringRightTime = intervalCensoringRightTime,
-        intervalCensoringDistribution = intervalCensoringDistribution,
-        intervalCensoringModel = intervalCensoringModel,
-        intervalCensoringBootstrap = intervalCensoringBootstrap,
-        intervalCensoringBootstrapSamples = intervalCensoringBootstrapSamples,
-        intervalCensoringCompareStages = intervalCensoringCompareStages,
-        intervalCensoringPlots = intervalCensoringPlots,
-        intervalCensoringDiagnostics = intervalCensoringDiagnostics,
-        intervalCensoringPredictionTime = intervalCensoringPredictionTime,
-        intervalCensoringConfidenceLevel = intervalCensoringConfidenceLevel,
-        intervalCensoringAdjustVariables = intervalCensoringAdjustVariables,
-        performInformativeCensoringAnalysis = performInformativeCensoringAnalysis,
-        informativeCensoringTestMethod = informativeCensoringTestMethod,
-        informativeCensoringCovariates = informativeCensoringCovariates,
-        informativeCensoringLandmarkTimes = informativeCensoringLandmarkTimes,
-        informativeCensoringAdjustmentMethod = informativeCensoringAdjustmentMethod,
-        informativeCensoringIPWVariables = informativeCensoringIPWVariables,
-        informativeCensoringSensitivityRange = informativeCensoringSensitivityRange,
-        informativeCensoringBootstrap = informativeCensoringBootstrap,
-        informativeCensoringBootstrapSamples = informativeCensoringBootstrapSamples,
-        informativeCensoringAlpha = informativeCensoringAlpha,
-        informativeCensoringPlots = informativeCensoringPlots,
-        informativeCensoringCompareStages = informativeCensoringCompareStages,
-        performConcordanceProbabilityAnalysis = performConcordanceProbabilityAnalysis,
-        concordanceProbabilityMethods = concordanceProbabilityMethods,
-        concordanceProbabilityTimePoints = concordanceProbabilityTimePoints,
-        concordanceProbabilityWeighting = concordanceProbabilityWeighting,
-        concordanceProbabilityBootstrap = concordanceProbabilityBootstrap,
-        concordanceProbabilityBootstrapSamples = concordanceProbabilityBootstrapSamples,
-        concordanceProbabilityConfidenceLevel = concordanceProbabilityConfidenceLevel,
-        concordanceProbabilityCompareStages = concordanceProbabilityCompareStages,
-        concordanceProbabilityAdjustVariables = concordanceProbabilityAdjustVariables,
-        concordanceProbabilityRobustnessAnalysis = concordanceProbabilityRobustnessAnalysis,
-        concordanceProbabilityAlpha = concordanceProbabilityAlpha,
-        concordanceProbabilityDiagnostics = concordanceProbabilityDiagnostics,
-        performWinRatioAnalysis = performWinRatioAnalysis,
-        winRatioEndpoints = winRatioEndpoints,
-        winRatioDeathVariable = winRatioDeathVariable,
-        winRatioSecondaryEndpoint = winRatioSecondaryEndpoint,
-        winRatioTertiaryEndpoint = winRatioTertiaryEndpoint,
-        winRatioTimeVariables = winRatioTimeVariables,
-        winRatioMatchingStrategy = winRatioMatchingStrategy,
-        winRatioConfidenceMethod = winRatioConfidenceMethod,
-        winRatioBootstrapSamples = winRatioBootstrapSamples,
-        winRatioConfidenceLevel = winRatioConfidenceLevel,
-        winRatioHandleTies = winRatioHandleTies,
-        winRatioSensitivityAnalysis = winRatioSensitivityAnalysis,
-        winRatioGeneralizedPairwise = winRatioGeneralizedPairwise,
-        performFrailtyModelsAnalysis = performFrailtyModelsAnalysis,
-        frailtyClusterVariable = frailtyClusterVariable,
-        frailtyDistribution = frailtyDistribution,
-        frailtyBootstrap = frailtyBootstrap,
-        frailtyBootstrapSamples = frailtyBootstrapSamples,
-        frailtyVarianceComponents = frailtyVarianceComponents,
-        frailtyHeterogeneityTest = frailtyHeterogeneityTest,
-        frailtyClusterComparison = frailtyClusterComparison,
-        frailtyModelSelection = frailtyModelSelection,
-        frailtyPredictiveAccuracy = frailtyPredictiveAccuracy,
-        frailtyDiagnostics = frailtyDiagnostics,
-        frailtyAdvancedInference = frailtyAdvancedInference,
-        performClinicalUtilityAnalysis = performClinicalUtilityAnalysis,
-        clinicalUtilityPrevalence = clinicalUtilityPrevalence,
-        clinicalUtilityTimePoint = clinicalUtilityTimePoint,
-        clinicalUtilityThresholds = clinicalUtilityThresholds,
-        clinicalUtilityNNT = clinicalUtilityNNT,
-        clinicalUtilityTreatmentEffect = clinicalUtilityTreatmentEffect,
-        clinicalUtilityComparison = clinicalUtilityComparison,
-        clinicalUtilityCostEffectiveness = clinicalUtilityCostEffectiveness,
-        clinicalUtilityCostPerIntervention = clinicalUtilityCostPerIntervention,
-        clinicalUtilityBootstrap = clinicalUtilityBootstrap,
-        clinicalUtilityBootstrapSamples = clinicalUtilityBootstrapSamples,
-        clinicalUtilityTimeVarying = clinicalUtilityTimeVarying)
+        showExplanations = showExplanations)
 
     analysis <- stagemigrationClass$new(
         options = options,

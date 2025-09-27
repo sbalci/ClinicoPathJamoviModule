@@ -157,7 +157,7 @@ stagemigration(
 stagemigration(
   data = pancreatic_cohort,
   oldStage = "T_AJCC8",
-  newStage = "T_modified", 
+  newStage = "T_modified",
   survivalTime = "overall_survival_months",
   event = "death_status",
   eventLevel = "Dead",
@@ -176,7 +176,7 @@ stagemigration(
   survivalTime = "survival_months",
   event = "vital_status",
   eventLevel = "deceased",
-  analysisType = "comprehensive", 
+  analysisType = "comprehensive",
   advancedMigrationAnalysis = TRUE,
   cancerType = "lung",  # Uses lung-specific landmark times: 3,6,12,24 months
   showWillRogersVisualization = TRUE,

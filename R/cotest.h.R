@@ -15,7 +15,8 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cond_dep_neg = 0.05,
             prevalence = 0.1,
             fnote = FALSE,
-            fagan = FALSE, ...) {
+            fagan = FALSE,
+            preset = "custom", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -77,6 +78,18 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..preset <- jmvcore::OptionList$new(
+                "preset",
+                preset,
+                options=list(
+                    "custom",
+                    "hpv_pap",
+                    "psa_dre",
+                    "troponin_ecg",
+                    "mammogram_ultrasound",
+                    "covid_antigen_pcr",
+                    "tb_xray_sputum"),
+                default="custom")
 
             self$.addOption(private$..test1_sens)
             self$.addOption(private$..test1_spec)
@@ -88,6 +101,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..prevalence)
             self$.addOption(private$..fnote)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..preset)
         }),
     active = list(
         test1_sens = function() private$..test1_sens$value,
@@ -99,7 +113,8 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cond_dep_neg = function() private$..cond_dep_neg$value,
         prevalence = function() private$..prevalence$value,
         fnote = function() private$..fnote$value,
-        fagan = function() private$..fagan$value),
+        fagan = function() private$..fagan$value,
+        preset = function() private$..preset$value),
     private = list(
         ..test1_sens = NA,
         ..test1_spec = NA,
@@ -110,7 +125,8 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..cond_dep_neg = NA,
         ..prevalence = NA,
         ..fnote = NA,
-        ..fagan = NA)
+        ..fagan = NA,
+        ..preset = NA)
 )
 
 cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -183,7 +199,7 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="orValue", 
-                        `title`="Odds Ratio", 
+                        `title`="Post-test Odds", 
                         `type`="number"))))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -205,7 +221,7 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot1",
-                requiresData=TRUE,
+                requiresData=FALSE,
                 visible="(fagan)",
                 clearWith=list(
                     "test1_sens",
@@ -294,6 +310,9 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Requires a value between 0.001 and 0.999.
 #' @param fnote .
 #' @param fagan .
+#' @param preset Select a clinical preset or use custom values. Presets load
+#'   evidence-based sensitivity and specificity values from medical literature
+#'   with appropriate dependence parameters and prevalence estimates.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$testParamsTable} \tab \tab \tab \tab \tab a table \cr
@@ -321,7 +340,8 @@ cotest <- function(
     cond_dep_neg = 0.05,
     prevalence = 0.1,
     fnote = FALSE,
-    fagan = FALSE) {
+    fagan = FALSE,
+    preset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("cotest requires jmvcore to be installed (restart may be required)")
@@ -337,7 +357,8 @@ cotest <- function(
         cond_dep_neg = cond_dep_neg,
         prevalence = prevalence,
         fnote = fnote,
-        fagan = fagan)
+        fagan = fagan,
+        preset = preset)
 
     analysis <- cotestClass$new(
         options = options,

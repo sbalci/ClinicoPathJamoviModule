@@ -15,7 +15,11 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             od = FALSE,
             fnote = FALSE,
             ci = FALSE,
-            fagan = FALSE, ...) {
+            fagan = FALSE,
+            showNaturalLanguage = TRUE,
+            showClinicalInterpretation = TRUE,
+            showReportTemplate = FALSE,
+            showAboutAnalysis = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -71,6 +75,22 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..showNaturalLanguage <- jmvcore::OptionBool$new(
+                "showNaturalLanguage",
+                showNaturalLanguage,
+                default=TRUE)
+            private$..showClinicalInterpretation <- jmvcore::OptionBool$new(
+                "showClinicalInterpretation",
+                showClinicalInterpretation,
+                default=TRUE)
+            private$..showReportTemplate <- jmvcore::OptionBool$new(
+                "showReportTemplate",
+                showReportTemplate,
+                default=FALSE)
+            private$..showAboutAnalysis <- jmvcore::OptionBool$new(
+                "showAboutAnalysis",
+                showAboutAnalysis,
+                default=FALSE)
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
@@ -82,6 +102,10 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..showNaturalLanguage)
+            self$.addOption(private$..showClinicalInterpretation)
+            self$.addOption(private$..showReportTemplate)
+            self$.addOption(private$..showAboutAnalysis)
         }),
     active = list(
         gold = function() private$..gold$value,
@@ -93,7 +117,11 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         od = function() private$..od$value,
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value,
-        fagan = function() private$..fagan$value),
+        fagan = function() private$..fagan$value,
+        showNaturalLanguage = function() private$..showNaturalLanguage$value,
+        showClinicalInterpretation = function() private$..showClinicalInterpretation$value,
+        showReportTemplate = function() private$..showReportTemplate$value,
+        showAboutAnalysis = function() private$..showAboutAnalysis$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
@@ -104,26 +132,30 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..od = NA,
         ..fnote = NA,
         ..ci = NA,
-        ..fagan = NA)
+        ..fagan = NA,
+        ..showNaturalLanguage = NA,
+        ..showClinicalInterpretation = NA,
+        ..showReportTemplate = NA,
+        ..showAboutAnalysis = NA)
 )
 
 decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionResults",
     inherit = jmvcore::Group,
     active = list(
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
-        naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
-        reportTemplate = function() private$.items[["reportTemplate"]],
-        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
-        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
+        rawContingency = function() private$.items[["rawContingency"]],
+        rawCounts = function() private$.items[["rawCounts"]],
         cTable = function() private$.items[["cTable"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
         missingDataSummary = function() private$.items[["missingDataSummary"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
         epirTable_number = function() private$.items[["epirTable_number"]],
-        plot1 = function() private$.items[["plot1"]]),
+        plot1 = function() private$.items[["plot1"]],
+        naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
+        reportTemplate = function() private$.items[["reportTemplate"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -134,36 +166,56 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "DiagnosticTests",
                     "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text1",
-                title="Original Data",
-                visible="(od)"))
-            self$add(jmvcore::Html$new(
+                name="rawContingency",
+                title="Raw Contingency Table",
+                visible="(od)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="test_level", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="gold_pos", 
+                        `title`="", 
+                        `type`="number"),
+                    list(
+                        `name`="gold_neg", 
+                        `title`="", 
+                        `type`="number"),
+                    list(
+                        `name`="row_total", 
+                        `title`="Total", 
+                        `type`="number")),
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive")))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text2",
-                title="Original Data",
-                visible="(od)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="naturalLanguageSummary",
-                title="\uD83D\uDCCB Clinical Summary",
-                visible=TRUE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="reportTemplate",
-                title="\uD83D\uDCC4 Copy-Ready Report",
-                visible=TRUE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="aboutAnalysis",
-                title="\uD83D\uDCDA About This Analysis",
-                visible=TRUE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="clinicalInterpretation",
-                title="\uD83E\uDE7A Clinical Interpretation Guide",
-                visible=TRUE))
+                name="rawCounts",
+                title="Raw Combination Counts",
+                visible="(od)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="test_level", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="gold_level", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer")),
+                clearWith=list(
+                    "gold",
+                    "newtest")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
@@ -371,7 +423,27 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fagan"),
                 refs=list(
                     "Fagan",
-                    "Fagan2")))}))
+                    "Fagan2")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalLanguageSummary",
+                title="Clinical Summary",
+                visible="(showNaturalLanguage)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretation",
+                title="Clinical Interpretation Guide",
+                visible="(showClinicalInterpretation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportTemplate",
+                title="Copy-Ready Report",
+                visible="(showReportTemplate)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(showAboutAnalysis)"))}))
 
 decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionBase",
@@ -396,8 +468,8 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Medical Decision
 #'
-#' Function for Medical Decision Analysis. Sensitivity, specificity, positive 
-#' predictive value, negative predictive value.
+#' Function for Medical Decision Analysis. Sensitivity, Specificity, Positive 
+#' Predictive Value, Negative Predictive Value.
 #' 
 #'
 #' @examples
@@ -424,14 +496,18 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ci Boolean selection whether to calculate and display 95\%
 #'   confidence intervals.
 #' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
+#' @param showNaturalLanguage Boolean selection whether to show the natural
+#'   language clinical summary.
+#' @param showClinicalInterpretation Boolean selection whether to show the
+#'   clinical interpretation guide.
+#' @param showReportTemplate Boolean selection whether to show the copy-ready
+#'   report template.
+#' @param showAboutAnalysis Boolean selection whether to show the about
+#'   analysis section.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$rawContingency} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rawCounts} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
@@ -439,13 +515,17 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$cTable$asDF}
+#' \code{results$rawContingency$asDF}
 #'
-#' \code{as.data.frame(results$cTable)}
+#' \code{as.data.frame(results$rawContingency)}
 #'
 #' @export
 decision <- function(
@@ -459,7 +539,11 @@ decision <- function(
     od = FALSE,
     fnote = FALSE,
     ci = FALSE,
-    fagan = FALSE) {
+    fagan = FALSE,
+    showNaturalLanguage = TRUE,
+    showClinicalInterpretation = TRUE,
+    showReportTemplate = FALSE,
+    showAboutAnalysis = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decision requires jmvcore to be installed (restart may be required)")
@@ -485,7 +569,11 @@ decision <- function(
         od = od,
         fnote = fnote,
         ci = ci,
-        fagan = fagan)
+        fagan = fagan,
+        showNaturalLanguage = showNaturalLanguage,
+        showClinicalInterpretation = showClinicalInterpretation,
+        showReportTemplate = showReportTemplate,
+        showAboutAnalysis = showAboutAnalysis)
 
     analysis <- decisionClass$new(
         options = options,

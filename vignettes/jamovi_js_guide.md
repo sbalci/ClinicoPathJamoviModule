@@ -852,6 +852,77 @@ onChange_primary: function(ui) {
    - **Complex exploration modes**: Dynamic range updates based on exploration type
    - **Helper function architecture**: Extensive use of external helper functions
 
+## Important Migration Notice: jQuery Removal
+
+### ⚠️ jQuery Deprecation in Jamovi
+
+**As of jamovi 2.6+, jQuery is being removed from the jamovi platform.** If your module uses jQuery or any of the following deprecated elements, you'll need to make adjustments:
+
+#### Deprecated jQuery Elements:
+- `$el`
+- `$addButton`
+- `$label`
+- `$suggestValues`
+- `$input`
+- `$fullCtrl`
+- `$suffix`
+- `$buttons`
+- Any usage of `$()` or `jQuery()`
+
+#### Migration Resources:
+- **Alternative patterns**: https://youmightnotneedjquery.com/
+- **Vanilla JavaScript replacements** for common jQuery operations
+
+#### ✅ Recommended Approach:
+**Use jamovi's native UI API instead of direct DOM manipulation:**
+
+```javascript
+// ✅ Correct: Use jamovi UI API (jQuery-free)
+const events = {
+    onChange_parameter(ui) {
+        const value = ui.parameter.value();    // Get value
+        ui.otherParam.setValue(newValue);      // Set value
+
+        // Safe UI updates with error handling
+        if (ui.guidanceField && typeof ui.guidanceField.setValue === 'function') {
+            ui.guidanceField.setValue("Updated guidance");
+        }
+    }
+};
+
+// ❌ Avoid: jQuery patterns (deprecated)
+const events = {
+    onChange_parameter(ui) {
+        const $element = $(ui.parameter.$el);  // Don't use
+        $element.val(newValue);                // Don't use
+    }
+};
+```
+
+#### Migration Checklist:
+- [ ] Replace all `$()` calls with vanilla JavaScript or jamovi UI API
+- [ ] Remove references to `$el`, `$addButton`, etc.
+- [ ] Use `ui.controlName.value()` and `ui.controlName.setValue()` instead
+- [ ] Test thoroughly in jamovi 2.6+
+- [ ] Ensure error handling for missing UI elements
+
+#### Example Migration:
+
+```javascript
+// Before (jQuery - deprecated):
+ui.myControl.$el.addClass('highlighted');
+ui.myControl.$label.text('New Label');
+
+// After (Vanilla JS + jamovi API):
+const control = ui.myControl;
+if (control && typeof control.setValue === 'function') {
+    control.setValue(newValue);
+    // Use CSS classes defined in your module instead of jQuery manipulation
+}
+```
+
+**All examples in this guide are jQuery-free and follow current best practices.**
+
 ## Troubleshooting JavaScript in Jamovi
 
 ### Known Issues and Solutions
@@ -912,9 +983,17 @@ JavaScript in jamovi modules enables sophisticated user interactions beyond stat
 
 1. **Use JavaScript for dynamic behavior** - presets, validation, intelligent defaults
 2. **Follow naming conventions** - `.events.js` for complex handlers
-3. **Handle errors gracefully** - try-catch for optional elements
-4. **Provide user feedback** - validation messages, guidance text
-5. **Avoid recursive calls** - check values before updating
-6. **Test thoroughly** - edge cases, null values, event chains
+3. **Use jamovi's native UI API** - avoid jQuery and DOM manipulation
+4. **Handle errors gracefully** - try-catch for optional elements
+5. **Provide user feedback** - validation messages, guidance text
+6. **Avoid recursive calls** - check values before updating
+7. **Test thoroughly** - edge cases, null values, event chains
+8. **Stay jQuery-free** - use vanilla JavaScript with jamovi API
 
-JavaScript events transform jamovi modules from simple input forms into intelligent analysis assistants that guide users toward appropriate statistical choices.
+### Future-Proofing Your Code:
+- ✅ Use `ui.controlName.value()` and `ui.controlName.setValue()`
+- ✅ Implement proper error handling for missing UI elements
+- ✅ Follow modern JavaScript patterns (const, let, arrow functions)
+- ❌ Avoid jQuery, `$el`, `$addButton`, and related deprecated elements
+
+JavaScript events transform jamovi modules from simple input forms into intelligent analysis assistants that guide users toward appropriate statistical choices, all while maintaining compatibility with jamovi's jQuery-free future.

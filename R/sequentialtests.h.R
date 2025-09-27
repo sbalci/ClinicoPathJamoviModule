@@ -6,6 +6,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            preset = "custom",
             test1_name = "Screening Test",
             test1_sens = 0.95,
             test1_spec = 0.7,
@@ -24,6 +25,19 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 requiresData=FALSE,
                 ...)
 
+            private$..preset <- jmvcore::OptionList$new(
+                "preset",
+                preset,
+                options=list(
+                    "custom",
+                    "covid_screening_confirmation",
+                    "breast_cancer_screening",
+                    "mi_emergency_parallel",
+                    "tb_screening_confirmation",
+                    "prostate_screening_exclusion",
+                    "hiv_screening_confirmation",
+                    "stroke_emergency_parallel"),
+                default="custom")
             private$..test1_name <- jmvcore::OptionString$new(
                 "test1_name",
                 test1_name,
@@ -83,6 +97,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 show_nomogram,
                 default=FALSE)
 
+            self$.addOption(private$..preset)
             self$.addOption(private$..test1_name)
             self$.addOption(private$..test1_sens)
             self$.addOption(private$..test1_spec)
@@ -96,6 +111,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..show_nomogram)
         }),
     active = list(
+        preset = function() private$..preset$value,
         test1_name = function() private$..test1_name$value,
         test1_sens = function() private$..test1_sens$value,
         test1_spec = function() private$..test1_spec$value,
@@ -108,6 +124,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         show_formulas = function() private$..show_formulas$value,
         show_nomogram = function() private$..show_nomogram$value),
     private = list(
+        ..preset = NA,
         ..test1_name = NA,
         ..test1_sens = NA,
         ..test1_spec = NA,
@@ -130,7 +147,11 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         population_flow_table = function() private$.items[["population_flow_table"]],
         explanation_text = function() private$.items[["explanation_text"]],
         formulas_text = function() private$.items[["formulas_text"]],
-        plot_nomogram = function() private$.items[["plot_nomogram"]]),
+        plot_flow_diagram = function() private$.items[["plot_flow_diagram"]],
+        plot_performance = function() private$.items[["plot_performance"]],
+        plot_probability = function() private$.items[["plot_probability"]],
+        plot_population_flow = function() private$.items[["plot_population_flow"]],
+        clinical_guidance = function() private$.items[["clinical_guidance"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -283,12 +304,40 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible="(show_formulas)"))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot_nomogram",
-                title="Sequential Testing Nomogram",
-                width=900,
-                height=600,
-                renderFun=".plot_nomogram",
-                visible="(show_nomogram)"))}))
+                name="plot_flow_diagram",
+                title="Testing Strategy Flow Diagram",
+                width=600,
+                height=400,
+                renderFun=".plot_flow_diagram",
+                visible="(show_nomogram)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_performance",
+                title="Test Performance Comparison",
+                width=600,
+                height=400,
+                renderFun=".plot_performance",
+                visible="(show_nomogram)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_probability",
+                title="Probability Transformation",
+                width=600,
+                height=400,
+                renderFun=".plot_probability",
+                visible="(show_nomogram)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_population_flow",
+                title="Population Flow Visualization",
+                width=600,
+                height=400,
+                renderFun=".plot_population_flow",
+                visible="(show_nomogram)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_guidance",
+                title="Clinical Guidance"))}))
 
 sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "sequentialtestsBase",
@@ -359,6 +408,9 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' data(teaching_examples)            # Educational scenarios
 #' data(common_test_combinations)     # Reference test characteristics
 #'
+#' @param preset Select a clinical preset or use custom values. Presets load
+#'   evidence-based test parameters and optimal strategies from medical
+#'   literature.
 #' @param test1_name .
 #' @param test1_sens .
 #' @param test1_spec .
@@ -377,7 +429,11 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$population_flow_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$explanation_text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$formulas_text} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot_flow_diagram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot_performance} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot_probability} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot_population_flow} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinical_guidance} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -388,6 +444,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'
 #' @export
 sequentialtests <- function(
+    preset = "custom",
     test1_name = "Screening Test",
     test1_sens = 0.95,
     test1_spec = 0.7,
@@ -405,6 +462,7 @@ sequentialtests <- function(
 
 
     options <- sequentialtestsOptions$new(
+        preset = preset,
         test1_name = test1_name,
         test1_sens = test1_sens,
         test1_spec = test1_spec,

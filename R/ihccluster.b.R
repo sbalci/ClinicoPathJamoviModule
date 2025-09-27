@@ -34,6 +34,329 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = ihcclusterBase,
     private = list(
         
+        .prepareData = function(data, catVars, contVars, opts) {
+            notes <- character()
+            info <- list(imputed = character(), addedMissingLevel = character())
+
+            allVars <- c(catVars, contVars)
+            df <- data[, allVars, drop = FALSE]
+
+            if (identical(opts$handleMissing, "complete")) {
+                initial_n <- nrow(df)
+                df <- jmvcore::naOmit(df)
+                removed <- initial_n - nrow(df)
+                if (removed > 0)
+                    notes <- c(notes, sprintf("Removed %d cases with incomplete data (complete-case analysis)", removed))
+            }
+
+            # Process categorical variables first so downstream methods have consistent factors
+            if (length(catVars) > 0) {
+                for (var in catVars) {
+                    x <- df[[var]]
+                    if (!is.factor(x))
+                        x <- as.factor(x)
+                    if (anyNA(x)) {
+                        x <- addNA(x, ifany = TRUE)
+                        levels(x)[is.na(levels(x))] <- "Missing"
+                        info$addedMissingLevel <- unique(c(info$addedMissingLevel, var))
+                    }
+                    df[[var]] <- droplevels(x)
+                }
+            }
+
+            if (length(contVars) > 0) {
+                for (var in contVars) {
+                    x <- df[[var]]
+                    if (!is.numeric(x))
+                        stop(sprintf("Variable '%s' must be numeric for continuous analysis", var))
+
+                    uniqueVals <- unique(na.omit(x))
+                    if (length(uniqueVals) == 1)
+                        warning(sprintf("Variable '%s' has constant values and may not contribute to clustering", var))
+
+                    if (anyNA(x)) {
+                        med <- stats::median(x, na.rm = TRUE)
+                        x[is.na(x)] <- med
+                        info$imputed <- unique(c(info$imputed, var))
+                    }
+
+                    if (length(uniqueVals) > 1) {
+                        q <- stats::quantile(x, c(0.01, 0.99), na.rm = TRUE)
+                        mean_val <- mean(x, na.rm = TRUE)
+                        if (!isTRUE(all.equal(mean_val, 0)) && abs(q[2] - q[1]) / max(1e-9, abs(mean_val)) > 10)
+                            warning(sprintf("Variable '%s' shows extreme spread and may influence clustering disproportionately", var))
+                    }
+
+                    if (isTRUE(opts$scaleContVars) && stats::sd(x, na.rm = TRUE) > 0)
+                        x <- as.numeric(scale(x))
+
+                    df[[var]] <- x
+                }
+            }
+
+            if (nrow(df) < 5)
+                stop("Insufficient data after preprocessing. Need at least 5 cases.")
+
+            # Compose descriptive notes
+            if (length(info$imputed) > 0)
+                notes <- c(notes, sprintf("Median-imputed missing values for: %s", paste(info$imputed, collapse = ", ")))
+            if (!is.null(info$addedMissingLevel) && length(info$addedMissingLevel) > 0)
+                notes <- c(notes, sprintf("Treated missing categorical values as explicit 'Missing' level for: %s", paste(info$addedMissingLevel, collapse = ", ")))
+
+            list(
+                df = df,
+                catVars = catVars,
+                contVars = contVars,
+                notes = notes,
+                info = info
+            )
+        },
+
+        .parseWeights = function(rawWeights, allVars) {
+            if (is.null(rawWeights) || rawWeights == "" || nchar(rawWeights) == 0)
+                return(NULL)
+
+            weights <- NULL
+            tryCatch({
+                w <- as.numeric(strsplit(rawWeights, ",")[[1]])
+                if (length(w) == length(allVars)) {
+                    weights <- w
+                } else if (length(w) == 1) {
+                    weights <- rep(w, length(allVars))
+                } else {
+                    warning(sprintf("Weights length (%d) doesn't match number of variables (%d). Ignoring weights.", length(w), length(allVars)))
+                    weights <- NULL
+                }
+            }, error = function(e) {
+                warning(sprintf("Error parsing weights: %s. Ignoring weights.", e$message))
+                weights <- NULL
+            })
+
+            if (!is.null(weights))
+                names(weights) <- allVars
+
+            weights
+        },
+
+        .clusterData = function(df, method, opts, k, autoSelect, catVars, contVars, weights, silhouetteTable = NULL) {
+            result <- list(clusters = NULL, usedK = k, fit = NULL, dist = NULL, hc = NULL,
+                           scores = NULL, silhouette = NULL, notes = character(), method = method)
+
+            # Compute distance matrix once for methods that can reuse it
+            dist_matrix <- tryCatch({
+                cluster::daisy(df, metric = "gower", weights = weights)
+            }, error = function(e) {
+                stop(sprintf("Failed to compute Gower distance: %s", e$message))
+            })
+            result$dist <- dist_matrix
+
+            addSilhouetteRow <- function(kVals, silhouettes, selected) {
+                if (is.null(silhouetteTable))
+                    return()
+                silhouetteTable$clear()
+                for (i in seq_along(kVals)) {
+                    silhouetteTable$addRow(
+                        rowKey = paste0("k_", kVals[i]),
+                        list(
+                            k = as.integer(kVals[i]),
+                            avg_silhouette = as.numeric(silhouettes[i]),
+                            selected = if (selected[i]) "✓" else ""
+                        )
+                    )
+                }
+            }
+
+            chooseK <- function(candidateKs, computeSilhouette) {
+                sil_values <- vapply(candidateKs, computeSilhouette, numeric(1))
+                best_index <- which.max(sil_values)
+                selected <- seq_along(candidateKs) == best_index
+                addSilhouetteRow(candidateKs, sil_values, selected)
+                list(k = candidateKs[[best_index]], values = sil_values, selected = selected)
+            }
+
+            kRange <- switch(opts$kRange %||% "medium",
+                              "small" = 2:6,
+                              "large" = 2:12,
+                              2:8)
+
+            if (method == "pam") {
+                if (autoSelect || is.null(k)) {
+                    res <- chooseK(kRange, function(kk) {
+                        fit_tmp <- cluster::pam(dist_matrix, k = kk, diss = TRUE)
+                        mean(cluster::silhouette(fit_tmp)[, "sil_width"])
+                    })
+                    k <- res$k
+                    result$silhouette <- res
+                    result$notes <- c(result$notes, sprintf("Auto-selected k=%d (PAM, silhouette)", k))
+                }
+                pam_fit <- cluster::pam(dist_matrix, k = k, diss = TRUE)
+                result$clusters <- factor(pam_fit$clustering, labels = paste0("C", seq_len(k)))
+                result$fit <- pam_fit
+                result$usedK <- k
+
+            } else if (method == "hierarchical") {
+                hc <- cluster::agnes(dist_matrix, method = "ward")
+                if (autoSelect || is.null(k)) {
+                    res <- chooseK(kRange, function(kk) {
+                        cluster_ids <- stats::cutree(as.hclust(hc), k = kk)
+                        sil <- cluster::silhouette(cluster_ids, dist_matrix)
+                        mean(sil[, "sil_width"])
+                    })
+                    k <- res$k
+                    result$silhouette <- res
+                    result$notes <- c(result$notes, sprintf("Auto-selected k=%d (hierarchical, silhouette)", k))
+                }
+                cluster_ids <- stats::cutree(as.hclust(hc), k = k)
+                result$clusters <- factor(cluster_ids, labels = paste0("C", seq_len(k)))
+                result$hc <- hc
+                result$usedK <- k
+
+            } else if (method == "dimreduce") {
+                # Use FactoMineR methods to derive low-dimensional representation
+                scores <- NULL
+                tryCatch({
+                    if (length(catVars) > 0 && length(contVars) > 0) {
+                        famd <- FactoMineR::FAMD(df, graph = FALSE, ncp = min(5, ncol(df)))
+                        scores <- famd$ind$coord
+                    } else if (length(catVars) > 0) {
+                        mca <- FactoMineR::MCA(df[, catVars, drop = FALSE], graph = FALSE)
+                        eig <- mca$eig
+                        cump <- cumsum(eig[, "cumulative percentage of variance"])
+                        keep <- max(1, which(cump >= 75)[1])
+                        scores <- mca$ind$coord[, 1:keep, drop = FALSE]
+                    } else {
+                        pca <- stats::prcomp(df[, contVars, drop = FALSE], center = TRUE, scale. = FALSE)
+                        keep <- min(5, ncol(pca$x))
+                        scores <- pca$x[, 1:keep, drop = FALSE]
+                    }
+                }, error = function(e) {
+                    stop(sprintf("Dimension reduction failed: %s", e$message))
+                })
+
+                if (ncol(scores) < 1)
+                    stop("Dimension reduction produced empty component matrix.")
+
+                scaled_scores <- scale(scores)
+                rownames(scaled_scores) <- rownames(df)
+
+                if (autoSelect || is.null(k)) {
+                    res <- chooseK(kRange, function(kk) {
+                        cl <- stats::kmeans(scaled_scores, centers = kk, nstart = 50)
+                        sil <- cluster::silhouette(cl$cluster, stats::dist(scaled_scores))
+                        mean(sil[, "sil_width"])
+                    })
+                    k <- res$k
+                    result$silhouette <- res
+                    result$notes <- c(result$notes, sprintf("Auto-selected k=%d (dimension reduction, silhouette)", k))
+                }
+
+                km_fit <- stats::kmeans(scaled_scores, centers = k, nstart = 100)
+                result$clusters <- factor(km_fit$cluster, labels = paste0("C", seq_len(k)))
+                result$usedK <- k
+                result$fit <- km_fit
+                result$scores <- scaled_scores
+
+            } else if (method == "kmodes") {
+                if (length(catVars) == 0)
+                    stop("k-modes method requires categorical variables")
+
+                catOnlyDf <- df[, catVars, drop = FALSE]
+                computeKmodes <- function(centers) {
+                    klaR::kmodes(catOnlyDf, modes = centers, iter.max = 100, weighted = FALSE)
+                }
+
+                if (autoSelect || is.null(k)) {
+                    res <- chooseK(kRange, function(kk) {
+                        fit_tmp <- computeKmodes(kk)
+                        sil <- cluster::silhouette(fit_tmp$cluster, dist_matrix)
+                        mean(sil[, "sil_width"])
+                    })
+                    k <- res$k
+                    result$silhouette <- res
+                    result$notes <- c(result$notes, sprintf("Auto-selected k=%d (k-modes, silhouette)", k))
+                }
+
+                fit <- computeKmodes(k)
+                result$clusters <- factor(fit$cluster, labels = paste0("C", seq_len(k)))
+                result$usedK <- k
+                result$fit <- fit
+
+            } else if (method == "mca_kmeans") {
+                if (length(catVars) == 0)
+                    stop("MCA k-means method requires categorical variables")
+
+                mca <- FactoMineR::MCA(df[, catVars, drop = FALSE], graph = FALSE)
+                eig <- mca$eig
+                cump <- cumsum(eig[, "cumulative percentage of variance"])
+                keep <- max(1, which(cump >= 75)[1])
+                scores <- mca$ind$coord[, 1:keep, drop = FALSE]
+                scaled_scores <- scale(scores)
+
+                if (autoSelect || is.null(k)) {
+                    res <- chooseK(kRange, function(kk) {
+                        cl <- stats::kmeans(scaled_scores, centers = kk, nstart = 50)
+                        sil <- cluster::silhouette(cl$cluster, stats::dist(scaled_scores))
+                        mean(sil[, "sil_width"])
+                    })
+                    k <- res$k
+                    result$silhouette <- res
+                    result$notes <- c(result$notes, sprintf("Auto-selected k=%d (MCA + k-means, silhouette)", k))
+                }
+
+                km <- stats::kmeans(scaled_scores, centers = k, nstart = 100)
+                result$clusters <- factor(km$cluster, labels = paste0("C", seq_len(k)))
+                result$usedK <- k
+                result$fit <- km
+                result$scores <- scaled_scores
+
+            } else {
+                stop(sprintf("Unknown clustering method: %s", method))
+            }
+
+            result
+        },
+
+        .clearJamoviTable = function(table) {
+            if (is.null(table))
+                return()
+            if ("clear" %in% names(table)) {
+                try(table$clear(), silent = TRUE)
+            } else if ("clearRows" %in% names(table)) {
+                try(table$clearRows(), silent = TRUE)
+            }
+        },
+
+        .paletteForLevels = function(levels) {
+            base_cols <- grDevices::hcl.colors(max(3, length(levels)), palette = "Set2")
+            base_cols <- base_cols[seq_along(levels)]
+            names(base_cols) <- levels
+            base_cols
+        },
+
+        .kwEpsilonSquared = function(test_result, clusters, values) {
+            H <- as.numeric(test_result$statistic)
+            k <- nlevels(clusters)
+            n <- sum(!is.na(values))
+            denom <- n - k
+            if (denom <= 0)
+                return(NA_real_)
+            eps2 <- (H - k + 1) / denom
+            max(0, min(1, eps2))
+        },
+
+        .cramersV = function(chisq_result) {
+            stat <- as.numeric(chisq_result$statistic)
+            n <- sum(chisq_result$observed)
+            if (n <= 0)
+                return(NA_real_)
+            dims <- dim(chisq_result$observed)
+            phi <- sqrt(stat / n)
+            min_dim <- min(dims[1] - 1, dims[2] - 1)
+            if (min_dim <= 0)
+                return(NA_real_)
+            phi / sqrt(min_dim)
+        },
+
         .init = function() {
             if (is.null(self$data))
                 return()
@@ -48,317 +371,80 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             if (is.null(self$data))
                 return()
-                
+
+            private$.handlePresets()
+
             data <- self$data
             opts <- self$options
             `%||%` <- function(x, y) if (is.null(x)) y else x
 
-            # Unified variable handling - merge all categorical variables and treat separately from continuous
-            catVars <- character(0)
-            contVars <- character(0)
-            
-            # Collect all categorical variables
-            if (!is.null(opts$catVars) && length(opts$catVars) > 0) {
-                catVars <- c(catVars, opts$catVars)
-            }
-            
-            # Collect continuous variables
-            if (!is.null(opts$contVars) && length(opts$contVars) > 0) {
-                contVars <- opts$contVars
-            }
-            
-            # Remove duplicates and create final variable list
+            catVars <- if (!is.null(opts$catVars) && length(opts$catVars) > 0) opts$catVars else character(0)
+            contVars <- if (!is.null(opts$contVars) && length(opts$contVars) > 0) opts$contVars else character(0)
             catVars <- unique(catVars)
             contVars <- unique(contVars)
             allVars <- c(catVars, contVars)
-                
-            # Check for minimum variables
+
             if (length(allVars) < 2) {
                 self$results$summary$setContent(
                     "<p><b>Error:</b> Please specify at least 2 IHC markers (categorical or continuous).</p>"
                 )
                 return()
             }
-                
-            # Handle missing data
-            if (opts$handleMissing %||% "pairwise" == "complete") {
-                df <- jmvcore::naOmit(data[, allVars, drop=FALSE])
-            } else {
-                df <- data[, allVars, drop=FALSE]
-            }
-                
-            # Process categorical variables as factors
-            if (length(catVars) > 0) {
-                df[catVars] <- lapply(df[catVars], function(x) as.factor(x))
-            }
-                
-            # Process continuous variables (scale if requested)  
-            if (length(contVars) > 0) {
-                # Validate continuous variables
-                for (var in contVars) {
-                    if (!is.numeric(df[[var]])) {
-                        stop(sprintf("Variable '%s' must be numeric for continuous analysis", var))
-                    }
-                    # Check for constant values
-                    uniqueVals <- unique(na.omit(df[[var]]))
-                    if (length(uniqueVals) == 1) {
-                        warning(sprintf("Variable '%s' has constant values and may not contribute to clustering", var))
-                    }
-                    # Check for extreme outliers
-                    if (length(uniqueVals) > 1) {
-                        q <- quantile(df[[var]], c(0.01, 0.99), na.rm = TRUE)
-                        if ((q[2] - q[1]) / mean(df[[var]], na.rm = TRUE) > 10) {
-                            warning(sprintf("Variable '%s' has extreme outliers that may affect clustering", var))
-                        }
-                    }
-                }
-                
-                if (isTRUE(opts$scaleContVars)) {
-                    df[contVars] <- lapply(df[contVars], function(x) {
-                        if (is.numeric(x) && sd(x, na.rm = TRUE) > 0) {
-                            as.numeric(scale(x))
-                        } else x
-                    })
-                }
-            }
-            
-            # Additional validation
-            if (nrow(df) < 5) {
+
+            prepared <- tryCatch({
+                private$.prepareData(data, catVars, contVars, opts)
+            }, error = function(e) {
                 self$results$summary$setContent(
-                    "<p><b>Error:</b> Insufficient data after handling missing values. Need at least 5 cases.</p>"
+                    sprintf("<p><b>Error:</b> %s</p>", jmvcore::escapeHtml(e$message))
                 )
+                NULL
+            })
+
+            if (is.null(prepared))
                 return()
-            }
+
+            df <- prepared$df
+            catVars <- prepared$catVars
+            contVars <- prepared$contVars
 
             set.seed(opts$seed %||% 42)
 
-            k <- opts$nClusters %||% 3
             method <- opts$method %||% "pam"
+            requestedK <- opts$nClusters %||% 3
+            autoSelect <- isTRUE(opts$autoSelectK) || is.null(opts$nClusters)
+            weights <- private$.parseWeights(opts$weights, colnames(df))
 
-            text_lines <- list()
-            clusters <- NULL
-            usedK <- NULL
+            if (!autoSelect && !is.null(self$results$silhouetteStats))
+                private$.clearJamoviTable(self$results$silhouetteStats)
 
-            # Parse weights if provided
-            weights <- NULL
-            if (!is.null(opts$weights) && opts$weights != "" && nchar(opts$weights) > 0) {
-                tryCatch({
-                    w <- as.numeric(strsplit(opts$weights, ",")[[1]])
-                    if (length(w) == length(allVars)) {
-                        weights <- w
-                        names(weights) <- allVars
-                    } else if (length(w) == 1) {
-                        # Single weight value - use for all variables
-                        weights <- rep(w, length(allVars))
-                        names(weights) <- allVars
-                    } else {
-                        warning(sprintf("Weights length (%d) doesn't match number of variables (%d). Ignoring weights.", length(w), length(allVars)))
-                        weights <- NULL
-                    }
-                }, error = function(e) {
-                    warning(sprintf("Error parsing weights: %s. Ignoring weights.", e$message))
-                    weights <- NULL
-                })
-            }
+            clusterResult <- tryCatch({
+                private$.clusterData(df, method, opts, requestedK, autoSelect, catVars, contVars, weights, self$results$silhouetteStats)
+            }, error = function(e) {
+                self$results$summary$setContent(
+                    sprintf("<p><b>Error:</b> %s</p>", jmvcore::escapeHtml(e$message))
+                )
+                NULL
+            })
 
-            if (method == "pam") {
-                if (is.null(weights)) {
-                    d <- cluster::daisy(df, metric="gower")
-                } else {
-                    d <- cluster::daisy(df, metric="gower", weights=weights)
-                }
-                
-                # Auto k selection with new range options
-                if (isTRUE(opts$autoSelectK) || is.null(k)) {
-                    kRange <- switch(opts$kRange %||% "medium",
-                                   "small" = 2:6,
-                                   "medium" = 2:8, 
-                                   "large" = 2:12,
-                                   2:8)
-                    
-                    # Calculate silhouette for each k and populate table directly
-                    sils <- sapply(kRange, function(kk) {
-                        fit <- cluster::pam(d, k=kk, diss=TRUE)
-                        mean(cluster::silhouette(fit)[, "sil_width"])
-                    })
-                    
-                    usedK <- kRange[which.max(sils)]
-                    text_lines <- c(text_lines, sprintf("Auto k (silhouette): %d", usedK))
-                    
-                    # Populate silhouette statistics table immediately
-                    if (!is.null(self$results$silhouetteStats)) {
-                        silTable <- self$results$silhouetteStats
-                        
-                        for (i in seq_along(kRange)) {
-                            selected_marker <- if (kRange[i] == usedK) "✓" else ""
-                            silTable$addRow(rowKey = paste0("k_", kRange[i]), list(
-                                k = as.integer(kRange[i]),
-                                avg_silhouette = as.numeric(sils[i]),
-                                selected = selected_marker
-                            ))
-                        }
-                    }
-                } else usedK <- k
-                fit <- cluster::pam(d, k=usedK, diss=TRUE)
-                clusters <- factor(fit$clustering, labels = paste0("C", seq_len(usedK)))
-                # self$state$fit <- fit
-                # self$state$dist <- d
-                
-                # Fit object now stored in central state management
+            if (is.null(clusterResult) || is.null(clusterResult$clusters))
+                return()
 
-            } else if (method == "hierarchical") {
-                # New hierarchical clustering method
-                if (is.null(weights)) {
-                    d <- cluster::daisy(df, metric="gower")
-                } else {
-                    d <- cluster::daisy(df, metric="gower", weights=weights)
-                }
-                
-                if (isTRUE(opts$autoSelectK) || is.null(k)) {
-                    kRange <- switch(opts$kRange %||% "medium", "small" = 2:6, "medium" = 2:8, "large" = 2:12, 2:8)
-                    
-                    hc <- cluster::agnes(d, method="ward")
-                    sils <- sapply(kRange, function(kk) {
-                        clusterIds <- cutree(as.hclust(hc), k=kk)
-                        sil <- cluster::silhouette(clusterIds, d)
-                        mean(sil[, "sil_width"])
-                    })
-                    usedK <- kRange[which.max(sils)]
-                    text_lines <- c(text_lines, sprintf("Auto k (hierarchical silhouette): %d", usedK))
-                    
-                    # Populate silhouette statistics table
-                    if (!is.null(self$results$silhouetteStats)) {
-                        silTable <- self$results$silhouetteStats
-                        for (i in seq_along(kRange)) {
-                            selected_marker <- if (kRange[i] == usedK) "✓" else ""
-                            silTable$addRow(rowKey = paste0("k_", kRange[i]), list(
-                                k = as.integer(kRange[i]),
-                                avg_silhouette = as.numeric(sils[i]),
-                                selected = selected_marker
-                            ))
-                        }
-                    }
-                } else usedK <- k
-                
-                hc <- cluster::agnes(d, method="ward")
-                clusterIds <- cutree(as.hclust(hc), k=usedK)
-                clusters <- factor(clusterIds, labels = paste0("C", seq_len(usedK)))
-                # self$state$fit <- hc
-                # self$state$dist <- d
+            clusters <- clusterResult$clusters
+            usedK <- clusterResult$usedK
 
-            } else if (method == "dimreduce") {
-                # New dimension reduction + k-means method
-                if (length(contVars) > 0 && length(catVars) > 0) {
-                    # Mixed data: use MCA for categorical + PCA for continuous
-                    scores <- NULL
-                    
-                    if (length(catVars) > 0) {
-                        catData <- df[, catVars, drop=FALSE]
-                        mca <- FactoMineR::MCA(catData, graph=FALSE)
-                        mcaScores <- mca$ind$coord[, 1:min(3, ncol(mca$ind$coord)), drop=FALSE]
-                        scores <- mcaScores
-                        # Store mca locally - self$state$mca <- mca
-                    }
-                    
-                    if (length(contVars) > 0) {
-                        contData <- df[, contVars, drop=FALSE]
-                        contData <- contData[complete.cases(contData), , drop=FALSE]
-                        if (nrow(contData) > 0) {
-                            pca <- prcomp(contData, scale.=TRUE)
-                            pcaScores <- pca$x[, 1:min(3, ncol(pca$x)), drop=FALSE]
-                            if (is.null(scores)) {
-                                scores <- pcaScores
-                            } else if (nrow(scores) == nrow(pcaScores)) {
-                                scores <- cbind(scores, pcaScores)
-                            }
-                            # self$state$pca <- pca
-                        }
-                    }
-                    
-                } else if (length(catVars) > 0) {
-                    # Categorical only: use MCA
-                    mca <- FactoMineR::MCA(df, graph=FALSE)
-                    eig <- mca$eig
-                    cump <- cumsum(eig[, "cumulative percentage of variance"])
-                    keep <- which(cump >= 75)[1]
-                    scores <- mca$ind$coord[, 1:keep, drop=FALSE]
-                    # self$state$mca <- mca
-                } else {
-                    # Continuous only: use PCA
-                    pca <- prcomp(df, scale.=TRUE)
-                    scores <- pca$x[, 1:min(ncol(pca$x), 5), drop=FALSE]
-                    # self$state$pca <- pca
-                }
+            text_lines <- character()
+            if (length(prepared$notes) > 0)
+                text_lines <- c(text_lines, prepared$notes)
+            if (!is.null(prepared$info$addedMissingLevel) && length(prepared$info$addedMissingLevel) > 0)
+                text_lines <- c(text_lines, sprintf("Recorded 'Missing' level for: %s", paste(prepared$info$addedMissingLevel, collapse = ", ")))
+            if (length(clusterResult$notes) > 0)
+                text_lines <- c(text_lines, clusterResult$notes)
+            if (!is.null(weights))
+                text_lines <- c(text_lines, "Variable weights applied during distance calculation")
 
-                if (isTRUE(opts$autoSelectK) || is.null(k)) {
-                    kRange <- switch(opts$kRange %||% "medium", "small" = 2:6, "medium" = 2:8, "large" = 2:12, 2:8)
-                    sils <- sapply(kRange, function(kk) {
-                        cl <- stats::kmeans(scale(scores), centers=kk, nstart=50)
-                        sil <- cluster::silhouette(cl$cluster, stats::dist(scale(scores)))
-                        mean(sil[, "sil_width"])
-                    })
-                    usedK <- kRange[which.max(sils)]
-                    text_lines <- c(text_lines, sprintf("Auto k (dimension reduction silhouette): %d", usedK))
-                } else usedK <- k
+            text_lines <- unique(text_lines)
+            text_lines <- text_lines[nzchar(text_lines)]
 
-                km <- stats::kmeans(scale(scores), centers=usedK, nstart=100)
-                clusters <- factor(km$cluster, labels = paste0("C", seq_len(usedK)))
-                # self$state$km <- km
-                # self$state$scores <- scores
-
-            # Keep existing methods for backward compatibility
-            } else if (method == "kmodes") {
-                # Only works with categorical data
-                catOnlyDf <- df[, catVars, drop=FALSE]
-                if (length(catVars) == 0) {
-                    stop("k-modes method requires categorical variables")
-                }
-                
-                if (isTRUE(opts$autoSelectK) || is.null(k)) {
-                    kRange <- switch(opts$kRange %||% "medium", "small" = 2:6, "medium" = 2:8, "large" = 2:12, 2:8)
-                    costs <- sapply(kRange, function(kk) {
-                        fit <- klaR::kmodes(catOnlyDf, modes = kk, iter.max = 50, weighted = FALSE)
-                        fit$withindiff
-                    })
-                    usedK <- kRange[which.min(costs)]
-                    text_lines <- c(text_lines, sprintf("Auto k (k-modes min cost): %d", usedK))
-                } else usedK <- k
-                fit <- klaR::kmodes(catOnlyDf, modes = usedK, iter.max = 100, weighted = FALSE)
-                clusters <- factor(fit$cluster, labels = paste0("C", seq_len(usedK)))
-                # self$state$fit <- fit
-
-            } else if (method == "mca_kmeans") {
-                # Legacy MCA method - only works with categorical data
-                catOnlyDf <- df[, catVars, drop=FALSE]
-                if (length(catVars) == 0) {
-                    stop("MCA k-means method requires categorical variables")
-                }
-                
-                mca <- FactoMineR::MCA(catOnlyDf, graph=FALSE)
-                eig <- mca$eig
-                cump <- cumsum(eig[, "cumulative percentage of variance"])
-                keep <- which(cump >= 75)[1]
-                scores <- mca$ind$coord[, 1:keep, drop=FALSE]
-
-                if (isTRUE(opts$autoSelectK) || is.null(k)) {
-                    kRange <- switch(opts$kRange %||% "medium", "small" = 2:6, "medium" = 2:8, "large" = 2:12, 2:8)
-                    sils <- sapply(kRange, function(kk) {
-                        cl <- stats::kmeans(scale(scores), centers=kk, nstart=50)
-                        sil <- cluster::silhouette(cl$cluster, stats::dist(scale(scores)))
-                        mean(sil[, "sil_width"])
-                    })
-                    usedK <- kRange[which.max(sils)]
-                    text_lines <- c(text_lines, sprintf("Auto k (MCA silhouette): %d", usedK))
-                } else usedK <- k
-
-                km <- stats::kmeans(scale(scores), centers=usedK, nstart=100)
-                clusters <- factor(km$cluster, labels = paste0("C", seq_len(usedK)))
-                # self$state$mca <- mca
-                # self$state$km <- km
-                # self$state$scores <- scores
-            }
-
-            # Store analysis results using jamovi state management
             analysisState <- list(
                 clusters = clusters,
                 usedK = usedK,
@@ -366,62 +452,43 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 method = method,
                 catVars = catVars,
                 contVars = contVars,
-                fit = NULL,  # Will store clustering fit object
-                dist = NULL, # Will store distance matrix
-                hc = NULL    # Will store hierarchical clustering object
+                fit = clusterResult$fit,
+                dist = clusterResult$dist,
+                hc = clusterResult$hc,
+                scores = clusterResult$scores,
+                notes = text_lines
             )
-
-            # Store method-specific objects for plots
-            if (method == "pam") {
-                # Recreate fit object for medoid info and silhouette plots
-                d <- if (is.null(weights)) {
-                    cluster::daisy(df, metric="gower")
-                } else {
-                    cluster::daisy(df, metric="gower", weights=weights)
-                }
-                fit <- cluster::pam(d, k=usedK, diss=TRUE)
-                analysisState$fit <- fit
-                analysisState$dist <- d
-            } else if (method == "hierarchical") {
-                # Store hierarchical clustering object for dendrogram
-                d <- if (is.null(weights)) {
-                    cluster::daisy(df, metric="gower")
-                } else {
-                    cluster::daisy(df, metric="gower", weights=weights)
-                }
-                hc <- cluster::agnes(d, method="ward")
-                analysisState$hc <- hc
-                analysisState$dist <- d
-            }
 
             self$results$summary$setState(analysisState)
 
-            # --- Populate results tables ---
-            
-            # Cluster sizes table (backward compatible)
             sizes <- table(clusters)
             if (!is.null(self$results$clusterSizes)) {
+                private$.clearJamoviTable(self$results$clusterSizes)
                 tbl <- self$results$clusterSizes
-                for (cl in names(sizes))
-                    tbl$addRow(rowKey=cl, list(cluster=cl, n=as.integer(sizes[[cl]]), 
-                                              percent=as.numeric(sizes[[cl]])/length(clusters)))
+                for (cl in names(sizes)) {
+                    tbl$addRow(rowKey = cl, list(
+                        cluster = cl,
+                        n = as.integer(sizes[[cl]]),
+                        percent = as.numeric(sizes[[cl]]) / length(clusters)
+                    ))
+                }
             } else if (!is.null(self$results$sizes)) {
+                private$.clearJamoviTable(self$results$sizes)
                 tbl <- self$results$sizes
-                for (cl in names(sizes))
-                    tbl$addRow(rowKey=cl, list(cluster=cl, n=as.integer(sizes[[cl]])))
+                for (cl in names(sizes)) {
+                    tbl$addRow(rowKey = cl, list(cluster = cl, n = as.integer(sizes[[cl]])))
+                }
             }
-            
-            # Medoid information for PAM clustering using centralized state
-            if (method == "pam" && !is.null(analysisState$fit)) {
-                fit <- analysisState$fit
+
+            if (method == "pam" && !is.null(clusterResult$fit)) {
                 medoidTable <- self$results$medoidInfo
                 if (!is.null(medoidTable)) {
+                    private$.clearJamoviTable(medoidTable)
+                    fit <- clusterResult$fit
                     for (i in seq_along(fit$medoids)) {
                         medoidId <- if (!is.null(rownames(df))) rownames(df)[fit$medoids[i]] else as.character(fit$medoids[i])
-                        # Create profile description
                         medoidRow <- df[fit$medoids[i], , drop = FALSE]
                         profileDesc <- paste(names(medoidRow), "=", sapply(medoidRow, as.character), collapse = ", ")
-
                         medoidTable$addRow(list(
                             cluster = paste0("C", i),
                             medoid_id = medoidId,
@@ -431,26 +498,23 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
-            # Silhouette statistics are now populated directly during k selection above
-
-            # Marker summary by cluster (new comprehensive format)
             if (!is.null(self$results$markerSummary)) {
                 mt <- self$results$markerSummary
+                private$.clearJamoviTable(mt)
                 for (cl in levels(clusters)) {
                     for (mk in colnames(df)) {
                         clusterData <- df[clusters == cl, mk]
                         clusterData <- clusterData[!is.na(clusterData)]
-                        
-                        if (length(clusterData) == 0) next
-                        
+                        if (length(clusterData) == 0)
+                            next
+
                         if (is.numeric(clusterData)) {
-                            # Continuous marker
                             meanVal <- round(mean(clusterData), 2)
-                            medianVal <- round(median(clusterData), 2)
-                            sdVal <- round(sd(clusterData), 2)
-                            iqrVal <- round(IQR(clusterData), 2)
+                            medianVal <- round(stats::median(clusterData), 2)
+                            sdVal <- round(stats::sd(clusterData), 2)
+                            iqrVal <- round(stats::IQR(clusterData), 2)
                             rangeVal <- paste0(round(min(clusterData), 2), " - ", round(max(clusterData), 2))
-                            
+
                             mt$addRow(rowKey = paste(cl, mk, sep = "_"), list(
                                 cluster = cl,
                                 marker = mk,
@@ -460,12 +524,11 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 range = rangeVal
                             ))
                         } else {
-                            # Categorical marker
                             tab <- table(clusterData)
                             mode_level <- names(which.max(tab))
                             mode_pct <- round(100 * max(tab) / sum(tab), 1)
                             levels_summary <- paste(names(tab), "(", tab, ")", collapse = ", ")
-                            
+
                             mt$addRow(rowKey = paste(cl, mk, sep = "_"), list(
                                 cluster = cl,
                                 marker = mk,
@@ -479,25 +542,18 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
-            # Legacy mode per stain per cluster (backward compatibility)
-            # NOTE: Skipping modes table as it requires dynamic columns which jamovi doesn't support
-            # The same information is available in markerSummary table with better formatting
-            # if (!is.null(self$results$modes)) {
-            #     # Cannot dynamically add columns in jamovi tables
-            #     # This legacy table is marked as visible: false anyway
-            # }
-
-            # Legacy distributions by cluster (backward compatibility, categorical only)
             if (!is.null(self$results$distr)) {
+                private$.clearJamoviTable(self$results$distr)
                 distr <- do.call(rbind, lapply(seq_along(df), function(j) {
                     mk <- colnames(df)[j]
-                    if (is.numeric(df[[j]])) return(NULL)  # Skip continuous for legacy table
-                    d <- as.data.frame(table(clusters, df[[j]], useNA="no"))
-                    colnames(d) <- c("cluster","level","n")
+                    if (is.numeric(df[[j]]))
+                        return(NULL)
+                    d <- as.data.frame(table(clusters, df[[j]], useNA = "no"))
+                    colnames(d) <- c("cluster", "level", "n")
                     d$marker <- mk
                     d
                 }))
-                
+
                 if (!is.null(distr) && nrow(distr) > 0) {
                     suppressWarnings({
                         distr <- dplyr::group_by(distr, marker, cluster)
@@ -507,94 +563,79 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     dtab <- self$results$distr
                     for (i in seq_len(nrow(distr))) {
                         row <- distr[i, ]
-                        dtab$addRow(rowKey = paste(row$marker, row$cluster, row$level, sep="|"),
-                            list(marker=as.character(row$marker),
-                                 cluster=as.character(row$cluster),
-                                 level=as.character(row$level),
-                                 n=as.integer(row$n),
-                                 pct=as.numeric(row$pct)))
+                        dtab$addRow(rowKey = paste(row$marker, row$cluster, row$level, sep = "|"), list(
+                            marker = as.character(row$marker),
+                            cluster = as.character(row$cluster),
+                            level = as.character(row$level),
+                            n = as.integer(row$n),
+                            pct = as.numeric(row$pct)
+                        ))
                     }
                 }
             }
 
-            # Association tests (enhanced for mixed data)
             if (isTRUE(self$options$associationTests)) {
-                # New comprehensive association tests
                 if (!is.null(self$results$associationTests)) {
                     at <- self$results$associationTests
+                    private$.clearJamoviTable(at)
                     for (mk in colnames(df)) {
                         if (is.numeric(df[[mk]])) {
-                            # Continuous marker - use Kruskal-Wallis
-                            test_result <- tryCatch({
-                                kruskal.test(df[[mk]], clusters)
-                            }, error = function(e) NULL)
-                            
+                            test_result <- tryCatch(kruskal.test(df[[mk]], clusters), error = function(e) NULL)
                             if (!is.null(test_result)) {
                                 at$addRow(rowKey = mk, list(
                                     marker = mk,
                                     test = "Kruskal-Wallis",
-                                    statistic = test_result$statistic,
+                                    statistic = as.numeric(test_result$statistic),
                                     p_value = test_result$p.value,
-                                    effect_size = "Eta-squared"
+                                    effect_size = private$.kwEpsilonSquared(test_result, clusters, df[[mk]])
                                 ))
                             }
                         } else {
-                            # Categorical marker - use Chi-square
                             test_result <- tryCatch({
                                 chisq.test(table(clusters, df[[mk]]))
                             }, error = function(e) NULL)
-                            
                             if (!is.null(test_result)) {
                                 at$addRow(rowKey = mk, list(
                                     marker = mk,
                                     test = "Chi-square",
-                                    statistic = test_result$statistic,
+                                    statistic = as.numeric(test_result$statistic),
                                     p_value = test_result$p.value,
-                                    effect_size = "Cramér's V"
+                                    effect_size = private$.cramersV(test_result)
                                 ))
                             }
                         }
                     }
                 }
-                
-                # Legacy association tests (backward compatibility)
+
                 if (!is.null(self$results$assoc)) {
                     at <- self$results$assoc
+                    private$.clearJamoviTable(at)
                     for (mk in colnames(df)) {
                         if (is.numeric(df[[mk]])) {
-                            p <- tryCatch(kruskal.test(df[[mk]], clusters)$p.value,
-                                          error=function(e) NA_real_)
+                            p <- tryCatch(kruskal.test(df[[mk]], clusters)$p.value, error = function(e) NA_real_)
                         } else {
-                            p <- tryCatch(stats::chisq.test(table(clusters, df[[mk]]))$p.value,
-                                          error=function(e) NA_real_)
+                            p <- tryCatch(stats::chisq.test(table(clusters, df[[mk]]))$p.value, error = function(e) NA_real_)
                         }
-                        at$addRow(rowKey = mk, list(marker=mk, p=p))
+                        at$addRow(rowKey = mk, list(marker = mk, p = p))
                     }
                 }
             }
-            
-            # Cluster profiles (characteristic features)
+
             if (isTRUE(self$options$clusterProfiles) && !is.null(self$results$clusterProfiles)) {
                 profileTable <- self$results$clusterProfiles
-                
+                private$.clearJamoviTable(profileTable)
                 for (cl in levels(clusters)) {
                     cluster_indices <- which(clusters == cl)
-                    
                     for (marker in colnames(df)) {
                         marker_data <- df[cluster_indices, marker]
-                        
                         if (is.numeric(marker_data)) {
-                            # Continuous marker
-                            mean_val <- mean(marker_data, na.rm = TRUE)
-                            sd_val <- sd(marker_data, na.rm = TRUE)
-                            summary_text <- sprintf("Mean: %.2f (SD: %.2f)", mean_val, sd_val)
+                            summary_text <- sprintf("Median: %.2f (IQR: %.2f)", stats::median(marker_data, na.rm = TRUE), stats::IQR(marker_data, na.rm = TRUE))
                         } else {
-                            # Categorical marker
-                            mode_val <- names(sort(table(marker_data), decreasing = TRUE))[1]
-                            pct <- round(100 * max(table(marker_data)) / length(marker_data), 1)
+                            counts <- table(marker_data)
+                            mode_val <- names(which.max(counts))
+                            pct <- round(100 * max(counts) / sum(counts), 1)
                             summary_text <- sprintf("Most common: %s (%.1f%%)", mode_val, pct)
                         }
-                        
                         profileTable$addRow(rowKey = paste(cl, marker, sep = "_"), list(
                             cluster = cl,
                             marker = marker,
@@ -604,89 +645,77 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
-            # Clinical variable comparisons
             if (length(self$options$clinicalVars) > 0 && !is.null(self$results$clinicalComparison)) {
                 clinicalTable <- self$results$clinicalComparison
-                
+                private$.clearJamoviTable(clinicalTable)
                 for (var in self$options$clinicalVars) {
                     clinicalData <- self$data[[var]]
                     if (is.null(clinicalData)) {
                         warning(sprintf("Clinical variable '%s' not found in data", var))
                         next
                     }
-                    
-                    # Check for sufficient non-missing values
+
                     nonMissing <- sum(!is.na(clinicalData))
                     if (nonMissing < 5) {
                         warning(sprintf("Clinical variable '%s' has insufficient non-missing values (%d)", var, nonMissing))
                         next
                     }
-                    
+
                     if (is.numeric(clinicalData)) {
-                        # Continuous clinical variable
-                        test_result <- tryCatch({
-                            kruskal.test(clinicalData, clusters)
-                        }, error = function(e) NULL)
-                        
+                        test_result <- tryCatch(kruskal.test(clinicalData, clusters), error = function(e) NULL)
                         if (!is.null(test_result)) {
-                            # Summary by cluster
                             summary_text <- paste(
                                 sapply(levels(clusters), function(cl) {
                                     cl_data <- clinicalData[clusters == cl]
                                     cl_data <- cl_data[!is.na(cl_data)]
                                     if (length(cl_data) > 0) {
-                                        paste0(cl, ": ", round(mean(cl_data), 2), "±", round(sd(cl_data), 2))
+                                        sprintf("%s: median %.2f (IQR %.2f)", cl, stats::median(cl_data), stats::IQR(cl_data))
                                     } else {
-                                        paste0(cl, ": No data")
+                                        sprintf("%s: No data", cl)
                                     }
                                 }),
                                 collapse = "; "
                             )
-                            
+
                             clinicalTable$addRow(rowKey = var, list(
                                 variable = var,
                                 test = "Kruskal-Wallis",
-                                statistic = test_result$statistic,
+                                statistic = as.numeric(test_result$statistic),
                                 p_value = test_result$p.value,
                                 summary = summary_text
                             ))
                         }
                     } else {
-                        # Categorical clinical variable
                         test_result <- tryCatch({
                             chisq.test(table(clusters, clinicalData))
                         }, error = function(e) NULL)
-                        
+
                         if (!is.null(test_result)) {
-                            summary_text <- "Cross-tabulation performed"
-                            
                             clinicalTable$addRow(rowKey = var, list(
                                 variable = var,
                                 test = "Chi-square",
-                                statistic = test_result$statistic,
+                                statistic = as.numeric(test_result$statistic),
                                 p_value = test_result$p.value,
-                                summary = summary_text
+                                summary = "Cross-tabulation performed"
                             ))
                         }
                     }
                 }
             }
 
-            # Consensus clustering if requested
             if (isTRUE(self$options$consensusClustering)) {
-                private$.performConsensus(df, usedK, weights, clusters)
+                private$.performConsensus(df, clusterResult, catVars, contVars, weights)
             }
 
-            # Notes (enhanced)
             method_names <- list(
                 "pam" = "PAM (k-medoids) with Gower distance",
                 "hierarchical" = "Hierarchical clustering (Ward) with Gower distance",
-                "dimreduce" = "Dimension reduction (MCA/PCA) + k-means",
+                "dimreduce" = "Dimension reduction (FAMD/MCA/PCA) + k-means",
                 "kmodes" = "k-modes (categorical only)",
                 "mca_kmeans" = "MCA + k-means (categorical only)"
             )
             method_name <- method_names[[method]] %||% method
-            
+
             txt <- paste(c(
                 sprintf("Method: %s", method_name),
                 sprintf("k: %s", ifelse(is.null(usedK), "NA", usedK)),
@@ -694,27 +723,24 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 sprintf("Continuous markers: %d", length(contVars)),
                 sprintf("Total cases: %d", nrow(df)),
                 text_lines
-            ), collapse="\n")
-            
+            ), collapse = "
+")
+
             if (!is.null(self$results$summary)) {
                 self$results$summary$setContent(paste0("<pre>", txt, "</pre>"))
             } else if (!is.null(self$results$text)) {
                 self$results$text$setContent(txt)
             }
 
-            # Generate and populate executive summary
             if (!is.null(self$results$executiveSummary)) {
                 executive_summary <- private$.generateExecutiveSummary()
                 self$results$executiveSummary$setContent(executive_summary)
             }
-            
-            # Control survival plot visibility dynamically
+
             if (!is.null(self$results$survivalPlot)) {
                 if (!is.null(self$options$survivalTime) && !is.null(self$options$survivalEvent)) {
-                    # Both survival variables are provided, make plot visible
                     self$results$survivalPlot$setVisible(TRUE)
                 } else {
-                    # Either variable missing, hide plot
                     self$results$survivalPlot$setVisible(FALSE)
                 }
             }
@@ -819,7 +845,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <li><b>Gower Distance:</b> Specially designed for mixed data types</li>
             <li><b>Categorical Variables:</b> Simple matching coefficient (0 = different, 1 = same)</li>
             <li><b>Continuous Variables:</b> Range-normalized to [0,1] scale</li>
-            <li><b>Missing Values:</b> Handled through pairwise deletion or complete case analysis</li>
+            <li><b>Missing Values:</b> Categorical markers gain an explicit "Missing" level; continuous markers are median-imputed when pairwise handling is selected</li>
             <li><b>Scaling:</b> Z-score standardization available for continuous variables</li>
             </ul>
             </div>
@@ -979,6 +1005,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <li>Clustering is <b>exploratory</b> - validate findings independently</li>
             <li>Consider technical factors: antibody clones, staining protocols, scoring methods</li>
             <li>Account for inter-observer variability in IHC scoring</li>
+            <li>Heatmap visualisations illustrate continuous markers; categorical markers appear as annotation bands</li>
             <li>Statistical significance ≠ clinical significance</li>
             </ul>
             </div>
@@ -1002,84 +1029,81 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$interpretationGuide$setContent(html)
         },
         
-        .performConsensus = function(df, k, weights, clusters) {
-            # Simple consensus clustering implementation using bootstrap resampling
+        .performConsensus = function(df, clusterResult, catVars, contVars, weights) {
             nBootstrap <- self$options$nBootstrap %||% 100
-            method <- self$options$method %||% "pam"
-            
-            # Consensus matrix initialization
+            method <- clusterResult$method %||% self$options$method %||% "pam"
+            k <- clusterResult$usedK
+
+            if (is.null(k) || k < 2)
+                return()
+
             n <- nrow(df)
             consensus_matrix <- matrix(0, nrow = n, ncol = n)
-            indicators <- matrix(0, nrow = n, ncol = n)  # Track co-occurrence
-            
+            indicators <- matrix(0, nrow = n, ncol = n)
+
             tryCatch({
                 for (i in seq_len(nBootstrap)) {
-                    # Bootstrap sample
-                    boot_idx <- sample(n, size = n, replace = TRUE)
+                    boot_idx <- sample.int(n, size = n, replace = TRUE)
                     boot_data <- df[boot_idx, , drop = FALSE]
-                    
-                    # Perform clustering on bootstrap sample
-                    if (method == "pam") {
-                        if (is.null(weights)) {
-                            d <- cluster::daisy(boot_data, metric = "gower")
-                        } else {
-                            d <- cluster::daisy(boot_data, metric = "gower", weights = weights)
-                        }
-                        fit <- cluster::pam(d, k = k, diss = TRUE)
-                        boot_clusters <- fit$clustering
-                    } else {
-                        # Simplified - use same method as main analysis
-                        if (is.null(weights)) {
-                            d <- cluster::daisy(boot_data, metric = "gower")
-                        } else {
-                            d <- cluster::daisy(boot_data, metric = "gower", weights = weights)
-                        }
-                        fit <- cluster::pam(d, k = k, diss = TRUE)  # Fallback to PAM
-                        boot_clusters <- fit$clustering
-                    }
-                    
-                    # Update consensus matrix for bootstrap indices
-                    for (j1 in seq_len(length(boot_idx))) {
-                        for (j2 in seq_len(length(boot_idx))) {
+
+                    boot_res <- private$.clusterData(
+                        df = boot_data,
+                        method = method,
+                        opts = self$options,
+                        k = k,
+                        autoSelect = FALSE,
+                        catVars = catVars,
+                        contVars = contVars,
+                        weights = weights,
+                        silhouetteTable = NULL
+                    )
+
+                    boot_clusters <- boot_res$clusters
+
+                    for (j1 in seq_along(boot_idx)) {
+                        for (j2 in seq_along(boot_idx)) {
                             orig_idx1 <- boot_idx[j1]
                             orig_idx2 <- boot_idx[j2]
-                            
-                            # Update co-occurrence matrix
                             indicators[orig_idx1, orig_idx2] <- indicators[orig_idx1, orig_idx2] + 1
-                            
-                            # If same cluster, update consensus
-                            if (boot_clusters[j1] == boot_clusters[j2]) {
+                            if (boot_clusters[j1] == boot_clusters[j2])
                                 consensus_matrix[orig_idx1, orig_idx2] <- consensus_matrix[orig_idx1, orig_idx2] + 1
-                            }
                         }
                     }
                 }
-                
-                # Calculate final consensus proportions
-                consensus_matrix <- ifelse(indicators > 0, consensus_matrix / indicators, 0)
-                
-                # Calculate stability metrics per cluster
+
+                indicators[indicators == 0] <- 1
+                consensus_matrix <- consensus_matrix / indicators
+
                 if (!is.null(self$results$consensusStats)) {
                     consensusTable <- self$results$consensusStats
-                    
+                    private$.clearJamoviTable(consensusTable)
+
+                    clusters <- clusterResult$clusters
                     for (cl in levels(clusters)) {
                         cluster_indices <- which(clusters == cl)
                         if (length(cluster_indices) > 1) {
-                            # Calculate within-cluster consensus
                             within_consensus <- consensus_matrix[cluster_indices, cluster_indices]
-                            stability <- mean(within_consensus[upper.tri(within_consensus)])
-                            
-                            # Count core samples (high consensus)
-                            core_samples <- sum(apply(within_consensus, 1, function(x) mean(x) > 0.8))
-                            
-                            interpretation <- if (stability > 0.8) {
+                            upper_vals <- within_consensus[upper.tri(within_consensus)]
+                            stability <- if (length(upper_vals) > 0) mean(upper_vals, na.rm = TRUE) else NA_real_
+
+                            row_means <- vapply(seq_along(cluster_indices), function(idx) {
+                                vals <- within_consensus[idx, ]
+                                vals <- vals[-idx]
+                                if (length(vals) == 0) return(NA_real_)
+                                mean(vals, na.rm = TRUE)
+                            }, numeric(1))
+                            core_samples <- sum(row_means > 0.8, na.rm = TRUE)
+
+                            interpretation <- if (is.na(stability)) {
+                                "Insufficient information"
+                            } else if (stability > 0.8) {
                                 "Highly stable"
                             } else if (stability > 0.6) {
-                                "Moderately stable" 
+                                "Moderately stable"
                             } else {
                                 "Low stability"
                             }
-                            
+
                             consensusTable$addRow(rowKey = cl, list(
                                 cluster = cl,
                                 stability = stability,
@@ -1089,9 +1113,8 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         }
                     }
                 }
-                
+
             }, error = function(e) {
-                # If consensus clustering fails, don't populate the table
                 warning(paste("Consensus clustering failed:", e$message))
             })
         },
@@ -1161,39 +1184,70 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(clusters) || is.null(df)) return()
             
             tryCatch({
-                # Convert to numeric matrix for heatmap
-                mat <- matrix(NA, nrow = nrow(df), ncol = ncol(df))
-                colnames(mat) <- colnames(df)
-                rownames(mat) <- rownames(df) %||% paste0("Case_", seq_len(nrow(df)))
-                
-                for (i in seq_along(colnames(df))) {
-                    var <- colnames(df)[i]
-                    if (is.numeric(df[[var]])) {
-                        mat[, i] <- df[[var]]
-                    } else {
-                        # Convert factor to numeric
-                        mat[, i] <- as.numeric(df[[var]])
-                    }
+                if (!requireNamespace("ComplexHeatmap", quietly = TRUE)) {
+                    plot(1, type="n", main="Heatmap Error", xlab="", ylab="")
+                    text(1, 1, "Please install the ComplexHeatmap package.", col="red")
+                    return()
                 }
-                
-                # Scale if requested
+
+                numericVars <- colnames(df)[vapply(df, is.numeric, logical(1))]
+                catVarsLocal <- setdiff(colnames(df), numericVars)
+
+                if (length(numericVars) == 0) {
+                    plot(1, type = "n", xlab = "", ylab = "", main = "Heatmap Unavailable")
+                    text(1, 1, "Heatmap requires at least one continuous marker.", col = "red")
+                    return()
+                }
+
+                mat <- as.matrix(df[, numericVars, drop = FALSE])
+                rownames(mat) <- rownames(df) %||% paste0("Case_", seq_len(nrow(df)))
+
                 heatmapScale <- self$options$heatmapScale %||% "row"
                 if (heatmapScale == "row") {
-                    mat <- t(scale(t(mat)))
+                    scaled <- t(scale(t(mat)))
+                    scaled[is.na(scaled)] <- 0
+                    mat <- scaled
                 } else if (heatmapScale == "column") {
-                    mat <- scale(mat)
+                    scaled <- scale(mat)
+                    scaled[is.na(scaled)] <- 0
+                    mat <- scaled
                 }
-                
-                # Order by clusters
+
                 ord <- order(clusters)
-                mat_ordered <- mat[ord, ]
+                mat_ordered <- mat[ord, , drop = FALSE]
+                clusters_ordered <- clusters[ord]
+
+                # Create cluster annotation
+                n_clusters <- length(unique(clusters))
+                colors <- private$.getColorPalette(n_clusters)
+                names(colors) <- levels(clusters)
+                annotation_df <- data.frame(Cluster = clusters_ordered)
+
+                anno_colors <- list(Cluster = colors)
+                if (length(catVarsLocal) > 0) {
+                    for (var in catVarsLocal) {
+                        annotation_df[[var]] <- droplevels(as.factor(df[ord, var]))
+                        anno_colors[[var]] <- private$.paletteForLevels(levels(annotation_df[[var]]))
+                    }
+                }
+
+                cluster_annot <- ComplexHeatmap::HeatmapAnnotation(
+                    df = annotation_df,
+                    col = anno_colors
+                )
+
+                # Generate heatmap
+                ht <- ComplexHeatmap::Heatmap(
+                    t(mat_ordered),
+                    name = "Expression",
+                    column_title = "Cases",
+                    row_title = "Markers",
+                    show_column_names = FALSE,
+                    cluster_columns = FALSE,
+                    top_annotation = cluster_annot
+                )
                 
-                # Simple heatmap using base graphics
-                heatmap(t(mat_ordered), 
-                       Colv = NA, 
-                       main = "IHC Expression Heatmap",
-                       xlab = "Cases", ylab = "Markers",
-                       col = colorRampPalette(c("blue", "white", "red"))(50))
+                ComplexHeatmap::draw(ht, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")
                 
             }, error = function(e) {
                 error_msg <- private$.createUserFriendlyError(e, "heatmap")
@@ -1811,7 +1865,35 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 return(paste("Executive summary generation failed:", e$message))
             })
+        },
+
+        .handlePresets = function() {
+            if (!isTRUE(self$options$applyPreset)) {
+                self$results$presetRecommendations$setVisible(FALSE)
+                return()
+            }
+
+            config <- private$.applyTumorPreset()
+            if (is.null(config)) {
+                self$results$presetRecommendations$setVisible(FALSE)
+                return()
+            }
+
+            html <- paste0(
+                '<div style="background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;">',
+                '<h4 style="margin-top: 0; color: #1976D2;">🔬 Preset Recommendations</h4>',
+                '<p><b>Description:</b> ', config$description, '</p>',
+                '<p><b>Recommended Method:</b> ', config$method, '</p>',
+                '<p><b>Recommended Number of Clusters:</b> ', config$nClusters, '</p>',
+                '<p><b>Recommended Markers:</b> ', paste(config$recommendedMarkers, collapse=", "), '</p>',
+                '<p><em>Please manually adjust the settings in the analysis panel to match these recommendations.</em></p>',
+                '</div>'
+            )
+
+            self$results$presetRecommendations$setContent(html)
+            self$results$presetRecommendations$setVisible(TRUE)
         }
+
     )
 )
 

@@ -9,6 +9,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
         "sequentialtestsClass",
         inherit = sequentialtestsBase,
         private = list(
+            NUMERICAL_TOLERANCE = 1e-10,
+            POPULATION_SIZE = 1000,
             .init = function() {
                 # Add rows to tables during initialization
                 individualTable <- self$results$individual_tests_table
@@ -40,6 +42,14 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 strategy <- self$options$strategy
                 prevalence <- self$options$prevalence
+
+                format_percent <- function(value) {
+                    if (is.na(value))
+                        return("not defined")
+                    if (is.infinite(value))
+                        return("infinite")
+                    sprintf("%.1f%%", value * 100)
+                }
                 
                 # Input validation and error handling
                 errors <- c()
@@ -58,8 +68,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (is.na(test2_spec) || test2_spec < 0 || test2_spec > 1) {
                     errors <- c(errors, "Test 2 specificity must be between 0 and 1 (0% to 100%)")
                 }
-                if (is.na(prevalence) || prevalence < 0 || prevalence > 1) {
-                    errors <- c(errors, "Prevalence must be between 0 and 1 (0% to 100%)")
+                if (is.na(prevalence) || prevalence <= 0 || prevalence >= 1) {
+                    errors <- c(errors, "Prevalence must be greater than 0 and less than 1 (exclusive)")
                 }
                 
                 # Validate test names
@@ -261,10 +271,35 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Calculate PPV and NPV for combined strategy
-                combined_ppv <- (prevalence * combined_sens) / (prevalence * combined_sens + (1 - prevalence) * (1 - combined_spec))
-                combined_npv <- ((1 - prevalence) * combined_spec) / ((1 - prevalence) * combined_spec + prevalence * (1 - combined_sens))
-                combined_plr <- combined_sens / (1 - combined_spec)
-                combined_nlr <- (1 - combined_sens) / combined_spec
+                combined_ppv_num <- prevalence * combined_sens
+                combined_ppv_denom <- combined_ppv_num + (1 - prevalence) * (1 - combined_spec)
+                combined_ppv <- private$.safeDivide(combined_ppv_num, combined_ppv_denom)
+
+                if (is.na(combined_ppv)) {
+                    warnings <- c(warnings, "Combined PPV could not be calculated because the denominator evaluated to zero. Check for extreme sensitivity/specificity combinations.")
+                }
+
+                combined_npv_num <- (1 - prevalence) * combined_spec
+                combined_npv_denom <- combined_npv_num + prevalence * (1 - combined_sens)
+                combined_npv <- private$.safeDivide(combined_npv_num, combined_npv_denom)
+
+                if (is.na(combined_npv)) {
+                    warnings <- c(warnings, "Combined NPV could not be calculated because the denominator evaluated to zero. Check for extreme sensitivity/specificity combinations.")
+                }
+
+                combined_plr <- private$.safeDivide(combined_sens, 1 - combined_spec, allowInfinite = TRUE)
+                if (is.na(combined_plr)) {
+                    warnings <- c(warnings, "Combined positive likelihood ratio undefined because both numerator and denominator approach zero.")
+                } else if (is.infinite(combined_plr)) {
+                    warnings <- c(warnings, "Combined positive likelihood ratio is infinite because combined specificity is effectively 100%.")
+                }
+
+                combined_nlr <- private$.safeDivide(1 - combined_sens, combined_spec, allowInfinite = TRUE)
+                if (is.na(combined_nlr)) {
+                    warnings <- c(warnings, "Combined negative likelihood ratio undefined because both numerator and denominator approach zero.")
+                } else if (is.infinite(combined_nlr)) {
+                    warnings <- c(warnings, "Combined negative likelihood ratio is infinite because combined specificity is effectively zero.")
+                }
 
                 # Update summary table
                 summaryTable <- self$results$summary_table
@@ -324,8 +359,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     )
                 )
 
-                # Calculate population flow numbers (assuming population of 1000)
-                pop_size <- 1000
+                # Calculate population flow numbers (assuming default population size)
+                pop_size <- private$POPULATION_SIZE
                 diseased <- pop_size * prevalence
                 healthy <- pop_size - diseased
 
@@ -421,6 +456,11 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 final_pos <- final_tp + final_fp
                 final_neg <- final_fn + final_tn
+
+                tp_rate <- if (diseased > 0) final_tp / diseased else NA_real_
+                tn_rate <- if (healthy > 0) final_tn / healthy else NA_real_
+                tp_rate_text <- if (is.na(tp_rate)) "not defined (no diseased subjects)" else format_percent(tp_rate)
+                tn_rate_text <- if (is.na(tn_rate)) "not defined (no disease-free subjects)" else format_percent(tn_rate)
 
                 flowTable$setRow(
                     rowKey = "after_test2",
@@ -592,37 +632,42 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     explanation <- paste0(
                         explanation,
                         "<p>With a disease prevalence of ",
-                        format(prevalence * 100, digits = 1),
-                        "%, the combined testing strategy results in:</p>"
+                        format_percent(prevalence),
+                        ", the combined testing strategy results in:</p>"
                     )
                     explanation <- paste0(explanation, "<ul>")
                     explanation <- paste0(
                         explanation,
                         "<li><strong>Combined Sensitivity:</strong> ",
-                        format(combined_sens * 100, digits = 1),
-                        "% (ability to correctly identify those with disease)</li>"
+                        format_percent(combined_sens),
+                        " (ability to correctly identify those with disease)</li>"
                     )
                     explanation <- paste0(
                         explanation,
                         "<li><strong>Combined Specificity:</strong> ",
-                        format(combined_spec * 100, digits = 1),
-                        "% (ability to correctly identify those without disease)</li>"
+                        format_percent(combined_spec),
+                        " (ability to correctly identify those without disease)</li>"
                     )
                     explanation <- paste0(
                         explanation,
                         "<li><strong>Combined PPV:</strong> ",
-                        format(combined_ppv * 100, digits = 1),
-                        "% (probability that subjects with a positive test truly have the disease)</li>"
+                        format_percent(combined_ppv),
+                        " (probability that subjects with a positive test truly have the disease)</li>"
                     )
                     explanation <- paste0(
                         explanation,
                         "<li><strong>Combined NPV:</strong> ",
-                        format(combined_npv * 100, digits = 1),
-                        "% (probability that subjects with a negative test truly do not have the disease)</li>"
+                        format_percent(combined_npv),
+                        " (probability that subjects with a negative test truly do not have the disease)</li>"
                     )
                     explanation <- paste0(explanation, "</ul>")
 
-                    explanation <- paste0(explanation, "<p>In a population of 1,000 people:</p>")
+                explanation <- paste0(
+                    explanation,
+                    "<p>In a population of ",
+                    format(pop_size, big.mark = ","),
+                    " people:</p>"
+                )
                     explanation <- paste0(explanation, "<ul>")
                     explanation <- paste0(
                         explanation,
@@ -641,19 +686,19 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     explanation <- paste0(
                         explanation,
                         sprintf(
-                            "<li>Of the %.0f true positives, %.0f would be correctly identified (%.1f%%)</li>",
+                            "<li>Of the %.0f true positives, %.0f would be correctly identified (%s)</li>",
                             diseased,
                             final_tp,
-                            final_tp / diseased * 100
+                            tp_rate_text
                         )
                     )
                     explanation <- paste0(
                         explanation,
                         sprintf(
-                            "<li>Of the %.0f true negatives, %.0f would be correctly identified (%.1f%%)</li>",
+                            "<li>Of the %.0f true negatives, %.0f would be correctly identified (%s)</li>",
                             healthy,
                             final_tn,
-                            final_tn / healthy * 100
+                            tn_rate_text
                         )
                     )
                     explanation <- paste0(explanation, "</ul>")
@@ -849,8 +894,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     self$results$formulas_text$setContent(formulas)
                 }
 
-                # Store data for Fagan nomogram
-                # In the .run function, when setting up the nomogram data:
+                # Store data for plots
                 if (self$options$show_nomogram) {
                     plotData <- list(
                         "Prevalence" = prevalence,
@@ -864,225 +908,461 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         "Combined_Sens" = combined_sens,
                         "Combined_Spec" = combined_spec,
                         "Combined_PPV" = combined_ppv,
-                        "Combined_NPV" = combined_npv
+                        "Combined_NPV" = combined_npv,
+                        "Final_TP" = final_tp,
+                        "Final_FP" = final_fp,
+                        "Final_FN" = final_fn,
+                        "Final_TN" = final_tn,
+                        "Pop_Size" = pop_size,
+                        "Diseased" = diseased,
+                        "Healthy" = healthy
                     )
 
-                    image <- self$results$plot_nomogram
-                    image$setState(plotData)
+                    # Set state for all plots
+                    self$results$plot_flow_diagram$setState(plotData)
+                    self$results$plot_performance$setState(plotData)
+                    self$results$plot_probability$setState(plotData)
+                    self$results$plot_population_flow$setState(plotData)
                 }
 
 
                 },
 
 
-            .plot_nomogram = function(image, ggtheme, ...) {
-                # Check if required packages are available
-                if (!requireNamespace("ggplot2", quietly = TRUE) || !requireNamespace("gridExtra", quietly = TRUE)) {
-                    # Create simple informative plot when packages unavailable
-                    plotData <- image$state
-                    
-                    info_plot <- ggplot2::ggplot() +
-                        ggplot2::geom_text(
-                            ggplot2::aes(x = 0.5, y = 0.7), 
-                            label = "Sequential Testing Nomogram", 
-                            size = 6, 
-                            fontface = "bold"
-                        ) +
-                        ggplot2::geom_text(
-                            ggplot2::aes(x = 0.5, y = 0.5), 
-                            label = paste0(
-                                "Strategy: ", plotData$Strategy, "\n",
-                                "Combined Sensitivity: ", round(plotData$Combined_Sens * 100, 1), "%\n",
-                                "Combined Specificity: ", round(plotData$Combined_Spec * 100, 1), "%\n",
-                                "Combined PPV: ", round(plotData$Combined_PPV * 100, 1), "%"
-                            ), 
-                            size = 4
-                        ) +
-                        ggplot2::geom_text(
-                            ggplot2::aes(x = 0.5, y = 0.2), 
-                            label = "Full nomogram requires ggplot2 and gridExtra packages", 
-                            size = 3, 
-                            color = "gray50"
-                        ) +
-                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                        ggplot2::theme_void() +
-                        ggplot2::theme(
-                            panel.background = ggplot2::element_rect(fill = "white"),
-                            plot.background = ggplot2::element_rect(fill = "white")
-                        )
-                    
-                    print(info_plot)
-                    return(TRUE)
-                }
-                
-                plotData <- image$state
+            .plot_flow_diagram = function(image, ggtheme, ...) {
+                if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
 
-                # Extract values
-                prevalence <- plotData$Prevalence
-                test1_sens <- plotData$Test1_Sens
-                test1_spec <- plotData$Test1_Spec
-                test2_sens <- plotData$Test2_Sens
-                test2_spec <- plotData$Test2_Spec
+                plotData <- image$state
                 strategy <- plotData$Strategy
 
-                # Calculate LRs for both tests
-                test1_plr <- test1_sens / (1 - test1_spec)
-                test1_nlr <- (1 - test1_sens) / test1_spec
-                test2_plr <- test2_sens / (1 - test2_spec)  
-                test2_nlr <- (1 - test2_sens) / test2_spec
-
-                # Create modern ggplot2-based nomogram visualization
-                tryCatch({
-                    # Create strategy flow diagram
-                    flow_plot <- private$.createFlowDiagram(plotData, strategy)
-                    
-                    # Create summary statistics plot
-                    stats_plot <- private$.createStatsPlot(plotData)
-                    
-                    # Create probability transformation plot
-                    prob_plot <- private$.createProbabilityPlot(plotData, prevalence, test1_plr, test1_nlr, test2_plr, test2_nlr)
-                    
-                    # Create formula explanation plot
-                    formula_plot <- private$.createFormulaPlot(plotData, strategy)
-                    
-                    # Combine all plots using gridExtra
-                    combined_plot <- gridExtra::grid.arrange(
-                        flow_plot, stats_plot,
-                        prob_plot, formula_plot,
-                        ncol = 2, nrow = 2,
-                        top = paste("Sequential Testing Analysis:", plotData$Strategy)
-                    )
-                    
-                    print(combined_plot)
-                    return(TRUE)
-                    
-                }, error = function(e) {
-                    # Fallback to simple text-based visualization
-                    simple_plot <- ggplot2::ggplot() +
-                        ggplot2::geom_text(
-                            ggplot2::aes(x = 0.5, y = 0.8), 
-                            label = "Sequential Testing Results", 
-                            size = 6, 
-                            fontface = "bold"
-                        ) +
-                        ggplot2::geom_text(
-                            ggplot2::aes(x = 0.5, y = 0.6), 
-                            label = paste0(
-                                "Strategy: ", plotData$Strategy, "\n",
-                                "Test 1: ", plotData$Test1_Name, " (", round(plotData$Test1_Sens*100,1), "%, ", round(plotData$Test1_Spec*100,1), "%)\n",
-                                "Test 2: ", plotData$Test2_Name, " (", round(plotData$Test2_Sens*100,1), "%, ", round(plotData$Test2_Spec*100,1), "%)\n\n",
-                                "Combined Performance:\n",
-                                "Sensitivity: ", round(plotData$Combined_Sens*100,1), "%\n",
-                                "Specificity: ", round(plotData$Combined_Spec*100,1), "%\n",
-                                "PPV: ", round(plotData$Combined_PPV*100,1), "%\n",
-                                "NPV: ", round(plotData$Combined_NPV*100,1), "%"
-                            ), 
-                            size = 4,
-                            hjust = 0.5
-                        ) +
-                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                        ggplot2::theme_void()
-                    
-                    print(simple_plot)
-                    return(TRUE)
-                })
-            },
-
-            # Helper functions for modular plot creation
-            .createFlowDiagram = function(plotData, strategy) {
-                # Create flow diagram based on strategy
+                # Enhanced flow diagram with better visual design
                 if (strategy == "serial_positive") {
-                    flow_data <- data.frame(
-                        x = c(1, 2, 3, 2.5, 2.5),
-                        y = c(5, 5, 5, 4, 6), 
-                        label = c("Start", plotData$Test1_Name, "Result", "Test2 if +", "Final")
-                    )
+                    # Create flow for serial positive testing
+                    flow_plot <- ggplot2::ggplot() +
+                        # Start node
+                        ggplot2::annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 4.5, ymax = 5.5,
+                                        fill = "lightblue", color = "darkblue", size = 1) +
+                        ggplot2::annotate("text", x = 1, y = 5, label = "All Patients\n(n=1000)",
+                                        size = 4, fontface = "bold") +
+
+                        # First test
+                        ggplot2::annotate("segment", x = 1.5, y = 5, xend = 2.5, yend = 5,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "darkblue", size = 1) +
+                        ggplot2::annotate("rect", xmin = 2.5, xmax = 3.5, ymin = 4.5, ymax = 5.5,
+                                        fill = "lightgreen", color = "darkgreen", size = 1) +
+                        ggplot2::annotate("text", x = 3, y = 5, label = plotData$Test1_Name,
+                                        size = 4, fontface = "bold") +
+
+                        # Positive branch
+                        ggplot2::annotate("segment", x = 3.5, y = 5.2, xend = 4.5, yend = 6,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "red", size = 1) +
+                        ggplot2::annotate("text", x = 4, y = 5.6, label = "Positive",
+                                        size = 3, color = "red", angle = 30) +
+                        ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 5.5, ymax = 6.5,
+                                        fill = "lightyellow", color = "orange", size = 1) +
+                        ggplot2::annotate("text", x = 5, y = 6, label = plotData$Test2_Name,
+                                        size = 4, fontface = "bold") +
+
+                        # Negative branch
+                        ggplot2::annotate("segment", x = 3.5, y = 4.8, xend = 4.5, yend = 4,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "darkgreen", size = 1) +
+                        ggplot2::annotate("text", x = 4, y = 4.4, label = "Negative",
+                                        size = 3, color = "darkgreen", angle = -30) +
+                        ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 3.5, ymax = 4.5,
+                                        fill = "lightgreen", color = "darkgreen", size = 1) +
+                        ggplot2::annotate("text", x = 5, y = 4, label = "Negative\nResult",
+                                        size = 3.5, fontface = "bold") +
+
+                        # Final results from second test
+                        ggplot2::annotate("segment", x = 5.5, y = 6.2, xend = 6.5, yend = 6.5,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "red", size = 1) +
+                        ggplot2::annotate("rect", xmin = 6.5, xmax = 7.5, ymin = 6, ymax = 7,
+                                        fill = "#ffcccc", color = "red", size = 1) +
+                        ggplot2::annotate("text", x = 7, y = 6.5, label = "Positive\nResult",
+                                        size = 3.5, fontface = "bold", color = "red") +
+
+                        ggplot2::annotate("segment", x = 5.5, y = 5.8, xend = 6.5, yend = 5.5,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "darkgreen", size = 1) +
+                        ggplot2::annotate("rect", xmin = 6.5, xmax = 7.5, ymin = 5, ymax = 6,
+                                        fill = "lightgreen", color = "darkgreen", size = 1) +
+                        ggplot2::annotate("text", x = 7, y = 5.5, label = "Negative\nResult",
+                                        size = 3.5, fontface = "bold", color = "darkgreen") +
+
+                        ggplot2::xlim(0, 8) + ggplot2::ylim(3, 7.5) +
+                        ggplot2::labs(title = "Serial Testing Strategy: Test Positives",
+                                    subtitle = "Second test only for those positive on first test") +
+                        ggplot2::theme_minimal() +
+                        ggplot2::theme(axis.text = ggplot2::element_blank(),
+                                     axis.title = ggplot2::element_blank(),
+                                     panel.grid = ggplot2::element_blank())
+
                 } else if (strategy == "serial_negative") {
-                    flow_data <- data.frame(
-                        x = c(1, 2, 3, 2.5, 2.5),
-                        y = c(5, 5, 5, 4, 6),
-                        label = c("Start", plotData$Test1_Name, "Result", "Test2 if -", "Final")
-                    )
+                    # Create flow for serial negative testing
+                    flow_plot <- ggplot2::ggplot() +
+                        # Start node
+                        ggplot2::annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 4.5, ymax = 5.5,
+                                        fill = "lightblue", color = "darkblue", size = 1) +
+                        ggplot2::annotate("text", x = 1, y = 5, label = "All Patients\n(n=1000)",
+                                        size = 4, fontface = "bold") +
+
+                        # First test
+                        ggplot2::annotate("segment", x = 1.5, y = 5, xend = 2.5, yend = 5,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "darkblue", size = 1) +
+                        ggplot2::annotate("rect", xmin = 2.5, xmax = 3.5, ymin = 4.5, ymax = 5.5,
+                                        fill = "lightgreen", color = "darkgreen", size = 1) +
+                        ggplot2::annotate("text", x = 3, y = 5, label = plotData$Test1_Name,
+                                        size = 4, fontface = "bold") +
+
+                        # Positive branch (final result)
+                        ggplot2::annotate("segment", x = 3.5, y = 5.2, xend = 4.5, yend = 6,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "red", size = 1) +
+                        ggplot2::annotate("text", x = 4, y = 5.6, label = "Positive",
+                                        size = 3, color = "red", angle = 30) +
+                        ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 5.5, ymax = 6.5,
+                                        fill = "#ffcccc", color = "red", size = 1) +
+                        ggplot2::annotate("text", x = 5, y = 6, label = "Positive\nResult",
+                                        size = 3.5, fontface = "bold", color = "red") +
+
+                        # Negative branch (needs second test)
+                        ggplot2::annotate("segment", x = 3.5, y = 4.8, xend = 4.5, yend = 4,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "orange", size = 1) +
+                        ggplot2::annotate("text", x = 4, y = 4.4, label = "Negative",
+                                        size = 3, color = "orange", angle = -30) +
+                        ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 3.5, ymax = 4.5,
+                                        fill = "lightyellow", color = "orange", size = 1) +
+                        ggplot2::annotate("text", x = 5, y = 4, label = plotData$Test2_Name,
+                                        size = 4, fontface = "bold") +
+
+                        # Final results from second test
+                        ggplot2::annotate("segment", x = 5.5, y = 4.2, xend = 6.5, yend = 4.5,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "red", size = 1) +
+                        ggplot2::annotate("rect", xmin = 6.5, xmax = 7.5, ymin = 4, ymax = 5,
+                                        fill = "#ffcccc", color = "red", size = 1) +
+                        ggplot2::annotate("text", x = 7, y = 4.5, label = "Positive\nResult",
+                                        size = 3.5, fontface = "bold", color = "red") +
+
+                        ggplot2::annotate("segment", x = 5.5, y = 3.8, xend = 6.5, yend = 3.5,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "darkgreen", size = 1) +
+                        ggplot2::annotate("rect", xmin = 6.5, xmax = 7.5, ymin = 3, ymax = 4,
+                                        fill = "lightgreen", color = "darkgreen", size = 1) +
+                        ggplot2::annotate("text", x = 7, y = 3.5, label = "Negative\nResult",
+                                        size = 3.5, fontface = "bold", color = "darkgreen") +
+
+                        ggplot2::xlim(0, 8) + ggplot2::ylim(2.5, 7) +
+                        ggplot2::labs(title = "Serial Testing Strategy: Test Negatives",
+                                    subtitle = "Second test only for those negative on first test") +
+                        ggplot2::theme_minimal() +
+                        ggplot2::theme(axis.text = ggplot2::element_blank(),
+                                     axis.title = ggplot2::element_blank(),
+                                     panel.grid = ggplot2::element_blank())
+
                 } else {
-                    flow_data <- data.frame(
-                        x = c(1, 2, 2, 3),
-                        y = c(5, 6, 4, 5),
-                        label = c("Start", plotData$Test1_Name, plotData$Test2_Name, "Combined")
-                    )
+                    # Parallel testing flow
+                    flow_plot <- ggplot2::ggplot() +
+                        # Start node
+                        ggplot2::annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 4.5, ymax = 5.5,
+                                        fill = "lightblue", color = "darkblue", size = 1) +
+                        ggplot2::annotate("text", x = 1, y = 5, label = "All Patients\n(n=1000)",
+                                        size = 4, fontface = "bold") +
+
+                        # Split to both tests
+                        ggplot2::annotate("segment", x = 1.5, y = 5.2, xend = 2.5, yend = 6,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "darkblue", size = 1) +
+                        ggplot2::annotate("segment", x = 1.5, y = 4.8, xend = 2.5, yend = 4,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "darkblue", size = 1) +
+
+                        # Test 1
+                        ggplot2::annotate("rect", xmin = 2.5, xmax = 3.5, ymin = 5.5, ymax = 6.5,
+                                        fill = "lightgreen", color = "darkgreen", size = 1) +
+                        ggplot2::annotate("text", x = 3, y = 6, label = plotData$Test1_Name,
+                                        size = 4, fontface = "bold") +
+
+                        # Test 2
+                        ggplot2::annotate("rect", xmin = 2.5, xmax = 3.5, ymin = 3.5, ymax = 4.5,
+                                        fill = "lightyellow", color = "orange", size = 1) +
+                        ggplot2::annotate("text", x = 3, y = 4, label = plotData$Test2_Name,
+                                        size = 4, fontface = "bold") +
+
+                        # Combine results
+                        ggplot2::annotate("segment", x = 3.5, y = 6, xend = 4.5, yend = 5.2,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "purple", size = 1) +
+                        ggplot2::annotate("segment", x = 3.5, y = 4, xend = 4.5, yend = 4.8,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "purple", size = 1) +
+
+                        ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 4.5, ymax = 5.5,
+                                        fill = "lavender", color = "purple", size = 1) +
+                        ggplot2::annotate("text", x = 5, y = 5, label = "Combine\nResults",
+                                        size = 4, fontface = "bold") +
+
+                        # Final result
+                        ggplot2::annotate("segment", x = 5.5, y = 5, xend = 6.5, yend = 5,
+                                        arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                        color = "purple", size = 1) +
+                        ggplot2::annotate("text", x = 6, y = 5.3, label = "Either +",
+                                        size = 3, color = "purple") +
+
+                        ggplot2::annotate("rect", xmin = 6.5, xmax = 7.5, ymin = 4.5, ymax = 5.5,
+                                        fill = "white", color = "black", size = 1) +
+                        ggplot2::annotate("text", x = 7, y = 5, label = "Final\nResult",
+                                        size = 4, fontface = "bold") +
+
+                        ggplot2::xlim(0, 8) + ggplot2::ylim(3, 7) +
+                        ggplot2::labs(title = "Parallel Testing Strategy",
+                                    subtitle = "Both tests performed on all patients") +
+                        ggplot2::theme_minimal() +
+                        ggplot2::theme(axis.text = ggplot2::element_blank(),
+                                     axis.title = ggplot2::element_blank(),
+                                     panel.grid = ggplot2::element_blank())
                 }
-                
-                ggplot2::ggplot(flow_data, ggplot2::aes(x = x, y = y)) +
-                    ggplot2::geom_point(size = 8, color = "steelblue") +
-                    ggplot2::geom_text(ggplot2::aes(label = label), size = 3, color = "white", fontface = "bold") +
-                    ggplot2::labs(title = paste("Testing Flow:", strategy)) +
-                    ggplot2::theme_void() +
-                    ggplot2::xlim(0.5, 3.5) +
-                    ggplot2::ylim(3, 7)
+
+                print(flow_plot)
+                return(TRUE)
             },
 
-            .createStatsPlot = function(plotData) {
-                # Create summary statistics visualization
-                stats_data <- data.frame(
-                    Metric = c("Sensitivity", "Specificity", "PPV", "NPV"),
-                    Value = c(plotData$Combined_Sens, plotData$Combined_Spec, 
-                             plotData$Combined_PPV, plotData$Combined_NPV) * 100,
-                    Test = "Combined"
-                )
-                
-                ggplot2::ggplot(stats_data, ggplot2::aes(x = Metric, y = Value, fill = Metric)) +
-                    ggplot2::geom_col(alpha = 0.7) +
-                    ggplot2::geom_text(ggplot2::aes(label = paste0(round(Value, 1), "%")), 
-                                      vjust = -0.5, fontface = "bold") +
-                    ggplot2::labs(title = "Combined Test Performance", 
-                                 y = "Percentage (%)", x = "") +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(legend.position = "none") +
-                    ggplot2::ylim(0, 100)
-            },
+            .plot_performance = function(image, ggtheme, ...) {
+                if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
 
-            .createProbabilityPlot = function(plotData, prevalence, test1_plr, test1_nlr, test2_plr, test2_nlr) {
-                # Create probability transformation visualization
-                prob_data <- data.frame(
-                    Stage = c("Pre-test", "After Test 1+", "After Test 2+", "Pre-test", "After Test 1-", "After Test 2-"),
-                    Probability = c(
-                        prevalence * 100,
-                        # Positive pathway
-                        (prevalence * test1_plr / (1 - prevalence + prevalence * test1_plr)) * 100,
+                plotData <- image$state
+
+                # Create comparison data
+                perf_data <- data.frame(
+                    Test = rep(c(plotData$Test1_Name, plotData$Test2_Name, "Combined"), 4),
+                    Metric = rep(c("Sensitivity", "Specificity", "PPV", "NPV"), each = 3),
+                    Value = c(
+                        plotData$Test1_Sens * 100, plotData$Test2_Sens * 100, plotData$Combined_Sens * 100,
+                        plotData$Test1_Spec * 100, plotData$Test2_Spec * 100, plotData$Combined_Spec * 100,
+                        plotData$Test1_Sens / (plotData$Test1_Sens + (1-plotData$Test1_Spec) * (1-plotData$Prevalence)/plotData$Prevalence) * 100,
+                        plotData$Test2_Sens / (plotData$Test2_Sens + (1-plotData$Test2_Spec) * (1-plotData$Prevalence)/plotData$Prevalence) * 100,
                         plotData$Combined_PPV * 100,
-                        # Negative pathway  
-                        prevalence * 100,
-                        (prevalence * test1_nlr / (1 - prevalence + prevalence * test1_nlr)) * 100,
-                        (1 - plotData$Combined_NPV) * 100
-                    ),
-                    Pathway = rep(c("Positive", "Negative"), each = 3),
-                    Step = rep(1:3, 2)
+                        plotData$Test1_Spec / (plotData$Test1_Spec + (1-plotData$Test1_Sens) * plotData$Prevalence/(1-plotData$Prevalence)) * 100,
+                        plotData$Test2_Spec / (plotData$Test2_Spec + (1-plotData$Test2_Sens) * plotData$Prevalence/(1-plotData$Prevalence)) * 100,
+                        plotData$Combined_NPV * 100
+                    )
                 )
-                
-                ggplot2::ggplot(prob_data, ggplot2::aes(x = Step, y = Probability, color = Pathway)) +
-                    ggplot2::geom_line(size = 2) +
-                    ggplot2::geom_point(size = 4) +
-                    ggplot2::labs(title = "Probability Transformation", 
-                                 x = "Testing Step", y = "Disease Probability (%)") +
-                    ggplot2::theme_minimal()
+
+                perf_data$Test <- factor(perf_data$Test, levels = c(plotData$Test1_Name, plotData$Test2_Name, "Combined"))
+
+                perf_plot <- ggplot2::ggplot(perf_data, ggplot2::aes(x = Test, y = Value, fill = Test)) +
+                    ggplot2::geom_col(alpha = 0.7, position = "dodge") +
+                    ggplot2::geom_text(ggplot2::aes(label = sprintf("%.1f%%", Value)),
+                                      position = ggplot2::position_dodge(width = 0.9),
+                                      vjust = -0.5, size = 3) +
+                    ggplot2::facet_wrap(~ Metric, scales = "free_y", ncol = 2) +
+                    ggplot2::labs(title = "Test Performance Comparison",
+                                subtitle = paste("Strategy:", plotData$Strategy),
+                                y = "Value (%)", x = "") +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(legend.position = "bottom",
+                                 axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+                    ggplot2::scale_fill_manual(values = c("#66c2a5", "#fc8d62", "#8da0cb")) +
+                    ggplot2::ylim(0, 105)
+
+                print(perf_plot)
+                return(TRUE)
             },
 
-            .createFormulaPlot = function(plotData, strategy) {
-                # Create formula explanation
-                if (strategy == "serial_positive") {
-                    formula_text <- "Serial Positive:\nSens = Se1 × Se2\nSpec = Sp1 + (1-Sp1) × Sp2"
-                } else if (strategy == "serial_negative") {
-                    formula_text <- "Serial Negative:\nSens = Se1 + (1-Se1) × Se2\nSpec = Sp1 × Sp2"
+            .plot_probability = function(image, ggtheme, ...) {
+                if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
+
+                plotData <- image$state
+
+                # Calculate probability progression
+                prevalence <- plotData$Prevalence
+
+                # For positive test pathway
+                test1_plr <- plotData$Test1_Sens / (1 - plotData$Test1_Spec)
+                post_test1_pos_odds <- (prevalence / (1 - prevalence)) * test1_plr
+                post_test1_pos_prob <- post_test1_pos_odds / (1 + post_test1_pos_odds)
+
+                test2_plr <- plotData$Test2_Sens / (1 - plotData$Test2_Spec)
+                post_test2_pos_odds <- post_test1_pos_odds * test2_plr
+                post_test2_pos_prob <- post_test2_pos_odds / (1 + post_test2_pos_odds)
+
+                # For negative test pathway
+                test1_nlr <- (1 - plotData$Test1_Sens) / plotData$Test1_Spec
+                post_test1_neg_odds <- (prevalence / (1 - prevalence)) * test1_nlr
+                post_test1_neg_prob <- post_test1_neg_odds / (1 + post_test1_neg_odds)
+
+                test2_nlr <- (1 - plotData$Test2_Sens) / plotData$Test2_Spec
+                post_test2_neg_odds <- post_test1_neg_odds * test2_nlr
+                post_test2_neg_prob <- post_test2_neg_odds / (1 + post_test2_neg_odds)
+
+                # Create data for plotting based on strategy
+                if (plotData$Strategy == "serial_positive") {
+                    prob_data <- data.frame(
+                        Step = c("Pre-test", "After Test 1 (+)", "After Test 2 (+)",
+                                "Pre-test", "After Test 1 (-)", "Final (-)"),
+                        Probability = c(prevalence * 100, post_test1_pos_prob * 100, plotData$Combined_PPV * 100,
+                                      prevalence * 100, post_test1_neg_prob * 100, post_test1_neg_prob * 100),
+                        Path = c(rep("Positive Path", 3), rep("Negative Path", 3)),
+                        x = c(1, 2, 3, 1, 2, 3)
+                    )
+                } else if (plotData$Strategy == "serial_negative") {
+                    prob_data <- data.frame(
+                        Step = c("Pre-test", "After Test 1 (+)", "Final (+)",
+                                "Pre-test", "After Test 1 (-)", "After Test 2 (-)"),
+                        Probability = c(prevalence * 100, post_test1_pos_prob * 100, post_test1_pos_prob * 100,
+                                      prevalence * 100, post_test1_neg_prob * 100, (1 - plotData$Combined_NPV) * 100),
+                        Path = c(rep("Positive Path", 3), rep("Negative Path", 3)),
+                        x = c(1, 2, 3, 1, 2, 3)
+                    )
                 } else {
-                    formula_text <- "Parallel Testing:\nSens = Se1 + Se2 - Se1×Se2\nSpec = Sp1 × Sp2"
+                    # Parallel testing
+                    prob_data <- data.frame(
+                        Step = c("Pre-test", "After Either Test (+)", "Final PPV",
+                                "Pre-test", "After Both Tests (-)", "Final NPV"),
+                        Probability = c(prevalence * 100, plotData$Combined_PPV * 100, plotData$Combined_PPV * 100,
+                                      prevalence * 100, (1 - plotData$Combined_NPV) * 100, (1 - plotData$Combined_NPV) * 100),
+                        Path = c(rep("Positive Path", 3), rep("Negative Path", 3)),
+                        x = c(1, 2, 3, 1, 2, 3)
+                    )
                 }
-                
-                ggplot2::ggplot() +
-                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, label = formula_text), 
-                                      size = 5, fontface = "bold") +
-                    ggplot2::labs(title = "Mathematical Formulas") +
+
+                prob_plot <- ggplot2::ggplot(prob_data, ggplot2::aes(x = x, y = Probability, color = Path, group = Path)) +
+                    ggplot2::geom_line(size = 2, alpha = 0.7) +
+                    ggplot2::geom_point(size = 4) +
+                    ggplot2::geom_text(ggplot2::aes(label = sprintf("%.1f%%", Probability)),
+                                      vjust = -1.5, hjust = 0.5, size = 3) +
+                    ggplot2::scale_x_continuous(breaks = 1:3, labels = c("Pre-test", "After Test 1", "Final")) +
+                    ggplot2::scale_color_manual(values = c("Positive Path" = "red", "Negative Path" = "darkgreen")) +
+                    ggplot2::labs(title = "Probability Transformation Through Testing",
+                                subtitle = paste("Strategy:", plotData$Strategy, "| Prevalence:", sprintf("%.1f%%", plotData$Prevalence * 100)),
+                                x = "Testing Stage", y = "Disease Probability (%)") +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(legend.position = "bottom") +
+                    ggplot2::ylim(0, max(prob_data$Probability) * 1.2)
+
+                print(prob_plot)
+                return(TRUE)
+            },
+
+            .plot_population_flow = function(image, ggtheme, ...) {
+                if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
+
+                plotData <- image$state
+
+                # Create Sankey-like flow visualization
+                pop_size <- plotData$Pop_Size
+                diseased <- plotData$Diseased
+                healthy <- plotData$Healthy
+
+                # Create flow data
+                flow_data <- data.frame(
+                    Category = c("Total Population", "Disease Present", "Disease Absent",
+                               "True Positive", "False Negative", "False Positive", "True Negative"),
+                    Count = c(pop_size, diseased, healthy,
+                            plotData$Final_TP, plotData$Final_FN, plotData$Final_FP, plotData$Final_TN),
+                    Stage = c(1, 2, 2, 3, 3, 3, 3),
+                    Type = c("Total", "Disease", "Healthy", "TP", "FN", "FP", "TN"),
+                    y_pos = c(50, 70, 30, 85, 70, 30, 15)
+                )
+
+                # Create visualization
+                flow_plot <- ggplot2::ggplot(flow_data) +
+                    # Initial population
+                    ggplot2::annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 25, ymax = 75,
+                                    fill = "lightblue", alpha = 0.5) +
+                    ggplot2::annotate("text", x = 1, y = 50, label = paste0("Total\nn=", pop_size),
+                                    size = 5, fontface = "bold") +
+
+                    # Disease status split
+                    ggplot2::annotate("rect", xmin = 2.5, xmax = 3.5, ymin = 55, ymax = 85,
+                                    fill = "#ffcccc", alpha = 0.5) +
+                    ggplot2::annotate("text", x = 3, y = 70, label = paste0("Disease+\nn=", round(diseased)),
+                                    size = 4, fontface = "bold") +
+
+                    ggplot2::annotate("rect", xmin = 2.5, xmax = 3.5, ymin = 15, ymax = 45,
+                                    fill = "#ccffcc", alpha = 0.5) +
+                    ggplot2::annotate("text", x = 3, y = 30, label = paste0("Disease-\nn=", round(healthy)),
+                                    size = 4, fontface = "bold") +
+
+                    # Test results
+                    ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 75, ymax = 90,
+                                    fill = "darkgreen", alpha = 0.7) +
+                    ggplot2::annotate("text", x = 5, y = 82.5, label = paste0("TP\nn=", round(plotData$Final_TP)),
+                                    size = 3.5, color = "white", fontface = "bold") +
+
+                    ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 60, ymax = 75,
+                                    fill = "red", alpha = 0.7) +
+                    ggplot2::annotate("text", x = 5, y = 67.5, label = paste0("FN\nn=", round(plotData$Final_FN)),
+                                    size = 3.5, color = "white", fontface = "bold") +
+
+                    ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 30, ymax = 45,
+                                    fill = "orange", alpha = 0.7) +
+                    ggplot2::annotate("text", x = 5, y = 37.5, label = paste0("FP\nn=", round(plotData$Final_FP)),
+                                    size = 3.5, color = "white", fontface = "bold") +
+
+                    ggplot2::annotate("rect", xmin = 4.5, xmax = 5.5, ymin = 10, ymax = 30,
+                                    fill = "darkgreen", alpha = 0.7) +
+                    ggplot2::annotate("text", x = 5, y = 20, label = paste0("TN\nn=", round(plotData$Final_TN)),
+                                    size = 3.5, color = "white", fontface = "bold") +
+
+                    # Add flow arrows
+                    ggplot2::annotate("segment", x = 1.5, y = 60, xend = 2.5, yend = 70,
+                                    arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                    size = 1, alpha = 0.5) +
+                    ggplot2::annotate("segment", x = 1.5, y = 40, xend = 2.5, yend = 30,
+                                    arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                    size = 1, alpha = 0.5) +
+
+                    ggplot2::annotate("segment", x = 3.5, y = 75, xend = 4.5, yend = 82.5,
+                                    arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                    size = 1, alpha = 0.5, color = "darkgreen") +
+                    ggplot2::annotate("segment", x = 3.5, y = 65, xend = 4.5, yend = 67.5,
+                                    arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                    size = 1, alpha = 0.5, color = "red") +
+                    ggplot2::annotate("segment", x = 3.5, y = 35, xend = 4.5, yend = 37.5,
+                                    arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                    size = 1, alpha = 0.5, color = "orange") +
+                    ggplot2::annotate("segment", x = 3.5, y = 25, xend = 4.5, yend = 20,
+                                    arrow = grid::arrow(length = grid::unit(0.3, "cm")),
+                                    size = 1, alpha = 0.5, color = "darkgreen") +
+
+                    # Add labels
+                    ggplot2::annotate("text", x = 1, y = 5, label = "Initial", size = 4, fontface = "bold") +
+                    ggplot2::annotate("text", x = 3, y = 5, label = "True Status", size = 4, fontface = "bold") +
+                    ggplot2::annotate("text", x = 5, y = 5, label = "Test Results", size = 4, fontface = "bold") +
+
+                    ggplot2::xlim(0, 6) + ggplot2::ylim(0, 95) +
+                    ggplot2::labs(title = "Population Flow Through Testing",
+                                subtitle = paste("Strategy:", plotData$Strategy,
+                                               "| Sensitivity:", sprintf("%.1f%%", plotData$Combined_Sens * 100),
+                                               "| Specificity:", sprintf("%.1f%%", plotData$Combined_Spec * 100))) +
                     ggplot2::theme_void() +
-                    ggplot2::xlim(0, 1) +
-                    ggplot2::ylim(0, 1)
+                    ggplot2::theme(plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5),
+                                 plot.subtitle = ggplot2::element_text(size = 10, hjust = 0.5))
+
+                print(flow_plot)
+                return(TRUE)
+            },
+
+            # Helper function for safe division
+            .safeDivide = function(numerator, denominator, allowInfinite = FALSE) {
+                if (is.na(denominator) || is.nan(denominator))
+                    return(NA_real_)
+
+                if (abs(denominator) < private$NUMERICAL_TOLERANCE) {
+                    if (!allowInfinite || abs(numerator) < private$NUMERICAL_TOLERANCE)
+                        return(NA_real_)
+
+                    return(ifelse(numerator >= 0, Inf, -Inf))
+                }
+
+                numerator / denominator
             }
 
 

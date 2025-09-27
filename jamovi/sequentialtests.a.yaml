@@ -1,7 +1,7 @@
 ---
 name: sequentialtests
 title: Sequential Testing Analysis
-menuGroup: meddecideD
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Sequential Test Analysis
 version: '0.0.31'
@@ -55,6 +55,33 @@ description:
             data(common_test_combinations)     # Reference test characteristics
 
 options:
+    # Clinical Presets
+    - name: preset
+      title: Clinical Preset
+      type: List
+      options:
+        - name: custom
+          title: Custom Values
+        - name: covid_screening_confirmation
+          title: COVID-19 Screening + PCR Confirmation
+        - name: breast_cancer_screening
+          title: Mammography + Biopsy (Breast Cancer)
+        - name: mi_emergency_parallel
+          title: Troponin + ECG (Emergency MI)
+        - name: tb_screening_confirmation
+          title: Chest X-ray + Sputum Culture (TB)
+        - name: prostate_screening_exclusion
+          title: PSA + MRI (Prostate Cancer)
+        - name: hiv_screening_confirmation
+          title: ELISA + Western Blot (HIV)
+        - name: stroke_emergency_parallel
+          title: Clinical Assessment + CT (Stroke)
+      default: custom
+      description:
+          R: |
+            Select a clinical preset or use custom values. Presets load evidence-based
+            test parameters and optimal strategies from medical literature.
+
     # First Test (Screening Test) Parameters
     - name: test1_name
       title: Screening Test Name
@@ -131,4 +158,5 @@ options:
       title: Show Fagan Nomogram
       type: Bool
       default: false
+
 ...

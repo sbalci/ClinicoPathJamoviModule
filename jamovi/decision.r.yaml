@@ -9,37 +9,59 @@ items:
     #   title: To Do
     #   type:  Html
 
-    - name:  text1
-      title: Original Data
-      type:  Preformatted
+    # - name:  text1
+    #   title: Original Data
+    #   type:  Preformatted
+    #   visible: (od)
+
+
+    # - name:  text2
+    #   title: Original Data
+    #   type:  Html
+    #   visible: (od)
+
+    - name: rawContingency
+      title: Raw Contingency Table
+      type: Table
       visible: (od)
+      rows: 0
+      columns:
+        - name: test_level
+          title: ''
+          type: text
+        - name: gold_pos
+          title: ''
+          type: number
+        - name: gold_neg
+          title: ''
+          type: number
+        - name: row_total
+          title: Total
+          type: number
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
 
-
-    - name:  text2
-      title: Original Data
-      type:  Html
+    - name: rawCounts
+      title: Raw Combination Counts
+      type: Table
       visible: (od)
-      
-    - name: naturalLanguageSummary
-      title: '📋 Clinical Summary'
-      type: Html
-      visible: true
-      
-    - name: reportTemplate
-      title: '📄 Copy-Ready Report'
-      type: Html
-      visible: true
-
-    - name: aboutAnalysis
-      title: '📚 About This Analysis'
-      type: Html
-      visible: true
-
-    - name: clinicalInterpretation
-      title: '🩺 Clinical Interpretation Guide'
-      type: Html
-      visible: true
-
+      rows: 0
+      columns:
+        - name: test_level
+          title: ''
+          type: text
+        - name: gold_level
+          title: ''
+          type: text
+        - name: count
+          title: Count
+          type: integer
+      clearWith:
+        - gold
+        - newtest
 
     # - name:  text2
     #   title: Original Data
@@ -358,6 +380,28 @@ items:
           - Fagan2
 
 
+      
+    - name: naturalLanguageSummary
+      title: 'Clinical Summary'
+      type: Html
+      visible: (showNaturalLanguage)
+
+    - name: clinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Html
+      visible: (showClinicalInterpretation)
+
+    - name: reportTemplate
+      title: 'Copy-Ready Report'
+      type: Html
+      visible: (showReportTemplate)
+
+    - name: aboutAnalysis
+      title: 'About This Analysis'
+      type: Html
+      visible: (showAboutAnalysis)
+
+
 
 
 
@@ -365,6 +409,7 @@ items:
 refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule
+    - epiR
 
 
 

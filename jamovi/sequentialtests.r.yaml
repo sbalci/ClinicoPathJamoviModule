@@ -116,13 +116,41 @@ items:
       type: Html
       visible: (show_formulas)
 
-    - name: plot_nomogram
-      title: 'Sequential Testing Nomogram'
+    - name: plot_flow_diagram
+      title: 'Testing Strategy Flow Diagram'
       type: Image
-      width: 900
-      height: 600
-      renderFun: .plot_nomogram
+      width: 600
+      height: 400
+      renderFun: .plot_flow_diagram
       visible: (show_nomogram)
+
+    - name: plot_performance
+      title: 'Test Performance Comparison'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot_performance
+      visible: (show_nomogram)
+
+    - name: plot_probability
+      title: 'Probability Transformation'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot_probability
+      visible: (show_nomogram)
+
+    - name: plot_population_flow
+      title: 'Population Flow Visualization'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot_population_flow
+      visible: (show_nomogram)
+
+    - name: clinical_guidance
+      title: 'Clinical Guidance'
+      type: Html
 
 
 
