@@ -43,7 +43,7 @@ items:
           title: 'Relative to Prevalence'
           type: number
         - name: orValue
-          title: 'Odds Ratio'
+          title: 'Post-test Odds'
           type: number
 
     - name:  dependenceInfo
@@ -65,7 +65,7 @@ items:
       width:  600
       height: 450
       renderFun: .plot1
-      requiresData: true
+      requiresData: false
       visible: (fagan)
       clearWith:
           - test1_sens

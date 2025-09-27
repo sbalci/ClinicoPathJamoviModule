@@ -11,6 +11,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # Constants for better maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
             NUMERICAL_TOLERANCE = 1e-10,
+
+            # Cache for expensive nomogram calculations
+            .nomogramCache = NULL,
+            .lastNomogramParams = NULL,
             .init = function() {
                 # Initialize tables with row headers
                 testParamsTable <- self$results$testParamsTable
@@ -89,26 +93,31 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     self$results$dependenceInfo$setContent(dependence_info)
                 }
 
-                # Create explanation text
+                # Create enhanced explanation with clinical interpretation
+                plr_interpretation <- private$.interpretPLR(if(indep) test1_plr * test2_plr else results$lr_both_pos)
                 explanation <- sprintf(
-                    "<p><strong>Interpretation:</strong></p>
-                <p>The disease prevalence (pre-test probability) in this population is <strong>%.1f%%</strong>.</p>
-                <p>If both tests are positive, the probability of disease increases to <strong>%.1f%%</strong>
-                (%.1f times the pre-test probability).</p>
-                <p>If both tests are negative, the probability of disease decreases to <strong>%.1f%%</strong>
-                (%.2f times the pre-test probability).</p>
-                <p>When only one test is positive, the post-test probabilities are:
+                    "<p><strong>Clinical Interpretation:</strong></p>
+                <p>Disease prevalence (pre-test probability): <strong>%.1f%%</strong></p>
+                <p><strong>Both tests positive:</strong> %.1f%% probability (%.1fx increase) - %s</p>
+                <p><strong>Both tests negative:</strong> %.1f%% probability (%.2fx change) %s</p>
+                <p><strong>Single positive test:</strong></p>
                 <ul>
-                <li>Test 1 positive only: <strong>%.1f%%</strong></li>
-                <li>Test 2 positive only: <strong>%.1f%%</strong></li>
-                </ul></p>",
+                <li>Test 1 positive only: <strong>%.1f%%</strong> %s</li>
+                <li>Test 2 positive only: <strong>%.1f%%</strong> %s</li>
+                </ul>
+                <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;'>
+                <p><strong>Copy-ready summary:</strong></p>
+                <p style='font-family: monospace; font-size: 12px;'>%s</p>
+                </div>",
                     prevalence * 100,
-                    postest_prob_both * 100,
-                    rel_prob_both,
-                    postest_prob_both_neg * 100,
-                    rel_prob_both_neg,
-                    postest_prob_t1 * 100,
-                    postest_prob_t2 * 100
+                    postest_prob_both * 100, rel_prob_both, plr_interpretation,
+                    postest_prob_both_neg * 100, rel_prob_both_neg,
+                    private$.getClinicalSignificance(postest_prob_both_neg, prevalence),
+                    postest_prob_t1 * 100, private$.getClinicalSignificance(postest_prob_t1, prevalence),
+                    postest_prob_t2 * 100, private$.getClinicalSignificance(postest_prob_t2, prevalence),
+                    private$.generateReportSentence(test1_sens, test1_spec, test2_sens, test2_spec,
+                                                   prevalence, postest_prob_both, rel_prob_both,
+                                                   postest_prob_both_neg, rel_prob_both_neg)
                 )
 
                 self$results$explanation$setContent(explanation)
@@ -126,17 +135,23 @@ cotestClass <- if (requireNamespace("jmvcore"))
             .plot1 = function(image1, ggtheme, ...) {
                 plotData <- image1$state
 
-                plot1 <- nomogrammer(
-                    Prevalence = plotData$Prevalence,
-                    Plr = plotData$Plr_Both,
-                    Nlr = plotData$Nlr_Both,
-                    Detail = TRUE,
-                    NullLine = TRUE,
-                    LabelSize = private$NOMOGRAM_LABEL_SIZE,
-                    Verbose = TRUE
-                )
+                # Check cache to avoid expensive recalculations
+                params_key <- paste(plotData$Prevalence, plotData$Plr_Both, plotData$Nlr_Both, sep="_")
 
-                print(plot1)
+                if (is.null(private$.lastNomogramParams) || private$.lastNomogramParams != params_key) {
+                    private$.nomogramCache <- nomogrammer(
+                        Prevalence = plotData$Prevalence,
+                        Plr = plotData$Plr_Both,
+                        Nlr = plotData$Nlr_Both,
+                        Detail = TRUE,
+                        NullLine = TRUE,
+                        LabelSize = private$NOMOGRAM_LABEL_SIZE,
+                        Verbose = TRUE
+                    )
+                    private$.lastNomogramParams <- params_key
+                }
+
+                print(private$.nomogramCache)
                 TRUE
             },
 
@@ -198,6 +213,45 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 return(result)
             },
 
+            # Clamp probabilities to valid ranges while providing informative warnings
+            .clampProbability = function(value, lower, upper, context) {
+                if (is.nan(value) || is.infinite(value)) {
+                    stop(sprintf("%s resulted in a non-finite probability.", context))
+                }
+
+                adjusted <- value
+
+                if (adjusted < lower - private$NUMERICAL_TOLERANCE) {
+                    warning(sprintf(
+                        "%s adjusted from %.6f to %.6f to satisfy joint probability bounds.",
+                        context, adjusted, lower
+                    ))
+                    adjusted <- lower
+                }
+
+                if (adjusted > upper + private$NUMERICAL_TOLERANCE) {
+                    warning(sprintf(
+                        "%s adjusted from %.6f to %.6f to satisfy joint probability bounds.",
+                        context, adjusted, upper
+                    ))
+                    adjusted <- upper
+                }
+
+                adjusted <- min(max(adjusted, lower), upper)
+                return(adjusted)
+            },
+
+            # Confirm that joint probability cells sum to unity
+            .validateJointDistribution = function(probabilities, label) {
+                total <- Reduce(`+`, probabilities)
+                if (abs(total - 1) > 1e-6) {
+                    warning(sprintf(
+                        "Joint probabilities for %s sum to %.6f (expected 1). Results may require review of dependence parameters.",
+                        label, total
+                    ))
+                }
+            },
+
             # Update test parameters table
             .updateTestParametersTable = function(test1_sens, test1_spec, test1_plr, test1_nlr, 
                                                   test2_sens, test2_spec, test2_plr, test2_nlr) {
@@ -233,17 +287,22 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 pretest_odds <- prevalence / (1 - prevalence)
                 
                 if (indep) {
-                    # Independent tests scenario
-                    postest_odds_t1 <- pretest_odds * test1_plr
+                    # Independent tests: combine appropriate likelihood ratios for each outcome
+                    lr_t1_only <- test1_plr * test2_nlr
+                    lr_t2_only <- test1_nlr * test2_plr
+                    lr_both_pos <- test1_plr * test2_plr
+                    lr_both_neg <- test1_nlr * test2_nlr
+
+                    postest_odds_t1 <- pretest_odds * lr_t1_only
                     postest_prob_t1 <- postest_odds_t1 / (1 + postest_odds_t1)
 
-                    postest_odds_t2 <- pretest_odds * test2_plr
+                    postest_odds_t2 <- pretest_odds * lr_t2_only
                     postest_prob_t2 <- postest_odds_t2 / (1 + postest_odds_t2)
 
-                    postest_odds_both <- pretest_odds * test1_plr * test2_plr
+                    postest_odds_both <- pretest_odds * lr_both_pos
                     postest_prob_both <- postest_odds_both / (1 + postest_odds_both)
 
-                    postest_odds_both_neg <- pretest_odds * test1_nlr * test2_nlr
+                    postest_odds_both_neg <- pretest_odds * lr_both_neg
                     postest_prob_both_neg <- postest_odds_both_neg / (1 + postest_odds_both_neg)
 
                     dependence_info <- "<p>Tests are assumed to be conditionally independent.</p>"
@@ -264,8 +323,13 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 # Store LRs for plot data (set to NA for independent case)
-                lr_both_pos <- if (indep) NA else dep_results$lr_both_pos
-                lr_both_neg <- if (indep) NA else dep_results$lr_both_neg
+                if (indep) {
+                    lr_both_pos <- test1_plr * test2_plr
+                    lr_both_neg <- test1_nlr * test2_nlr
+                } else {
+                    lr_both_pos <- dep_results$lr_both_pos
+                    lr_both_neg <- dep_results$lr_both_neg
+                }
                 
                 return(list(
                     postest_prob_t1 = postest_prob_t1,
@@ -285,33 +349,49 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # Calculate probabilities for dependent tests
             .calculateDependentTestProbabilities = function(test1_sens, test1_spec, test2_sens, test2_spec,
                                                             cond_dep_pos, cond_dep_neg, pretest_odds) {
-                # Probability of both tests positive for diseased subjects (with dependence)
-                p_both_pos_D <- (test1_sens * test2_sens) + (cond_dep_pos * sqrt(
+                # Helper values for marginal probabilities
+                fp_test1 <- 1 - test1_spec
+                fp_test2 <- 1 - test2_spec
+
+                # Probability of both tests positive given disease present
+                p_both_pos_D_raw <- (test1_sens * test2_sens) + (cond_dep_pos * sqrt(
                     test1_sens * (1 - test1_sens) * test2_sens * (1 - test2_sens)
                 ))
+                lower_pos_D <- max(0, test1_sens + test2_sens - 1)
+                upper_pos_D <- min(test1_sens, test2_sens)
+                p_both_pos_D <- private$.clampProbability(p_both_pos_D_raw, lower_pos_D, upper_pos_D,
+                                                          "P(Test1+, Test2+ | Disease+)")
 
-                # Probability of both tests positive for non-diseased subjects (with dependence)
-                p_both_pos_nD <- ((1 - test1_spec) * (1 - test2_spec)) + (cond_dep_neg * sqrt(
-                    (1 - test1_spec) * test1_spec * (1 - test2_spec) * test2_spec
+                p_t1_only_D <- private$.clampProbability(test1_sens - p_both_pos_D, 0, test1_sens,
+                                                         "P(Test1+, Test2- | Disease+)")
+                p_t2_only_D <- private$.clampProbability(test2_sens - p_both_pos_D, 0, test2_sens,
+                                                         "P(Test1-, Test2+ | Disease+)")
+                p_both_neg_D <- 1 - (p_both_pos_D + p_t1_only_D + p_t2_only_D)
+
+                # Probability of both tests positive given disease absent (false positives)
+                p_both_pos_nD_raw <- (fp_test1 * fp_test2) + (cond_dep_neg * sqrt(
+                    fp_test1 * (1 - fp_test1) * fp_test2 * (1 - fp_test2)
                 ))
+                lower_pos_nD <- max(0, fp_test1 + fp_test2 - 1)
+                upper_pos_nD <- min(fp_test1, fp_test2)
+                p_both_pos_nD <- private$.clampProbability(p_both_pos_nD_raw, lower_pos_nD, upper_pos_nD,
+                                                          "P(Test1+, Test2+ | Disease-)")
 
-                # Probability of both tests negative for diseased subjects (with dependence)
-                p_both_neg_D <- ((1 - test1_sens) * (1 - test2_sens)) + (cond_dep_pos * sqrt(
-                    (1 - test1_sens) * test1_sens * (1 - test2_sens) * test2_sens
-                ))
+                p_t1_only_nD <- private$.clampProbability(fp_test1 - p_both_pos_nD, 0, fp_test1,
+                                                          "P(Test1+, Test2- | Disease-)")
+                p_t2_only_nD <- private$.clampProbability(fp_test2 - p_both_pos_nD, 0, fp_test2,
+                                                          "P(Test1-, Test2+ | Disease-)")
+                p_both_neg_nD <- 1 - (p_both_pos_nD + p_t1_only_nD + p_t2_only_nD)
 
-                # Probability of both tests negative for non-diseased subjects (with dependence)
-                p_both_neg_nD <- (test1_spec * test2_spec) + (cond_dep_neg * sqrt(
-                    test1_spec * (1 - test1_spec) * test2_spec * (1 - test2_spec)
-                ))
-
-                # Probability of test1 positive only
-                p_t1_only_D <- test1_sens - p_both_pos_D
-                p_t1_only_nD <- (1 - test1_spec) - p_both_pos_nD
-
-                # Probability of test2 positive only
-                p_t2_only_D <- test2_sens - p_both_pos_D
-                p_t2_only_nD <- (1 - test2_spec) - p_both_pos_nD
+                # Ensure probability sets sum to 1 within tolerance
+                private$.validateJointDistribution(
+                    list(p_both_pos_D, p_t1_only_D, p_t2_only_D, p_both_neg_D),
+                    "Disease+"
+                )
+                private$.validateJointDistribution(
+                    list(p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD),
+                    "Disease-"
+                )
 
                 # Calculate likelihood ratios with stability checks
                 lr_t1_only <- private$.calculateLikelihoodRatio(p_t1_only_D, p_t1_only_nD, "Test 1 Only LR")
@@ -338,10 +418,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 Dependence for subjects without disease: %.2f</p>
                 <p>Joint probabilities after accounting for dependence:<br>
                 P(Test1+,Test2+ | Disease+): %.4f<br>
-                P(Test1+,Test2+ | Disease-): %.4f<br>
+                P(Test1+,Test2- | Disease+): %.4f<br>
+                P(Test1-,Test2+ | Disease+): %.4f<br>
                 P(Test1-,Test2- | Disease+): %.4f<br>
+                P(Test1+,Test2+ | Disease-): %.4f<br>
+                P(Test1+,Test2- | Disease-): %.4f<br>
+                P(Test1-,Test2+ | Disease-): %.4f<br>
                 P(Test1-,Test2- | Disease-): %.4f</p>",
-                    cond_dep_pos, cond_dep_neg, p_both_pos_D, p_both_pos_nD, p_both_neg_D, p_both_neg_nD
+                    cond_dep_pos, cond_dep_neg,
+                    p_both_pos_D, p_t1_only_D, p_t2_only_D, p_both_neg_D,
+                    p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD
                 )
                 
                 return(list(
@@ -413,16 +499,34 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     rowKey = "test1", col = "nlr",
                     "Negative Likelihood Ratio: how much more likely a negative result is in diseased vs. non-diseased patients"
                 )
+                testParamsTable$addFootnote(
+                    rowKey = "test2", col = "sens",
+                    "Proportion of diseased patients correctly identified by Test 2"
+                )
+                testParamsTable$addFootnote(
+                    rowKey = "test2", col = "spec",
+                    "Proportion of non-diseased patients correctly identified by Test 2"
+                )
+                testParamsTable$addFootnote(
+                    rowKey = "test2", col = "plr",
+                    "Positive Likelihood Ratio: how much more likely a positive result is in diseased vs. non-diseased patients"
+                )
+                testParamsTable$addFootnote(
+                    rowKey = "test2", col = "nlr",
+                    "Negative Likelihood Ratio: how much more likely a negative result is in diseased vs. non-diseased patients"
+                )
 
                 # Results footnotes
-                cotestResultsTable$addFootnote(
-                    rowKey = "both_pos", col = "postProb",
-                    "Probability of disease after obtaining this test result combination"
-                )
-                cotestResultsTable$addFootnote(
-                    rowKey = "both_pos", col = "relativeProbability",
-                    "How many times more (or less) likely disease is after testing compared to before testing"
-                )
+                for (row_key in c("test1_pos", "test2_pos", "both_pos", "both_neg")) {
+                    cotestResultsTable$addFootnote(
+                        rowKey = row_key, col = "postProb",
+                        "Probability of disease after obtaining this test result combination"
+                    )
+                    cotestResultsTable$addFootnote(
+                        rowKey = row_key, col = "relativeProbability",
+                        "How many times more (or less) likely disease is after testing compared to before testing"
+                    )
+                }
             },
 
             # Prepare Fagan nomogram plot data
@@ -443,6 +547,38 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
                 image1 <- self$results$plot1
                 image1$setState(plotData)
+            },
+
+            # Clinical interpretation helpers
+            .interpretPLR = function(plr) {
+                if (plr > 10) return("strong evidence for disease")
+                if (plr > 5) return("moderate evidence for disease")
+                if (plr > 2) return("weak evidence for disease")
+                if (plr > 1) return("minimal evidence for disease")
+                return("no diagnostic value")
+            },
+
+            .getClinicalSignificance = function(post_prob, prevalence) {
+                change_factor <- post_prob / prevalence
+                if (change_factor > 3) return("(major increase)")
+                if (change_factor > 1.5) return("(moderate increase)")
+                if (change_factor > 1.1) return("(slight increase)")
+                if (change_factor < 0.5) return("(major decrease)")
+                if (change_factor < 0.8) return("(moderate decrease)")
+                return("(minimal change)")
+            },
+
+            .generateReportSentence = function(test1_sens, test1_spec, test2_sens, test2_spec,
+                                               prevalence, postest_prob_both, rel_prob_both,
+                                               postest_prob_both_neg, rel_prob_both_neg) {
+                sprintf(
+                    "Co-testing with Test 1 (sensitivity %.0f%%, specificity %.0f%%) and Test 2 (sensitivity %.0f%%, specificity %.0f%%) in a population with %.1f%% disease prevalence showed: when both tests are positive, disease probability is %.1f%% (%.1fx increase); when both are negative, disease probability is %.1f%% (%.2fx decrease).",
+                    test1_sens * 100, test1_spec * 100,
+                    test2_sens * 100, test2_spec * 100,
+                    prevalence * 100,
+                    postest_prob_both * 100, rel_prob_both,
+                    postest_prob_both_neg * 100, rel_prob_both_neg
+                )
             },
 
             # Helper method to build dependence explanation content

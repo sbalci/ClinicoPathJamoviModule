@@ -46,8 +46,10 @@ can we apply labelled logic as in oddsratio
 check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js> and <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39>  to implement it for clinical presets
 <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R>
 
+jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("~/Desktop/survival_pancreas_T2_to_T3_upstage_10072025.csv");stagemigration(data = data, oldStage = T_AJCC8_gr, newStage = T_modified_gr, survivalTime = OverallTime, event = Outcome, eventLevel = "DEAD")
+
 update .u.yaml to make it user friendly. make all relevant features to be together.
-remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders. 
+remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders.
 prepare comprehensive test data generator under data-raw and prepare the data  as csv under data folder
 To lower the computation make all default checkboxes to be false in .a.yaml
 implement welcome/introductory message styling of decisionpanel.

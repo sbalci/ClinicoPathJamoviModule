@@ -216,6 +216,37 @@ test_that("Cardiac testing scenario works correctly", {
   expect_true(npv > 0.90) # Good negative predictive value
 })
 
+test_that("sequentialtests returns finite combined metrics for typical inputs", {
+  result <- sequentialtests(
+    test1_sens = 0.85,
+    test1_spec = 0.90,
+    test2_sens = 0.95,
+    test2_spec = 0.98,
+    strategy = "serial_positive",
+    prevalence = 0.10
+  )
+
+  expect_s3_class(result, "sequentialtestsResults")
+
+  summary_df <- result$summary_table$asDF
+  expect_true(all(is.finite(summary_df$combined_sens)))
+  expect_true(all(is.finite(summary_df$combined_spec)))
+  expect_true(all(is.finite(summary_df$combined_ppv)))
+  expect_true(all(is.finite(summary_df$combined_npv)))
+
+  tests_df <- result$individual_tests_table$asDF
+  numeric_cols_tests <- vapply(tests_df, is.numeric, logical(1))
+  if (any(numeric_cols_tests)) {
+    expect_false(any(is.nan(as.matrix(tests_df[ , numeric_cols_tests, drop = FALSE]))))
+  }
+
+  flow_df <- result$population_flow_table$asDF
+  numeric_cols_flow <- vapply(flow_df, is.numeric, logical(1))
+  if (any(numeric_cols_flow)) {
+    expect_false(any(is.nan(as.matrix(flow_df[ , numeric_cols_flow, drop = FALSE]))))
+  }
+})
+
 context("Sequential Testing Analysis - Strategy Comparisons")
 
 test_that("Serial positive strategy maximizes specificity", {

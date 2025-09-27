@@ -245,7 +245,7 @@ test_that("decision function produces correct metrics", {
 
 test_that("decision function output structure is complete", {
   testthat::skip_on_cran()
-  
+
   data("histopathology", package = "ClinicoPath")
   
   result <- decision(
@@ -268,4 +268,118 @@ test_that("decision function output structure is complete", {
     expect_true(component %in% names(result), 
                 info = paste("Missing component:", component))
   }
+})
+
+test_that("decision handles NA values without misclassification", {
+  testthat::skip_on_cran()
+
+  diagnostic_data <- data.frame(
+    gold = factor(c("pos", "pos", "neg", "neg", "pos", NA), levels = c("pos", "neg")),
+    assay = factor(c("pos", "neg", "pos", "neg", NA, "pos"), levels = c("pos", "neg"))
+  )
+
+  result <- decision(
+    data = diagnostic_data,
+    gold = "gold",
+    goldPositive = "pos",
+    newtest = "assay",
+    testPositive = "pos"
+  )
+
+  c_table <- result$cTable$asDF
+  n_table <- result$nTable$asDF
+
+  expect_equal(n_table$TotalPop, 4)
+  expect_equal(c_table$GP[c_table$newtest == "Test Positive"], 1)
+  expect_equal(c_table$GN[c_table$newtest == "Test Positive"], 1)
+  expect_equal(c_table$GP[c_table$newtest == "Test Negative"], 1)
+  expect_equal(c_table$GN[c_table$newtest == "Test Negative"], 1)
+})
+
+test_that("decision ignores missing values in unrelated variables", {
+  testthat::skip_on_cran()
+
+  diagnostic_data <- data.frame(
+    gold = factor(c("pos", "pos", "neg", "neg", "pos"), levels = c("pos", "neg")),
+    assay = factor(c("pos", "neg", "pos", "neg", "pos"), levels = c("pos", "neg")),
+    other_measure = c(1, NA, 3, 4, 5)
+  )
+
+  result <- decision(
+    data = diagnostic_data,
+    gold = "gold",
+    goldPositive = "pos",
+    newtest = "assay",
+    testPositive = "pos"
+  )
+
+  n_table <- result$nTable$asDF
+  expect_equal(n_table$TotalPop, 5)
+})
+
+test_that("decision allows population prevalence with confidence intervals", {
+  testthat::skip_on_cran()
+
+  data("histopathology", package = "ClinicoPath")
+
+  result <- decision(
+    data = histopathology,
+    gold = "Golden Standart",
+    goldPositive = "1",
+    newtest = "New Test",
+    testPositive = "1",
+    pp = TRUE,
+    pprob = 0.2,
+    ci = TRUE
+  )
+
+  ratio <- result$ratioTable$asDF
+  expect_equal(ratio$PrevalenceD, 0.2, tolerance = 1e-6)
+  expect_true("epirTable_ratio" %in% names(result))
+})
+
+test_that("natural language summary reports NPV correctly", {
+  testthat::skip_on_cran()
+
+  diagnostic_data <- data.frame(
+    gold = factor(c("pos", "pos", "pos", "neg", "neg", "neg"), levels = c("pos", "neg")),
+    assay = factor(c("pos", "pos", "neg", "pos", "neg", "neg"), levels = c("pos", "neg"))
+  )
+
+  result <- decision(
+    data = diagnostic_data,
+    gold = "gold",
+    goldPositive = "pos",
+    newtest = "assay",
+    testPositive = "pos"
+  )
+
+  ratio <- result$ratioTable$asDF
+  npv_percent <- sprintf("%.1f%%", ratio$NPV * 100)
+
+  summary_html <- result$naturalLanguageSummary$content
+  expect_match(summary_html, paste0("NPV ", npv_percent), fixed = TRUE)
+  expect_false(grepl("NPV 33.3%", summary_html, fixed = TRUE))
+})
+
+test_that("decision handles absence of gold standard negatives", {
+  testthat::skip_on_cran()
+
+  diagnostic_data <- data.frame(
+    gold = factor(rep("pos", 5), levels = c("pos", "neg")),
+    assay = factor(c("pos", "pos", "pos", "pos", "neg"), levels = c("pos", "neg"))
+  )
+
+  result <- decision(
+    data = diagnostic_data,
+    gold = "gold",
+    goldPositive = "pos",
+    newtest = "assay",
+    testPositive = "pos"
+  )
+
+  ratio <- result$ratioTable$asDF
+  expect_true(is.na(ratio$Spec))
+  expect_true(is.na(ratio$LRP))
+  expect_true(is.na(ratio$LRN))
 })

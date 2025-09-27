@@ -1,16 +1,16 @@
 ---
 name:  decision
 title: Medical Decision
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
-menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
+menuSubtitle: Sensitivity, Specificity, PPV, NPV
 version: '0.0.31'
 jas: '1.2'
 
 description:
     main: >
-        Function for Medical Decision Analysis. Sensitivity, specificity, positive predictive value,
-        negative predictive value.
+        Function for Medical Decision Analysis. Sensitivity, Specificity, Positive Predictive Value,
+        Negative Predictive Value.
     R:
         dontrun: true
         usage: |
@@ -147,6 +147,50 @@ options:
             Shows how test results change the probability of disease from pre-test to post-test.
           R: >
             Boolean selection whether to generate a Fagan nomogram plot.
+
+    - name: showNaturalLanguage
+      title: 'Show Clinical Summary'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display a natural language clinical summary of the diagnostic test performance.
+            Provides an easy-to-understand interpretation of results for clinical use.
+          R: >
+            Boolean selection whether to show the natural language clinical summary.
+
+    - name: showClinicalInterpretation
+      title: 'Show Clinical Interpretation Guide'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display detailed clinical interpretation with likelihood ratio guidance.
+            Helps understand the clinical significance of test results.
+          R: >
+            Boolean selection whether to show the clinical interpretation guide.
+
+    - name: showReportTemplate
+      title: 'Show Copy-Ready Report'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Generate a copy-ready clinical report template for documentation.
+            Formatted text that can be copied directly into clinical reports.
+          R: >
+            Boolean selection whether to show the copy-ready report template.
+
+    - name: showAboutAnalysis
+      title: 'Show About This Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display educational information about diagnostic test evaluation.
+            Explains concepts and provides interpretation guidelines.
+          R: >
+            Boolean selection whether to show the about analysis section.
 
 
 

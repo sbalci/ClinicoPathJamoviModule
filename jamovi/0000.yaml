@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.75
+version: 0.0.31.77
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-24'
+date: '2025-09-26'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -1224,10 +1224,10 @@ analyses:
     menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
-    menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
+    menuSubtitle: Sensitivity, Specificity, PPV, NPV
     description: >
-      Function for Medical Decision Analysis. Sensitivity, specificity, positive
-      predictive value, negative predictive value.
+      Function for Medical Decision Analysis. Sensitivity, Specificity, Positive
+      Predictive Value, Negative Predictive Value.
     ribbon: analyses
     category: analyses
   - title: Medical Decision Calculator
@@ -1376,7 +1376,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Analyze combined test results
@@ -1389,7 +1389,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecide
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Sequential Test Analysis

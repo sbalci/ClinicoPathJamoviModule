@@ -1,7 +1,7 @@
 ---
 name:  cotest
 title: Co-Testing Analysis
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Analyze combined test results
 version: '0.0.31'
@@ -148,5 +148,31 @@ options:
       title: 'Fagan Nomogram'
       type: Bool
       default: false
+
+    # Clinical presets
+    - name: preset
+      title: Clinical Preset
+      type: List
+      options:
+        - name: custom
+          title: Custom Values
+        - name: hpv_pap
+          title: HPV + Pap Smear (Cervical Cancer)
+        - name: psa_dre
+          title: PSA + DRE (Prostate Cancer)
+        - name: troponin_ecg
+          title: Troponin + ECG (Myocardial Infarction)
+        - name: mammogram_ultrasound
+          title: Mammogram + Ultrasound (Breast Cancer)
+        - name: covid_antigen_pcr
+          title: Rapid Antigen + PCR (COVID-19)
+        - name: tb_xray_sputum
+          title: Chest X-ray + Sputum (Tuberculosis)
+      default: custom
+      description:
+          R: >
+            Select a clinical preset or use custom values. Presets load evidence-based
+            sensitivity and specificity values from medical literature with appropriate
+            dependence parameters and prevalence estimates.
 
 ...

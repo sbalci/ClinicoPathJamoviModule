@@ -89,7 +89,8 @@
       "Bash(if grep -q \"self$results$$output$setContent\\|self$results$$output$setState\" R/survivalPower.b.R)",
       "Bash(then echo \"✅ POPULATED\")",
       "Bash(else echo \"❌ NOT POPULATED\")",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/stagemigration.r.yaml)"
     ],
     "deny": [],
     "ask": [],

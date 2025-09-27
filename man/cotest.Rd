@@ -14,7 +14,8 @@ cotest(
   cond_dep_neg = 0.05,
   prevalence = 0.1,
   fnote = FALSE,
-  fagan = FALSE
+  fagan = FALSE,
+  preset = "custom"
 )
 }
 \arguments{
@@ -41,6 +42,10 @@ Requires a value between 0.001 and 0.999.}
 \item{fnote}{.}
 
 \item{fagan}{.}
+
+\item{preset}{Select a clinical preset or use custom values. Presets load
+evidence-based sensitivity and specificity values from medical literature
+with appropriate dependence parameters and prevalence estimates.}
 }
 \value{
 A results object containing:

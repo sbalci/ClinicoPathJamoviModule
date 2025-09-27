@@ -106,7 +106,9 @@ available)}
 
 \item{tumorPreset}{Apply tumor-specific clustering configurations}
 
-\item{applyPreset}{Apply the selected tumor-specific preset settings}
+\item{applyPreset}{Apply the selected tumor-specific preset settings. Note:
+This will provide recommendations, you may need to manually adjust the
+settings.}
 
 \item{language}{Interface and output language / Arayüz ve çıktı dili}
 }

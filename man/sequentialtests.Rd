@@ -5,6 +5,7 @@
 \title{Sequential Testing Analysis}
 \usage{
 sequentialtests(
+  preset = "custom",
   test1_name = "Screening Test",
   test1_sens = 0.95,
   test1_spec = 0.7,
@@ -19,6 +20,10 @@ sequentialtests(
 )
 }
 \arguments{
+\item{preset}{Select a clinical preset or use custom values. Presets load
+evidence-based test parameters and optimal strategies from medical
+literature.}
+
 \item{test1_name}{.}
 
 \item{test1_sens}{.}
@@ -49,7 +54,11 @@ A results object containing:
 \code{results$population_flow_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$explanation_text} \tab \tab \tab \tab \tab a html \cr
 \code{results$formulas_text} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot_flow_diagram} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot_performance} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot_probability} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot_population_flow} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinical_guidance} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

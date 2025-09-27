@@ -4,6 +4,16 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Clinical Presets
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: preset
+        stretchFactor: 1
+        events:
+          change: ./cotest.events::onChange_preset
+
   - type: Label
     label: Test 1 Parameters
     children:
@@ -12,12 +22,20 @@ children:
         children:
           - type: TextBox
             name: test1_sens
-            label: 'Sensitivity'
+            label: 'Sensitivity (%)'
+            suffix: '%'
             format: number
+            enable: (preset == 'custom')
+            events:
+              change: ./cotest.events::onChange_test1_sens
           - type: TextBox
             name: test1_spec
-            label: 'Specificity'
+            label: 'Specificity (%)'
+            suffix: '%'
             format: number
+            enable: (preset == 'custom')
+            events:
+              change: ./cotest.events::onChange_test1_spec
 
   - type: Label
     label: Test 2 Parameters
@@ -27,12 +45,20 @@ children:
         children:
           - type: TextBox
             name: test2_sens
-            label: 'Sensitivity'
+            label: 'Sensitivity (%)'
+            suffix: '%'
             format: number
+            enable: (preset == 'custom')
+            events:
+              change: ./cotest.events::onChange_test2_sens
           - type: TextBox
             name: test2_spec
-            label: 'Specificity'
+            label: 'Specificity (%)'
+            suffix: '%'
             format: number
+            enable: (preset == 'custom')
+            events:
+              change: ./cotest.events::onChange_test2_spec
 
   - type: Label
     label: Test Independence
@@ -43,6 +69,8 @@ children:
           - type: CheckBox
             name: indep
             label: 'Assume tests are conditionally independent'
+            events:
+              change: ./cotest.events::onChange_indep
           - type: LayoutBox
             margin: large
             children:
@@ -51,11 +79,15 @@ children:
                 label: 'Conditional Dependence (Positive)'
                 format: number
                 enable: (!indep)
+                events:
+                  change: ./cotest.events::onChange_cond_dep_pos
               - type: TextBox
                 name: cond_dep_neg
                 label: 'Conditional Dependence (Negative)'
                 format: number
                 enable: (!indep)
+                events:
+                  change: ./cotest.events::onChange_cond_dep_neg
 
   - type: Label
     label: Disease Prevalence
@@ -65,8 +97,11 @@ children:
         children:
           - type: TextBox
             name: prevalence
-            label: 'Prevalence'
+            label: 'Disease Prevalence (%)'
+            suffix: '%'
             format: number
+            events:
+              change: ./cotest.events::onChange_prevalence
 
   - type: Label
     label: Display Options
@@ -76,7 +111,7 @@ children:
         children:
           - type: CheckBox
             name: fnote
-            label: 'Show footnotes'
+            label: 'Show detailed footnotes'
           - type: CheckBox
             name: fagan
-            label: 'Show Fagan nomogram'
+            label: 'Show Fagan nomogram (visualization)'

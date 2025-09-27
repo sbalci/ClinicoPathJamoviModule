@@ -862,7 +862,9 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param fontSize Base font size for all text elements
 #' @param plotContrast Enable high contrast mode for better visibility
 #' @param tumorPreset Apply tumor-specific clustering configurations
-#' @param applyPreset Apply the selected tumor-specific preset settings
+#' @param applyPreset Apply the selected tumor-specific preset settings. Note:
+#'   This will provide recommendations, you may need to manually adjust the
+#'   settings.
 #' @param language Interface and output language / Arayüz ve çıktı dili
 #' @return A results object containing:
 #' \tabular{llllll}{
