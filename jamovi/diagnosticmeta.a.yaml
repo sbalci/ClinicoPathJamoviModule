@@ -1,7 +1,7 @@
 ---
 name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
-menuGroup: OncoPathT
+menuGroup: OncoPath
 version: '1.0.0'
 jas: '1.2'
 
@@ -102,16 +102,9 @@ options:
     - name: hsroc_analysis
       title: HSROC Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: Perform hierarchical summary ROC (HSROC) analysis
-
-    - name: heterogeneity_analysis
-      title: Heterogeneity Assessment
-      type: Bool
-      default: true
-      description:
-          R: Assess heterogeneity in sensitivity and specificity
 
     - name: meta_regression
       title: Meta-Regression
@@ -120,19 +113,26 @@ options:
       description:
           R: Perform meta-regression with specified covariate
 
+    - name: heterogeneity_analysis
+      title: Heterogeneity Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform heterogeneity analysis including I-squared and Q statistics
+
     - name: publication_bias
       title: Publication Bias Assessment
       type: Bool
-      default: true
+      default: false
       description:
           R: Assess publication bias using Deeks' funnel plot test
 
     - name: confidence_level
       title: Confidence Level
-      type: Number
-      min: 0.5
-      max: 0.99
-      default: 0.95
+      type: Integer
+      min: 50
+      max: 99
+      default: 95
       description:
           R: Confidence level for meta-analysis results
 
@@ -141,9 +141,15 @@ options:
       type: List
       options:
           - name: 'reml'
-            title: REML (Default)
+            title: REML (Recommended)
           - name: 'ml'
             title: Maximum Likelihood
+          - name: 'fixed'
+            title: Fixed Effects
+          - name: 'mm'
+            title: Method of Moments
+          - name: 'vc'
+            title: Variance Components
           - name: 'dersimonian_laird'
             title: DerSimonian-Laird
       default: reml
@@ -153,27 +159,73 @@ options:
     - name: forest_plot
       title: Forest Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: Generate forest plot for sensitivity and specificity
 
     - name: sroc_plot
       title: Summary ROC Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: Generate summary receiver operating characteristic plot
 
     - name: funnel_plot
       title: Funnel Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: Generate funnel plot for publication bias assessment
 
     - name: show_individual_studies
       title: Show Individual Study Results
       type: Bool
-      default: true
+      default: false
       description:
           R: Display results for individual studies in summary tables
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: false
+      description:
+          R: Display clinical interpretation guidelines and recommendations
+
+    - name: show_methodology
+      title: Show Methodology Information
+      type: Bool
+      default: false
+      description:
+          R: Display detailed methodology and statistical approach information
+
+    - name: show_analysis_summary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display natural language summary of analysis results
+
+    - name: color_palette
+      title: Plot Color Palette
+      type: List
+      options:
+          - name: 'standard'
+            title: Standard Colors
+          - name: 'colorblind_safe'
+            title: Color-Blind Safe
+          - name: 'high_contrast'
+            title: High Contrast
+          - name: 'viridis'
+            title: Viridis (Blue-Purple)
+          - name: 'plasma'
+            title: Plasma (Purple-Pink)
+      default: standard
+      description:
+          R: Color palette for all plots - choose color-blind safe options for accessibility
+
+    - name: show_plot_explanations
+      title: Show Plot Explanations
+      type: Bool
+      default: false
+      description:
+          R: Display detailed explanations for all plots including interpretation guidance

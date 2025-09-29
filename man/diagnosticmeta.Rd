@@ -13,16 +13,19 @@ diagnosticmeta(
   true_negatives,
   covariate,
   bivariate_analysis = TRUE,
-  hsroc_analysis = TRUE,
-  heterogeneity_analysis = TRUE,
+  hsroc_analysis = FALSE,
   meta_regression = FALSE,
-  publication_bias = TRUE,
-  confidence_level = 0.95,
+  heterogeneity_analysis = FALSE,
+  publication_bias = FALSE,
+  confidence_level = 95,
   method = "reml",
-  forest_plot = TRUE,
-  sroc_plot = TRUE,
-  funnel_plot = TRUE,
-  show_individual_studies = TRUE
+  forest_plot = FALSE,
+  sroc_plot = FALSE,
+  funnel_plot = FALSE,
+  show_individual_studies = FALSE,
+  show_interpretation = FALSE,
+  show_methodology = FALSE,
+  show_analysis_summary = FALSE
 )
 }
 \arguments{
@@ -44,10 +47,10 @@ diagnosticmeta(
 
 \item{hsroc_analysis}{Perform hierarchical summary ROC (HSROC) analysis}
 
-\item{heterogeneity_analysis}{Assess heterogeneity in sensitivity and
-specificity}
-
 \item{meta_regression}{Perform meta-regression with specified covariate}
+
+\item{heterogeneity_analysis}{Perform heterogeneity analysis including
+I-squared and Q statistics}
 
 \item{publication_bias}{Assess publication bias using Deeks' funnel plot
 test}
@@ -64,10 +67,20 @@ test}
 
 \item{show_individual_studies}{Display results for individual studies in
 summary tables}
+
+\item{show_interpretation}{Display clinical interpretation guidelines and
+recommendations}
+
+\item{show_methodology}{Display detailed methodology and statistical
+approach information}
+
+\item{show_analysis_summary}{Display natural language summary of analysis
+results}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr

@@ -1,7 +1,7 @@
 ---
 name:  venn
 title: Venn Diagram
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
 menuSubtitle: Venn Diagram, UpSet Plot
 version: '0.0.31'
@@ -62,6 +62,7 @@ options:
     - name: var3
       title: 'Variable 3 (Optional)'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -83,6 +84,7 @@ options:
     - name: var4
       title: 'Variable 4 (Optional)'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -101,20 +103,94 @@ options:
           jamovi: >
             The level in `var4` that represents the true condition.
 
-    - name: upsetType
-      title: 'UpSet Plot Type'
-      type: List
-      options:
-        - name: upsetR
-          title: 'UpSetR (Classic)'
-        - name: complexUpset
-          title: 'ComplexUpset (Advanced)'
-      default: upsetR
+
+    - name: var5
+      title: 'Variable 5 (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
       description:
           R: >
-            Choose between UpSetR (classic) or ComplexUpset (advanced with more features).
+            Fifth variable for 5-set Venn diagrams (automatically switches to advanced engine).
           jamovi: >
-            Choose the type of UpSet plot to generate.
+            Fifth variable for 5+ set analysis.
+
+    - name: var5true
+      title: 'Select True Level'
+      type: Level
+      variable: (var5)
+      description:
+          R: >
+            The level in `var5` that represents the positive condition.
+          jamovi: >
+            The level in `var5` that represents the true condition.
+
+    - name: var6
+      title: 'Variable 6 (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Sixth variable for 6-set Venn diagrams (uses advanced engine automatically).
+          jamovi: >
+            Sixth variable for 6+ set analysis.
+
+    - name: var6true
+      title: 'Select True Level'
+      type: Level
+      variable: (var6)
+      description:
+          R: >
+            The level in `var6` that represents the positive condition.
+          jamovi: >
+            The level in `var6` that represents the true condition.
+
+    - name: var7
+      title: 'Variable 7 (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Seventh variable for 7-set Venn diagrams (uses advanced engine automatically).
+          jamovi: >
+            Seventh variable for 7+ set analysis.
+
+    - name: var7true
+      title: 'Select True Level'
+      type: Level
+      variable: (var7)
+      description:
+          R: >
+            The level in `var7` that represents the positive condition.
+          jamovi: >
+            The level in `var7` that represents the true condition.
+
+    - name: show_upsetR
+      title: 'Show upsetR Plot'
+      type: Bool
+      default: false
+
+    - name: show_complexUpset
+      title: 'Show complexUpset Plot'
+      type: Bool
+      default: false
+
+    - name: show_ggvenn
+      title: 'Show ggvenn Plot'
+      type: Bool
+      default: false
+
+    - name: show_ggVennDiagram
+      title: 'Show ggVennDiagram Plot'
+      type: Bool
+      default: false
+
+
 
     - name: sortBy
       title: 'Sort Intersections By'
@@ -154,83 +230,78 @@ options:
           jamovi: >
             Add percentage labels and enhanced text formatting to the plot.
 
-    - name: vennEngine
-      title: 'Venn Diagram Engine'
+    - name: explanatory
+      title: 'Explanatory Output'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add detailed explanatory footnotes with interpretation guidance for Venn diagrams and set operations.
+          jamovi: >
+            Add detailed explanatory footnotes with interpretation guidance.
+
+    - name: aboutAnalysis
+      title: 'Show About Analysis'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed information about Venn diagram analysis and interpretation.
+          jamovi: >
+            Show detailed information about the analysis method.
+
+    - name: clinicalSummary
+      title: 'Show Clinical Summary'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display clinical interpretation of overlap patterns and key findings.
+          jamovi: >
+            Show clinical interpretation and key findings.
+
+    - name: reportSentences
+      title: 'Show Report Sentences'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate copy-ready sentences for clinical reports and publications.
+          jamovi: >
+            Generate copy-ready sentences for reports.
+
+    - name: assumptions
+      title: 'Show Assumptions'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display interpretation guidelines and statistical assumptions.
+          jamovi: >
+            Show interpretation guidelines and assumptions.
+
+
+
+    - name: shapeType
+      title: 'Venn Diagram Shape'
       type: List
       options:
-        - name: ggvenn
-          title: 'ggvenn (Classic)'
-        - name: ggVennDiagram
-          title: 'ggVennDiagram (Advanced)'
-      default: ggvenn
+        - name: auto
+          title: 'Automatic'
+        - name: circle
+          title: 'Circle'
+        - name: ellipse
+          title: 'Ellipse'
+        - name: polygon
+          title: 'Polygon'
+        - name: triangle
+          title: 'Triangle'
+      default: auto
       description:
           R: >
-            Choose between ggvenn (classic, 2-4 sets) or ggVennDiagram (advanced, 2-7 sets with enhanced customization).
+            Shape type for ggVennDiagram. Auto selects optimal shape based on number of sets.
           jamovi: >
-            Choose the Venn diagram engine. ggVennDiagram supports more sets and customization options.
-
-    - name: var5
-      title: 'Variable 5 (ggVennDiagram only)'
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-      description:
-          R: >
-            Fifth variable for 5-set Venn diagrams (only available with ggVennDiagram engine).
-          jamovi: >
-            Fifth variable (requires ggVennDiagram engine).
-
-    - name: var5true
-      title: 'Select True Level'
-      type: Level
-      variable: (var5)
-      description:
-          R: >
-            The level in `var5` that represents the positive condition.
-          jamovi: >
-            The level in `var5` that represents the true condition.
-
-    - name: var6
-      title: 'Variable 6 (ggVennDiagram only)'
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-      description:
-          R: >
-            Sixth variable for 6-set Venn diagrams (only available with ggVennDiagram engine).
-          jamovi: >
-            Sixth variable (requires ggVennDiagram engine).
-
-    - name: var6true
-      title: 'Select True Level'
-      type: Level
-      variable: (var6)
-      description:
-          R: >
-            The level in `var6` that represents the positive condition.
-          jamovi: >
-            The level in `var6` that represents the true condition.
-
-    - name: var7
-      title: 'Variable 7 (ggVennDiagram only)'
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-      description:
-          R: >
-            Seventh variable for 7-set Venn diagrams (only available with ggVennDiagram engine).
-          jamovi: >
-            Seventh variable (requires ggVennDiagram engine).
-
-    - name: var7true
-      title: 'Select True Level'
-      type: Level
-      variable: (var7)
-      description:
-          R: >
-            The level in `var7` that represents the positive condition.
-          jamovi: >
-            The level in `var7` that represents the true condition.
+            Choose the shape type for the Venn diagram.
 
     - name: regionLabels
       title: 'Region Labels'
@@ -247,9 +318,22 @@ options:
       default: count
       description:
           R: >
-            What to display in Venn diagram regions (ggVennDiagram only).
+            What to display in Venn diagram regions (available for advanced diagrams).
+
+    - name: labelGeometry
+      title: 'Label Style'
+      type: List
+      options:
+        - name: label
+          title: 'Label (with background)'
+        - name: text
+          title: 'Text (no background)'
+      default: label
+      description:
+          R: >
+            Whether to use label geometry (with background) or text geometry for region labels.
           jamovi: >
-            Choose what to display in diagram regions (ggVennDiagram only).
+            Choose label style for region text.
 
     - name: labelPrecisionDigits
       title: 'Percentage Decimal Places'
@@ -259,9 +343,9 @@ options:
       default: 1
       description:
           R: >
-            Number of decimal places for percentage labels (ggVennDiagram only).
+            Number of decimal places for percentage labels (available for advanced diagrams).
           jamovi: >
-            Decimal precision for percentages (ggVennDiagram only).
+            Decimal precision for percentages.
 
     - name: setNameSize
       title: 'Set Name Size'
@@ -271,9 +355,9 @@ options:
       default: 5
       description:
           R: >
-            Font size for set names (ggVennDiagram only).
+            Font size for set names (available for advanced diagrams).
           jamovi: >
-            Size of set name labels (ggVennDiagram only).
+            Size of set name labels.
 
     - name: labelSize
       title: 'Region Label Size'
@@ -283,9 +367,9 @@ options:
       default: 4
       description:
           R: >
-            Font size for region labels (ggVennDiagram only).
+            Font size for region labels (available for advanced diagrams).
           jamovi: >
-            Size of region labels (ggVennDiagram only).
+            Size of region labels.
 
     - name: edgeSize
       title: 'Edge Line Width'
@@ -295,9 +379,9 @@ options:
       default: 1
       description:
           R: >
-            Width of set boundary lines (ggVennDiagram only).
+            Width of set boundary lines (available for advanced diagrams).
           jamovi: >
-            Width of boundary lines (ggVennDiagram only).
+            Width of boundary lines.
 
     - name: edgeColor
       title: 'Edge Color'
@@ -305,9 +389,76 @@ options:
       default: 'black'
       description:
           R: >
-            Color of set boundary lines (ggVennDiagram only).
+            Color of set boundary lines (available for advanced diagrams).
           jamovi: >
-            Color of boundary lines (ggVennDiagram only).
+            Color of boundary lines.
+
+    - name: edgeLineType
+      title: 'Edge Line Type'
+      type: List
+      options:
+        - name: solid
+          title: 'Solid'
+        - name: dashed
+          title: 'Dashed'
+        - name: dotted
+          title: 'Dotted'
+        - name: dotdash
+          title: 'Dot-Dash'
+        - name: longdash
+          title: 'Long Dash'
+        - name: twodash
+          title: 'Two Dash'
+      default: solid
+      description:
+          R: >
+            Line type for set boundaries in ggVennDiagram.
+          jamovi: >
+            Choose the line style for set boundaries.
+
+    - name: edgeAlpha
+      title: 'Edge Transparency'
+      type: Number
+      min: 0
+      max: 1
+      default: 1
+      description:
+          R: >
+            Transparency level for set boundary lines (0=transparent, 1=opaque).
+          jamovi: >
+            Set transparency of boundary lines.
+
+    - name: fillAlpha
+      title: 'Fill Transparency'
+      type: Number
+      min: 0
+      max: 1
+      default: 0.5
+      description:
+          R: >
+            Transparency level for region fills (0=transparent, 1=opaque).
+          jamovi: >
+            Set transparency of region fills.
+
+    - name: showSetLabels
+      title: 'Show Set Names'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display set names on the diagram.
+          jamovi: >
+            Show or hide set name labels.
+
+    - name: setLabelColor
+      title: 'Set Label Color'
+      type: String
+      default: 'black'
+      description:
+          R: >
+            Color for set name labels.
+          jamovi: >
+            Set the color of set name labels.
 
     - name: fillColorMapping
       title: 'Fill Color Mapping'
@@ -315,9 +466,9 @@ options:
       default: true
       description:
           R: >
-            Map fill colors to intersection sizes (ggVennDiagram only).
+            Map fill colors to intersection sizes (available for advanced diagrams).
           jamovi: >
-            Use color gradient based on intersection sizes (ggVennDiagram only).
+            Use color gradient based on intersection sizes.
 
     - name: colorPalette
       title: 'Color Palette'
@@ -350,7 +501,77 @@ options:
       default: default
       description:
           R: >
-            Color palette for Venn diagram regions (ggVennDiagram only).
+            Color palette for Venn diagram regions (available for advanced diagrams).
           jamovi: >
-            Choose color palette for regions (ggVennDiagram only).
+            Choose color palette for regions.
+
+    - name: showSetCalculations
+      title: 'Show Set Calculations'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed set calculations including overlaps, unique members, and unions.
+          jamovi: >
+            Show detailed set calculations and membership tables.
+
+    - name: calculateOverlap
+      title: 'Calculate Overlaps'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate and display overlap intersections between sets.
+          jamovi: >
+            Calculate overlap intersections.
+
+    - name: calculateDiscern
+      title: 'Calculate Unique Members'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate and display unique members for each set (discern operation).
+          jamovi: >
+            Calculate unique members per set.
+
+    - name: calculateUnite
+      title: 'Calculate Unions'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate and display union of all sets.
+          jamovi: >
+            Calculate union of all sets.
+
+    - name: showMembershipTable
+      title: 'Show Membership Table'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed membership table showing which items belong to which sets.
+          jamovi: >
+            Show detailed membership information.
+
+    - name: membershipGroups
+      title: 'Add Membership Groups to Data'
+      type: Output
+      description:
+          R: >
+            Adds a categorical variable to the data set describing the combination of selected sets each case belongs to.
+          jamovi: >
+            Add a column with the membership group for each row.
+
+    - name: showGlossary
+      title: 'Show Statistical Glossary'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display glossary of statistical terms and clinical interpretations.
+          jamovi: >
+            Show definitions of statistical terms used in Venn diagram analysis.
+
 ...

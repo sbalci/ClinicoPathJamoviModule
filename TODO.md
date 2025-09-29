@@ -48,6 +48,21 @@ check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/
 
 jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("~/Desktop/survival_pancreas_T2_to_T3_upstage_10072025.csv");stagemigration(data = data, oldStage = T_AJCC8_gr, newStage = T_modified_gr, survivalTime = OverallTime, event = Outcome, eventLevel = "DEAD")
 
+
+jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/diagnostic_meta_test.csv");diagnosticmeta(
+    data = data,
+    study = study_name,
+    true_positives = true_positives,
+    false_positives = false_positives,
+    false_negatives = false_negatives,
+    true_negatives = true_negatives,
+    covariate = NULL,
+    hsroc_analysis = TRUE,
+    meta_regression = TRUE,
+    heterogeneity_analysis = TRUE)
+
+
+
 update .u.yaml to make it user friendly. make all relevant features to be together.
 remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders.
 prepare comprehensive test data generator under data-raw and prepare the data  as csv under data folder

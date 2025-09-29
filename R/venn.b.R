@@ -21,6 +21,46 @@
 #'
 #' @return The function produces a Venn diagram and an Upset diagram.
 #' @export vennClass
+
+# Helper function to escape variable names with special characters for formulas
+.escapeVariableNames <- function(var_names) {
+    # Check if variable names contain special characters that need escaping
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    return(var_names)
+}
+
+# Helper function to validate and clean variable names for jamovi interface
+.validateVariableNames <- function(var_names) {
+    if (is.null(var_names) || length(var_names) == 0) {
+        return(list(valid = TRUE, message = ""))
+    }
+
+    problematic <- c()
+
+    # Check for names that might cause parsing issues
+    for (name in var_names) {
+        if (grepl("^[0-9]", name)) {
+            problematic <- c(problematic, paste0("'", name, "' starts with a number"))
+        }
+        if (grepl("\\s+[0-9]", name)) {
+            problematic <- c(problematic, paste0("'", name, "' contains space followed by number"))
+        }
+        if (grepl("[^a-zA-Z0-9._\\s]", name)) {
+            problematic <- c(problematic, paste0("'", name, "' contains special characters"))
+        }
+    }
+
+    if (length(problematic) > 0) {
+        message <- paste0(
+            "⚠️ Variable name format note: ", paste(problematic, collapse = "; "),
+            ". If you encounter parsing errors, consider renaming these variables or using the jamovi GUI for variable selection."
+        )
+        return(list(valid = FALSE, message = message))
+    }
+
+    return(list(valid = TRUE, message = ""))
+}
 #'
 #' @examples
 #' \dontrun{
@@ -28,24 +68,46 @@
 #' data("mtcars")
 #' mtcars$vs <- factor(mtcars$vs, levels = c(0, 1), labels = c("V-shaped", "Straight"))
 #' mtcars$am <- factor(mtcars$am, levels = c(0, 1), labels = c("Automatic", "Manual"))
-#' 
+#'
 #' # Create Venn diagram showing overlap between V-shaped engines and Manual transmission
-#' venn(data = mtcars, var1 = "vs", var1true = "V-shaped", 
+#' venn(data = mtcars, var1 = "vs", var1true = "V-shaped",
 #'      var2 = "am", var2true = "Manual")
-#' 
+#'
 #' # Example 2: 3-variable Venn diagram with penguins data
 #' library(palmerpenguins)
 #' data("penguins")
 #' penguins$large_bill <- factor(ifelse(penguins$bill_length_mm > 45, "Large", "Small"))
 #' penguins$heavy_weight <- factor(ifelse(penguins$body_mass_g > 4000, "Heavy", "Light"))
 #' penguins$adelie_species <- factor(ifelse(penguins$species == "Adelie", "Adelie", "Other"))
-#' 
-#' venn(data = penguins, 
+#'
+#' venn(data = penguins,
 #'      var1 = "large_bill", var1true = "Large",
-#'      var2 = "heavy_weight", var2true = "Heavy", 
+#'      var2 = "heavy_weight", var2true = "Heavy",
 #'      var3 = "adelie_species", var3true = "Adelie")
-#' 
-#' # Example 3: Medical/Clinical example
+#'
+#' # Example 3: Variable names with spaces and numbers (requires careful handling)
+#' # jamovi GUI automatically handles most problematic names
+#' # When calling directly in R, variable names with spaces/numbers need backticks:
+#' # venn(data = mydata, var1 = "`Rater 1`", var1true = "Positive",
+#' #      var2 = "`Score 2A`", var2true = "High")
+#'
+#' # Note: Names like "Rater 1", "Score 2A", "Item 3B" may cause parsing issues
+#' # at the jamovi interface level. Solutions:
+#' # 1. Use jamovi GUI for variable selection (recommended)
+#' # 2. Rename variables to avoid spaces + numbers: "Rater1", "Score2A", "Item3B"
+#' # 3. In R console, use backticks: `Rater 1` or quote properly
+#'
+#' # Example 4: Clinical biomarker analysis
+#' data("biomarkers")  # Hypothetical clinical dataset
+#' venn(data = biomarkers,
+#'      var1 = "ER_positive", var1true = "Positive",
+#'      var2 = "PR_positive", var2true = "Positive",
+#'      var3 = "HER2_amplified", var3true = "Amplified",
+#'      show_ggVennDiagram = TRUE,
+#'      regionLabels = "both",
+#'      clinicalSummary = TRUE)
+#'
+#' # Example 5: Medical/Clinical comorbidity analysis
 #' # Create sample clinical data
 #' clinical_data <- data.frame(
 #'   patient_id = 1:100,
@@ -65,23 +127,23 @@
 #'      var1 = "diabetes", var1true = "Yes",
 #'      var2 = "hypertension", var2true = "Yes",
 #'      var3 = "obesity", var3true = "Yes",
-#'      upsetType = "complexUpset",
+#'      show_complexUpset = TRUE,
 #'      sortBy = "freq",
 #'      minSize = 5,
 #'      showAnnotations = TRUE)
 #'
-#' # Example 5: Using ggVennDiagram for advanced customization
+#' # Example 5: Advanced customization using ggVennDiagram
 #' venn(data = clinical_data,
 #'      var1 = "diabetes", var1true = "Yes",
 #'      var2 = "hypertension", var2true = "Yes",
 #'      var3 = "obesity", var3true = "Yes",
-#'      vennEngine = "ggVennDiagram",
+#'      show_ggVennDiagram = TRUE,
 #'      regionLabels = "both",
 #'      colorPalette = "Set1",
 #'      labelSize = 3.5,
 #'      setNameSize = 4.5)
 #'
-#' # Example 6: 5-variable Venn diagram with ggVennDiagram
+#' # Example 6: 5-variable Venn diagram using ggVennDiagram
 #' # Add more clinical variables
 #' clinical_data$smoking <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.2, 0.8))
 #' clinical_data$family_history <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.35, 0.65))
@@ -92,7 +154,7 @@
 #'      var3 = "obesity", var3true = "Yes",
 #'      var4 = "smoking", var4true = "Yes",
 #'      var5 = "family_history", var5true = "Yes",
-#'      vennEngine = "ggVennDiagram",
+#'      show_ggVennDiagram = TRUE,
 #'      regionLabels = "percent",
 #'      colorPalette = "viridis")
 #' }
@@ -103,7 +165,54 @@ vennClass <- if (requireNamespace('jmvcore'))
         "vennClass",
         inherit = vennBase,
         private = list(
+            .name_mapping = list(),
+
+            .init = function() {
+                # Count number of selected variables for dynamic sizing
+                num_vars <- 0
+                if (!is.null(self$options$var1)) num_vars <- num_vars + 1
+                if (!is.null(self$options$var2)) num_vars <- num_vars + 1
+                if (!is.null(self$options$var3)) num_vars <- num_vars + 1
+                if (!is.null(self$options$var4)) num_vars <- num_vars + 1
+                if (!is.null(self$options$var5)) num_vars <- num_vars + 1
+                if (!is.null(self$options$var6)) num_vars <- num_vars + 1
+                if (!is.null(self$options$var7)) num_vars <- num_vars + 1
+
+                # Calculate dynamic dimensions based on number of variables
+                # Base dimensions
+                base_width <- 700
+                base_height <- 450
+
+                # Adjust dimensions based on number of variables
+                if (num_vars <= 2) {
+                    # 2 variables: compact size
+                    plot_width <- base_width
+                    plot_height <- base_height
+                } else if (num_vars <= 4) {
+                    # 3-4 variables: moderate increase
+                    plot_width <- base_width + 100
+                    plot_height <- base_height + 100
+                } else {
+                    # 5+ variables: larger size for UpSet plots
+                    plot_width <- base_width + 200
+                    plot_height <- base_height + 200
+                }
+
+                # Set dynamic sizes for all plot types
+                self$results$plotGgvenn$setSize(plot_width, plot_height)
+                self$results$plotGgVennDiagram$setSize(plot_width, plot_height)
+
+                # UpSet plots need extra width for more variables
+                upset_width <- plot_width + (num_vars * 50)  # Add 50px per variable
+                upset_height <- plot_height + 50  # Extra height for intersections
+
+                self$results$plotUpsetR$setSize(upset_width, upset_height)
+                self$results$plotComplexUpset$setSize(upset_width, upset_height)
+            },
+
             .run = function() {
+                private$.checkpoint()
+
                 # Validate required variables and their true levels
                 validation_error <- private$.validateVariables()
                 if (!is.null(validation_error)) {
@@ -111,6 +220,96 @@ vennClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
                 
+                # Control welcome panel visibility based on variable selection
+                if (is.null(self$options$var1) || is.null(self$options$var2)) {
+                    # Show welcome message when no variables are selected
+                    self$results$welcome$setVisible(TRUE)
+
+                    # Extract progress info
+                    has_var1 <- !is.null(self$options$var1) && length(self$options$var1) > 0
+                    has_var2 <- !is.null(self$options$var2) && length(self$options$var2) > 0
+                    has_var1_level <- !is.null(self$options$var1true) && length(self$options$var1true) > 0
+                    has_var2_level <- !is.null(self$options$var2true) && length(self$options$var2true) > 0
+
+                    # Count optional variables
+                    optional_vars <- sum(!sapply(list(self$options$var3, self$options$var4,
+                                                    self$options$var5, self$options$var6,
+                                                    self$options$var7), is.null))
+
+                    # Create professional welcome message following decisionpanel style
+                    welcome_content <- paste0(
+                        "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+                        "<div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>",
+                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'>Venn Diagram Analysis</h2>",
+                        "<p style='margin: 0; font-size: 14px; color: #666;'>Visualize overlaps and intersections between categorical variables</p>",
+                        "</div>",
+
+                        "<div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>",
+                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Setup Progress</h3>"
+                    )
+
+                    # Progress indicators - simple and accessible
+                    if (has_var1 && has_var2 && has_var1_level && has_var2_level) {
+                        welcome_content <- paste0(welcome_content,
+                            "<div style='font-weight: bold; margin-bottom: 10px;'>",
+                            "[READY] Variables: 2 required + ", optional_vars, " optional | Levels: Selected</div>",
+                            "<p style='margin: 0;'>Minimum requirements met. Analysis will begin automatically.</p>"
+                        )
+                    } else {
+                        welcome_content <- paste0(welcome_content,
+                            "<div style='margin-bottom: 10px;'>",
+                            if(has_var1) "[✓]" else "[ ]", " Variable 1: ", if(has_var1) "Selected" else "Not selected",
+                            if(has_var1 && has_var1_level) " + Level" else "", "</div>",
+                            "<div style='margin-bottom: 10px;'>",
+                            if(has_var2) "[✓]" else "[ ]", " Variable 2: ", if(has_var2) "Selected" else "Not selected",
+                            if(has_var2 && has_var2_level) " + Level" else "", "</div>",
+                            if(optional_vars > 0) paste0("<div style='margin-bottom: 10px;'>[+] Optional Variables: ", optional_vars, "</div>") else ""
+                        )
+                    }
+
+                    welcome_content <- paste0(welcome_content,
+                        "</div>",
+
+                        "<table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>",
+                        "<tr>",
+                        "<td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>",
+                        "<h4 style='margin: 0 0 10px 0; font-size: 15px;'>Quick Start Guide</h4>",
+                        "<ol style='margin: 0; padding-left: 20px; font-size: 14px;'>",
+                        "<li>Select your <strong>Primary Variable</strong> (Variable 1)</li>",
+                        "<li>Choose which level represents the <strong>'true' condition</strong></li>",
+                        "<li>Add a <strong>Secondary Variable</strong> (Variable 2)</li>",
+                        "<li>Select its <strong>'true' level</strong></li>",
+                        "<li>Optionally add Variables 3-7 for complex analysis</li>",
+                        "<li>Configure plot options and styling</li>",
+                        "</ol></td>",
+
+                        "<td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>",
+                        "<h4 style='margin: 0 0 10px 0; font-size: 15px;'>Visualization Options</h4>",
+                        "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
+                        "<li><strong>ggvenn:</strong> Classic 2-3 variable Venn diagrams</li>",
+                        "<li><strong>ggVennDiagram:</strong> Advanced customizable Venn plots</li>",
+                        "<li><strong>UpSetR:</strong> Matrix-style intersection plots for 3+ variables</li>",
+                        "<li><strong>ComplexUpset:</strong> Enhanced UpSet with annotations</li>",
+                        "<li><strong>Set calculations:</strong> Detailed overlap statistics</li>",
+                        "</ul></td></tr></table>",
+
+                        "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
+                        "<h4 style='margin: 0 0 10px 0; font-size: 15px;'>Clinical Applications</h4>",
+                        "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
+                        "<li><strong>Biomarker overlap:</strong> Analyze multiple tumor markers or expression patterns</li>",
+                        "<li><strong>Treatment response:</strong> Compare response across different therapies</li>",
+                        "<li><strong>Risk factors:</strong> Examine comorbidity patterns and risk combinations</li>",
+                        "<li><strong>Diagnostic concordance:</strong> Compare agreement between different tests or raters</li>",
+                        "<li><strong>Variable naming:</strong> Supports names with spaces and numbers (e.g., 'Rater 3', 'Marker 2A')</li>",
+                        "</ul></div></div>"
+                    )
+
+                    self$results$welcome$setContent(welcome_content)
+                } else {
+                    # Hide welcome message when variables are selected
+                    self$results$welcome$setVisible(FALSE)
+                }
+
                 # Check if required variables (var1 and var2) are provided.
                 if (is.null(self$options$var1) || is.null(self$options$var2)) {
                     # Display a friendly welcome and instruction message.
@@ -136,15 +335,22 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # Clear welcome message once variables are selected.
                     self$results$todo$setContent("")
                     
-                    # Generate explanatory content
-                    private$.generateAboutAnalysis()
+                    # Generate explanatory content if requested
+                    if (self$options$explanatory || self$options$aboutAnalysis) {
+                        private$.generateAboutAnalysis()
+                    }
 
                     # Ensure data contains complete rows.
                     if (nrow(self$data) == 0)
                         stop(.("Data contains no (complete) rows"))
 
                     # Read and clean the data.
-                    mydata <- jmvcore::naOmit(self$data)
+                    private$.checkpoint()
+                    full_data <- jmvcore::naOmit(self$data)
+                    row_numbers <- suppressWarnings(as.integer(rownames(full_data)))
+                    if (length(row_numbers) != nrow(full_data) || any(is.na(row_numbers))) {
+                        row_numbers <- seq_len(nrow(full_data))
+                    }
 
                     # Retrieve variable names and their corresponding "true" level selections.
                     var1 <- self$options$var1
@@ -162,40 +368,137 @@ vennClass <- if (requireNamespace('jmvcore'))
                     var7 <- self$options$var7
                     var7true <- self$options$var7true
 
-                    # Convert each selected variable to logical values (TRUE if equal to the selected true level).
+                    # Validate variable names for potential parsing issues
+                    all_vars <- c(var1, var2, var3, var4, var5, var6, var7)
+                    selected_vars <- all_vars[!sapply(all_vars, is.null)]
+                    validation_result <- .validateVariableNames(selected_vars)
+
+                    if (!validation_result$valid) {
+                        # Display warning but continue with analysis
+                        warning_html <- paste0(
+                            "<div style='background-color: #fff3cd; padding: 12px; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px;'>",
+                            "<h6 style='margin: 0 0 8px 0; color: #856404;'>Variable Name Format Warning</h6>",
+                            "<p style='margin: 0;'>", validation_result$message, "</p>",
+                            "</div>"
+                        )
+                        self$results$todo$setContent(warning_html)
+                    }
+
+                    # Collect only selected variables and convert to logical values
+                    mydata <- data.frame(row.names = seq_len(nrow(full_data)))
+
+                    # Create mapping between original and safe names for variables with spaces/numbers
+                    name_mapping <- list()
+
+                    # Process each variable with robust error handling for problematic names
                     if (!is.null(self$options$var1)) {
-                        mydata[[var1]] <- ifelse(mydata[[var1]] == var1true, TRUE, FALSE)
+                        safe_name1 <- make.names(var1)
+                        tryCatch({
+                            mydata[[safe_name1]] <- ifelse(full_data[[var1]] == var1true, TRUE, FALSE)
+                            name_mapping[[safe_name1]] <- var1
+                        }, error = function(e) {
+                            # If direct access fails, try with escaped name or provide helpful error
+                            escaped_var1 <- .escapeVariableNames(var1)
+                            stop(paste("Error processing variable '", var1, "': ", e$message,
+                                       ". Try using backticks around the variable name: `", var1, "`", sep = ""))
+                        })
                     }
                     if (!is.null(self$options$var2)) {
-                        mydata[[var2]] <- ifelse(mydata[[var2]] == var2true, TRUE, FALSE)
+                        safe_name2 <- make.names(var2)
+                        tryCatch({
+                            mydata[[safe_name2]] <- ifelse(full_data[[var2]] == var2true, TRUE, FALSE)
+                            name_mapping[[safe_name2]] <- var2
+                        }, error = function(e) {
+                            escaped_var2 <- .escapeVariableNames(var2)
+                            stop(paste("Error processing variable '", var2, "': ", e$message,
+                                       ". Try using backticks around the variable name: `", var2, "`", sep = ""))
+                        })
                     }
                     if (!is.null(self$options$var3)) {
-                        mydata[[var3]] <- ifelse(mydata[[var3]] == var3true, TRUE, FALSE)
+                        safe_name3 <- make.names(var3)
+                        tryCatch({
+                            mydata[[safe_name3]] <- ifelse(full_data[[var3]] == var3true, TRUE, FALSE)
+                            name_mapping[[safe_name3]] <- var3
+                        }, error = function(e) {
+                            escaped_var3 <- .escapeVariableNames(var3)
+                            stop(paste("Error processing variable '", var3, "': ", e$message,
+                                       ". Try using backticks around the variable name: `", var3, "`", sep = ""))
+                        })
                     }
                     if (!is.null(self$options$var4)) {
-                        mydata[[var4]] <- ifelse(mydata[[var4]] == var4true, TRUE, FALSE)
+                        safe_name4 <- make.names(var4)
+                        tryCatch({
+                            mydata[[safe_name4]] <- ifelse(full_data[[var4]] == var4true, TRUE, FALSE)
+                            name_mapping[[safe_name4]] <- var4
+                        }, error = function(e) {
+                            escaped_var4 <- .escapeVariableNames(var4)
+                            stop(paste("Error processing variable '", var4, "': ", e$message,
+                                       ". Try using backticks around the variable name: `", var4, "`", sep = ""))
+                        })
                     }
                     if (!is.null(self$options$var5)) {
-                        mydata[[var5]] <- ifelse(mydata[[var5]] == var5true, TRUE, FALSE)
+                        safe_name5 <- make.names(var5)
+                        tryCatch({
+                            mydata[[safe_name5]] <- ifelse(full_data[[var5]] == var5true, TRUE, FALSE)
+                            name_mapping[[safe_name5]] <- var5
+                        }, error = function(e) {
+                            escaped_var5 <- .escapeVariableNames(var5)
+                            stop(paste("Error processing variable '", var5, "': ", e$message,
+                                       ". Try using backticks around the variable name: `", var5, "`", sep = ""))
+                        })
                     }
                     if (!is.null(self$options$var6)) {
-                        mydata[[var6]] <- ifelse(mydata[[var6]] == var6true, TRUE, FALSE)
+                        safe_name6 <- make.names(var6)
+                        tryCatch({
+                            mydata[[safe_name6]] <- ifelse(full_data[[var6]] == var6true, TRUE, FALSE)
+                            name_mapping[[safe_name6]] <- var6
+                        }, error = function(e) {
+                            escaped_var6 <- .escapeVariableNames(var6)
+                            stop(paste("Error processing variable '", var6, "': ", e$message,
+                                       ". Try using backticks around the variable name: `", var6, "`", sep = ""))
+                        })
                     }
                     if (!is.null(self$options$var7)) {
-                        mydata[[var7]] <- ifelse(mydata[[var7]] == var7true, TRUE, FALSE)
+                        safe_name7 <- make.names(var7)
+                        tryCatch({
+                            mydata[[safe_name7]] <- ifelse(full_data[[var7]] == var7true, TRUE, FALSE)
+                            name_mapping[[safe_name7]] <- var7
+                        }, error = function(e) {
+                            escaped_var7 <- .escapeVariableNames(var7)
+                            stop(paste("Error processing variable '", var7, "': ", e$message,
+                                       ". Try using backticks around the variable name: `", var7, "`", sep = ""))
+                        })
                     }
 
-                    # Prepare data for the Venn diagram.
-                    plotData <- list("mydata" = mydata,
-                                     "names" = names(mydata))
-                    self$results$plot$setState(plotData)
+                    # Store name mapping for use in plots and calculations
+                    private$.name_mapping <- name_mapping
 
-                    # Prepare data for the Upset diagram by converting logical values to integers.
+                    # Prepare data for Venn diagrams (logical values).
+                    plotDataVenn <- list("mydata" = mydata,
+                                         "names" = names(mydata))
+
+                    # Set state for each plot type
+                    if (self$options$show_ggvenn) {
+                        self$results$plotGgvenn$setState(plotDataVenn)
+                    }
+                    if (self$options$show_ggVennDiagram) {
+                        self$results$plotGgVennDiagram$setState(plotDataVenn)
+                    }
+
+                    # Prepare data for Upset diagrams by converting logical values to integers.
+                    private$.checkpoint()
                     mydata2 <- mydata %>%
                         dplyr::mutate(dplyr::across(.cols = dplyr::everything(), ~ as.integer(.)))
-                    plotData2 <- list("mydata" = mydata2,
-                                      "names" = names(mydata2))
-                    self$results$plot2$setState(plotData2)
+                    namescolumn2 <- names(mydata2)
+                    plotDataUpset <- list("mydata" = mydata2,
+                                          "names" = namescolumn2)
+
+                    if (self$options$show_upsetR) {
+                        self$results$plotUpsetR$setState(plotDataUpset)
+                    }
+                    if (self$options$show_complexUpset) {
+                        self$results$plotComplexUpset$setState(plotDataUpset)
+                    }
 
                     # Create summary statistics for each variable using helper function
                     summaryData <- data.frame(
@@ -211,9 +514,13 @@ vennClass <- if (requireNamespace('jmvcore'))
                     variables <- list(var1, var2, var3, var4, var5, var6, var7)
                     for (var in variables) {
                         if (!is.null(var)) {
-                            varStats <- private$.calculateSummaryStats(mydata, var)
-                            if (!is.null(varStats)) {
-                                summaryData <- rbind(summaryData, varStats)
+                            # Find the safe column name that corresponds to this variable
+                            safe_name <- make.names(var)
+                            if (safe_name %in% names(mydata)) {
+                                varStats <- private$.calculateSummaryStats(mydata, safe_name, var)
+                                if (!is.null(varStats)) {
+                                    summaryData <- rbind(summaryData, varStats)
+                                }
                             }
                         }
                     }
@@ -231,14 +538,104 @@ vennClass <- if (requireNamespace('jmvcore'))
                         }
                     }
                     
-                    # Generate clinical interpretations
-                    private$.generateClinicalSummary(mydata, list(var1, var2, var3, var4, var5, var6, var7), summaryData)
-                    private$.generateReportSentences(summaryData)
-                    private$.generateAssumptions()
+                    # Generate clinical interpretations if requested
+                    if (self$options$explanatory || self$options$clinicalSummary) {
+                        private$.generateClinicalSummary(mydata, list(var1, var2, var3, var4, var5, var6, var7), summaryData)
+                    }
+                    if (self$options$explanatory || self$options$reportSentences) {
+                        private$.generateReportSentences(summaryData, mydata)
+                    }
+                    if (self$options$explanatory || self$options$assumptions) {
+                        private$.generateAssumptions()
+                    }
+                    if (self$options$showGlossary) {
+                        private$.generateGlossary()
+                    }
+
+                    # Generate set calculations if requested
+                    if (self$options$showSetCalculations) {
+                        private$.generateSetCalculations(mydata2, namescolumn2, summaryData)
+                    }
+
+                    # Generate membership table if requested
+                    if (self$options$showSetCalculations && (self$options$showMembershipTable || self$options$membershipGroups)) {
+                        private$.generateMembershipTable(mydata, names(mydata), private$.name_mapping, row_numbers)
+                    }
                 }
             },
 
-            .plot = function(image, ggtheme, theme, ...) {
+            .plotGgvenn = function(image, ggtheme, theme, ...) {
+                private$.checkpoint()
+
+                # Validate that the required inputs are available.
+                if (is.null(self$options$var1) || is.null(self$options$var2))
+                    return()
+                if (nrow(self$data) == 0)
+                    stop(.('Data contains no (complete) rows'))
+
+                # Count the number of variables selected
+                num_vars <- sum(!sapply(list(self$options$var1, self$options$var2, self$options$var3,
+                                           self$options$var4, self$options$var5, self$options$var6,
+                                           self$options$var7), is.null))
+
+                # Check if more than 4 variables are selected
+                if (num_vars > 4) {
+                    # Create an informative message similar to waterfall spider plot
+                    text_warning <- paste0(
+                        .("ggvenn Plot: Too Many Variables"),
+                        "\n\n",
+                        .("ggvenn can only display up to 4 variables effectively."),
+                        "\n",
+                        sprintf(.("You have selected %d variables."), num_vars),
+                        "\n\n",
+                        .("Recommended Solution:"),
+                        "\n",
+                        .("• Enable 'Show ggVennDiagram Plot' instead"),
+                        "\n",
+                        .("• ggVennDiagram supports 5+ variables with better visualization"),
+                        "\n\n",
+                        .("Alternative Options:"),
+                        "\n",
+                        .("• Use UpSetR or ComplexUpset plots for complex intersections"),
+                        "\n",
+                        .("• Reduce to 4 or fewer variables for ggvenn visualization")
+                    )
+
+                    # Create a text plot with the warning message
+                    p <- ggplot2::ggplot() +
+                        ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                        label = text_warning,
+                                        hjust = 0.5, vjust = 0.5,
+                                        size = 4, color = "#2c3e50",
+                                        lineheight = 1.2) +
+                        ggplot2::theme_void() +
+                        ggplot2::theme(
+                            plot.background = ggplot2::element_rect(fill = "#f8f9fa", color = "#dee2e6"),
+                            plot.margin = ggplot2::margin(20, 20, 20, 20)
+                        ) +
+                        ggplot2::xlim(0, 1) +
+                        ggplot2::ylim(0, 1)
+
+                    print(p)
+                    return(TRUE)
+                }
+
+                # Retrieve the prepared data.
+                results <- image$state
+                mydata2 <- results$mydata
+                namescolumn2 <- results$names
+
+                # Use ggvenn (classic)
+                plot <- private$.plotGgVenn(mydata2, namescolumn2, ggtheme)
+
+                # Print the Venn Diagram.
+                print(plot)
+                TRUE
+            },
+
+            .plotGgVennDiagram = function(image, ggtheme, theme, ...) {
+                private$.checkpoint()
+
                 # Validate that the required inputs are available.
                 if (is.null(self$options$var1) || is.null(self$options$var2))
                     return()
@@ -250,24 +647,17 @@ vennClass <- if (requireNamespace('jmvcore'))
                 mydata2 <- results$mydata
                 namescolumn2 <- results$names
 
-                # Get the selected Venn engine
-                vennEngine <- self$options$vennEngine
-
-                # Generate the Venn Diagram based on selected engine
-                if (vennEngine == "ggVennDiagram") {
-                    # Use ggVennDiagram for advanced features
-                    plot <- private$.plotGgVennDiagram(mydata2, namescolumn2, ggtheme)
-                } else {
-                    # Use ggvenn (default/classic)
-                    plot <- private$.plotGgVenn(mydata2, namescolumn2, ggtheme)
-                }
+                # Use ggVennDiagram (advanced features)
+                plot <- private$.plotGgVennDiagramHelper(mydata2, namescolumn2, ggtheme, theme)
 
                 # Print the Venn Diagram.
                 print(plot)
                 TRUE
             },
 
-            .plot2 = function(image, ggtheme, theme, ...) {
+            .plotUpsetR = function(image, ggtheme, theme, ...) {
+                private$.checkpoint()
+
                 # Validate that the required inputs are available.
                 if (is.null(self$options$var1) || is.null(self$options$var2))
                     return()
@@ -277,130 +667,36 @@ vennClass <- if (requireNamespace('jmvcore'))
                 # Retrieve the prepared data.
                 results <- image$state
                 mydata2 <- results$mydata
-                
-                # Get user options
-                upsetType <- self$options$upsetType
-                sortBy <- self$options$sortBy
-                minSize <- self$options$minSize
-                showAnnotations <- self$options$showAnnotations
 
-                # Generate the Upset Diagram based on user choice
-                if (upsetType == "complexUpset") {
-                    # Use ComplexUpset for advanced features
-                    
-                    # Prepare data for ComplexUpset (convert back to logical from integer)
-                    upset_data <- mydata2
-                    for (col in names(upset_data)) {
-                        upset_data[[col]] <- as.logical(upset_data[[col]])
-                    }
-                    
-                    # Determine sort mode for ComplexUpset
-                    sort_mode <- switch(sortBy,
-                        "freq" = "descending",
-                        "degree" = "ascending", 
-                        "none" = FALSE,
-                        "descending"  # default
-                    )
-                    
-                    # Create the base ComplexUpset plot with proper annotations
-                    base_annotations_list <- list(
-                        'Intersection size' = ComplexUpset::intersection_size(
-                            counts = TRUE,
-                            text = list(size = 3)
-                        )
-                    )
+                # Generate the UpSetR plot
+                plot <- private$.plotUpsetRHelper(mydata2)
 
-                    # Add custom annotations if requested
-                    # Note: For ComplexUpset, showAnnotations adds percentage labels to intersection sizes
-                    annotations_list <- if (showAnnotations) {
-                        list(
-                            'Intersection percentages' = ComplexUpset::intersection_size(
-                                counts = FALSE,
-                                text = list(size = 3),
-                                text_mapping = ggplot2::aes(label = paste0(round(100 * !!rlang::sym('intersection_size') / sum(!!rlang::sym('intersection_size')), 1), '%'))
-                            )
-                        )
-                    } else {
-                        NULL
-                    }
-
-                    plot2 <- ComplexUpset::upset(
-                        data = upset_data,
-                        intersect = names(upset_data),
-                        min_size = minSize,
-                        sort_intersections = sort_mode,
-                        sort_sets = sort_mode,
-                        name = .("Intersection Size"),
-                        width_ratio = 0.1,
-                        height_ratio = 0.8,
-                        wrap = TRUE,
-                        base_annotations = base_annotations_list,
-                        annotations = annotations_list,
-                        themes = list(
-                            'intersections_matrix' = ggplot2::theme(
-                                text = ggplot2::element_text(size = 10),
-                                axis.text = ggplot2::element_text(size = 8)
-                            ),
-                            'overall_sizes' = ggplot2::theme(
-                                text = ggplot2::element_text(size = 10),
-                                axis.text = ggplot2::element_text(size = 8)
-                            )
-                        )
-                    )
-                    
-                    # Add title
-                    plot2 <- plot2 + 
-                        ggplot2::ggtitle(.("ComplexUpset Diagram of Selected Variables")) +
-                        ggplot2::theme(
-                            plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 14)
-                        )
-                    
-                    # Print the ComplexUpset plot
-                    print(plot2)
-                    
-                } else {
-                    # Use classic UpSetR
-                    
-                    # Determine order.by parameter
-                    orderBy <- switch(sortBy,
-                        "freq" = "freq",
-                        "degree" = "degree",
-                        "none" = "freq",  # Default to "freq" instead of NULL to avoid xtfrm error
-                        "freq"  # default
-                    )
-                    
-                    # Create UpSetR plot
-                    # Note: For UpSetR, showAnnotations controls text visibility and scaling
-                    if (showAnnotations) {
-                        # Enhanced visibility: larger text and show intersection sizes
-                        plot2 <- UpSetR::upset(
-                            mydata2,
-                            order.by = orderBy,
-                            cutoff = minSize,
-                            text.scale = c(1.5, 1.3, 1.2, 1.1, 2, 1),
-                            show.numbers = "yes"
-                        )
-                    } else {
-                        # Minimal text: smaller scaling and hide numbers
-                        plot2 <- UpSetR::upset(
-                            mydata2,
-                            order.by = orderBy,
-                            cutoff = minSize,
-                            text.scale = c(0.8, 0.8, 0.8, 0.8, 1, 0.6),
-                            show.numbers = "no"
-                        )
-                    }
-                    
-                    # Print the Upset Diagram.
-                    print(plot2)
-                    
-                    # Add a title to the Upset Diagram using grid.text.
-                    grid::grid.text(.("UpSetR Diagram of Selected Variables"), x = 0.5, y = 0.97,
-                                    gp = grid::gpar(fontsize = 14, fontface = "bold"))
-                }
-                
+                # Print the UpSetR plot
+                print(plot)
                 TRUE
             },
+
+            .plotComplexUpset = function(image, ggtheme, theme, ...) {
+                private$.checkpoint()
+
+                # Validate that the required inputs are available.
+                if (is.null(self$options$var1) || is.null(self$options$var2))
+                    return()
+                if (nrow(self$data) == 0)
+                    stop(.('Data contains no (complete) rows'))
+
+                # Retrieve the prepared data.
+                results <- image$state
+                mydata2 <- results$mydata
+
+                # Generate the ComplexUpset plot
+                plot <- private$.plotComplexUpsetHelper(mydata2)
+
+                # Print the ComplexUpset plot
+                print(plot)
+                TRUE
+            },
+
             
             # Validation helper method
             .validateVariables = function() {
@@ -501,14 +797,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                     }
                 }
 
-                # Check variables 5-7 (ggVennDiagram only)
+                # Check variables 5-7 (automatically uses advanced engine)
                 if (!is.null(self$options$var5)) {
-                    if (self$options$vennEngine != "ggVennDiagram") {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 5 Requires ggVennDiagram Engine"), "</strong><br>",
-                            .("Variable 5 is only supported with ggVennDiagram engine. Please change the engine or remove Variable 5."),
-                            "</div>"))
-                    }
                     if (is.null(self$options$var5true)) {
                         return(paste0("<div class='alert alert-warning'>",
                             "<strong>", .("Variable 5 Selected but True Level Missing"), "</strong><br>",
@@ -518,12 +808,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                 }
 
                 if (!is.null(self$options$var6)) {
-                    if (self$options$vennEngine != "ggVennDiagram") {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 6 Requires ggVennDiagram Engine"), "</strong><br>",
-                            .("Variable 6 is only supported with ggVennDiagram engine. Please change the engine or remove Variable 6."),
-                            "</div>"))
-                    }
                     if (is.null(self$options$var6true)) {
                         return(paste0("<div class='alert alert-warning'>",
                             "<strong>", .("Variable 6 Selected but True Level Missing"), "</strong><br>",
@@ -533,12 +817,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                 }
 
                 if (!is.null(self$options$var7)) {
-                    if (self$options$vennEngine != "ggVennDiagram") {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 7 Requires ggVennDiagram Engine"), "</strong><br>",
-                            .("Variable 7 is only supported with ggVennDiagram engine. Please change the engine or remove Variable 7."),
-                            "</div>"))
-                    }
                     if (is.null(self$options$var7true)) {
                         return(paste0("<div class='alert alert-warning'>",
                             "<strong>", .("Variable 7 Selected but True Level Missing"), "</strong><br>",
@@ -551,15 +829,33 @@ vennClass <- if (requireNamespace('jmvcore'))
             },
             
             # Helper function for calculating summary statistics
-            .calculateSummaryStats = function(data, varname) {
-                if (is.null(varname)) return(NULL)
-                
-                true_count <- sum(data[[varname]], na.rm = TRUE)
-                false_count <- sum(!data[[varname]], na.rm = TRUE)
+            .calculateSummaryStats = function(data, safe_varname, original_varname = NULL) {
+                if (is.null(safe_varname)) return(NULL)
+
+                # Use original name for display, safe name for data access
+                display_name <- if (!is.null(original_varname)) original_varname else safe_varname
+
+                # Ensure the column exists and contains logical data
+                if (!safe_varname %in% names(data)) return(NULL)
+
+                column_data <- data[[safe_varname]]
+
+                # Ensure data is logical, convert if necessary
+                if (!is.logical(column_data)) {
+                    if (is.numeric(column_data)) {
+                        column_data <- as.logical(column_data)
+                    } else {
+                        warning(paste("Column", safe_varname, "is not logical and cannot be converted"))
+                        return(NULL)
+                    }
+                }
+
+                true_count <- sum(column_data, na.rm = TRUE)
+                false_count <- sum(!column_data, na.rm = TRUE)
                 total_count <- true_count + false_count
-                
+
                 data.frame(
-                    Variable = varname,
+                    Variable = display_name,
                     TrueCount = true_count,
                     FalseCount = false_count,
                     TotalCount = total_count,
@@ -583,16 +879,16 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "</ul>",
                     "<p><strong>", .("How to Use:"), "</strong></p>",
                     "<ol style='margin-left: 20px;'>",
-                    "<li>", .("Select 2-7 categorical variables (2-4 for ggvenn, 2-7 for ggVennDiagram)"), "</li>",
+                    "<li>", .("Select 2-7 categorical variables"), "</li>",
                     "<li>", .("Choose the 'true' level for each variable (e.g., 'Positive', 'Present', 'Yes')"), "</li>",
-                    "<li>", .("Select Venn engine: ggvenn (classic) or ggVennDiagram (advanced with more customization)"), "</li>",
+                    "<li>", .("Engine is automatically selected: classic (2-4 variables) or advanced (5+ variables)"), "</li>",
                     "<li>", .("Adjust visualization options as needed"), "</li>",
                     "<li>", .("Interpret intersections - larger overlaps indicate stronger associations"), "</li>",
                     "</ol>",
-                    "<p><strong>", .("Engine Comparison:"), "</strong></p>",
+                    "<p><strong>", .("Automatic Engine Selection:"), "</strong></p>",
                     "<ul style='margin-left: 20px;'>",
-                    "<li><strong>ggvenn:</strong> ", .("Simple, fast, supports 2-4 variables"), "</li>",
-                    "<li><strong>ggVennDiagram:</strong> ", .("Advanced features, supports 2-7 variables, extensive customization, publication-ready"), "</li>",
+                    "<li><strong>2-4 variables:</strong> ", .("Uses ggvenn (classic, simple visualization)"), "</li>",
+                    "<li><strong>5+ variables:</strong> ", .("Uses ggVennDiagram (advanced features, extensive customization, publication-ready)"), "</li>",
                     "</ul>",
                     "</div>"
                 )
@@ -627,6 +923,10 @@ vennClass <- if (requireNamespace('jmvcore'))
                     )
                 }
                 
+                # Generate clinical interpretation and statistical warnings
+                clinical_interpretation <- private$.generateClinicalInterpretation(summaryData, var_names, total_n)
+                statistical_warnings <- private$.validateStatisticalPower(summaryData, total_n)
+
                 clinical_summary <- paste0(
                     "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'>",
                     "<h4 style='color: #2980b9; margin-top: 0;'>", .("Clinical Summary"), "</h4>",
@@ -635,39 +935,80 @@ vennClass <- if (requireNamespace('jmvcore'))
                     sprintf(.("%s was most common (%s cases, %s%%)."), largest_var, largest_count, largest_pct), "</p>",
                     intersection_analysis,
                     "<p><em>", .("Tip: Use the Venn diagram to visualize overlap patterns and the UpSet plot for detailed intersection analysis."), "</em></p>",
-                    "</div>"
+                    "</div>",
+                    clinical_interpretation,
+                    statistical_warnings
                 )
-                
+
                 self$results$clinicalSummary$setContent(clinical_summary)
             },
             
             # Generate copy-ready report sentences
-            .generateReportSentences = function(summaryData) {
+            .generateReportSentences = function(summaryData, data) {
                 if (is.null(summaryData) || nrow(summaryData) == 0) return()
-                
+
                 var_names <- summaryData$Variable
-                total_n <- sum(summaryData$TotalCount[1])  # Total should be same for all
-                
-                # Create sentences for each variable
-                sentences <- sapply(1:nrow(summaryData), function(i) {
-                    sprintf(.("%s was positive in %s/%s cases (%s%%)."), 
-                            summaryData$Variable[i], 
+                total_n <- nrow(data)
+
+                # Create individual variable sentences
+                individual_sentences <- sapply(1:nrow(summaryData), function(i) {
+                    sprintf("%s was positive in %s of %s cases (%s%%).",
+                            summaryData$Variable[i],
                             summaryData$TrueCount[i],
-                            summaryData$TotalCount[i],
+                            total_n,
                             round(summaryData$TruePercentage[i] * 100, 1))
                 })
-                
+
+                # Generate intersection analysis for clinical reporting
+                intersection_sentences <- ""
+                if (length(var_names) >= 2) {
+                    # Calculate 2-way intersection
+                    var1_data <- as.logical(data[[var_names[1]]])
+                    var2_data <- as.logical(data[[var_names[2]]])
+                    both_positive <- sum(var1_data & var2_data, na.rm = TRUE)
+                    both_pct <- round((both_positive / total_n) * 100, 1)
+
+                    # Calculate exclusive positivity
+                    var1_only <- sum(var1_data & !var2_data, na.rm = TRUE)
+                    var2_only <- sum(!var1_data & var2_data, na.rm = TRUE)
+
+                    intersection_sentences <- sprintf(
+                        "Co-occurrence of %s and %s was observed in %s cases (%s%%). %s cases (%s%%) were positive for %s only, while %s cases (%s%%) were positive for %s only.",
+                        var_names[1], var_names[2], both_positive, both_pct,
+                        var1_only, round((var1_only/total_n)*100, 1), var_names[1],
+                        var2_only, round((var2_only/total_n)*100, 1), var_names[2]
+                    )
+                }
+
+                # Generate comprehensive clinical paragraph
+                clinical_paragraph <- sprintf(
+                    "Analysis of %s cases revealed distinct patterns of variable expression. %s The intersection analysis demonstrated %s overlap patterns, which may have clinical implications for patient stratification and treatment planning.",
+                    total_n,
+                    paste(individual_sentences, collapse = " "),
+                    if (length(var_names) >= 2) {
+                        mean_overlap <- mean(summaryData$TrueCount) / total_n
+                        if (mean_overlap > 0.5) "significant" else if (mean_overlap > 0.2) "moderate" else "limited"
+                    } else "individual variable"
+                )
+
                 report_content <- paste0(
                     "<div style='background-color: #f0f8f0; padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60;'>",
-                    "<h4 style='color: #27ae60; margin-top: 0;'>", .("Copy-Ready Clinical Summary"), "</h4>",
-                    "<div style='background-color: white; padding: 10px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6;'>",
-                    "<p>", .("Analysis of overlap patterns was performed on"), " ", total_n, " ", .("cases"), ". ",
-                    paste(sentences, collapse = " "), 
-                    " ", .("Venn diagram analysis revealed the intersection patterns between these variables"), ".</p>",
+                    "<h4 style='color: #27ae60; margin-top: 0;'>📋 Copy-Ready Clinical Summary</h4>",
+                    "<div style='background-color: white; padding: 12px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6; border: 1px solid #e9ecef;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: #495057;'>Clinical Report Template</h6>",
+                    "<p style='margin: 0 0 10px 0;'>", clinical_paragraph, "</p>",
+                    if (intersection_sentences != "") paste0("<p style='margin: 0;'>", intersection_sentences, "</p>") else "",
                     "</div>",
-                    "<p style='margin-top: 10px;'><small><em>", 
-                    .("Note: Copy the text above for direct use in clinical reports. Modify as needed for your specific context."), 
-                    "</em></small></p>",
+                    "<div style='background-color: white; padding: 10px; border-radius: 3px; margin-top: 8px; border: 1px solid #e9ecef;'>",
+                    "<h6 style='margin: 0 0 6px 0; color: #495057;'>Individual Variable Summary</h6>",
+                    "<ul style='margin: 0; padding-left: 20px;'>",
+                    paste0("<li>", individual_sentences, "</li>", collapse = ""),
+                    "</ul>",
+                    "</div>",
+                    "<div style='margin-top: 10px; padding: 8px; background-color: #e7f3ff; border-radius: 3px;'>",
+                    "<small>💡 <strong>Usage:</strong> Select and copy text from either template above. ",
+                    "The clinical report template provides publication-ready prose, while the summary offers bullet-point details.</small>",
+                    "</div>",
                     "</div>"
                 )
                 
@@ -735,75 +1076,303 @@ vennClass <- if (requireNamespace('jmvcore'))
                 return(plot)
             },
 
+            # Helper function for UpSetR plotting
+            .plotUpsetRHelper = function(mydata2) {
+                # Get user options
+                sortBy <- self$options$sortBy
+                minSize <- self$options$minSize
+                showAnnotations <- self$options$showAnnotations
+
+                # Determine order.by parameter
+                orderBy <- switch(sortBy,
+                    "freq" = "freq",
+                    "degree" = "degree",
+                    "none" = "freq",  # Default to "freq" instead of NULL to avoid xtfrm error
+                    "freq"  # default
+                )
+
+                # Create UpSetR plot
+                # Note: For UpSetR, showAnnotations controls text visibility and scaling
+                if (showAnnotations) {
+                    # Enhanced visibility: larger text and show intersection sizes
+                    plot <- UpSetR::upset(
+                        mydata2,
+                        order.by = orderBy,
+                        cutoff = minSize,
+                        text.scale = c(1.5, 1.3, 1.2, 1.1, 2, 1),
+                        show.numbers = "yes"
+                    )
+                } else {
+                    # Minimal text: smaller scaling and hide numbers
+                    plot <- UpSetR::upset(
+                        mydata2,
+                        order.by = orderBy,
+                        cutoff = minSize,
+                        text.scale = c(0.8, 0.8, 0.8, 0.8, 1, 0.6),
+                        show.numbers = "no"
+                    )
+                }
+
+                # Add a title to the Upset Diagram using grid.text.
+                grid::grid.text(.("UpSetR Diagram of Selected Variables"), x = 0.5, y = 0.97,
+                                gp = grid::gpar(fontsize = 14, fontface = "bold"))
+
+                return(plot)
+            },
+
+            # Helper function for ComplexUpset plotting
+            .plotComplexUpsetHelper = function(mydata2) {
+                private$.checkpoint()
+                # Get user options
+                sortBy <- self$options$sortBy
+                minSize <- self$options$minSize
+                showAnnotations <- self$options$showAnnotations
+
+                # Prepare data for ComplexUpset (convert back to logical from integer)
+                upset_data <- mydata2
+                for (col in names(upset_data)) {
+                    upset_data[[col]] <- as.logical(upset_data[[col]])
+                }
+
+                # Determine sort mode for ComplexUpset
+                sort_mode <- switch(sortBy,
+                    "freq" = "descending",
+                    "degree" = "ascending",
+                    "none" = FALSE,
+                    "descending"  # default
+                )
+
+                # Create the base ComplexUpset plot with proper annotations
+                base_annotations_list <- list(
+                    'Intersection size' = ComplexUpset::intersection_size(
+                        counts = TRUE,
+                        text = list(size = 3)
+                    )
+                )
+
+                # Add custom annotations if requested
+                # Note: For ComplexUpset, showAnnotations adds percentage labels to intersection sizes
+                annotations_list <- if (showAnnotations) {
+                    list(
+                        'Intersection percentages' = ComplexUpset::intersection_size(
+                            counts = FALSE,
+                            text = list(size = 3),
+                            text_mapping = ggplot2::aes(label = paste0(round(100 * !!rlang::sym('intersection_size') / sum(!!rlang::sym('intersection_size')), 1), '%'))
+                        )
+                    )
+                } else {
+                    NULL
+                }
+
+                plot <- ComplexUpset::upset(
+                    data = upset_data,
+                    intersect = names(upset_data),
+                    min_size = minSize,
+                    sort_intersections = sort_mode,
+                    sort_sets = sort_mode,
+                    name = .("Intersection Size"),
+                    width_ratio = 0.1,
+                    height_ratio = 0.8,
+                    wrap = TRUE,
+                    base_annotations = base_annotations_list,
+                    annotations = annotations_list,
+                    themes = list(
+                        'intersections_matrix' = ggplot2::theme(
+                            text = ggplot2::element_text(size = 10),
+                            axis.text = ggplot2::element_text(size = 8)
+                        ),
+                        'overall_sizes' = ggplot2::theme(
+                            text = ggplot2::element_text(size = 10),
+                            axis.text = ggplot2::element_text(size = 8)
+                        )
+                    )
+                )
+
+                # Add title
+                plot <- plot +
+                    ggplot2::ggtitle(.("ComplexUpset Diagram of Selected Variables")) +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 14)
+                    )
+
+                return(plot)
+            },
+
             # Helper function for ggVennDiagram plotting (advanced)
-            .plotGgVennDiagram = function(mydata2, namescolumn2, ggtheme) {
+            .plotGgVennDiagramHelper = function(mydata2, namescolumn2, ggtheme, theme) {
+                private$.checkpoint()
+                # ggVennDiagram expects a list of vectors containing row indices where each variable is TRUE
+                # Convert dataframe format to list format
+
+                # First convert to logical if needed
+                if (all(sapply(mydata2, function(x) all(x %in% c(0, 1))))) {
+                    mydata2 <- mydata2 %>%
+                        dplyr::mutate(dplyr::across(.cols = dplyr::everything(), ~ as.logical(.)))
+                }
+
+                # Convert to list format required by ggVennDiagram
+                venn_list <- list()
+                for (col_name in namescolumn2) {
+                    if (col_name %in% names(mydata2)) {
+                        # Get row indices where this variable is TRUE
+                        true_indices <- which(mydata2[[col_name]] == TRUE)
+                        venn_list[[col_name]] <- true_indices
+                    }
+                }
+
+                # Use the list format for ggVennDiagram
+                mydata2 <- venn_list
+
                 # Get user options for ggVennDiagram
+                shapeType <- self$options$shapeType
                 regionLabels <- self$options$regionLabels
+                labelGeometry <- self$options$labelGeometry
                 labelPrecisionDigits <- self$options$labelPrecisionDigits
                 setNameSize <- self$options$setNameSize
                 labelSize <- self$options$labelSize
                 edgeSize <- self$options$edgeSize
                 edgeColor <- self$options$edgeColor
+                edgeLineType <- self$options$edgeLineType
+                edgeAlpha <- self$options$edgeAlpha
+                fillAlpha <- self$options$fillAlpha
+                showSetLabels <- self$options$showSetLabels
+                setLabelColor <- self$options$setLabelColor
                 fillColorMapping <- self$options$fillColorMapping
                 colorPalette <- self$options$colorPalette
 
-                # Create the base ggVennDiagram plot
-                plot <- ggVennDiagram::ggVennDiagram(
-                    mydata2,
-                    category.names = namescolumn2,
-                    label = regionLabels,
-                    label_percent_digit = labelPrecisionDigits,
-                    label_size = labelSize,
-                    set_name_size = setNameSize,
-                    edge_size = edgeSize
-                )
+                # Determine shape parameters based on number of sets and user selection
+                num_sets <- length(mydata2)
+                shape_params <- list()
 
-                # Apply color palette if specified
-                if (colorPalette != "default" && fillColorMapping) {
-                    tryCatch({
-                        if (colorPalette %in% c("viridis", "plasma", "magma", "inferno")) {
-                            # Use viridis-type palettes for continuous scales
-                            plot <- plot +
-                                ggplot2::scale_fill_viridis_c(option = substr(colorPalette, 1, 1))
+                if (shapeType == "auto") {
+                    # Let ggVennDiagram choose the best shape automatically
+                    # Don't set any shape parameter
+                } else if (shapeType == "circle") {
+                    # Circle works for 2-4 sets
+                    if (num_sets <= 4) {
+                        shape_params$type <- "circle"
+                    }
+                } else if (shapeType == "ellipse") {
+                    # Ellipse works for 2-5 sets
+                    if (num_sets <= 5) {
+                        shape_params$type <- "ellipse"
+                    }
+                } else if (shapeType == "triangle") {
+                    # Triangle only works for exactly 3 sets
+                    if (num_sets == 3) {
+                        shape_params$type <- "triangle"
+                    }
+                } else if (shapeType == "polygon") {
+                    # Polygon works for 4+ sets
+                    if (num_sets >= 4) {
+                        shape_params$type <- "polygon"
+                    }
+                }
+
+                # Get original names for display using name mapping if available
+                display_names <- namescolumn2
+                if (!is.null(private$.name_mapping)) {
+                    display_names <- sapply(namescolumn2, function(name) {
+                        if (name %in% names(private$.name_mapping)) {
+                            private$.name_mapping[[name]]
                         } else {
-                            # Use RColorBrewer palettes
-                            if (requireNamespace("RColorBrewer", quietly = TRUE)) {
-                                # Get the data layer to determine how many unique values we have
-                                plot_data <- ggplot2::ggplot_build(plot)
-                                if (length(plot_data$data) > 0 && "fill" %in% names(plot_data$data[[1]])) {
-                                    fill_values <- plot_data$data[[1]]$fill
-                                    n_colors <- length(unique(fill_values[!is.na(fill_values)]))
-
-                                    if (n_colors > 0) {
-                                        max_colors <- RColorBrewer::brewer.pal.info[colorPalette, "maxcolors"]
-                                        n_colors <- min(max(n_colors, 3), max_colors)
-                                        colors <- RColorBrewer::brewer.pal(n = n_colors, name = colorPalette)
-
-                                        # Check if we have discrete or continuous values
-                                        if (all(is.numeric(fill_values))) {
-                                            plot <- plot + ggplot2::scale_fill_gradientn(colors = colors)
-                                        } else {
-                                            plot <- plot + ggplot2::scale_fill_manual(values = colors)
-                                        }
-                                    }
-                                }
-                            }
+                            name
                         }
-                    }, error = function(e) {
-                        # If color palette application fails, continue without custom colors
-                        warning("Failed to apply color palette: ", e$message)
                     })
                 }
 
-                # Apply edge color
-                if (edgeColor != "black") {
-                    plot <- plot +
-                        ggplot2::theme(panel.border = ggplot2::element_rect(color = edgeColor))
+                # Create the base ggVennDiagram plot with advanced options
+                plot_args <- list(
+                    x = mydata2,
+                    category.names = if (showSetLabels) display_names else NULL,
+                    label = regionLabels,
+                    label_geom = labelGeometry,
+                    label_percent_digit = labelPrecisionDigits,
+                    label_size = labelSize,
+                    set_name_size = setNameSize,
+                    edge_size = edgeSize,
+                    edge_lty = edgeLineType,
+                    edge_alpha = edgeAlpha,
+                    set_color = edgeColor  # Apply edge color to set boundaries
+                )
+
+                # Add shape parameters if specified
+                if (length(shape_params) > 0) {
+                    plot_args <- c(plot_args, shape_params)
                 }
 
-                # Add title and theme
+                # Create the plot
+                plot <- do.call(ggVennDiagram::ggVennDiagram, plot_args)
+
+                # Determine base fill colours from the jamovi theme or use defaults
+                base_fill_colors <- theme$fill
+                if (is.null(base_fill_colors) || length(base_fill_colors) == 0) {
+                    base_fill_colors <- c("#FFFFFF", "#79A6EA")
+                } else if (length(base_fill_colors) == 1) {
+                    base_fill_colors <- rep(base_fill_colors[1], 2)
+                } else {
+                    base_fill_colors <- base_fill_colors[1:2]
+                }
+
+                build_palette_scale <- function() {
+                    if (!isTRUE(fillColorMapping) || colorPalette == "default") {
+                        return(NULL)
+                    }
+
+                    tryCatch({
+                        if (colorPalette %in% c("viridis", "plasma", "magma", "inferno", "cividis")) {
+                            palette_fun <- switch(colorPalette,
+                                "viridis" = viridis::viridis,
+                                "plasma" = viridis::plasma,
+                                "magma" = viridis::magma,
+                                "inferno" = viridis::inferno,
+                                "cividis" = viridis::cividis
+                            )
+                            cols <- palette_fun(6)
+                            cols <- grDevices::adjustcolor(cols, alpha.f = fillAlpha)
+                            return(ggplot2::scale_fill_gradientn(colours = cols, guide = "none"))
+                        }
+
+                        if (requireNamespace("RColorBrewer", quietly = TRUE) &&
+                            colorPalette %in% rownames(RColorBrewer::brewer.pal.info)) {
+                            max_colors <- RColorBrewer::brewer.pal.info[colorPalette, "maxcolors"]
+                            cols <- RColorBrewer::brewer.pal(n = min(9, max_colors), name = colorPalette)
+                            cols <- grDevices::adjustcolor(cols, alpha.f = fillAlpha)
+                            return(ggplot2::scale_fill_gradientn(colours = cols, guide = "none"))
+                        }
+
+                        NULL
+                    }, error = function(e) NULL)
+                }
+
+                palette_scale <- build_palette_scale()
+                if (is.null(palette_scale)) {
+                    adjusted_colors <- grDevices::adjustcolor(base_fill_colors, alpha.f = fillAlpha)
+                    palette_scale <- ggplot2::scale_fill_gradient(
+                        low = adjusted_colors[1],
+                        high = adjusted_colors[length(adjusted_colors)],
+                        guide = "none"
+                    )
+                }
+
+                if (!is.null(ggtheme)) {
+                    plot <- plot + ggtheme
+                }
+
+                if (!is.null(palette_scale)) {
+                    plot <- plot + palette_scale
+                }
+
+                # Apply set label colour if it differs from default
+                if (setLabelColor != "black") {
+                    plot <- plot +
+                        ggplot2::theme(
+                            text = ggplot2::element_text(color = setLabelColor)
+                        )
+                }
+
+                # Add title and remove axes for a cleaner Venn diagram display
                 plot <- plot +
-                    ggtheme +
                     ggplot2::ggtitle(.("Advanced Venn Diagram of Selected Variables")) +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
@@ -818,6 +1387,440 @@ vennClass <- if (requireNamespace('jmvcore'))
                     )
 
                 return(plot)
+            },
+
+            # Generate set calculations using ggVennDiagram functions
+            .generateSetCalculations = function(mydata2, namescolumn2, summaryData) {
+                tryCatch({
+                    # Prepare calculations
+                    calculations <- list()
+
+                    # Create venn object for calculations if ggVennDiagram is available
+                    if (requireNamespace("ggVennDiagram", quietly = TRUE)) {
+                        # Convert dataframe to list format required by ggVennDiagram
+                        # mydata2 comes as integers (0/1), convert to logical first
+                        mydata_logical <- mydata2
+                        for (col in names(mydata_logical)) {
+                            mydata_logical[[col]] <- as.logical(mydata_logical[[col]])
+                        }
+
+                        # Convert to list of row indices
+                        venn_list <- list()
+                        for (col_name in namescolumn2) {
+                            if (col_name %in% names(mydata_logical)) {
+                                # Get row indices where this variable is TRUE
+                                true_indices <- which(mydata_logical[[col_name]] == TRUE)
+                                venn_list[[col_name]] <- true_indices
+                            }
+                        }
+
+                        # Create venn object with the list format
+                        venn_obj <- ggVennDiagram::Venn(venn_list)
+
+                        # Calculate overlaps if requested
+                        if (self$options$calculateOverlap) {
+                            tryCatch({
+                                overlaps <- ggVennDiagram::overlap(venn_obj, slice = "all")
+                                if (!is.null(overlaps)) {
+                                    calculations$overlaps <- overlaps
+                                }
+                            }, error = function(e) {
+                                # If overlap calculation fails, continue without it
+                                NULL
+                            })
+                        }
+
+                        # Calculate unique members (discern) if requested
+                        if (self$options$calculateDiscern) {
+                            tryCatch({
+                                unique_members <- ggVennDiagram::discern(venn_obj, slice = "all")
+                                if (!is.null(unique_members)) {
+                                    calculations$unique_members <- unique_members
+                                }
+                            }, error = function(e) {
+                                # If discern calculation fails, continue without it
+                                NULL
+                            })
+                        }
+
+                        # Calculate union if requested
+                        if (self$options$calculateUnite) {
+                            tryCatch({
+                                union_result <- ggVennDiagram::unite(venn_obj, slice = "all")
+                                if (!is.null(union_result)) {
+                                    calculations$union <- union_result
+                                }
+                            }, error = function(e) {
+                                # If unite calculation fails, continue without it
+                                NULL
+                            })
+                        }
+                    }
+
+                    # Format results for HTML output
+                    html_content <- "<div class='set-calculations'>"
+                    html_content <- paste0(html_content, "<h3>Set Calculations</h3>")
+
+                    # Always show basic information about the sets
+                    html_content <- paste0(html_content, "<h4>Set Information:</h4>")
+                    total_observations <- nrow(mydata2)
+                    html_content <- paste0(html_content,
+                        "<p><strong>Total observations:</strong> ", total_observations, "</p>")
+                    html_content <- paste0(html_content,
+                        "<p><strong>Number of sets:</strong> ", length(namescolumn2), "</p>")
+
+                    if (length(calculations) > 0) {
+                        if (!is.null(calculations$overlaps)) {
+                            html_content <- paste0(html_content, "<h4>Overlapping Members:</h4>")
+                            if (!is.null(calculations$overlaps) && is.list(calculations$overlaps) && length(calculations$overlaps) > 0) {
+                                for (i in seq_along(calculations$overlaps)) {
+                                    set_name <- names(calculations$overlaps)[i]
+                                    # Use original name for display if available
+                                    display_name <- set_name
+                                    if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
+                                        display_name <- private$.name_mapping[[set_name]]
+                                    }
+                                    members <- calculations$overlaps[[i]]
+                                    html_content <- paste0(html_content,
+                                        "<p><strong>", display_name, ":</strong> ",
+                                        length(members), " members (",
+                                        round(length(members)/total_observations*100, 1), "%)</p>")
+                                }
+                            } else {
+                                html_content <- paste0(html_content, "<p>No overlaps found.</p>")
+                            }
+                        }
+
+                        if (!is.null(calculations$unique_members)) {
+                            html_content <- paste0(html_content, "<h4>Unique Members per Set:</h4>")
+                            if (!is.null(calculations$unique_members) && is.list(calculations$unique_members) && length(calculations$unique_members) > 0) {
+                                for (i in seq_along(calculations$unique_members)) {
+                                    set_name <- names(calculations$unique_members)[i]
+                                    # Use original name for display if available
+                                    display_name <- set_name
+                                    if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
+                                        display_name <- private$.name_mapping[[set_name]]
+                                    }
+                                    members <- calculations$unique_members[[i]]
+                                    html_content <- paste0(html_content,
+                                        "<p><strong>", display_name, ":</strong> ",
+                                        length(members), " unique members (",
+                                        round(length(members)/total_observations*100, 1), "%)</p>")
+                                }
+                            } else {
+                                html_content <- paste0(html_content, "<p>No unique members found.</p>")
+                            }
+                        }
+
+                        if (!is.null(calculations$union)) {
+                            html_content <- paste0(html_content, "<h4>Union of All Sets:</h4>")
+                            union_size <- length(calculations$union)
+                            html_content <- paste0(html_content,
+                                "<p><strong>Total unique items across all sets:</strong> ",
+                                union_size, " items (",
+                                round(union_size/total_observations*100, 1), "%)</p>")
+                        }
+                    } else {
+                        html_content <- paste0(html_content,
+                            "<div style='background: #fff3cd; padding: 10px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 10px 0;'>",
+                            "<p><strong>📊 Enable Calculations:</strong></p>",
+                            "<p>To see detailed set calculations, please enable the specific options:</p>",
+                            "<ul>",
+                            "<li><strong>Calculate Overlaps:</strong> Shows intersection members</li>",
+                            "<li><strong>Calculate Unique Members:</strong> Shows members exclusive to each set</li>",
+                            "<li><strong>Calculate Unions:</strong> Shows combined membership across all sets</li>",
+                            "</ul>",
+                            "</div>")
+                    }
+
+                    html_content <- paste0(html_content, "</div>")
+
+                    # Set the content
+                    self$results$setCalculations$setContent(html_content)
+
+                }, error = function(e) {
+                    # If calculations fail, show error message
+                    error_html <- paste0("<div class='error'>",
+                        "<p>Error in set calculations: ", e$message, "</p>",
+                        "<p>This feature requires ggVennDiagram package.</p>",
+                        "</div>")
+                    self$results$setCalculations$setContent(error_html)
+                })
+            },
+
+            # Generate membership table showing which items belong to which sets
+            .generateMembershipTable = function(mydata, safe_names, name_mapping, row_numbers) {
+                tryCatch({
+                    if (length(safe_names) < 2) {
+                        return()
+                    }
+
+                    table <- self$results$membershipTable
+                    if (is.null(table)) {
+                        return()
+                    }
+
+                    # Build membership data with the display names that will appear in the table header
+                    membership_data <- data.frame(Row = seq_len(nrow(mydata)))
+                    group_labels <- NULL
+                    for (safe_name in safe_names) {
+                        if (safe_name %in% names(mydata)) {
+                            display_name <- if (!is.null(name_mapping) && safe_name %in% names(name_mapping)) {
+                                name_mapping[[safe_name]]
+                            } else {
+                                safe_name
+                            }
+                            membership_data[[display_name]] <- ifelse(mydata[[safe_name]], "Yes", "No")
+                        }
+                    }
+
+                    set_columns <- names(membership_data)[names(membership_data) != "Row"]
+                    if (length(set_columns) > 0) {
+                        group_labels <- vapply(seq_len(nrow(membership_data)), function(i) {
+                            row_values <- membership_data[i, set_columns, drop = FALSE]
+                            positives <- set_columns[unlist(row_values, use.names = FALSE) == "Yes"]
+                            if (length(positives) == 0) {
+                                "None"
+                            } else {
+                                paste(positives, collapse = " & ")
+                            }
+                        }, FUN.VALUE = character(1))
+
+                        membership_data$Group <- group_labels
+                        membership_data <- membership_data[, c("Row", "Group", set_columns), drop = FALSE]
+                    } else {
+                        group_labels <- rep("None", nrow(membership_data))
+                    }
+
+                    if (nrow(membership_data) == 0L) {
+                        table$deleteRows()
+                        return()
+                    }
+
+                    state_data <- membership_data
+
+                    # Map display names to safe column identifiers used internally by jamovi
+                    original_names <- names(membership_data)
+                    safe_col_names <- make.names(original_names, unique = TRUE)
+
+                    # Ensure required columns exist (add only when missing to avoid duplication)
+                    existing_cols <- character(0)
+                    try({ existing_cols <- names(table$columns) }, silent = TRUE)
+
+                    for (i in seq_along(original_names)) {
+                        if (is.na(match(safe_col_names[i], existing_cols))) {
+                            table$addColumn(
+                                name = safe_col_names[i],
+                                title = original_names[i],
+                                type = if (original_names[i] == "Row") "integer" else "text"
+                            )
+                            existing_cols <- c(existing_cols, safe_col_names[i])
+                        } else {
+                            column <- NULL
+                            try({ column <- table$getColumn(safe_col_names[i]) }, silent = TRUE)
+                            if (!is.null(column)) {
+                                try({ column$title <- original_names[i] }, silent = TRUE)
+                            }
+                        }
+                    }
+
+                    # Align data frame column names with the safe identifiers
+                    names(membership_data) <- safe_col_names
+
+                    table$setState(state_data)
+                    table$deleteRows()
+
+                    column_mapping <- stats::setNames(safe_col_names, safe_col_names)
+                    private$.populateTableSafely(table, membership_data, column_mapping)
+
+                    try({ table$setNote(key = "error", note = NULL) }, silent = TRUE)
+
+                    if (!is.null(group_labels) && self$options$membershipGroups && self$results$membershipGroups$isNotFilled()) {
+                        try({
+                            output_rows <- row_numbers
+                            if (length(output_rows) != length(group_labels)) {
+                                output_rows <- seq_len(length(group_labels))
+                            }
+                            self$results$membershipGroups$setRowNums(output_rows)
+                            self$results$membershipGroups$setValues(group_labels)
+                        }, silent = TRUE)
+                    }
+
+                }, error = function(e) {
+                    self$results$membershipTable$setNote(
+                        key = "error",
+                        note = paste("Error in generating membership table:", e$message)
+                    )
+                })
+            },
+
+            # Utility function for escaping variable names with special characters
+            .escapeVar = function(x) {
+                # mimic modelbuilder behavior for safe variable naming
+                gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+            },
+
+            # Populate jamovi tables safely using a data frame and column mapping
+            .populateTableSafely = function(table_result, data_frame, column_mapping) {
+                tryCatch({
+                    if (is.null(data_frame) || nrow(data_frame) == 0) {
+                        return(invisible(NULL))
+                    }
+
+                    for (i in seq_len(nrow(data_frame))) {
+                        row_values <- list()
+
+                        for (col_name in names(column_mapping)) {
+                            source_col <- column_mapping[[col_name]]
+                            if (source_col %in% names(data_frame)) {
+                                row_values[[col_name]] <- data_frame[[source_col]][i]
+                            } else {
+                                row_values[[col_name]] <- NA
+                            }
+                        }
+
+                        table_result$addRow(rowKey = i, values = row_values)
+
+                        if (i %% 100 == 0) {
+                            private$.checkpoint()
+                        }
+                    }
+                }, error = function(e) {
+                    warning(paste(.("Table population failed:"), e$message))
+                })
+            },
+
+            # Generate clinical interpretation of overlap patterns
+            .generateClinicalInterpretation = function(intersection_data, var_names, total_n) {
+                if (is.null(intersection_data) || nrow(intersection_data) < 2) return("")
+
+                # Find largest and most meaningful overlaps
+                largest_count <- max(intersection_data$TrueCount, na.rm = TRUE)
+                largest_var <- intersection_data$Variable[which.max(intersection_data$TrueCount)]
+                largest_pct <- round((largest_count / total_n) * 100, 1)
+
+                # Calculate overall overlap assessment
+                mean_overlap <- mean(intersection_data$TrueCount, na.rm = TRUE)
+                overlap_level <- if (mean_overlap / total_n > 0.5) "high" else if (mean_overlap / total_n > 0.2) "moderate" else "low"
+
+                interpretation <- paste0(
+                    "<div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; border-radius: 4px;'>",
+                    "<h5 style='margin: 0 0 10px 0; color: #155724;'>🔬 Clinical Interpretation</h5>",
+                    "<p style='margin: 0 0 8px 0;'><strong>Key Finding:</strong> In this dataset of ", total_n, " cases, ",
+                    "'", largest_var, "' shows the highest prevalence with ", largest_count, " positive cases (", largest_pct, "%).</p>",
+                    "<p style='margin: 0 0 8px 0;'><strong>Overlap Pattern:</strong> The variables show ", overlap_level, " levels of intersection, ",
+                    if (overlap_level == "high") "suggesting strong associations between the measured characteristics."
+                    else if (overlap_level == "moderate") "indicating meaningful but not dominant relationships."
+                    else "suggesting the variables capture largely distinct characteristics.", "</p>",
+                    "<p style='margin: 0; font-size: 0.9em; color: #6c757d;'>",
+                    "💡 <em>Clinical Relevance:</em> Use Venn diagrams to identify patient subgroups, assess diagnostic overlap, ",
+                    "or evaluate multi-marker patterns in pathology and oncology research.</p>",
+                    "</div>"
+                )
+
+                return(interpretation)
+            },
+
+            # Validate statistical power and provide warnings
+            .validateStatisticalPower = function(intersection_data, total_n) {
+                warnings <- c()
+
+                # Check for small intersection sizes
+                if (!is.null(intersection_data) && nrow(intersection_data) > 0) {
+                    small_counts <- sum(intersection_data$TrueCount < 5, na.rm = TRUE)
+                    if (small_counts > 0) {
+                        warnings <- c(warnings, paste0(
+                            "⚠️ <strong>Small Sample Warning:</strong> ", small_counts, " variable(s) have fewer than 5 positive cases. ",
+                            "Consider combining categories or collecting additional data for robust statistical inference."
+                        ))
+                    }
+
+                    # Check for very low prevalence
+                    low_prev <- sum((intersection_data$TrueCount / total_n) < 0.05, na.rm = TRUE)
+                    if (low_prev > 0) {
+                        warnings <- c(warnings, paste0(
+                            "📊 <strong>Low Prevalence Note:</strong> ", low_prev, " variable(s) have prevalence below 5%. ",
+                            "Venn diagram patterns may be difficult to interpret visually."
+                        ))
+                    }
+
+                    # Check for total sample size
+                    if (total_n < 30) {
+                        warnings <- c(warnings, paste0(
+                            "📈 <strong>Sample Size Advisory:</strong> With only ", total_n, " cases, overlap patterns should be interpreted cautiously. ",
+                            "Consider this as exploratory analysis requiring validation in larger samples."
+                        ))
+                    }
+                }
+
+                if (length(warnings) > 0) {
+                    warning_html <- paste0(
+                        "<div style='background: #fff3cd; padding: 12px; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px;'>",
+                        "<h6 style='margin: 0 0 8px 0; color: #856404;'>Statistical Considerations</h6>",
+                        paste(warnings, collapse = "<br><br>"),
+                        "</div>"
+                    )
+                    return(warning_html)
+                }
+
+                return("")
+            },
+
+            # Generate statistical glossary
+            .generateGlossary = function() {
+                glossary_content <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #6f42c1;'>",
+                    "<h4 style='color: #6f42c1; margin-top: 0;'>📚 Statistical Glossary & Clinical Guide</h4>",
+
+                    "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;'>",
+
+                    # Venn Diagram Terms
+                    "<div style='background: white; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Venn Diagram Terms</h6>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Intersection:</strong> Cases positive for multiple variables simultaneously (overlap regions)</p>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Union:</strong> Cases positive for any of the variables (total covered area)</p>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Exclusive:</strong> Cases positive for only one specific variable</p>",
+                    "<p style='margin: 0; font-size: 0.9em;'><strong>Complement:</strong> Cases negative for all variables</p>",
+                    "</div>",
+
+                    # Clinical Applications
+                    "<div style='background: white; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Clinical Applications</h6>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Biomarker Analysis:</strong> Assess multi-marker expression patterns in tumors</p>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Diagnostic Overlap:</strong> Evaluate concordance between different diagnostic methods</p>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Risk Stratification:</strong> Identify patient subgroups with multiple risk factors</p>",
+                    "<p style='margin: 0; font-size: 0.9em;'><strong>Treatment Response:</strong> Compare response across different outcome measures</p>",
+                    "</div>",
+
+                    "</div>",
+
+                    # Plot Types Explanation
+                    "<div style='background: white; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 15px;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Plot Type Selection Guide</h6>",
+                    "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'>",
+                    "<div>",
+                    "<p style='margin: 0 0 4px 0; font-size: 0.9em;'><strong>ggvenn:</strong> Simple, classic Venn diagrams for 2-3 variables</p>",
+                    "<p style='margin: 0 0 4px 0; font-size: 0.9em;'><strong>ggVennDiagram:</strong> Advanced Venn with customization options</p>",
+                    "</div>",
+                    "<div>",
+                    "<p style='margin: 0 0 4px 0; font-size: 0.9em;'><strong>UpSetR:</strong> Matrix-style plots for 4+ variables</p>",
+                    "<p style='margin: 0; font-size: 0.9em;'><strong>ComplexUpset:</strong> Enhanced UpSet with statistical annotations</p>",
+                    "</div>",
+                    "</div>",
+                    "</div>",
+
+                    # Statistical Considerations
+                    "<div style='background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: #856404;'>⚠️ Statistical Considerations</h6>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Sample Size:</strong> Ensure adequate cases in each intersection for reliable interpretation</p>",
+                    "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Independence:</strong> Venn diagrams show overlap but don't imply causal relationships</p>",
+                    "<p style='margin: 0; font-size: 0.9em;'><strong>Clinical Context:</strong> Always interpret results within appropriate clinical and biological context</p>",
+                    "</div>",
+
+                    "</div>"
+                )
+
+                self$results$glossary$setContent(glossary_content)
             }
         )
     )

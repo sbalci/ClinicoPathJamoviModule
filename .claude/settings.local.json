@@ -90,7 +90,8 @@
       "Bash(then echo \"✅ POPULATED\")",
       "Bash(else echo \"❌ NOT POPULATED\")",
       "Bash(xargs:*)",
-      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/stagemigration.r.yaml)"
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/stagemigration.r.yaml)",
+      "WebFetch(domain:cloud.r-project.org)"
     ],
     "deny": [],
     "ask": [],

@@ -10,29 +10,49 @@ venn(
   var1true,
   var2,
   var2true,
-  var3,
+  var3 = NULL,
   var3true,
-  var4,
+  var4 = NULL,
   var4true,
-  upsetType = "upsetR",
+  var5 = NULL,
+  var5true,
+  var6 = NULL,
+  var6true,
+  var7 = NULL,
+  var7true,
+  show_upsetR = FALSE,
+  show_complexUpset = FALSE,
+  show_ggvenn = FALSE,
+  show_ggVennDiagram = FALSE,
   sortBy = "freq",
   minSize = 0,
   showAnnotations = FALSE,
-  vennEngine = "ggvenn",
-  var5,
-  var5true,
-  var6,
-  var6true,
-  var7,
-  var7true,
+  explanatory = FALSE,
+  aboutAnalysis = FALSE,
+  clinicalSummary = FALSE,
+  reportSentences = FALSE,
+  assumptions = FALSE,
+  shapeType = "auto",
   regionLabels = "count",
+  labelGeometry = "label",
   labelPrecisionDigits = 1,
   setNameSize = 5,
   labelSize = 4,
   edgeSize = 1,
   edgeColor = "black",
+  edgeLineType = "solid",
+  edgeAlpha = 1,
+  fillAlpha = 0.5,
+  showSetLabels = TRUE,
+  setLabelColor = "black",
   fillColorMapping = TRUE,
-  colorPalette = "default"
+  colorPalette = "default",
+  showSetCalculations = FALSE,
+  calculateOverlap = FALSE,
+  calculateDiscern = FALSE,
+  calculateUnite = FALSE,
+  showMembershipTable = FALSE,
+  showGlossary = FALSE
 )
 }
 \arguments{
@@ -63,8 +83,31 @@ analysis.}
 \item{var4true}{The level in \code{var4} that represents the positive
 condition.}
 
-\item{upsetType}{Choose between UpSetR (classic) or ComplexUpset (advanced
-with more features).}
+\item{var5}{Fifth variable for 5-set Venn diagrams (automatically switches
+to advanced engine).}
+
+\item{var5true}{The level in \code{var5} that represents the positive
+condition.}
+
+\item{var6}{Sixth variable for 6-set Venn diagrams (uses advanced engine
+automatically).}
+
+\item{var6true}{The level in \code{var6} that represents the positive
+condition.}
+
+\item{var7}{Seventh variable for 7-set Venn diagrams (uses advanced engine
+automatically).}
+
+\item{var7true}{The level in \code{var7} that represents the positive
+condition.}
+
+\item{show_upsetR}{.}
+
+\item{show_complexUpset}{.}
+
+\item{show_ggvenn}{.}
+
+\item{show_ggVennDiagram}{.}
 
 \item{sortBy}{How to sort the intersections in the UpSet plot.}
 
@@ -73,58 +116,98 @@ with more features).}
 \item{showAnnotations}{Add percentage labels to intersection sizes in
 ComplexUpset plots or enhanced text scaling in UpSetR plots.}
 
-\item{vennEngine}{Choose between ggvenn (classic, 2-4 sets) or
-ggVennDiagram (advanced, 2-7 sets with enhanced customization).}
+\item{explanatory}{Add detailed explanatory footnotes with interpretation
+guidance for Venn diagrams and set operations.}
 
-\item{var5}{Fifth variable for 5-set Venn diagrams (only available with
-ggVennDiagram engine).}
+\item{aboutAnalysis}{Display detailed information about Venn diagram
+analysis and interpretation.}
 
-\item{var5true}{The level in \code{var5} that represents the positive
-condition.}
+\item{clinicalSummary}{Display clinical interpretation of overlap patterns
+and key findings.}
 
-\item{var6}{Sixth variable for 6-set Venn diagrams (only available with
-ggVennDiagram engine).}
+\item{reportSentences}{Generate copy-ready sentences for clinical reports
+and publications.}
 
-\item{var6true}{The level in \code{var6} that represents the positive
-condition.}
+\item{assumptions}{Display interpretation guidelines and statistical
+assumptions.}
 
-\item{var7}{Seventh variable for 7-set Venn diagrams (only available with
-ggVennDiagram engine).}
+\item{shapeType}{Shape type for ggVennDiagram. Auto selects optimal shape
+based on number of sets.}
 
-\item{var7true}{The level in \code{var7} that represents the positive
-condition.}
+\item{regionLabels}{What to display in Venn diagram regions (available for
+advanced diagrams).}
 
-\item{regionLabels}{What to display in Venn diagram regions (ggVennDiagram
-only).}
+\item{labelGeometry}{Whether to use label geometry (with background) or
+text geometry for region labels.}
 
 \item{labelPrecisionDigits}{Number of decimal places for percentage labels
-(ggVennDiagram only).}
+(available for advanced diagrams).}
 
-\item{setNameSize}{Font size for set names (ggVennDiagram only).}
+\item{setNameSize}{Font size for set names (available for advanced
+diagrams).}
 
-\item{labelSize}{Font size for region labels (ggVennDiagram only).}
+\item{labelSize}{Font size for region labels (available for advanced
+diagrams).}
 
-\item{edgeSize}{Width of set boundary lines (ggVennDiagram only).}
+\item{edgeSize}{Width of set boundary lines (available for advanced
+diagrams).}
 
-\item{edgeColor}{Color of set boundary lines (ggVennDiagram only).}
+\item{edgeColor}{Color of set boundary lines (available for advanced
+diagrams).}
 
-\item{fillColorMapping}{Map fill colors to intersection sizes
-(ggVennDiagram only).}
+\item{edgeLineType}{Line type for set boundaries in ggVennDiagram.}
 
-\item{colorPalette}{Color palette for Venn diagram regions (ggVennDiagram
-only).}
+\item{edgeAlpha}{Transparency level for set boundary lines (0=transparent,
+1=opaque).}
+
+\item{fillAlpha}{Transparency level for region fills (0=transparent,
+1=opaque).}
+
+\item{showSetLabels}{Whether to display set names on the diagram.}
+
+\item{setLabelColor}{Color for set name labels.}
+
+\item{fillColorMapping}{Map fill colors to intersection sizes (available
+for advanced diagrams).}
+
+\item{colorPalette}{Color palette for Venn diagram regions (available for
+advanced diagrams).}
+
+\item{showSetCalculations}{Display detailed set calculations including
+overlaps, unique members, and unions.}
+
+\item{calculateOverlap}{Calculate and display overlap intersections between
+sets.}
+
+\item{calculateDiscern}{Calculate and display unique members for each set
+(discern operation).}
+
+\item{calculateUnite}{Calculate and display union of all sets.}
+
+\item{showMembershipTable}{Display detailed membership table showing which
+items belong to which sets.}
+
+\item{showGlossary}{Display glossary of statistical terms and clinical
+interpretations.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$plotGgvenn} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotGgVennDiagram} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotUpsetR} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotComplexUpset} \tab \tab \tab \tab \tab an image \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$summary} \tab \tab \tab \tab \tab a table \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$setCalculations} \tab \tab \tab \tab \tab a html \cr
+\code{results$membershipTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$membershipGroups} \tab \tab \tab \tab \tab an output \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

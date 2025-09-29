@@ -8,26 +8,26 @@ clearWith:
     - var2
     - var3
     - var4
+    - var5
+    - var6
+    - var7
     - var1true
     - var2true
     - var3true
     - var4true
+    - var5true
+    - var6true
+    - var7true
 
 items:
+
+    - name: welcome
+      title: "Welcome"
+      type: Html
 
     - name:  todo
       title: To Do
       type:  Html
-
-    - name: aboutAnalysis
-      title: "About This Analysis"
-      type: Html
-      visible: true
-
-    - name: clinicalSummary
-      title: "Clinical Summary"
-      type: Html
-      visible: true
 
     - title: Summary of True Counts
       name: summary
@@ -51,40 +51,114 @@ items:
           type: number
           format: pc
 
-    - title: Venn Diagram
-      name: plot
+    - title: ggvenn Plot
+      name: plotGgvenn
       type: Image
       width:  700
       height: 450
-      renderFun: .plot
+      renderFun: .plotGgvenn
       requiresData: true
+      visible: (show_ggvenn)
       refs:
-        - venn
+        - ggvenn
 
-    - title: Upset Diagram
-      name: plot2
+    - title: ggVennDiagram Plot
+      name: plotGgVennDiagram
       type: Image
       width:  700
       height: 450
-      renderFun: .plot2
+      renderFun: .plotGgVennDiagram
       requiresData: true
+      visible: (show_ggVennDiagram)
       refs:
-        - upset
+        - ggVennDiagram
+
+    - title: UpSetR Plot
+      name: plotUpsetR
+      type: Image
+      width:  700
+      height: 450
+      renderFun: .plotUpsetR
+      requiresData: true
+      visible: (show_upsetR)
+      refs:
+        - upsetR
+
+    - title: ComplexUpset Plot
+      name: plotComplexUpset
+      type: Image
+      width:  700
+      height: 450
+      renderFun: .plotComplexUpset
+      requiresData: true
+      visible: (show_complexUpset)
+      refs:
+        - complexUpset
+
+
+    - name: aboutAnalysis
+      title: "About This Analysis"
+      type: Html
+      visible: (aboutAnalysis)
+
+    - name: clinicalSummary
+      title: "Clinical Summary"
+      type: Html
+      visible: (clinicalSummary)
 
     - name: reportSentences
       title: "Copy-Ready Clinical Summary"
       type: Html
-      visible: true
+      visible: (reportSentences)
 
     - name: assumptions
       title: "Interpretation Guide & Assumptions"
       type: Html
-      visible: true
+      visible: (assumptions)
+
+    - name: setCalculations
+      title: "Set Calculations"
+      type: Html
+      visible: (showSetCalculations)
+
+    - name: membershipTable
+      title: "Membership Table"
+      type: Table
+      visible: (showMembershipTable)
+      rows: 0
+      columns: []
+
+    - name: membershipGroups
+      title: "Add Membership Groups to Data"
+      type: Output
+      varTitle: '`Venn Membership Groups - ${var1}`'
+      varDescription: 'Combination of selected Venn sets satisfied by each case'
+      measureType: nominal
+      clearWith:
+        - var1
+        - var2
+        - var3
+        - var4
+        - var5
+        - var6
+        - var7
+        - var1true
+        - var2true
+        - var3true
+        - var4true
+        - var5true
+        - var6true
+        - var7true
+        - showSetCalculations
+        - showMembershipTable
+        - membershipGroups
+
+    - name: glossary
+      title: "Statistical Glossary"
+      type: Html
+      visible: (showGlossary)
 
 refs:
     - ClinicoPathJamoviModule
-    - ggvenn
-    - UpSetR
-    - ComplexUpset
 
 ...

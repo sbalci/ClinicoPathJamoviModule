@@ -12,7 +12,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "📝 Study Names (Required)"
+            label: "Study Names (Required)"
             fitToGrid: true
           - type: VariablesListBox
             name: study
@@ -23,7 +23,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "✅ True Positives (Disease+, Test+)"
+            label: "True Positives (Disease+, Test+)"
             fitToGrid: true
           - type: VariablesListBox
             name: true_positives
@@ -34,7 +34,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "⚠️ False Positives (Disease-, Test+)"
+            label: "False Positives (Disease-, Test+)"
             fitToGrid: true
           - type: VariablesListBox
             name: false_positives
@@ -45,7 +45,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "❌ False Negatives (Disease+, Test-)"
+            label: "False Negatives (Disease+, Test-)"
             fitToGrid: true
           - type: VariablesListBox
             name: false_negatives
@@ -56,7 +56,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "✅ True Negatives (Disease-, Test-)"
+            label: "True Negatives (Disease-, Test-)"
             fitToGrid: true
           - type: VariablesListBox
             name: true_negatives
@@ -67,7 +67,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "📊 Meta-Regression Variable (Optional)"
+            label: "Meta-Regression Variable (Optional)"
             fitToGrid: true
           - type: VariablesListBox
             name: covariate
@@ -80,14 +80,14 @@ children:
     stretchFactor: 2
     children:
       - type: Label
-        label: "🔬 Analysis Options"
+        label: "Analysis Options"
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: bivariate_analysis
-                label: "Bivariate Random-Effects Model (Recommended)"
+                label: "Bivariate Random-Effects Model"
 
               - type: CheckBox
                 name: hsroc_analysis
@@ -100,6 +100,7 @@ children:
               - type: CheckBox
                 name: meta_regression
                 label: "Meta-Regression (Explore Covariate Effects)"
+                enable: (!is.null(covariate) && covariate !="")
 
               - type: CheckBox
                 name: publication_bias
@@ -110,7 +111,7 @@ children:
                 label: "Show Individual Study Results"
 
       - type: Label
-        label: "⚙️ Advanced Options"
+        label: "Advanced Options"
         children:
           - type: LayoutBox
             margin: large
@@ -126,7 +127,7 @@ children:
                 label: "Estimation Method"
 
       - type: Label
-        label: "📈 Visualization Options"
+        label: "Visualization Options"
         children:
           - type: LayoutBox
             margin: large
@@ -143,3 +144,29 @@ children:
                 name: funnel_plot
                 label: "Funnel Plot (Publication Bias)"
                 enable: (publication_bias)
+
+              - type: ComboBox
+                name: color_palette
+                label: "Plot Colors (Accessibility)"
+
+              - type: CheckBox
+                name: show_plot_explanations
+                label: "Show Plot Explanations & Interpretation"
+
+      - type: Label
+        label: "Reporting Options"
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_interpretation
+                label: "Show Clinical Interpretation"
+
+              - type: CheckBox
+                name: show_methodology
+                label: "Show Methodology Information"
+
+              - type: CheckBox
+                name: show_analysis_summary
+                label: "Show Analysis Summary"
