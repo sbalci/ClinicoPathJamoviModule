@@ -14,25 +14,45 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             var3true = NULL,
             var4 = NULL,
             var4true = NULL,
-            upsetType = "upsetR",
-            sortBy = "freq",
-            minSize = 0,
-            showAnnotations = FALSE,
-            vennEngine = "ggvenn",
             var5 = NULL,
             var5true = NULL,
             var6 = NULL,
             var6true = NULL,
             var7 = NULL,
             var7true = NULL,
+            show_upsetR = FALSE,
+            show_complexUpset = FALSE,
+            show_ggvenn = FALSE,
+            show_ggVennDiagram = FALSE,
+            sortBy = "freq",
+            minSize = 0,
+            showAnnotations = FALSE,
+            explanatory = FALSE,
+            aboutAnalysis = FALSE,
+            clinicalSummary = FALSE,
+            reportSentences = FALSE,
+            assumptions = FALSE,
+            shapeType = "auto",
             regionLabels = "count",
+            labelGeometry = "label",
             labelPrecisionDigits = 1,
             setNameSize = 5,
             labelSize = 4,
             edgeSize = 1,
             edgeColor = "black",
+            edgeLineType = "solid",
+            edgeAlpha = 1,
+            fillAlpha = 0.5,
+            showSetLabels = TRUE,
+            setLabelColor = "black",
             fillColorMapping = TRUE,
-            colorPalette = "default", ...) {
+            colorPalette = "default",
+            showSetCalculations = FALSE,
+            calculateOverlap = FALSE,
+            calculateDiscern = FALSE,
+            calculateUnite = FALSE,
+            showMembershipTable = FALSE,
+            showGlossary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -67,6 +87,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..var3 <- jmvcore::OptionVariable$new(
                 "var3",
                 var3,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -79,6 +100,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..var4 <- jmvcore::OptionVariable$new(
                 "var4",
                 var4,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -88,13 +110,61 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "var4true",
                 var4true,
                 variable="(var4)")
-            private$..upsetType <- jmvcore::OptionList$new(
-                "upsetType",
-                upsetType,
-                options=list(
-                    "upsetR",
-                    "complexUpset"),
-                default="upsetR")
+            private$..var5 <- jmvcore::OptionVariable$new(
+                "var5",
+                var5,
+                default=NULL,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..var5true <- jmvcore::OptionLevel$new(
+                "var5true",
+                var5true,
+                variable="(var5)")
+            private$..var6 <- jmvcore::OptionVariable$new(
+                "var6",
+                var6,
+                default=NULL,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..var6true <- jmvcore::OptionLevel$new(
+                "var6true",
+                var6true,
+                variable="(var6)")
+            private$..var7 <- jmvcore::OptionVariable$new(
+                "var7",
+                var7,
+                default=NULL,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..var7true <- jmvcore::OptionLevel$new(
+                "var7true",
+                var7true,
+                variable="(var7)")
+            private$..show_upsetR <- jmvcore::OptionBool$new(
+                "show_upsetR",
+                show_upsetR,
+                default=FALSE)
+            private$..show_complexUpset <- jmvcore::OptionBool$new(
+                "show_complexUpset",
+                show_complexUpset,
+                default=FALSE)
+            private$..show_ggvenn <- jmvcore::OptionBool$new(
+                "show_ggvenn",
+                show_ggvenn,
+                default=FALSE)
+            private$..show_ggVennDiagram <- jmvcore::OptionBool$new(
+                "show_ggVennDiagram",
+                show_ggVennDiagram,
+                default=FALSE)
             private$..sortBy <- jmvcore::OptionList$new(
                 "sortBy",
                 sortBy,
@@ -112,49 +182,36 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showAnnotations",
                 showAnnotations,
                 default=FALSE)
-            private$..vennEngine <- jmvcore::OptionList$new(
-                "vennEngine",
-                vennEngine,
+            private$..explanatory <- jmvcore::OptionBool$new(
+                "explanatory",
+                explanatory,
+                default=FALSE)
+            private$..aboutAnalysis <- jmvcore::OptionBool$new(
+                "aboutAnalysis",
+                aboutAnalysis,
+                default=FALSE)
+            private$..clinicalSummary <- jmvcore::OptionBool$new(
+                "clinicalSummary",
+                clinicalSummary,
+                default=FALSE)
+            private$..reportSentences <- jmvcore::OptionBool$new(
+                "reportSentences",
+                reportSentences,
+                default=FALSE)
+            private$..assumptions <- jmvcore::OptionBool$new(
+                "assumptions",
+                assumptions,
+                default=FALSE)
+            private$..shapeType <- jmvcore::OptionList$new(
+                "shapeType",
+                shapeType,
                 options=list(
-                    "ggvenn",
-                    "ggVennDiagram"),
-                default="ggvenn")
-            private$..var5 <- jmvcore::OptionVariable$new(
-                "var5",
-                var5,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
-            private$..var5true <- jmvcore::OptionLevel$new(
-                "var5true",
-                var5true,
-                variable="(var5)")
-            private$..var6 <- jmvcore::OptionVariable$new(
-                "var6",
-                var6,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
-            private$..var6true <- jmvcore::OptionLevel$new(
-                "var6true",
-                var6true,
-                variable="(var6)")
-            private$..var7 <- jmvcore::OptionVariable$new(
-                "var7",
-                var7,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
-            private$..var7true <- jmvcore::OptionLevel$new(
-                "var7true",
-                var7true,
-                variable="(var7)")
+                    "auto",
+                    "circle",
+                    "ellipse",
+                    "polygon",
+                    "triangle"),
+                default="auto")
             private$..regionLabels <- jmvcore::OptionList$new(
                 "regionLabels",
                 regionLabels,
@@ -164,6 +221,13 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "both",
                     "none"),
                 default="count")
+            private$..labelGeometry <- jmvcore::OptionList$new(
+                "labelGeometry",
+                labelGeometry,
+                options=list(
+                    "label",
+                    "text"),
+                default="label")
             private$..labelPrecisionDigits <- jmvcore::OptionInteger$new(
                 "labelPrecisionDigits",
                 labelPrecisionDigits,
@@ -192,6 +256,37 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "edgeColor",
                 edgeColor,
                 default="black")
+            private$..edgeLineType <- jmvcore::OptionList$new(
+                "edgeLineType",
+                edgeLineType,
+                options=list(
+                    "solid",
+                    "dashed",
+                    "dotted",
+                    "dotdash",
+                    "longdash",
+                    "twodash"),
+                default="solid")
+            private$..edgeAlpha <- jmvcore::OptionNumber$new(
+                "edgeAlpha",
+                edgeAlpha,
+                min=0,
+                max=1,
+                default=1)
+            private$..fillAlpha <- jmvcore::OptionNumber$new(
+                "fillAlpha",
+                fillAlpha,
+                min=0,
+                max=1,
+                default=0.5)
+            private$..showSetLabels <- jmvcore::OptionBool$new(
+                "showSetLabels",
+                showSetLabels,
+                default=TRUE)
+            private$..setLabelColor <- jmvcore::OptionString$new(
+                "setLabelColor",
+                setLabelColor,
+                default="black")
             private$..fillColorMapping <- jmvcore::OptionBool$new(
                 "fillColorMapping",
                 fillColorMapping,
@@ -213,6 +308,32 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "magma",
                     "inferno"),
                 default="default")
+            private$..showSetCalculations <- jmvcore::OptionBool$new(
+                "showSetCalculations",
+                showSetCalculations,
+                default=FALSE)
+            private$..calculateOverlap <- jmvcore::OptionBool$new(
+                "calculateOverlap",
+                calculateOverlap,
+                default=FALSE)
+            private$..calculateDiscern <- jmvcore::OptionBool$new(
+                "calculateDiscern",
+                calculateDiscern,
+                default=FALSE)
+            private$..calculateUnite <- jmvcore::OptionBool$new(
+                "calculateUnite",
+                calculateUnite,
+                default=FALSE)
+            private$..showMembershipTable <- jmvcore::OptionBool$new(
+                "showMembershipTable",
+                showMembershipTable,
+                default=FALSE)
+            private$..membershipGroups <- jmvcore::OptionOutput$new(
+                "membershipGroups")
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
 
             self$.addOption(private$..var1)
             self$.addOption(private$..var1true)
@@ -222,25 +343,46 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..var3true)
             self$.addOption(private$..var4)
             self$.addOption(private$..var4true)
-            self$.addOption(private$..upsetType)
-            self$.addOption(private$..sortBy)
-            self$.addOption(private$..minSize)
-            self$.addOption(private$..showAnnotations)
-            self$.addOption(private$..vennEngine)
             self$.addOption(private$..var5)
             self$.addOption(private$..var5true)
             self$.addOption(private$..var6)
             self$.addOption(private$..var6true)
             self$.addOption(private$..var7)
             self$.addOption(private$..var7true)
+            self$.addOption(private$..show_upsetR)
+            self$.addOption(private$..show_complexUpset)
+            self$.addOption(private$..show_ggvenn)
+            self$.addOption(private$..show_ggVennDiagram)
+            self$.addOption(private$..sortBy)
+            self$.addOption(private$..minSize)
+            self$.addOption(private$..showAnnotations)
+            self$.addOption(private$..explanatory)
+            self$.addOption(private$..aboutAnalysis)
+            self$.addOption(private$..clinicalSummary)
+            self$.addOption(private$..reportSentences)
+            self$.addOption(private$..assumptions)
+            self$.addOption(private$..shapeType)
             self$.addOption(private$..regionLabels)
+            self$.addOption(private$..labelGeometry)
             self$.addOption(private$..labelPrecisionDigits)
             self$.addOption(private$..setNameSize)
             self$.addOption(private$..labelSize)
             self$.addOption(private$..edgeSize)
             self$.addOption(private$..edgeColor)
+            self$.addOption(private$..edgeLineType)
+            self$.addOption(private$..edgeAlpha)
+            self$.addOption(private$..fillAlpha)
+            self$.addOption(private$..showSetLabels)
+            self$.addOption(private$..setLabelColor)
             self$.addOption(private$..fillColorMapping)
             self$.addOption(private$..colorPalette)
+            self$.addOption(private$..showSetCalculations)
+            self$.addOption(private$..calculateOverlap)
+            self$.addOption(private$..calculateDiscern)
+            self$.addOption(private$..calculateUnite)
+            self$.addOption(private$..showMembershipTable)
+            self$.addOption(private$..membershipGroups)
+            self$.addOption(private$..showGlossary)
         }),
     active = list(
         var1 = function() private$..var1$value,
@@ -251,25 +393,46 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         var3true = function() private$..var3true$value,
         var4 = function() private$..var4$value,
         var4true = function() private$..var4true$value,
-        upsetType = function() private$..upsetType$value,
-        sortBy = function() private$..sortBy$value,
-        minSize = function() private$..minSize$value,
-        showAnnotations = function() private$..showAnnotations$value,
-        vennEngine = function() private$..vennEngine$value,
         var5 = function() private$..var5$value,
         var5true = function() private$..var5true$value,
         var6 = function() private$..var6$value,
         var6true = function() private$..var6true$value,
         var7 = function() private$..var7$value,
         var7true = function() private$..var7true$value,
+        show_upsetR = function() private$..show_upsetR$value,
+        show_complexUpset = function() private$..show_complexUpset$value,
+        show_ggvenn = function() private$..show_ggvenn$value,
+        show_ggVennDiagram = function() private$..show_ggVennDiagram$value,
+        sortBy = function() private$..sortBy$value,
+        minSize = function() private$..minSize$value,
+        showAnnotations = function() private$..showAnnotations$value,
+        explanatory = function() private$..explanatory$value,
+        aboutAnalysis = function() private$..aboutAnalysis$value,
+        clinicalSummary = function() private$..clinicalSummary$value,
+        reportSentences = function() private$..reportSentences$value,
+        assumptions = function() private$..assumptions$value,
+        shapeType = function() private$..shapeType$value,
         regionLabels = function() private$..regionLabels$value,
+        labelGeometry = function() private$..labelGeometry$value,
         labelPrecisionDigits = function() private$..labelPrecisionDigits$value,
         setNameSize = function() private$..setNameSize$value,
         labelSize = function() private$..labelSize$value,
         edgeSize = function() private$..edgeSize$value,
         edgeColor = function() private$..edgeColor$value,
+        edgeLineType = function() private$..edgeLineType$value,
+        edgeAlpha = function() private$..edgeAlpha$value,
+        fillAlpha = function() private$..fillAlpha$value,
+        showSetLabels = function() private$..showSetLabels$value,
+        setLabelColor = function() private$..setLabelColor$value,
         fillColorMapping = function() private$..fillColorMapping$value,
-        colorPalette = function() private$..colorPalette$value),
+        colorPalette = function() private$..colorPalette$value,
+        showSetCalculations = function() private$..showSetCalculations$value,
+        calculateOverlap = function() private$..calculateOverlap$value,
+        calculateDiscern = function() private$..calculateDiscern$value,
+        calculateUnite = function() private$..calculateUnite$value,
+        showMembershipTable = function() private$..showMembershipTable$value,
+        membershipGroups = function() private$..membershipGroups$value,
+        showGlossary = function() private$..showGlossary$value),
     private = list(
         ..var1 = NA,
         ..var1true = NA,
@@ -279,39 +442,67 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..var3true = NA,
         ..var4 = NA,
         ..var4true = NA,
-        ..upsetType = NA,
-        ..sortBy = NA,
-        ..minSize = NA,
-        ..showAnnotations = NA,
-        ..vennEngine = NA,
         ..var5 = NA,
         ..var5true = NA,
         ..var6 = NA,
         ..var6true = NA,
         ..var7 = NA,
         ..var7true = NA,
+        ..show_upsetR = NA,
+        ..show_complexUpset = NA,
+        ..show_ggvenn = NA,
+        ..show_ggVennDiagram = NA,
+        ..sortBy = NA,
+        ..minSize = NA,
+        ..showAnnotations = NA,
+        ..explanatory = NA,
+        ..aboutAnalysis = NA,
+        ..clinicalSummary = NA,
+        ..reportSentences = NA,
+        ..assumptions = NA,
+        ..shapeType = NA,
         ..regionLabels = NA,
+        ..labelGeometry = NA,
         ..labelPrecisionDigits = NA,
         ..setNameSize = NA,
         ..labelSize = NA,
         ..edgeSize = NA,
         ..edgeColor = NA,
+        ..edgeLineType = NA,
+        ..edgeAlpha = NA,
+        ..fillAlpha = NA,
+        ..showSetLabels = NA,
+        ..setLabelColor = NA,
         ..fillColorMapping = NA,
-        ..colorPalette = NA)
+        ..colorPalette = NA,
+        ..showSetCalculations = NA,
+        ..calculateOverlap = NA,
+        ..calculateDiscern = NA,
+        ..calculateUnite = NA,
+        ..showMembershipTable = NA,
+        ..membershipGroups = NA,
+        ..showGlossary = NA)
 )
 
 vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vennResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
         todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
+        plotGgvenn = function() private$.items[["plotGgvenn"]],
+        plotGgVennDiagram = function() private$.items[["plotGgVennDiagram"]],
+        plotUpsetR = function() private$.items[["plotUpsetR"]],
+        plotComplexUpset = function() private$.items[["plotComplexUpset"]],
         aboutAnalysis = function() private$.items[["aboutAnalysis"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
-        summary = function() private$.items[["summary"]],
-        plot = function() private$.items[["plot"]],
-        plot2 = function() private$.items[["plot2"]],
         reportSentences = function() private$.items[["reportSentences"]],
-        assumptions = function() private$.items[["assumptions"]]),
+        assumptions = function() private$.items[["assumptions"]],
+        setCalculations = function() private$.items[["setCalculations"]],
+        membershipTable = function() private$.items[["membershipTable"]],
+        membershipGroups = function() private$.items[["membershipGroups"]],
+        glossary = function() private$.items[["glossary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -320,33 +511,30 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Venn Diagram",
                 refs=list(
-                    "ClinicoPathJamoviModule",
-                    "ggvenn",
-                    "UpSetR",
-                    "ComplexUpset"),
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "var1",
                     "var2",
                     "var3",
                     "var4",
+                    "var5",
+                    "var6",
+                    "var7",
                     "var1true",
                     "var2true",
                     "var3true",
-                    "var4true"))
+                    "var4true",
+                    "var5true",
+                    "var6true",
+                    "var7true"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="Welcome"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="aboutAnalysis",
-                title="About This Analysis",
-                visible=TRUE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="clinicalSummary",
-                title="Clinical Summary",
-                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 title="Summary of True Counts",
@@ -376,34 +564,110 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="pc"))))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="Venn Diagram",
-                name="plot",
+                title="ggvenn Plot",
+                name="plotGgvenn",
                 width=700,
                 height=450,
-                renderFun=".plot",
+                renderFun=".plotGgvenn",
                 requiresData=TRUE,
+                visible="(show_ggvenn)",
                 refs=list(
-                    "venn")))
+                    "ggvenn")))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="Upset Diagram",
-                name="plot2",
+                title="ggVennDiagram Plot",
+                name="plotGgVennDiagram",
                 width=700,
                 height=450,
-                renderFun=".plot2",
+                renderFun=".plotGgVennDiagram",
                 requiresData=TRUE,
+                visible="(show_ggVennDiagram)",
                 refs=list(
-                    "upset")))
+                    "ggVennDiagram")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                title="UpSetR Plot",
+                name="plotUpsetR",
+                width=700,
+                height=450,
+                renderFun=".plotUpsetR",
+                requiresData=TRUE,
+                visible="(show_upsetR)",
+                refs=list(
+                    "upsetR")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                title="ComplexUpset Plot",
+                name="plotComplexUpset",
+                width=700,
+                height=450,
+                renderFun=".plotComplexUpset",
+                requiresData=TRUE,
+                visible="(show_complexUpset)",
+                refs=list(
+                    "complexUpset")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(aboutAnalysis)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible="(clinicalSummary)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentences",
                 title="Copy-Ready Clinical Summary",
-                visible=TRUE))
+                visible="(reportSentences)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
                 title="Interpretation Guide & Assumptions",
-                visible=TRUE))}))
+                visible="(assumptions)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="setCalculations",
+                title="Set Calculations",
+                visible="(showSetCalculations)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="membershipTable",
+                title="Membership Table",
+                visible="(showMembershipTable)",
+                rows=0,
+                columns=list()))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="membershipGroups",
+                title="Add Membership Groups to Data",
+                varTitle="`Venn Membership Groups - ${var1}`",
+                varDescription="Combination of selected Venn sets satisfied by each case",
+                measureType="nominal",
+                clearWith=list(
+                    "var1",
+                    "var2",
+                    "var3",
+                    "var4",
+                    "var5",
+                    "var6",
+                    "var7",
+                    "var1true",
+                    "var2true",
+                    "var3true",
+                    "var4true",
+                    "var5true",
+                    "var6true",
+                    "var7true",
+                    "showSetCalculations",
+                    "showMembershipTable",
+                    "membershipGroups")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Statistical Glossary",
+                visible="(showGlossary)"))}))
 
 vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vennBase",
@@ -423,7 +687,7 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Venn Diagram
@@ -447,48 +711,91 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis.
 #' @param var4true The level in \code{var4} that represents the positive
 #'   condition.
-#' @param upsetType Choose between UpSetR (classic) or ComplexUpset (advanced
-#'   with more features).
+#' @param var5 Fifth variable for 5-set Venn diagrams (automatically switches
+#'   to advanced engine).
+#' @param var5true The level in \code{var5} that represents the positive
+#'   condition.
+#' @param var6 Sixth variable for 6-set Venn diagrams (uses advanced engine
+#'   automatically).
+#' @param var6true The level in \code{var6} that represents the positive
+#'   condition.
+#' @param var7 Seventh variable for 7-set Venn diagrams (uses advanced engine
+#'   automatically).
+#' @param var7true The level in \code{var7} that represents the positive
+#'   condition.
+#' @param show_upsetR .
+#' @param show_complexUpset .
+#' @param show_ggvenn .
+#' @param show_ggVennDiagram .
 #' @param sortBy How to sort the intersections in the UpSet plot.
 #' @param minSize Minimum size of intersections to display.
 #' @param showAnnotations Add percentage labels to intersection sizes in
 #'   ComplexUpset plots or enhanced text scaling in UpSetR plots.
-#' @param vennEngine Choose between ggvenn (classic, 2-4 sets) or
-#'   ggVennDiagram (advanced, 2-7 sets with enhanced customization).
-#' @param var5 Fifth variable for 5-set Venn diagrams (only available with
-#'   ggVennDiagram engine).
-#' @param var5true The level in \code{var5} that represents the positive
-#'   condition.
-#' @param var6 Sixth variable for 6-set Venn diagrams (only available with
-#'   ggVennDiagram engine).
-#' @param var6true The level in \code{var6} that represents the positive
-#'   condition.
-#' @param var7 Seventh variable for 7-set Venn diagrams (only available with
-#'   ggVennDiagram engine).
-#' @param var7true The level in \code{var7} that represents the positive
-#'   condition.
-#' @param regionLabels What to display in Venn diagram regions (ggVennDiagram
-#'   only).
+#' @param explanatory Add detailed explanatory footnotes with interpretation
+#'   guidance for Venn diagrams and set operations.
+#' @param aboutAnalysis Display detailed information about Venn diagram
+#'   analysis and interpretation.
+#' @param clinicalSummary Display clinical interpretation of overlap patterns
+#'   and key findings.
+#' @param reportSentences Generate copy-ready sentences for clinical reports
+#'   and publications.
+#' @param assumptions Display interpretation guidelines and statistical
+#'   assumptions.
+#' @param shapeType Shape type for ggVennDiagram. Auto selects optimal shape
+#'   based on number of sets.
+#' @param regionLabels What to display in Venn diagram regions (available for
+#'   advanced diagrams).
+#' @param labelGeometry Whether to use label geometry (with background) or
+#'   text geometry for region labels.
 #' @param labelPrecisionDigits Number of decimal places for percentage labels
-#'   (ggVennDiagram only).
-#' @param setNameSize Font size for set names (ggVennDiagram only).
-#' @param labelSize Font size for region labels (ggVennDiagram only).
-#' @param edgeSize Width of set boundary lines (ggVennDiagram only).
-#' @param edgeColor Color of set boundary lines (ggVennDiagram only).
-#' @param fillColorMapping Map fill colors to intersection sizes
-#'   (ggVennDiagram only).
-#' @param colorPalette Color palette for Venn diagram regions (ggVennDiagram
-#'   only).
+#'   (available for advanced diagrams).
+#' @param setNameSize Font size for set names (available for advanced
+#'   diagrams).
+#' @param labelSize Font size for region labels (available for advanced
+#'   diagrams).
+#' @param edgeSize Width of set boundary lines (available for advanced
+#'   diagrams).
+#' @param edgeColor Color of set boundary lines (available for advanced
+#'   diagrams).
+#' @param edgeLineType Line type for set boundaries in ggVennDiagram.
+#' @param edgeAlpha Transparency level for set boundary lines (0=transparent,
+#'   1=opaque).
+#' @param fillAlpha Transparency level for region fills (0=transparent,
+#'   1=opaque).
+#' @param showSetLabels Whether to display set names on the diagram.
+#' @param setLabelColor Color for set name labels.
+#' @param fillColorMapping Map fill colors to intersection sizes (available
+#'   for advanced diagrams).
+#' @param colorPalette Color palette for Venn diagram regions (available for
+#'   advanced diagrams).
+#' @param showSetCalculations Display detailed set calculations including
+#'   overlaps, unique members, and unions.
+#' @param calculateOverlap Calculate and display overlap intersections between
+#'   sets.
+#' @param calculateDiscern Calculate and display unique members for each set
+#'   (discern operation).
+#' @param calculateUnite Calculate and display union of all sets.
+#' @param showMembershipTable Display detailed membership table showing which
+#'   items belong to which sets.
+#' @param showGlossary Display glossary of statistical terms and clinical
+#'   interpretations.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plotGgvenn} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotGgVennDiagram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotUpsetR} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotComplexUpset} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$setCalculations} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$membershipTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$membershipGroups} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -504,29 +811,49 @@ venn <- function(
     var1true,
     var2,
     var2true,
-    var3,
+    var3 = NULL,
     var3true,
-    var4,
+    var4 = NULL,
     var4true,
-    upsetType = "upsetR",
+    var5 = NULL,
+    var5true,
+    var6 = NULL,
+    var6true,
+    var7 = NULL,
+    var7true,
+    show_upsetR = FALSE,
+    show_complexUpset = FALSE,
+    show_ggvenn = FALSE,
+    show_ggVennDiagram = FALSE,
     sortBy = "freq",
     minSize = 0,
     showAnnotations = FALSE,
-    vennEngine = "ggvenn",
-    var5,
-    var5true,
-    var6,
-    var6true,
-    var7,
-    var7true,
+    explanatory = FALSE,
+    aboutAnalysis = FALSE,
+    clinicalSummary = FALSE,
+    reportSentences = FALSE,
+    assumptions = FALSE,
+    shapeType = "auto",
     regionLabels = "count",
+    labelGeometry = "label",
     labelPrecisionDigits = 1,
     setNameSize = 5,
     labelSize = 4,
     edgeSize = 1,
     edgeColor = "black",
+    edgeLineType = "solid",
+    edgeAlpha = 1,
+    fillAlpha = 0.5,
+    showSetLabels = TRUE,
+    setLabelColor = "black",
     fillColorMapping = TRUE,
-    colorPalette = "default") {
+    colorPalette = "default",
+    showSetCalculations = FALSE,
+    calculateOverlap = FALSE,
+    calculateDiscern = FALSE,
+    calculateUnite = FALSE,
+    showMembershipTable = FALSE,
+    showGlossary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("venn requires jmvcore to be installed (restart may be required)")
@@ -566,25 +893,45 @@ venn <- function(
         var3true = var3true,
         var4 = var4,
         var4true = var4true,
-        upsetType = upsetType,
-        sortBy = sortBy,
-        minSize = minSize,
-        showAnnotations = showAnnotations,
-        vennEngine = vennEngine,
         var5 = var5,
         var5true = var5true,
         var6 = var6,
         var6true = var6true,
         var7 = var7,
         var7true = var7true,
+        show_upsetR = show_upsetR,
+        show_complexUpset = show_complexUpset,
+        show_ggvenn = show_ggvenn,
+        show_ggVennDiagram = show_ggVennDiagram,
+        sortBy = sortBy,
+        minSize = minSize,
+        showAnnotations = showAnnotations,
+        explanatory = explanatory,
+        aboutAnalysis = aboutAnalysis,
+        clinicalSummary = clinicalSummary,
+        reportSentences = reportSentences,
+        assumptions = assumptions,
+        shapeType = shapeType,
         regionLabels = regionLabels,
+        labelGeometry = labelGeometry,
         labelPrecisionDigits = labelPrecisionDigits,
         setNameSize = setNameSize,
         labelSize = labelSize,
         edgeSize = edgeSize,
         edgeColor = edgeColor,
+        edgeLineType = edgeLineType,
+        edgeAlpha = edgeAlpha,
+        fillAlpha = fillAlpha,
+        showSetLabels = showSetLabels,
+        setLabelColor = setLabelColor,
         fillColorMapping = fillColorMapping,
-        colorPalette = colorPalette)
+        colorPalette = colorPalette,
+        showSetCalculations = showSetCalculations,
+        calculateOverlap = calculateOverlap,
+        calculateDiscern = calculateDiscern,
+        calculateUnite = calculateUnite,
+        showMembershipTable = showMembershipTable,
+        showGlossary = showGlossary)
 
     analysis <- vennClass$new(
         options = options,

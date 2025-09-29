@@ -29,9 +29,12 @@ The following table provides a detailed mapping of the module's features, from t
 | Variable 4 (Optional)            | `var4`                         | Variable 4 (Optional)                  | `plot`, `plot2`, `summary`          | `.run`, `.plot`, `.plot2`            |
 | Select True Level (Var4)         | `var4true`                     | Select True Level                      | `plot`, `plot2`, `summary`          | `.run`                               |
 | **Upset Plot Customization**     |                                |                                        |                                     |                                      |
-| UpSet Plot Type                  | `upsetType`                    | UpSet Plot Type                        | `plot2`                             | `.plot2`                             |
-| Sort Intersections By            | `sortBy`                       | Sort Intersections By                  | `plot2`                             | `.plot2`                             |
-| Minimum Intersection Size        | `minSize`                      | Minimum Intersection Size              | `plot2`                             | `.plot2`                             |
-| Show Statistical Annotations     | `showAnnotations`              | Show Statistical Annotations           | `plot2`                             | `.plot2`                             |
+| Show UpSetR Plot                 | `show_upsetR`                  | Show UpSetR Plot                       | `plotUpsetR`                        | `.plotUpsetR`                        |
+| Show ComplexUpset Plot           | `show_complexUpset`            | Show ComplexUpset Plot                 | `plotComplexUpset`                  | `.plotComplexUpset`                  |
+| Show ggvenn Plot                 | `show_ggvenn`                  | Show ggvenn Plot                       | `plotGgvenn`                        | `.plotGgvenn`                        |
+| Show ggVennDiagram Plot          | `show_ggVennDiagram`           | Show ggVennDiagram Plot                | `plotGgVennDiagram`                 | `.plotGgVennDiagram`                 |
+| Sort Intersections By            | `sortBy`                       | Sort Intersections By                  | `plotUpsetR`, `plotComplexUpset`    | `.plotUpsetR`, `.plotComplexUpset`   |
+| Minimum Intersection Size        | `minSize`                      | Minimum Intersection Size              | `plotUpsetR`, `plotComplexUpset`    | `.plotUpsetR`, `.plotComplexUpset`   |
+| Show Statistical Annotations     | `showAnnotations`              | Show Statistical Annotations           | `plotUpsetR`, `plotComplexUpset`    | `.plotUpsetR`, `.plotComplexUpset`   |
 | **Summary Statistics**           |                                |                                        |                                     |                                      |
 | Summary of True Counts Table     | `summary`                      | Summary of True Counts                 | `summary`                           | `.run`                               |

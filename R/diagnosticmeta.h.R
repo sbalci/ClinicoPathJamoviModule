@@ -13,16 +13,21 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             true_negatives = NULL,
             covariate = NULL,
             bivariate_analysis = TRUE,
-            hsroc_analysis = TRUE,
-            heterogeneity_analysis = TRUE,
+            hsroc_analysis = FALSE,
             meta_regression = FALSE,
-            publication_bias = TRUE,
-            confidence_level = 0.95,
+            heterogeneity_analysis = FALSE,
+            publication_bias = FALSE,
+            confidence_level = 95,
             method = "reml",
-            forest_plot = TRUE,
-            sroc_plot = TRUE,
-            funnel_plot = TRUE,
-            show_individual_studies = TRUE, ...) {
+            forest_plot = FALSE,
+            sroc_plot = FALSE,
+            funnel_plot = FALSE,
+            show_individual_studies = FALSE,
+            show_interpretation = FALSE,
+            show_methodology = FALSE,
+            show_analysis_summary = FALSE,
+            color_palette = "standard",
+            show_plot_explanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -82,49 +87,78 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..hsroc_analysis <- jmvcore::OptionBool$new(
                 "hsroc_analysis",
                 hsroc_analysis,
-                default=TRUE)
-            private$..heterogeneity_analysis <- jmvcore::OptionBool$new(
-                "heterogeneity_analysis",
-                heterogeneity_analysis,
-                default=TRUE)
+                default=FALSE)
             private$..meta_regression <- jmvcore::OptionBool$new(
                 "meta_regression",
                 meta_regression,
                 default=FALSE)
+            private$..heterogeneity_analysis <- jmvcore::OptionBool$new(
+                "heterogeneity_analysis",
+                heterogeneity_analysis,
+                default=FALSE)
             private$..publication_bias <- jmvcore::OptionBool$new(
                 "publication_bias",
                 publication_bias,
-                default=TRUE)
-            private$..confidence_level <- jmvcore::OptionNumber$new(
+                default=FALSE)
+            private$..confidence_level <- jmvcore::OptionInteger$new(
                 "confidence_level",
                 confidence_level,
-                min=0.5,
-                max=0.99,
-                default=0.95)
+                min=50,
+                max=99,
+                default=95)
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
                 options=list(
                     "reml",
                     "ml",
+                    "fixed",
+                    "mm",
+                    "vc",
                     "dersimonian_laird"),
                 default="reml")
             private$..forest_plot <- jmvcore::OptionBool$new(
                 "forest_plot",
                 forest_plot,
-                default=TRUE)
+                default=FALSE)
             private$..sroc_plot <- jmvcore::OptionBool$new(
                 "sroc_plot",
                 sroc_plot,
-                default=TRUE)
+                default=FALSE)
             private$..funnel_plot <- jmvcore::OptionBool$new(
                 "funnel_plot",
                 funnel_plot,
-                default=TRUE)
+                default=FALSE)
             private$..show_individual_studies <- jmvcore::OptionBool$new(
                 "show_individual_studies",
                 show_individual_studies,
-                default=TRUE)
+                default=FALSE)
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
+                default=FALSE)
+            private$..show_methodology <- jmvcore::OptionBool$new(
+                "show_methodology",
+                show_methodology,
+                default=FALSE)
+            private$..show_analysis_summary <- jmvcore::OptionBool$new(
+                "show_analysis_summary",
+                show_analysis_summary,
+                default=FALSE)
+            private$..color_palette <- jmvcore::OptionList$new(
+                "color_palette",
+                color_palette,
+                options=list(
+                    "standard",
+                    "colorblind_safe",
+                    "high_contrast",
+                    "viridis",
+                    "plasma"),
+                default="standard")
+            private$..show_plot_explanations <- jmvcore::OptionBool$new(
+                "show_plot_explanations",
+                show_plot_explanations,
+                default=FALSE)
 
             self$.addOption(private$..study)
             self$.addOption(private$..true_positives)
@@ -134,8 +168,8 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..covariate)
             self$.addOption(private$..bivariate_analysis)
             self$.addOption(private$..hsroc_analysis)
-            self$.addOption(private$..heterogeneity_analysis)
             self$.addOption(private$..meta_regression)
+            self$.addOption(private$..heterogeneity_analysis)
             self$.addOption(private$..publication_bias)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..method)
@@ -143,6 +177,11 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..sroc_plot)
             self$.addOption(private$..funnel_plot)
             self$.addOption(private$..show_individual_studies)
+            self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..show_methodology)
+            self$.addOption(private$..show_analysis_summary)
+            self$.addOption(private$..color_palette)
+            self$.addOption(private$..show_plot_explanations)
         }),
     active = list(
         study = function() private$..study$value,
@@ -153,15 +192,20 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         covariate = function() private$..covariate$value,
         bivariate_analysis = function() private$..bivariate_analysis$value,
         hsroc_analysis = function() private$..hsroc_analysis$value,
-        heterogeneity_analysis = function() private$..heterogeneity_analysis$value,
         meta_regression = function() private$..meta_regression$value,
+        heterogeneity_analysis = function() private$..heterogeneity_analysis$value,
         publication_bias = function() private$..publication_bias$value,
         confidence_level = function() private$..confidence_level$value,
         method = function() private$..method$value,
         forest_plot = function() private$..forest_plot$value,
         sroc_plot = function() private$..sroc_plot$value,
         funnel_plot = function() private$..funnel_plot$value,
-        show_individual_studies = function() private$..show_individual_studies$value),
+        show_individual_studies = function() private$..show_individual_studies$value,
+        show_interpretation = function() private$..show_interpretation$value,
+        show_methodology = function() private$..show_methodology$value,
+        show_analysis_summary = function() private$..show_analysis_summary$value,
+        color_palette = function() private$..color_palette$value,
+        show_plot_explanations = function() private$..show_plot_explanations$value),
     private = list(
         ..study = NA,
         ..true_positives = NA,
@@ -171,21 +215,27 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..covariate = NA,
         ..bivariate_analysis = NA,
         ..hsroc_analysis = NA,
-        ..heterogeneity_analysis = NA,
         ..meta_regression = NA,
+        ..heterogeneity_analysis = NA,
         ..publication_bias = NA,
         ..confidence_level = NA,
         ..method = NA,
         ..forest_plot = NA,
         ..sroc_plot = NA,
         ..funnel_plot = NA,
-        ..show_individual_studies = NA)
+        ..show_individual_studies = NA,
+        ..show_interpretation = NA,
+        ..show_methodology = NA,
+        ..show_analysis_summary = NA,
+        ..color_palette = NA,
+        ..show_plot_explanations = NA)
 )
 
 diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "diagnosticmetaResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
         instructions = function() private$.items[["instructions"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
@@ -198,7 +248,10 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         forestplot = function() private$.items[["forestplot"]],
         srocplot = function() private$.items[["srocplot"]],
         funnelplot = function() private$.items[["funnelplot"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        forestplot_explanation = function() private$.items[["forestplot_explanation"]],
+        srocplot_explanation = function() private$.items[["srocplot_explanation"]],
+        funnelplot_explanation = function() private$.items[["funnelplot_explanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -207,7 +260,14 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Diagnostic Test Meta-Analysis for Pathology",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "mada",
+                    "metafor"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="Welcome",
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -217,7 +277,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="summary",
                 title="Analysis Summary",
-                visible="(bivariate_analysis)",
+                visible="(show_analysis_summary)",
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -228,7 +288,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="about",
                 title="About This Analysis",
-                visible=TRUE))
+                visible="(show_methodology)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bivariateresults",
@@ -354,7 +414,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="metaregression",
                 title="Meta-Regression Results",
-                visible="(meta_regression)",
+                visible="(meta_regression && !is.null(covariate))",
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -517,7 +577,40 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation and Guidelines",
-                visible=TRUE))}))
+                visible="(show_interpretation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="forestplot_explanation",
+                title="Forest Plot Explanation",
+                visible="(show_plot_explanations && forest_plot)",
+                clearWith=list(
+                    "study",
+                    "true_positives",
+                    "false_positives",
+                    "false_negatives",
+                    "true_negatives")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="srocplot_explanation",
+                title="SROC Plot Explanation",
+                visible="(show_plot_explanations && sroc_plot)",
+                clearWith=list(
+                    "study",
+                    "true_positives",
+                    "false_positives",
+                    "false_negatives",
+                    "true_negatives")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="funnelplot_explanation",
+                title="Funnel Plot Explanation",
+                visible="(show_plot_explanations && funnel_plot)",
+                clearWith=list(
+                    "study",
+                    "true_positives",
+                    "false_positives",
+                    "false_negatives",
+                    "true_negatives")))}))
 
 diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "diagnosticmetaBase",
@@ -570,9 +663,9 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param covariate Optional covariate for meta-regression analysis
 #' @param bivariate_analysis Perform bivariate random-effects meta-analysis
 #' @param hsroc_analysis Perform hierarchical summary ROC (HSROC) analysis
-#' @param heterogeneity_analysis Assess heterogeneity in sensitivity and
-#'   specificity
 #' @param meta_regression Perform meta-regression with specified covariate
+#' @param heterogeneity_analysis Perform heterogeneity analysis including
+#'   I-squared and Q statistics
 #' @param publication_bias Assess publication bias using Deeks' funnel plot
 #'   test
 #' @param confidence_level Confidence level for meta-analysis results
@@ -582,8 +675,19 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param funnel_plot Generate funnel plot for publication bias assessment
 #' @param show_individual_studies Display results for individual studies in
 #'   summary tables
+#' @param show_interpretation Display clinical interpretation guidelines and
+#'   recommendations
+#' @param show_methodology Display detailed methodology and statistical
+#'   approach information
+#' @param show_analysis_summary Display natural language summary of analysis
+#'   results
+#' @param color_palette Color palette for all plots - choose color-blind safe
+#'   options for accessibility
+#' @param show_plot_explanations Display detailed explanations for all plots
+#'   including interpretation guidance
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -597,6 +701,9 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$srocplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$funnelplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$forestplot_explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$srocplot_explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$funnelplot_explanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -615,16 +722,21 @@ diagnosticmeta <- function(
     true_negatives,
     covariate,
     bivariate_analysis = TRUE,
-    hsroc_analysis = TRUE,
-    heterogeneity_analysis = TRUE,
+    hsroc_analysis = FALSE,
     meta_regression = FALSE,
-    publication_bias = TRUE,
-    confidence_level = 0.95,
+    heterogeneity_analysis = FALSE,
+    publication_bias = FALSE,
+    confidence_level = 95,
     method = "reml",
-    forest_plot = TRUE,
-    sroc_plot = TRUE,
-    funnel_plot = TRUE,
-    show_individual_studies = TRUE) {
+    forest_plot = FALSE,
+    sroc_plot = FALSE,
+    funnel_plot = FALSE,
+    show_individual_studies = FALSE,
+    show_interpretation = FALSE,
+    show_methodology = FALSE,
+    show_analysis_summary = FALSE,
+    color_palette = "standard",
+    show_plot_explanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("diagnosticmeta requires jmvcore to be installed (restart may be required)")
@@ -655,15 +767,20 @@ diagnosticmeta <- function(
         covariate = covariate,
         bivariate_analysis = bivariate_analysis,
         hsroc_analysis = hsroc_analysis,
-        heterogeneity_analysis = heterogeneity_analysis,
         meta_regression = meta_regression,
+        heterogeneity_analysis = heterogeneity_analysis,
         publication_bias = publication_bias,
         confidence_level = confidence_level,
         method = method,
         forest_plot = forest_plot,
         sroc_plot = sroc_plot,
         funnel_plot = funnel_plot,
-        show_individual_studies = show_individual_studies)
+        show_individual_studies = show_individual_studies,
+        show_interpretation = show_interpretation,
+        show_methodology = show_methodology,
+        show_analysis_summary = show_analysis_summary,
+        color_palette = color_palette,
+        show_plot_explanations = show_plot_explanations)
 
     analysis <- diagnosticmetaClass$new(
         options = options,

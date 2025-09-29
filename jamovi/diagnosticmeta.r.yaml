@@ -4,6 +4,20 @@ title: Diagnostic Test Meta-Analysis for Pathology
 jrs: '1.1'
 
 items:
+
+
+    # - name: mydataview
+    #   title: mydataview
+    #   type: Preformatted
+    #   visible: false
+
+
+
+    - name: welcome
+      title: Welcome
+      type: Html
+      visible: false
+
     - name: instructions
       title: Getting Started
       type: Html
@@ -12,7 +26,7 @@ items:
     - name: summary
       title: Analysis Summary
       type: Html
-      visible: (bivariate_analysis)
+      visible: (show_analysis_summary)
       clearWith:
           - study
           - true_positives
@@ -23,7 +37,7 @@ items:
     - name: about
       title: About This Analysis
       type: Html
-      visible: true
+      visible: (show_methodology)
 
     - name: bivariateresults
       title: Bivariate Meta-Analysis Results
@@ -132,7 +146,7 @@ items:
     - name: metaregression
       title: Meta-Regression Results
       type: Table
-      visible: (meta_regression)
+      visible: (meta_regression && !is.null(covariate))
       clearWith:
           - study
           - true_positives
@@ -277,9 +291,44 @@ items:
     - name: interpretation
       title: Clinical Interpretation and Guidelines
       type: Html
-      visible: true
+      visible: (show_interpretation)
+
+    - name: forestplot_explanation
+      title: Forest Plot Explanation
+      type: Html
+      visible: (show_plot_explanations && forest_plot)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+
+    - name: srocplot_explanation
+      title: SROC Plot Explanation
+      type: Html
+      visible: (show_plot_explanations && sroc_plot)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+
+    - name: funnelplot_explanation
+      title: Funnel Plot Explanation
+      type: Html
+      visible: (show_plot_explanations && funnel_plot)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
 
 refs:
     - ClinicoPathJamoviModule
+    - mada
+    - metafor
 
 ...

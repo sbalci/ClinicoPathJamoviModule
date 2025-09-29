@@ -173,24 +173,24 @@ test_that("venn works with missing optional parameters", {
 
 test_that("venn works with ComplexUpset options", {
   library(ClinicoPath)
-  
+
   # Test ComplexUpset functionality
   test_data <- data.frame(
     var1 = factor(c("A", "B", "A", "B", "A", "B")),
     var2 = factor(c("X", "Y", "X", "Y", "X", "Y")),
     var3 = factor(c("P", "Q", "P", "Q", "P", "Q"))
   )
-  
+
   # Test with ComplexUpset options
-  result <- venn(data = test_data, 
-                 var1 = "var1", var1true = "A", 
+  result <- venn(data = test_data,
+                 var1 = "var1", var1true = "A",
                  var2 = "var2", var2true = "X",
                  var3 = "var3", var3true = "P",
-                 upsetType = "complexUpset",
+                 show_complexUpset = TRUE,
                  sortBy = "freq",
                  minSize = 1,
                  showAnnotations = TRUE)
-  
+
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
 })
@@ -217,18 +217,143 @@ test_that("venn works with different upset sorting options", {
 
 test_that("venn works with minimum size filtering", {
   library(ClinicoPath)
-  
+
   test_data <- data.frame(
     var1 = factor(c("A", "B", "A", "B", "A", "B")),
     var2 = factor(c("X", "Y", "X", "Y", "X", "Y"))
   )
-  
+
   # Test with minimum size filter
-  result <- venn(data = test_data, 
-                 var1 = "var1", var1true = "A", 
+  result <- venn(data = test_data,
+                 var1 = "var1", var1true = "A",
                  var2 = "var2", var2true = "X",
                  minSize = 2)
-  
+
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
+})
+
+test_that("venn works with separate plot type options", {
+  library(ClinicoPath)
+
+  test_data <- data.frame(
+    var1 = factor(c("A", "B", "A", "B")),
+    var2 = factor(c("X", "Y", "X", "Y"))
+  )
+
+  # Test with only ggvenn
+  result1 <- venn(data = test_data,
+                  var1 = "var1", var1true = "A",
+                  var2 = "var2", var2true = "X",
+                  show_ggvenn = TRUE,
+                  show_ggVennDiagram = FALSE,
+                  show_upsetR = FALSE,
+                  show_complexUpset = FALSE)
+
+  expect_false(is.null(result1))
+  expect_true(inherits(result1, "vennResults"))
+
+  # Test with only ggVennDiagram
+  result2 <- venn(data = test_data,
+                  var1 = "var1", var1true = "A",
+                  var2 = "var2", var2true = "X",
+                  show_ggvenn = FALSE,
+                  show_ggVennDiagram = TRUE,
+                  show_upsetR = FALSE,
+                  show_complexUpset = FALSE)
+
+  expect_false(is.null(result2))
+  expect_true(inherits(result2, "vennResults"))
+
+  # Test with only upsetR
+  result3 <- venn(data = test_data,
+                  var1 = "var1", var1true = "A",
+                  var2 = "var2", var2true = "X",
+                  show_ggvenn = FALSE,
+                  show_ggVennDiagram = FALSE,
+                  show_upsetR = TRUE,
+                  show_complexUpset = FALSE)
+
+  expect_false(is.null(result3))
+  expect_true(inherits(result3, "vennResults"))
+
+  # Test with multiple plots enabled
+  result4 <- venn(data = test_data,
+                  var1 = "var1", var1true = "A",
+                  var2 = "var2", var2true = "X",
+                  show_ggvenn = TRUE,
+                  show_ggVennDiagram = TRUE,
+                  show_upsetR = TRUE,
+                  show_complexUpset = TRUE)
+
+  expect_false(is.null(result4))
+  expect_true(inherits(result4, "vennResults"))
+})
+
+test_that("venn shows warning message for ggvenn with >4 variables", {
+  library(ClinicoPath)
+
+  # Create test data with 5 variables
+  test_data <- data.frame(
+    var1 = factor(c("A", "B", "A", "B", "A")),
+    var2 = factor(c("X", "Y", "X", "Y", "X")),
+    var3 = factor(c("P", "Q", "P", "Q", "P")),
+    var4 = factor(c("M", "N", "M", "N", "M")),
+    var5 = factor(c("U", "V", "U", "V", "U"))
+  )
+
+  # Test that ggvenn shows explanatory message with >4 variables
+  result <- venn(data = test_data,
+                 var1 = "var1", var1true = "A",
+                 var2 = "var2", var2true = "X",
+                 var3 = "var3", var3true = "P",
+                 var4 = "var4", var4true = "M",
+                 var5 = "var5", var5true = "U",
+                 show_ggvenn = TRUE,
+                 show_ggVennDiagram = FALSE,
+                 show_upsetR = FALSE,
+                 show_complexUpset = FALSE)
+
+  expect_false(is.null(result))
+  expect_true(inherits(result, "vennResults"))
+
+  # Test that ggVennDiagram works fine with >4 variables
+  result2 <- venn(data = test_data,
+                  var1 = "var1", var1true = "A",
+                  var2 = "var2", var2true = "X",
+                  var3 = "var3", var3true = "P",
+                  var4 = "var4", var4true = "M",
+                  var5 = "var5", var5true = "U",
+                  show_ggvenn = FALSE,
+                  show_ggVennDiagram = TRUE,
+                  show_upsetR = FALSE,
+                  show_complexUpset = FALSE)
+
+  expect_false(is.null(result2))
+  expect_true(inherits(result2, "vennResults"))
+})
+
+test_that("membership table populates when enabled", {
+  library(ClinicoPath)
+
+  test_data <- data.frame(
+    var1 = factor(c("A", "B", "A", "B")),
+    var2 = factor(c("X", "Y", "X", "Y"))
+  )
+
+  result <- venn(
+    data = test_data,
+    var1 = "var1", var1true = "A",
+    var2 = "var2", var2true = "X",
+    showSetCalculations = TRUE,
+    showMembershipTable = TRUE
+  )
+
+  output <- capture.output(print(result))
+  expect_true(any(grepl("Membership Table", output, fixed = TRUE)))
+  expect_true(any(grepl("Group", output, fixed = TRUE)))
+  expect_true(any(grepl("Yes", output, fixed = TRUE)))
+  expect_true(any(grepl("var1 & var2", output, fixed = TRUE)) ||
+                any(grepl("None", output, fixed = TRUE)))
+  expect_false(any(grepl("Error in generating membership table", output, fixed = TRUE)))
 })
