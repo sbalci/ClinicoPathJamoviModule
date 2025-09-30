@@ -702,6 +702,173 @@ items:
       type: Html
       visible: (showInlineComments)
 
+    # ========================================================================
+    # Clustering Analysis Results (Usubutun et al. 2012)
+    # ========================================================================
+
+    - name: styleGroupSummary
+      title: 'Diagnostic Style Groups Summary'
+      type: Table
+      visible: (performClustering)
+      columns:
+        - name: style_group
+          title: 'Style Group'
+          type: text
+        - name: n_raters
+          title: 'Number of Raters'
+          type: integer
+        - name: rater_names
+          title: 'Raters'
+          type: text
+        - name: within_agreement
+          title: 'Within-Group Agreement %'
+          type: number
+          format: zto
+        - name: between_agreement
+          title: 'Between-Group Agreement %'
+          type: number
+          format: zto
+        - name: silhouette_score
+          title: 'Silhouette Score'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Style Interpretation'
+          type: text
+
+    - name: styleGroupProfiles
+      title: 'Diagnostic Patterns by Style Group'
+      type: Table
+      visible: (performClustering)
+      columns:
+        - name: style_group
+          title: 'Style Group'
+          type: text
+        - name: category
+          title: 'Diagnostic Category'
+          type: text
+        - name: frequency
+          title: 'Frequency'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: zto
+        - name: relative_frequency
+          title: 'Relative to Other Groups'
+          type: text
+
+    - name: discordantCasesCluster
+      title: 'High-Disagreement Cases Between Style Groups'
+      type: Table
+      visible: (performClustering && identifyDiscordant)
+      columns:
+        - name: case_id
+          title: 'Case ID'
+          type: text
+        - name: disagreement_score
+          title: 'Disagreement Score'
+          type: number
+          format: zto
+        - name: entropy
+          title: 'Entropy'
+          type: number
+          format: zto
+        - name: style_group_patterns
+          title: 'Style Group Diagnostic Patterns'
+          type: text
+        - name: difficulty_level
+          title: 'Case Difficulty'
+          type: text
+
+    - name: characteristicAssociations
+      title: 'Style Group Associations with Rater Characteristics'
+      type: Table
+      visible: (performClustering)
+      columns:
+        - name: characteristic
+          title: 'Rater Characteristic'
+          type: text
+        - name: test_statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: effect_size
+          title: 'Effect Size'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Association Interpretation'
+          type: text
+
+    - name: referenceComparison
+      title: 'Style Group Agreement with Reference Standard'
+      type: Table
+      visible: (performClustering && !is.null(referenceStandard))
+      columns:
+        - name: style_group
+          title: 'Style Group'
+          type: text
+        - name: kappa_vs_reference
+          title: 'Kappa vs Reference'
+          type: number
+          format: zto
+        - name: agreement_percent
+          title: 'Agreement %'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 'CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 'CI Upper'
+          type: number
+          format: zto
+        - name: accuracy_level
+          title: 'Accuracy Level'
+          type: text
+
+    - name: clusteringHeatmap
+      title: 'Hierarchical Clustering Heatmap (Cases × Raters)'
+      type: Image
+      width: 1000
+      height: 800
+      renderFun: .clusteringHeatmap
+      visible: (performClustering && showClusteringHeatmap)
+      description: 'Heatmap showing diagnostic patterns with dual dendrograms (raters and cases)'
+
+    - name: clusterDendrogram
+      title: 'Rater Clustering Dendrogram'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .clusterDendrogram
+      visible: (performClustering)
+      description: 'Dendrogram showing hierarchical relationships between raters'
+
+    - name: silhouettePlot
+      title: 'Cluster Quality (Silhouette Plot)'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .silhouettePlot
+      visible: (performClustering)
+      description: 'Silhouette plot showing cluster separation and cohesion'
+
+    - name: clusteringInterpretation
+      title: 'Clustering Analysis Interpretation Guide'
+      type: Html
+      visible: (performClustering && showClusteringInterpretation)
+      description: 'Explanatory guide for understanding diagnostic style groups and cluster results'
+
 refs:
     - irr
     - psych

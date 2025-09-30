@@ -469,6 +469,91 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(results)
         },
 
+        # Phase 3: Calculate marker ratios (e.g., CD4/CD8 ratio)
+        .calculateRatio = function(data, numerator_var, denominator_var, ratio_name, opts) {
+            # Validate inputs
+            if (is.null(numerator_var) || is.null(denominator_var)) {
+                return(list(
+                    error = "Both numerator and denominator variables must be specified"
+                ))
+            }
+
+            if (!numerator_var %in% colnames(data)) {
+                return(list(error = sprintf("Numerator variable '%s' not found in dataset", numerator_var)))
+            }
+
+            if (!denominator_var %in% colnames(data)) {
+                return(list(error = sprintf("Denominator variable '%s' not found in dataset", denominator_var)))
+            }
+
+            # Extract values
+            numerator <- data[[numerator_var]]
+            denominator <- data[[denominator_var]]
+
+            # Check numeric
+            if (!is.numeric(numerator)) {
+                return(list(error = sprintf("Numerator variable '%s' must be numeric", numerator_var)))
+            }
+            if (!is.numeric(denominator)) {
+                return(list(error = sprintf("Denominator variable '%s' must be numeric", denominator_var)))
+            }
+
+            # Calculate ratio (handle zero denominators)
+            ratio_values <- ifelse(denominator > 0, numerator / denominator, NA)
+
+            # Summary statistics
+            summary_stats <- list(
+                n_valid = sum(!is.na(ratio_values)),
+                n_missing = sum(is.na(ratio_values)),
+                n_zero_denom = sum(denominator == 0, na.rm = TRUE),
+                mean = mean(ratio_values, na.rm = TRUE),
+                median = median(ratio_values, na.rm = TRUE),
+                sd = sd(ratio_values, na.rm = TRUE),
+                min = min(ratio_values, na.rm = TRUE),
+                max = max(ratio_values, na.rm = TRUE),
+                q25 = quantile(ratio_values, 0.25, na.rm = TRUE),
+                q75 = quantile(ratio_values, 0.75, na.rm = TRUE)
+            )
+
+            # Classify if requested
+            classification <- NULL
+            if (isTRUE(opts$ratioClassification)) {
+                low_cutoff <- opts$ratioLowCutoff %||% 1.0
+                high_cutoff <- opts$ratioHighCutoff %||% 2.0
+
+                # Classify values
+                ratio_class <- rep(NA_character_, length(ratio_values))
+                ratio_class[!is.na(ratio_values) & ratio_values <= low_cutoff] <- "Low"
+                ratio_class[!is.na(ratio_values) & ratio_values > low_cutoff & ratio_values < high_cutoff] <- "Intermediate"
+                ratio_class[!is.na(ratio_values) & ratio_values >= high_cutoff] <- "High"
+                ratio_class <- factor(ratio_class, levels = c("Low", "Intermediate", "High"))
+
+                # Classification summary
+                class_table <- table(ratio_class, useNA = "ifany")
+                classification <- list(
+                    classes = ratio_class,
+                    low_cutoff = low_cutoff,
+                    high_cutoff = high_cutoff,
+                    n_low = as.integer(class_table["Low"]),
+                    n_intermediate = as.integer(class_table["Intermediate"]),
+                    n_high = as.integer(class_table["High"]),
+                    n_missing = sum(is.na(ratio_class)),
+                    range_low = range(ratio_values[ratio_class == "Low"], na.rm = TRUE),
+                    range_intermediate = range(ratio_values[ratio_class == "Intermediate"], na.rm = TRUE),
+                    range_high = range(ratio_values[ratio_class == "High"], na.rm = TRUE)
+                )
+            }
+
+            return(list(
+                ratio_values = ratio_values,
+                summary = summary_stats,
+                classification = classification,
+                numerator_var = numerator_var,
+                denominator_var = denominator_var,
+                ratio_name = ratio_name
+            ))
+        },
+
         .prepareData = function(data, catVars, contVars, opts) {
             notes <- character()
             info <- list(
@@ -1193,6 +1278,34 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
+            # Phase 3: Calculate marker ratios (Sterlacci 2019)
+            ratioResult <- NULL
+            if (isTRUE(opts$calculateRatios)) {
+                ratioResult <- private$.calculateRatio(
+                    data = data,
+                    numerator_var = opts$ratioNumerator,
+                    denominator_var = opts$ratioDenominator,
+                    ratio_name = opts$ratioName %||% "Marker_Ratio",
+                    opts = opts
+                )
+
+                # If successful, add ratio to continuous markers for clustering
+                if (is.null(ratioResult$error)) {
+                    # Add ratio values to data frame
+                    ratio_name <- ratioResult$ratio_name
+                    df[[ratio_name]] <- ratioResult$ratio_values
+
+                    # Add to continuous markers list
+                    contVars <- c(contVars, ratio_name)
+
+                    # If classification requested, also add classified variable
+                    if (isTRUE(opts$ratioClassification) && !is.null(ratioResult$classification)) {
+                        df[[paste0(ratio_name, "_Class")]] <- ratioResult$classification$classes
+                        catVars <- c(catVars, paste0(ratio_name, "_Class"))
+                    }
+                }
+            }
+
             # Phase 2: Reproducibility testing (Sterlacci 2019)
             reproducibilityResults <- NULL
             if (isTRUE(opts$reproducibilityTest)) {
@@ -1269,6 +1382,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             private$.populateOutlierCases()
             private$.populateReproducibilityStats(reproducibilityResults)
             private$.populateSupervisedResults(supervisedResults)
+            private$.populateRatioResults(ratioResult)
 
             sizes <- table(clusters)
             if (!is.null(self$results$clusterSizes)) {
@@ -4619,6 +4733,128 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 html <- paste0(html, "</div>")
                 detailsHtml$setContent(html)
+            }
+        },
+
+        # Phase 3: Populate ratio calculation results
+        .populateRatioResults = function(ratioResult) {
+            if (!isTRUE(self$options$calculateRatios)) return()
+            if (is.null(ratioResult)) return()
+
+            # Check for error
+            if (!is.null(ratioResult$error)) {
+                # Could add error message somewhere
+                return()
+            }
+
+            # Populate ratio summary table
+            summaryTable <- self$results$ratioSummary
+            if (!is.null(summaryTable)) {
+                stats <- ratioResult$summary
+
+                # Add rows for each statistic
+                summaryTable$addRow(rowKey = "ratio", list(
+                    statistic = sprintf("%s / %s", ratioResult$numerator_var, ratioResult$denominator_var),
+                    value = NA
+                ))
+
+                summaryTable$addRow(rowKey = "n_valid", list(
+                    statistic = "N Valid",
+                    value = stats$n_valid
+                ))
+
+                summaryTable$addRow(rowKey = "n_missing", list(
+                    statistic = "N Missing",
+                    value = stats$n_missing
+                ))
+
+                if (stats$n_zero_denom > 0) {
+                    summaryTable$addRow(rowKey = "n_zero_denom", list(
+                        statistic = "N Zero Denominator",
+                        value = stats$n_zero_denom
+                    ))
+                }
+
+                summaryTable$addRow(rowKey = "mean", list(
+                    statistic = "Mean",
+                    value = stats$mean
+                ))
+
+                summaryTable$addRow(rowKey = "median", list(
+                    statistic = "Median",
+                    value = stats$median
+                ))
+
+                summaryTable$addRow(rowKey = "sd", list(
+                    statistic = "SD",
+                    value = stats$sd
+                ))
+
+                summaryTable$addRow(rowKey = "min", list(
+                    statistic = "Minimum",
+                    value = stats$min
+                ))
+
+                summaryTable$addRow(rowKey = "q25", list(
+                    statistic = "25th Percentile",
+                    value = stats$q25
+                ))
+
+                summaryTable$addRow(rowKey = "q75", list(
+                    statistic = "75th Percentile",
+                    value = stats$q75
+                ))
+
+                summaryTable$addRow(rowKey = "max", list(
+                    statistic = "Maximum",
+                    value = stats$max
+                ))
+            }
+
+            # Populate classification table if requested
+            if (isTRUE(self$options$ratioClassification) && !is.null(ratioResult$classification)) {
+                classTable <- self$results$ratioClassificationTable
+                if (!is.null(classTable)) {
+                    classif <- ratioResult$classification
+
+                    # Low category
+                    if (!is.na(classif$n_low) && classif$n_low > 0) {
+                        range_str <- sprintf("%.2f - %.2f", classif$range_low[1], classif$range_low[2])
+                        classTable$addRow(rowKey = "low", list(
+                            category = "Low",
+                            n = classif$n_low,
+                            percent = classif$n_low / ratioResult$summary$n_valid,
+                            range = range_str
+                        ))
+                    }
+
+                    # Intermediate category
+                    if (!is.na(classif$n_intermediate) && classif$n_intermediate > 0) {
+                        range_str <- sprintf("%.2f - %.2f", classif$range_intermediate[1], classif$range_intermediate[2])
+                        classTable$addRow(rowKey = "intermediate", list(
+                            category = "Intermediate",
+                            n = classif$n_intermediate,
+                            percent = classif$n_intermediate / ratioResult$summary$n_valid,
+                            range = range_str
+                        ))
+                    }
+
+                    # High category
+                    if (!is.na(classif$n_high) && classif$n_high > 0) {
+                        range_str <- sprintf("%.2f - %.2f", classif$range_high[1], classif$range_high[2])
+                        classTable$addRow(rowKey = "high", list(
+                            category = "High",
+                            n = classif$n_high,
+                            percent = classif$n_high / ratioResult$summary$n_valid,
+                            range = range_str
+                        ))
+                    }
+
+                    # Add note about cutoffs
+                    note_text <- sprintf("Classification: Low (≤ %.2f), Intermediate (> %.2f and < %.2f), High (≥ %.2f)",
+                                        classif$low_cutoff, classif$low_cutoff, classif$high_cutoff, classif$high_cutoff)
+                    classTable$setNote("cutoffs", note_text)
+                }
             }
         }
 

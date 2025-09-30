@@ -233,6 +233,46 @@ items:
       refs:
           - supervisedVariable
 
+    # Phase 3: Ratio Calculation Results
+    - name: ratioSummary
+      title: Marker Ratio Summary
+      type: Table
+      visible: (calculateRatios)
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto
+      refs:
+          - ratioNumerator
+          - ratioDenominator
+          - ratioName
+
+    - name: ratioClassificationTable
+      title: Ratio Classification
+      type: Table
+      visible: (calculateRatios && ratioClassification)
+      columns:
+          - name: category
+            title: Category
+            type: text
+          - name: n
+            title: N Cases
+            type: integer
+          - name: percent
+            title: Percent
+            type: number
+            format: pc
+          - name: range
+            title: Range
+            type: text
+      refs:
+          - ratioLowCutoff
+          - ratioHighCutoff
+
     - name: markerImportance
       title: Marker Importance for Clustering
       type: Table

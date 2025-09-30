@@ -53,7 +53,22 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             agreementTrendAnalysis = FALSE,
             caseDifficultyScoring = FALSE,
             agreementStabilityAnalysis = FALSE,
+            performClustering = FALSE,
+            clusteringMethod = "ward",
+            nStyleGroups = 3,
+            autoSelectGroups = FALSE,
+            showClusteringHeatmap = TRUE,
+            heatmapColorScheme = "diagnostic",
+            identifyDiscordant = TRUE,
+            discordantThreshold = 0.5,
+            raterExperience = NULL,
+            raterSpecialty = NULL,
+            raterInstitution = NULL,
+            raterVolume = NULL,
+            referenceStandard = NULL,
+            useMetadataRows = FALSE,
             showInlineComments = FALSE,
+            showClusteringInterpretation = FALSE,
             enhancedErrorGuidance = TRUE,
             showProgressIndicators = TRUE, ...) {
 
@@ -309,9 +324,103 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "agreementStabilityAnalysis",
                 agreementStabilityAnalysis,
                 default=FALSE)
+            private$..performClustering <- jmvcore::OptionBool$new(
+                "performClustering",
+                performClustering,
+                default=FALSE)
+            private$..clusteringMethod <- jmvcore::OptionList$new(
+                "clusteringMethod",
+                clusteringMethod,
+                options=list(
+                    "ward",
+                    "complete",
+                    "average",
+                    "single"),
+                default="ward")
+            private$..nStyleGroups <- jmvcore::OptionInteger$new(
+                "nStyleGroups",
+                nStyleGroups,
+                min=2,
+                max=10,
+                default=3)
+            private$..autoSelectGroups <- jmvcore::OptionBool$new(
+                "autoSelectGroups",
+                autoSelectGroups,
+                default=FALSE)
+            private$..showClusteringHeatmap <- jmvcore::OptionBool$new(
+                "showClusteringHeatmap",
+                showClusteringHeatmap,
+                default=TRUE)
+            private$..heatmapColorScheme <- jmvcore::OptionList$new(
+                "heatmapColorScheme",
+                heatmapColorScheme,
+                options=list(
+                    "diagnostic",
+                    "viridis",
+                    "RdYlBu"),
+                default="diagnostic")
+            private$..identifyDiscordant <- jmvcore::OptionBool$new(
+                "identifyDiscordant",
+                identifyDiscordant,
+                default=TRUE)
+            private$..discordantThreshold <- jmvcore::OptionNumber$new(
+                "discordantThreshold",
+                discordantThreshold,
+                min=0.2,
+                max=0.8,
+                default=0.5)
+            private$..raterExperience <- jmvcore::OptionVariable$new(
+                "raterExperience",
+                raterExperience,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..raterSpecialty <- jmvcore::OptionVariable$new(
+                "raterSpecialty",
+                raterSpecialty,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
+            private$..raterInstitution <- jmvcore::OptionVariable$new(
+                "raterInstitution",
+                raterInstitution,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
+            private$..raterVolume <- jmvcore::OptionVariable$new(
+                "raterVolume",
+                raterVolume,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..referenceStandard <- jmvcore::OptionVariable$new(
+                "referenceStandard",
+                referenceStandard,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
+            private$..useMetadataRows <- jmvcore::OptionBool$new(
+                "useMetadataRows",
+                useMetadataRows,
+                default=FALSE)
             private$..showInlineComments <- jmvcore::OptionBool$new(
                 "showInlineComments",
                 showInlineComments,
+                default=FALSE)
+            private$..showClusteringInterpretation <- jmvcore::OptionBool$new(
+                "showClusteringInterpretation",
+                showClusteringInterpretation,
                 default=FALSE)
             private$..enhancedErrorGuidance <- jmvcore::OptionBool$new(
                 "enhancedErrorGuidance",
@@ -369,7 +478,22 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..agreementTrendAnalysis)
             self$.addOption(private$..caseDifficultyScoring)
             self$.addOption(private$..agreementStabilityAnalysis)
+            self$.addOption(private$..performClustering)
+            self$.addOption(private$..clusteringMethod)
+            self$.addOption(private$..nStyleGroups)
+            self$.addOption(private$..autoSelectGroups)
+            self$.addOption(private$..showClusteringHeatmap)
+            self$.addOption(private$..heatmapColorScheme)
+            self$.addOption(private$..identifyDiscordant)
+            self$.addOption(private$..discordantThreshold)
+            self$.addOption(private$..raterExperience)
+            self$.addOption(private$..raterSpecialty)
+            self$.addOption(private$..raterInstitution)
+            self$.addOption(private$..raterVolume)
+            self$.addOption(private$..referenceStandard)
+            self$.addOption(private$..useMetadataRows)
             self$.addOption(private$..showInlineComments)
+            self$.addOption(private$..showClusteringInterpretation)
             self$.addOption(private$..enhancedErrorGuidance)
             self$.addOption(private$..showProgressIndicators)
         }),
@@ -421,7 +545,22 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         agreementTrendAnalysis = function() private$..agreementTrendAnalysis$value,
         caseDifficultyScoring = function() private$..caseDifficultyScoring$value,
         agreementStabilityAnalysis = function() private$..agreementStabilityAnalysis$value,
+        performClustering = function() private$..performClustering$value,
+        clusteringMethod = function() private$..clusteringMethod$value,
+        nStyleGroups = function() private$..nStyleGroups$value,
+        autoSelectGroups = function() private$..autoSelectGroups$value,
+        showClusteringHeatmap = function() private$..showClusteringHeatmap$value,
+        heatmapColorScheme = function() private$..heatmapColorScheme$value,
+        identifyDiscordant = function() private$..identifyDiscordant$value,
+        discordantThreshold = function() private$..discordantThreshold$value,
+        raterExperience = function() private$..raterExperience$value,
+        raterSpecialty = function() private$..raterSpecialty$value,
+        raterInstitution = function() private$..raterInstitution$value,
+        raterVolume = function() private$..raterVolume$value,
+        referenceStandard = function() private$..referenceStandard$value,
+        useMetadataRows = function() private$..useMetadataRows$value,
         showInlineComments = function() private$..showInlineComments$value,
+        showClusteringInterpretation = function() private$..showClusteringInterpretation$value,
         enhancedErrorGuidance = function() private$..enhancedErrorGuidance$value,
         showProgressIndicators = function() private$..showProgressIndicators$value),
     private = list(
@@ -472,7 +611,22 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..agreementTrendAnalysis = NA,
         ..caseDifficultyScoring = NA,
         ..agreementStabilityAnalysis = NA,
+        ..performClustering = NA,
+        ..clusteringMethod = NA,
+        ..nStyleGroups = NA,
+        ..autoSelectGroups = NA,
+        ..showClusteringHeatmap = NA,
+        ..heatmapColorScheme = NA,
+        ..identifyDiscordant = NA,
+        ..discordantThreshold = NA,
+        ..raterExperience = NA,
+        ..raterSpecialty = NA,
+        ..raterInstitution = NA,
+        ..raterVolume = NA,
+        ..referenceStandard = NA,
+        ..useMetadataRows = NA,
         ..showInlineComments = NA,
+        ..showClusteringInterpretation = NA,
         ..enhancedErrorGuidance = NA,
         ..showProgressIndicators = NA)
 )
@@ -520,7 +674,16 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         trendPlot = function() private$.items[["trendPlot"]],
         biasPlot = function() private$.items[["biasPlot"]],
         difficultyPlot = function() private$.items[["difficultyPlot"]],
-        inlineComments = function() private$.items[["inlineComments"]]),
+        inlineComments = function() private$.items[["inlineComments"]],
+        styleGroupSummary = function() private$.items[["styleGroupSummary"]],
+        styleGroupProfiles = function() private$.items[["styleGroupProfiles"]],
+        discordantCasesCluster = function() private$.items[["discordantCasesCluster"]],
+        characteristicAssociations = function() private$.items[["characteristicAssociations"]],
+        referenceComparison = function() private$.items[["referenceComparison"]],
+        clusteringHeatmap = function() private$.items[["clusteringHeatmap"]],
+        clusterDendrogram = function() private$.items[["clusterDendrogram"]],
+        silhouettePlot = function() private$.items[["silhouettePlot"]],
+        clusteringInterpretation = function() private$.items[["clusteringInterpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1327,7 +1490,195 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="inlineComments",
                 title="Statistical Commentary",
-                visible="(showInlineComments)"))}))
+                visible="(showInlineComments)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="styleGroupSummary",
+                title="Diagnostic Style Groups Summary",
+                visible="(performClustering)",
+                columns=list(
+                    list(
+                        `name`="style_group", 
+                        `title`="Style Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n_raters", 
+                        `title`="Number of Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="rater_names", 
+                        `title`="Raters", 
+                        `type`="text"),
+                    list(
+                        `name`="within_agreement", 
+                        `title`="Within-Group Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="between_agreement", 
+                        `title`="Between-Group Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="silhouette_score", 
+                        `title`="Silhouette Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Style Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="styleGroupProfiles",
+                title="Diagnostic Patterns by Style Group",
+                visible="(performClustering)",
+                columns=list(
+                    list(
+                        `name`="style_group", 
+                        `title`="Style Group", 
+                        `type`="text"),
+                    list(
+                        `name`="category", 
+                        `title`="Diagnostic Category", 
+                        `type`="text"),
+                    list(
+                        `name`="frequency", 
+                        `title`="Frequency", 
+                        `type`="integer"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="relative_frequency", 
+                        `title`="Relative to Other Groups", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="discordantCasesCluster",
+                title="High-Disagreement Cases Between Style Groups",
+                visible="(performClustering && identifyDiscordant)",
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case ID", 
+                        `type`="text"),
+                    list(
+                        `name`="disagreement_score", 
+                        `title`="Disagreement Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="entropy", 
+                        `title`="Entropy", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="style_group_patterns", 
+                        `title`="Style Group Diagnostic Patterns", 
+                        `type`="text"),
+                    list(
+                        `name`="difficulty_level", 
+                        `title`="Case Difficulty", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="characteristicAssociations",
+                title="Style Group Associations with Rater Characteristics",
+                visible="(performClustering)",
+                columns=list(
+                    list(
+                        `name`="characteristic", 
+                        `title`="Rater Characteristic", 
+                        `type`="text"),
+                    list(
+                        `name`="test_statistic", 
+                        `title`="Test Statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Association Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="referenceComparison",
+                title="Style Group Agreement with Reference Standard",
+                visible="(performClustering && !is.null(referenceStandard))",
+                columns=list(
+                    list(
+                        `name`="style_group", 
+                        `title`="Style Group", 
+                        `type`="text"),
+                    list(
+                        `name`="kappa_vs_reference", 
+                        `title`="Kappa vs Reference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="agreement_percent", 
+                        `title`="Agreement %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="accuracy_level", 
+                        `title`="Accuracy Level", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="clusteringHeatmap",
+                title="Hierarchical Clustering Heatmap (Cases \u00D7 Raters)",
+                width=1000,
+                height=800,
+                renderFun=".clusteringHeatmap",
+                visible="(performClustering && showClusteringHeatmap)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="clusterDendrogram",
+                title="Rater Clustering Dendrogram",
+                width=800,
+                height=600,
+                renderFun=".clusterDendrogram",
+                visible="(performClustering)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="silhouettePlot",
+                title="Cluster Quality (Silhouette Plot)",
+                width=700,
+                height=500,
+                renderFun=".silhouettePlot",
+                visible="(performClustering)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clusteringInterpretation",
+                title="Clustering Analysis Interpretation Guide",
+                visible="(performClustering && showClusteringInterpretation)"))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -1491,8 +1842,51 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   inter-rater disagreement patterns and provide difficulty scores.
 #' @param agreementStabilityAnalysis Bootstrap-based stability measures to
 #'   assess the consistency of agreement statistics across different samples.
+#' @param performClustering Identify diagnostic style groups among raters
+#'   using hierarchical clustering. Implements methodology from Usubutun et al.
+#'   (2012) Modern Pathology. Clusters raters based on diagnosis pattern
+#'   similarity to reveal systematic differences in diagnostic approach.
+#' @param clusteringMethod Hierarchical clustering linkage method. Ward's
+#'   method minimizes within-group variance and is recommended for identifying
+#'   distinct diagnostic styles (Usubutun 2012).
+#' @param nStyleGroups Number of diagnostic style groups to identify. Original
+#'   study found 3 groups: conservative (under-diagnosis), moderate (majority),
+#'   and sensitive (aligns with expert).
+#' @param autoSelectGroups Use silhouette method or within-cluster sum of
+#'   squares to automatically determine optimal number of style groups.
+#' @param showClusteringHeatmap Display Cases × Raters heatmap with
+#'   hierarchical dendrograms showing diagnostic patterns and style groups.
+#' @param heatmapColorScheme Color scheme for clustering heatmap. Diagnostic
+#'   uses distinct colors per category as in Usubutun (2012).
+#' @param identifyDiscordant Flag cases with high inter-rater disagreement
+#'   that distinguish diagnostic style groups. These cases are useful for
+#'   training and quality assurance discussions.
+#' @param discordantThreshold Minimum disagreement proportion for flagging
+#'   discordant cases. 0.5 means at least 50\% of raters disagreed with majority
+#'   diagnosis.
+#' @param raterExperience Years of experience for each rater. Will be tested
+#'   for association with style group membership.
+#' @param raterSpecialty Specialty or practice type (e.g., specialist vs
+#'   generalist, subspecialty). Will be tested for association with style group
+#'   membership.
+#' @param raterInstitution Training or current practice institution. Will be
+#'   tested for association with style group membership. Usubutun (2012) found
+#'   no association, suggesting diagnostic style is personal rather than
+#'   institutional.
+#' @param raterVolume Number of cases seen per month or year. Will be tested
+#'   for association with style group membership.
+#' @param referenceStandard Expert consensus or reference standard diagnosis.
+#'   Used to compare style groups and identify which group aligns most closely
+#'   with expert judgment.
+#' @param useMetadataRows Enable extraction of rater characteristics from
+#'   special metadata rows in the dataset. Metadata rows should have case_id
+#'   starting with "META_" (e.g., META_experience, META_specialty). Values in
+#'   rater columns will be extracted as characteristics for association testing.
 #' @param showInlineComments Show detailed statistical explanations and
 #'   interpretations inline with results for educational purposes.
+#' @param showClusteringInterpretation Display explanatory guide for
+#'   interpreting clustering results, diagnostic style groups, and discordant
+#'   cases. Useful for understanding clinical implications.
 #' @param enhancedErrorGuidance Provide detailed error messages and
 #'   suggestions for resolving common issues in agreement analysis.
 #' @param showProgressIndicators Display progress indicators for
@@ -1539,6 +1933,15 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$biasPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$difficultyPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$inlineComments} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$styleGroupSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$styleGroupProfiles} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$discordantCasesCluster} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$characteristicAssociations} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$referenceComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusteringHeatmap} \tab \tab \tab \tab \tab Heatmap showing diagnostic patterns with dual dendrograms (raters and cases) \cr
+#'   \code{results$clusterDendrogram} \tab \tab \tab \tab \tab Dendrogram showing hierarchical relationships between raters \cr
+#'   \code{results$silhouettePlot} \tab \tab \tab \tab \tab Silhouette plot showing cluster separation and cohesion \cr
+#'   \code{results$clusteringInterpretation} \tab \tab \tab \tab \tab Explanatory guide for understanding diagnostic style groups and cluster results \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1597,7 +2000,22 @@ agreement <- function(
     agreementTrendAnalysis = FALSE,
     caseDifficultyScoring = FALSE,
     agreementStabilityAnalysis = FALSE,
+    performClustering = FALSE,
+    clusteringMethod = "ward",
+    nStyleGroups = 3,
+    autoSelectGroups = FALSE,
+    showClusteringHeatmap = TRUE,
+    heatmapColorScheme = "diagnostic",
+    identifyDiscordant = TRUE,
+    discordantThreshold = 0.5,
+    raterExperience = NULL,
+    raterSpecialty = NULL,
+    raterInstitution = NULL,
+    raterVolume = NULL,
+    referenceStandard = NULL,
+    useMetadataRows = FALSE,
     showInlineComments = FALSE,
+    showClusteringInterpretation = FALSE,
     enhancedErrorGuidance = TRUE,
     showProgressIndicators = TRUE) {
 
@@ -1610,6 +2028,11 @@ agreement <- function(
     if ( ! missing(institutionVar)) institutionVar <- jmvcore::resolveQuo(jmvcore::enquo(institutionVar))
     if ( ! missing(specialtyVar)) specialtyVar <- jmvcore::resolveQuo(jmvcore::enquo(specialtyVar))
     if ( ! missing(caseID)) caseID <- jmvcore::resolveQuo(jmvcore::enquo(caseID))
+    if ( ! missing(raterExperience)) raterExperience <- jmvcore::resolveQuo(jmvcore::enquo(raterExperience))
+    if ( ! missing(raterSpecialty)) raterSpecialty <- jmvcore::resolveQuo(jmvcore::enquo(raterSpecialty))
+    if ( ! missing(raterInstitution)) raterInstitution <- jmvcore::resolveQuo(jmvcore::enquo(raterInstitution))
+    if ( ! missing(raterVolume)) raterVolume <- jmvcore::resolveQuo(jmvcore::enquo(raterVolume))
+    if ( ! missing(referenceStandard)) referenceStandard <- jmvcore::resolveQuo(jmvcore::enquo(referenceStandard))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -1618,9 +2041,17 @@ agreement <- function(
             `if`( ! missing(trainingVar), trainingVar, NULL),
             `if`( ! missing(institutionVar), institutionVar, NULL),
             `if`( ! missing(specialtyVar), specialtyVar, NULL),
-            `if`( ! missing(caseID), caseID, NULL))
+            `if`( ! missing(caseID), caseID, NULL),
+            `if`( ! missing(raterExperience), raterExperience, NULL),
+            `if`( ! missing(raterSpecialty), raterSpecialty, NULL),
+            `if`( ! missing(raterInstitution), raterInstitution, NULL),
+            `if`( ! missing(raterVolume), raterVolume, NULL),
+            `if`( ! missing(referenceStandard), referenceStandard, NULL))
 
     for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in raterSpecialty) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in raterInstitution) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in referenceStandard) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- agreementOptions$new(
         vars = vars,
@@ -1670,7 +2101,22 @@ agreement <- function(
         agreementTrendAnalysis = agreementTrendAnalysis,
         caseDifficultyScoring = caseDifficultyScoring,
         agreementStabilityAnalysis = agreementStabilityAnalysis,
+        performClustering = performClustering,
+        clusteringMethod = clusteringMethod,
+        nStyleGroups = nStyleGroups,
+        autoSelectGroups = autoSelectGroups,
+        showClusteringHeatmap = showClusteringHeatmap,
+        heatmapColorScheme = heatmapColorScheme,
+        identifyDiscordant = identifyDiscordant,
+        discordantThreshold = discordantThreshold,
+        raterExperience = raterExperience,
+        raterSpecialty = raterSpecialty,
+        raterInstitution = raterInstitution,
+        raterVolume = raterVolume,
+        referenceStandard = referenceStandard,
+        useMetadataRows = useMetadataRows,
         showInlineComments = showInlineComments,
+        showClusteringInterpretation = showClusteringInterpretation,
         enhancedErrorGuidance = enhancedErrorGuidance,
         showProgressIndicators = showProgressIndicators)
 

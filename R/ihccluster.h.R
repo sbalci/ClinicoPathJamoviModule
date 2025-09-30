@@ -43,6 +43,13 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nSplits = 10,
             supervisedClustering = FALSE,
             supervisedVariable = NULL,
+            calculateRatios = FALSE,
+            ratioNumerator = NULL,
+            ratioDenominator = NULL,
+            ratioName = "Marker_Ratio",
+            ratioClassification = FALSE,
+            ratioLowCutoff = 1,
+            ratioHighCutoff = 2,
             exportClusters = FALSE,
             knownDiagnosis = NULL,
             calculateDiagnosticMetrics = FALSE,
@@ -276,6 +283,42 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..calculateRatios <- jmvcore::OptionBool$new(
+                "calculateRatios",
+                calculateRatios,
+                default=FALSE)
+            private$..ratioNumerator <- jmvcore::OptionVariable$new(
+                "ratioNumerator",
+                ratioNumerator,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..ratioDenominator <- jmvcore::OptionVariable$new(
+                "ratioDenominator",
+                ratioDenominator,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..ratioName <- jmvcore::OptionString$new(
+                "ratioName",
+                ratioName,
+                default="Marker_Ratio")
+            private$..ratioClassification <- jmvcore::OptionBool$new(
+                "ratioClassification",
+                ratioClassification,
+                default=FALSE)
+            private$..ratioLowCutoff <- jmvcore::OptionNumber$new(
+                "ratioLowCutoff",
+                ratioLowCutoff,
+                default=1)
+            private$..ratioHighCutoff <- jmvcore::OptionNumber$new(
+                "ratioHighCutoff",
+                ratioHighCutoff,
+                default=2)
             private$..exportClusters <- jmvcore::OptionBool$new(
                 "exportClusters",
                 exportClusters,
@@ -410,6 +453,13 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nSplits)
             self$.addOption(private$..supervisedClustering)
             self$.addOption(private$..supervisedVariable)
+            self$.addOption(private$..calculateRatios)
+            self$.addOption(private$..ratioNumerator)
+            self$.addOption(private$..ratioDenominator)
+            self$.addOption(private$..ratioName)
+            self$.addOption(private$..ratioClassification)
+            self$.addOption(private$..ratioLowCutoff)
+            self$.addOption(private$..ratioHighCutoff)
             self$.addOption(private$..exportClusters)
             self$.addOption(private$..knownDiagnosis)
             self$.addOption(private$..calculateDiagnosticMetrics)
@@ -464,6 +514,13 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nSplits = function() private$..nSplits$value,
         supervisedClustering = function() private$..supervisedClustering$value,
         supervisedVariable = function() private$..supervisedVariable$value,
+        calculateRatios = function() private$..calculateRatios$value,
+        ratioNumerator = function() private$..ratioNumerator$value,
+        ratioDenominator = function() private$..ratioDenominator$value,
+        ratioName = function() private$..ratioName$value,
+        ratioClassification = function() private$..ratioClassification$value,
+        ratioLowCutoff = function() private$..ratioLowCutoff$value,
+        ratioHighCutoff = function() private$..ratioHighCutoff$value,
         exportClusters = function() private$..exportClusters$value,
         knownDiagnosis = function() private$..knownDiagnosis$value,
         calculateDiagnosticMetrics = function() private$..calculateDiagnosticMetrics$value,
@@ -517,6 +574,13 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nSplits = NA,
         ..supervisedClustering = NA,
         ..supervisedVariable = NA,
+        ..calculateRatios = NA,
+        ..ratioNumerator = NA,
+        ..ratioDenominator = NA,
+        ..ratioName = NA,
+        ..ratioClassification = NA,
+        ..ratioLowCutoff = NA,
+        ..ratioHighCutoff = NA,
         ..exportClusters = NA,
         ..knownDiagnosis = NA,
         ..calculateDiagnosticMetrics = NA,
@@ -551,6 +615,8 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         reproducibilityStats = function() private$.items[["reproducibilityStats"]],
         supervisedSummary = function() private$.items[["supervisedSummary"]],
         supervisedResults = function() private$.items[["supervisedResults"]],
+        ratioSummary = function() private$.items[["ratioSummary"]],
+        ratioClassificationTable = function() private$.items[["ratioClassificationTable"]],
         markerImportance = function() private$.items[["markerImportance"]],
         clusterQuality = function() private$.items[["clusterQuality"]],
         refinementHistory = function() private$.items[["refinementHistory"]],
@@ -861,6 +927,51 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(supervisedClustering)",
                 refs=list(
                     "supervisedVariable")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ratioSummary",
+                title="Marker Ratio Summary",
+                visible="(calculateRatios)",
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto")),
+                refs=list(
+                    "ratioNumerator",
+                    "ratioDenominator",
+                    "ratioName")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ratioClassificationTable",
+                title="Ratio Classification",
+                visible="(calculateRatios && ratioClassification)",
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percent", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="range", 
+                        `title`="Range", 
+                        `type`="text")),
+                refs=list(
+                    "ratioLowCutoff",
+                    "ratioHighCutoff")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="markerImportance",
@@ -1595,6 +1706,15 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   separately
 #' @param supervisedVariable Variable defining groups (e.g., histotype,
 #'   diagnosis)
+#' @param calculateRatios Calculate ratios between continuous markers (e.g.,
+#'   CD4/CD8 ratio)
+#' @param ratioNumerator Numerator marker for ratio calculation
+#' @param ratioDenominator Denominator marker for ratio calculation
+#' @param ratioName Name for the computed ratio variable
+#' @param ratioClassification Classify ratio as Low/Intermediate/High using
+#'   cutoffs
+#' @param ratioLowCutoff Values ≤ this are classified as Low
+#' @param ratioHighCutoff Values ≥ this are classified as High
 #' @param exportClusters Save cluster assignments to dataset
 #' @param knownDiagnosis Known diagnoses for calculating marker performance
 #'   metrics (sensitivity, specificity, PPV, NPV)
@@ -1631,6 +1751,8 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$reproducibilityStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$supervisedSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$supervisedResults} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ratioSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ratioClassificationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$markerImportance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clusterQuality} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$refinementHistory} \tab \tab \tab \tab \tab a table \cr
@@ -1707,6 +1829,13 @@ ihccluster <- function(
     nSplits = 10,
     supervisedClustering = FALSE,
     supervisedVariable = NULL,
+    calculateRatios = FALSE,
+    ratioNumerator = NULL,
+    ratioDenominator = NULL,
+    ratioName = "Marker_Ratio",
+    ratioClassification = FALSE,
+    ratioLowCutoff = 1,
+    ratioHighCutoff = 2,
     exportClusters = FALSE,
     knownDiagnosis = NULL,
     calculateDiagnosticMetrics = FALSE,
@@ -1731,6 +1860,8 @@ ihccluster <- function(
     if ( ! missing(caseId)) caseId <- jmvcore::resolveQuo(jmvcore::enquo(caseId))
     if ( ! missing(spatialCompartment)) spatialCompartment <- jmvcore::resolveQuo(jmvcore::enquo(spatialCompartment))
     if ( ! missing(supervisedVariable)) supervisedVariable <- jmvcore::resolveQuo(jmvcore::enquo(supervisedVariable))
+    if ( ! missing(ratioNumerator)) ratioNumerator <- jmvcore::resolveQuo(jmvcore::enquo(ratioNumerator))
+    if ( ! missing(ratioDenominator)) ratioDenominator <- jmvcore::resolveQuo(jmvcore::enquo(ratioDenominator))
     if ( ! missing(knownDiagnosis)) knownDiagnosis <- jmvcore::resolveQuo(jmvcore::enquo(knownDiagnosis))
     if ( ! missing(clinicalVars)) clinicalVars <- jmvcore::resolveQuo(jmvcore::enquo(clinicalVars))
     if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
@@ -1743,6 +1874,8 @@ ihccluster <- function(
             `if`( ! missing(caseId), caseId, NULL),
             `if`( ! missing(spatialCompartment), spatialCompartment, NULL),
             `if`( ! missing(supervisedVariable), supervisedVariable, NULL),
+            `if`( ! missing(ratioNumerator), ratioNumerator, NULL),
+            `if`( ! missing(ratioDenominator), ratioDenominator, NULL),
             `if`( ! missing(knownDiagnosis), knownDiagnosis, NULL),
             `if`( ! missing(clinicalVars), clinicalVars, NULL),
             `if`( ! missing(survivalTime), survivalTime, NULL),
@@ -1791,6 +1924,13 @@ ihccluster <- function(
         nSplits = nSplits,
         supervisedClustering = supervisedClustering,
         supervisedVariable = supervisedVariable,
+        calculateRatios = calculateRatios,
+        ratioNumerator = ratioNumerator,
+        ratioDenominator = ratioDenominator,
+        ratioName = ratioName,
+        ratioClassification = ratioClassification,
+        ratioLowCutoff = ratioLowCutoff,
+        ratioHighCutoff = ratioHighCutoff,
         exportClusters = exportClusters,
         knownDiagnosis = knownDiagnosis,
         calculateDiagnosticMetrics = calculateDiagnosticMetrics,

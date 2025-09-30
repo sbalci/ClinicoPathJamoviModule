@@ -509,6 +509,172 @@ options:
           R: >
             Bootstrap-based stability measures to assess the consistency of agreement statistics across different samples.
 
+    # Rater Clustering Analysis (Usubutun 2012)
+    - name: performClustering
+      title: 'Perform Rater Clustering Analysis'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Identify diagnostic style groups among raters using hierarchical clustering.
+            Implements methodology from Usubutun et al. (2012) Modern Pathology.
+            Clusters raters based on diagnosis pattern similarity to reveal systematic differences in diagnostic approach.
+
+    - name: clusteringMethod
+      title: 'Clustering Linkage Method'
+      type: List
+      options:
+          - title: "Ward's method (minimize variance)"
+            name: ward
+          - title: 'Complete linkage (furthest neighbor)'
+            name: complete
+          - title: 'Average linkage (mean distance)'
+            name: average
+          - title: 'Single linkage (nearest neighbor)'
+            name: single
+      default: ward
+      description:
+          R: >
+            Hierarchical clustering linkage method. Ward's method minimizes within-group variance
+            and is recommended for identifying distinct diagnostic styles (Usubutun 2012).
+
+    - name: nStyleGroups
+      title: 'Number of Style Groups'
+      type: Integer
+      min: 2
+      max: 10
+      default: 3
+      description:
+          R: >
+            Number of diagnostic style groups to identify. Original study found 3 groups:
+            conservative (under-diagnosis), moderate (majority), and sensitive (aligns with expert).
+
+    - name: autoSelectGroups
+      title: 'Automatically Select Number of Groups'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use silhouette method or within-cluster sum of squares to automatically determine optimal number of style groups.
+
+    - name: showClusteringHeatmap
+      title: 'Show Clustering Heatmap'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display Cases × Raters heatmap with hierarchical dendrograms showing diagnostic patterns and style groups.
+
+    - name: heatmapColorScheme
+      title: 'Heatmap Color Scheme'
+      type: List
+      options:
+          - title: 'Diagnostic categories (blue-green-gold)'
+            name: diagnostic
+          - title: 'Viridis (colorblind-safe)'
+            name: viridis
+          - title: 'Red-Yellow-Blue (diverging)'
+            name: RdYlBu
+      default: diagnostic
+      description:
+          R: >
+            Color scheme for clustering heatmap. Diagnostic uses distinct colors per category as in Usubutun (2012).
+
+    - name: identifyDiscordant
+      title: 'Identify Discordant Cases'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Flag cases with high inter-rater disagreement that distinguish diagnostic style groups.
+            These cases are useful for training and quality assurance discussions.
+
+    - name: discordantThreshold
+      title: 'Discordant Case Threshold'
+      type: Number
+      min: 0.2
+      max: 0.8
+      default: 0.5
+      description:
+          R: >
+            Minimum disagreement proportion for flagging discordant cases.
+            0.5 means at least 50% of raters disagreed with majority diagnosis.
+
+    # Rater Characteristics (optional)
+    - name: raterExperience
+      title: 'Rater Experience (years)'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Years of experience for each rater. Will be tested for association with style group membership.
+      default: NULL
+
+    - name: raterSpecialty
+      title: 'Rater Specialty/Practice Type'
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: >
+            Specialty or practice type (e.g., specialist vs generalist, subspecialty).
+            Will be tested for association with style group membership.
+      default: NULL
+
+    - name: raterInstitution
+      title: 'Rater Institution'
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: >
+            Training or current practice institution. Will be tested for association with style group membership.
+            Usubutun (2012) found no association, suggesting diagnostic style is personal rather than institutional.
+      default: NULL
+
+    - name: raterVolume
+      title: 'Rater Case Volume'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Number of cases seen per month or year. Will be tested for association with style group membership.
+      default: NULL
+
+    - name: referenceStandard
+      title: 'Reference/Expert Standard (optional)'
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: >
+            Expert consensus or reference standard diagnosis. Used to compare style groups
+            and identify which group aligns most closely with expert judgment.
+      default: NULL
+
+    - name: useMetadataRows
+      title: 'Extract Rater Characteristics from Metadata Rows'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable extraction of rater characteristics from special metadata rows in the dataset.
+            Metadata rows should have case_id starting with "META_" (e.g., META_experience, META_specialty).
+            Values in rater columns will be extracted as characteristics for association testing.
+
     # Enhanced User Experience Options
     - name: showInlineComments
       title: Show Inline Statistical Comments
@@ -517,6 +683,15 @@ options:
       description:
           R: >
             Show detailed statistical explanations and interpretations inline with results for educational purposes.
+
+    - name: showClusteringInterpretation
+      title: Show Clustering Interpretation Guide
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display explanatory guide for interpreting clustering results, diagnostic style groups,
+            and discordant cases. Useful for understanding clinical implications.
 
     - name: enhancedErrorGuidance
       title: Enhanced Error Guidance
