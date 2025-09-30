@@ -3,48 +3,15 @@ name:  agreement
 title: Interrater Reliability
 menuGroup: meddecideT
 menuSubgroup: Agreement
-version: '0.0.31'
+version: '0.0.3'
 jas: '1.2'
 
 description:
-    main: >
-        Comprehensive interrater reliability analysis including Cohen's kappa (2 raters), 
-        Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
-        Provides agreement statistics, visualization, and clinical interpretation
-        for categorical rating data.
+    main: Function for Interrater Reliability.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            # Load example data
-            data('pathology_ratings', package = 'ClinicoPath')
-            
-            # Basic agreement analysis with 2 raters
-            agreement(pathology_ratings, 
-                      vars = c('rater1', 'rater2'))
-            
-            # Advanced analysis with 3+ raters including visualization
-            agreement(pathology_ratings,
-                      vars = c('rater1', 'rater2', 'rater3'),
-                      multiraterMethod = 'fleiss',
-                      fleissCI = TRUE,
-                      heatmap = TRUE,
-                      heatmapDetails = TRUE,
-                      sft = TRUE)
-            
-            # Krippendorff's alpha for ordinal data
-            agreement(pathology_ratings,
-                      vars = c('rater1', 'rater2', 'rater3'),
-                      multiraterMethod = 'krippendorff',
-                      kripp = TRUE,
-                      krippMethod = 'ordinal')
-            
-            # Consensus analysis
-            agreement(pathology_ratings,
-                      vars = c('rater1', 'rater2', 'rater3'),
-                      consensus = TRUE,
-                      consensus_method = 'majority',
-                      tie_breaking = 'arbitration',
-                      show_consensus_table = TRUE)
+            # example will be added
 
 
 options:
@@ -52,17 +19,17 @@ options:
       type: Data
       description:
           R: >
-            The data as a data frame. Each row represents a case/subject, and columns represent different raters/observers.
+            The data as a data frame. The data should be in long format, where each row is a unique observation.
 
     - name: vars
-      title: Raters/Observers
+      title: Raters
       type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            Variables representing different raters/observers. Each variable should contain the ratings/diagnoses 
-            given by each observer for the same set of cases.
+            A string naming the variable from `data` that contains the
+            diagnosis given by the observer, variable can be categorical or ordinal.
 
 
     - name: sft
@@ -71,42 +38,9 @@ options:
       default: false
       description:
           R: >
-            Show frequency tables for each rater and cross-tabulation tables for pairwise comparisons.
+            Boolean selection whether to show frequency table. Default is 'false'. If 'true', the function will show
+            frequency table for each observer.
 
-    - name: heatmap
-      title: Agreement Heatmap
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show agreement heatmap visualization with color-coded agreement levels.
-
-    - name: heatmapDetails
-      title: Show Detailed Heatmap
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show detailed heatmap with kappa values and confidence intervals for all rater pairs.
-
-    - name: heatmapTheme
-      title: Heatmap Color Theme
-      type: List
-      options:
-        - title: Viridis (colorblind-safe)
-          name: viridis
-        - title: Plasma (colorblind-safe)
-          name: plasma
-        - title: Cividis (colorblind-safe)
-          name: cividis
-        - title: Blue-White-Red
-          name: bwr
-        - title: Red-Yellow-Green (classic)
-          name: ryg
-      default: viridis
-      description:
-          R: >
-            Choose color scheme for the agreement heatmap visualization.
 
     - name: wght
       title: Weighted Kappa (Ordinal Variables only)
@@ -121,8 +55,9 @@ options:
       default: unweighted
       description:
           R: >
-            Weighting scheme for kappa analysis. Use 'squared' or 'equal' only with ordinal variables.
-            Weighted kappa accounts for the degree of disagreement.
+            A list for the argument weight (wght), for weighted kappa analysis. Default is 'unweighted'.
+            'squared' or 'equal' should be selected only with ordinal variables. The function gives error if the variable type
+            is not ordinal. The default is 'unweighted'.
 
     - name: exct
       title: Exact Kappa (>=3 Variables)
@@ -130,32 +65,7 @@ options:
       default: false
       description:
           R: >
-            Use exact method for Fleiss' kappa calculation with 3 or more raters. More accurate but computationally intensive.
-
-    - name: multiraterMethod
-      title: Multi-rater Agreement Method
-      type: List
-      options:
-        - title: Automatic (based on number of raters)
-          name: auto
-        - title: Pairwise Cohen's Kappa (2 raters)
-          name: cohen
-        - title: Fleiss' Kappa (3+ raters)
-          name: fleiss
-        - title: Krippendorff's Alpha (any number)
-          name: krippendorff
-      default: auto
-      description:
-          R: >
-            Choose specific method for multi-rater agreement analysis or use automatic selection.
-
-    - name: fleissCI
-      title: Fleiss Kappa Confidence Intervals
-      type: Bool
-      default: true
-      description:
-          R: >
-            Calculate 95% confidence intervals for Fleiss' kappa using asymptotic standard errors.
+            Boolean selection whether to use exact kappa. Effects only more than 3 observers. Default is 'false'.
 
     - name: kripp
       title: "Krippendorff's Alpha"
@@ -163,7 +73,7 @@ options:
       default: false
       description:
           R: >
-            Calculate Krippendorff's alpha, a generalized measure of reliability for any number of observers and data types.
+            Boolean selection whether to calculate Krippendorff's alpha. Default is 'false'.
 
     - name: krippMethod
       title: "Data Type for Krippendorff's Alpha" 
@@ -180,534 +90,15 @@ options:
       default: nominal
       description:
           R: >
-            Measurement level for Krippendorff's alpha calculation. Choose based on your data type.
-
-    - name: consensus
-      title: Consensus Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            Perform consensus scoring analysis to determine agreed-upon ratings from multiple raters.
-
-    - name: consensus_method
-      title: Consensus Method
-      type: List
-      options:
-        - title: Majority Rule (≥50%)
-          name: majority
-        - title: Super Majority (≥2/3)
-          name: super_majority
-        - title: Unanimous Only
-          name: unanimous
-      default: majority
-      description:
-          R: >
-            Method for determining consensus scores from multiple raters.
-
-    - name: tie_breaking
-      title: Tie Breaking Method
-      type: List
-      options:
-        - title: Exclude ties from analysis
-          name: exclude
-        - title: Flag for expert arbitration
-          name: arbitration
-        - title: Use most frequent category overall
-          name: global_mode
-      default: exclude
-      description:
-          R: >
-            How to handle cases where no consensus can be reached using the selected method.
-
-    - name: show_consensus_table
-      title: Show Consensus Results
-      type: Bool
-      default: true
-      description:
-          R: >
-            Display detailed consensus scoring results including individual rater scores and consensus outcomes.
-
-    - name: showClinicalSummary
-      title: Clinical Summary
-      type: Bool
-      default: true
-      description:
-          R: >
-            Show clinical summary with plain-language interpretation of agreement statistics and their practical implications.
-
-    - name: showAboutAnalysis
-      title: About This Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show educational information about inter-rater reliability analysis, when to use it, and what the outputs mean.
-
-    - name: showAssumptions
-      title: Assumptions & Caveats
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show important assumptions, data requirements, common pitfalls, and interpretation guidelines for the analysis.
-
-    - name: showWeightedKappaGuide
-      title: Weighted Kappa Guide
-      type: Bool
-      default: true
-      description:
-          R: >
-            Show explanatory guide for weighted kappa options, including when to use linear vs quadratic weighting schemes.
-
-    - name: showStatisticalGlossary
-      title: Statistical Terms Glossary
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show glossary of statistical terms (kappa, ICC, alpha, etc.) with clinical interpretations and usage guidelines.
-
-    # Diagnostic Style Analysis (Usubutun Method)
-    - name: diagnosticStyleAnalysis
-      title: Diagnostic Style Clustering
-      type: Bool
-      default: false
-      description:
-          R: >
-            Enable diagnostic style clustering analysis using the Usubutun method to identify pathologist "schools" or diagnostic approaches.
-
-    - name: styleClusterMethod
-      title: Style Clustering Method
-      type: List
-      options:
-        - title: Ward's Linkage
-          name: ward
-        - title: Complete Linkage
-          name: complete
-        - title: Average Linkage
-          name: average
-      default: ward
-      description:
-          R: >
-            Hierarchical clustering method for diagnostic style analysis. Ward's linkage is the Usubutun standard.
-
-    - name: styleDistanceMetric
-      title: Style Distance Metric
-      type: List
-      options:
-        - title: Percentage Agreement
-          name: agreement
-        - title: Correlation
-          name: correlation
-        - title: Euclidean
-          name: euclidean
-      default: agreement
-      description:
-          R: >
-            Distance metric for measuring diagnostic similarity between raters for style clustering.
-
-    - name: styleGroups
-      title: Number of Style Groups
-      type: Number
-      min: 2
-      max: 10
-      default: 3
-      description:
-          R: >
-            Number of diagnostic style groups to identify. Usubutun et al. found 3 groups optimal for most analyses.
-
-    - name: raterCharacteristics
-      title: Include Rater Characteristics
-      type: Bool
-      default: false
-      description:
-          R: >
-            Include rater background characteristics (experience, training, institution) in style analysis.
-
-    - name: experienceVar
-      title: Experience Variable
-      type: Variable
-      suggested: [continuous, ordinal, nominal]
-      description:
-          R: >
-            Optional variable containing rater experience information (years of experience, level of training, etc.)
-
-    - name: trainingVar
-      title: Training Variable  
-      type: Variable
-      suggested: [nominal, ordinal]
-      description:
-          R: >
-            Optional variable containing rater training institution or background information
-
-    - name: institutionVar
-      title: Institution Variable
-      type: Variable
-      suggested: [nominal]
-      description:
-          R: >
-            Optional variable containing rater current institution or location information
-
-    - name: specialtyVar
-      title: Specialty Variable
-      type: Variable
-      suggested: [nominal, ordinal]
-      description:
-          R: >
-            Optional variable containing rater medical specialty or subspecialty information
-
-    - name: identifyDiscordantCases
-      title: Identify Discordant Cases
-      type: Bool
-      default: false
-      description:
-          R: >
-            Identify cases that distinguish different diagnostic styles - useful for training and consensus development.
-
-    - name: caseID
-      title: Case ID Variable
-      type: Variable
-      suggested: [id, nominal]
-      description:
-          R: >
-            Optional variable containing case identifiers. If not specified, cases will be numbered automatically.
-
-    # Advanced Analysis Options
-    - name: icc
-      title: Intraclass Correlation Coefficient
-      type: Bool
-      default: false
-      description:
-          R: >
-            Calculate ICC for continuous or ordinal data. Provides additional reliability measures beyond kappa.
+            Specifies the measurement level for Krippendorff's alpha calculation.
 
     - name: bootstrap
-      title: Bootstrap Confidence Intervals
+      title: "Bootstrap Confidence Intervals"
       type: Bool
       default: false
       description:
           R: >
-            Calculate bootstrap confidence intervals for Krippendorff's alpha and other statistics.
-
-    - name: bootstrapSamples
-      title: Bootstrap Samples
-      type: Number
-      min: 100
-      max: 5000
-      default: 1000
-      description:
-          R: >
-            Number of bootstrap samples for confidence interval calculation.
-
-    - name: pairwiseAnalysis
-      title: Pairwise Rater Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            Detailed analysis of agreement between each pair of raters.
-
-    - name: categoryAnalysis
-      title: Category-Specific Agreement
-      type: Bool
-      default: false
-      description:
-          R: >
-            Agreement analysis for each diagnostic category separately.
-
-    - name: outlierAnalysis
-      title: Identify Outlier Cases
-      type: Bool
-      default: false
-      description:
-          R: >
-            Identify cases with unusually poor agreement across raters.
-
-    - name: pathologyContext
-      title: Pathology-Specific Metrics
-      type: Bool
-      default: false
-      description:
-          R: >
-            Calculate pathology-specific metrics including diagnostic accuracy, sensitivity, and specificity when gold standard is available.
-
-    # Enhanced Analysis Features
-    - name: gwetAC
-      title: Gwet's Agreement Coefficients
-      type: Bool
-      default: false
-      description:
-          R: >
-            Calculate Gwet's AC1 and AC2 coefficients, which are more robust than kappa for high agreement scenarios and less affected by prevalence.
-
-    - name: pabak
-      title: PABAK Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            Calculate Prevalence-Adjusted Bias-Adjusted Kappa (PABAK) to address prevalence and bias issues in agreement studies.
-
-    - name: sampleSizePlanning
-      title: Sample Size Planning
-      type: Bool
-      default: false
-      description:
-          R: >
-            Perform sample size planning calculations for agreement studies with specified precision requirements.
-
-    - name: targetKappa
-      title: Target Kappa Value
-      type: Number
-      min: 0
-      max: 1
-      default: 0.8
-      description:
-          R: >
-            Target kappa value for sample size planning calculations.
-
-    - name: targetPrecision
-      title: Target Precision (CI Width)
-      type: Number
-      min: 0.01
-      max: 0.5
-      default: 0.1
-      description:
-          R: >
-            Target precision for confidence interval width in sample size planning.
-
-    - name: raterBiasAnalysis
-      title: Rater Bias Detection
-      type: Bool
-      default: false
-      description:
-          R: >
-            Analyze systematic tendencies and biases for each rater compared to the consensus or average ratings.
-
-    - name: agreementTrendAnalysis
-      title: Agreement Trend Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            Analyze how agreement changes over time or case sequence, useful for training effect assessment.
-
-    - name: caseDifficultyScoring
-      title: Case Difficulty Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            Quantify inherent case difficulty based on inter-rater disagreement patterns and provide difficulty scores.
-
-    - name: agreementStabilityAnalysis
-      title: Agreement Stability Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            Bootstrap-based stability measures to assess the consistency of agreement statistics across different samples.
-
-    # Rater Clustering Analysis (Usubutun 2012)
-    - name: performClustering
-      title: 'Perform Rater Clustering Analysis'
-      type: Bool
-      default: false
-      description:
-          R: >
-            Identify diagnostic style groups among raters using hierarchical clustering.
-            Implements methodology from Usubutun et al. (2012) Modern Pathology.
-            Clusters raters based on diagnosis pattern similarity to reveal systematic differences in diagnostic approach.
-
-    - name: clusteringMethod
-      title: 'Clustering Linkage Method'
-      type: List
-      options:
-          - title: "Ward's method (minimize variance)"
-            name: ward
-          - title: 'Complete linkage (furthest neighbor)'
-            name: complete
-          - title: 'Average linkage (mean distance)'
-            name: average
-          - title: 'Single linkage (nearest neighbor)'
-            name: single
-      default: ward
-      description:
-          R: >
-            Hierarchical clustering linkage method. Ward's method minimizes within-group variance
-            and is recommended for identifying distinct diagnostic styles (Usubutun 2012).
-
-    - name: nStyleGroups
-      title: 'Number of Style Groups'
-      type: Integer
-      min: 2
-      max: 10
-      default: 3
-      description:
-          R: >
-            Number of diagnostic style groups to identify. Original study found 3 groups:
-            conservative (under-diagnosis), moderate (majority), and sensitive (aligns with expert).
-
-    - name: autoSelectGroups
-      title: 'Automatically Select Number of Groups'
-      type: Bool
-      default: false
-      description:
-          R: >
-            Use silhouette method or within-cluster sum of squares to automatically determine optimal number of style groups.
-
-    - name: showClusteringHeatmap
-      title: 'Show Clustering Heatmap'
-      type: Bool
-      default: true
-      description:
-          R: >
-            Display Cases × Raters heatmap with hierarchical dendrograms showing diagnostic patterns and style groups.
-
-    - name: heatmapColorScheme
-      title: 'Heatmap Color Scheme'
-      type: List
-      options:
-          - title: 'Diagnostic categories (blue-green-gold)'
-            name: diagnostic
-          - title: 'Viridis (colorblind-safe)'
-            name: viridis
-          - title: 'Red-Yellow-Blue (diverging)'
-            name: RdYlBu
-      default: diagnostic
-      description:
-          R: >
-            Color scheme for clustering heatmap. Diagnostic uses distinct colors per category as in Usubutun (2012).
-
-    - name: identifyDiscordant
-      title: 'Identify Discordant Cases'
-      type: Bool
-      default: true
-      description:
-          R: >
-            Flag cases with high inter-rater disagreement that distinguish diagnostic style groups.
-            These cases are useful for training and quality assurance discussions.
-
-    - name: discordantThreshold
-      title: 'Discordant Case Threshold'
-      type: Number
-      min: 0.2
-      max: 0.8
-      default: 0.5
-      description:
-          R: >
-            Minimum disagreement proportion for flagging discordant cases.
-            0.5 means at least 50% of raters disagreed with majority diagnosis.
-
-    # Rater Characteristics (optional)
-    - name: raterExperience
-      title: 'Rater Experience (years)'
-      type: Variable
-      suggested:
-          - continuous
-      permitted:
-          - numeric
-      description:
-          R: >
-            Years of experience for each rater. Will be tested for association with style group membership.
-      default: NULL
-
-    - name: raterSpecialty
-      title: 'Rater Specialty/Practice Type'
-      type: Variable
-      suggested:
-          - nominal
-      permitted:
-          - factor
-      description:
-          R: >
-            Specialty or practice type (e.g., specialist vs generalist, subspecialty).
-            Will be tested for association with style group membership.
-      default: NULL
-
-    - name: raterInstitution
-      title: 'Rater Institution'
-      type: Variable
-      suggested:
-          - nominal
-      permitted:
-          - factor
-      description:
-          R: >
-            Training or current practice institution. Will be tested for association with style group membership.
-            Usubutun (2012) found no association, suggesting diagnostic style is personal rather than institutional.
-      default: NULL
-
-    - name: raterVolume
-      title: 'Rater Case Volume'
-      type: Variable
-      suggested:
-          - continuous
-      permitted:
-          - numeric
-      description:
-          R: >
-            Number of cases seen per month or year. Will be tested for association with style group membership.
-      default: NULL
-
-    - name: referenceStandard
-      title: 'Reference/Expert Standard (optional)'
-      type: Variable
-      suggested:
-          - nominal
-          - ordinal
-      permitted:
-          - factor
-      description:
-          R: >
-            Expert consensus or reference standard diagnosis. Used to compare style groups
-            and identify which group aligns most closely with expert judgment.
-      default: NULL
-
-    - name: useMetadataRows
-      title: 'Extract Rater Characteristics from Metadata Rows'
-      type: Bool
-      default: false
-      description:
-          R: >
-            Enable extraction of rater characteristics from special metadata rows in the dataset.
-            Metadata rows should have case_id starting with "META_" (e.g., META_experience, META_specialty).
-            Values in rater columns will be extracted as characteristics for association testing.
-
-    # Enhanced User Experience Options
-    - name: showInlineComments
-      title: Show Inline Statistical Comments
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show detailed statistical explanations and interpretations inline with results for educational purposes.
-
-    - name: showClusteringInterpretation
-      title: Show Clustering Interpretation Guide
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display explanatory guide for interpreting clustering results, diagnostic style groups,
-            and discordant cases. Useful for understanding clinical implications.
-
-    - name: enhancedErrorGuidance
-      title: Enhanced Error Guidance
-      type: Bool
-      default: true
-      description:
-          R: >
-            Provide detailed error messages and suggestions for resolving common issues in agreement analysis.
-
-    - name: showProgressIndicators
-      title: Show Progress for Long Operations
-      type: Bool
-      default: true
-      description:
-          R: >
-            Display progress indicators for computationally intensive operations like bootstrap calculations.
+            Calculate bootstrap confidence intervals for Krippendorff's alpha.
 
 
 ...

@@ -1,0 +1,631 @@
+title: Pathology Interrater Reliability
+name: pathagreement
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+
+  # ========================================================================
+  # DATA INPUT - Essential Variables
+  # ========================================================================
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: "Rater Variables (Required)"
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: "Case ID Variable (Optional)"
+        children:
+          - type: VariablesListBox
+            name: caseID
+            maxItemCount: 1
+            isTarget: true
+
+  # ========================================================================
+  # CORE ANALYSIS - Main Statistical Settings
+  # ========================================================================
+  - type: CollapseBox
+    label: "Core Agreement Analysis"
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Statistical Method Selection"
+          - type: ComboBox
+            name: multiraterMethod
+            label: "Primary Analysis Method"
+            options:
+              - title: "Automatic (recommended for most users)"
+                name: auto
+              - title: "Cohen's Kappa (exactly 2 raters)"
+                name: cohen
+              - title: "Fleiss' Kappa (3 or more raters)"
+                name: fleiss
+              - title: "Krippendorff's Alpha (universal method)"
+                name: krippendorff
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Data Type & Weighting"
+          - type: ComboBox
+            name: wght
+            label: "Weighting Scheme"
+            options:
+              - title: "Unweighted (nominal/categorical data)"
+                name: unweighted
+              - title: "Linear Weighted (ordinal data, equal steps)"
+                name: equal
+              - title: "Quadratic Weighted (ordinal data, severe distant errors)"
+                name: squared
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Statistical Options"
+          - type: CheckBox
+            name: fleissCI
+            label: "Show Confidence Intervals (recommended)"
+          - type: CheckBox
+            name: exct
+            label: "Use Exact Method (more accurate, slower)"
+
+  # ========================================================================
+  # CLINICAL OUTPUT - Results & Interpretation
+  # ========================================================================
+  - type: CollapseBox
+    label: "Clinical Output & Interpretation"
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Clinical Reports"
+          - type: CheckBox
+            name: showClinicalSummary
+            label: "Clinical Summary (recommended)"
+          - type: CheckBox
+            name: sft
+            label: "Individual Rater Frequency Tables"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Educational Content"
+          - type: CheckBox
+            name: showAboutAnalysis
+            label: "About This Analysis"
+          - type: CheckBox
+            name: showAssumptions
+            label: "Assumptions & Caveats"
+          - type: CheckBox
+            name: showStatisticalGlossary
+            label: "Statistical Terms Glossary"
+          - type: CheckBox
+            name: showWeightedKappaGuide
+            label: "Weighted Kappa Guide"
+            enable: (wght != 'unweighted')
+
+  # ========================================================================
+  # VISUALIZATION - Charts and Graphics
+  # ========================================================================
+  - type: CollapseBox
+    label: "Visualization"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Agreement Visualization"
+          - type: CheckBox
+            name: heatmap
+            label: "Agreement Heatmap"
+          - type: CheckBox
+            name: heatmapDetails
+            label: "Show Statistical Details in Heatmap"
+            enable: (heatmap)
+
+          - type: ComboBox
+            name: heatmapTheme
+            label: "Color Theme"
+            enable: (heatmap)
+            options:
+              - title: "Viridis (colorblind-safe, recommended)"
+                name: viridis
+              - title: "Plasma (colorblind-safe)"
+                name: plasma
+              - title: "Cividis (colorblind-safe)"
+                name: cividis
+              - title: "Blue-White-Red"
+                name: bwr
+              - title: "Red-Yellow-Green (classic)"
+                name: ryg
+
+  # ========================================================================
+  # ADVANCED STATISTICS - Extended Statistical Methods
+  # ========================================================================
+  - type: CollapseBox
+    label: "Advanced Statistical Methods"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Alternative Agreement Coefficients"
+          - type: CheckBox
+            name: kripp
+            label: "Krippendorff's Alpha (handles missing data)"
+          - type: ComboBox
+            name: krippMethod
+            label: "Data Measurement Level"
+            enable: (kripp)
+            options:
+              - title: "Nominal (unordered categories)"
+                name: nominal
+              - title: "Ordinal (ranked categories)"
+                name: ordinal
+              - title: "Interval (equal intervals)"
+                name: interval
+              - title: "Ratio (true zero point)"
+                name: ratio
+
+          - type: CheckBox
+            name: icc
+            label: "Intraclass Correlation Coefficient (ICC)"
+          - type: CheckBox
+            name: gwetAC
+            label: "Gwet's AC1/AC2 Coefficients (prevalence-robust)"
+          - type: CheckBox
+            name: pabak
+            label: "PABAK (Prevalence-Adjusted Kappa)"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Bootstrap Analysis"
+          - type: CheckBox
+            name: bootstrap
+            label: "Bootstrap Confidence Intervals"
+          - type: TextBox
+            name: bootstrapSamples
+            label: "Bootstrap Samples (100-5000)"
+            enable: (bootstrap)
+            format: number
+
+  # ========================================================================
+  # CONSENSUS ANALYSIS - Agreement Scoring
+  # ========================================================================
+  - type: CollapseBox
+    label: "Consensus Analysis"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: consensus
+            label: "Enable Consensus Scoring"
+
+          - type: ComboBox
+            name: consensus_method
+            label: "Consensus Threshold"
+            enable: (consensus)
+            options:
+              - title: "Simple Majority (>50% agreement)"
+                name: majority
+              - title: "Supermajority (≥67% agreement)"
+                name: super_majority
+              - title: "Unanimous Agreement (100%)"
+                name: unanimous
+
+          - type: ComboBox
+            name: tie_breaking
+            label: "Handle Ties By"
+            enable: (consensus)
+            options:
+              - title: "Excluding tied cases from analysis"
+                name: exclude
+              - title: "Flagging for expert arbitration"
+                name: arbitration
+              - title: "Using global most frequent category"
+                name: global_mode
+
+          - type: CheckBox
+            name: show_consensus_table
+            label: "Show Detailed Case-by-Case Results"
+            enable: (consensus)
+
+  # ========================================================================
+  # DETAILED ANALYSIS - Case and Rater Level Analysis
+  # ========================================================================
+  - type: CollapseBox
+    label: "Detailed Analysis Options"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Rater-Level Analysis"
+          - type: CheckBox
+            name: pairwiseAnalysis
+            label: "Pairwise Rater Comparisons"
+          - type: CheckBox
+            name: raterBiasAnalysis
+            label: "Rater Bias Detection"
+          - type: CheckBox
+            name: agreementTrendAnalysis
+            label: "Agreement Trend Over Cases (training effect)"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Case-Level Analysis"
+          - type: CheckBox
+            name: categoryAnalysis
+            label: "Category-Specific Agreement"
+          - type: CheckBox
+            name: outlierAnalysis
+            label: "Identify Problematic Cases"
+          - type: CheckBox
+            name: caseDifficultyScoring
+            label: "Case Difficulty Assessment"
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Clinical Context Analysis"
+          - type: CheckBox
+            name: pathologyContext
+            label: "Diagnostic Accuracy Metrics"
+          - type: CheckBox
+            name: agreementStabilityAnalysis
+            label: "Agreement Stability Analysis"
+
+  # ========================================================================
+  # DIAGNOSTIC STYLE ANALYSIS - Usubutun Method
+  # ========================================================================
+  - type: CollapseBox
+    label: "Diagnostic Style Analysis (Usubutun Method)"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: diagnosticStyleAnalysis
+            label: "Enable Diagnostic Style Clustering"
+
+          - type: ComboBox
+            name: styleClusterMethod
+            label: "Clustering Algorithm"
+            enable: (diagnosticStyleAnalysis)
+            options:
+              - title: "Ward's Linkage (Usubutun standard, recommended)"
+                name: ward
+              - title: "Complete Linkage"
+                name: complete
+              - title: "Average Linkage"
+                name: average
+
+          - type: ComboBox
+            name: styleDistanceMetric
+            label: "Distance Metric"
+            enable: (diagnosticStyleAnalysis)
+            options:
+              - title: "Percentage Agreement (recommended)"
+                name: agreement
+              - title: "Correlation"
+                name: correlation
+              - title: "Euclidean Distance"
+                name: euclidean
+
+          - type: TextBox
+            name: styleGroups
+            label: "Number of Style Groups (2-10)"
+            enable: (diagnosticStyleAnalysis)
+            format: number
+          
+          - type: CheckBox
+            name: identifyDiscordantCases
+            label: "Identify Cases Distinguishing Styles"
+            enable: (diagnosticStyleAnalysis)
+
+  # ========================================================================
+  # RATER CHARACTERISTICS - Optional Background Information
+  # ========================================================================
+  - type: CollapseBox
+    label: "Rater Background Information (Optional)"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: raterCharacteristics
+            label: "Include Rater Background Variables"
+
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: "Experience Variable"
+            children:
+              - type: VariablesListBox
+                name: experienceVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+
+          - type: TargetLayoutBox
+            label: "Training Institution Variable"
+            children:
+              - type: VariablesListBox
+                name: trainingVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+
+          - type: TargetLayoutBox
+            label: "Current Institution Variable"
+            children:
+              - type: VariablesListBox
+                name: institutionVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+
+          - type: TargetLayoutBox
+            label: "Medical Specialty Variable"
+            children:
+              - type: VariablesListBox
+                name: specialtyVar
+                maxItemCount: 1
+                isTarget: true
+                enable: (raterCharacteristics)
+
+  # ========================================================================
+  # STUDY DESIGN - Sample Size Planning
+  # ========================================================================
+  - type: CollapseBox
+    label: "Study Design & Sample Size Planning"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sampleSizePlanning
+            label: "Perform Sample Size Planning"
+
+          - type: TextBox
+            name: targetKappa
+            label: "Target Kappa Value (0.0-1.0)"
+            format: number
+            enable: (sampleSizePlanning)
+
+          - type: TextBox
+            name: targetPrecision
+            label: "Target Precision (CI Width, e.g., 0.1)"
+            format: number
+            enable: (sampleSizePlanning)
+
+  # ========================================================================
+  # RATER CLUSTERING ANALYSIS (Usubutun et al. 2012)
+  # ========================================================================
+  - type: CollapseBox
+    label: "Rater Clustering Analysis (Diagnostic Styles)"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Hierarchical Clustering Settings"
+          - type: CheckBox
+            name: performClustering
+            label: "Perform Rater Clustering Analysis"
+
+          - type: ComboBox
+            name: clusteringMethod
+            label: "Clustering Linkage Method"
+            enable: (performClustering)
+            options:
+              - title: "Ward's method (minimize variance)"
+                name: ward
+              - title: "Complete linkage (furthest neighbor)"
+                name: complete
+              - title: "Average linkage (mean distance)"
+                name: average
+              - title: "Single linkage (nearest neighbor)"
+                name: single
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Number of Style Groups"
+          - type: CheckBox
+            name: autoSelectGroups
+            label: "Automatically Select Optimal Number (silhouette method)"
+            enable: (performClustering)
+
+          - type: TextBox
+            name: nStyleGroups
+            label: "Number of Groups (if manual)"
+            format: number
+            enable: (performClustering && !autoSelectGroups)
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Discordant Case Analysis"
+          - type: CheckBox
+            name: identifyDiscordant
+            label: "Identify High-Disagreement Cases"
+            enable: (performClustering)
+
+          - type: TextBox
+            name: discordantThreshold
+            label: "Disagreement Threshold (0.0-1.0)"
+            format: number
+            enable: (performClustering && identifyDiscordant)
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Visualization Settings"
+          - type: CheckBox
+            name: showClusteringHeatmap
+            label: "Show Clustering Heatmap"
+            enable: (performClustering)
+
+          - type: ComboBox
+            name: heatmapColorScheme
+            label: "Heatmap Color Scheme"
+            enable: (performClustering && showClusteringHeatmap)
+            options:
+              - title: "Diagnostic categories (blue-green-gold)"
+                name: diagnostic
+              - title: "Viridis (colorblind-safe)"
+                name: viridis
+              - title: "Red-Yellow-Blue (diverging)"
+                name: RdYlBu
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Interpretation Guide"
+          - type: CheckBox
+            name: showClusteringInterpretation
+            label: "Show Clustering Interpretation Guide (optional)"
+            enable: (performClustering)
+
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: "Rater Characteristics (for association testing)"
+        children:
+          - type: VariablesListBox
+            name: raterExperience
+            maxItemCount: 1
+            isTarget: true
+            enable: (performClustering)
+
+      - type: TargetLayoutBox
+        label: "Rater Specialty"
+        children:
+          - type: VariablesListBox
+            name: raterSpecialty
+            maxItemCount: 1
+            isTarget: true
+            enable: (performClustering)
+
+      - type: TargetLayoutBox
+        label: "Rater Institution"
+        children:
+          - type: VariablesListBox
+            name: raterInstitution
+            maxItemCount: 1
+            isTarget: true
+            enable: (performClustering)
+
+      - type: TargetLayoutBox
+        label: "Rater Case Volume"
+        children:
+          - type: VariablesListBox
+            name: raterVolume
+            maxItemCount: 1
+            isTarget: true
+            enable: (performClustering)
+
+      - type: TargetLayoutBox
+        label: "Reference/Expert Standard (optional)"
+        children:
+          - type: VariablesListBox
+            name: referenceStandard
+            maxItemCount: 1
+            isTarget: true
+            enable: (performClustering)
+
+  # ========================================================================
+  # METADATA ROWS APPROACH (Alternative to Variable Selection)
+  # ========================================================================
+  - type: CollapseBox
+    label: "Rater Metadata (Alternative Input Method)"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: |
+              To provide rater characteristics without separate variables,
+              add metadata rows to your dataset:
+
+              1. Add rows at the bottom of your data
+              2. Set case_id to: META_experience, META_specialty,
+                 META_institution, or META_volume
+              3. Fill rater columns with corresponding values
+
+              Example:
+              case_id          | Rater_A | Rater_B | Rater_C
+              1                | EIN     | Benign  | EIN
+              2                | Benign  | Benign  | Adenoca
+              META_experience  | 25      | 13      | 8
+              META_specialty   | GYN     | GYN     | GEN
+
+          - type: CheckBox
+            name: useMetadataRows
+            label: "Extract rater characteristics from metadata rows"
+            enable: (performClustering)
+
+  # ========================================================================
+  # SYSTEM & TECHNICAL OPTIONS
+  # ========================================================================
+  - type: CollapseBox
+    label: "System & Technical Options"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Performance & Debugging"
+          - type: CheckBox
+            name: showInlineComments
+            label: "Show Inline Statistical Comments"
+          - type: CheckBox
+            name: enhancedErrorGuidance
+            label: "Enhanced Error Guidance"
+          - type: CheckBox
+            name: showProgressIndicators
+            label: "Show Progress for Long Operations"

@@ -92,7 +92,15 @@
       "Bash(xargs:*)",
       "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/stagemigration.r.yaml)",
       "WebFetch(domain:cloud.r-project.org)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash({ echo \"=== Files referencing ''''ein_agreement'''' in data/ ===\" ls -1 data/*agreement*)",
+      "Bash(head -10 })",
+      "Bash({ echo \"=== agreement.a.yaml (should be meddecide) ===\" grep -A1 \"^name:\" jamovi/agreement.a.yaml)",
+      "Bash(head -5 echo \"\" echo \"=== pathagreement.a.yaml (should be OncoPathT) ===\" grep -A1 \"^name:\" jamovi/pathagreement.a.yaml)",
+      "Bash(head -5 })",
+      "Bash({ echo \"=== CSV files NOT in data/ ===\" find . -name \"*.csv\" -not -path \"./data/*\" -not -path \"./.git/*\" -not -path \"./node_modules/*\")",
+      "Bash(head -20 })",
+      "Bash(do echo \"=== $file ===\" ls -lh data/$file.* vignettes/data/$file.*)"
     ],
     "deny": [],
     "ask": [],

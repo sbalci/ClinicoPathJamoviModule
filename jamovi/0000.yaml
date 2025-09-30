@@ -1208,14 +1208,10 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
-    description: >
-      Comprehensive interrater reliability analysis including Cohen's kappa (2
-      raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
-      analysis. Provides agreement statistics, visualization, and clinical
-      interpretation for categorical rating data.
+    description: Function for Interrater Reliability.
     ribbon: analyses
     category: analyses
   - title: Medical Decision
@@ -4840,6 +4836,18 @@ analyses:
 
       using a trained reference model from previously analyzed cases with known
       diagnoses.
+  - title: Pathology Interrater Reliability
+    name: pathagreement
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Agreement
+    menuTitle: Pathology Interrater Reliability
+    description: >
+      Comprehensive interrater reliability analysis including Cohen's kappa (2
+      raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
+      analysis. Provides agreement statistics, visualization, and clinical
+      interpretation for categorical rating data.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

@@ -2,7 +2,7 @@
 
 ## 📚 Overview
 
-This folder contains comprehensive documentation for the **Hierarchical Clustering Analysis** feature in the Agreement function, which identifies diagnostic style groups among raters.
+This folder contains comprehensive documentation for the **Hierarchical Clustering Analysis** feature in the Pathology Agreement function, which identifies diagnostic style groups among raters.
 
 **Based on**: Usubutun A, et al. (2012). *Modern Pathology* 25:877-884
 
@@ -201,7 +201,7 @@ Ward JH Jr. (1963). Hierarchical grouping to optimize an objective function. *Jo
 Rousseeuw PJ. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. *Journal of Computational and Applied Mathematics* 20:53-65.
 
 **Software**:
-ClinicoPath jamovi module, Agreement function with Hierarchical Clustering Analysis (Version 0.0.31.81)
+ClinicoPath jamovi module, Pathology Agreement function with Hierarchical Clustering Analysis (Version 0.0.31.81)
 
 ---
 
