@@ -299,8 +299,8 @@ Test script (`data-raw/test_ein_clustering_replication.R`) executed successfully
    - Open jamovi
    - File → Import → Navigate to `ein_agreement_wide.csv`
 
-2. **Open Agreement Analysis**
-   - Analyses → ClinicoPath → meddecide → Agreement
+2. **Open Pathology Interrater Reliability Analysis**
+   - Analyses → ClinicoPath → OncoPathT → Pathology Interrater Reliability
 
 3. **Select Variables**
    - Rater Variables: Select columns **T through E** (20 pathologist columns)

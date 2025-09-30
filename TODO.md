@@ -93,4 +93,4 @@ run devtools::document() to see if there are any errors
 prepare a realistic data to test the features in detail
 move csv files under data folder.
 move data generation files under data-raw folder.
-move documentation files under vignettes folder.
+move documentation files under module specific vignettes folder.
