@@ -105,6 +105,17 @@ wrote: pathagreement.src.js
 **OncoPathT menu:**
 - Pathology Interrater Reliability (complex, pathology-specific)
 
+## File Organization Audit
+
+A comprehensive audit of all project files was conducted following this reorganization to ensure:
+- All CSV files are in `/data/` folder
+- All data generation scripts are in `/data-raw/` folder
+- All documentation files are in appropriate module-specific vignettes folders
+
+**Audit Result:** ✅ All files properly organized
+
+See `FILE_ORGANIZATION_AUDIT.md` for complete details.
+
 ---
 
 **Date:** September 30, 2025
