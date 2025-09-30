@@ -1,7 +1,7 @@
 ---
 name: linechart
 title: Line Chart
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT2
 menuSubgroup: Lines
 menuSubtitle: 'Time Series and Trend Analysis'
 version: '0.0.31'

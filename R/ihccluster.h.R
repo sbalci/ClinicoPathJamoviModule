@@ -9,7 +9,12 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             catVars = NULL,
             contVars = NULL,
             caseId = NULL,
+            spatialCompartment = NULL,
+            performSpatialAnalysis = FALSE,
+            spatialComparisonMode = "both",
             method = "pam",
+            distanceMethod = "gower",
+            linkageMethod = "ward",
             nClusters = 3,
             autoSelectK = TRUE,
             kRange = "medium",
@@ -28,16 +33,31 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             markerSummary = TRUE,
             clusterProfiles = TRUE,
             associationTests = TRUE,
+            multipleTestingCorrection = "bonferroni",
+            markerOptimization = FALSE,
+            showMarkerCorrelation = FALSE,
+            clusterQualityMetrics = TRUE,
+            iterativeRefinement = FALSE,
+            refinementIterations = 3,
+            reproducibilityTest = FALSE,
+            nSplits = 10,
+            supervisedClustering = FALSE,
+            supervisedVariable = NULL,
             exportClusters = FALSE,
+            knownDiagnosis = NULL,
+            calculateDiagnosticMetrics = FALSE,
+            identifyOptimalPanel = FALSE,
+            panelSize = "pairs",
+            flagOutliers = TRUE,
+            outlierThreshold = 0.25,
             clinicalVars = NULL,
             survivalTime = NULL,
             survivalEvent = NULL,
             colorPalette = "default",
             fontSize = "medium",
             plotContrast = FALSE,
-            tumorPreset = "none",
-            applyPreset = FALSE,
-            language = "english", ...) {
+            showInterpretation = FALSE,
+            showTechnicalNotes = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -52,7 +72,8 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..contVars <- jmvcore::OptionVariables$new(
                 "contVars",
                 contVars,
@@ -69,7 +90,28 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "id"),
                 permitted=list(
                     "factor",
-                    "id"))
+                    "id"),
+                default=NULL)
+            private$..spatialCompartment <- jmvcore::OptionVariable$new(
+                "spatialCompartment",
+                spatialCompartment,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
+            private$..performSpatialAnalysis <- jmvcore::OptionBool$new(
+                "performSpatialAnalysis",
+                performSpatialAnalysis,
+                default=FALSE)
+            private$..spatialComparisonMode <- jmvcore::OptionList$new(
+                "spatialComparisonMode",
+                spatialComparisonMode,
+                options=list(
+                    "between",
+                    "within",
+                    "both"),
+                default="both")
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -78,6 +120,22 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "hierarchical",
                     "dimreduce"),
                 default="pam")
+            private$..distanceMethod <- jmvcore::OptionList$new(
+                "distanceMethod",
+                distanceMethod,
+                options=list(
+                    "gower",
+                    "jaccard"),
+                default="gower")
+            private$..linkageMethod <- jmvcore::OptionList$new(
+                "linkageMethod",
+                linkageMethod,
+                options=list(
+                    "ward",
+                    "complete",
+                    "average",
+                    "single"),
+                default="ward")
             private$..nClusters <- jmvcore::OptionInteger$new(
                 "nClusters",
                 nClusters,
@@ -165,10 +223,97 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "associationTests",
                 associationTests,
                 default=TRUE)
+            private$..multipleTestingCorrection <- jmvcore::OptionList$new(
+                "multipleTestingCorrection",
+                multipleTestingCorrection,
+                options=list(
+                    "none",
+                    "bonferroni",
+                    "fdr",
+                    "holm"),
+                default="bonferroni")
+            private$..markerOptimization <- jmvcore::OptionBool$new(
+                "markerOptimization",
+                markerOptimization,
+                default=FALSE)
+            private$..showMarkerCorrelation <- jmvcore::OptionBool$new(
+                "showMarkerCorrelation",
+                showMarkerCorrelation,
+                default=FALSE)
+            private$..clusterQualityMetrics <- jmvcore::OptionBool$new(
+                "clusterQualityMetrics",
+                clusterQualityMetrics,
+                default=TRUE)
+            private$..iterativeRefinement <- jmvcore::OptionBool$new(
+                "iterativeRefinement",
+                iterativeRefinement,
+                default=FALSE)
+            private$..refinementIterations <- jmvcore::OptionInteger$new(
+                "refinementIterations",
+                refinementIterations,
+                min=2,
+                max=5,
+                default=3)
+            private$..reproducibilityTest <- jmvcore::OptionBool$new(
+                "reproducibilityTest",
+                reproducibilityTest,
+                default=FALSE)
+            private$..nSplits <- jmvcore::OptionInteger$new(
+                "nSplits",
+                nSplits,
+                min=1,
+                max=100,
+                default=10)
+            private$..supervisedClustering <- jmvcore::OptionBool$new(
+                "supervisedClustering",
+                supervisedClustering,
+                default=FALSE)
+            private$..supervisedVariable <- jmvcore::OptionVariable$new(
+                "supervisedVariable",
+                supervisedVariable,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
             private$..exportClusters <- jmvcore::OptionBool$new(
                 "exportClusters",
                 exportClusters,
                 default=FALSE)
+            private$..knownDiagnosis <- jmvcore::OptionVariable$new(
+                "knownDiagnosis",
+                knownDiagnosis,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
+            private$..calculateDiagnosticMetrics <- jmvcore::OptionBool$new(
+                "calculateDiagnosticMetrics",
+                calculateDiagnosticMetrics,
+                default=FALSE)
+            private$..identifyOptimalPanel <- jmvcore::OptionBool$new(
+                "identifyOptimalPanel",
+                identifyOptimalPanel,
+                default=FALSE)
+            private$..panelSize <- jmvcore::OptionList$new(
+                "panelSize",
+                panelSize,
+                options=list(
+                    "pairs",
+                    "triplets",
+                    "both"),
+                default="pairs")
+            private$..flagOutliers <- jmvcore::OptionBool$new(
+                "flagOutliers",
+                flagOutliers,
+                default=TRUE)
+            private$..outlierThreshold <- jmvcore::OptionNumber$new(
+                "outlierThreshold",
+                outlierThreshold,
+                min=0,
+                max=0.5,
+                default=0.25)
             private$..clinicalVars <- jmvcore::OptionVariables$new(
                 "clinicalVars",
                 clinicalVars,
@@ -178,7 +323,8 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
@@ -218,35 +364,24 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plotContrast",
                 plotContrast,
                 default=FALSE)
-            private$..tumorPreset <- jmvcore::OptionList$new(
-                "tumorPreset",
-                tumorPreset,
-                options=list(
-                    "none",
-                    "breast_luminal",
-                    "breast_triple_negative",
-                    "lung_nsclc",
-                    "prostate_standard",
-                    "colon_standard",
-                    "melanoma_immune",
-                    "lymphoma_panel"),
-                default="none")
-            private$..applyPreset <- jmvcore::OptionBool$new(
-                "applyPreset",
-                applyPreset,
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
                 default=FALSE)
-            private$..language <- jmvcore::OptionList$new(
-                "language",
-                language,
-                options=list(
-                    "english",
-                    "turkish"),
-                default="english")
+            private$..showTechnicalNotes <- jmvcore::OptionBool$new(
+                "showTechnicalNotes",
+                showTechnicalNotes,
+                default=FALSE)
 
             self$.addOption(private$..catVars)
             self$.addOption(private$..contVars)
             self$.addOption(private$..caseId)
+            self$.addOption(private$..spatialCompartment)
+            self$.addOption(private$..performSpatialAnalysis)
+            self$.addOption(private$..spatialComparisonMode)
             self$.addOption(private$..method)
+            self$.addOption(private$..distanceMethod)
+            self$.addOption(private$..linkageMethod)
             self$.addOption(private$..nClusters)
             self$.addOption(private$..autoSelectK)
             self$.addOption(private$..kRange)
@@ -265,22 +400,42 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..markerSummary)
             self$.addOption(private$..clusterProfiles)
             self$.addOption(private$..associationTests)
+            self$.addOption(private$..multipleTestingCorrection)
+            self$.addOption(private$..markerOptimization)
+            self$.addOption(private$..showMarkerCorrelation)
+            self$.addOption(private$..clusterQualityMetrics)
+            self$.addOption(private$..iterativeRefinement)
+            self$.addOption(private$..refinementIterations)
+            self$.addOption(private$..reproducibilityTest)
+            self$.addOption(private$..nSplits)
+            self$.addOption(private$..supervisedClustering)
+            self$.addOption(private$..supervisedVariable)
             self$.addOption(private$..exportClusters)
+            self$.addOption(private$..knownDiagnosis)
+            self$.addOption(private$..calculateDiagnosticMetrics)
+            self$.addOption(private$..identifyOptimalPanel)
+            self$.addOption(private$..panelSize)
+            self$.addOption(private$..flagOutliers)
+            self$.addOption(private$..outlierThreshold)
             self$.addOption(private$..clinicalVars)
             self$.addOption(private$..survivalTime)
             self$.addOption(private$..survivalEvent)
             self$.addOption(private$..colorPalette)
             self$.addOption(private$..fontSize)
             self$.addOption(private$..plotContrast)
-            self$.addOption(private$..tumorPreset)
-            self$.addOption(private$..applyPreset)
-            self$.addOption(private$..language)
+            self$.addOption(private$..showInterpretation)
+            self$.addOption(private$..showTechnicalNotes)
         }),
     active = list(
         catVars = function() private$..catVars$value,
         contVars = function() private$..contVars$value,
         caseId = function() private$..caseId$value,
+        spatialCompartment = function() private$..spatialCompartment$value,
+        performSpatialAnalysis = function() private$..performSpatialAnalysis$value,
+        spatialComparisonMode = function() private$..spatialComparisonMode$value,
         method = function() private$..method$value,
+        distanceMethod = function() private$..distanceMethod$value,
+        linkageMethod = function() private$..linkageMethod$value,
         nClusters = function() private$..nClusters$value,
         autoSelectK = function() private$..autoSelectK$value,
         kRange = function() private$..kRange$value,
@@ -299,21 +454,41 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         markerSummary = function() private$..markerSummary$value,
         clusterProfiles = function() private$..clusterProfiles$value,
         associationTests = function() private$..associationTests$value,
+        multipleTestingCorrection = function() private$..multipleTestingCorrection$value,
+        markerOptimization = function() private$..markerOptimization$value,
+        showMarkerCorrelation = function() private$..showMarkerCorrelation$value,
+        clusterQualityMetrics = function() private$..clusterQualityMetrics$value,
+        iterativeRefinement = function() private$..iterativeRefinement$value,
+        refinementIterations = function() private$..refinementIterations$value,
+        reproducibilityTest = function() private$..reproducibilityTest$value,
+        nSplits = function() private$..nSplits$value,
+        supervisedClustering = function() private$..supervisedClustering$value,
+        supervisedVariable = function() private$..supervisedVariable$value,
         exportClusters = function() private$..exportClusters$value,
+        knownDiagnosis = function() private$..knownDiagnosis$value,
+        calculateDiagnosticMetrics = function() private$..calculateDiagnosticMetrics$value,
+        identifyOptimalPanel = function() private$..identifyOptimalPanel$value,
+        panelSize = function() private$..panelSize$value,
+        flagOutliers = function() private$..flagOutliers$value,
+        outlierThreshold = function() private$..outlierThreshold$value,
         clinicalVars = function() private$..clinicalVars$value,
         survivalTime = function() private$..survivalTime$value,
         survivalEvent = function() private$..survivalEvent$value,
         colorPalette = function() private$..colorPalette$value,
         fontSize = function() private$..fontSize$value,
         plotContrast = function() private$..plotContrast$value,
-        tumorPreset = function() private$..tumorPreset$value,
-        applyPreset = function() private$..applyPreset$value,
-        language = function() private$..language$value),
+        showInterpretation = function() private$..showInterpretation$value,
+        showTechnicalNotes = function() private$..showTechnicalNotes$value),
     private = list(
         ..catVars = NA,
         ..contVars = NA,
         ..caseId = NA,
+        ..spatialCompartment = NA,
+        ..performSpatialAnalysis = NA,
+        ..spatialComparisonMode = NA,
         ..method = NA,
+        ..distanceMethod = NA,
+        ..linkageMethod = NA,
         ..nClusters = NA,
         ..autoSelectK = NA,
         ..kRange = NA,
@@ -332,16 +507,31 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..markerSummary = NA,
         ..clusterProfiles = NA,
         ..associationTests = NA,
+        ..multipleTestingCorrection = NA,
+        ..markerOptimization = NA,
+        ..showMarkerCorrelation = NA,
+        ..clusterQualityMetrics = NA,
+        ..iterativeRefinement = NA,
+        ..refinementIterations = NA,
+        ..reproducibilityTest = NA,
+        ..nSplits = NA,
+        ..supervisedClustering = NA,
+        ..supervisedVariable = NA,
         ..exportClusters = NA,
+        ..knownDiagnosis = NA,
+        ..calculateDiagnosticMetrics = NA,
+        ..identifyOptimalPanel = NA,
+        ..panelSize = NA,
+        ..flagOutliers = NA,
+        ..outlierThreshold = NA,
         ..clinicalVars = NA,
         ..survivalTime = NA,
         ..survivalEvent = NA,
         ..colorPalette = NA,
         ..fontSize = NA,
         ..plotContrast = NA,
-        ..tumorPreset = NA,
-        ..applyPreset = NA,
-        ..language = NA)
+        ..showInterpretation = NA,
+        ..showTechnicalNotes = NA)
 )
 
 ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -349,6 +539,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        binaryConversionNote = function() private$.items[["binaryConversionNote"]],
         summary = function() private$.items[["summary"]],
         clusterSizes = function() private$.items[["clusterSizes"]],
         silhouetteStats = function() private$.items[["silhouetteStats"]],
@@ -357,18 +548,34 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         associationTests = function() private$.items[["associationTests"]],
         clinicalComparison = function() private$.items[["clinicalComparison"]],
         consensusStats = function() private$.items[["consensusStats"]],
+        reproducibilityStats = function() private$.items[["reproducibilityStats"]],
+        supervisedSummary = function() private$.items[["supervisedSummary"]],
+        supervisedResults = function() private$.items[["supervisedResults"]],
+        markerImportance = function() private$.items[["markerImportance"]],
+        clusterQuality = function() private$.items[["clusterQuality"]],
+        refinementHistory = function() private$.items[["refinementHistory"]],
+        markerPerformance = function() private$.items[["markerPerformance"]],
+        optimalPanels = function() private$.items[["optimalPanels"]],
+        outlierCases = function() private$.items[["outlierCases"]],
         silhouettePlot = function() private$.items[["silhouettePlot"]],
         heatmapPlot = function() private$.items[["heatmapPlot"]],
         dendrogramPlot = function() private$.items[["dendrogramPlot"]],
+        pcaContributions = function() private$.items[["pcaContributions"]],
+        pcaVariablePlot = function() private$.items[["pcaVariablePlot"]],
         pcaPlot = function() private$.items[["pcaPlot"]],
         boxplotPlot = function() private$.items[["boxplotPlot"]],
+        markerCorrelationPlot = function() private$.items[["markerCorrelationPlot"]],
         survivalPlot = function() private$.items[["survivalPlot"]],
         medoidInfo = function() private$.items[["medoidInfo"]],
         interpretationGuide = function() private$.items[["interpretationGuide"]],
         technicalNotes = function() private$.items[["technicalNotes"]],
         executiveSummary = function() private$.items[["executiveSummary"]],
+        spatialCompartmentSummary = function() private$.items[["spatialCompartmentSummary"]],
+        spatialConcordance = function() private$.items[["spatialConcordance"]],
+        spatialClusterComparison = function() private$.items[["spatialClusterComparison"]],
+        spatialMarkerDifferences = function() private$.items[["spatialMarkerDifferences"]],
+        spatialHeatmapPlot = function() private$.items[["spatialHeatmapPlot"]],
         sizes = function() private$.items[["sizes"]],
-        modes = function() private$.items[["modes"]],
         distr = function() private$.items[["distr"]],
         assoc = function() private$.items[["assoc"]],
         text = function() private$.items[["text"]]),
@@ -384,10 +591,14 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Instructions",
-                clearWith=list(
-                    "catVars",
-                    "contVars")))
+                title="Instructions"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="binaryConversionNote",
+                title="Binary Conversion Notice",
+                visible=FALSE,
+                refs=list(
+                    "distanceMethod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -526,6 +737,11 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
+                        `name`="p_adjusted", 
+                        `title`="Adjusted p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
                         `name`="effect_size", 
                         `title`="Effect Size", 
                         `type`="text"))))
@@ -578,6 +794,315 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="reproducibilityStats",
+                title="Cluster Reproducibility (Random Split Validation)",
+                visible="(reproducibilityTest)",
+                columns=list(
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_kappa", 
+                        `title`="Mean Cohen Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="sd_kappa", 
+                        `title`="SD Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"),
+                    list(
+                        `name`="n_splits", 
+                        `title`="N Splits", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="supervisedSummary",
+                title="Supervised Clustering Summary",
+                visible="(supervisedClustering)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_clusters", 
+                        `title`="N Clusters", 
+                        `type`="integer"),
+                    list(
+                        `name`="avg_silhouette", 
+                        `title`="Avg Silhouette", 
+                        `type`="number"),
+                    list(
+                        `name`="status", 
+                        `title`="Status", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="supervisedResults",
+                title="Supervised Clustering Details",
+                visible="(supervisedClustering)",
+                refs=list(
+                    "supervisedVariable")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="markerImportance",
+                title="Marker Importance for Clustering",
+                visible="(markerOptimization)",
+                columns=list(
+                    list(
+                        `name`="marker", 
+                        `title`="Marker", 
+                        `type`="text"),
+                    list(
+                        `name`="importance", 
+                        `title`="Importance Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"),
+                    list(
+                        `name`="correlation_max", 
+                        `title`="Max Correlation", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="redundant_with", 
+                        `title`="Redundant With", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clusterQuality",
+                title="Cluster Quality and Predictive Values",
+                visible="(clusterQualityMetrics)",
+                columns=list(
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="size", 
+                        `title`="Size", 
+                        `type`="integer"),
+                    list(
+                        `name`="purity", 
+                        `title`="Purity", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="avg_silhouette", 
+                        `title`="Avg Silhouette", 
+                        `type`="number"),
+                    list(
+                        `name`="separation", 
+                        `title`="Separation Index", 
+                        `type`="number"),
+                    list(
+                        `name`="compactness", 
+                        `title`="Compactness", 
+                        `type`="number"),
+                    list(
+                        `name`="quality", 
+                        `title`="Quality Rating", 
+                        `type`="text")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="refinementHistory",
+                title="Iterative Refinement History",
+                visible="(iterativeRefinement)",
+                columns=list(
+                    list(
+                        `name`="iteration", 
+                        `title`="Iteration", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_markers", 
+                        `title`="N Markers", 
+                        `type`="integer"),
+                    list(
+                        `name`="markers_used", 
+                        `title`="Markers Used", 
+                        `type`="text"),
+                    list(
+                        `name`="silhouette", 
+                        `title`="Avg Silhouette", 
+                        `type`="number"),
+                    list(
+                        `name`="improvement", 
+                        `title`="Improvement", 
+                        `type`="text")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="markerPerformance",
+                title="Marker Diagnostic Performance",
+                visible="(calculateDiagnosticMetrics && knownDiagnosis)",
+                columns=list(
+                    list(
+                        `name`="marker", 
+                        `title`="Marker", 
+                        `type`="text"),
+                    list(
+                        `name`="diagnosis", 
+                        `title`="Diagnosis", 
+                        `type`="text"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="zto,pc")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "knownDiagnosis")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="optimalPanels",
+                title="Optimal Antibody Panel Recommendations",
+                visible="(identifyOptimalPanel && knownDiagnosis)",
+                columns=list(
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"),
+                    list(
+                        `name`="panel", 
+                        `title`="Marker Panel", 
+                        `type`="text"),
+                    list(
+                        `name`="target_diagnosis", 
+                        `title`="Target Diagnosis", 
+                        `type`="text"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="performance_score", 
+                        `title`="Performance Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "knownDiagnosis",
+                    "panelSize")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="outlierCases",
+                title="Cases with Atypical Immunoprofiles",
+                visible="(flagOutliers)",
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case ID", 
+                        `type`="text"),
+                    list(
+                        `name`="assigned_cluster", 
+                        `title`="Assigned Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="silhouette", 
+                        `title`="Silhouette Score", 
+                        `type`="number"),
+                    list(
+                        `name`="distance_to_center", 
+                        `title`="Distance to Center", 
+                        `type`="number"),
+                    list(
+                        `name`="nearest_alternative", 
+                        `title`="Nearest Alternative Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="quality_flag", 
+                        `title`="Quality Flag", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK",
+                    "outlierThreshold")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="silhouettePlot",
@@ -594,8 +1119,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "autoSelectK",
                     "colorPalette",
                     "fontSize",
-                    "plotContrast",
-                    "language")))
+                    "plotContrast")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="heatmapPlot",
@@ -613,8 +1137,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "autoSelectK",
                     "colorPalette",
                     "fontSize",
-                    "plotContrast",
-                    "language")))
+                    "plotContrast")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="dendrogramPlot",
@@ -630,12 +1153,58 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "autoSelectK",
                     "colorPalette",
                     "fontSize",
-                    "plotContrast",
-                    "language")))
+                    "plotContrast")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pcaContributions",
+                title="PCA/MCA Contributions",
+                visible="(showPCAPlot)",
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Component", 
+                        `type`="text"),
+                    list(
+                        `name`="marker", 
+                        `title`="Marker", 
+                        `type`="text"),
+                    list(
+                        `name`="contribution", 
+                        `title`="Contribution", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="pcaVariablePlot",
+                title="PCA/MCA Variable Factor Map (Correlation Circle)",
+                width=700,
+                height=600,
+                renderFun=".plotPCAVariables",
+                visible="(showPCAPlot)",
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="pcaPlot",
-                title="PCA/MCA Plot",
+                title="PCA/MCA Individual Factor Map",
                 width=700,
                 height=600,
                 renderFun=".plotPCA",
@@ -648,8 +1217,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "autoSelectK",
                     "colorPalette",
                     "fontSize",
-                    "plotContrast",
-                    "language")))
+                    "plotContrast")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="boxplotPlot",
@@ -664,8 +1232,21 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "autoSelectK",
                     "colorPalette",
                     "fontSize",
-                    "plotContrast",
-                    "language")))
+                    "plotContrast")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="markerCorrelationPlot",
+                title="Marker Correlation Matrix",
+                width=800,
+                height=700,
+                renderFun=".plotMarkerCorrelation",
+                visible="(showMarkerCorrelation)",
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
@@ -681,8 +1262,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "autoSelectK",
                     "colorPalette",
                     "fontSize",
-                    "plotContrast",
-                    "language")))
+                    "plotContrast")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="medoidInfo",
@@ -705,12 +1285,12 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="interpretationGuide",
                 title="Clinical Interpretation",
-                visible=TRUE))
+                visible="(showInterpretation)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="technicalNotes",
                 title="Technical Notes",
-                visible=TRUE))
+                visible="(showTechnicalNotes)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="executiveSummary",
@@ -721,10 +1301,158 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "contVars",
                     "method",
                     "nClusters",
-                    "autoSelectK",
-                    "language",
-                    "tumorPreset",
-                    "applyPreset")))
+                    "autoSelectK")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="spatialCompartmentSummary",
+                title="Spatial Compartment Summary",
+                visible="(performSpatialAnalysis)",
+                columns=list(
+                    list(
+                        `name`="compartment", 
+                        `title`="Compartment", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_clusters", 
+                        `title`="N Clusters", 
+                        `type`="integer"),
+                    list(
+                        `name`="avg_silhouette", 
+                        `title`="Avg Silhouette", 
+                        `type`="number"),
+                    list(
+                        `name`="quality", 
+                        `title`="Quality", 
+                        `type`="text")),
+                clearWith=list(
+                    "spatialCompartment",
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="spatialConcordance",
+                title="Inter-Compartment Cluster Concordance",
+                visible="(performSpatialAnalysis && spatialComparisonMode:between || spatialComparisonMode:both)",
+                columns=list(
+                    list(
+                        `name`="compartment1", 
+                        `title`="Compartment 1", 
+                        `type`="text"),
+                    list(
+                        `name`="compartment2", 
+                        `title`="Compartment 2", 
+                        `type`="text"),
+                    list(
+                        `name`="concordance", 
+                        `title`="Concordance", 
+                        `type`="number", 
+                        `format`="zto,pc"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Cohen's Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "spatialCompartment",
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="spatialClusterComparison",
+                title="Cluster Distribution by Compartment",
+                visible="(performSpatialAnalysis)",
+                columns=list(
+                    list(
+                        `name`="compartment", 
+                        `title`="Compartment", 
+                        `type`="text"),
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="zto,pc")),
+                clearWith=list(
+                    "spatialCompartment",
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="spatialMarkerDifferences",
+                title="Marker Expression Differences by Compartment",
+                visible="(performSpatialAnalysis)",
+                columns=list(
+                    list(
+                        `name`="marker", 
+                        `title`="Marker", 
+                        `type`="text"),
+                    list(
+                        `name`="compartment1", 
+                        `title`="Compartment 1", 
+                        `type`="text"),
+                    list(
+                        `name`="compartment2", 
+                        `title`="Compartment 2", 
+                        `type`="text"),
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size", 
+                        `type`="text")),
+                clearWith=list(
+                    "spatialCompartment",
+                    "catVars",
+                    "contVars")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="spatialHeatmapPlot",
+                title="Spatial Compartment Heatmap",
+                width=1000,
+                height=700,
+                renderFun=".plotSpatialHeatmap",
+                visible="(performSpatialAnalysis && showHeatmap)",
+                clearWith=list(
+                    "spatialCompartment",
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "heatmapScale",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="sizes",
@@ -739,16 +1467,6 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="n", 
                         `title`="N", 
                         `type`="integer"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="modes",
-                title="Cluster Modes (Legacy)",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="cluster", 
-                        `title`="Cluster", 
-                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="distr",
@@ -833,7 +1551,14 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param contVars H-scores (0-300), \% positivity (0-100), or other
 #'   continuous measures
 #' @param caseId Case identifier for tracking
+#' @param spatialCompartment Groups cases by spatial location (e.g.,
+#'   Central/Invasive, Preinvasive/Invasive, Primary/Metastatic)
+#' @param performSpatialAnalysis Compare clustering patterns across spatial
+#'   compartments
+#' @param spatialComparisonMode How to analyze spatial compartments
 #' @param method Clustering algorithm to use
+#' @param distanceMethod Distance metric for clustering
+#' @param linkageMethod Hierarchical clustering linkage method
 #' @param nClusters Leave blank for automatic selection using silhouette
 #' @param autoSelectK Use silhouette width to find optimal number of clusters
 #' @param kRange Range to test when auto-selecting k
@@ -853,7 +1578,35 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param markerSummary Summary statistics for each marker by cluster
 #' @param clusterProfiles Characteristic features of each cluster
 #' @param associationTests Test marker-cluster associations
+#' @param multipleTestingCorrection Correction method for marker association
+#'   tests
+#' @param markerOptimization Analyze marker importance and identify optimal
+#'   panel
+#' @param showMarkerCorrelation Display correlation structure between markers
+#' @param clusterQualityMetrics Calculate PPV, purity, and cluster quality
+#'   measures
+#' @param iterativeRefinement Perform iterative clustering with marker
+#'   selection (advanced)
+#' @param refinementIterations Number of iterative refinement cycles
+#' @param reproducibilityTest Random split validation with Cohen kappa
+#'   (Sterlacci 2019)
+#' @param nSplits Number of random splits for reproducibility testing
+#' @param supervisedClustering Cluster within each known diagnosis group
+#'   separately
+#' @param supervisedVariable Variable defining groups (e.g., histotype,
+#'   diagnosis)
 #' @param exportClusters Save cluster assignments to dataset
+#' @param knownDiagnosis Known diagnoses for calculating marker performance
+#'   metrics (sensitivity, specificity, PPV, NPV)
+#' @param calculateDiagnosticMetrics Compute sensitivity, specificity, PPV,
+#'   NPV for each marker when diagnosis is known
+#' @param identifyOptimalPanel Find minimal marker combinations with maximum
+#'   diagnostic discrimination
+#' @param panelSize Size of antibody panel combinations to evaluate
+#' @param flagOutliers Identify cases with ambiguous/atypical immunoprofiles
+#'   based on silhouette scores
+#' @param outlierThreshold Silhouette score threshold below which cases are
+#'   flagged as outliers
 #' @param clinicalVars Clinical variables to compare across clusters
 #' @param survivalTime Time variable for survival analysis
 #' @param survivalEvent Event variable for survival analysis
@@ -861,14 +1614,12 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   available)
 #' @param fontSize Base font size for all text elements
 #' @param plotContrast Enable high contrast mode for better visibility
-#' @param tumorPreset Apply tumor-specific clustering configurations
-#' @param applyPreset Apply the selected tumor-specific preset settings. Note:
-#'   This will provide recommendations, you may need to manually adjust the
-#'   settings.
-#' @param language Interface and output language / Arayüz ve çıktı dili
+#' @param showInterpretation Display clinical interpretation guide
+#' @param showTechnicalNotes Display technical notes about the analysis
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$binaryConversionNote} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clusterSizes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$silhouetteStats} \tab \tab \tab \tab \tab a table \cr
@@ -877,18 +1628,34 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$associationTests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$consensusStats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$reproducibilityStats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$supervisedSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$supervisedResults} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$markerImportance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterQuality} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$refinementHistory} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$markerPerformance} \tab \tab \tab \tab \tab Sensitivity, specificity, PPV, NPV for each marker by diagnosis \cr
+#'   \code{results$optimalPanels} \tab \tab \tab \tab \tab Ranked marker combinations for differential diagnosis \cr
+#'   \code{results$outlierCases} \tab \tab \tab \tab \tab Cases with ambiguous cluster assignment or low silhouette scores \cr
 #'   \code{results$silhouettePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$dendrogramPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$pcaContributions} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pcaVariablePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$pcaPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$boxplotPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$markerCorrelationPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$executiveSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$spatialCompartmentSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spatialConcordance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spatialClusterComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spatialMarkerDifferences} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spatialHeatmapPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$sizes} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$modes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$distr} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$assoc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
@@ -903,10 +1670,15 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 ihccluster <- function(
     data,
-    catVars,
+    catVars = NULL,
     contVars = NULL,
-    caseId,
+    caseId = NULL,
+    spatialCompartment = NULL,
+    performSpatialAnalysis = FALSE,
+    spatialComparisonMode = "both",
     method = "pam",
+    distanceMethod = "gower",
+    linkageMethod = "ward",
     nClusters = 3,
     autoSelectK = TRUE,
     kRange = "medium",
@@ -925,16 +1697,31 @@ ihccluster <- function(
     markerSummary = TRUE,
     clusterProfiles = TRUE,
     associationTests = TRUE,
+    multipleTestingCorrection = "bonferroni",
+    markerOptimization = FALSE,
+    showMarkerCorrelation = FALSE,
+    clusterQualityMetrics = TRUE,
+    iterativeRefinement = FALSE,
+    refinementIterations = 3,
+    reproducibilityTest = FALSE,
+    nSplits = 10,
+    supervisedClustering = FALSE,
+    supervisedVariable = NULL,
     exportClusters = FALSE,
-    clinicalVars,
+    knownDiagnosis = NULL,
+    calculateDiagnosticMetrics = FALSE,
+    identifyOptimalPanel = FALSE,
+    panelSize = "pairs",
+    flagOutliers = TRUE,
+    outlierThreshold = 0.25,
+    clinicalVars = NULL,
     survivalTime = NULL,
     survivalEvent = NULL,
     colorPalette = "default",
     fontSize = "medium",
     plotContrast = FALSE,
-    tumorPreset = "none",
-    applyPreset = FALSE,
-    language = "english") {
+    showInterpretation = FALSE,
+    showTechnicalNotes = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihccluster requires jmvcore to be installed (restart may be required)")
@@ -942,6 +1729,9 @@ ihccluster <- function(
     if ( ! missing(catVars)) catVars <- jmvcore::resolveQuo(jmvcore::enquo(catVars))
     if ( ! missing(contVars)) contVars <- jmvcore::resolveQuo(jmvcore::enquo(contVars))
     if ( ! missing(caseId)) caseId <- jmvcore::resolveQuo(jmvcore::enquo(caseId))
+    if ( ! missing(spatialCompartment)) spatialCompartment <- jmvcore::resolveQuo(jmvcore::enquo(spatialCompartment))
+    if ( ! missing(supervisedVariable)) supervisedVariable <- jmvcore::resolveQuo(jmvcore::enquo(supervisedVariable))
+    if ( ! missing(knownDiagnosis)) knownDiagnosis <- jmvcore::resolveQuo(jmvcore::enquo(knownDiagnosis))
     if ( ! missing(clinicalVars)) clinicalVars <- jmvcore::resolveQuo(jmvcore::enquo(clinicalVars))
     if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
     if ( ! missing(survivalEvent)) survivalEvent <- jmvcore::resolveQuo(jmvcore::enquo(survivalEvent))
@@ -951,17 +1741,28 @@ ihccluster <- function(
             `if`( ! missing(catVars), catVars, NULL),
             `if`( ! missing(contVars), contVars, NULL),
             `if`( ! missing(caseId), caseId, NULL),
+            `if`( ! missing(spatialCompartment), spatialCompartment, NULL),
+            `if`( ! missing(supervisedVariable), supervisedVariable, NULL),
+            `if`( ! missing(knownDiagnosis), knownDiagnosis, NULL),
             `if`( ! missing(clinicalVars), clinicalVars, NULL),
             `if`( ! missing(survivalTime), survivalTime, NULL),
             `if`( ! missing(survivalEvent), survivalEvent, NULL))
 
     for (v in catVars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in spatialCompartment) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in supervisedVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in knownDiagnosis) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- ihcclusterOptions$new(
         catVars = catVars,
         contVars = contVars,
         caseId = caseId,
+        spatialCompartment = spatialCompartment,
+        performSpatialAnalysis = performSpatialAnalysis,
+        spatialComparisonMode = spatialComparisonMode,
         method = method,
+        distanceMethod = distanceMethod,
+        linkageMethod = linkageMethod,
         nClusters = nClusters,
         autoSelectK = autoSelectK,
         kRange = kRange,
@@ -980,16 +1781,31 @@ ihccluster <- function(
         markerSummary = markerSummary,
         clusterProfiles = clusterProfiles,
         associationTests = associationTests,
+        multipleTestingCorrection = multipleTestingCorrection,
+        markerOptimization = markerOptimization,
+        showMarkerCorrelation = showMarkerCorrelation,
+        clusterQualityMetrics = clusterQualityMetrics,
+        iterativeRefinement = iterativeRefinement,
+        refinementIterations = refinementIterations,
+        reproducibilityTest = reproducibilityTest,
+        nSplits = nSplits,
+        supervisedClustering = supervisedClustering,
+        supervisedVariable = supervisedVariable,
         exportClusters = exportClusters,
+        knownDiagnosis = knownDiagnosis,
+        calculateDiagnosticMetrics = calculateDiagnosticMetrics,
+        identifyOptimalPanel = identifyOptimalPanel,
+        panelSize = panelSize,
+        flagOutliers = flagOutliers,
+        outlierThreshold = outlierThreshold,
         clinicalVars = clinicalVars,
         survivalTime = survivalTime,
         survivalEvent = survivalEvent,
         colorPalette = colorPalette,
         fontSize = fontSize,
         plotContrast = plotContrast,
-        tumorPreset = tumorPreset,
-        applyPreset = applyPreset,
-        language = language)
+        showInterpretation = showInterpretation,
+        showTechnicalNotes = showTechnicalNotes)
 
     analysis <- ihcclusterClass$new(
         options = options,

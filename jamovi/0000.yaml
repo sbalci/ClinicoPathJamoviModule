@@ -16,7 +16,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
@@ -56,7 +56,7 @@ analyses:
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -72,7 +72,7 @@ analyses:
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial Diagrams
     ribbon: analyses
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -102,7 +102,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT2
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT2
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -258,7 +258,7 @@ analyses:
   - title: Multi-Variable Visual Quality
     name: dataquality
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Multi-Variable Visual Quality
     description: >
@@ -272,7 +272,7 @@ analyses:
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Advanced Outlier Detection
     menuSubtitle: easystats Performance Package
@@ -634,7 +634,7 @@ analyses:
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Continuous vs Continuous
     menuTitle: Hull Plot
     menuSubtitle: Cluster Visualization with ggforce
@@ -654,7 +654,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -694,7 +694,7 @@ analyses:
   - title: Single Variable Quality Check
     name: checkdata
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuTitle: Single Variable Quality Check
     menuSubgroup: ClinicoPath Data Quality
     ribbon: analyses
@@ -790,7 +790,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT2
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
@@ -882,7 +882,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1031,7 +1031,7 @@ analyses:
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
@@ -1221,7 +1221,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1250,7 +1250,7 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
@@ -1313,7 +1313,7 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -1376,7 +1376,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Analyze combined test results
@@ -1389,7 +1389,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Sequential Test Analysis
@@ -1458,7 +1458,7 @@ analyses:
   - title: Decision Panel Optimization
     name: decisionpanel
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuTitle: Decision Panel Optimization
     menuSubgroup: Decision
     menuSubtitle: Optimize test panels and decision trees
@@ -1505,7 +1505,7 @@ analyses:
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Distribution
     menuTitle: Histogram
     description: |
@@ -1516,7 +1516,7 @@ analyses:
   - title: Scatter Plot
     name: jjscatterstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Continuous vs Continuous
     menuTitle: Scatter Plot
     ribbon: analyses
@@ -1528,7 +1528,7 @@ analyses:
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
@@ -1540,7 +1540,7 @@ analyses:
   - title: Dot Chart
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart
     ribbon: analyses
@@ -1553,7 +1553,7 @@ analyses:
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples
@@ -1567,7 +1567,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -1581,7 +1581,7 @@ analyses:
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: |
@@ -1593,7 +1593,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -1605,7 +1605,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >
@@ -1620,7 +1620,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Auto Visualization
     menuTitle: Automatic Plot Selection
     description: >-
@@ -1653,7 +1653,7 @@ analyses:
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Lines
     menuTitle: Line Chart
     menuSubtitle: Time Series and Trend Analysis
@@ -1666,7 +1666,7 @@ analyses:
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Lollipop Chart
     ribbon: analyses
@@ -1711,7 +1711,7 @@ analyses:
   - title: Arc Diagram
     name: jjarcdiagram
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Network
     menuTitle: Arc Diagram
     description: >
@@ -1722,7 +1722,7 @@ analyses:
   - title: Ridge Plot
     name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Distribution
     menuTitle: Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization
@@ -1876,7 +1876,7 @@ analyses:
   - title: Segmented Total Bar Charts
     name: jjsegmentedtotalbar
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT2
     menuTitle: Segmented Total Bar Charts
     menuSubgroup: Categorical vs Categorical
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
@@ -2290,7 +2290,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation
@@ -2428,7 +2428,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
@@ -4161,7 +4161,7 @@ analyses:
     name: exacttests
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Exact Tests for Small Samples
     menuSubtitle: Precise inference for small sample sizes
@@ -4169,7 +4169,7 @@ analyses:
     name: partialcorrelation
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Enhanced Partial Correlation Analysis
     menuSubtitle: Correlation analysis with BlueSky integration and advanced features
@@ -4189,7 +4189,7 @@ analyses:
     name: polychoriccorr
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Polychoric Correlation Analysis
     menuSubtitle: Correlation for ordinal and binary variables
@@ -4197,7 +4197,7 @@ analyses:
     name: clinicaldataintegration
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Clinical Data Integration
     menuSubtitle: EHR data import/export and quality assessment
@@ -4205,7 +4205,7 @@ analyses:
     name: clinicaldashboard
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Interactive Clinical Dashboard
     menuSubtitle: Real-time clinical analytics and visualization
@@ -4226,7 +4226,7 @@ analyses:
     name: excessmortality
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Excess Mortality Analysis
     menuSubtitle: Population-based excess mortality modeling with mexhaz
@@ -4234,7 +4234,7 @@ analyses:
     name: flexiblerelativesurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Flexible Relative Survival Analysis
     menuSubtitle: Relative survival with spline smoothing (flexrsurv approach)
@@ -4242,7 +4242,7 @@ analyses:
     name: bayesianmetaanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Bayesian
     menuTitle: Bayesian Meta-Analysis
     menuSubtitle: Hierarchical models for evidence synthesis
@@ -4255,7 +4255,7 @@ analyses:
     name: penalizedcoxregression
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Penalized Cox Regression
     menuSubtitle: L1/L2 penalized survival models for high-dimensional data
@@ -4463,7 +4463,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -4522,7 +4522,7 @@ analyses:
     name: enhancedtwowayfrequency
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Enhanced Two-Way Frequency Analysis
     menuSubtitle: Cross-tabulation analysis with BlueSky integration and advanced features
@@ -4826,6 +4826,20 @@ analyses:
 
       User-friendly interface for basic survival power calculations with
       multiple statistical methods.
+  - title: IHC Diagnostic Prediction
+    name: ihcpredict
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT2
+    menuSubgroup: IHC Analysis
+    menuTitle: IHC Diagnostic Prediction
+    menuSubtitle: Predict diagnoses from IHC markers using trained model
+    description: >-
+      Predicts diagnoses for cases with unknown diagnoses based on IHC marker
+      expression patterns,
+
+      using a trained reference model from previously analyzed cases with known
+      diagnoses.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

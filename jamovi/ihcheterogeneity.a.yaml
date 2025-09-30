@@ -1,7 +1,7 @@
 ---
 name: ihcheterogeneity
 title: IHC Heterogeneity Analysis
-menuGroup: OncoPath
+menuGroup: OncoPathT
 menuSubgroup: IHC Analysis
 version: '0.0.31'
 jas: '1.2'
@@ -95,8 +95,26 @@ options:
         - factor
       description:
           R: >
-            identifier for spatial regions or tissue areas
+            identifier for spatial regions or tissue areas (e.g., Central/Invasive, Preinvasive/Invasive)
       default: NULL
+
+    - name: compareCompartments
+      title: Compare Spatial Compartments
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform statistical comparison of heterogeneity patterns between spatial compartments.
+            Requires spatial_id variable. Compares ICC, CV, and bias across compartments.
+
+    - name: compartmentTests
+      title: Compartment Comparison Tests
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform statistical tests to determine if heterogeneity differs significantly between compartments.
+            Uses Levene's test for variance equality and Kruskal-Wallis for distributional differences.
 
     - name: analysis_type
       title: Analysis Focus

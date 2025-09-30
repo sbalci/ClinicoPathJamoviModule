@@ -3,7 +3,7 @@ name: flexiblerelativesurvival
 title: Flexible Relative Survival Analysis
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Survival
 menuTitle: Flexible Relative Survival Analysis
 menuSubtitle: Relative survival with spline smoothing (flexrsurv approach)

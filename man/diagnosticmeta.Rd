@@ -25,7 +25,9 @@ diagnosticmeta(
   show_individual_studies = FALSE,
   show_interpretation = FALSE,
   show_methodology = FALSE,
-  show_analysis_summary = FALSE
+  show_analysis_summary = FALSE,
+  color_palette = "standard",
+  show_plot_explanations = FALSE
 )
 }
 \arguments{
@@ -76,6 +78,12 @@ approach information}
 
 \item{show_analysis_summary}{Display natural language summary of analysis
 results}
+
+\item{color_palette}{Color palette for all plots - choose color-blind safe
+options for accessibility}
+
+\item{show_plot_explanations}{Display detailed explanations for all plots
+including interpretation guidance}
 }
 \value{
 A results object containing:
@@ -94,6 +102,9 @@ A results object containing:
 \code{results$srocplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$funnelplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$forestplot_explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$srocplot_explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$funnelplot_explanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

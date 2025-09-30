@@ -3,7 +3,7 @@ name: polychoriccorr
 title: Polychoric Correlation Analysis
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Polychoric Correlation Analysis
 menuSubtitle: Correlation for ordinal and binary variables

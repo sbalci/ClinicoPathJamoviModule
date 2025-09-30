@@ -6,9 +6,9 @@
 \usage{
 ihccluster(
   data,
-  catVars,
+  catVars = NULL,
   contVars = NULL,
-  caseId,
+  caseId = NULL,
   method = "pam",
   nClusters = 3,
   autoSelectK = TRUE,
@@ -28,16 +28,20 @@ ihccluster(
   markerSummary = TRUE,
   clusterProfiles = TRUE,
   associationTests = TRUE,
+  markerOptimization = FALSE,
+  showMarkerCorrelation = FALSE,
+  clusterQualityMetrics = TRUE,
+  iterativeRefinement = FALSE,
+  refinementIterations = 3,
   exportClusters = FALSE,
-  clinicalVars,
+  clinicalVars = NULL,
   survivalTime = NULL,
   survivalEvent = NULL,
   colorPalette = "default",
   fontSize = "medium",
   plotContrast = FALSE,
-  tumorPreset = "none",
-  applyPreset = FALSE,
-  language = "english"
+  showInterpretation = FALSE,
+  showTechnicalNotes = FALSE
 )
 }
 \arguments{
@@ -89,6 +93,19 @@ markers)}
 
 \item{associationTests}{Test marker-cluster associations}
 
+\item{markerOptimization}{Analyze marker importance and identify optimal
+panel}
+
+\item{showMarkerCorrelation}{Display correlation structure between markers}
+
+\item{clusterQualityMetrics}{Calculate PPV, purity, and cluster quality
+measures}
+
+\item{iterativeRefinement}{Perform iterative clustering with marker
+selection (advanced)}
+
+\item{refinementIterations}{Number of iterative refinement cycles}
+
 \item{exportClusters}{Save cluster assignments to dataset}
 
 \item{clinicalVars}{Clinical variables to compare across clusters}
@@ -104,13 +121,9 @@ available)}
 
 \item{plotContrast}{Enable high contrast mode for better visibility}
 
-\item{tumorPreset}{Apply tumor-specific clustering configurations}
+\item{showInterpretation}{Display clinical interpretation guide}
 
-\item{applyPreset}{Apply the selected tumor-specific preset settings. Note:
-This will provide recommendations, you may need to manually adjust the
-settings.}
-
-\item{language}{Interface and output language / Arayüz ve çıktı dili}
+\item{showTechnicalNotes}{Display technical notes about the analysis}
 }
 \value{
 A results object containing:
@@ -124,18 +137,23 @@ A results object containing:
 \code{results$associationTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$consensusStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$markerImportance} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterQuality} \tab \tab \tab \tab \tab a table \cr
+\code{results$refinementHistory} \tab \tab \tab \tab \tab a table \cr
 \code{results$silhouettePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$dendrogramPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$pcaContributions} \tab \tab \tab \tab \tab a table \cr
+\code{results$pcaVariablePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$pcaPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$boxplotPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$markerCorrelationPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$executiveSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$sizes} \tab \tab \tab \tab \tab a table \cr
-\code{results$modes} \tab \tab \tab \tab \tab a table \cr
 \code{results$distr} \tab \tab \tab \tab \tab a table \cr
 \code{results$assoc} \tab \tab \tab \tab \tab a table \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr

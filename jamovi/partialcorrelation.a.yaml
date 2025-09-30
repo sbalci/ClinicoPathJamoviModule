@@ -3,7 +3,7 @@ name: partialcorrelation
 title: Enhanced Partial Correlation Analysis with BlueSky Integration
 jas: '1.2'
 version: '0.0.31'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Enhanced Partial Correlation Analysis
 menuSubtitle: Correlation analysis with BlueSky integration and advanced features

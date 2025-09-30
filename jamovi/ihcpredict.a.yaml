@@ -1,0 +1,289 @@
+---
+name: ihcpredict
+title: IHC Diagnostic Prediction
+menuGroup: OncoPathT2
+menuSubgroup: IHC Analysis
+menuSubtitle: 'Predict diagnoses from IHC markers using trained model'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Predicts diagnoses for cases with unknown diagnoses based on IHC marker expression patterns,
+        using a trained reference model from previously analyzed cases with known diagnoses.
+
+        **Requirements:**
+        - Training dataset analyzed with `ihccluster` (with known diagnoses)
+        - Query dataset with same IHC markers (unknown diagnoses to predict)
+        - Marker names and data types must match between datasets
+
+        **Output:**
+        - Predicted diagnosis per case with confidence level
+        - Alternative diagnoses (differential)
+        - Evidence supporting each prediction
+        - Flags for atypical/low-confidence cases
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The query data as a data frame (cases with unknown diagnoses).
+
+    # Reference Model Selection
+    - name: useStoredModel
+      title: 'Model Source'
+      type: List
+      options:
+          - title: 'Use stored model from previous ihccluster analysis'
+            name: stored
+          - title: 'Load training data from CSV file'
+            name: file
+      default: stored
+      description: 'Source of the trained reference model'
+
+    - name: trainingFile
+      title: 'Training Data File (CSV)'
+      type: String
+      default: ''
+      description: 'Path to CSV file with training cases (must include Diagnosis column)'
+
+    - name: trainingDiagnosis
+      title: 'Diagnosis Column in Training Data'
+      type: String
+      default: 'Diagnosis'
+      description: 'Name of the diagnosis variable in training dataset'
+
+    # Query Dataset Variables
+    - name: catVars
+      title: 'Categorical IHC Markers'
+      type: Variables
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description: 'Binary (pos/neg) or ordinal (0/1/2/3) stain results - must match training markers'
+      default: NULL
+
+    - name: contVars
+      title: 'Continuous IHC Markers'
+      type: Variables
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description: 'H-scores (0-300), % positivity (0-100) - must match training markers'
+      default: NULL
+
+    - name: caseId
+      title: 'Case ID (optional)'
+      type: Variable
+      suggested:
+          - nominal
+          - id
+      permitted:
+          - factor
+          - id
+      description: 'Case identifier for tracking predictions'
+      default: NULL
+
+    # Prediction Method
+    - name: predictionMethod
+      title: 'Prediction Method'
+      type: List
+      options:
+          - title: 'Hybrid (rules + distance + cluster quality)'
+            name: hybrid
+          - title: 'Distance-based (nearest centroid)'
+            name: distance
+          - title: 'Rule-based (optimal panels only)'
+            name: rules
+          - title: 'Cluster membership (assign to nearest cluster)'
+            name: cluster
+      default: hybrid
+      description: 'Algorithm for predicting diagnoses'
+
+    # Confidence Thresholds
+    - name: confidenceThreshold
+      title: 'Minimum Confidence Threshold'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.50
+      description: 'Minimum confidence score to accept prediction (0-1)'
+
+    - name: highConfidenceThreshold
+      title: 'High Confidence Threshold'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.75
+      description: 'Threshold for "High Confidence" classification'
+
+    - name: lowConfidenceThreshold
+      title: 'Low Confidence Threshold'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.25
+      description: 'Threshold below which cases are flagged as very low confidence'
+
+    # Hybrid Method Weights
+    - name: panelWeight
+      title: 'Panel Match Weight'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.5
+      description: 'Weight for rule-based panel matches (hybrid method only)'
+
+    - name: distanceWeight
+      title: 'Distance Weight'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.3
+      description: 'Weight for distance to centroid (hybrid method only)'
+
+    - name: silhouetteWeight
+      title: 'Cluster Quality Weight'
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.2
+      description: 'Weight for silhouette score (hybrid method only)'
+
+    # Output Options
+    - name: showAlternatives
+      title: 'Show Alternative Diagnoses'
+      type: Bool
+      default: true
+      description: 'Display differential diagnosis with top 3 alternatives'
+
+    - name: nAlternatives
+      title: 'Number of Alternatives'
+      type: Integer
+      min: 1
+      max: 5
+      default: 3
+      description: 'Number of alternative diagnoses to report'
+
+    - name: showEvidence
+      title: 'Show Prediction Evidence'
+      type: Bool
+      default: true
+      description: 'Display detailed evidence supporting each prediction'
+
+    - name: flagLowConfidence
+      title: 'Flag Low Confidence Cases'
+      type: Bool
+      default: true
+      description: 'Create separate table for cases requiring review'
+
+    - name: showMarkerComparison
+      title: 'Show Marker Comparison'
+      type: Bool
+      default: true
+      description: 'Compare query case markers to cluster centroids'
+
+    # Validation Options
+    - name: validateMarkers
+      title: 'Validate Marker Consistency'
+      type: Bool
+      default: true
+      description: 'Check that query markers match training markers'
+
+    - name: requireAllMarkers
+      title: 'Require All Training Markers'
+      type: Bool
+      default: true
+      description: 'Error if any training markers are missing from query data'
+
+    # Advanced Options
+    - name: scaleContVars
+      title: 'Scale Continuous Variables'
+      type: Bool
+      default: true
+      description: 'Z-score continuous markers using training set parameters'
+
+    - name: handleMissing
+      title: 'Missing Data Method'
+      type: List
+      options:
+          - title: 'Skip cases with missing values'
+            name: complete
+          - title: 'Use pairwise distances'
+            name: pairwise
+      default: pairwise
+      description: 'How to handle missing marker values in query data'
+
+    # Output Format
+    - name: exportPredictions
+      title: 'Export Predictions to Dataset'
+      type: Bool
+      default: false
+      description: 'Save predicted diagnoses and confidence scores to dataset'
+
+    - name: predictionVarName
+      title: 'Prediction Variable Name'
+      type: String
+      default: 'Predicted_Diagnosis'
+      description: 'Name for exported prediction variable'
+
+    - name: confidenceVarName
+      title: 'Confidence Variable Name'
+      type: String
+      default: 'Prediction_Confidence'
+      description: 'Name for exported confidence score variable'
+
+    # Visualization
+    - name: showPredictionPlot
+      title: 'Show Prediction Visualization'
+      type: Bool
+      default: true
+      description: 'Display PCA/MCA plot with query cases and training clusters'
+
+    - name: showConfidencePlot
+      title: 'Show Confidence Distribution'
+      type: Bool
+      default: true
+      description: 'Display histogram of prediction confidence scores'
+
+    - name: colorPalette
+      title: 'Color Palette'
+      type: List
+      options:
+          - name: default
+            title: 'Default'
+          - name: colorblind
+            title: 'Colorblind Safe'
+          - name: viridis
+            title: 'Viridis'
+          - name: high_contrast
+            title: 'High Contrast'
+      default: colorblind
+      description: 'Color palette for plots'
+
+    - name: fontSize
+      title: 'Font Size'
+      type: List
+      options:
+          - name: small
+            title: 'Small (10pt)'
+          - name: medium
+            title: 'Medium (12pt)'
+          - name: large
+            title: 'Large (14pt)'
+          - name: extra_large
+            title: 'Extra Large (16pt)'
+      default: medium
+      description: 'Base font size for all text elements'
+
+    - name: plotContrast
+      title: 'High Contrast Mode'
+      type: Bool
+      default: false
+      description: 'Enable high contrast mode for better visibility'
+
+...

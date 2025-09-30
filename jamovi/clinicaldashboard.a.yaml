@@ -3,7 +3,7 @@ name: clinicaldashboard
 title: Interactive Clinical Dashboard
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Interactive Clinical Dashboard
 menuSubtitle: Real-time clinical analytics and visualization

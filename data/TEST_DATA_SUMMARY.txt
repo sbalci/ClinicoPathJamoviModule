@@ -1,0 +1,305 @@
+=============================================================================
+IHC CLUSTERING TEST DATA - SUMMARY
+=============================================================================
+
+Dataset: ihc_breast_cancer.csv
+Purpose: Comprehensive testing of ihccluster jamovi function
+Generated: 2024-01-15
+Seed: 42 (reproducible)
+
+=============================================================================
+DATASET OVERVIEW
+=============================================================================
+
+Total Cases: 155
+- Luminal A: 60 (38.7%)
+- Luminal B: 40 (25.8%)
+- HER2 Positive: 25 (16.1%)
+- Triple Negative: 25 (16.1%)
+- Test Cases: 5 (3.2%) - edge cases with extreme values
+
+Variables: 17 total
+- 2 identifiers (PatientID, TrueSubtype)
+- 5 categorical IHC markers
+- 3 continuous IHC markers
+- 5 clinical variables
+- 2 survival variables
+
+Missing Data: ~10% realistic missingness
+- AR_Hscore: 11.6%
+- p53_Percent: 9.7%
+- Ki67_Percent: 7.7%
+- EGFR: 7.1%
+- Tumor_Size_cm: 5.8%
+- CK5_6: 5.2%
+
+=============================================================================
+CATEGORICAL IHC MARKERS
+=============================================================================
+
+ER_Status (Estrogen Receptor):
+  Negative: 43 (27.7%)
+  Positive: 112 (72.3%)
+
+PR_Status (Progesterone Receptor):
+  Negative: 64 (41.3%)
+  Positive: 91 (58.7%)
+
+HER2_IHC (HER2 immunohistochemistry):
+  0:   95 (61.3%)
+  1+:  28 (18.1%)
+  2+:  13 (8.4%)
+  3+:  19 (12.3%)
+
+CK5_6 (Cytokeratin 5/6 basal marker):
+  Negative: 133 (91.1% of non-missing)
+  Positive: 14 (8.9% of non-missing)
+
+EGFR (Epidermal Growth Factor Receptor):
+  Negative: 131 (91.0% of non-missing)
+  Positive: 13 (9.0% of non-missing)
+
+=============================================================================
+CONTINUOUS IHC MARKERS
+=============================================================================
+
+Ki67_Percent (Proliferation index, 0-100%):
+  Mean: 27.8%
+  Median: 21.1%
+  SD: 21.9%
+  Range: 0.0% - 100.0%
+  Missing: 12 (7.7%)
+
+AR_Hscore (Androgen Receptor H-score, 0-300):
+  Mean: 160
+  Median: 164
+  SD: 75
+  Range: 0 - 300
+  Missing: 18 (11.6%)
+
+p53_Percent (p53 nuclear staining, 0-100%):
+  Mean: 41.3%
+  Median: 39.6%
+  SD: 38.8%
+  Range: 0.0% - 100.0%
+  Missing: 15 (9.7%)
+
+=============================================================================
+CLINICAL VARIABLES
+=============================================================================
+
+Age_Years: Mean 58, Range 30-90 years
+Tumor_Grade: G1 (17%), G2 (38%), G3 (45%)
+Tumor_Stage: I (30%), II (45%), III (20%), IV (5%)
+Tumor_Size_cm: Mean 2.5 cm, Range 0.5-15 cm
+Lymph_Node_Status: Negative (52%), Positive (48%)
+
+=============================================================================
+SURVIVAL DATA
+=============================================================================
+
+OS_Months (Overall Survival):
+  Median: 46.1 months
+  Range: 1.0 - 180.0 months
+  Mean: 64.8 months
+
+OS_Event (Death):
+  Events (deaths): 78 (50.3%)
+  Censored: 77 (49.7%)
+
+Expected Survival by Subtype:
+  Luminal A: Best (median ~90 months)
+  Luminal B: Intermediate (median ~70 months)
+  HER2+: Intermediate-poor (median ~60 months)
+  Triple Negative: Poorest (median ~40 months)
+
+=============================================================================
+EXPECTED CLUSTERING RESULTS
+=============================================================================
+
+With proper configuration, analysis should identify 3-4 main clusters:
+
+Cluster 1 - Luminal A-like (~60 cases):
+  Profile: ER+/PR+/HER2-/low Ki67
+  Characteristics: Best prognosis, hormone responsive
+
+Cluster 2 - Luminal B-like (~40 cases):
+  Profile: ER+/PR+/high Ki67 or HER2+
+  Characteristics: Intermediate prognosis, may need chemotherapy
+
+Cluster 3 - HER2-enriched (~25 cases):
+  Profile: ER-/PR-/HER2 2+/3+
+  Characteristics: HER2-targeted therapy responsive
+
+Cluster 4 - Triple Negative (~25 cases):
+  Profile: ER-/PR-/HER2-/high CK5_6
+  Characteristics: Aggressive, limited targeted options
+
+Note: Some mixing between clusters is expected and realistic.
+
+=============================================================================
+KEY TESTING SCENARIOS
+=============================================================================
+
+1. BASIC CLUSTERING
+   Markers: ER, PR, HER2, Ki67
+   Method: PAM
+   Expected: 3-4 clusters with good separation
+
+2. MISSING DATA HANDLING
+   Compare: Complete cases vs Pairwise distances
+   Expected: Different n analyzed, similar cluster structure
+
+3. CONSENSUS CLUSTERING
+   Bootstrap: 100 iterations
+   Expected: Stability metrics >0.6 for main clusters
+
+4. CLINICAL CORRELATIONS
+   Test: Age, Grade, Stage vs clusters
+   Expected: Significant associations with grade and stage
+
+5. SURVIVAL ANALYSIS
+   Outcome: OS_Months, OS_Event
+   Expected: Survival curves differ by cluster (p<0.05)
+
+6. ACCESSIBILITY
+   Test: Colorblind palette, large fonts, high contrast
+   Expected: Enhanced visibility maintained
+
+7. TUMOR PRESETS
+   Preset: Breast Cancer - Luminal Markers
+   Expected: Recommendations appear
+
+8. INTERNATIONALIZATION
+   Language: Turkish
+   Expected: All text translated
+
+9. NEW - NATURAL LANGUAGE SUMMARY
+   Enable: Show Plain-Language Summary
+   Expected: Green panel with simplified explanation
+
+10. NEW - CONTEXTUAL WARNINGS
+    Test: k=8 (overfitting)
+    Expected: Yellow warning panel appears
+
+11. NEW - STATISTICAL GLOSSARY
+    Enable: Show Statistical Glossary
+    Expected: Term definitions panel displays
+
+=============================================================================
+FILES INCLUDED
+=============================================================================
+
+Data Files:
+  ihc_breast_cancer.csv      - Main dataset (18 KB)
+  ihc_breast_cancer.rds      - R binary format (3.4 KB)
+  ihc_breast_cancer_codebook.txt - Variable definitions (2.2 KB)
+
+Documentation:
+  README_IHC_TEST_DATA.md    - Comprehensive guide
+  QUICK_START_GUIDE.md       - 5-minute quick start
+  TEST_DATA_SUMMARY.txt      - This file
+
+Scripts:
+  data-raw/generate_ihc_test_data.R     - Data generation (18 KB)
+  data-raw/test_ihccluster_features.R   - Test scenarios (19 KB)
+
+=============================================================================
+VALIDATION CHECKLIST
+=============================================================================
+
+Basic Functionality:
+[ ] Data loads correctly (155 rows, 17 columns)
+[ ] Clusters form (3-4 groups)
+[ ] Silhouette plot displays
+[ ] Heatmap displays
+[ ] Tables populate correctly
+
+Missing Data:
+[ ] Complete cases analysis works
+[ ] Pairwise distances work
+[ ] Appropriate warnings for missing data
+
+Advanced Features:
+[ ] Consensus clustering runs
+[ ] Clinical correlations compute
+[ ] Survival analysis integrates
+[ ] Dendrogram displays (hierarchical)
+[ ] PCA/MCA plot displays (dimreduce)
+
+Accessibility:
+[ ] Colorblind palettes apply
+[ ] Font sizes adjust
+[ ] High contrast mode works
+
+Clinical Presets:
+[ ] Preset recommendations appear
+[ ] Preset interpretation displays
+
+Internationalization:
+[ ] English interface complete
+[ ] Turkish translation works
+[ ] Language switch functional
+
+NEW FEATURES:
+[ ] Natural language summary displays
+[ ] Summary adapts to language
+[ ] Contextual warnings appear when appropriate
+[ ] Warnings detect small clusters
+[ ] Warnings detect overfitting
+[ ] Statistical glossary displays
+[ ] Glossary translates to Turkish
+[ ] Patient IDs show in medoid table
+[ ] Export notification appears
+[ ] All features work together
+
+=============================================================================
+QUICK START
+=============================================================================
+
+1. Open data:
+   jamovi → File → Open → data/ihc_breast_cancer.csv
+
+2. Run clustering:
+   Analyses → OncoPathT → IHC Clustering Analysis
+
+3. Basic settings:
+   - Categorical: ER_Status, PR_Status, HER2_IHC
+   - Continuous: Ki67_Percent
+   - Method: PAM
+   - Auto-select k: Yes
+
+4. NEW features:
+   - Show Plain-Language Summary: Yes
+   - Show Analysis Warnings: Yes
+   - Show Statistical Glossary: Yes
+
+5. Expected:
+   - 3-4 clusters identified
+   - Silhouette ~0.5-0.7
+   - Plain-language summary panel (green)
+   - Glossary panel (gray)
+   - Warnings if issues detected (yellow)
+
+=============================================================================
+SUPPORT
+=============================================================================
+
+Full Documentation: data/README_IHC_TEST_DATA.md
+Quick Start: data/QUICK_START_GUIDE.md
+Test Scenarios: data-raw/test_ihccluster_features.R
+Data Generation: data-raw/generate_ihc_test_data.R
+
+GitHub: https://github.com/sbalci/ClinicoPathJamoviModule
+Issues: https://github.com/sbalci/ClinicoPathJamoviModule/issues
+
+=============================================================================
+VERSION INFO
+=============================================================================
+
+Dataset Version: 1.0
+Generation Date: 2024-01-15
+Compatible with: ClinicoPath ihccluster v2.0.0+
+Random Seed: 42 (reproducible)
+
+=============================================================================

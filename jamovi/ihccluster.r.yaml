@@ -5,9 +5,13 @@ items:
     - name: todo
       title: Instructions
       type: Html
-      clearWith:
-          - catVars
-          - contVars
+
+    - name: binaryConversionNote
+      title: Binary Conversion Notice
+      type: Html
+      visible: false
+      refs:
+          - distanceMethod
 
     - name: summary
       title: Analysis Summary
@@ -126,6 +130,10 @@ items:
             title: p-value
             type: number
             format: zto,pvalue
+          - name: p_adjusted
+            title: Adjusted p
+            type: number
+            format: zto,pvalue
           - name: effect_size
             title: Effect Size
             type: text
@@ -170,6 +178,267 @@ items:
             title: Interpretation
             type: text
 
+    - name: reproducibilityStats
+      title: Cluster Reproducibility (Random Split Validation)
+      type: Table
+      visible: (reproducibilityTest)
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: mean_kappa
+            title: Mean Cohen Kappa
+            type: number
+          - name: sd_kappa
+            title: SD Kappa
+            type: number
+          - name: ci_lower
+            title: 95% CI Lower
+            type: number
+          - name: ci_upper
+            title: 95% CI Upper
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+          - name: n_splits
+            title: N Splits
+            type: integer
+
+    - name: supervisedSummary
+      title: Supervised Clustering Summary
+      type: Table
+      visible: (supervisedClustering)
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n_cases
+            title: N Cases
+            type: integer
+          - name: n_clusters
+            title: N Clusters
+            type: integer
+          - name: avg_silhouette
+            title: Avg Silhouette
+            type: number
+          - name: status
+            title: Status
+            type: text
+
+    - name: supervisedResults
+      title: Supervised Clustering Details
+      type: Html
+      visible: (supervisedClustering)
+      refs:
+          - supervisedVariable
+
+    - name: markerImportance
+      title: Marker Importance for Clustering
+      type: Table
+      visible: (markerOptimization)
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: importance
+            title: Importance Score
+            type: number
+            format: zto
+          - name: rank
+            title: Rank
+            type: integer
+          - name: correlation_max
+            title: Max Correlation
+            type: number
+            format: zto
+          - name: redundant_with
+            title: Redundant With
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+
+    - name: clusterQuality
+      title: Cluster Quality and Predictive Values
+      type: Table
+      visible: (clusterQualityMetrics)
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: size
+            title: Size
+            type: integer
+          - name: purity
+            title: Purity
+            type: number
+            format: zto,pc
+          - name: avg_silhouette
+            title: Avg Silhouette
+            type: number
+          - name: separation
+            title: Separation Index
+            type: number
+          - name: compactness
+            title: Compactness
+            type: number
+          - name: quality
+            title: Quality Rating
+            type: text
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+
+    - name: refinementHistory
+      title: Iterative Refinement History
+      type: Table
+      visible: (iterativeRefinement)
+      columns:
+          - name: iteration
+            title: Iteration
+            type: integer
+          - name: n_markers
+            title: N Markers
+            type: integer
+          - name: markers_used
+            title: Markers Used
+            type: text
+          - name: silhouette
+            title: Avg Silhouette
+            type: number
+          - name: improvement
+            title: Improvement
+            type: text
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+
+    # Diagnostic Features (Olsen et al. 2006)
+    - name: markerPerformance
+      title: Marker Diagnostic Performance
+      type: Table
+      visible: (calculateDiagnosticMetrics && knownDiagnosis)
+      description: Sensitivity, specificity, PPV, NPV for each marker by diagnosis
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: diagnosis
+            title: Diagnosis
+            type: text
+          - name: sensitivity
+            title: Sensitivity
+            type: number
+            format: zto,pc
+          - name: specificity
+            title: Specificity
+            type: number
+            format: zto,pc
+          - name: ppv
+            title: PPV
+            type: number
+            format: zto,pc
+          - name: npv
+            title: NPV
+            type: number
+            format: zto,pc
+          - name: accuracy
+            title: Accuracy
+            type: number
+            format: zto,pc
+      clearWith:
+          - catVars
+          - contVars
+          - knownDiagnosis
+
+    - name: optimalPanels
+      title: Optimal Antibody Panel Recommendations
+      type: Table
+      visible: (identifyOptimalPanel && knownDiagnosis)
+      description: Ranked marker combinations for differential diagnosis
+      columns:
+          - name: rank
+            title: Rank
+            type: integer
+          - name: panel
+            title: Marker Panel
+            type: text
+          - name: target_diagnosis
+            title: Target Diagnosis
+            type: text
+          - name: sensitivity
+            title: Sensitivity
+            type: number
+            format: zto,pc
+          - name: specificity
+            title: Specificity
+            type: number
+            format: zto,pc
+          - name: ppv
+            title: PPV
+            type: number
+            format: zto,pc
+          - name: performance_score
+            title: Performance Score
+            type: number
+            format: zto
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - catVars
+          - contVars
+          - knownDiagnosis
+          - panelSize
+
+    - name: outlierCases
+      title: Cases with Atypical Immunoprofiles
+      type: Table
+      visible: (flagOutliers)
+      description: Cases with ambiguous cluster assignment or low silhouette scores
+      columns:
+          - name: case_id
+            title: Case ID
+            type: text
+          - name: assigned_cluster
+            title: Assigned Cluster
+            type: text
+          - name: silhouette
+            title: Silhouette Score
+            type: number
+          - name: distance_to_center
+            title: Distance to Center
+            type: number
+          - name: nearest_alternative
+            title: Nearest Alternative Cluster
+            type: text
+          - name: quality_flag
+            title: Quality Flag
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+          - outlierThreshold
+
     - name: silhouettePlot
       title: Silhouette Plot
       type: Image
@@ -186,7 +455,6 @@ items:
           - colorPalette
           - fontSize
           - plotContrast
-          - language
 
     - name: heatmapPlot
       title: Expression Heatmap
@@ -205,7 +473,6 @@ items:
           - colorPalette
           - fontSize
           - plotContrast
-          - language
 
     - name: dendrogramPlot
       title: Dendrogram
@@ -222,10 +489,52 @@ items:
           - colorPalette
           - fontSize
           - plotContrast
-          - language
+
+    - name: pcaContributions
+      title: PCA/MCA Contributions
+      type: Table
+      visible: (showPCAPlot)
+      columns:
+          - name: component
+            title: Component
+            type: text
+          - name: marker
+            title: Marker
+            type: text
+          - name: contribution
+            title: Contribution
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+
+    - name: pcaVariablePlot
+      title: PCA/MCA Variable Factor Map (Correlation Circle)
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotPCAVariables
+      visible: (showPCAPlot)
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+          - colorPalette
+          - fontSize
+          - plotContrast
 
     - name: pcaPlot
-      title: PCA/MCA Plot
+      title: PCA/MCA Individual Factor Map
       type: Image
       width: 700
       height: 600
@@ -240,7 +549,6 @@ items:
           - colorPalette
           - fontSize
           - plotContrast
-          - language
 
     - name: boxplotPlot
       title: Marker Distributions by Cluster
@@ -256,7 +564,20 @@ items:
           - colorPalette
           - fontSize
           - plotContrast
-          - language
+
+    - name: markerCorrelationPlot
+      title: Marker Correlation Matrix
+      type: Image
+      width: 800
+      height: 700
+      renderFun: .plotMarkerCorrelation
+      visible: (showMarkerCorrelation)
+      clearWith:
+          - catVars
+          - contVars
+          - colorPalette
+          - fontSize
+          - plotContrast
 
     - name: survivalPlot
       title: Survival Analysis by Cluster
@@ -273,7 +594,6 @@ items:
           - colorPalette
           - fontSize
           - plotContrast
-          - language
 
     - name: medoidInfo
       title: Cluster Medoids (Representative Cases)
@@ -293,12 +613,12 @@ items:
     - name: interpretationGuide
       title: Clinical Interpretation
       type: Html
-      visible: true
+      visible: (showInterpretation)
 
     - name: technicalNotes
       title: Technical Notes
       type: Html
-      visible: true
+      visible: (showTechnicalNotes)
 
     - name: executiveSummary
       title: Executive Summary (Copy-Ready)
@@ -310,9 +630,137 @@ items:
           - method
           - nClusters
           - autoSelectK
-          - language
-          - tumorPreset
-          - applyPreset
+
+    # Spatial/Compartment Analysis Results
+    - name: spatialCompartmentSummary
+      title: Spatial Compartment Summary
+      type: Table
+      visible: (performSpatialAnalysis)
+      columns:
+          - name: compartment
+            title: Compartment
+            type: text
+          - name: n_cases
+            title: N Cases
+            type: integer
+          - name: n_clusters
+            title: N Clusters
+            type: integer
+          - name: avg_silhouette
+            title: Avg Silhouette
+            type: number
+          - name: quality
+            title: Quality
+            type: text
+      clearWith:
+          - spatialCompartment
+          - catVars
+          - contVars
+          - method
+          - nClusters
+
+    - name: spatialConcordance
+      title: Inter-Compartment Cluster Concordance
+      type: Table
+      visible: (performSpatialAnalysis && spatialComparisonMode:between || spatialComparisonMode:both)
+      columns:
+          - name: compartment1
+            title: Compartment 1
+            type: text
+          - name: compartment2
+            title: Compartment 2
+            type: text
+          - name: concordance
+            title: Concordance
+            type: number
+            format: zto,pc
+          - name: kappa
+            title: Cohen's Kappa
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - spatialCompartment
+          - catVars
+          - contVars
+          - method
+          - nClusters
+
+    - name: spatialClusterComparison
+      title: Cluster Distribution by Compartment
+      type: Table
+      visible: (performSpatialAnalysis)
+      columns:
+          - name: compartment
+            title: Compartment
+            type: text
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: percent
+            title: Percentage
+            type: number
+            format: zto,pc
+      clearWith:
+          - spatialCompartment
+          - catVars
+          - contVars
+          - method
+          - nClusters
+
+    - name: spatialMarkerDifferences
+      title: Marker Expression Differences by Compartment
+      type: Table
+      visible: (performSpatialAnalysis)
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: compartment1
+            title: Compartment 1
+            type: text
+          - name: compartment2
+            title: Compartment 2
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: text
+      clearWith:
+          - spatialCompartment
+          - catVars
+          - contVars
+
+    - name: spatialHeatmapPlot
+      title: Spatial Compartment Heatmap
+      type: Image
+      width: 1000
+      height: 700
+      renderFun: .plotSpatialHeatmap
+      visible: (performSpatialAnalysis && showHeatmap)
+      clearWith:
+          - spatialCompartment
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - heatmapScale
+          - colorPalette
+          - fontSize
+          - plotContrast
 
     # Legacy result tables for backward compatibility
     - name: sizes
@@ -326,15 +774,6 @@ items:
           - name: "n"
             title: "N"
             type: integer
-
-    - name: modes
-      title: Cluster Modes (Legacy)
-      type: Table
-      visible: false
-      columns:
-          - name: cluster
-            title: Cluster
-            type: text
 
     - name: distr
       title: Distributions (Legacy)

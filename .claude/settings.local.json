@@ -91,7 +91,8 @@
       "Bash(else echo \"❌ NOT POPULATED\")",
       "Bash(xargs:*)",
       "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/stagemigration.r.yaml)",
-      "WebFetch(domain:cloud.r-project.org)"
+      "WebFetch(domain:cloud.r-project.org)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": [],
