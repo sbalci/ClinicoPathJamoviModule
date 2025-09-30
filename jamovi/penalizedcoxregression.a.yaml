@@ -3,7 +3,7 @@ name: penalizedcoxregression
 title: Penalized Cox Regression
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Survival
 menuTitle: Penalized Cox Regression
 menuSubtitle: L1/L2 penalized survival models for high-dimensional data

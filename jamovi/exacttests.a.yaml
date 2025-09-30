@@ -3,7 +3,7 @@ name: exacttests
 title: Exact Tests for Small Samples
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Exact Tests for Small Samples
 menuSubtitle: Precise inference for small sample sizes

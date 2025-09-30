@@ -1,0 +1,323 @@
+name: ihcpredict
+title: IHC Diagnostic Prediction
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+
+    - name: modelSummary
+      title: Reference Model Summary
+      type: Html
+      visible: true
+      clearWith:
+          - useStoredModel
+          - trainingFile
+          - trainingDiagnosis
+
+    - name: validationResults
+      title: Marker Validation
+      type: Table
+      visible: (validateMarkers)
+      clearWith:
+          - catVars
+          - contVars
+          - trainingFile
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: in_training
+            title: In Training Set
+            type: text
+          - name: in_query
+            title: In Query Set
+            type: text
+          - name: type_match
+            title: Data Type Match
+            type: text
+          - name: status
+            title: Validation Status
+            type: text
+
+    - name: predictions
+      title: Diagnostic Predictions
+      type: Table
+      visible: true
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+          - confidenceThreshold
+          - panelWeight
+          - distanceWeight
+          - silhouetteWeight
+      columns:
+          - name: case_id
+            title: Case ID
+            type: text
+          - name: predicted_diagnosis
+            title: Predicted Diagnosis
+            type: text
+          - name: confidence
+            title: Confidence Score
+            type: number
+            format: zto
+          - name: confidence_level
+            title: Confidence Level
+            type: text
+          - name: prediction_method
+            title: Method Used
+            type: text
+          - name: recommendation
+            title: Clinical Recommendation
+            type: text
+
+    - name: alternativeDiagnoses
+      title: Alternative Diagnoses (Differential)
+      type: Table
+      visible: (showAlternatives)
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+          - nAlternatives
+      columns:
+          - name: case_id
+            title: Case ID
+            type: text
+          - name: rank
+            title: Rank
+            type: integer
+          - name: alternative_diagnosis
+            title: Alternative Diagnosis
+            type: text
+          - name: confidence
+            title: Confidence Score
+            type: number
+            format: zto
+          - name: difference_from_primary
+            title: Difference from Primary
+            type: number
+            format: zto
+
+    - name: predictionEvidence
+      title: Prediction Evidence Details
+      type: Table
+      visible: (showEvidence)
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+      columns:
+          - name: case_id
+            title: Case ID
+            type: text
+          - name: predicted_diagnosis
+            title: Predicted Diagnosis
+            type: text
+          - name: panel_match
+            title: Panel Match
+            type: text
+          - name: panel_ppv
+            title: Panel PPV
+            type: number
+            format: zto,pc
+          - name: assigned_cluster
+            title: Assigned Cluster
+            type: text
+          - name: cluster_purity
+            title: Cluster Purity
+            type: number
+            format: zto,pc
+          - name: distance_to_centroid
+            title: Distance to Centroid
+            type: number
+          - name: silhouette_score
+            title: Silhouette Score
+            type: number
+          - name: overall_confidence
+            title: Overall Confidence
+            type: number
+            format: zto
+
+    - name: lowConfidenceCases
+      title: Low Confidence Predictions (Review Required)
+      type: Table
+      visible: (flagLowConfidence)
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+          - lowConfidenceThreshold
+      columns:
+          - name: case_id
+            title: Case ID
+            type: text
+          - name: predicted_diagnosis
+            title: Predicted Diagnosis
+            type: text
+          - name: confidence
+            title: Confidence Score
+            type: number
+            format: zto
+          - name: quality_flag
+            title: Quality Flag
+            type: text
+          - name: primary_issue
+            title: Primary Issue
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+
+    - name: markerComparison
+      title: Marker Expression Comparison
+      type: Table
+      visible: (showMarkerComparison)
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+      columns:
+          - name: case_id
+            title: Case ID
+            type: text
+          - name: marker
+            title: Marker
+            type: text
+          - name: query_value
+            title: Query Case Value
+            type: text
+          - name: predicted_diagnosis
+            title: Predicted Diagnosis
+            type: text
+          - name: centroid_value
+            title: Centroid Value
+            type: text
+          - name: match_status
+            title: Match Status
+            type: text
+
+    - name: predictionSummary
+      title: Prediction Summary Statistics
+      type: Table
+      visible: true
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: text
+
+    - name: confidenceByDiagnosis
+      title: Confidence Statistics by Predicted Diagnosis
+      type: Table
+      visible: true
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+      columns:
+          - name: diagnosis
+            title: Predicted Diagnosis
+            type: text
+          - name: n_cases
+            title: N Cases
+            type: integer
+          - name: mean_confidence
+            title: Mean Confidence
+            type: number
+            format: zto
+          - name: median_confidence
+            title: Median Confidence
+            type: number
+            format: zto
+          - name: min_confidence
+            title: Min Confidence
+            type: number
+            format: zto
+          - name: max_confidence
+            title: Max Confidence
+            type: number
+            format: zto
+          - name: n_high_confidence
+            title: N High Confidence
+            type: integer
+          - name: n_low_confidence
+            title: N Low Confidence
+            type: integer
+
+    - name: predictionPlot
+      title: Prediction Visualization (PCA/MCA)
+      type: Image
+      width: 800
+      height: 700
+      renderFun: .plotPredictions
+      visible: (showPredictionPlot)
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+          - colorPalette
+          - fontSize
+          - plotContrast
+
+    - name: confidencePlot
+      title: Confidence Score Distribution
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotConfidenceDistribution
+      visible: (showConfidencePlot)
+      clearWith:
+          - predictionMethod
+          - highConfidenceThreshold
+          - lowConfidenceThreshold
+          - colorPalette
+          - fontSize
+          - plotContrast
+
+    - name: markerHeatmap
+      title: Query Cases vs Training Centroids Heatmap
+      type: Image
+      width: 900
+      height: 700
+      renderFun: .plotMarkerHeatmap
+      visible: (showMarkerComparison)
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+          - colorPalette
+          - fontSize
+          - plotContrast
+
+    - name: clinicalGuidance
+      title: Clinical Interpretation and Next Steps
+      type: Html
+      visible: true
+
+    - name: technicalDetails
+      title: Technical Details
+      type: Html
+      visible: true
+
+    - name: exportSummary
+      title: Export Summary (Copy-Ready Report)
+      type: Preformatted
+      visible: true
+      clearWith:
+          - catVars
+          - contVars
+          - predictionMethod
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

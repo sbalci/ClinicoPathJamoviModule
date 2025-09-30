@@ -3,7 +3,7 @@ name: enhancedtwowayfrequency
 title: Enhanced Two-Way Frequency Analysis with BlueSky Integration
 jas: '1.2'
 version: '0.0.31'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Enhanced Two-Way Frequency Analysis
 menuSubtitle: Cross-tabulation analysis with BlueSky integration and advanced features

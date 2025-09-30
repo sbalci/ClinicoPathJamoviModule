@@ -1,7 +1,7 @@
 ---
 name: decisionpanel
 title: Decision Panel Optimization
-menuGroup: meddecide
+menuGroup: meddecideT2
 menuSubgroup: Decision
 menuSubtitle: Optimize test panels and decision trees
 version: '0.0.31'

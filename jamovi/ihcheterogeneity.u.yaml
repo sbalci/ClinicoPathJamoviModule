@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Overall / Whole Slide / HotSpot (Optional) 
+        label: Overall / Whole Slide / HotSpot (Optional)
         children:
           - type: VariablesListBox
             name: wholesection
@@ -56,7 +56,6 @@ children:
             name: spatial_id
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Analysis Configuration
     children:
@@ -66,7 +65,13 @@ children:
       - type: ComboBox
         name: sampling_strategy
         label: Sampling Strategy
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: compareCompartments
+      - type: CheckBox
+        name: compartmentTests
   - type: CollapseBox
     label: Clinical Thresholds
     children:
@@ -78,7 +83,6 @@ children:
         name: correlation_threshold
         format: number
         label: Correlation Threshold
-
   - type: CollapseBox
     label: Additional Analyses
     children:
@@ -94,7 +98,6 @@ children:
       - type: CheckBox
         name: generate_recommendations
         label: Generate Clinical Recommendations
-
   - type: CollapseBox
     label: Output Options
     collapsed: true

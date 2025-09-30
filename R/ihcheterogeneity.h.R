@@ -13,6 +13,8 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             biopsy4 = NULL,
             biopsies = NULL,
             spatial_id = NULL,
+            compareCompartments = FALSE,
+            compartmentTests = FALSE,
             analysis_type = "comprehensive",
             sampling_strategy = "unknown",
             cv_threshold = 20,
@@ -85,6 +87,14 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..compareCompartments <- jmvcore::OptionBool$new(
+                "compareCompartments",
+                compareCompartments,
+                default=FALSE)
+            private$..compartmentTests <- jmvcore::OptionBool$new(
+                "compartmentTests",
+                compartmentTests,
+                default=FALSE)
             private$..analysis_type <- jmvcore::OptionList$new(
                 "analysis_type",
                 analysis_type,
@@ -147,6 +157,8 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..biopsy4)
             self$.addOption(private$..biopsies)
             self$.addOption(private$..spatial_id)
+            self$.addOption(private$..compareCompartments)
+            self$.addOption(private$..compartmentTests)
             self$.addOption(private$..analysis_type)
             self$.addOption(private$..sampling_strategy)
             self$.addOption(private$..cv_threshold)
@@ -166,6 +178,8 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         biopsy4 = function() private$..biopsy4$value,
         biopsies = function() private$..biopsies$value,
         spatial_id = function() private$..spatial_id$value,
+        compareCompartments = function() private$..compareCompartments$value,
+        compartmentTests = function() private$..compartmentTests$value,
         analysis_type = function() private$..analysis_type$value,
         sampling_strategy = function() private$..sampling_strategy$value,
         cv_threshold = function() private$..cv_threshold$value,
@@ -184,6 +198,8 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..biopsy4 = NA,
         ..biopsies = NA,
         ..spatial_id = NA,
+        ..compareCompartments = NA,
+        ..compartmentTests = NA,
         ..analysis_type = NA,
         ..sampling_strategy = NA,
         ..cv_threshold = NA,
@@ -210,6 +226,8 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         variancetable = function() private$.items[["variancetable"]],
         poweranalysistable = function() private$.items[["poweranalysistable"]],
         spatialanalysistable = function() private$.items[["spatialanalysistable"]],
+        compartmentComparison = function() private$.items[["compartmentComparison"]],
+        compartmentTests = function() private$.items[["compartmentTests"]],
         biopsyplot = function() private$.items[["biopsyplot"]],
         variabilityplot = function() private$.items[["variabilityplot"]],
         spatialplot = function() private$.items[["spatialplot"]]),
@@ -382,6 +400,67 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `name`="heterogeneity_level", 
                         `title`="Heterogeneity Level", 
                         `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compartmentComparison",
+                title="Compartment Heterogeneity Comparison",
+                visible="(compareCompartments && spatial_id)",
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Heterogeneity Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="compartment", 
+                        `title`="Compartment", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison to Other Compartments", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compartmentTests",
+                title="Statistical Tests for Compartment Differences",
+                visible="(compartmentTests && spatial_id)",
+                columns=list(
+                    list(
+                        `name`="test_type", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="DF", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="biopsyplot",
@@ -446,7 +525,15 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param biopsy3 Third tissue region biomarker measurement
 #' @param biopsy4 Fourth tissue region biomarker measurement
 #' @param biopsies additional simulated biopsy measurements
-#' @param spatial_id identifier for spatial regions or tissue areas
+#' @param spatial_id identifier for spatial regions or tissue areas (e.g.,
+#'   Central/Invasive, Preinvasive/Invasive)
+#' @param compareCompartments Perform statistical comparison of heterogeneity
+#'   patterns between spatial compartments. Requires spatial_id variable.
+#'   Compares ICC, CV, and bias across compartments.
+#' @param compartmentTests Perform statistical tests to determine if
+#'   heterogeneity differs significantly between compartments. Uses Levene's
+#'   test for variance equality and Kruskal-Wallis for distributional
+#'   differences.
 #' @param analysis_type primary focus of biopsy simulation analysis
 #' @param sampling_strategy biopsy sampling strategy used
 #' @param cv_threshold Coefficient of variation threshold for acceptable
@@ -481,6 +568,8 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
 #'   \code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
 #'   \code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
+#'   \code{results$compartmentComparison} \tab \tab \tab \tab \tab Statistical comparison of heterogeneity metrics between compartments \cr
+#'   \code{results$compartmentTests} \tab \tab \tab \tab \tab Formal statistical tests comparing heterogeneity across compartments \cr
 #'   \code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across regional measurements and reference (if provided) \cr
 #'   \code{results$variabilityplot} \tab \tab \tab \tab \tab Coefficient of variation by case \cr
 #'   \code{results$spatialplot} \tab \tab \tab \tab \tab Spatial distribution of biomarker values \cr
@@ -502,6 +591,8 @@ ihcheterogeneity <- function(
     biopsy4 = NULL,
     biopsies = NULL,
     spatial_id = NULL,
+    compareCompartments = FALSE,
+    compartmentTests = FALSE,
     analysis_type = "comprehensive",
     sampling_strategy = "unknown",
     cv_threshold = 20,
@@ -544,6 +635,8 @@ ihcheterogeneity <- function(
         biopsy4 = biopsy4,
         biopsies = biopsies,
         spatial_id = spatial_id,
+        compareCompartments = compareCompartments,
+        compartmentTests = compartmentTests,
         analysis_type = analysis_type,
         sampling_strategy = sampling_strategy,
         cv_threshold = cv_threshold,

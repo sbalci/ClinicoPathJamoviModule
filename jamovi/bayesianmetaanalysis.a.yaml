@@ -3,7 +3,7 @@ name: bayesianmetaanalysis
 title: Bayesian Meta-Analysis
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Bayesian
 menuTitle: Bayesian Meta-Analysis
 menuSubtitle: Hierarchical models for evidence synthesis

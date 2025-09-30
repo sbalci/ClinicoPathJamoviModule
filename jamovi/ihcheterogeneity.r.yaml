@@ -149,6 +149,58 @@ items:
           title: 'Heterogeneity Level'
           type: text
 
+    - name: compartmentComparison
+      title: Compartment Heterogeneity Comparison
+      type: Table
+      visible: (compareCompartments && spatial_id)
+      description: Statistical comparison of heterogeneity metrics between compartments
+      columns:
+        - name: metric
+          title: 'Heterogeneity Metric'
+          type: text
+        - name: compartment
+          title: 'Compartment'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+        - name: comparison
+          title: 'Comparison to Other Compartments'
+          type: text
+
+    - name: compartmentTests
+      title: Statistical Tests for Compartment Differences
+      type: Table
+      visible: (compartmentTests && spatial_id)
+      description: Formal statistical tests comparing heterogeneity across compartments
+      columns:
+        - name: test_type
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'Statistic'
+          type: number
+          format: zto
+        - name: df
+          title: 'DF'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
     - name: biopsyplot
       title: Regional Measurements Comparison
       type: Image

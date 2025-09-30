@@ -3,7 +3,7 @@ name: excessmortality
 title: Excess Mortality Analysis
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Survival
 menuTitle: Excess Mortality Analysis
 menuSubtitle: Population-based excess mortality modeling with mexhaz

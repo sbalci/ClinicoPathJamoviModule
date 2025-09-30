@@ -1,7 +1,7 @@
 ---
 name: waterfall
 title: Treatment Response Analysis
-menuGroup: OncoPath
+menuGroup: OncoPathT2
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
 version: '0.0.31'

@@ -13,6 +13,14 @@ source .venv/bin/activate
 
 > pdftotext
 
+> markitdown path-to-file.pdf -o document.md
+https://github.com/microsoft/markitdown
+
+> marker_single /path/to/file.pdf --output_dir
+marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf --output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/ 
+https://github.com/datalab-to/marker
+
+
 > /review-article-stats '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.html'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.pdf'
@@ -60,6 +68,13 @@ jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::rea
     hsroc_analysis = TRUE,
     meta_regression = TRUE,
     heterogeneity_analysis = TRUE)
+
+
+jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/ihc_breast_cancer.csv");ihccluster(
+    data = data,
+    catVars = vars(ER_Status, PR_Status),
+    caseId = NULL,
+    clinicalVars = vars())
 
 
 

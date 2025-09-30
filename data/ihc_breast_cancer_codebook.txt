@@ -1,0 +1,70 @@
+
+# IHC Breast Cancer Clustering Test Dataset
+
+## Overview
+Realistic breast cancer IHC data for testing clustering algorithms.
+155 cases representing 4 molecular subtypes with clinical and survival data.
+
+## Variables
+
+### Identifiers
+- **PatientID**: Unique patient identifier (BC-0001 to BC-0155)
+- **TrueSubtype**: Ground truth molecular subtype for validation
+  - Luminal_A (n=60)
+  - Luminal_B (n=40)
+  - HER2_Positive (n=25)
+  - Triple_Negative (n=25)
+  - Test_Case (n=5, edge cases)
+
+### Categorical IHC Markers
+- **ER_Status**: Estrogen Receptor (Negative/Positive)
+- **PR_Status**: Progesterone Receptor (Negative/Positive)
+- **HER2_IHC**: HER2 immunohistochemistry (0/1+/2+/3+)
+- **CK5_6**: Cytokeratin 5/6 basal marker (Negative/Positive)
+- **EGFR**: Epidermal Growth Factor Receptor (Negative/Positive)
+
+### Continuous IHC Markers
+- **Ki67_Percent**: Proliferation index (0-100%)
+- **AR_Hscore**: Androgen Receptor H-score (0-300)
+- **p53_Percent**: p53 nuclear staining (0-100%)
+
+### Clinical Variables
+- **Age_Years**: Age at diagnosis (30-90 years)
+- **Tumor_Grade**: Histologic grade (G1/G2/G3)
+- **Tumor_Stage**: Clinical stage (I/II/III/IV)
+- **Tumor_Size_cm**: Tumor size in cm
+- **Lymph_Node_Status**: Lymph node involvement (Negative/Positive)
+
+### Survival Data
+- **OS_Months**: Overall survival time in months
+- **OS_Event**: Death event (0=censored, 1=death)
+
+## Missing Data
+~10% realistic missingness across markers:
+- AR_Hscore: 12% (newer marker)
+- p53_Percent: 10%
+- Ki67_Percent: 8%
+- EGFR: 7%
+
+## Expected Clustering Results
+With proper clustering, should identify ~4 main clusters corresponding to:
+1. Luminal A: ER+/PR+/HER2-/low Ki67
+2. Luminal B: ER+/PR+/HER2-/high Ki67 or HER2+
+3. HER2-enriched: ER-/PR-/HER2+++
+4. Triple Negative: ER-/PR-/HER2-/high CK5_6
+
+## Test Scenarios
+The dataset enables testing:
+- Mixed categorical and continuous markers
+- Missing data handling (complete vs pairwise)
+- Multiple clustering methods (PAM, hierarchical, dimension reduction)
+- Survival analysis integration
+- Clinical variable correlations
+- Tumor preset configurations (breast_luminal, breast_triple_negative)
+- Edge cases (extreme values in test cases)
+
+## Generation
+Generated using data-raw/generate_ihc_test_data.R
+Date: 2024-01-15
+Seed: 42 (reproducible)
+

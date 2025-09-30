@@ -3,7 +3,7 @@ name: clinicaldataintegration
 title: Clinical Data Integration
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Clinical Data Integration
 menuSubtitle: EHR data import/export and quality assessment

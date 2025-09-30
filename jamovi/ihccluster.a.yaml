@@ -34,6 +34,7 @@ options:
       permitted:
           - factor
       description: 'Binary (pos/neg) or ordinal (0/1/2/3) stain results'
+      default: NULL
 
     - name: contVars
       title: 'Continuous IHC Markers'
@@ -56,6 +57,37 @@ options:
           - factor
           - id
       description: 'Case identifier for tracking'
+      default: NULL
+
+    # Spatial/Compartment Analysis Options
+    - name: spatialCompartment
+      title: 'Spatial Compartment Variable (optional)'
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description: 'Groups cases by spatial location (e.g., Central/Invasive, Preinvasive/Invasive, Primary/Metastatic)'
+      default: NULL
+
+    - name: performSpatialAnalysis
+      title: 'Perform Spatial Compartment Analysis'
+      type: Bool
+      default: false
+      description: 'Compare clustering patterns across spatial compartments'
+
+    - name: spatialComparisonMode
+      title: 'Spatial Comparison Mode'
+      type: List
+      options:
+          - title: 'Compare clusters between compartments'
+            name: between
+          - title: 'Cluster within each compartment separately'
+            name: within
+          - title: 'Both comparisons'
+            name: both
+      default: both
+      description: 'How to analyze spatial compartments'
 
     - name: method
       title: 'Clustering Method'
@@ -70,6 +102,31 @@ options:
       default: pam
       description: 'Clustering algorithm to use'
 
+    - name: distanceMethod
+      title: 'Distance Metric'
+      type: List
+      options:
+          - title: 'Gower (handles mixed data)'
+            name: gower
+          - title: 'Jaccard (binary data only)'
+            name: jaccard
+      default: gower
+      description: 'Distance metric for clustering'
+
+    - name: linkageMethod
+      title: 'Linkage Method (hierarchical only)'
+      type: List
+      options:
+          - title: 'Ward (minimize variance)'
+            name: ward
+          - title: 'Complete (furthest neighbor)'
+            name: complete
+          - title: 'Average (mean distance)'
+            name: average
+          - title: 'Single (nearest neighbor)'
+            name: single
+      default: ward
+      description: 'Hierarchical clustering linkage method'
 
     - name: nClusters
       title: 'Number of Clusters'
@@ -205,11 +262,139 @@ options:
       default: true
       description: 'Test marker-cluster associations'
 
+    - name: multipleTestingCorrection
+      title: 'Multiple Testing Correction'
+      type: List
+      options:
+          - title: 'None'
+            name: none
+          - title: 'Bonferroni'
+            name: bonferroni
+          - title: 'Benjamini-Hochberg (FDR)'
+            name: fdr
+          - title: 'Holm'
+            name: holm
+      default: bonferroni
+      description: 'Correction method for marker association tests'
+
+    - name: markerOptimization
+      title: 'Marker Optimization Analysis'
+      type: Bool
+      default: false
+      description: 'Analyze marker importance and identify optimal panel'
+
+    - name: showMarkerCorrelation
+      title: 'Show Marker Correlation Matrix'
+      type: Bool
+      default: false
+      description: 'Display correlation structure between markers'
+
+    - name: clusterQualityMetrics
+      title: 'Cluster Quality Metrics'
+      type: Bool
+      default: true
+      description: 'Calculate PPV, purity, and cluster quality measures'
+
+    - name: iterativeRefinement
+      title: 'Iterative Marker Refinement'
+      type: Bool
+      default: false
+      description: 'Perform iterative clustering with marker selection (advanced)'
+
+    - name: refinementIterations
+      title: 'Refinement Iterations'
+      type: Integer
+      min: 2
+      max: 5
+      default: 3
+      description: 'Number of iterative refinement cycles'
+
+    # Sterlacci 2019 Phase 2 Features
+    - name: reproducibilityTest
+      title: 'Test Cluster Reproducibility'
+      type: Bool
+      default: false
+      description: 'Random split validation with Cohen kappa (Sterlacci 2019)'
+
+    - name: nSplits
+      title: 'Number of Random Splits'
+      type: Integer
+      min: 1
+      max: 100
+      default: 10
+      description: 'Number of random splits for reproducibility testing'
+
+    - name: supervisedClustering
+      title: 'Supervised Clustering'
+      type: Bool
+      default: false
+      description: 'Cluster within each known diagnosis group separately'
+
+    - name: supervisedVariable
+      title: 'Grouping Variable for Supervised Clustering'
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description: 'Variable defining groups (e.g., histotype, diagnosis)'
+      default: NULL
+
     - name: exportClusters
       title: 'Export Cluster Assignments'
       type: Bool
       default: false
       description: 'Save cluster assignments to dataset'
+
+    # Diagnostic Features (Olsen et al. 2006)
+    - name: knownDiagnosis
+      title: 'Known Diagnosis (optional)'
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description: 'Known diagnoses for calculating marker performance metrics (sensitivity, specificity, PPV, NPV)'
+      default: NULL
+
+    - name: calculateDiagnosticMetrics
+      title: 'Calculate Marker Performance Metrics'
+      type: Bool
+      default: false
+      description: 'Compute sensitivity, specificity, PPV, NPV for each marker when diagnosis is known'
+
+    - name: identifyOptimalPanel
+      title: 'Identify Optimal Antibody Panels'
+      type: Bool
+      default: false
+      description: 'Find minimal marker combinations with maximum diagnostic discrimination'
+
+    - name: panelSize
+      title: 'Antibody Panel Size'
+      type: List
+      options:
+          - name: pairs
+            title: '2-marker panels'
+          - name: triplets
+            title: '3-marker panels'
+          - name: both
+            title: 'Both 2 and 3-marker panels'
+      default: pairs
+      description: 'Size of antibody panel combinations to evaluate'
+
+    - name: flagOutliers
+      title: 'Flag Atypical Cases'
+      type: Bool
+      default: true
+      description: 'Identify cases with ambiguous/atypical immunoprofiles based on silhouette scores'
+
+    - name: outlierThreshold
+      title: 'Outlier Threshold'
+      type: Number
+      min: 0.0
+      max: 0.5
+      default: 0.25
+      description: 'Silhouette score threshold below which cases are flagged as outliers'
 
     - name: clinicalVars
       title: 'Clinical Variables (optional)'
@@ -222,6 +407,7 @@ options:
           - factor
           - numeric
       description: 'Clinical variables to compare across clusters'
+      default: NULL
 
     - name: survivalTime
       title: 'Survival Time (optional)'
@@ -281,44 +467,17 @@ options:
       default: false
       description: 'Enable high contrast mode for better visibility'
 
-    # Tumor-Specific Presets
-    - name: tumorPreset
-      title: 'Tumor-Specific Preset'
-      type: List
-      options:
-          - name: none
-            title: 'No Preset (Custom)'
-          - name: breast_luminal
-            title: 'Breast Cancer - Luminal Markers'
-          - name: breast_triple_negative
-            title: 'Breast Cancer - Triple Negative'
-          - name: lung_nsclc
-            title: 'Lung Cancer - NSCLC Panel'
-          - name: prostate_standard
-            title: 'Prostate Cancer - Standard Panel'
-          - name: colon_standard
-            title: 'Colorectal Cancer - Standard Panel'
-          - name: melanoma_immune
-            title: 'Melanoma - Immune Panel'
-          - name: lymphoma_panel
-            title: 'Lymphoma - Classification Panel'
-      default: none
-      description: 'Apply tumor-specific clustering configurations'
-
-    - name: applyPreset
-      title: 'Apply Preset Configuration'
+    # Explanatory Output Options
+    - name: showInterpretation
+      title: 'Show Clinical Interpretation'
       type: Bool
       default: false
-      description: 'Apply the selected tumor-specific preset settings. Note: This will provide recommendations, you may need to manually adjust the settings.'
+      description: 'Display clinical interpretation guide'
 
-    # Internationalization Options
-    - name: language
-      title: 'Language / Dil'
-      type: List
-      options:
-          - name: english
-            title: 'English'
-          - name: turkish
-            title: 'Türkçe'
-      default: english
-      description: 'Interface and output language / Arayüz ve çıktı dili'
+    - name: showTechnicalNotes
+      title: 'Show Technical Notes'
+      type: Bool
+      default: false
+      description: 'Display technical notes about the analysis'
+
+

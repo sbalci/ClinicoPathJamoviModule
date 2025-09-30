@@ -253,6 +253,7 @@ Imports:
     corpcor,
     spBayesSurv,
     mgcv,
+    proxy,
     quantreg,
     np,
     KernSmooth,
