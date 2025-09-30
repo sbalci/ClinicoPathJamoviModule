@@ -1,7 +1,7 @@
 ---
 name: clinicalvalidationinteractive
 title: Interactive Clinical Model Validation
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Interactive validation with real-time parameter optimization
 version: '0.0.31'
