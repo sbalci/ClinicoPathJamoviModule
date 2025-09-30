@@ -4,6 +4,9 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  # ============================================================================
+  # Variable Selection
+  # ============================================================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -27,6 +30,17 @@ children:
             name: caseId
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Spatial Compartment Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: spatialCompartment
+            maxItemCount: 1
+            isTarget: true
+
+  # ============================================================================
+  # Clustering Settings
+  # ============================================================================
   - type: CollapseBox
     label: Clustering Settings
     collapsed: false
@@ -38,6 +52,20 @@ children:
             label: Clustering Method
           - type: ComboBox
             name: method
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Distance Metric
+          - type: ComboBox
+            name: distanceMethod
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Linkage Method (hierarchical only)
+          - type: ComboBox
+            name: linkageMethod
       - type: LayoutBox
         margin: large
         children:
@@ -56,22 +84,18 @@ children:
             label: Range for automatic k selection
           - type: ComboBox
             name: kRange
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Spatial Compartment Variable (optional)
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: spatialCompartment
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: distanceMethod
+          - type: Label
+            label: Random seed (for reproducibility)
+          - type: TextBox
+            name: seed
+            format: number
+
+  # ============================================================================
+  # Data Preprocessing
+  # ============================================================================
   - type: CollapseBox
     label: Data Preprocessing
     collapsed: true
@@ -94,44 +118,193 @@ children:
           - type: TextBox
             name: weights
             format: string
-  - type: LayoutBox
-    margin: large
+
+  # ============================================================================
+  # Phase 3: Derived Markers (Sterlacci 2019)
+  # ============================================================================
+  - type: CollapseBox
+    label: Derived Markers (CD4/CD8 Ratio)
+    collapsed: true
     children:
-      - type: ComboBox
-        name: linkageMethod
-  - type: LayoutBox
-    margin: large
+      - type: CheckBox
+        name: calculateRatios
+        label: Calculate marker ratios (e.g., CD4/CD8)
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Ratio Numerator
+            children:
+              - type: VariablesListBox
+                name: ratioNumerator
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Ratio Denominator
+            children:
+              - type: VariablesListBox
+                name: ratioDenominator
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Ratio Variable Name
+          - type: TextBox
+            name: ratioName
+            format: string
+      - type: CheckBox
+        name: ratioClassification
+        label: Classify ratio as Low/Intermediate/High
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Low Cutoff (≤)
+          - type: TextBox
+            name: ratioLowCutoff
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: High Cutoff (≥)
+          - type: TextBox
+            name: ratioHighCutoff
+            format: number
+
+  # ============================================================================
+  # Spatial Analysis
+  # ============================================================================
+  - type: CollapseBox
+    label: Spatial Compartment Analysis
+    collapsed: true
     children:
       - type: CheckBox
         name: performSpatialAnalysis
+        label: Perform spatial compartment analysis
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Spatial Comparison Mode
+          - type: ComboBox
+            name: spatialComparisonMode
+
+  # ============================================================================
+  # Phase 2: Validation & Supervised Clustering (Sterlacci 2019)
+  # ============================================================================
   - type: CollapseBox
-    label: Advanced Options
+    label: Cluster Validation (Sterlacci 2019)
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: reproducibilityTest
+        label: Test cluster reproducibility (random split + Cohen's kappa)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Number of Random Splits
+          - type: TextBox
+            name: nSplits
+            format: number
+      - type: CheckBox
+        name: supervisedClustering
+        label: Supervised clustering (cluster within diagnosis groups)
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Grouping Variable (e.g., diagnosis, histotype)
+            children:
+              - type: VariablesListBox
+                name: supervisedVariable
+                maxItemCount: 1
+                isTarget: true
+
+  # ============================================================================
+  # Advanced Options
+  # ============================================================================
+  - type: CollapseBox
+    label: Advanced Clustering Options
     collapsed: true
     children:
       - type: CheckBox
         name: consensusClustering
-        label: Perform consensus clustering
+        label: Perform consensus clustering (bootstrap resampling)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Bootstrap iterations
+            label: Bootstrap Iterations
           - type: TextBox
             name: nBootstrap
             format: number
+      - type: CheckBox
+        name: markerOptimization
+        label: Marker optimization analysis
+      - type: CheckBox
+        name: iterativeRefinement
+        label: Iterative marker refinement
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Random seed (for reproducibility)
+            label: Refinement Iterations
           - type: TextBox
-            name: seed
+            name: refinementIterations
             format: number
-  - type: LayoutBox
-    margin: large
+
+  # ============================================================================
+  # Diagnostic Features (Olsen 2006)
+  # ============================================================================
+  - type: CollapseBox
+    label: Diagnostic Features (Olsen 2006)
+    collapsed: true
     children:
-      - type: ComboBox
-        name: spatialComparisonMode
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Known Diagnosis (for marker performance)
+            children:
+              - type: VariablesListBox
+                name: knownDiagnosis
+                maxItemCount: 1
+                isTarget: true
+      - type: CheckBox
+        name: calculateDiagnosticMetrics
+        label: Calculate marker performance (sensitivity, specificity, PPV, NPV)
+      - type: CheckBox
+        name: identifyOptimalPanel
+        label: Identify optimal antibody panels
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Antibody Panel Size
+          - type: ComboBox
+            name: panelSize
+      - type: CheckBox
+        name: flagOutliers
+        label: Flag atypical cases (low silhouette scores)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Outlier Threshold (silhouette score)
+          - type: TextBox
+            name: outlierThreshold
+            format: number
+
+  # ============================================================================
+  # Visualizations
+  # ============================================================================
   - type: CollapseBox
     label: Visualizations
     collapsed: false
@@ -142,44 +315,59 @@ children:
       - type: CheckBox
         name: showHeatmap
         label: Expression heatmap
-      - type: CheckBox
-        name: showDendrogram
-        label: Dendrogram (hierarchical only)
-      - type: CheckBox
-        name: showPCAPlot
-        label: PCA/MCA plot
-      - type: CheckBox
-        name: showBoxplots
-        label: Marker distribution boxplots
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Heatmap scaling
+            label: Heatmap Scaling
           - type: ComboBox
             name: heatmapScale
+      - type: CheckBox
+        name: showDendrogram
+        label: Dendrogram (hierarchical clustering only)
+      - type: CheckBox
+        name: showPCAPlot
+        label: PCA/MCA dimension reduction plot
+      - type: CheckBox
+        name: showBoxplots
+        label: Marker distribution boxplots
+
+  # ============================================================================
+  # Output Tables
+  # ============================================================================
   - type: CollapseBox
-    label: Output Tables
+    label: Output Tables & Statistics
     collapsed: false
     children:
       - type: CheckBox
         name: markerSummary
-        label: Marker summary statistics
+        label: Marker summary statistics by cluster
       - type: CheckBox
         name: clusterProfiles
         label: Cluster characteristic profiles
       - type: CheckBox
         name: associationTests
         label: Marker-cluster association tests
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Multiple Testing Correction
+          - type: ComboBox
+            name: multipleTestingCorrection
+      - type: CheckBox
+        name: clusterQualityMetrics
+        label: Cluster quality metrics (PPV, purity)
+      - type: CheckBox
+        name: showMarkerCorrelation
+        label: Marker correlation matrix
       - type: CheckBox
         name: exportClusters
-        label: Export cluster assignments
-      - type: CheckBox
-        name: showInterpretation
-        label: Clinical interpretation guide
-      - type: CheckBox
-        name: showTechnicalNotes
-        label: Technical notes
+        label: Export cluster assignments to dataset
+
+  # ============================================================================
+  # Clinical Correlations
+  # ============================================================================
   - type: CollapseBox
     label: Clinical Correlations (optional)
     collapsed: true
@@ -208,99 +396,34 @@ children:
                 name: survivalEvent
                 maxItemCount: 1
                 isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: multipleTestingCorrection
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Known Diagnosis (optional)
-        children:
-          - type: VariablesListBox
-            name: knownDiagnosis
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: markerOptimization
-      - type: CheckBox
-        name: showMarkerCorrelation
-      - type: CheckBox
-        name: clusterQualityMetrics
-      - type: CheckBox
-        name: iterativeRefinement
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: calculateDiagnosticMetrics
-      - type: CheckBox
-        name: identifyOptimalPanel
+
+  # ============================================================================
+  # Accessibility & Display
+  # ============================================================================
   - type: CollapseBox
     label: Accessibility & Display
     collapsed: true
     children:
-      - type: ComboBox
-        name: colorPalette
-        label: Color Palette
-      - type: ComboBox
-        name: fontSize
-        label: Font Size
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Color Palette
+          - type: ComboBox
+            name: colorPalette
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Font Size
+          - type: ComboBox
+            name: fontSize
       - type: CheckBox
         name: plotContrast
         label: High Contrast Mode
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: panelSize
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: refinementIterations
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
       - type: CheckBox
-        name: flagOutliers
-  - type: LayoutBox
-    margin: large
-    children:
+        name: showInterpretation
+        label: Show clinical interpretation guide
       - type: CheckBox
-        name: reproducibilityTest
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: outlierThreshold
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: nSplits
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: supervisedClustering
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Grouping Variable for Supervised Clustering
-        children:
-          - type: VariablesListBox
-            name: supervisedVariable
-            maxItemCount: 1
-            isTarget: true
+        name: showTechnicalNotes
+        label: Show technical notes

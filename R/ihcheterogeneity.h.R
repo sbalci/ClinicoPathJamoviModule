@@ -404,7 +404,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="compartmentComparison",
                 title="Compartment Heterogeneity Comparison",
-                visible="(compareCompartments && spatial_id)",
+                visible="(compareCompartments && !is.null(spatial_id))",
                 columns=list(
                     list(
                         `name`="metric", 
@@ -437,7 +437,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="compartmentTests",
                 title="Statistical Tests for Compartment Differences",
-                visible="(compartmentTests && spatial_id)",
+                visible="(compartmentTests && !is.null(spatial_id))",
                 columns=list(
                     list(
                         `name`="test_type", 

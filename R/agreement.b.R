@@ -194,6 +194,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.performDiagnosticStyleAnalysis()
             }
 
+            # Perform clustering analysis (Usubutun et al. 2012)
+            if (self$options$performClustering) {
+                # Checkpoint before computationally intensive clustering
+                private$.checkpoint()
+                private$.performClusteringAnalysis()
+            }
+
             # Handle frequency tables
             if (self$options$sft) {
                 private$.generateFrequencyTables()
@@ -253,6 +260,15 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # Extract data matrix
             data_subset <- self$data[rater_vars]
+
+            # Extract metadata rows if enabled
+            if (self$options$useMetadataRows && !is.null(self$options$caseID)) {
+                metadata_result <- private$.extractMetadata(data_subset)
+                data_subset <- metadata_result$case_data
+                private$.rater_metadata <- metadata_result$metadata
+            } else {
+                private$.rater_metadata <- NULL
+            }
 
             # Remove rows with any missing values
             complete_cases <- complete.cases(data_subset)
@@ -1021,7 +1037,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             hc <- hclust(distance_matrix, method = cluster_method)
 
             # Cut dendrogram to get specified number of groups
-            n_groups <- self$options$styleGroups
+            n_groups <- self$options$nStyleGroups
             style_groups <- cutree(hc, k = n_groups)
 
             # Populate style clustering results table
@@ -1564,30 +1580,37 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             # Extract clustering results
-            hc <- private$.style_clustering_results$hclust
-            style_groups <- private$.style_clustering_results$groups
+            hc <- private$.style_clustering_results$hclust_object
+            style_groups <- private$.style_clustering_results$cluster_assignments
             rater_names <- private$.rater_names
-            
+
             # Create dendrogram using ggdendro
             require(ggdendro)
-            
+
             # Convert hclust to ggplot-compatible format
             dend_data <- dendro_data(hc)
-            
+
             # Assign colors to branches based on style groups
-            n_groups <- self$options$styleGroups
+            n_groups <- private$.style_clustering_results$n_clusters
+
+            # Check if n_groups is valid
+            if (is.null(n_groups) || length(n_groups) == 0 || n_groups < 2) {
+                # Default to 3 groups if invalid
+                n_groups <- 3
+            }
+
             if (n_groups == 3) {
                 # Use Usubutun colors: Green, Yellow, Red
                 group_colors <- c("#2E8B57", "#FFD700", "#DC143C")  # Green, Gold, Crimson
             } else {
                 group_colors <- rainbow(n_groups)
             }
-            
+
             # Create color mapping for raters based on their style groups
             rater_colors <- rep("black", length(rater_names))
             for (i in 1:length(rater_names)) {
                 group_id <- style_groups[i]
-                if (group_id <= length(group_colors)) {
+                if (!is.null(group_id) && !is.na(group_id) && group_id > 0 && group_id <= length(group_colors)) {
                     rater_colors[i] <- group_colors[group_id]
                 }
             }
@@ -1792,7 +1815,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             )
             
             # Create dendrograms for both dimensions
-            rater_dend_data <- dendro_data(private$.style_clustering_results$hclust)
+            rater_dend_data <- dendro_data(private$.style_clustering_results$hclust_object)
             
             # Create the main heatmap
             main_heatmap <- ggplot(heatmap_data, aes(x = Rater, y = Case, fill = Diagnosis)) +
@@ -1874,12 +1897,21 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             # Get clustering results and data
-            hc <- private$.style_clustering_results$hclust
-            style_groups <- private$.style_clustering_results$groups
+            hc <- private$.style_clustering_results$hclust_object
+            style_groups <- private$.style_clustering_results$cluster_assignments
             rater_names <- private$.rater_names
             data_matrix <- private$.data_matrix
             n_cases <- private$.n_cases
-            n_groups <- self$options$styleGroups
+            n_groups <- private$.style_clustering_results$n_clusters
+
+            # Check if n_groups is valid
+            if (is.null(n_groups) || length(n_groups) == 0 || n_groups < 2) {
+                # Fallback to option value or default to 3
+                n_groups <- self$options$nStyleGroups
+                if (is.null(n_groups) || length(n_groups) == 0 || n_groups < 2) {
+                    n_groups <- 3
+                }
+            }
 
             # Load required packages
             require(ggdendro)
@@ -1888,7 +1920,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # === CREATE DENDROGRAM (TOP PART) ===
             dend_data <- dendro_data(hc)
-            
+
             # Define colors
             if (n_groups == 3) {
                 group_colors <- c("#2E8B57", "#FFD700", "#DC143C")  # Green, Gold, Crimson
@@ -1905,7 +1937,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             rater_colors <- rep("black", length(rater_names))
             for (i in 1:length(rater_names)) {
                 group_id <- style_groups[i]
-                if (group_id <= length(group_colors)) {
+                if (!is.null(group_id) && !is.na(group_id) && group_id > 0 && group_id <= length(group_colors)) {
                     rater_colors[i] <- group_colors[group_id]
                 }
             }
@@ -4234,7 +4266,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (is.na(icc_value) || is.null(icc_value)) {
                 return("Unable to calculate")
             }
-            
+
             if (icc_value < 0) {
                 return("Poor reliability (negative ICC)")
             } else if (icc_value < 0.5) {
@@ -4246,6 +4278,897 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else {
                 return("Excellent reliability")
             }
+        },
+
+        # ====================================================================
+        # Clustering Analysis Methods (Usubutun et al. 2012)
+        # ====================================================================
+
+        # Perform hierarchical clustering of raters
+        .performClusteringAnalysis = function() {
+            if (!self$options$performClustering) {
+                return()
+            }
+
+            # Ensure data is prepared
+            if (is.null(private$.data_matrix)) {
+                return()
+            }
+
+            # Need at least 3 raters for clustering
+            if (private$.n_raters < 3) {
+                self$results$styleGroupSummary$setNote(
+                    'note',
+                    'Clustering requires at least 3 raters'
+                )
+                return()
+            }
+
+            # Perform hierarchical clustering
+            clustering_result <- private$.performRaterClustering()
+
+            # Store results
+            private$.style_clustering_results <- clustering_result
+
+            # Populate result tables
+            private$.populateStyleGroupSummary(clustering_result)
+            private$.populateStyleGroupProfiles(clustering_result)
+
+            # Identify discordant cases if requested
+            if (self$options$identifyDiscordant) {
+                private$.identifyClusteringDiscordantCases(clustering_result)
+            }
+
+            # Test associations with rater characteristics
+            private$.testCharacteristicAssociations(clustering_result)
+
+            # Compare with reference standard if provided
+            if (!is.null(self$options$referenceStandard)) {
+                private$.compareWithReference(clustering_result)
+            }
+
+            # Generate interpretation guide if requested
+            if (self$options$showClusteringInterpretation) {
+                private$.generateClusteringInterpretation(clustering_result)
+            }
+        },
+
+        # Extract metadata rows from dataset
+        .extractMetadata = function(data_subset) {
+            # Get the full dataset including case ID
+            case_id_var <- self$options$caseID
+            full_data <- self$data
+
+            # Identify metadata rows (case_id starts with "META_")
+            case_ids <- as.character(full_data[[case_id_var]])
+            metadata_rows <- grepl("^META_", case_ids, ignore.case = TRUE)
+
+            if (!any(metadata_rows)) {
+                # No metadata rows found
+                return(list(
+                    case_data = data_subset,
+                    metadata = NULL,
+                    has_metadata = FALSE
+                ))
+            }
+
+            # Separate metadata from case data
+            metadata_indices <- which(metadata_rows)
+            case_indices <- which(!metadata_rows)
+
+            # Extract case data (non-metadata rows)
+            case_data <- data_subset[case_indices, , drop = FALSE]
+
+            # Parse metadata
+            rater_metadata <- list()
+
+            for (idx in metadata_indices) {
+                # Get metadata type from case_id
+                meta_id <- case_ids[idx]
+                meta_type <- gsub("^META_", "", meta_id, ignore.case = TRUE)
+                meta_type <- tolower(trimws(meta_type))
+
+                # Extract values for each rater
+                rater_values <- as.character(full_data[idx, private$.rater_names])
+                names(rater_values) <- private$.rater_names
+
+                # Try to convert to numeric if possible (for experience, volume)
+                if (meta_type %in% c("experience", "volume", "years", "age")) {
+                    numeric_values <- suppressWarnings(as.numeric(rater_values))
+                    if (!all(is.na(numeric_values))) {
+                        rater_values <- numeric_values
+                    }
+                }
+
+                rater_metadata[[meta_type]] <- rater_values
+            }
+
+            return(list(
+                case_data = case_data,
+                metadata = rater_metadata,
+                has_metadata = TRUE
+            ))
+        },
+
+        # Core clustering function using percentage agreement distance
+        .performRaterClustering = function() {
+            # Calculate pairwise agreement matrix
+            n_raters <- private$.n_raters
+            agreement_matrix <- matrix(0, nrow = n_raters, ncol = n_raters)
+            rownames(agreement_matrix) <- private$.rater_names
+            colnames(agreement_matrix) <- private$.rater_names
+
+            # Calculate agreement for each rater pair
+            for (i in 1:n_raters) {
+                for (j in 1:n_raters) {
+                    if (i == j) {
+                        agreement_matrix[i, j] <- 1.0
+                    } else {
+                        # Percentage agreement
+                        rater_i <- private$.data_matrix[[i]]
+                        rater_j <- private$.data_matrix[[j]]
+                        agreement_matrix[i, j] <- mean(rater_i == rater_j, na.rm = TRUE)
+                    }
+                }
+            }
+
+            # Convert to distance matrix (1 - agreement)
+            distance_matrix <- as.dist(1 - agreement_matrix)
+
+            # Perform hierarchical clustering
+            linkage_method <- self$options$clusteringMethod
+            hc <- hclust(distance_matrix, method = linkage_method)
+
+            # Determine number of clusters
+            if (self$options$autoSelectGroups) {
+                # Use silhouette method
+                k_optimal <- private$.selectOptimalK(distance_matrix, hc)
+            } else {
+                k_optimal <- self$options$nStyleGroups
+            }
+
+            # Cut tree to get cluster assignments
+            cluster_assignments <- cutree(hc, k = k_optimal)
+
+            # Calculate silhouette scores
+            if (requireNamespace("cluster", quietly = TRUE)) {
+                sil <- cluster::silhouette(cluster_assignments, distance_matrix)
+                silhouette_scores <- as.numeric(sil[, "sil_width"])
+            } else {
+                silhouette_scores <- rep(NA, n_raters)
+            }
+
+            return(list(
+                hclust_object = hc,
+                cluster_assignments = cluster_assignments,
+                agreement_matrix = agreement_matrix,
+                distance_matrix = distance_matrix,
+                n_clusters = k_optimal,
+                silhouette_scores = silhouette_scores,
+                rater_names = private$.rater_names
+            ))
+        },
+
+        # Select optimal number of clusters using silhouette method
+        .selectOptimalK = function(distance_matrix, hc) {
+            n_raters <- private$.n_raters
+            max_k <- min(10, n_raters - 1)
+
+            if (!requireNamespace("cluster", quietly = TRUE)) {
+                # Default to 3 if cluster package not available
+                return(3)
+            }
+
+            # Try different k values
+            sil_scores <- numeric(max_k - 1)
+            for (k in 2:max_k) {
+                clusters <- cutree(hc, k = k)
+                sil <- cluster::silhouette(clusters, distance_matrix)
+                sil_scores[k - 1] <- mean(sil[, "sil_width"])
+            }
+
+            # Return k with highest average silhouette score
+            optimal_k <- which.max(sil_scores) + 1
+            return(optimal_k)
+        },
+
+        # Populate style group summary table
+        .populateStyleGroupSummary = function(clustering_result) {
+            table <- self$results$styleGroupSummary
+
+            cluster_assignments <- clustering_result$cluster_assignments
+            n_clusters <- clustering_result$n_clusters
+            agreement_matrix <- clustering_result$agreement_matrix
+            silhouette_scores <- clustering_result$silhouette_scores
+            rater_names <- clustering_result$rater_names
+
+            for (k in 1:n_clusters) {
+                # Get raters in this cluster
+                cluster_members <- which(cluster_assignments == k)
+                member_names <- paste(rater_names[cluster_members], collapse = ", ")
+                n_raters <- length(cluster_members)
+
+                # Calculate within-group agreement
+                if (n_raters > 1) {
+                    within_agreements <- agreement_matrix[cluster_members, cluster_members]
+                    within_agreement <- mean(within_agreements[upper.tri(within_agreements)]) * 100
+                } else {
+                    within_agreement <- 100
+                }
+
+                # Calculate between-group agreement
+                if (n_clusters > 1) {
+                    other_members <- which(cluster_assignments != k)
+                    if (length(other_members) > 0) {
+                        between_agreements <- agreement_matrix[cluster_members, other_members, drop = FALSE]
+                        between_agreement <- mean(between_agreements) * 100
+                    } else {
+                        between_agreement <- NA
+                    }
+                } else {
+                    between_agreement <- NA
+                }
+
+                # Average silhouette score for this cluster
+                cluster_sil <- mean(silhouette_scores[cluster_members], na.rm = TRUE)
+
+                # Interpretation
+                interpretation <- private$.interpretStyleGroup(
+                    within_agreement,
+                    between_agreement,
+                    cluster_sil
+                )
+
+                table$addRow(rowKey = k, values = list(
+                    style_group = paste("Group", k),
+                    n_raters = n_raters,
+                    rater_names = member_names,
+                    within_agreement = within_agreement,
+                    between_agreement = between_agreement,
+                    silhouette_score = cluster_sil,
+                    interpretation = interpretation
+                ))
+            }
+        },
+
+        # Interpret style group characteristics
+        .interpretStyleGroup = function(within_agreement, between_agreement, silhouette) {
+            if (is.na(silhouette) || silhouette < 0.25) {
+                return("Poorly separated group")
+            } else if (silhouette < 0.5) {
+                return("Moderately cohesive diagnostic style")
+            } else if (silhouette < 0.7) {
+                return("Distinct diagnostic style")
+            } else {
+                return("Highly consistent diagnostic style")
+            }
+        },
+
+        # Populate style group diagnostic profiles
+        .populateStyleGroupProfiles = function(clustering_result) {
+            table <- self$results$styleGroupProfiles
+
+            cluster_assignments <- clustering_result$cluster_assignments
+            n_clusters <- clustering_result$n_clusters
+
+            # Get all diagnoses by cluster
+            for (k in 1:n_clusters) {
+                cluster_members <- which(cluster_assignments == k)
+
+                # Get all diagnoses from raters in this cluster
+                cluster_diagnoses <- unlist(private$.data_matrix[, cluster_members])
+
+                # Frequency table
+                freq_table <- table(cluster_diagnoses)
+                total <- sum(freq_table)
+
+                for (category in names(freq_table)) {
+                    freq <- as.numeric(freq_table[category])
+                    pct <- (freq / total) * 100
+
+                    # Compare to other groups
+                    relative_freq <- private$.compareToOtherGroups(
+                        category,
+                        k,
+                        cluster_assignments,
+                        n_clusters
+                    )
+
+                    table$addRow(rowKey = paste0(k, "_", category), values = list(
+                        style_group = paste("Group", k),
+                        category = category,
+                        frequency = freq,
+                        percentage = pct,
+                        relative_frequency = relative_freq
+                    ))
+                }
+            }
+        },
+
+        # Compare category frequency to other groups
+        .compareToOtherGroups = function(category, current_group, cluster_assignments, n_clusters) {
+            if (n_clusters == 1) {
+                return("N/A")
+            }
+
+            # Get frequency in current group
+            current_members <- which(cluster_assignments == current_group)
+            current_diagnoses <- unlist(private$.data_matrix[, current_members])
+            current_freq <- mean(current_diagnoses == category)
+
+            # Get frequency in other groups
+            other_members <- which(cluster_assignments != current_group)
+            other_diagnoses <- unlist(private$.data_matrix[, other_members])
+            other_freq <- mean(other_diagnoses == category)
+
+            # Compare
+            diff <- current_freq - other_freq
+            if (abs(diff) < 0.05) {
+                return("Similar")
+            } else if (diff > 0.15) {
+                return("Much higher")
+            } else if (diff > 0.05) {
+                return("Higher")
+            } else if (diff < -0.15) {
+                return("Much lower")
+            } else {
+                return("Lower")
+            }
+        },
+
+        # Identify high-disagreement cases between style groups
+        .identifyClusteringDiscordantCases = function(clustering_result) {
+            table <- self$results$discordantCasesCluster
+
+            cluster_assignments <- clustering_result$cluster_assignments
+            n_clusters <- clustering_result$n_clusters
+
+            if (n_clusters < 2) {
+                table$setNote('note', 'Discordant case analysis requires at least 2 style groups')
+                return()
+            }
+
+            threshold <- self$options$discordantThreshold
+
+            # For each case, calculate disagreement between groups
+            for (i in 1:private$.n_cases) {
+                case_diagnoses <- as.character(private$.data_matrix[i, ])
+
+                # Calculate entropy of diagnoses in this case
+                diagnosis_freq <- table(case_diagnoses)
+                diagnosis_prop <- diagnosis_freq / sum(diagnosis_freq)
+                entropy <- -sum(diagnosis_prop * log2(diagnosis_prop + 1e-10))
+
+                # Calculate between-group disagreement
+                disagreement_scores <- numeric()
+                group_patterns <- character()
+
+                for (k1 in 1:(n_clusters - 1)) {
+                    for (k2 in (k1 + 1):n_clusters) {
+                        group1_members <- which(cluster_assignments == k1)
+                        group2_members <- which(cluster_assignments == k2)
+
+                        group1_diagnoses <- case_diagnoses[group1_members]
+                        group2_diagnoses <- case_diagnoses[group2_members]
+
+                        # Proportion of disagreement
+                        disagreement <- 1 - mean(outer(group1_diagnoses, group2_diagnoses, "=="))
+                        disagreement_scores <- c(disagreement_scores, disagreement)
+
+                        # Most common diagnoses
+                        g1_mode <- names(which.max(table(group1_diagnoses)))
+                        g2_mode <- names(which.max(table(group2_diagnoses)))
+                        group_patterns <- c(group_patterns,
+                            sprintf("G%d:%s vs G%d:%s", k1, g1_mode, k2, g2_mode))
+                    }
+                }
+
+                max_disagreement <- max(disagreement_scores)
+
+                # Only include cases with high disagreement
+                if (max_disagreement >= threshold) {
+                    # Difficulty level based on entropy
+                    difficulty <- if (entropy < 0.5) {
+                        "Low disagreement"
+                    } else if (entropy < 1.0) {
+                        "Moderate disagreement"
+                    } else if (entropy < 1.5) {
+                        "High disagreement"
+                    } else {
+                        "Very high disagreement"
+                    }
+
+                    table$addRow(rowKey = i, values = list(
+                        case_id = as.character(i),
+                        disagreement_score = max_disagreement,
+                        entropy = entropy,
+                        style_group_patterns = paste(group_patterns, collapse = "; "),
+                        difficulty_level = difficulty
+                    ))
+                }
+            }
+        },
+
+        # Test associations between style groups and rater characteristics
+        .testCharacteristicAssociations = function(clustering_result) {
+            table <- self$results$characteristicAssociations
+
+            cluster_assignments <- clustering_result$cluster_assignments
+
+            # List of rater characteristics to test
+            characteristics_data <- list()
+
+            # First, check if we have metadata from metadata rows
+            if (!is.null(private$.rater_metadata)) {
+                # Use metadata extracted from rows
+                for (meta_name in names(private$.rater_metadata)) {
+                    # Capitalize first letter for display
+                    display_name <- paste0(toupper(substring(meta_name, 1, 1)), substring(meta_name, 2))
+                    characteristics_data[[display_name]] <- private$.rater_metadata[[meta_name]]
+                }
+            } else {
+                # Fall back to using variable options
+                if (!is.null(self$options$raterExperience)) {
+                    char_data <- self$data[[self$options$raterExperience]]
+                    if (length(char_data) == private$.n_raters) {
+                        characteristics_data[["Experience"]] <- char_data
+                    }
+                }
+                if (!is.null(self$options$raterSpecialty)) {
+                    char_data <- self$data[[self$options$raterSpecialty]]
+                    if (length(char_data) == private$.n_raters) {
+                        characteristics_data[["Specialty"]] <- char_data
+                    }
+                }
+                if (!is.null(self$options$raterInstitution)) {
+                    char_data <- self$data[[self$options$raterInstitution]]
+                    if (length(char_data) == private$.n_raters) {
+                        characteristics_data[["Institution"]] <- char_data
+                    }
+                }
+                if (!is.null(self$options$raterVolume)) {
+                    char_data <- self$data[[self$options$raterVolume]]
+                    if (length(char_data) == private$.n_raters) {
+                        characteristics_data[["Case Volume"]] <- char_data
+                    }
+                }
+            }
+
+            if (length(characteristics_data) == 0) {
+                table$setNote('note', 'No rater characteristics provided for association testing')
+                return()
+            }
+
+            # Test each characteristic
+            for (char_name in names(characteristics_data)) {
+                char_data <- characteristics_data[[char_name]]
+
+                # Test association
+                test_result <- private$.testCharacteristicAssociation(
+                    char_data,
+                    cluster_assignments,
+                    char_name
+                )
+
+                if (!is.null(test_result)) {
+                    table$addRow(rowKey = char_name, values = test_result)
+                }
+            }
+        },
+
+        # Statistical test for characteristic-cluster association
+        .testCharacteristicAssociation = function(char_data, clusters, char_name) {
+            # Determine if continuous or categorical
+            is_numeric <- is.numeric(char_data)
+
+            if (is_numeric) {
+                # Kruskal-Wallis test for continuous data
+                tryCatch({
+                    test <- kruskal.test(char_data ~ clusters)
+
+                    # Effect size: eta-squared
+                    effect_size <- test$statistic / (length(char_data) - 1)
+
+                    interpretation <- private$.interpretAssociation(
+                        test$p.value,
+                        effect_size,
+                        is_numeric
+                    )
+
+                    return(list(
+                        characteristic = char_name,
+                        test_statistic = test$statistic,
+                        df = test$parameter,
+                        p_value = test$p.value,
+                        effect_size = effect_size,
+                        interpretation = interpretation
+                    ))
+                }, error = function(e) {
+                    return(NULL)
+                })
+            } else {
+                # Chi-square or Fisher's exact test for categorical data
+                tryCatch({
+                    contingency_table <- table(char_data, clusters)
+
+                    # Check expected frequencies
+                    if (any(contingency_table < 5)) {
+                        # Use Fisher's exact test
+                        test <- fisher.test(contingency_table, simulate.p.value = TRUE)
+                        effect_size <- sqrt(test$statistic / sum(contingency_table))
+
+                        interpretation <- private$.interpretAssociation(
+                            test$p.value,
+                            effect_size,
+                            is_numeric = FALSE
+                        )
+
+                        return(list(
+                            characteristic = char_name,
+                            test_statistic = NA,
+                            df = NA,
+                            p_value = test$p.value,
+                            effect_size = effect_size,
+                            interpretation = interpretation
+                        ))
+                    } else {
+                        # Use Chi-square test
+                        test <- chisq.test(contingency_table)
+
+                        # Cramér's V effect size
+                        n <- sum(contingency_table)
+                        min_dim <- min(nrow(contingency_table), ncol(contingency_table)) - 1
+                        effect_size <- sqrt(test$statistic / (n * min_dim))
+
+                        interpretation <- private$.interpretAssociation(
+                            test$p.value,
+                            effect_size,
+                            is_numeric = FALSE
+                        )
+
+                        return(list(
+                            characteristic = char_name,
+                            test_statistic = test$statistic,
+                            df = test$parameter,
+                            p_value = test$p.value,
+                            effect_size = effect_size,
+                            interpretation = interpretation
+                        ))
+                    }
+                }, error = function(e) {
+                    return(NULL)
+                })
+            }
+        },
+
+        # Interpret association test results
+        .interpretAssociation = function(p_value, effect_size, is_numeric) {
+            sig_text <- if (p_value < 0.001) {
+                "highly significant"
+            } else if (p_value < 0.01) {
+                "significant"
+            } else if (p_value < 0.05) {
+                "marginally significant"
+            } else {
+                "not significant"
+            }
+
+            effect_text <- if (is.na(effect_size)) {
+                ""
+            } else if (effect_size < 0.1) {
+                ", negligible effect"
+            } else if (effect_size < 0.3) {
+                ", small effect"
+            } else if (effect_size < 0.5) {
+                ", moderate effect"
+            } else {
+                ", large effect"
+            }
+
+            return(paste0("Association ", sig_text, effect_text))
+        },
+
+        # Compare style groups with reference standard
+        .compareWithReference = function(clustering_result) {
+            table <- self$results$referenceComparison
+
+            ref_var <- self$options$referenceStandard
+            if (is.null(ref_var)) {
+                return()
+            }
+
+            # Get reference standard data
+            ref_data <- self$data[[ref_var]]
+            if (length(ref_data) != private$.n_cases) {
+                table$setNote('note', 'Reference standard length does not match number of cases')
+                return()
+            }
+
+            cluster_assignments <- clustering_result$cluster_assignments
+            n_clusters <- clustering_result$n_clusters
+
+            # For each style group, calculate agreement with reference
+            for (k in 1:n_clusters) {
+                cluster_members <- which(cluster_assignments == k)
+
+                # Get diagnoses from this group
+                group_diagnoses_list <- private$.data_matrix[, cluster_members, drop = FALSE]
+
+                # Calculate kappa for each rater in group vs reference
+                kappa_values <- numeric()
+                agreement_values <- numeric()
+
+                for (rater_idx in cluster_members) {
+                    rater_diagnoses <- private$.data_matrix[[rater_idx]]
+
+                    # Calculate Cohen's kappa
+                    tryCatch({
+                        kappa_result <- irr::kappa2(data.frame(rater_diagnoses, ref_data))
+                        kappa_values <- c(kappa_values, kappa_result$value)
+
+                        # Agreement percentage
+                        agreement <- mean(rater_diagnoses == ref_data) * 100
+                        agreement_values <- c(agreement_values, agreement)
+                    }, error = function(e) {
+                        # Skip if calculation fails
+                    })
+                }
+
+                # Average kappa and agreement for this group
+                avg_kappa <- mean(kappa_values, na.rm = TRUE)
+                avg_agreement <- mean(agreement_values, na.rm = TRUE)
+
+                # Confidence interval (approximate)
+                se_kappa <- sd(kappa_values, na.rm = TRUE) / sqrt(length(kappa_values))
+                ci_lower <- avg_kappa - 1.96 * se_kappa
+                ci_upper <- avg_kappa + 1.96 * se_kappa
+
+                # Accuracy level
+                accuracy_level <- private$.interpretKappa(avg_kappa)
+
+                table$addRow(rowKey = k, values = list(
+                    style_group = paste("Group", k),
+                    kappa_vs_reference = avg_kappa,
+                    agreement_percent = avg_agreement,
+                    ci_lower = ci_lower,
+                    ci_upper = ci_upper,
+                    accuracy_level = accuracy_level
+                ))
+            }
+        },
+
+        # Generate clustering interpretation guide
+        .generateClusteringInterpretation = function(clustering_result) {
+            html_content <- self$results$clusteringInterpretation
+
+            n_clusters <- clustering_result$n_clusters
+
+            html <- '<div style="font-family: Arial, sans-serif; max-width: 900px; margin: 20px;">'
+            html <- paste0(html, '<h2 style="color: #1976d2;">Clustering Analysis Interpretation Guide</h2>')
+
+            html <- paste0(html, '<h3>What is Diagnostic Style Clustering?</h3>')
+            html <- paste0(html, '<p>This analysis groups raters based on their diagnostic patterns, ')
+            html <- paste0(html, 'identifying "diagnostic styles" - consistent approaches to diagnosis ')
+            html <- paste0(html, 'that differ systematically between groups.</p>')
+
+            html <- paste0(html, '<h3>Your Results</h3>')
+            html <- paste0(html, sprintf('<p>Analysis identified <strong>%d diagnostic style groups</strong> ', n_clusters))
+            html <- paste0(html, 'using hierarchical clustering with percentage agreement distance.</p>')
+
+            html <- paste0(html, '<h3>Understanding the Tables</h3>')
+            html <- paste0(html, '<ul>')
+            html <- paste0(html, '<li><strong>Style Groups Summary:</strong> Shows rater composition and agreement within/between groups</li>')
+            html <- paste0(html, '<li><strong>Diagnostic Patterns:</strong> Shows how each group uses diagnostic categories</li>')
+            html <- paste0(html, '<li><strong>Discordant Cases:</strong> Cases where style groups disagree most - distinguishing cases</li>')
+            html <- paste0(html, '<li><strong>Characteristic Associations:</strong> Tests whether style relates to experience, institution, etc.</li>')
+            html <- paste0(html, '</ul>')
+
+            html <- paste0(html, '<h3>Clinical Implications</h3>')
+            html <- paste0(html, '<p><strong>High within-group agreement</strong> suggests consistent diagnostic approach within style groups.</p>')
+            html <- paste0(html, '<p><strong>Low between-group agreement</strong> indicates systematic differences in diagnostic interpretation.</p>')
+            html <- paste0(html, '<p><strong>No association with characteristics</strong> (as in Usubutun 2012) suggests diagnostic style ')
+            html <- paste0(html, 'is not determined by training, experience, or institution.</p>')
+
+            html <- paste0(html, '<h3>Silhouette Scores</h3>')
+            html <- paste0(html, '<ul>')
+            html <- paste0(html, '<li><strong>&gt; 0.7:</strong> Strong separation - distinct diagnostic styles</li>')
+            html <- paste0(html, '<li><strong>0.5-0.7:</strong> Moderate separation - recognizable styles</li>')
+            html <- paste0(html, '<li><strong>&lt; 0.5:</strong> Weak separation - overlapping approaches</li>')
+            html <- paste0(html, '</ul>')
+
+            html <- paste0(html, '</div>')
+
+            html_content$setContent(html)
+        },
+
+        # ====================================================================
+        # Plot Render Functions for Clustering
+        # ====================================================================
+
+        # Render clustering heatmap with dual dendrograms
+        .clusteringHeatmap = function(image, ggtheme, theme, ...) {
+            if (!self$options$performClustering) {
+                return(FALSE)
+            }
+
+            if (is.null(private$.style_clustering_results)) {
+                return(FALSE)
+            }
+
+            if (!requireNamespace("pheatmap", quietly = TRUE) &&
+                !requireNamespace("ComplexHeatmap", quietly = TRUE)) {
+                # Fallback to basic ggplot2 heatmap
+                return(private$.clusteringHeatmapGgplot(image))
+            }
+
+            clustering_result <- private$.style_clustering_results
+
+            # Create matrix for heatmap (cases x raters)
+            heatmap_matrix <- as.matrix(private$.data_matrix)
+
+            # Convert to numeric if categorical
+            if (!is.numeric(heatmap_matrix[1, 1])) {
+                # Map categories to numbers
+                all_categories <- sort(unique(as.vector(heatmap_matrix)))
+                category_map <- seq_along(all_categories)
+                names(category_map) <- all_categories
+
+                heatmap_numeric <- matrix(category_map[heatmap_matrix],
+                    nrow = nrow(heatmap_matrix),
+                    ncol = ncol(heatmap_matrix))
+                colnames(heatmap_numeric) <- colnames(heatmap_matrix)
+                rownames(heatmap_numeric) <- rownames(heatmap_matrix)
+            } else {
+                heatmap_numeric <- heatmap_matrix
+            }
+
+            # Use pheatmap if available
+            if (requireNamespace("pheatmap", quietly = TRUE)) {
+                # Get color scheme
+                color_scheme <- self$options$heatmapColorScheme
+                if (color_scheme == "viridis") {
+                    colors <- viridisLite::viridis(100)
+                } else if (color_scheme == "RdYlBu") {
+                    colors <- grDevices::colorRampPalette(
+                        c("#d73027", "#fee090", "#4575b4"))(100)
+                } else {
+                    # Diagnostic scheme
+                    colors <- grDevices::colorRampPalette(
+                        c("#2196f3", "#4caf50", "#ffc107"))(100)
+                }
+
+                # Create dendrogram from clustering result
+                rater_dendrogram <- as.dendrogram(clustering_result$hclust_object)
+
+                # Create heatmap
+                pheatmap::pheatmap(
+                    t(heatmap_numeric),  # Transpose: raters as rows
+                    cluster_rows = rater_dendrogram,
+                    cluster_cols = TRUE,
+                    color = colors,
+                    main = "Rater Clustering Heatmap",
+                    fontsize = 10,
+                    angle_col = 45,
+                    cutree_rows = clustering_result$n_clusters,
+                    filename = NULL
+                )
+
+                TRUE
+            } else {
+                return(private$.clusteringHeatmapGgplot(image))
+            }
+        },
+
+        # Fallback ggplot2 clustering heatmap
+        .clusteringHeatmapGgplot = function(image) {
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+                return(FALSE)
+            }
+
+            clustering_result <- private$.style_clustering_results
+
+            # Prepare data for ggplot
+            heatmap_data <- private$.data_matrix
+            heatmap_data$case <- seq_len(nrow(heatmap_data))
+
+            # Melt to long format
+            heatmap_long <- reshape2::melt(heatmap_data,
+                id.vars = "case",
+                variable.name = "rater",
+                value.name = "diagnosis")
+
+            # Get cluster assignments
+            cluster_order <- order(clustering_result$cluster_assignments)
+            rater_levels <- private$.rater_names[cluster_order]
+            heatmap_long$rater <- factor(heatmap_long$rater, levels = rater_levels)
+
+            # Create plot
+            p <- ggplot2::ggplot(heatmap_long,
+                ggplot2::aes(x = case, y = rater, fill = diagnosis)) +
+                ggplot2::geom_tile(color = "white", size = 0.5) +
+                ggplot2::scale_fill_viridis_d(option = "D") +
+                ggplot2::labs(
+                    title = "Rater Clustering Heatmap",
+                    x = "Case",
+                    y = "Rater (ordered by cluster)",
+                    fill = "Diagnosis"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, size = 6),
+                    axis.text.y = ggplot2::element_text(size = 8),
+                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
+                )
+
+            print(p)
+            TRUE
+        },
+
+        # Render dendrogram
+        .clusterDendrogram = function(image, ggtheme, theme, ...) {
+            if (!self$options$performClustering) {
+                return(FALSE)
+            }
+
+            if (is.null(private$.style_clustering_results)) {
+                return(FALSE)
+            }
+
+            clustering_result <- private$.style_clustering_results
+
+            # Plot dendrogram with cluster groups
+            hc <- clustering_result$hclust_object
+            k <- clustering_result$n_clusters
+
+            # Use base R plot
+            plot(hc,
+                main = sprintf("Hierarchical Clustering Dendrogram (%d groups)", k),
+                xlab = "Rater",
+                ylab = "Distance (1 - Agreement)",
+                sub = "",
+                cex.main = 1.2)
+
+            # Add rectangles around clusters
+            rect.hclust(hc, k = k, border = 2:6)
+
+            TRUE
+        },
+
+        # Render silhouette plot
+        .silhouettePlot = function(image, ggtheme, theme, ...) {
+            if (!self$options$performClustering) {
+                return(FALSE)
+            }
+
+            if (is.null(private$.style_clustering_results)) {
+                return(FALSE)
+            }
+
+            if (!requireNamespace("cluster", quietly = TRUE)) {
+                return(FALSE)
+            }
+
+            clustering_result <- private$.style_clustering_results
+
+            # Create silhouette object
+            sil <- cluster::silhouette(
+                clustering_result$cluster_assignments,
+                clustering_result$distance_matrix
+            )
+
+            # Plot silhouette
+            plot(sil,
+                main = "Cluster Quality (Silhouette Plot)",
+                col = 2:(clustering_result$n_clusters + 1),
+                border = NA,
+                cex.names = 0.8)
+
+            # Add average silhouette width
+            avg_sil <- mean(sil[, "sil_width"])
+            mtext(sprintf("Average silhouette width: %.3f", avg_sil),
+                side = 3, line = -1, cex = 0.9)
+
+            TRUE
         }
     )
 )

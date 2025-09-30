@@ -1,5 +1,142 @@
 # ClinicoPath News
 
+## Version 0.0.31.81
+
+### 🗓️ **September 30, 2025 - Agreement Clustering Analysis Implementation**
+
+#### 🔬 **Major Enhancement: Diagnostic Style Group Analysis**
+
+##### **Hierarchical Clustering for Agreement Analysis**
+
+* **Style Group Identification:** Identify diagnostic style groups among raters using hierarchical clustering (Usubutun et al. 2012 methodology)
+* **Ward's Linkage Method:** Minimize within-cluster variance using percentage agreement distance metric
+* **Automatic Cluster Selection:** Silhouette method for optimal number of groups (k = 2-10)
+* **Manual Override:** Option to specify exact number of style groups
+
+##### **New Statistical Outputs:**
+
+**Style Group Analysis:**
+* **Group Summary Tables:** Within-group vs between-group agreement percentages
+* **Silhouette Quality Metrics:** Cluster separation and cohesion scores
+* **Diagnostic Pattern Tables:** Category usage frequency by style group
+* **Clinical Interpretations:** Conservative, Balanced, and Sensitive style classifications
+
+**Discordant Case Analysis:**
+* **High-Disagreement Detection:** Cases that distinguish style groups
+* **Entropy Calculations:** Diagnostic uncertainty quantification
+* **Pattern Descriptions:** Style-specific diagnostic tendencies
+* **Difficulty Classification:** Case complexity levels
+
+**Characteristic Associations:**
+* **Statistical Testing:** Kruskal-Wallis (continuous), Chi-square/Fisher's exact (categorical)
+* **Effect Size Calculations:** Eta-squared, Cramér's V
+* **Clinical Variables:** Experience, specialty, institution, case volume
+* **Reference Comparison:** Cohen's kappa by style group
+
+##### **Professional Visualizations:**
+
+**Hierarchical Clustering Heatmap:**
+* **Dual Dendrograms:** Top (raters) and left (cases) hierarchical trees
+* **Color-Coded Diagnoses:** Blue (Benign), Green (EIN), Gold (Cancer)
+* **Style Group Annotation:** Conservative/Balanced/Sensitive branch colors
+* **Publication Quality:** pheatmap integration with ggplot2 fallback
+
+**Additional Plots:**
+* **Dendrogram Plot:** Hierarchical rater relationships with cluster rectangles
+* **Silhouette Plot:** Cluster quality visualization with average scores
+
+##### **User Interface Enhancements:**
+
+* **Organized ColllapseBox:** "🔬 Rater Clustering Analysis (Diagnostic Styles)"
+* **Hierarchical Clustering Settings:** Method selection (Ward/Complete/Average/Single)
+* **Number of Groups:** Manual specification or automatic silhouette-based selection
+* **Discordant Case Controls:** Threshold slider for disagreement detection
+* **Visualization Options:** Heatmap display with multiple color schemes
+* **Optional Interpretation Guide:** Clinical explanations (can be turned off)
+* **Rater Characteristics:** Variable selectors for experience, specialty, institution, volume
+
+##### **Synthetic Dataset: EIN Agreement Study**
+
+**Dataset Characteristics:**
+* **62 Endometrial Biopsies:** Replicates Usubutun et al. (2012) structure
+* **20 Pathologists:** Varying experience and practice settings
+* **3 Diagnostic Categories:** Benign non-EIN, EIN, Adenocarcinoma
+* **Reference Standard:** Expert consensus diagnoses
+* **10 Discordant Cases:** Marked high-disagreement cases
+
+**Files Provided:**
+* `ein_agreement_wide.csv` - Cases × raters format (for jamovi)
+* `ein_agreement_long.csv` - Long format (1,240 rows)
+* `ein_pathologist_info.csv` - Rater characteristics
+
+**Data Generation:**
+* `data-raw/generate_ein_agreement_data.R` - Reproducible data generation
+* `data-raw/test_ein_clustering_replication.R` - Testing and verification
+
+##### **Comprehensive Documentation:**
+
+**Vignettes (vignettes-meddecide/agreement-clustering/):**
+* **EIN_AGREEMENT_README.md:** Complete dataset documentation with usage guide
+* **USUBUTUN_PLOT_ANALYSIS.md:** Detailed analysis of original study Figure 1
+* **QUICK_START_GUIDE.md:** 5-step quick start with troubleshooting
+* **IMPLEMENTATION_SUMMARY.md:** Technical specifications and testing results
+* **AGREEMENT_CLUSTERING_SPECIFICATION.md:** Algorithm details and formulas
+* **PHASE_1_IMPLEMENTATION_SUMMARY.md:** Jaccard distance and Complete linkage features
+* **PHASE_2_IMPLEMENTATION_SUMMARY.md:** Reproducibility testing and supervised clustering
+
+**Example Visualization:**
+* `ein_clustering_heatmap_test.png` - Sample output showing dual dendrograms
+
+##### **Clinical Applications:**
+
+**Quality Assurance:**
+* **Self-Awareness:** Help pathologists recognize their diagnostic style
+* **Calibration:** Use balanced group as consensus reference
+* **Targeted Education:** Focus on confounders that polarize groups
+
+**Research Applications:**
+* **Reproducibility Studies:** Understand sources of inter-rater variability
+* **Panel Composition:** Ensure style diversity in validation studies
+* **Guidelines Development:** Create criteria that transcend individual styles
+
+**Key Findings (from Original Study):**
+* Diagnostic style exists and is measurable
+* Style is independent of training, experience, and institution
+* Specific case features (polyp, differentiation, technical quality) drive disagreement
+* Overall reproducibility remains good (κ ~ 0.6-0.7)
+
+##### **Technical Implementation:**
+
+**Backend Functions (R/agreement.b.R):**
+* `.performClusteringAnalysis()` - Main orchestration
+* `.performRaterClustering()` - Core hierarchical clustering
+* `.selectOptimalK()` - Silhouette-based cluster selection
+* `.populateStyleGroupSummary()` - Summary table generation
+* `.populateStyleGroupProfiles()` - Diagnostic pattern analysis
+* `.identifyClusteringDiscordantCases()` - High-disagreement detection
+* `.testCharacteristicAssociations()` - Statistical testing
+* `.compareWithReference()` - Cohen's kappa calculations
+* `.generateClusteringInterpretation()` - HTML guide generation
+* `.clusteringHeatmap()`, `.clusterDendrogram()`, `.silhouettePlot()` - Plot renderers
+
+**Configuration Files:**
+* `jamovi/agreement.a.yaml` - 14 new clustering options
+* `jamovi/agreement.r.yaml` - 10 new result tables/plots
+* `jamovi/agreement.u.yaml` - Organized UI with collapse boxes
+
+**Module Status:**
+* ✅ Compiles successfully with no errors
+* ✅ All functions tested and verified
+* ✅ Ready for production use
+
+##### **References:**
+
+* Usubutun A, Mutter GL, Saglam A, et al. (2012). Reproducibility of endometrial intraepithelial neoplasia diagnosis is good, but influenced by the diagnostic style of pathologists. *Modern Pathology* 25:877-884.
+* Ward JH Jr. (1963). Hierarchical grouping to optimize an objective function. *JASA* 58:236-244.
+* Rousseeuw PJ. (1987). Silhouettes: A graphical aid to interpretation and validation of cluster analysis. *JCAM* 20:53-65.
+
+---
+
 ## Version 0.0.31.70
 
 ### 🗓️ **September 19, 2025 - Comprehensive Survival Power Analysis Enhancement**

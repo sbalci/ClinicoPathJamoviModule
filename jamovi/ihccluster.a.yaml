@@ -340,6 +340,57 @@ options:
       description: 'Variable defining groups (e.g., histotype, diagnosis)'
       default: NULL
 
+    # Phase 3: Derived Markers (Sterlacci 2019)
+    - name: calculateRatios
+      title: 'Calculate Marker Ratios'
+      type: Bool
+      default: false
+      description: 'Calculate ratios between continuous markers (e.g., CD4/CD8 ratio)'
+
+    - name: ratioNumerator
+      title: 'Ratio Numerator'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description: 'Numerator marker for ratio calculation'
+      default: NULL
+
+    - name: ratioDenominator
+      title: 'Ratio Denominator'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description: 'Denominator marker for ratio calculation'
+      default: NULL
+
+    - name: ratioName
+      title: 'Ratio Variable Name'
+      type: String
+      default: 'Marker_Ratio'
+      description: 'Name for the computed ratio variable'
+
+    - name: ratioClassification
+      title: 'Classify Ratio Values'
+      type: Bool
+      default: false
+      description: 'Classify ratio as Low/Intermediate/High using cutoffs'
+
+    - name: ratioLowCutoff
+      title: 'Low Cutoff'
+      type: Number
+      default: 1.0
+      description: 'Values ≤ this are classified as Low'
+
+    - name: ratioHighCutoff
+      title: 'High Cutoff'
+      type: Number
+      default: 2.0
+      description: 'Values ≥ this are classified as High'
+
     - name: exportClusters
       title: 'Export Cluster Assignments'
       type: Bool
