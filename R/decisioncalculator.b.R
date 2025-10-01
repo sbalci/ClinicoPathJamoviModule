@@ -7,9 +7,48 @@
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisioncalculatorClass",
     inherit = decisioncalculatorBase, private = list(
 
-
+        # Clinical interpretation thresholds (evidence-based cutoffs)
+        # Youden's Index thresholds based on diagnostic test literature
+        .YOUDEN_EXCELLENT = 0.8,  # J > 0.8: Excellent discriminatory ability
+        .YOUDEN_GOOD = 0.6,       # J > 0.6: Good discriminatory ability
+        .YOUDEN_FAIR = 0.4,       # J > 0.4: Fair discriminatory ability
+        .ACCURACY_EXCELLENT = 0.9, # Accuracy > 0.9: Excellent overall performance
+        .ACCURACY_GOOD = 0.8,      # Accuracy > 0.8: Good overall performance
 
         .init = function() {
+
+            # Welcome message
+            welcome_html <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
+                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Medical Decision Calculator</h2>
+                <p style='margin: 0; font-size: 14px; color: #666;'>
+                Comprehensive diagnostic test evaluation for clinical decision-making
+                </p>
+                </div>
+
+                <div style='font-size: 14px; color: #333;'>
+                <p><strong>What this tool does:</strong></p>
+                <p>Evaluates diagnostic test performance by calculating sensitivity, specificity,
+                predictive values, likelihood ratios, and advanced metrics from a 2×2 confusion matrix.</p>
+
+                <p><strong>To get started:</strong></p>
+                <ol style='margin: 10px 0; padding-left: 25px;'>
+                    <li>Enter your four counts: TP (True Positives), FP (False Positives), TN (True Negatives), FN (False Negatives)</li>
+                    <li>Choose whether to calculate confidence intervals (recommended)</li>
+                    <li>Optionally enable summary, glossary, or about panels for additional guidance</li>
+                </ol>
+
+                <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <p style='margin: 0; font-size: 13px;'><strong>Quick Example:</strong>
+                    If you tested 200 patients (100 diseased, 100 healthy) and your test correctly
+                    identified 90 diseased (TP=90) and 80 healthy (TN=80), you have FN=10 and FP=20.</p>
+                </div>
+                </div>
+            </div>
+            "
+
+            self$results$welcome$setContent(welcome_html)
 
             cTable <- self$results$cTable
 
@@ -43,14 +82,25 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
         .run = function() {
-            
+
             # Read numbers from input ----
             TP <- self$options$TP
             FP <- self$options$FP
             TN <- self$options$TN
             FN <- self$options$FN
-            
+
+            # Read analysis options
+            pp <- self$options$pp
+            pprob <- self$options$pprob
+            ci <- self$options$ci
+
             # Input validation ----
+            # Enforce mutual exclusion of CI and custom prevalence
+            if (ci && pp) {
+                stop("Cannot use both confidence intervals (ci=TRUE) and custom prevalence (pp=TRUE) simultaneously. ",
+                     "Confidence interval calculations require study prevalence. Please disable one option.")
+            }
+
             # Check for non-negative values
             if (TP < 0 || FP < 0 || TN < 0 || FN < 0) {
                 stop("All counts must be non-negative. Please check your input values.")
@@ -92,10 +142,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         names(attributes(table3)$dimnames) <- c("Test", "Golden Standard")
 
         # Prior Probability ----
-
-        pp <- self$options$pp
-
-        pprob <- self$options$pprob
+        # (pp and pprob already read at top of function for validation)
 
 
 
@@ -193,8 +240,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         LRN <- if (Spec > 0 && !is.na(Sens)) (1 - Sens) / Spec else 0
 
         # Advanced confidence interval calculations ----
-        # Following DiagROC's comprehensive approach
-        
+        # Multiple CI methods for different metrics (following diagnostic test literature):
+        # - Clopper-Pearson exact: Gold standard for sensitivity/specificity (binomial proportions)
+        # - Logit transformation: Better coverage for PPV/NPV at extreme values
+        # - Log transformation: Standard approach for likelihood ratios (multiplicative scale)
+        # These supplement epiR::epi.tests() for verification and methodological transparency
+
         # Clopper-Pearson exact binomial CIs for sensitivity and specificity
         sens_ci <- stats::binom.test(TP, TP + FN, conf.level = 0.95)$conf.int
         spec_ci <- stats::binom.test(TN, TN + FP, conf.level = 0.95)$conf.int
@@ -517,44 +568,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         # Combine enhanced metrics with existing epiR results
         epirresult_ratio <- rbind(epirresult_ratio, balanced_acc_row, f1_row, mcc_row)
 
-
-
-         # text4 <-
-         #     list(
-
-                 # "summary" = epirresult2
-
-         # epirresult[[3]]$aprev,
-         # epirresult[[3]]$tprev,
-         # epirresult[[3]]$se,
-         # epirresult[[3]]$sp,
-         # epirresult[[3]]$diag.acc,
-         # epirresult[[3]]$diag.or,
-         # epirresult[[3]]$nnd,
-         # epirresult[[3]]$youden,
-         # epirresult[[3]]$ppv,
-         # epirresult[[3]]$npv,
-         # epirresult[[3]]$plr,
-         # epirresult[[3]]$nlr,
-         # epirresult[[3]]$pro,
-         # epirresult[[3]]$pri,
-         # epirresult[[3]]$pfp,
-         # epirresult[[3]]$pfn
-             # )
-
-
-
-
-
-
-
         # Enhanced functionality: Multiple CI methods applied
-        # - Clopper-Pearson exact for sensitivity/specificity  
+        # - Clopper-Pearson exact for sensitivity/specificity
         # - Logit transformation for PPV/NPV
         # - Log transformation for likelihood ratios
         # - Additional metrics: Balanced Accuracy, F1 Score, MCC
-        
-        # self$results$text4$setContent(text4)
 
 
 
@@ -566,21 +584,6 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         for(i in seq_along(data_frame[,1,drop=T])) {
             epirTable_ratio$addRow(rowKey = i, values = c(data_frame[i,])) # This code produces a named vector/list, which is what the values argument expects
         }
-
-
-
-        # epirTable_ratio footnotes ----
-
-        # if (self$options$fnote) {
-        #
-        #     epirTable_ratio$addFootnote(
-        #         rowNo = 5,
-        #         col = "statsnames",
-        #         "Proportion of all tests that give a correct result."
-        #         )
-        # }
-
-
 
 
 
@@ -597,33 +600,6 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        # epirTable_number footnotes ----
-
-        # if (self$options$fnote) {
-        #
-        #
-        #     epirTable_number$addFootnote(
-        #         rowNo = 1,
-        #         col = "statsnames",
-        #         "How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."
-        #         )
-        #
-        #     epirTable_number$addFootnote(
-        #         rowNo = 2,
-        #         col = "statsnames",
-        #         "Number of patients that need to be tested to give one correct positive test."
-        #     )
-        #
-        #
-        #     epirTable_number$addFootnote(
-        #         rowNo = 3,
-        #         col = "statsnames",
-        #         "Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."
-        #
-        #     )
-        #
-        #
-        # }
 
 
 
@@ -659,13 +635,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                 npv <- tn / (tn + fn)
                 accuracy <- (tp + tn) / total
                 youden <- sens + spec - 1
-                
+
                 # Clinical recommendation based on Youden index and balanced metrics
-                if (youden > 0.8 && accuracy > 0.9) {
+                if (youden > private$.YOUDEN_EXCELLENT && accuracy > private$.ACCURACY_EXCELLENT) {
                     recommendation <- "Excellent performance - Recommended"
-                } else if (youden > 0.6 && accuracy > 0.8) {
+                } else if (youden > private$.YOUDEN_GOOD && accuracy > private$.ACCURACY_GOOD) {
                     recommendation <- "Good performance - Consider for use"
-                } else if (youden > 0.4) {
+                } else if (youden > private$.YOUDEN_FAIR) {
                     recommendation <- "Fair performance - Use with caution"
                 } else {
                     recommendation <- "Poor performance - Not recommended"
@@ -734,6 +710,32 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             )
         }
 
+        # Generate Summary, About, and Glossary panels ----
+
+        # Summary panel
+        if (self$options$showSummary) {
+            summary_html <- private$.createSummary(
+                Sens, Spec, PPV, NPV, LRP, LRN,
+                YoudenIndex, AccurT, PriorProb
+            )
+            self$results$summary$setContent(summary_html)
+        }
+
+        # About and Assumptions panels
+        if (self$options$showAbout) {
+            about_html <- private$.createAboutPanel()
+            self$results$about$setContent(about_html)
+
+            assumptions_html <- private$.createAssumptionsPanel(TP, TN, FP, FN, PriorProb)
+            self$results$assumptions$setContent(assumptions_html)
+        }
+
+        # Glossary panel
+        if (self$options$showGlossary) {
+            glossary_html <- private$.createGlossary()
+            self$results$glossary$setContent(glossary_html)
+        }
+
         # Send Data to Plot ----
 
 
@@ -779,31 +781,285 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         TRUE
 
 
+        },
+
+        # Private helper methods for summaries ----
+
+        .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence) {
+
+            # Clinical interpretation of performance
+            performance <- if (Youden > private$.YOUDEN_EXCELLENT && Accuracy > private$.ACCURACY_EXCELLENT) {
+                "excellent discriminatory ability"
+            } else if (Youden > private$.YOUDEN_GOOD && Accuracy > private$.ACCURACY_GOOD) {
+                "good discriminatory ability"
+            } else if (Youden > private$.YOUDEN_FAIR) {
+                "fair discriminatory ability"
+            } else {
+                "limited discriminatory ability"
+            }
+
+            # LR interpretation
+            lr_interp <- if (LRP > 10) {
+                "strong evidence for disease when test positive"
+            } else if (LRP > 5) {
+                "moderate evidence for disease when test positive"
+            } else {
+                "weak evidence for disease when test positive"
+            }
+
+            # NLR interpretation
+            nlr_interp <- if (LRN < 0.1) {
+                "strong evidence against disease when test negative"
+            } else if (LRN < 0.2) {
+                "moderate evidence against disease when test negative"
+            } else {
+                "weak evidence against disease when test negative"
+            }
+
+            # Recommendation
+            recommendation <- private$.getRecommendation(Youden, Accuracy, LRP, LRN)
+
+            sprintf(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
+                <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+                <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Diagnostic Test Performance Summary</h3>
+                </div>
+
+                <div style='font-size: 14px; color: #333;'>
+                    <p style='margin: 10px 0;'><strong>Overall Assessment:</strong> This test demonstrates %s (Youden index: %.3f, Accuracy: %.1f%%).</p>
+
+                    <table style='width: 100%%; border-collapse: collapse; margin: 15px 0;'>
+                    <tr>
+                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <strong>Sensitivity</strong><br>
+                        <span style='font-size: 18px;'>%.1f%%</span><br>
+                        <span style='font-size: 12px; color: #666;'>True positive rate</span>
+                        </td>
+                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <strong>Specificity</strong><br>
+                        <span style='font-size: 18px;'>%.1f%%</span><br>
+                        <span style='font-size: 12px; color: #666;'>True negative rate</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <strong>PPV</strong><br>
+                        <span style='font-size: 18px;'>%.1f%%</span><br>
+                        <span style='font-size: 12px; color: #666;'>At %.1f%% prevalence</span>
+                        </td>
+                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <strong>NPV</strong><br>
+                        <span style='font-size: 18px;'>%.1f%%</span><br>
+                        <span style='font-size: 12px; color: #666;'>At %.1f%% prevalence</span>
+                        </td>
+                    </tr>
+                    </table>
+
+                    <p style='margin: 10px 0;'><strong>Clinical Utility:</strong></p>
+                    <ul style='margin: 10px 0; padding-left: 25px;'>
+                    <li>The positive likelihood ratio of %.2f indicates %s.</li>
+                    <li>The negative likelihood ratio of %.3f indicates %s.</li>
+                    </ul>
+
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                        <p style='margin: 0; font-weight: bold;'>Clinical Recommendation</p>
+                        <p style='margin: 5px 0 0 0;'>%s</p>
+                    </div>
+                </div>
+                </div>",
+                performance, Youden, Accuracy * 100,
+                Sens * 100, Spec * 100,
+                PPV * 100, Prevalence * 100,
+                NPV * 100, Prevalence * 100,
+                LRP, lr_interp,
+                LRN, nlr_interp,
+                recommendation
+            )
+        },
+
+        .createAboutPanel = function() {
+            "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
+            <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+            <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>About Diagnostic Test Evaluation</h3>
+            </div>
+
+            <div style='font-size: 14px; color: #333;'>
+            <p><strong>What does this analysis do?</strong></p>
+            <p>This function evaluates the performance of a diagnostic test by comparing test results
+            against a gold standard (reference test). It calculates sensitivity, specificity, predictive values,
+            and likelihood ratios to help determine how well the test identifies disease.</p>
+
+            <p><strong>When to use it:</strong></p>
+            <ul style='margin: 10px 0; padding-left: 25px;'>
+            <li>Validating a new diagnostic test against established gold standard</li>
+            <li>Comparing different diagnostic methods</li>
+            <li>Determining optimal test cut-off values</li>
+            <li>Clinical decision-making about test utility</li>
+            </ul>
+
+            <p><strong>Key Outputs:</strong></p>
+            <ul style='margin: 10px 0; padding-left: 25px;'>
+            <li><strong>Sensitivity:</strong> Ability to detect disease when present (avoid false negatives)</li>
+            <li><strong>Specificity:</strong> Ability to confirm absence when healthy (avoid false positives)</li>
+            <li><strong>PPV/NPV:</strong> Post-test probability after positive/negative result (depends on prevalence)</li>
+            <li><strong>Likelihood Ratios:</strong> How much test result changes disease probability</li>
+            <li><strong>Youden Index:</strong> Overall discriminatory power (optimal cut-off criterion)</li>
+            <li><strong>Advanced Metrics:</strong> Balanced Accuracy, F1 Score, MCC, DOR</li>
+            </ul>
+
+            <p><strong>References:</strong></p>
+            <ul style='margin: 10px 0; padding-left: 25px; font-size: 13px;'>
+            <li>Altman DG, Bland JM. Diagnostic tests. 1: Sensitivity and specificity. BMJ. 1994 Jun 11;308(6943):1552. doi: 10.1136/bmj.308.6943.1552. PMID: 8019315; PMCID: PMC2540489.</li>
+            <li>Deeks JJ, Altman DG. Diagnostic tests 4: likelihood ratios. BMJ 2004;329:168-169</li>
+            <li>epiR package documentation: <a href='https://cran.r-project.org/package=epiR' target='_blank'>CRAN</a></li>
+            </ul>
+            </div>
+            </div>"
+        },
+
+        .createAssumptionsPanel = function(TP, TN, FP, FN, prev) {
+
+            warnings <- character()
+
+            # Check sample size adequacy
+            if (TP < 10 || TN < 10) {
+                warnings <- c(warnings, sprintf(
+                    "<li style='color: #d9534f;'><strong>Small sample size:</strong> TP=%d, TN=%d.
+                    Confidence intervals may be unreliable. Consider n ≥ 30 per group.</li>",
+                    TP, TN
+                ))
+            }
+
+            # Check for extreme prevalence
+            if (prev < 0.05 || prev > 0.95) {
+                warnings <- c(warnings, sprintf(
+                    "<li style='color: #f0ad4e;'><strong>Extreme prevalence:</strong> %.1f%%.
+                    PPV/NPV estimates may be unstable. Verify in target population.</li>",
+                    prev * 100
+                ))
+            }
+
+            # Check for zero cells
+            if (FP == 0 || FN == 0) {
+                warnings <- c(warnings,
+                    "<li style='color: #f0ad4e;'><strong>Zero cells detected:</strong>
+                    Perfect sensitivity or specificity. May indicate overfitting or insufficient validation.</li>"
+                )
+            }
+
+            # Check for very small error counts
+            if ((FP > 0 && FP < 5) || (FN > 0 && FN < 5)) {
+                warnings <- c(warnings,
+                    "<li style='color: #f0ad4e;'><strong>Very few errors:</strong>
+                    Small counts in FP or FN cells may lead to unstable estimates.</li>"
+                )
+            }
+
+            warning_html <- if (length(warnings) > 0) {
+                sprintf("<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e;'>
+                <h4 style='margin-top: 0; color: #856404;'>⚠ Warnings</h4>
+                <ul style='margin: 10px 0; padding-left: 20px;'>%s</ul>
+                </div>", paste(warnings, collapse = "\n"))
+            } else {
+                "<div style='background: #d4edda; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745;'>
+                <p style='margin: 0; color: #155724;'><strong>✓ No issues detected</strong> - Sample size and distribution appear adequate.</p>
+                </div>"
+            }
+
+            sprintf(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
+                <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+                <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Assumptions & Caveats</h3>
+                </div>
+
+                <div style='font-size: 14px; color: #333;'>
+                <p><strong>Key Assumptions:</strong></p>
+                <ul style='margin: 10px 0; padding-left: 25px;'>
+                <li><strong>Gold standard validity:</strong> Reference test must be highly accurate (near 100%% sensitivity/specificity)</li>
+                <li><strong>Independent assessment:</strong> Test and gold standard should be evaluated independently (blinded)</li>
+                <li><strong>Representative sample:</strong> Study population should match intended clinical use population</li>
+                <li><strong>Disease spectrum:</strong> Include appropriate mix of disease severity (avoid spectrum bias)</li>
+                <li><strong>Prevalence dependence:</strong> PPV/NPV vary with disease prevalence; verify in target setting</li>
+                </ul>
+
+                <p><strong>Common Pitfalls:</strong></p>
+                <ul style='margin: 10px 0; padding-left: 25px;'>
+                <li><strong>Verification bias:</strong> Not all test-positive patients receive gold standard confirmation</li>
+                <li><strong>Incorporation bias:</strong> Gold standard includes results of the test being evaluated</li>
+                <li><strong>Spectrum bias:</strong> Study population has more severe disease than clinical practice</li>
+                <li><strong>Prevalence extrapolation:</strong> Applying PPV/NPV from high-prevalence study to low-prevalence screening</li>
+                </ul>
+
+                %s
+
+                <p><strong>Sample Size Guidance:</strong></p>
+                <ul style='margin: 10px 0; padding-left: 25px;'>
+                <li>Minimum 30-50 diseased cases (for sensitivity estimation)</li>
+                <li>Minimum 30-50 healthy controls (for specificity estimation)</li>
+                <li>For rare diseases (prevalence < 5%%), consider n ≥ 200 total</li>
+                <li>Larger samples needed for precise CI estimation</li>
+                </ul>
+                </div>
+                </div>",
+                warning_html
+            )
+        },
+
+        .createGlossary = function() {
+            "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
+            <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+            <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Clinical Terms Glossary</h3>
+            </div>
+
+            <div style='font-size: 14px; color: #333;'>
+            <dl style='margin: 0;'>
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Sensitivity (True Positive Rate)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Proportion of diseased patients correctly identified. <em>Clinical use:</em> How good is this test at catching disease?</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Specificity (True Negative Rate)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Proportion of healthy patients correctly identified. <em>Clinical use:</em> How good is this test at confirming health?</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>PPV (Positive Predictive Value)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Probability of disease given positive test. <em>Clinical use:</em> If test is positive, how likely is disease? <strong>Depends on prevalence.</strong></dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>NPV (Negative Predictive Value)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Probability of health given negative test. <em>Clinical use:</em> If test is negative, how likely is patient healthy? <strong>Depends on prevalence.</strong></dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>LR+ (Positive Likelihood Ratio)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>How much positive test increases odds of disease. <em>Interpretation:</em> >10 = strong evidence, 5-10 = moderate, 2-5 = weak, <2 = minimal.</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>LR- (Negative Likelihood Ratio)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>How much negative test decreases odds of disease. <em>Interpretation:</em> <0.1 = strong evidence against, 0.1-0.2 = moderate, 0.2-0.5 = weak, >0.5 = minimal.</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Youden Index (J)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Sensitivity + Specificity - 1. Range: -1 to +1. <em>Clinical use:</em> Optimal cut-off selection. >0.8 = excellent, 0.6-0.8 = good, 0.4-0.6 = fair, <0.4 = poor.</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Balanced Accuracy</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Average of sensitivity and specificity. Better than raw accuracy for imbalanced datasets. >0.9 = excellent, 0.8-0.9 = good.</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>F1 Score</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Harmonic mean of sensitivity and PPV. Useful when false negatives and false positives are equally costly. >0.8 = excellent.</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>MCC (Matthews Correlation Coefficient)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Balanced measure accounting for class imbalance. Range: -1 to +1. >0.8 = excellent, 0.6-0.8 = good, 0.4-0.6 = fair.</dd>
+
+            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>DOR (Diagnostic Odds Ratio)</dt>
+            <dd style='margin-left: 20px; margin-bottom: 10px;'>Odds of positive test in diseased vs healthy. <em>Interpretation:</em> >100 = excellent, 20-100 = good, 5-20 = fair, <5 = poor discrimination.</dd>
+            </dl>
+            </div>
+            </div>"
+        },
+
+        .getRecommendation = function(Youden, Accuracy, LRP, LRN) {
+            if (Youden > private$.YOUDEN_EXCELLENT && Accuracy > private$.ACCURACY_EXCELLENT && LRP > 10 && LRN < 0.1) {
+                "This test shows excellent performance across all metrics. Recommended for clinical use."
+            } else if (Youden > private$.YOUDEN_GOOD && Accuracy > private$.ACCURACY_GOOD) {
+                "This test shows good performance. Consider clinical implementation with appropriate quality controls."
+            } else if (Youden > private$.YOUDEN_FAIR) {
+                "This test shows fair performance. Use with caution; consider combining with other diagnostic information."
+            } else {
+                "This test shows limited discriminatory ability. Not recommended as standalone diagnostic tool. Consider alternative tests or additional validation."
+            }
         }
-
-
-        # ,
-        # .plot2 = function(image2, ggtheme, ...) {
-        #
-        #
-        #     plotData2 <- image2$state
-        #
-        #     plot2 <- nomogrammer(Prevalence = plotData2$Prevalence,
-        #                          Plr = plotData2$Plr,
-        #                          Nlr = plotData2$Nlr,
-        #                          Detail = TRUE,
-        #                          NullLine = TRUE,
-        #                          LabelSize = (14/5),
-        #                          Verbose = TRUE
-        #     )
-        #
-        #     print(plot2)
-        #     TRUE
-        #
-        #
-        # }
-        #
-
-
 
         ))
