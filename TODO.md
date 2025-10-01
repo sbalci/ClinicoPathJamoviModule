@@ -79,10 +79,23 @@ jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::rea
 
 
 update .u.yaml to make it user friendly. make all relevant features to be together.
+
 remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders.
+
 prepare comprehensive test data generator under data-raw and prepare the data  as csv under data folder
+
 To lower the computation make all default checkboxes to be false in .a.yaml
+
 implement welcome/introductory message styling of decisionpanel.
+Key Styling Elements (matching decisionpanel):
+- Font: Arial, sans-serif
+- Line height: 1.4
+- Headers: #333 (dark gray) with 2px solid borders
+- Body text: 14px, #333
+- Backgrounds: #f5f5f5 and #f9f9f9
+- Accent text: #666
+- No bright colors or emoji
+- Consistent font sizes (14px body, 16-18px headers, 13px secondary)
 
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"

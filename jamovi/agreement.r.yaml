@@ -5,6 +5,10 @@ jrs:   '1.1'
 
 items:
 
+    - name: welcome
+      title: ""
+      type: Html
+
     # - name:  todo
     #   title: To Do
     #   type:  Html
@@ -101,7 +105,7 @@ items:
     - name:  text
       title: 'Table'
       type:  Preformatted
-      visible: (sft)
+      visible: (sft && showText)
       clearWith:
           - vars
           - wght
@@ -137,7 +141,7 @@ items:
           title: 'Cases'
           type: integer
         - name: raters
-          title: 'Raters'  
+          title: 'Raters'
           type: integer
         - name: alpha
           title: 'Alpha'
@@ -146,7 +150,7 @@ items:
           title: 'CI Lower'
           type: number
           visible: (bootstrap)
-        - name: ci_upper  
+        - name: ci_upper
           title: 'CI Upper'
           type: number
           visible: (bootstrap)
@@ -154,6 +158,21 @@ items:
           - vars
           - krippMethod
           - bootstrap
+
+    - name: weightedKappaGuide
+      title: "Weighted Kappa Interpretation Guide"
+      type: Html
+      visible: (showAbout && (wght:unweighted == FALSE))
+
+    - name: summary
+      title: "Summary"
+      type: Html
+      visible: (showSummary)
+
+    - name: about
+      title: "About This Analysis"
+      type: Html
+      visible: (showAbout)
 
 
 

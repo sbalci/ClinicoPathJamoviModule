@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.81
+version: 0.0.31.82
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-09-30'
+date: '2025-10-01'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1208,7 +1208,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -3109,7 +3109,7 @@ analyses:
     name: differentialdiagnosis
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Differential Diagnosis Assistance
     menuSubtitle: Bayesian Diagnostic Reasoning & Probability Analysis
@@ -4289,7 +4289,7 @@ analyses:
     name: clinicalvalidationinteractive
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Interactive Clinical Model Validation
     menuSubtitle: Interactive validation with real-time parameter optimization
