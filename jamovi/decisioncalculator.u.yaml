@@ -5,144 +5,233 @@ stage: 0
 compilerMode: tame
 children:
   - type: Label
-    label: Confusion Matrix (2×2 Table)
+    label: "Confusion Matrix (Gold Standard vs Test Result)"
+    margin: small
     children:
       - type: LayoutBox
-        style: inline
+        margin: normal
+        children:
+          - type: Label
+            label: "Enter the four key counts from your diagnostic test evaluation:"
+            style: list-inline
+          - type: LayoutBox
+            style: inline
+            children:
+              - type: LayoutBox
+                margin: large
+                cell:
+                  row: 1
+                  column: 1
+                stretchFactor: 1
+                children:
+                  - type: Label
+                    label: "Disease Present (Gold +)"
+                    style: list-inline
+                  - type: TextBox
+                    name: TP
+                    format: number
+                    label: "True Positive (TP)"
+                  - type: TextBox
+                    name: FN
+                    format: number
+                    label: "False Negative (FN)"
+              - type: LayoutBox
+                margin: large
+                cell:
+                  row: 1
+                  column: 2
+                stretchFactor: 1
+                children:
+                  - type: Label
+                    label: "Disease Absent (Gold -)"
+                    style: list-inline
+                  - type: TextBox
+                    name: FP
+                    format: number
+                    label: "False Positive (FP)"
+                  - type: TextBox
+                    name: TN
+                    format: number
+                    label: "True Negative (TN)"
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Output Display
         children:
           - type: LayoutBox
             margin: large
-            cell:
-              row: 1
-              column: 1
             children:
-              - type: TextBox
-                name: TP
-                format: number
-              - type: TextBox
-                name: FN
-                format: number
+              - type: CheckBox
+                name: showWelcome
+              - type: CheckBox
+                name: showSummary
+              - type: CheckBox
+                name: showAbout
+              - type: CheckBox
+                name: showGlossary
+              - type: CheckBox
+                name: fnote
+
+  - type: CollapseBox
+    label: Statistical Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Confidence Intervals
+        children:
           - type: LayoutBox
             margin: large
-            cell:
-              row: 1
-              column: 2
             children:
-              - type: TextBox
-                name: FP
-                format: number
-              - type: TextBox
-                name: TN
-                format: number
-  - type: Label
-    label: Analysis Options
+              - type: CheckBox
+                name: ci
+                enable: (!pp)
+
+  - type: CollapseBox
+    label: Population Prevalence
+    collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: "Use Known Prevalence (instead of study prevalence)"
         children:
-          - type: CheckBox
-            name: ci
-            enable: (!pp)
-          - type: CheckBox
-            name: fnote
-  - type: Label
-    label: Population Prevalence Settings
-    children:
-      - type: CheckBox
-        name: pp
-        enable: (!ci)
-      - type: TextBox
-        name: pprob
-        label: 'Prevalence (0.0-1.0)'
-        format: number
-        enable: (!ci && pp)
-  - type: Label
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: pp
+                enable: (!ci)
+              - type: TextBox
+                name: pprob
+                label: 'Prevalence (0.001-0.999)'
+                format: number
+                enable: (!ci && pp)
+
+  - type: CollapseBox
     label: Visualization
+    collapsed: true
     children:
-      - type: CheckBox
-        name: fagan
-  - type: Label
-    label: Multiple Cut-off Comparison
-    children:
-      - type: CheckBox
-        name: multiplecuts
-  - type: Label
-    label: Cut-off Scenario 1
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: cutoff1
-            label: 'Scenario Name'
-            format: string
-      - type: LayoutBox
-        style: inline
-        margin: large
+      - type: Label
+        label: Plots
         children:
           - type: LayoutBox
-            cell:
-              row: 1
-              column: 1
+            margin: large
             children:
-              - type: TextBox
-                name: tp1
-                label: 'TP'
-                format: number
-              - type: TextBox
-                name: fn1
-                label: 'FN'
-                format: number
-          - type: LayoutBox
-            cell:
-              row: 1
-              column: 2
-            children:
-              - type: TextBox
-                name: fp1
-                label: 'FP'
-                format: number
-              - type: TextBox
-                name: tn1
-                label: 'TN'
-                format: number
-  - type: Label
-    label: Cut-off Scenario 2
+              - type: CheckBox
+                name: fagan
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: cutoff2
-            label: 'Scenario Name'
-            format: string
-      - type: LayoutBox
-        style: inline
-        margin: large
+      - type: Label
+        label: Multiple Cut-off Comparison
         children:
           - type: LayoutBox
-            cell:
-              row: 1
-              column: 1
+            margin: large
             children:
-              - type: TextBox
-                name: tp2
-                label: 'TP'
-                format: number
-              - type: TextBox
-                name: fn2
-                label: 'FN'
-                format: number
+              - type: CheckBox
+                name: multiplecuts
+              - type: Label
+                label: "Compare different diagnostic thresholds to find optimal cut-off values"
+                style: list-inline
+                enable: (multiplecuts)
+
+      - type: Label
+        label: Cut-off Scenario 1
+        enable: (multiplecuts)
+        children:
           - type: LayoutBox
-            cell:
-              row: 1
-              column: 2
+            margin: large
             children:
               - type: TextBox
-                name: fp2
-                label: 'FP'
-                format: number
+                name: cutoff1
+                label: 'Scenario Name'
+                format: string
+                width: largest
+          - type: LayoutBox
+            style: inline
+            margin: large
+            children:
+              - type: LayoutBox
+                cell:
+                  row: 1
+                  column: 1
+                children:
+                  - type: Label
+                    label: "Disease Present"
+                    style: list-inline
+                  - type: TextBox
+                    name: tp1
+                    label: 'TP'
+                    format: number
+                  - type: TextBox
+                    name: fn1
+                    label: 'FN'
+                    format: number
+              - type: LayoutBox
+                cell:
+                  row: 1
+                  column: 2
+                children:
+                  - type: Label
+                    label: "Disease Absent"
+                    style: list-inline
+                  - type: TextBox
+                    name: fp1
+                    label: 'FP'
+                    format: number
+                  - type: TextBox
+                    name: tn1
+                    label: 'TN'
+                    format: number
+
+      - type: Label
+        label: Cut-off Scenario 2
+        enable: (multiplecuts)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
               - type: TextBox
-                name: tn2
-                label: 'TN'
-                format: number
+                name: cutoff2
+                label: 'Scenario Name'
+                format: string
+                width: largest
+          - type: LayoutBox
+            style: inline
+            margin: large
+            children:
+              - type: LayoutBox
+                cell:
+                  row: 1
+                  column: 1
+                children:
+                  - type: Label
+                    label: "Disease Present"
+                    style: list-inline
+                  - type: TextBox
+                    name: tp2
+                    label: 'TP'
+                    format: number
+                  - type: TextBox
+                    name: fn2
+                    label: 'FN'
+                    format: number
+              - type: LayoutBox
+                cell:
+                  row: 1
+                  column: 2
+                children:
+                  - type: Label
+                    label: "Disease Absent"
+                    style: list-inline
+                  - type: TextBox
+                    name: fp2
+                    label: 'FP'
+                    format: number
+                  - type: TextBox
+                    name: tn2
+                    label: 'TN'
+                    format: number

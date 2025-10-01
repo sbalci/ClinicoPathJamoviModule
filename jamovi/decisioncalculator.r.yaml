@@ -5,23 +5,30 @@ jrs:   '1.1'
 
 items:
 
-    # - name:  todo
-    #   title: To Do
-    #   type:  Html
+    - name: welcome
+      title: ""
+      type: Html
+      visible: (showWelcome)
 
-    # - name:  text1
-    #   title: Decision Calculator
-    #   type:  Preformatted
+    - name: summary
+      title: "Summary"
+      type: Html
+      visible: (showSummary)
 
-    # - name:  text2
-    #   title: Decision Calculator
-    #   type:  Preformatted
-    #   clearWith:
-    #       - pp
-    #       - pprob
-    #       - fnote
-    #   refs: caret
+    - name: about
+      title: "About This Analysis"
+      type: Html
+      visible: (showAbout)
 
+    - name: assumptions
+      title: "Assumptions & Caveats"
+      type: Html
+      visible: (showAbout)
+
+    - name: glossary
+      title: "Clinical Terms Glossary"
+      type: Html
+      visible: (showGlossary)
 
     - name:  cTable
       title: ''

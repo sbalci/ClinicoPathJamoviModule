@@ -1,7 +1,7 @@
 ---
 name:  decisioncalculator
 title: Medical Decision Calculator
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
 version: '0.0.31'
@@ -143,7 +143,51 @@ options:
             Shows how test results change the probability of disease.
           R: >
             Boolean selection whether to generate a Fagan nomogram plot.
-      
+
+    - name: showWelcome
+      title: Show Welcome Message
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display introductory message with quick start guide.
+            Helpful for first-time users to understand the tool.
+          R: >
+            Boolean selection whether to show welcome message.
+
+    - name: showSummary
+      title: Show Plain-Language Summary
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display natural-language interpretation with key findings and clinical guidance.
+            Presents results in plain English without statistical jargon.
+          R: >
+            Boolean selection whether to show plain-language summary of results.
+
+    - name: showAbout
+      title: Show About This Analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Show explanatory panels describing test evaluation methodology, assumptions, and clinical guidance.
+            Helpful for understanding when and how to use this analysis.
+          R: >
+            Boolean selection whether to show about and assumptions panels.
+
+    - name: showGlossary
+      title: Show Clinical Terms Glossary
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display glossary defining clinical terms (sensitivity, specificity, PPV, NPV, likelihood ratios, etc.)
+            with plain-language explanations and interpretation guides.
+          R: >
+            Boolean selection whether to show clinical glossary.
+
     # Multiple cut-off evaluation (DiagROC inspired)
     - name: multiplecuts
       title: 'Multiple Cut-off Evaluation'
