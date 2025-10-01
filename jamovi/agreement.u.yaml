@@ -17,23 +17,30 @@ children:
             # maxItemCount: 5
 
   - type: Label
-    label: Table
+    label: Display Options
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: sft
+          - type: CheckBox
+            name: showText
+            enable: (sft)
+          - type: CheckBox
+            name: showSummary
+          - type: CheckBox
+            name: showAbout
   - type: Label
-    label: Tests
+    label: "Weighted Kappa (Ordinal Data)"
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: exct
           - type: ComboBox
             name: wght
+          - type: CheckBox
+            name: exct
 
   - type: Label
     label: "Krippendorff's Alpha"

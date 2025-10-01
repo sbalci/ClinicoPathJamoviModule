@@ -12,7 +12,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             exct = FALSE,
             kripp = FALSE,
             krippMethod = "nominal",
-            bootstrap = FALSE, ...) {
+            bootstrap = FALSE,
+            showSummary = FALSE,
+            showAbout = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -37,8 +39,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 wght,
                 options=list(
                     "unweighted",
-                    "squared",
-                    "equal"),
+                    "equal",
+                    "squared"),
                 default="unweighted")
             private$..exct <- jmvcore::OptionBool$new(
                 "exct",
@@ -61,6 +63,14 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "bootstrap",
                 bootstrap,
                 default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showAbout <- jmvcore::OptionBool$new(
+                "showAbout",
+                showAbout,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
@@ -69,6 +79,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..kripp)
             self$.addOption(private$..krippMethod)
             self$.addOption(private$..bootstrap)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showAbout)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -77,7 +89,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         exct = function() private$..exct$value,
         kripp = function() private$..kripp$value,
         krippMethod = function() private$..krippMethod$value,
-        bootstrap = function() private$..bootstrap$value),
+        bootstrap = function() private$..bootstrap$value,
+        showSummary = function() private$..showSummary$value,
+        showAbout = function() private$..showAbout$value),
     private = list(
         ..vars = NA,
         ..sft = NA,
@@ -85,17 +99,23 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..exct = NA,
         ..kripp = NA,
         ..krippMethod = NA,
-        ..bootstrap = NA)
+        ..bootstrap = NA,
+        ..showSummary = NA,
+        ..showAbout = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
         irrtable = function() private$.items[["irrtable"]],
         text2 = function() private$.items[["text2"]],
         text = function() private$.items[["text"]],
-        krippTable = function() private$.items[["krippTable"]]),
+        krippTable = function() private$.items[["krippTable"]],
+        weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
+        summary = function() private$.items[["summary"]],
+        about = function() private$.items[["about"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -107,6 +127,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "irr",
                     "PathologyKappa",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="",
+                visible="(vars:length() < 2)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="irrtable",
@@ -201,7 +226,22 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "krippMethod",
-                    "bootstrap")))}))
+                    "bootstrap")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="weightedKappaGuide",
+                title="Weighted Kappa Interpretation Guide",
+                visible="(wght:unweighted == false)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Summary",
+                visible="(showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About This Analysis",
+                visible="(showAbout)"))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -211,7 +251,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agreement",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = agreementResults$new(options=options),
                 data = data,
@@ -236,27 +276,39 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the
 #'   diagnosis given by the observer, variable can be categorical or ordinal.
-#' @param sft Boolean selection whether to show frequency table. Default is
-#'   'false'. If 'true', the function will show frequency table for each
-#'   observer.
-#' @param wght A list for the argument weight (wght), for weighted kappa
-#'   analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
-#'   only with ordinal variables. The function gives error if the variable type
-#'   is not ordinal. The default is 'unweighted'.
-#' @param exct Boolean selection whether to use exact kappa. Effects only more
-#'   than 3 observers. Default is 'false'.
-#' @param kripp Boolean selection whether to calculate Krippendorff's alpha.
-#'   Default is 'false'.
+#' @param sft Display frequency tables showing the distribution of ratings for
+#'   each rater. Useful for understanding rating patterns and identifying
+#'   potential biases.
+#' @param wght For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
+#'   kappa accounts for degree of disagreement. Linear weights: Adjacent
+#'   disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
+#'   disagreements (G1 vs G3) are penalized more heavily. Use 'Unweighted' for
+#'   nominal categories with no inherent order.
+#' @param exct Use exact p-value calculation instead of normal approximation.
+#'   Recommended for small sample sizes (< 30 cases) with 3 or more raters.
+#'   Note: Not applicable for 2-rater analysis (use Cohen's kappa).
+#' @param kripp Alternative reliability measure that handles missing data and
+#'   supports various data types. Useful when raters didn't rate all cases or
+#'   when comparing different measurement levels.
 #' @param krippMethod Specifies the measurement level for Krippendorff's alpha
 #'   calculation.
 #' @param bootstrap Calculate bootstrap confidence intervals for
 #'   Krippendorff's alpha.
+#' @param showSummary Display a natural-language interpretation of results
+#'   with color-coded agreement levels and clinical guidance. Recommended for
+#'   reports and presentations.
+#' @param showAbout Display an explanatory panel describing what this analysis
+#'   does, when to use it, and how to interpret results.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -274,7 +326,9 @@ agreement <- function(
     exct = FALSE,
     kripp = FALSE,
     krippMethod = "nominal",
-    bootstrap = FALSE) {
+    bootstrap = FALSE,
+    showSummary = FALSE,
+    showAbout = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -294,7 +348,9 @@ agreement <- function(
         exct = exct,
         kripp = kripp,
         krippMethod = krippMethod,
-        bootstrap = bootstrap)
+        bootstrap = bootstrap,
+        showSummary = showSummary,
+        showAbout = showAbout)
 
     analysis <- agreementClass$new(
         options = options,

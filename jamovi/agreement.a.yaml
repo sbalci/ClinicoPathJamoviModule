@@ -1,9 +1,9 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Agreement
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -33,47 +33,60 @@ options:
 
 
     - name: sft
-      title: Frequency Tables
+      title: Show Frequency Tables
       type: Bool
       default: false
       description:
           R: >
-            Boolean selection whether to show frequency table. Default is 'false'. If 'true', the function will show
-            frequency table for each observer.
+            Display frequency tables showing the distribution of ratings for each rater.
+            Useful for understanding rating patterns and identifying potential biases.
+
+    - name: showText
+      title: Show Simple Text Frequency Tables
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display simple preformatted text version of frequency tables.
+            Provides a plain-text alternative to the HTML formatted tables.
 
 
     - name: wght
-      title: Weighted Kappa (Ordinal Variables only)
+      title: Weighted Kappa (Ordinal Data Only)
       type: List
       options:
-        - title: Unweighted
+        - title: Unweighted (Standard)
           name: unweighted
-        - title: Squared
-          name: squared
-        - title: Equal/Linear
+        - title: Linear Weights (Equal Steps)
           name: equal
+        - title: Squared Weights (Severity Weighted)
+          name: squared
       default: unweighted
       description:
           R: >
-            A list for the argument weight (wght), for weighted kappa analysis. Default is 'unweighted'.
-            'squared' or 'equal' should be selected only with ordinal variables. The function gives error if the variable type
-            is not ordinal. The default is 'unweighted'.
+            For ordinal variables (e.g., tumor grade G1/G2/G3), weighted kappa accounts for degree of disagreement.
+            Linear weights: Adjacent disagreements (G1 vs G2) receive partial credit.
+            Squared weights: Larger disagreements (G1 vs G3) are penalized more heavily.
+            Use 'Unweighted' for nominal categories with no inherent order.
 
     - name: exct
-      title: Exact Kappa (>=3 Variables)
+      title: Exact Kappa (3+ Raters)
       type: Bool
       default: false
       description:
           R: >
-            Boolean selection whether to use exact kappa. Effects only more than 3 observers. Default is 'false'.
+            Use exact p-value calculation instead of normal approximation.
+            Recommended for small sample sizes (< 30 cases) with 3 or more raters.
+            Note: Not applicable for 2-rater analysis (use Cohen's kappa).
 
     - name: kripp
-      title: "Krippendorff's Alpha"
+      title: "Calculate Krippendorff's Alpha"
       type: Bool
       default: false
       description:
           R: >
-            Boolean selection whether to calculate Krippendorff's alpha. Default is 'false'.
+            Alternative reliability measure that handles missing data and supports various data types.
+            Useful when raters didn't rate all cases or when comparing different measurement levels.
 
     - name: krippMethod
       title: "Data Type for Krippendorff's Alpha" 
@@ -99,6 +112,23 @@ options:
       description:
           R: >
             Calculate bootstrap confidence intervals for Krippendorff's alpha.
+
+    - name: showSummary
+      title: "Show Plain-Language Summary"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a natural-language interpretation of results with color-coded agreement levels
+            and clinical guidance. Recommended for reports and presentations.
+
+    - name: showAbout
+      title: "Show About This Analysis"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display an explanatory panel describing what this analysis does, when to use it, and how to interpret results.
 
 
 ...

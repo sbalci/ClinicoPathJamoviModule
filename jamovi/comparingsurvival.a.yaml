@@ -1,7 +1,7 @@
 ---
 name:  comparingSurvival
 title: Comparing Survival Outcomes
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: SimpleSurvival
 version: '0.0.3'
