@@ -11,17 +11,11 @@ decisioncombine(
   test1,
   test1Positive,
   test2 = NULL,
-  test2Positive,
+  test2Positive = NULL,
   test3 = NULL,
-  test3Positive,
-  od = FALSE,
+  test3Positive = NULL,
   showIndividual = FALSE,
-  addCombinationPattern = FALSE,
-  showVisualization = FALSE,
-  plotType = "heatmap",
-  plotHeight = 600,
-  plotWidth = 800,
-  colorScheme = "clinical"
+  showPlot = FALSE
 )
 }
 \arguments{
@@ -31,83 +25,58 @@ decisioncombine(
 status.}
 
 \item{goldPositive}{The level indicating presence of disease in the gold
-standard variable.}
+standard.}
 
-\item{test1}{The first diagnostic test variable being evaluated for
-performance.}
+\item{test1}{The first diagnostic test variable.}
 
 \item{test1Positive}{The level representing a positive result for Test 1.}
 
 \item{test2}{The second diagnostic test variable for combination analysis.}
 
-\item{test2Positive}{.}
+\item{test2Positive}{The level representing a positive result for Test 2.}
 
-\item{test3}{.}
+\item{test3}{The third diagnostic test variable for 3-way combination
+analysis.}
 
-\item{test3Positive}{.}
+\item{test3Positive}{The level representing a positive result for Test 3.}
 
-\item{od}{Boolean selection whether to show frequency tables. Default is
-'false'.}
+\item{showIndividual}{Boolean to show individual test performance tables.}
 
-\item{showIndividual}{.}
-
-\item{addCombinationPattern}{Export a new variable to the original data
-frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).}
-
-\item{showVisualization}{Display comprehensive visualizations for
-categorical test combination analysis.}
-
-\item{plotType}{Visualization selection: heatmap (performance matrix), tree
-(clinical decision hierarchy),  venn (test agreement), forest (Wilson CIs),
-all (comprehensive output).}
-
-\item{plotHeight}{Height of the plot in pixels.}
-
-\item{plotWidth}{Width of the plot in pixels.}
-
-\item{colorScheme}{Color scheme for visualizations. Clinical uses red for
-negative and green for positive.}
+\item{showPlot}{Boolean to display performance visualization.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$goldStandardFreqTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$crossTabTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$indTable1} \tab \tab \tab \tab \tab a table \cr
-\code{results$indTable2} \tab \tab \tab \tab \tab a table \cr
-\code{results$indTable3} \tab \tab \tab \tab \tab a table \cr
-\code{results$combinationsAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis of all possible test combinations \cr
-\code{results$combStatsTable} \tab \tab \tab \tab \tab Primary diagnostic performance metrics for each test combination pattern. Wilson score confidence intervals used for enhanced accuracy with small samples. \cr
-\code{results$combStatsTableCI} \tab \tab \tab \tab \tab Detailed confidence intervals using Wilson score method, which provides more accurate bounds for diagnostic proportions than normal approximation, especially for small samples or extreme values. \cr
-\code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
-\code{results$performanceHeatmap} \tab \tab \tab \tab \tab Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding. \cr
-\code{results$decisionTree} \tab \tab \tab \tab \tab an image \cr
-\code{results$vennDiagram} \tab \tab \tab \tab \tab an image \cr
-\code{results$forestPlot} \tab \tab \tab \tab \tab Comprehensive forest plot displaying all diagnostic metrics with Wilson score confidence intervals, providing more accurate uncertainty estimates than normal approximation methods. \cr
+\code{results$combinationTable} \tab \tab \tab \tab \tab Diagnostic performance metrics for each test combination pattern and strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
+\code{results$combinationTableCI} \tab \tab \tab \tab \tab Wilson score confidence intervals (and log-scale intervals for likelihood ratios/diagnostic odds ratios) providing robust uncertainty estimates for diagnostic metrics. \cr
+\code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr
+\code{results$individualTest1$test1Stats} \tab \tab \tab \tab \tab a table \cr
+\code{results$individualTest2$test2Contingency} \tab \tab \tab \tab \tab a table \cr
+\code{results$individualTest2$test2Stats} \tab \tab \tab \tab \tab a table \cr
+\code{results$individualTest3$test3Contingency} \tab \tab \tab \tab \tab a table \cr
+\code{results$individualTest3$test3Stats} \tab \tab \tab \tab \tab a table \cr
+\code{results$performancePlot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$goldStandardFreqTable$asDF}
+\code{results$combinationTable$asDF}
 
-\code{as.data.frame(results$goldStandardFreqTable)}
+\code{as.data.frame(results$combinationTable)}
 }
 \description{
-Advanced medical diagnostic test combination analysis for categorical tests
-with comprehensive clinical interpretation. This function systematically
-evaluates all possible test result combinations (2-test: 4 patterns,
-3-test: 8 patterns) against a gold standard using state-of-the-art
-statistical methods. Features include Wilson score confidence intervals
-for enhanced accuracy, performance heatmaps, decision trees, and
-publication-quality visualizations with clinical decision thresholds.
-Provides actionable recommendations for screening vs. confirmatory testing
-strategies with detailed clinical interpretation guidelines. Essential for
-evidence-based diagnostic protocol development and categorical test
-validation studies.
+Systematic evaluation of diagnostic test combinations. Analyzes all
+possible
+test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a
+gold
+standard to identify optimal testing strategies. Calculates sensitivity,
+specificity, PPV, NPV, accuracy, prevalence, balanced accuracy, Youden's J,
+likelihood ratios, and diagnostic odds ratios for each pattern and common
+clinical combination strategy.
 }
 \examples{
-# Basic two-test combination analysis
-result1 <- decisioncombine(
+# Two-test combination analysis
+result <- decisioncombine(
   data = histopathology,
   gold = "Golden Standart",
   goldPositive = "1",
@@ -115,28 +84,7 @@ result1 <- decisioncombine(
   test1Positive = "1",
   test2 = "Rater 1",
   test2Positive = "1",
-  showVisualization = TRUE,
-  plotType = "all"  # Shows all visualization types
+  showIndividual = TRUE
 )
-
-# Comprehensive three-test analysis with clinical recommendations
-result2 <- decisioncombine(
-  data = histopathology,
-  gold = "Golden Standart",
-  goldPositive = "1",
-  test1 = "New Test",
-  test1Positive = "1",
-  test2 = "Rater 1",
-  test2Positive = "1",
-  test3 = "Rater 2",
-  test3Positive = "1",
-  showIndividual = TRUE,
-  showVisualization = TRUE,
-  plotType = "heatmap",  # Focus on performance heatmap
-  addCombinationPattern = TRUE  # Export patterns for further analysis
-)
-
-# Access clinical recommendations from HTML output
-# result2$combinationsAnalysis contains clinical recommendations
 
 }

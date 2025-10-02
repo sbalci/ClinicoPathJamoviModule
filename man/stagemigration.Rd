@@ -6,42 +6,54 @@
 \usage{
 stagemigration(
   data,
-  oldStage = NULL,
-  newStage = NULL,
-  survivalTime = NULL,
-  event = NULL,
+  oldStage,
+  newStage,
+  survivalTime,
+  event,
   eventLevel,
+  clinicalPreset = "routine_clinical",
+  enableGuidedMode = TRUE,
+  generateCopyReadyReport = TRUE,
+  enableAccessibilityFeatures = FALSE,
+  preferredLanguage = "en",
+  enableProgressIndicators = TRUE,
+  optimizeForLargeDatasets = FALSE,
+  analysisType = "comprehensive",
   confidenceLevel = 0.95,
-  calculateNRI = TRUE,
+  calculateNRI = FALSE,
   nriTimePoints = "12, 24, 60",
-  calculateIDI = TRUE,
-  performROCAnalysis = TRUE,
+  calculateIDI = FALSE,
+  performROCAnalysis = FALSE,
   rocTimePoints = "12, 24, 36, 60",
   performDCA = FALSE,
   performCalibration = FALSE,
-  institutionVariable = NULL,
+  performBootstrap = FALSE,
+  bootstrapReps = 1000,
+  performCrossValidation = FALSE,
+  cvFolds = 5,
+  institutionVariable,
   clinicalSignificanceThreshold = 0.02,
   nriClinicalThreshold = 0.2,
   performHomogeneityTests = FALSE,
   performTrendTests = FALSE,
   performLikelihoodTests = FALSE,
-  calculatePseudoR2 = FALSE,
+  calculatePseudoR2 = TRUE,
   showMigrationOverview = TRUE,
-  showMigrationSummary = FALSE,
-  showStageDistribution = FALSE,
+  showMigrationSummary = TRUE,
+  showStageDistribution = TRUE,
   showMigrationMatrix = TRUE,
   showStatisticalComparison = TRUE,
-  showConcordanceComparison = FALSE,
-  showMigrationHeatmap = TRUE,
+  showConcordanceComparison = TRUE,
+  showMigrationHeatmap = FALSE,
   showSankeyDiagram = FALSE,
-  showROCComparison = TRUE,
+  showROCComparison = FALSE,
   showCalibrationPlots = FALSE,
   showDecisionCurves = FALSE,
   showForestPlot = FALSE,
   showWillRogersAnalysis = FALSE,
   showWillRogersVisualization = FALSE,
   showMigrationSurvivalComparison = FALSE,
-  showSurvivalCurves = TRUE,
+  showSurvivalCurves = FALSE,
   survivalPlotType = "separate",
   showConfidenceIntervals = FALSE,
   showRiskTables = FALSE,
@@ -52,8 +64,177 @@ stagemigration(
   includeEffectSizes = FALSE,
   advancedMigrationAnalysis = FALSE,
   generateExecutiveSummary = FALSE,
-  enableMultifactorialAnalysis = TRUE,
-  showExplanations = FALSE
+  cancerType = "general",
+  useOptimismCorrection = FALSE,
+  enableMultifactorialAnalysis = FALSE,
+  continuousCovariates = NULL,
+  categoricalCovariates = NULL,
+  multifactorialComparisonType = "comprehensive",
+  baselineModel = "covariates_only",
+  performInteractionTests = FALSE,
+  stratifiedAnalysis = FALSE,
+  showMultifactorialTables = FALSE,
+  showAdjustedCIndexComparison = FALSE,
+  showNestedModelTests = FALSE,
+  showStepwiseResults = FALSE,
+  showExplanations = TRUE,
+  showAbbreviationGlossary = FALSE,
+  calculateSME = FALSE,
+  calculateRMST = FALSE,
+  performCompetingRisks = FALSE,
+  competingEventVar,
+  performOptimalCutpoint = FALSE,
+  continuousStageVariable,
+  cutpointMethod = "maxstat",
+  cutpointRange = "0.1, 0.9",
+  multipleTestingCorrection = "bonferroni",
+  validateCutpoint = FALSE,
+  cutpointBootstrap = FALSE,
+  cutpointBootstrapReps = 500,
+  generateStagingSystem = FALSE,
+  stagingSystemLevels = 3,
+  performSHAPAnalysis = FALSE,
+  shapAnalysisType = "comprehensive",
+  shapCovariates,
+  shapSampleSize = 100,
+  shapBackgroundSamples = 50,
+  shapExplanationType = "auto",
+  generateSHAPPlots = TRUE,
+  shapPatientProfiles = "representative",
+  shapInteractionAnalysis = FALSE,
+  shapClinicalThresholds = "0.25, 0.50, 0.75",
+  performCompetingRisksAdvanced = FALSE,
+  competingRisksMethod = "comprehensive",
+  cifTimePoints = "12, 24, 36, 60",
+  competingEventLevels = "cancer_death, other_death, censored",
+  primaryEventLevel = "cancer_death",
+  generateCIFPlots = TRUE,
+  performGrayTest = TRUE,
+  cifConfidenceLevel = 0.95,
+  competingRisksCovariates,
+  stratifyByStaging = TRUE,
+  calculateCRCIndex = TRUE,
+  generateCRSummary = TRUE,
+  performMultiStateAnalysis = FALSE,
+  multiStateModel = "illness_death",
+  stateVariable,
+  transitionTimeVariable,
+  multiStateStates = "healthy, disease, death",
+  absorptionStates = "death",
+  multiStateCovariates,
+  calculateTransitionProbabilities = TRUE,
+  multiStateTimePoints = "6, 12, 24, 36, 60",
+  generateTransitionMatrix = TRUE,
+  multiStateGraphics = TRUE,
+  msStratifyByStaging = TRUE,
+  multiStateValidation = FALSE,
+  generateMSMSummary = TRUE,
+  performRandomForestAnalysis = FALSE,
+  forestModelType = "rsf",
+  forestNTrees = 500,
+  forestMTry = "auto",
+  forestMinNodeSize = 3,
+  forestCovariates,
+  calculateVariableImportance = TRUE,
+  forestImportanceType = "permutation",
+  performForestValidation = FALSE,
+  forestPredictionTimePoints = "12, 24, 36, 60",
+  generateSurvivalPredictions = TRUE,
+  forestDiscriminationMetrics = TRUE,
+  forestStagingComparison = TRUE,
+  forestBootstrap = FALSE,
+  forestBootstrapSamples = 100,
+  generateForestSummary = TRUE,
+  performCureModelAnalysis = FALSE,
+  cureModelType = "mixture",
+  cureDistribution = "weibull",
+  cureAnalyzeOldStage = TRUE,
+  cureAnalyzeNewStage = TRUE,
+  cureFractionEstimation = "parametric",
+  cureConfidenceLevel = 0.95,
+  cureBootstrapCI = TRUE,
+  cureBootstrapReps = 500,
+  cureTimeHorizon = 120,
+  curePlateauThreshold = 0.05,
+  cureCovariates,
+  cureModelComparison = TRUE,
+  cureStageSpecificAnalysis = TRUE,
+  cureGoodnessOfFit = TRUE,
+  generateCureSummary = TRUE,
+  performIntervalCensoringAnalysis = FALSE,
+  intervalCensoringLeftTime,
+  intervalCensoringRightTime,
+  intervalCensoringDistribution = "weibull",
+  intervalCensoringModel = "both",
+  intervalCensoringBootstrap = TRUE,
+  intervalCensoringBootstrapSamples = 1000,
+  intervalCensoringCompareStages = TRUE,
+  intervalCensoringPlots = TRUE,
+  intervalCensoringDiagnostics = TRUE,
+  intervalCensoringPredictionTime = "12, 24, 36, 60",
+  intervalCensoringConfidenceLevel = 0.95,
+  intervalCensoringAdjustVariables,
+  performInformativeCensoringAnalysis = FALSE,
+  informativeCensoringTestMethod = "all_tests",
+  informativeCensoringCovariates,
+  informativeCensoringLandmarkTimes = "12, 24, 36, 60",
+  informativeCensoringAdjustmentMethod = "sensitivity_analysis",
+  informativeCensoringIPWVariables,
+  informativeCensoringSensitivityRange = "0.8, 0.9, 1.0, 1.1, 1.2",
+  informativeCensoringBootstrap = TRUE,
+  informativeCensoringBootstrapSamples = 1000,
+  informativeCensoringAlpha = 0.05,
+  informativeCensoringPlots = TRUE,
+  informativeCensoringCompareStages = TRUE,
+  performConcordanceProbabilityAnalysis = FALSE,
+  concordanceProbabilityMethods = "all_methods",
+  concordanceProbabilityTimePoints = "12, 24, 36, 60, 120",
+  concordanceProbabilityWeighting = "uniform",
+  concordanceProbabilityBootstrap = TRUE,
+  concordanceProbabilityBootstrapSamples = 1000,
+  concordanceProbabilityConfidenceLevel = 0.95,
+  concordanceProbabilityCompareStages = TRUE,
+  concordanceProbabilityAdjustVariables,
+  concordanceProbabilityRobustnessAnalysis = TRUE,
+  concordanceProbabilityAlpha = 0.05,
+  concordanceProbabilityDiagnostics = TRUE,
+  performWinRatioAnalysis = FALSE,
+  winRatioEndpoints = "death_progression_response",
+  winRatioDeathVariable,
+  winRatioSecondaryEndpoint,
+  winRatioTertiaryEndpoint,
+  winRatioTimeVariables,
+  winRatioMatchingStrategy = "all_pairs",
+  winRatioConfidenceMethod = "bootstrap",
+  winRatioBootstrapSamples = 1000,
+  winRatioConfidenceLevel = 0.95,
+  winRatioHandleTies = "next_endpoint",
+  winRatioSensitivityAnalysis = TRUE,
+  winRatioGeneralizedPairwise = FALSE,
+  performFrailtyModelsAnalysis = FALSE,
+  frailtyClusterVariable,
+  frailtyDistribution = "gamma",
+  frailtyBootstrap = TRUE,
+  frailtyBootstrapSamples = 500,
+  frailtyVarianceComponents = TRUE,
+  frailtyHeterogeneityTest = TRUE,
+  frailtyClusterComparison = FALSE,
+  frailtyModelSelection = TRUE,
+  frailtyPredictiveAccuracy = FALSE,
+  frailtyDiagnostics = TRUE,
+  frailtyAdvancedInference = FALSE,
+  performClinicalUtilityAnalysis = FALSE,
+  clinicalUtilityPrevalence = 0.2,
+  clinicalUtilityTimePoint = 60,
+  clinicalUtilityThresholds = "standard",
+  clinicalUtilityNNT = TRUE,
+  clinicalUtilityTreatmentEffect = 0.7,
+  clinicalUtilityComparison = TRUE,
+  clinicalUtilityCostEffectiveness = FALSE,
+  clinicalUtilityCostPerIntervention = 5000,
+  clinicalUtilityBootstrap = TRUE,
+  clinicalUtilityBootstrapSamples = 500,
+  clinicalUtilityTimeVarying = FALSE
 )
 }
 \arguments{
@@ -92,6 +273,44 @@ the specific disease being studied.}
 \item{eventLevel}{The level indicating event occurrence when using factor
 variables.}
 
+\item{clinicalPreset}{Choose a preset tailored to your clinical workflow.
+'Routine Clinical' provides essential  validation metrics for daily
+practice. 'Research Study' adds advanced statistics for  academic research.
+'Publication Ready' includes all methods and visualizations for
+manuscripts. Choose 'Custom' to manually configure all options.}
+
+\item{enableGuidedMode}{Enable step-by-step guidance for clinical users.
+Provides contextual help,  assumption checking, and clinical interpretation
+assistance throughout the analysis. Highly recommended for users new to
+staging validation methods.}
+
+\item{generateCopyReadyReport}{Generate plain-language clinical summary
+paragraphs that can be copied directly  into reports or manuscripts.
+Includes key findings, statistical significance,  clinical interpretation,
+and implementation recommendations.}
+
+\item{enableAccessibilityFeatures}{Enable accessibility features including
+color-blind safe palettes,  high contrast visualizations, larger font
+sizes, and enhanced table readability. Ensures outputs are accessible to
+users with visual impairments.}
+
+\item{preferredLanguage}{Choose the language for explanations, labels, and
+clinical interpretations. Scientific terminology and statistical results
+remain standardized.}
+
+\item{enableProgressIndicators}{Show progress bars and status updates for
+long-running analyses such as  bootstrap validation and cross-validation.
+Helps users track analysis progress.}
+
+\item{optimizeForLargeDatasets}{Enable memory-efficient processing for
+large datasets (>10,000 patients).  Uses chunked processing and optimized
+algorithms to reduce memory usage  and improve performance while
+maintaining statistical accuracy.}
+
+\item{analysisType}{Determines the scope of statistical analysis performed.
+Comprehensive analysis includes all available methods for thorough staging
+system validation.}
+
 \item{confidenceLevel}{Confidence level for all confidence intervals and
 hypothesis tests.}
 
@@ -118,6 +337,19 @@ making.}
 
 \item{performCalibration}{Assess calibration of risk predictions from both
 staging systems. Important for validating accuracy of survival predictions.}
+
+\item{performBootstrap}{Perform bootstrap validation with optimism
+correction to assess internal validity of results. Recommended for all
+staging validation studies.}
+
+\item{bootstrapReps}{Number of bootstrap repetitions for internal
+validation.  1000 repetitions recommended for stable results.}
+
+\item{performCrossValidation}{Perform k-fold cross-validation for
+additional validation. Computationally intensive but provides robust
+validation.}
+
+\item{cvFolds}{Number of folds for cross-validation when enabled.}
 
 \item{institutionVariable}{Optional variable indicating institution or
 study center for  multi-institutional validation. When provided, performs
@@ -256,9 +488,760 @@ detailed assessment of  staging system quality and migration patterns.}
 \item{generateExecutiveSummary}{Generate executive summary with key
 findings and recommendations for clinical and research stakeholders.}
 
-\item{enableMultifactorialAnalysis}{.}
+\item{cancerType}{Optional cancer type specification for customized
+thresholds and  interpretation guidelines based on cancer-specific
+literature.}
+
+\item{useOptimismCorrection}{Apply optimism correction to performance
+metrics using bootstrap validation to avoid overly optimistic estimates.}
+
+\item{enableMultifactorialAnalysis}{Enable advanced multifactorial stage
+migration analysis that includes additional covariates in the comparison.
+This allows for adjusted comparisons between staging systems after
+accounting for other prognostic factors.}
+
+\item{continuousCovariates}{Continuous variables to include as covariates
+in the multifactorial analysis (e.g., age, tumor size, biomarker levels).
+These will be included in Cox regression models for both staging systems.}
+
+\item{categoricalCovariates}{Categorical variables to include as covariates
+in the multifactorial analysis (e.g., sex, histology, treatment type).
+These will be included in Cox regression models for both staging systems.}
+
+\item{multifactorialComparisonType}{Type of multifactorial comparison to
+perform. Comprehensive includes all methods for thorough evaluation of
+staging systems in the context of other prognostic factors.}
+
+\item{baselineModel}{Baseline model for multifactorial comparisons. This
+determines the reference model against which staging systems are compared.}
+
+\item{performInteractionTests}{Test for interactions between staging
+systems and covariates. This helps identify if the staging system
+performance varies across different patient subgroups.}
+
+\item{stratifiedAnalysis}{Perform stratified analysis by categorical
+covariates to evaluate staging system performance within subgroups.}
+
+\item{showMultifactorialTables}{Display detailed tables showing
+multifactorial model results, including adjusted hazard ratios and model
+comparison statistics.}
+
+\item{showAdjustedCIndexComparison}{Display comparison of C-indices for
+staging systems adjusted for covariates. This shows the discriminative
+ability of each staging system after accounting for other prognostic
+factors.}
+
+\item{showNestedModelTests}{Display likelihood ratio tests comparing nested
+models to formally test the added value of each staging system over the
+baseline model.}
+
+\item{showStepwiseResults}{Display results of stepwise model selection
+showing which variables (including staging systems) are selected in the
+final model.}
 
 \item{showExplanations}{Include detailed explanations for results.}
+
+\item{showAbbreviationGlossary}{Display a comprehensive glossary of all
+abbreviations, statistical terms,  and technical terminology used in the
+stage migration analysis. This  provides a quick reference for interpreting
+dashboard values and  understanding statistical outputs.}
+
+\item{calculateSME}{Calculate Stage Migration Effect Formula (SME) to
+quantify the cumulative  difference in survival between corresponding
+stages of old and new staging  systems. SME = Σ(S_new_i - S_old_i) where S
+represents stage-specific  survival rates. Positive values indicate Will
+Rogers phenomenon (apparent  improvement in new system), while negative
+values suggest understaging.}
+
+\item{calculateRMST}{Calculate Restricted Mean Survival Time (RMST) metrics
+for robust  discrimination assessment. RMST provides clinically
+interpretable  survival measures that are independent of proportional
+hazards assumptions.  Particularly valuable when median survival is not
+reached or when comparing  absolute survival benefits between staging
+systems.}
+
+\item{performCompetingRisks}{Perform competing risks analysis for scenarios
+with multiple event types  (e.g., cancer-specific death vs. other causes).
+Implements Fine-Gray  subdistribution hazard models and Cumulative
+Incidence Function (CIF)  analysis. Essential when competing events prevent
+observation of primary  outcome and standard survival analysis may be
+biased.}
+
+\item{competingEventVar}{Optional variable indicating competing events
+(events other than primary  outcome). If not specified, the analysis will
+attempt to detect competing  risks from multi-level event variables. For
+cancer studies, this typically  represents non-cancer deaths when primary
+outcome is cancer-specific death.}
+
+\item{performOptimalCutpoint}{Determine optimal cut-points for continuous
+variables that create the most  statistically significant separation in
+survival outcomes. Uses maximal  selected rank statistics with appropriate
+multiple testing corrections.  Essential for developing new staging
+criteria from continuous biomarkers  or measurements.}
+
+\item{continuousStageVariable}{Continuous variable (e.g., tumor size,
+biomarker level, age) for optimal  cut-point determination. The analysis
+will find the cut-point that maximizes  the separation in survival outcomes
+while controlling for multiple testing.}
+
+\item{cutpointMethod}{Method for optimal cut-point determination. Maximal
+selected rank statistics  provides the most rigorous approach with proper
+multiple testing correction.}
+
+\item{cutpointRange}{Proportion range for cut-point search (e.g., "0.1,
+0.9" excludes outer  10\\% to maintain statistical power). Prevents extreme
+cut-points that  create unbalanced groups.}
+
+\item{multipleTestingCorrection}{Multiple testing correction method for
+cut-point determination.  Bonferroni is most conservative; use when testing
+many cut-points.}
+
+\item{validateCutpoint}{Perform cross-validation to assess stability of
+optimal cut-point.  Helps identify robust cut-points that are not dependent
+on specific  data characteristics.}
+
+\item{cutpointBootstrap}{Use bootstrap validation to assess cut-point
+stability and derive  confidence intervals. Provides robust assessment of
+cut-point reliability.}
+
+\item{cutpointBootstrapReps}{Number of bootstrap repetitions for cut-point
+validation.}
+
+\item{generateStagingSystem}{Automatically generate a new staging system
+based on optimal cut-points.  Creates categorical staging variable from
+continuous measurements using  determined cut-points with appropriate stage
+labeling.}
+
+\item{stagingSystemLevels}{Number of staging levels to create from optimal
+cut-points (e.g., 3 for  Low/Intermediate/High or 4 for Stages I-IV).}
+
+\item{performSHAPAnalysis}{Perform Shapley Additive Explanations (SHAP)
+analysis to explain which  factors are driving the predictions of staging
+models. SHAP provides  both global feature importance and individual
+patient-level explanations  for complex staging decisions.}
+
+\item{shapAnalysisType}{Type of SHAP analysis to perform. Global analysis
+shows overall feature  importance across all patients, individual analysis
+explains specific  patient predictions, comprehensive includes both
+approaches.}
+
+\item{shapCovariates}{Additional variables to include in SHAP
+interpretability analysis  alongside staging variables. Include key
+clinical variables that  might influence staging decisions or patient
+outcomes.}
+
+\item{shapSampleSize}{Number of patients to use for SHAP analysis. Larger
+samples provide  more comprehensive explanations but require more
+computation time.  Recommended: 100-200 for routine analysis, 500+ for
+detailed research.}
+
+\item{shapBackgroundSamples}{Number of background samples for SHAP baseline
+calculation. More  samples provide more stable explanations but increase
+computation time.}
+
+\item{shapExplanationType}{SHAP explanation method to use. Auto-detect
+chooses the most appropriate  method based on the model type. TreeSHAP is
+fastest for tree models,  Kernel SHAP works with any model but is slower.}
+
+\item{generateSHAPPlots}{Generate SHAP visualization plots including
+summary plots, bar plots,  and dependence plots for model interpretability.}
+
+\item{shapPatientProfiles}{Types of patient profiles to include in
+individual SHAP explanations.  Helps understand how different patient
+characteristics influence  staging-based predictions.}
+
+\item{shapInteractionAnalysis}{Perform SHAP interaction analysis to
+identify important feature  interactions. Shows how combinations of
+features affect predictions  beyond individual feature effects.}
+
+\item{shapClinicalThresholds}{Comma-separated risk thresholds for clinical
+decision boundaries in  SHAP analysis (e.g., "0.25, 0.50, 0.75" for
+low/moderate/high risk).  Used to interpret SHAP values in clinical
+context.}
+
+\item{performCompetingRisksAdvanced}{Perform comprehensive competing risks
+analysis using Fine-Gray  subdistribution hazard models and Cumulative
+Incidence Function (CIF)  analysis. Essential when competing events prevent
+observation of primary  outcome and standard survival analysis may be
+biased.}
+
+\item{competingRisksMethod}{Method for competing risks analysis. Fine-Gray
+models cumulative  incidence, cause-specific models instantaneous hazard
+rates.  Comprehensive includes both approaches for complete assessment.}
+
+\item{cifTimePoints}{Time points for Cumulative Incidence Function analysis
+(e.g.,  "12, 24, 36, 60" for 1, 2, 3, and 5-year analysis). Use clinically
+relevant time points for the specific cancer type.}
+
+\item{competingEventLevels}{Comma-separated list of event categories for
+competing risks analysis.  Typically includes primary event (cancer death),
+competing events  (other causes), and censoring indicator.}
+
+\item{primaryEventLevel}{Specify the primary event of interest for
+competing risks analysis  (e.g., "cancer_death", "disease_progression",
+"cardiovascular_death").  Must match one of the competing event categories.}
+
+\item{generateCIFPlots}{Generate Cumulative Incidence Function plots
+showing probability of  each event type over time. Essential for
+visualizing competing risks  patterns and staging system comparisons.}
+
+\item{performGrayTest}{Perform Gray's test for equality of cumulative
+incidence functions  across staging groups. Tests whether CIF curves differ
+significantly  between stages for each event type.}
+
+\item{cifConfidenceLevel}{Confidence level for Cumulative Incidence
+Function confidence intervals  and statistical tests.}
+
+\item{competingRisksCovariates}{Additional variables to include in
+competing risks regression models.  Include important prognostic factors
+that may influence both primary  and competing events.}
+
+\item{stratifyByStaging}{Perform separate competing risks analysis for each
+staging system  (original vs new) to compare their performance in the
+presence of  competing events.}
+
+\item{calculateCRCIndex}{Calculate C-index specifically adapted for
+competing risks analysis.  Provides discrimination metrics that properly
+account for competing  events when evaluating staging system performance.}
+
+\item{generateCRSummary}{Generate comprehensive summary table with
+Fine-Gray regression results,  cumulative incidence estimates, and staging
+system comparisons in  competing risks context.}
+
+\item{performMultiStateAnalysis}{Perform multi-state survival analysis for
+complex disease progression  scenarios where patients can transition
+between multiple health states  over time. Essential for modeling disease
+progression, remission,  relapse, and death in oncology.}
+
+\item{multiStateModel}{Type of multi-state model to fit. Illness-Death
+models progression  from healthy to disease to death. Progression models
+include stable,  progressive, terminal states. Comprehensive fits multiple
+models for  comparison.}
+
+\item{stateVariable}{Variable indicating patient disease states (e.g.,
+stable, progressive,  deceased, remission). Should contain all possible
+states that patients  can transition between during follow-up.}
+
+\item{transitionTimeVariable}{Time variable indicating when state
+transitions occurred. For multiple  transitions per patient, use
+comma-separated times or separate records  for each transition.}
+
+\item{multiStateStates}{Comma-separated list of all possible states in
+order of progression  (e.g., "healthy, disease, death" or "stable,
+progressive, remission, death").  Must match levels in the state variable.}
+
+\item{absorptionStates}{Comma-separated list of absorbing states that
+patients cannot leave  once entered (e.g., "death", "terminal"). These
+represent final  outcomes in the disease process.}
+
+\item{multiStateCovariates}{Additional variables to include in multi-state
+models as covariates.  Include important prognostic factors that may
+influence transition  rates between states.}
+
+\item{calculateTransitionProbabilities}{Calculate state transition
+probabilities between all possible state  pairs. Provides insight into
+likelihood of disease progression,  remission, and mortality transitions.}
+
+\item{multiStateTimePoints}{Time points for transition probability
+calculations (e.g.,  "6, 12, 24, 36, 60" for 6-month intervals up to 5
+years). Use  clinically relevant time points for disease monitoring.}
+
+\item{generateTransitionMatrix}{Generate comprehensive transition intensity
+matrix showing hazard  rates for all possible state transitions. Essential
+for understanding  disease progression dynamics.}
+
+\item{multiStateGraphics}{Generate multi-state model visualizations
+including state transition  diagrams, probability plots, and Aalen-Johansen
+estimator curves for  state occupancy probabilities.}
+
+\item{msStratifyByStaging}{Perform separate multi-state analysis for each
+staging system to  compare their ability to predict disease transitions and
+progression  patterns.}
+
+\item{multiStateValidation}{Perform model validation including
+goodness-of-fit testing, residual  analysis, and cross-validation for
+multi-state models. Computationally  intensive but provides robust model
+assessment.}
+
+\item{generateMSMSummary}{Generate comprehensive summary table with
+transition intensities,  hazard ratios, and state occupancy probabilities
+comparing staging  systems in multi-state framework.}
+
+\item{performRandomForestAnalysis}{Perform Random Survival Forest analysis
+as a non-parametric alternative  to Cox proportional hazards models.
+Provides robust predictions through  ensemble methods without proportional
+hazards assumptions, ideal for  complex interactions and non-linear
+relationships.}
+
+\item{forestModelType}{Type of random forest model to fit. RSF is the
+standard approach,  conditional inference forests handle categorical
+variables better,  extra trees provide additional randomization. Ensemble
+combines  multiple approaches for maximum robustness.}
+
+\item{forestNTrees}{Number of trees in the random forest. More trees
+generally improve  performance but increase computation time. 500 trees
+provide good  balance between accuracy and speed for most applications.}
+
+\item{forestMTry}{Number of variables randomly selected at each split. Use
+"auto" for  automatic selection (sqrt of total variables), or specify a
+number.  Lower values increase randomization, higher values may improve
+accuracy.}
+
+\item{forestMinNodeSize}{Minimum number of observations in terminal nodes.
+Larger values prevent  overfitting but may reduce model flexibility.
+Recommended: 3-10 for  survival data depending on sample size.}
+
+\item{forestCovariates}{Additional variables to include in random forest
+models alongside  staging variables. Include important clinical variables
+for  comprehensive non-parametric survival modeling.}
+
+\item{calculateVariableImportance}{Calculate variable importance measures
+using permutation-based methods.  Shows which variables contribute most to
+survival predictions,  complementing SHAP analysis with forest-specific
+importance metrics.}
+
+\item{forestImportanceType}{Type of variable importance measure.
+Permutation importance is most  interpretable, VIMP is RF-specific, minimal
+depth shows variable  selection frequency. Comprehensive provides all
+measures.}
+
+\item{performForestValidation}{Perform out-of-bag validation and
+cross-validation for random forest  models. Provides robust assessment of
+model performance including  prediction error rates and concordance
+indices.}
+
+\item{forestPredictionTimePoints}{Time points for survival probability
+predictions from random forest  models (e.g., "12, 24, 36, 60" for 1, 2, 3,
+and 5-year predictions).  Use clinically relevant time points for staging
+comparison.}
+
+\item{generateSurvivalPredictions}{Generate individual patient survival
+probability predictions at  specified time points. Provides personalized
+risk assessments  based on random forest ensemble predictions.}
+
+\item{forestDiscriminationMetrics}{Calculate discrimination metrics
+specifically for random forest models  including C-index, Integrated Brier
+Score, and time-dependent AUC.  Compares forest performance with
+traditional Cox models.}
+
+\item{forestStagingComparison}{Use random forest models to compare staging
+systems through  non-parametric ensemble methods. Provides robust staging
+comparison  without proportional hazards assumptions.}
+
+\item{forestBootstrap}{Perform bootstrap validation of random forest models
+with multiple  bootstrap samples. Provides confidence intervals for
+forest-based  predictions and importance measures.}
+
+\item{forestBootstrapSamples}{Number of bootstrap samples for forest
+validation. More samples  provide more stable confidence intervals but
+increase computation time.}
+
+\item{generateForestSummary}{Generate comprehensive summary of random
+forest analysis including  model performance, variable importance, staging
+comparison, and  clinical recommendations based on ensemble predictions.}
+
+\item{performCureModelAnalysis}{Perform cure model analysis for populations
+where a fraction of patients  may be effectively cured. Uses mixture models
+to separate susceptible  and cured populations, particularly relevant for
+cancer staging analysis.}
+
+\item{cureModelType}{Type of cure model to fit. Mixture models assume a
+cured fraction with  infinite survival, promotion time models use
+biological mechanisms,  and both provides comprehensive comparison.}
+
+\item{cureDistribution}{Underlying survival distribution for the
+susceptible population in  cure models. Weibull is most flexible,
+exponential is simplest,  log-normal and log-logistic provide alternative
+hazard shapes.}
+
+\item{cureAnalyzeOldStage}{Fit cure models to original staging system to
+estimate cure fractions  and survival patterns for susceptible patients in
+each stage.}
+
+\item{cureAnalyzeNewStage}{Fit cure models to new staging system to
+estimate cure fractions and  survival patterns, enabling comparison of
+staging discrimination for  both cured and susceptible populations.}
+
+\item{cureFractionEstimation}{Method for estimating cure fractions.
+Parametric uses maximum likelihood  with specified distributions,
+non-parametric uses Kaplan-Meier plateau  detection, both provides
+validation.}
+
+\item{cureConfidenceLevel}{Confidence level for cure model parameter
+estimates and cure fraction  confidence intervals. Standard 95\\% provides
+balance between precision  and coverage.}
+
+\item{cureBootstrapCI}{Calculate bootstrap confidence intervals for cure
+fractions and model  parameters. Provides robust uncertainty quantification
+especially for  small samples or complex models.}
+
+\item{cureBootstrapReps}{Number of bootstrap replications for confidence
+interval calculation.  More replications provide more stable intervals but
+increase  computation time.}
+
+\item{cureTimeHorizon}{Time horizon for cure assessment in months. Patients
+surviving beyond  this time without events are considered potentially
+cured. Typical  values: 60-120 months for most cancers.}
+
+\item{curePlateauThreshold}{Threshold for detecting survival curve plateau
+in non-parametric cure  fraction estimation. Lower values detect smaller
+plateaus but may be  more sensitive to noise.}
+
+\item{cureCovariates}{Additional variables to include in cure model
+analysis alongside staging  variables. Can affect both cure probability and
+survival of susceptible  patients.}
+
+\item{cureModelComparison}{Compare cure models between staging systems
+using likelihood ratio tests,  AIC/BIC criteria, and cure fraction
+differences. Assesses which staging  system better identifies cured
+patients.}
+
+\item{cureStageSpecificAnalysis}{Perform separate cure model analysis for
+each stage group to understand  stage-specific cure patterns and survival
+of susceptible patients.  Essential for staging validation.}
+
+\item{cureGoodnessOfFit}{Perform goodness-of-fit tests for cure models
+including Kolmogorov-Smirnov  tests and visual diagnostic plots. Validates
+model assumptions and  identifies potential misspecification.}
+
+\item{generateCureSummary}{Generate comprehensive summary of cure model
+analysis including cure  fractions by stage, model comparison results, and
+clinical interpretation  for staging system evaluation.}
+
+\item{performIntervalCensoringAnalysis}{Perform interval censoring analysis
+for events detected between visits. This handles cases where the exact
+event time is unknown but falls  within a known interval (e.g., between
+clinic visits). Uses icenReg  package for non-parametric and parametric
+interval-censored survival  analysis.}
+
+\item{intervalCensoringLeftTime}{Variable containing the left endpoint of
+the censoring interval. For exact observations, this should equal the right
+endpoint. For left-censored observations, use 0 or NA.}
+
+\item{intervalCensoringRightTime}{Variable containing the right endpoint of
+the censoring interval. For right-censored observations, use Inf or a large
+value. For exact observations, this should equal the left endpoint.}
+
+\item{intervalCensoringDistribution}{Distribution assumption for parametric
+interval-censored regression. Weibull is most commonly used and provides
+good flexibility.}
+
+\item{intervalCensoringModel}{Type of interval censoring model to fit.
+Non-parametric uses non-parametric maximum likelihood estimation (NPMLE).
+Parametric fits accelerated failure time models with specified
+distribution.}
+
+\item{intervalCensoringBootstrap}{Calculate bootstrap confidence intervals
+for non-parametric estimates. This provides uncertainty quantification for
+the survival function estimates with interval-censored data.}
+
+\item{intervalCensoringBootstrapSamples}{Number of bootstrap samples for
+confidence interval calculation. More samples provide more accurate
+intervals but increase computation time.}
+
+\item{intervalCensoringCompareStages}{Compare survival functions between
+different staging systems accounting for interval censoring. Provides
+likelihood ratio tests and information criteria for model comparison.}
+
+\item{intervalCensoringPlots}{Generate survival plots specifically designed
+for interval-censored data, including non-parametric survival function
+estimates and comparison plots between staging systems.}
+
+\item{intervalCensoringDiagnostics}{Perform model diagnostics including
+convergence assessment, residual analysis for parametric models, and
+goodness-of-fit tests for interval-censored regression models.}
+
+\item{intervalCensoringPredictionTime}{Comma-separated list of time points
+(in months) for survival probability predictions. These will be used for
+staging system comparison and clinical interpretation of interval-censored
+survival estimates.}
+
+\item{intervalCensoringConfidenceLevel}{Confidence level for interval
+estimates and hypothesis tests. Standard choices are 0.90, 0.95, or 0.99.}
+
+\item{intervalCensoringAdjustVariables}{Additional variables to include in
+parametric interval-censored regression models for adjusted survival
+analysis. These will be included as covariates in the accelerated failure
+time model.}
+
+\item{performInformativeCensoringAnalysis}{Perform tests for informative
+censoring to validate the assumption that censoring is non-informative.
+Informative censoring occurs when the censoring mechanism is related to the
+failure time, potentially biasing survival estimates. This analysis
+provides tests and adjustments for non-random censoring patterns.}
+
+\item{informativeCensoringTestMethod}{Method for testing informative
+censoring. Correlation tests examine relationship between censoring and
+survival times. Regression tests model censoring as outcome. Competing
+risks treats censoring as competing event. Landmark analysis examines
+censoring patterns.}
+
+\item{informativeCensoringCovariates}{Variables that may be associated with
+the censoring mechanism. These could include clinical factors, treatment
+decisions, or administrative factors that might influence when patients are
+censored from the study.}
+
+\item{informativeCensoringLandmarkTimes}{Comma-separated list of landmark
+time points (in months) for landmark analysis of censoring patterns.
+Analysis examines whether censoring probabilities differ across staging
+groups at these specific time points.}
+
+\item{informativeCensoringAdjustmentMethod}{Method for adjusting survival
+estimates when informative censoring is detected. IPW uses inverse
+probability weighting. Multiple imputation imputes censored failure times.
+Sensitivity analysis explores range of possible bias effects.}
+
+\item{informativeCensoringIPWVariables}{Variables to include in inverse
+probability weighting model for censoring probability estimation. Should
+include factors that predict censoring but are not affected by the outcome.}
+
+\item{informativeCensoringSensitivityRange}{Comma-separated list of
+sensitivity parameters for bias analysis. These represent hazard ratio
+multipliers for exploring potential bias from informative censoring (1.0 =
+no bias assumption).}
+
+\item{informativeCensoringBootstrap}{Calculate bootstrap confidence
+intervals for adjusted survival estimates and bias-corrected parameters.
+Provides uncertainty quantification for informative censoring adjustments.}
+
+\item{informativeCensoringBootstrapSamples}{Number of bootstrap samples for
+confidence interval calculation in informative censoring analysis. More
+samples provide more accurate intervals but increase computation time.}
+
+\item{informativeCensoringAlpha}{Significance level for testing informative
+censoring hypotheses. Used for determining whether censoring appears to be
+informative and for confidence interval construction.}
+
+\item{informativeCensoringPlots}{Generate diagnostic plots for informative
+censoring assessment including censoring probability over time, correlation
+plots, and sensitivity analysis visualizations.}
+
+\item{informativeCensoringCompareStages}{Compare censoring patterns across
+different staging groups to assess whether censoring differs by stage,
+which could indicate stage-related informative censoring that affects
+staging system evaluation.}
+
+\item{performConcordanceProbabilityAnalysis}{Perform advanced concordance
+probability analysis for heavily censored data. This provides alternative
+concordance measures beyond traditional C-index, including Harrell's
+C-index modifications, Uno's C-index for heavily censored data, and
+time-dependent concordance measures specifically designed for staging
+system evaluation with high censoring rates.}
+
+\item{concordanceProbabilityMethods}{Concordance probability estimation
+methods. Harrell C-index is traditional but may be biased with heavy
+censoring. Uno C-index uses inverse probability weighting for censoring.
+Time-dependent measures evaluate concordance at specific time points. IPCW
+and weighted methods provide robust alternatives.}
+
+\item{concordanceProbabilityTimePoints}{Comma-separated list of time points
+(in months) for time-dependent concordance assessment. These will be used
+for evaluating staging system discrimination at clinically relevant time
+horizons.}
+
+\item{concordanceProbabilityWeighting}{Weighting strategy for concordance
+probability estimation. Uniform gives equal weight to all pairs. Sample
+size weights by stage frequency. Event rate weights by observed events.
+Follow-up weights by observation time. Inverse variance uses precision
+weighting.}
+
+\item{concordanceProbabilityBootstrap}{Calculate bootstrap confidence
+intervals for concordance probability estimates. This provides uncertainty
+quantification for discrimination measures, especially important for
+heavily censored data where traditional standard errors may be unreliable.}
+
+\item{concordanceProbabilityBootstrapSamples}{Number of bootstrap samples
+for confidence interval calculation. More samples provide more accurate
+intervals but increase computation time. Recommended minimum 500 for
+reliable confidence intervals.}
+
+\item{concordanceProbabilityConfidenceLevel}{Confidence level for
+concordance probability confidence intervals. Standard choices are 0.90,
+0.95, or 0.99 for 90\\%, 95\\%, or 99\\% confidence intervals respectively.}
+
+\item{concordanceProbabilityCompareStages}{Compare concordance
+probabilities between different staging systems using hypothesis tests and
+confidence interval overlap assessment. Provides statistical evidence for
+staging system discrimination differences accounting for heavy censoring.}
+
+\item{concordanceProbabilityAdjustVariables}{Additional variables to
+include in adjusted concordance analysis. These variables will be included
+alongside staging in multivariable models to assess staging contribution to
+discrimination beyond other prognostic factors.}
+
+\item{concordanceProbabilityRobustnessAnalysis}{Perform robustness analysis
+for concordance probability estimates including sensitivity to censoring
+assumptions, outlier influence, and temporal stability assessment for
+comprehensive validation of staging system discrimination.}
+
+\item{concordanceProbabilityAlpha}{Significance level for concordance
+probability hypothesis tests and confidence interval construction. Used for
+testing differences between staging systems and assessing statistical
+significance of discrimination improvements.}
+
+\item{concordanceProbabilityDiagnostics}{Perform diagnostic assessment of
+concordance probability estimates including convergence checks, influence
+diagnostics, and sensitivity analysis to ensure reliable discrimination
+assessment for staging system evaluation.}
+
+\item{performWinRatioAnalysis}{Perform win ratio analysis for composite
+endpoint analysis in staging comparison. The win ratio is a novel method
+for analyzing composite endpoints that respects the clinical hierarchy of
+outcomes and provides intuitive interpretation for staging system
+evaluation.}
+
+\item{winRatioEndpoints}{Clinical hierarchy of endpoints for win ratio
+analysis. More important outcomes are prioritized in the analysis. Death is
+typically the most important endpoint, followed by disease-specific
+outcomes. The hierarchy determines how patient pairs are compared.}
+
+\item{winRatioDeathVariable}{Variable indicating death or primary endpoint
+occurrence (1 = event, 0 = no event). This is typically the most important
+outcome in the hierarchy and is compared first when evaluating patient
+pairs.}
+
+\item{winRatioSecondaryEndpoint}{Variable for secondary endpoint (e.g.,
+disease progression, recurrence). This endpoint is evaluated when the
+primary endpoint comparison is tied. Can be binary (event/no event) or
+continuous (time to event).}
+
+\item{winRatioTertiaryEndpoint}{Variable for tertiary endpoint (e.g.,
+response, quality of life). This endpoint is evaluated when both primary
+and secondary comparisons are tied. Can be binary or continuous.}
+
+\item{winRatioTimeVariables}{Time variables corresponding to each endpoint
+in the hierarchy. Should be provided in the same order as the endpoints.
+Used for time-to-event comparisons when endpoints are not binary.}
+
+\item{winRatioMatchingStrategy}{Strategy for forming patient pairs for
+comparison. All pairs compares every patient from one group with every
+patient from another. Matched pairs uses pre-specified matching. Stratified
+performs within-stage comparisons. Propensity matching balances baseline
+characteristics.}
+
+\item{winRatioConfidenceMethod}{Method for calculating confidence intervals
+for the win ratio. Bootstrap is most robust but computationally intensive.
+Asymptotic uses large sample theory. Permutation provides exact p-values.}
+
+\item{winRatioBootstrapSamples}{Number of bootstrap samples for confidence
+interval calculation when using bootstrap method. More samples provide more
+accurate intervals but increase computation time.}
+
+\item{winRatioConfidenceLevel}{Confidence level for win ratio confidence
+intervals and hypothesis tests. Standard choices are 0.90, 0.95, or 0.99
+for 90\\%, 95\\%, or 99\\% confidence intervals respectively.}
+
+\item{winRatioHandleTies}{Strategy for handling tied comparisons. Split
+assigns 0.5 wins to each. Ignore excludes tied pairs from analysis. Next
+endpoint proceeds to compare the next outcome in the hierarchy for tied
+pairs.}
+
+\item{winRatioSensitivityAnalysis}{Perform sensitivity analysis for win
+ratio including assessment of endpoint ordering impact, missing data
+influence, and robustness to matching strategy choices.}
+
+\item{winRatioGeneralizedPairwise}{Use generalized pairwise comparison
+(GPC) framework which extends win ratio to include continuous outcomes and
+provides additional metrics like net benefit and win odds.}
+
+\item{performFrailtyModelsAnalysis}{Perform frailty models analysis for
+clustered survival data using  mixed-effects Cox models (coxme) for
+multi-institutional data with  center-specific random effects and
+clustering adjustments.}
+
+\item{frailtyClusterVariable}{Variable defining clusters/institutions for
+frailty modeling (e.g.,  hospital, center, surgeon). Used to account for
+unobserved  heterogeneity and clustering effects in survival analysis.}
+
+\item{frailtyDistribution}{Distribution assumption for the frailty (random
+effects) terms. Gamma distribution is most common and provides
+multiplicative  frailty effects on the hazard function.}
+
+\item{frailtyBootstrap}{Perform bootstrap validation for frailty model
+parameters and  variance components to assess model stability and provide
+robust confidence intervals.}
+
+\item{frailtyBootstrapSamples}{Number of bootstrap samples for frailty
+model validation.  Higher values provide more stable estimates but increase
+computational time.}
+
+\item{frailtyVarianceComponents}{Analyze variance components to quantify
+the proportion of  total variation explained by cluster-level random
+effects  vs individual-level factors.}
+
+\item{frailtyHeterogeneityTest}{Test for significant frailty/heterogeneity
+using likelihood  ratio tests comparing frailty models to standard Cox
+models  without random effects.}
+
+\item{frailtyClusterComparison}{Perform cluster-specific survival analysis
+comparing staging  systems within each cluster/institution to assess
+consistency  of staging performance across centers.}
+
+\item{frailtyModelSelection}{Perform systematic model selection comparing
+different frailty  distributions and model specifications using AIC/BIC
+criteria  and likelihood ratio tests.}
+
+\item{frailtyPredictiveAccuracy}{Assess predictive accuracy of frailty
+models using cross-validation  and concordance measures accounting for
+clustering structure in  the data.}
+
+\item{frailtyDiagnostics}{Comprehensive model diagnostics including
+residual analysis,  influence detection, and goodness-of-fit assessment for
+frailty  models with clustering adjustments.}
+
+\item{frailtyAdvancedInference}{Advanced statistical inference including
+profile likelihood  confidence intervals, score tests, and robust variance
+estimation for complex frailty model specifications.}
+
+\item{performClinicalUtilityAnalysis}{Perform clinical utility index
+analysis combining sensitivity/specificity  with disease prevalence to
+assess clinical decision-making value of  staging systems beyond
+statistical discrimination.}
+
+\item{clinicalUtilityPrevalence}{Disease prevalence (proportion with
+events) for clinical utility  calculations. Can be estimated from study
+data or specified based  on population characteristics.}
+
+\item{clinicalUtilityTimePoint}{Time point (in months) for clinical utility
+assessment. Should  represent clinically relevant decision-making horizon
+for the  specific cancer type and staging system.}
+
+\item{clinicalUtilityThresholds}{Range of risk thresholds for clinical
+utility assessment. Different  ranges appropriate for different clinical
+decision contexts and  treatment aggressiveness preferences.}
+
+\item{clinicalUtilityNNT}{Calculate Number Needed to Treat (NNT) and Number
+Needed to Harm (NNH)  based on staging-guided interventions with
+configurable treatment  effect assumptions.}
+
+\item{clinicalUtilityTreatmentEffect}{Assumed treatment effect (hazard
+ratio) for calculating NNT/NNH.  Should reflect realistic treatment
+benefits for staging-guided  interventions in the specific clinical
+context.}
+
+\item{clinicalUtilityComparison}{Compare clinical utility between staging
+systems using net benefit  difference analysis and utility improvement
+quantification across  different risk thresholds.}
+
+\item{clinicalUtilityCostEffectiveness}{Include basic cost-effectiveness
+considerations in clinical utility  assessment with configurable cost
+assumptions for staging-guided  interventions and outcomes.}
+
+\item{clinicalUtilityCostPerIntervention}{Estimated cost per staging-guided
+intervention for cost-effectiveness  analysis. Should reflect realistic
+healthcare costs in the relevant  healthcare system and setting.}
+
+\item{clinicalUtilityBootstrap}{Perform bootstrap validation for clinical
+utility metrics including  confidence intervals for NNT, net benefit
+differences, and utility  improvement measures.}
+
+\item{clinicalUtilityBootstrapSamples}{Number of bootstrap samples for
+clinical utility validation. Higher  values provide more stable estimates
+but increase computational time.}
+
+\item{clinicalUtilityTimeVarying}{Assess clinical utility across multiple
+time points to understand  how staging system value changes over time
+horizon and identify  optimal decision timing.}
 }
 \value{
 A results object containing:
@@ -364,6 +1347,85 @@ A results object containing:
 \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$crossValidationPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$enhancedLRComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageMigrationEffectExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$stageMigrationEffect} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageMigrationEffectAssessment} \tab \tab \tab \tab \tab a table \cr
+\code{results$rmstAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rmstByStage} \tab \tab \tab \tab \tab a table \cr
+\code{results$rmstComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$competingRisksExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$competingRisksEventDistribution} \tab \tab \tab \tab \tab a table \cr
+\code{results$competingRisksComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$optimalCutpointAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$cutpointValidation} \tab \tab \tab \tab \tab a table \cr
+\code{results$generatedStagingSystem} \tab \tab \tab \tab \tab a table \cr
+\code{results$shapGlobalImportance} \tab \tab \tab \tab \tab a table \cr
+\code{results$shapIndividualExplanations} \tab \tab \tab \tab \tab a table \cr
+\code{results$shapInteractions} \tab \tab \tab \tab \tab a table \cr
+\code{results$shapSummaryStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$fineGrayResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$causeSpecificResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$cifSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$competingRisksCIndex} \tab \tab \tab \tab \tab a table \cr
+\code{results$competingRisksSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$transitionIntensities} \tab \tab \tab \tab \tab a table \cr
+\code{results$transitionProbabilities} \tab \tab \tab \tab \tab a table \cr
+\code{results$stateOccupancy} \tab \tab \tab \tab \tab a table \cr
+\code{results$multiStateComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$multiStateSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$forestVariableImportance} \tab \tab \tab \tab \tab a table \cr
+\code{results$forestModelPerformance} \tab \tab \tab \tab \tab a table \cr
+\code{results$forestSurvivalPredictions} \tab \tab \tab \tab \tab a table \cr
+\code{results$forestCoxComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$forestStagingComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$forestAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$cureFractionEstimates} \tab \tab \tab \tab \tab a table \cr
+\code{results$cureModelParameters} \tab \tab \tab \tab \tab a table \cr
+\code{results$cureModelComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageSpecificCureAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$cureModelBootstrap} \tab \tab \tab \tab \tab a table \cr
+\code{results$cureAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$intervalCensoringOverview} \tab \tab \tab \tab \tab Summary of interval-censored data characteristics and model selection \cr
+\code{results$intervalCensoringNonparametric} \tab \tab \tab \tab \tab Non-parametric maximum likelihood survival estimates for interval-censored data \cr
+\code{results$intervalCensoringParametric} \tab \tab \tab \tab \tab Parametric survival regression results for interval-censored data \cr
+\code{results$intervalCensoringComparison} \tab \tab \tab \tab \tab Model comparison between staging systems accounting for interval censoring \cr
+\code{results$intervalCensoringDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for interval-censored survival models \cr
+\code{results$intervalCensoringSummary} \tab \tab \tab \tab \tab Clinical interpretation and recommendations for interval-censored survival analysis \cr
+\code{results$informativeCensoringOverview} \tab \tab \tab \tab \tab Summary of informative censoring detection analysis and data characteristics \cr
+\code{results$informativeCensoringTests} \tab \tab \tab \tab \tab Statistical tests for detecting informative censoring patterns \cr
+\code{results$informativeCensoringByStage} \tab \tab \tab \tab \tab Comparison of censoring patterns across staging groups \cr
+\code{results$informativeCensoringAdjustment} \tab \tab \tab \tab \tab Survival estimates adjusted for informative censoring effects \cr
+\code{results$informativeCensoringSensitivity} \tab \tab \tab \tab \tab Sensitivity analysis exploring range of potential bias from informative censoring \cr
+\code{results$informativeCensoringDiagnostics} \tab \tab \tab \tab \tab Diagnostic measures for informative censoring assessment \cr
+\code{results$informativeCensoringSummary} \tab \tab \tab \tab \tab Summary of informative censoring findings and recommendations \cr
+\code{results$concordanceProbabilityOverview} \tab \tab \tab \tab \tab Summary of concordance probability analysis for staging system discrimination assessment \cr
+\code{results$concordanceProbabilityEstimates} \tab \tab \tab \tab \tab Concordance probability estimates using multiple methods for robust discrimination assessment \cr
+\code{results$concordanceProbabilityTimeDependentComplex} \tab \tab \tab \tab \tab Time-dependent concordance probability estimates at clinically relevant time points \cr
+\code{results$concordanceProbabilityComparison} \tab \tab \tab \tab \tab Statistical comparison of concordance probabilities between staging systems \cr
+\code{results$concordanceProbabilityRobustness} \tab \tab \tab \tab \tab Robustness analysis for concordance probability estimates under different assumptions \cr
+\code{results$concordanceProbabilityDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for concordance probability analysis validation \cr
+\code{results$concordanceProbabilitySummary} \tab \tab \tab \tab \tab Summary of concordance probability findings and clinical interpretation \cr
+\code{results$winRatioOverview} \tab \tab \tab \tab \tab Summary of win ratio analysis configuration and data characteristics \cr
+\code{results$winRatioPrimaryResults} \tab \tab \tab \tab \tab Primary win ratio analysis results comparing staging systems \cr
+\code{results$winRatioEndpointContributions} \tab \tab \tab \tab \tab Contribution of each endpoint to the overall win ratio \cr
+\code{results$winRatioStageSpecific} \tab \tab \tab \tab \tab Win ratio analysis stratified by staging categories \cr
+\code{results$winRatioSensitivityResults} \tab \tab \tab \tab \tab Sensitivity analysis results for win ratio estimates \cr
+\code{results$winRatioGeneralizedPairwiseResults} \tab \tab \tab \tab \tab Extended metrics from generalized pairwise comparison framework \cr
+\code{results$winRatioSummary} \tab \tab \tab \tab \tab Summary of win ratio findings and clinical interpretation \cr
+\code{results$frailtyModelsOverview} \tab \tab \tab \tab \tab Overview of frailty models analysis for clustered survival data \cr
+\code{results$frailtyModelsComparison} \tab \tab \tab \tab \tab Comparison of staging systems using frailty models with clustering adjustments \cr
+\code{results$frailtyModelsVarianceComponents} \tab \tab \tab \tab \tab Detailed variance components analysis for frailty models \cr
+\code{results$frailtyModelsClusterSpecific} \tab \tab \tab \tab \tab Cluster-specific survival analysis comparing staging systems within institutions \cr
+\code{results$frailtyModelsBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for frailty model parameters and variance components \cr
+\code{results$frailtyModelsDiagnostics} \tab \tab \tab \tab \tab Comprehensive model diagnostics for frailty models including residual analysis and goodness-of-fit \cr
+\code{results$frailtyModelsSummary} \tab \tab \tab \tab \tab Executive summary of frailty models analysis with evidence-based recommendations \cr
+\code{results$clinicalUtilityOverview} \tab \tab \tab \tab \tab Overview of clinical utility index analysis combining discrimination with clinical decision-making value \cr
+\code{results$clinicalUtilityComparison} \tab \tab \tab \tab \tab Comparison of clinical utility between staging systems across different risk thresholds \cr
+\code{results$clinicalUtilityNNT} \tab \tab \tab \tab \tab Number Needed to Treat (NNT) and Number Needed to Harm (NNH) analysis for staging-guided interventions \cr
+\code{results$clinicalUtilityNetBenefit} \tab \tab \tab \tab \tab Net benefit analysis across risk thresholds with comparative utility assessment \cr
+\code{results$clinicalUtilityTimeVarying} \tab \tab \tab \tab \tab Time-varying clinical utility analysis showing how staging system value changes over time \cr
+\code{results$clinicalUtilityBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for clinical utility metrics with confidence intervals \cr
+\code{results$clinicalUtilitySummary} \tab \tab \tab \tab \tab Executive summary of clinical utility analysis with evidence-based recommendations \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -1,0 +1,283 @@
+title: Advanced TNM Stage Migration Analysis 1
+name: stagemigration1
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: CollapseBox
+    label: Core Data Variables
+    collapsed: false
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Original TNM Staging System
+            children:
+              - type: VariablesListBox
+                name: oldStage
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: New/Revised TNM Staging System
+            children:
+              - type: VariablesListBox
+                name: newStage
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Survival Time (months)
+            children:
+              - type: VariablesListBox
+                name: survivalTime
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Event Status (Death/Outcome)
+            children:
+              - type: VariablesListBox
+                name: event
+                maxItemCount: 1
+                isTarget: true
+              - type: LevelSelector
+                name: eventLevel
+  - type: CollapseBox
+    label: Basic Migration Analysis
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Essential Migration Tables
+          - type: CheckBox
+            name: showMigrationOverview
+            label: Migration Overview (patient counts & percentages)
+          - type: CheckBox
+            name: showMigrationMatrix
+            label: Migration Matrix (detailed cross-tabulation)
+          - type: CheckBox
+            name: showStageDistribution
+            label: Stage Distribution Comparison
+          - type: CheckBox
+            name: showMigrationSummary
+            label: Statistical Migration Summary
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Basic Performance Metrics
+          - type: CheckBox
+            name: showStatisticalComparison
+            label: C-index & Performance Metrics
+          - type: CheckBox
+            name: showConcordanceComparison
+            label: Concordance Comparison Details
+          - type: CheckBox
+            name: calculatePseudoR2
+            label: Pseudo R-squared Measures
+  - type: CollapseBox
+    label: Advanced Statistical Methods
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Reclassification & Discrimination
+          - type: CheckBox
+            name: calculateNRI
+            label: Net Reclassification Improvement (NRI)
+          - type: TextBox
+            name: nriTimePoints
+            label: NRI Time Points (months)
+            format: string
+            enable: (calculateNRI)
+          - type: CheckBox
+            name: calculateIDI
+            label: Integrated Discrimination Improvement (IDI)
+          - type: CheckBox
+            name: performROCAnalysis
+            label: Time-dependent ROC Analysis
+          - type: TextBox
+            name: rocTimePoints
+            label: ROC Time Points (months)
+            format: string
+            enable: (performROCAnalysis)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clinical Utility Assessment
+          - type: CheckBox
+            name: performDCA
+            label: Decision Curve Analysis
+          - type: CheckBox
+            name: performCalibration
+            label: Calibration Analysis
+  - type: CollapseBox
+    label: Validation & Robustness
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Internal Validation
+  - type: CollapseBox
+    label: Clinical Significance Thresholds
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: clinicalSignificanceThreshold
+            label: C-index Clinical Significance Threshold
+            format: number
+          - type: TextBox
+            name: nriClinicalThreshold
+            label: NRI Clinical Threshold
+            format: number
+          - type: TextBox
+            name: confidenceLevel
+            label: Confidence Level
+            format: number
+  - type: CollapseBox
+    label: Specialized Analyses
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Will Rogers Phenomenon
+          - type: CheckBox
+            name: showWillRogersAnalysis
+            label: Will Rogers Phenomenon Analysis
+          - type: CheckBox
+            name: advancedMigrationAnalysis
+            label: Advanced Migration Analysis
+  - type: CollapseBox
+    label: Additional Statistical Tests
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: performHomogeneityTests
+            label: Stage Homogeneity Tests
+          - type: CheckBox
+            name: performTrendTests
+            label: Stage Trend Analysis
+          - type: CheckBox
+            name: performLikelihoodTests
+            label: Likelihood Ratio Tests
+  - type: CollapseBox
+    label: Multifactorial Analysis
+    collapsed: true
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Institution Variable
+            children:
+              - type: VariablesListBox
+                name: institutionVariable
+                maxItemCount: 1
+                isTarget: true
+  - type: CollapseBox
+    label: Visualizations & Plots
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Migration Visualizations
+          - type: CheckBox
+            name: showMigrationHeatmap
+            label: Migration Heatmap
+          - type: CheckBox
+            name: showSankeyDiagram
+            label: Stage Migration Flow Diagram
+          - type: CheckBox
+            name: showWillRogersVisualization
+            label: Will Rogers Effect Visualization
+          - type: CheckBox
+            name: showMigrationSurvivalComparison
+            label: Migration Survival Comparison
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Statistical Plots
+          - type: CheckBox
+            name: showROCComparison
+            label: ROC Curve Comparison
+          - type: CheckBox
+            name: showCalibrationPlots
+            label: Calibration Plots
+          - type: CheckBox
+            name: showDecisionCurves
+            label: Decision Curves
+          - type: CheckBox
+            name: showForestPlot
+            label: Hazard Ratio Forest Plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Survival Curves
+          - type: CheckBox
+            name: showSurvivalCurves
+            label: Show Survival Curves
+          - type: ComboBox
+            name: survivalPlotType
+            label: Survival Plot Display
+            enable: (showSurvivalCurves)
+          - type: CheckBox
+            name: showConfidenceIntervals
+            label: Show Confidence Intervals
+            enable: (showSurvivalCurves)
+          - type: CheckBox
+            name: showRiskTables
+            label: Show Risk Tables
+            enable: (showSurvivalCurves)
+          - type: TextBox
+            name: plotTimeRange
+            label: Plot Time Range (months)
+            format: string
+            enable: (showSurvivalCurves)
+  - type: CollapseBox
+    label: Output & Reporting Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clinical Interpretation
+          - type: CheckBox
+            name: showClinicalInterpretation
+            label: Clinical Interpretation Guide
+          - type: CheckBox
+            name: showMethodologyNotes
+            label: Methodology Notes
+          - type: CheckBox
+            name: showStatisticalSummary
+            label: Statistical Summary
+          - type: CheckBox
+            name: includeEffectSizes
+            label: Include Effect Sizes
+          - type: CheckBox
+            name: generateExecutiveSummary
+            label: Executive Summary
+          - type: CheckBox
+            name: showExplanations
+          - type: CheckBox
+            name: enableMultifactorialAnalysis

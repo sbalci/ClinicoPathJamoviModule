@@ -47,7 +47,6 @@ options:
       type: Variable
       suggested: [ordinal, nominal]
       permitted: [factor]
-      default: null
       description: >-
         📋 CLINICAL EXAMPLE: Select your current staging variable such as 'TNM7_Stage' 
         containing values like: Stage I, Stage IIA, Stage IIB, Stage IIIA, Stage IIIB, Stage IV.
@@ -60,7 +59,6 @@ options:
       type: Variable
       suggested: [ordinal, nominal]
       permitted: [factor]
-      default: null
       description: >-
         📋 CLINICAL EXAMPLE: Select your new staging variable such as 'TNM8_Stage' 
         containing the same patients but potentially different stage assignments based on 
@@ -74,7 +72,6 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
-      default: null
       description: >-
         📋 CLINICAL EXAMPLE: Select your follow-up time variable such as 'OS_months' 
         containing values like: 12.5, 24.8, 36.2, 45.0 (months from diagnosis to death or last contact).
@@ -88,7 +85,6 @@ options:
       type: Variable
       suggested: [ordinal, nominal, continuous]
       permitted: [factor, numeric]
-      default: null
       description: >-
         📋 CLINICAL EXAMPLE: Select your event variable such as 'Death_Status' 
         containing values like: 0 (alive/censored), 1 (dead/event occurred) OR 
@@ -105,89 +101,101 @@ options:
       description: >-
         The level indicating event occurrence when using factor variables.
 
-    # Clinical Analysis Presets - NOT IMPLEMENTED
-    #     # - name: clinicalPreset
-    #       title: 'Clinical Analysis Preset'
-    #       type: List
-    #       options:
-    #         - title: "🏥 Routine Clinical Validation (Basic + Key Metrics)"
-    #           name: routine_clinical
-    #         - title: "📊 Research Study (Standard + Advanced Statistics)"  
-    #           name: research_study
-    #         - title: "📝 Publication Manuscript (All Methods + Visualizations)"
-    #           name: publication_ready
-    #         - title: "🔬 Custom Analysis (Manual Configuration)"
-    #           name: custom
-    #       default: routine_clinical
-    #       description: >-
-    #         Choose a preset tailored to your clinical workflow. 'Routine Clinical' provides essential 
-    #         validation metrics for daily practice. 'Research Study' adds advanced statistics for 
-    #         academic research. 'Publication Ready' includes all methods and visualizations for manuscripts.
-    #         Choose 'Custom' to manually configure all options.
+    # Clinical Analysis Presets (New Feature)
+    - name: clinicalPreset
+      title: 'Clinical Analysis Preset'
+      type: List
+      options:
+        - title: "🏥 Routine Clinical Validation (Basic + Key Metrics)"
+          name: routine_clinical
+        - title: "📊 Research Study (Standard + Advanced Statistics)"  
+          name: research_study
+        - title: "📝 Publication Manuscript (All Methods + Visualizations)"
+          name: publication_ready
+        - title: "🔬 Custom Analysis (Manual Configuration)"
+          name: custom
+      default: routine_clinical
+      description: >-
+        Choose a preset tailored to your clinical workflow. 'Routine Clinical' provides essential 
+        validation metrics for daily practice. 'Research Study' adds advanced statistics for 
+        academic research. 'Publication Ready' includes all methods and visualizations for manuscripts.
+        Choose 'Custom' to manually configure all options.
 
-    # - name: enableGuidedMode
-    #       title: '🧭 Guided Analysis Mode'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Enable step-by-step guidance for clinical users. Provides contextual help, 
-    #         assumption checking, and clinical interpretation assistance throughout the analysis.
-    #         Highly recommended for users new to staging validation methods.
+    - name: enableGuidedMode
+      title: '🧭 Guided Analysis Mode'
+      type: Bool
+      default: true
+      description: >-
+        Enable step-by-step guidance for clinical users. Provides contextual help, 
+        assumption checking, and clinical interpretation assistance throughout the analysis.
+        Highly recommended for users new to staging validation methods.
 
-    # - name: generateCopyReadyReport
-    #       title: '📄 Generate Copy-Ready Clinical Summary'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate plain-language clinical summary paragraphs that can be copied directly 
-    #         into reports or manuscripts. Includes key findings, statistical significance, 
-    #         clinical interpretation, and implementation recommendations.
+    - name: generateCopyReadyReport
+      title: '📄 Generate Copy-Ready Clinical Summary'
+      type: Bool
+      default: true
+      description: >-
+        Generate plain-language clinical summary paragraphs that can be copied directly 
+        into reports or manuscripts. Includes key findings, statistical significance, 
+        clinical interpretation, and implementation recommendations.
 
-    # Accessibility and User Experience Options - NOT IMPLEMENTED
-    # - name: enableAccessibilityFeatures
-    #       title: '♿ Accessibility Features'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Enable accessibility features including color-blind safe palettes, 
-    #         high contrast visualizations, larger font sizes, and enhanced table readability.
-    #         Ensures outputs are accessible to users with visual impairments.
+    # Accessibility and User Experience Options
+    - name: enableAccessibilityFeatures
+      title: '♿ Accessibility Features'
+      type: Bool
+      default: false
+      description: >-
+        Enable accessibility features including color-blind safe palettes, 
+        high contrast visualizations, larger font sizes, and enhanced table readability.
+        Ensures outputs are accessible to users with visual impairments.
 
+    - name: preferredLanguage
+      title: '🌐 Output Language'
+      type: List
+      options:
+        - title: "English (EN)"
+          name: en
+        - title: "Türkçe (TR)"
+          name: tr
+      default: en
+      description: >-
+        Choose the language for explanations, labels, and clinical interpretations.
+        Scientific terminology and statistical results remain standardized.
 
-    # - name: enableProgressIndicators
-    #       title: '⏱️ Show Progress Indicators'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Show progress bars and status updates for long-running analyses such as 
-    #         bootstrap validation and cross-validation. Helps users track analysis progress.
+    - name: enableProgressIndicators
+      title: '⏱️ Show Progress Indicators'
+      type: Bool
+      default: true
+      description: >-
+        Show progress bars and status updates for long-running analyses such as 
+        bootstrap validation and cross-validation. Helps users track analysis progress.
 
-    # - name: optimizeForLargeDatasets
-    #       title: '🚀 Large Dataset Optimization'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Enable memory-efficient processing for large datasets (>10,000 patients). 
-    #         Uses chunked processing and optimized algorithms to reduce memory usage 
-    #         and improve performance while maintaining statistical accuracy.
+    - name: optimizeForLargeDatasets
+      title: '🚀 Large Dataset Optimization'
+      type: Bool
+      default: false
+      description: >-
+        Enable memory-efficient processing for large datasets (>10,000 patients). 
+        Uses chunked processing and optimized algorithms to reduce memory usage 
+        and improve performance while maintaining statistical accuracy.
 
     # Analysis Type and Core Options  
-    # - name: analysisType
-    #       title: 'Analysis Scope'
-    #       type: List
-    #       options:
-    #         - title: "Basic Migration Analysis"
-    #           name: basic
-    #         - title: "Standard Validation (includes C-index, NRI)"
-    #           name: standard  
-    #         - title: "Comprehensive Analysis (all methods)"
-    #           name: comprehensive
-    #         - title: "Publication Ready (optimized for manuscripts)"
-    #           name: publication
-    #       default: comprehensive
-    #       description: >-
-    #         Determines the scope of statistical analysis performed. Comprehensive analysis
-    #         includes all available methods for thorough staging system validation.
+    - name: analysisType
+      title: 'Analysis Scope'
+      type: List
+      options:
+        - title: "Basic Migration Analysis"
+          name: basic
+        - title: "Standard Validation (includes C-index, NRI)"
+          name: standard  
+        - title: "Comprehensive Analysis (all methods)"
+          name: comprehensive
+        - title: "Publication Ready (optimized for manuscripts)"
+          name: publication
+      default: comprehensive
+      description: >-
+        Determines the scope of statistical analysis performed. Comprehensive analysis
+        includes all available methods for thorough staging system validation.
 
     - name: confidenceLevel
       title: 'Confidence Level'
@@ -202,7 +210,7 @@ options:
     - name: calculateNRI
       title: 'Net Reclassification Improvement (NRI)'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate Net Reclassification Improvement to quantify improvement in 
         risk classification between staging systems. Essential for staging validation.
@@ -218,7 +226,7 @@ options:
     - name: calculateIDI
       title: 'Integrated Discrimination Improvement (IDI)'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate Integrated Discrimination Improvement to measure improvement 
         in risk prediction accuracy between staging systems.
@@ -226,7 +234,7 @@ options:
     - name: performROCAnalysis
       title: 'Time-dependent ROC Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform time-dependent ROC analysis to compare discriminative ability
         of staging systems over time.
@@ -256,40 +264,40 @@ options:
         Important for validating accuracy of survival predictions.
 
     # Validation and Bootstrap Options
-    # - name: performBootstrap
-    #       title: 'Bootstrap Validation'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform bootstrap validation with optimism correction to assess
-    #         internal validity of results. Recommended for all staging validation studies.
+    - name: performBootstrap
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: false
+      description: >-
+        Perform bootstrap validation with optimism correction to assess
+        internal validity of results. Recommended for all staging validation studies.
 
-    # - name: bootstrapReps
-    #       title: 'Bootstrap Repetitions'
-    #       type: Number
-    #       min: 100
-    #       max: 2000
-    #       default: 1000
-    #       description: >-
-    #         Number of bootstrap repetitions for internal validation. 
-    #         1000 repetitions recommended for stable results.
+    - name: bootstrapReps
+      title: 'Bootstrap Repetitions'
+      type: Number
+      min: 100
+      max: 2000
+      default: 1000
+      description: >-
+        Number of bootstrap repetitions for internal validation. 
+        1000 repetitions recommended for stable results.
 
-    # - name: performCrossValidation
-    #   title: 'Cross-Validation'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Perform k-fold cross-validation for additional validation.
-    #     Computationally intensive but provides robust validation.
+    - name: performCrossValidation
+      title: 'Cross-Validation'
+      type: Bool
+      default: false
+      description: >-
+        Perform k-fold cross-validation for additional validation.
+        Computationally intensive but provides robust validation.
 
-    # - name: cvFolds
-    #   title: 'CV Folds'
-    #   type: Number
-    #   min: 3
-    #   max: 10
-    #   default: 5
-    #   description: >-
-    #     Number of folds for cross-validation when enabled.
+    - name: cvFolds
+      title: 'CV Folds'
+      type: Number
+      min: 3
+      max: 10
+      default: 5
+      description: >-
+        Number of folds for cross-validation when enabled.
 
     - name: institutionVariable
       title: 'Institution Variable'
@@ -300,7 +308,6 @@ options:
       permitted:
         - factor
         - numeric
-      default: null
       description: >-
         Optional variable indicating institution or study center for 
         multi-institutional validation. When provided, performs internal-external
@@ -357,7 +364,7 @@ options:
     - name: calculatePseudoR2
       title: 'Pseudo R-squared Measures'
       type: Bool
-      default: false
+      default: true
       description: >-
         Calculate multiple pseudo R-squared measures for model comparison
         (Nagelkerke, McFadden, Cox-Snell).
@@ -377,7 +384,7 @@ options:
     - name: showMigrationSummary
       title: 'Migration Summary Table'
       type: Bool
-      default: false
+      default: true
       description: >-
         Display statistical summary of migration patterns including overall migration
         rate and formal statistical tests. Shows Chi-square test results for
@@ -388,7 +395,7 @@ options:
     - name: showStageDistribution
       title: 'Stage Distribution Comparison Table'
       type: Bool
-      default: false
+      default: true
       description: >-
         Display side-by-side comparison of how patients are distributed across stages
         in both the original and new staging systems. Shows the count and percentage
@@ -418,7 +425,7 @@ options:
     - name: showConcordanceComparison
       title: 'Concordance Comparison Table'
       type: Bool
-      default: false
+      default: true
       description: >-
         Display detailed concordance comparison between staging systems.
 
@@ -426,7 +433,7 @@ options:
     - name: showMigrationHeatmap
       title: 'Migration Heatmap'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display a color-coded heatmap visualization of the migration matrix. 
         Darker colors indicate more patients, with the diagonal showing patients 
@@ -448,7 +455,7 @@ options:
     - name: showROCComparison
       title: 'ROC Curve Comparison'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display time-dependent ROC curves comparing staging systems.
 
@@ -504,7 +511,7 @@ options:
     - name: showSurvivalCurves
       title: 'Show Survival Curves'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display survival curves comparing the staging systems.
     
@@ -594,2046 +601,2017 @@ options:
         for clinical and research stakeholders.
 
     # Advanced Options for Specific Cancer Types
-    # - name: cancerType
-    #   title: 'Cancer Type (Optional)'
-    #   type: List
-    #   options:
-    #     - title: "General (use default thresholds)"
-    #       name: general
-    #     - title: "Lung Cancer"
-    #       name: lung
-    #     - title: "Breast Cancer" 
-    #       name: breast
-    #     - title: "Colorectal Cancer"
-    #       name: colorectal
-    #     - title: "Prostate Cancer"
-    #       name: prostate
-    #     - title: "Head and Neck Cancer"
-    #       name: headneck
-    #     - title: "Melanoma"
-    #       name: melanoma
-    #     - title: "Other Solid Tumor"
-    #       name: other
-    #   default: general
-    #   description: >-
-    #     Optional cancer type specification for customized thresholds and 
-    #     interpretation guidelines based on cancer-specific literature.
+    - name: cancerType
+      title: 'Cancer Type (Optional)'
+      type: List
+      options:
+        - title: "General (use default thresholds)"
+          name: general
+        - title: "Lung Cancer"
+          name: lung
+        - title: "Breast Cancer" 
+          name: breast
+        - title: "Colorectal Cancer"
+          name: colorectal
+        - title: "Prostate Cancer"
+          name: prostate
+        - title: "Head and Neck Cancer"
+          name: headneck
+        - title: "Melanoma"
+          name: melanoma
+        - title: "Other Solid Tumor"
+          name: other
+      default: general
+      description: >-
+        Optional cancer type specification for customized thresholds and 
+        interpretation guidelines based on cancer-specific literature.
 
-    # - name: useOptimismCorrection
-    #   title: 'Apply Optimism Correction'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Apply optimism correction to performance metrics using bootstrap
-    #     validation to avoid overly optimistic estimates.
+    - name: useOptimismCorrection
+      title: 'Apply Optimism Correction'
+      type: Bool
+      default: false
+      description: >-
+        Apply optimism correction to performance metrics using bootstrap
+        validation to avoid overly optimistic estimates.
 
     # Multifactorial Analysis Options
     - name: enableMultifactorialAnalysis
       title: 'Enable Multifactorial Analysis'
       type: Bool
-      default: true
-    #   description: >-
-    #     Enable advanced multifactorial stage migration analysis that includes
-    #     additional covariates in the comparison. This allows for adjusted
-    #     comparisons between staging systems after accounting for other
-    #     prognostic factors.
+      default: false
+      description: >-
+        Enable advanced multifactorial stage migration analysis that includes
+        additional covariates in the comparison. This allows for adjusted
+        comparisons between staging systems after accounting for other
+        prognostic factors.
 
-    # - name: continuousCovariates
-    #   title: 'Continuous Covariates'
-    #   type: Variables
-    #   suggested: [continuous]
-    #   permitted: [numeric]
-    #   description: >-
-    #     Continuous variables to include as covariates in the multifactorial
-    #     analysis (e.g., age, tumor size, biomarker levels). These will be
-    #     included in Cox regression models for both staging systems.
-    #   default: NULL
+    - name: continuousCovariates
+      title: 'Continuous Covariates'
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >-
+        Continuous variables to include as covariates in the multifactorial
+        analysis (e.g., age, tumor size, biomarker levels). These will be
+        included in Cox regression models for both staging systems.
+      default: NULL
 
-    # - name: categoricalCovariates
-    #   title: 'Categorical Covariates'
-    #   type: Variables
-    #   suggested: [ordinal, nominal]
-    #   permitted: [factor]
-    #   description: >-
-    #     Categorical variables to include as covariates in the multifactorial
-    #     analysis (e.g., sex, histology, treatment type). These will be
-    #     included in Cox regression models for both staging systems.
-    #   default: NULL
+    - name: categoricalCovariates
+      title: 'Categorical Covariates'
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >-
+        Categorical variables to include as covariates in the multifactorial
+        analysis (e.g., sex, histology, treatment type). These will be
+        included in Cox regression models for both staging systems.
+      default: NULL
 
-    # - name: multifactorialComparisonType
-    #   title: 'Multifactorial Comparison Type'
-    #   type: List
-    #   options:
-    #     - title: "Adjusted C-index comparison"
-    #       name: adjusted_cindex
-    #     - title: "Nested model comparison"
-    #       name: nested_models
-    #     - title: "Stepwise model selection"
-    #       name: stepwise
-    #     - title: "Comprehensive comparison"
-    #       name: comprehensive
-    #   default: comprehensive
-    #   description: >-
-    #     Type of multifactorial comparison to perform. Comprehensive includes
-    #     all methods for thorough evaluation of staging systems in the context
-    #     of other prognostic factors.
+    - name: multifactorialComparisonType
+      title: 'Multifactorial Comparison Type'
+      type: List
+      options:
+        - title: "Adjusted C-index comparison"
+          name: adjusted_cindex
+        - title: "Nested model comparison"
+          name: nested_models
+        - title: "Stepwise model selection"
+          name: stepwise
+        - title: "Comprehensive comparison"
+          name: comprehensive
+      default: comprehensive
+      description: >-
+        Type of multifactorial comparison to perform. Comprehensive includes
+        all methods for thorough evaluation of staging systems in the context
+        of other prognostic factors.
 
-    # - name: baselineModel
-    #   title: 'Baseline Model'
-    #   type: List
-    #   options:
-    #     - title: "Covariates only"
-    #       name: covariates_only
-    #     - title: "Original staging + covariates"
-    #       name: original_plus_covariates
-    #     - title: "New staging + covariates"
-    #       name: new_plus_covariates
-    #   default: covariates_only
-    #   description: >-
-    #     Baseline model for multifactorial comparisons. This determines the
-    #     reference model against which staging systems are compared.
+    - name: baselineModel
+      title: 'Baseline Model'
+      type: List
+      options:
+        - title: "Covariates only"
+          name: covariates_only
+        - title: "Original staging + covariates"
+          name: original_plus_covariates
+        - title: "New staging + covariates"
+          name: new_plus_covariates
+      default: covariates_only
+      description: >-
+        Baseline model for multifactorial comparisons. This determines the
+        reference model against which staging systems are compared.
 
-    # - name: performInteractionTests
-    #   title: 'Test Stage-Covariate Interactions'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Test for interactions between staging systems and covariates. This
-    #     helps identify if the staging system performance varies across
-    #     different patient subgroups.
+    - name: performInteractionTests
+      title: 'Test Stage-Covariate Interactions'
+      type: Bool
+      default: false
+      description: >-
+        Test for interactions between staging systems and covariates. This
+        helps identify if the staging system performance varies across
+        different patient subgroups.
 
-    # - name: stratifiedAnalysis
-    #   title: 'Stratified Analysis'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Perform stratified analysis by categorical covariates to evaluate
-    #     staging system performance within subgroups.
+    - name: stratifiedAnalysis
+      title: 'Stratified Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform stratified analysis by categorical covariates to evaluate
+        staging system performance within subgroups.
 
-    # - name: showMultifactorialTables
-    #   title: 'Show Multifactorial Tables'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Display detailed tables showing multifactorial model results,
-    #     including adjusted hazard ratios and model comparison statistics.
+    - name: showMultifactorialTables
+      title: 'Show Multifactorial Tables'
+      type: Bool
+      default: false
+      description: >-
+        Display detailed tables showing multifactorial model results,
+        including adjusted hazard ratios and model comparison statistics.
 
-    # - name: showAdjustedCIndexComparison
-    #   title: 'Show Adjusted C-index Comparison'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Display comparison of C-indices for staging systems adjusted for
-    #     covariates. This shows the discriminative ability of each staging
-    #     system after accounting for other prognostic factors.
+    - name: showAdjustedCIndexComparison
+      title: 'Show Adjusted C-index Comparison'
+      type: Bool
+      default: false
+      description: >-
+        Display comparison of C-indices for staging systems adjusted for
+        covariates. This shows the discriminative ability of each staging
+        system after accounting for other prognostic factors.
 
-    # - name: showNestedModelTests
-    #   title: 'Show Nested Model Tests'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Display likelihood ratio tests comparing nested models to formally
-    #     test the added value of each staging system over the baseline model.
+    - name: showNestedModelTests
+      title: 'Show Nested Model Tests'
+      type: Bool
+      default: false
+      description: >-
+        Display likelihood ratio tests comparing nested models to formally
+        test the added value of each staging system over the baseline model.
 
-    # - name: showStepwiseResults
-    #   title: 'Show Stepwise Selection Results'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Display results of stepwise model selection showing which variables
-    #     (including staging systems) are selected in the final model.
+    - name: showStepwiseResults
+      title: 'Show Stepwise Selection Results'
+      type: Bool
+      default: false
+      description: >-
+        Display results of stepwise model selection showing which variables
+        (including staging systems) are selected in the final model.
 
     - name: showExplanations
       title: 'Explanations for Results'
       type: Bool
-      default: false
+      default: true
       description: >-
         Include detailed explanations for results.
 
-    # - name: showAbbreviationGlossary
-    #   title: 'Show Abbreviation Glossary'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Display a comprehensive glossary of all abbreviations, statistical terms, 
-    #     and technical terminology used in the stage migration analysis. This 
-    #     provides a quick reference for interpreting dashboard values and 
-    #     understanding statistical outputs.
+    - name: showAbbreviationGlossary
+      title: 'Show Abbreviation Glossary'
+      type: Bool
+      default: false
+      description: >-
+        Display a comprehensive glossary of all abbreviations, statistical terms, 
+        and technical terminology used in the stage migration analysis. This 
+        provides a quick reference for interpreting dashboard values and 
+        understanding statistical outputs.
 
-    # # Stage Migration Effect Options
-    # - name: calculateSME
-    #   title: 'Calculate Stage Migration Effect'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Calculate Stage Migration Effect Formula (SME) to quantify the cumulative 
-    #     difference in survival between corresponding stages of old and new staging 
-    #     systems. SME = Σ(S_new_i - S_old_i) where S represents stage-specific 
-    #     survival rates. Positive values indicate Will Rogers phenomenon (apparent 
-    #     improvement in new system), while negative values suggest understaging.
+    # Stage Migration Effect Options
+    - name: calculateSME
+      title: 'Calculate Stage Migration Effect'
+      type: Bool
+      default: false
+      description: >-
+        Calculate Stage Migration Effect Formula (SME) to quantify the cumulative 
+        difference in survival between corresponding stages of old and new staging 
+        systems. SME = Σ(S_new_i - S_old_i) where S represents stage-specific 
+        survival rates. Positive values indicate Will Rogers phenomenon (apparent 
+        improvement in new system), while negative values suggest understaging.
 
-    # # RMST Analysis Options
-    # - name: calculateRMST
-    #   title: 'Calculate RMST Metrics'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Calculate Restricted Mean Survival Time (RMST) metrics for robust 
-    #     discrimination assessment. RMST provides clinically interpretable 
-    #     survival measures that are independent of proportional hazards assumptions. 
-    #     Particularly valuable when median survival is not reached or when comparing 
-    #     absolute survival benefits between staging systems.
+    # RMST Analysis Options
+    - name: calculateRMST
+      title: 'Calculate RMST Metrics'
+      type: Bool
+      default: false
+      description: >-
+        Calculate Restricted Mean Survival Time (RMST) metrics for robust 
+        discrimination assessment. RMST provides clinically interpretable 
+        survival measures that are independent of proportional hazards assumptions. 
+        Particularly valuable when median survival is not reached or when comparing 
+        absolute survival benefits between staging systems.
 
-    # Competing Risks Analysis Options - NOT IMPLEMENTED
-    # - name: performCompetingRisks
-    #       title: 'Perform Competing Risks Analysis'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform competing risks analysis for scenarios with multiple event types 
-    #         (e.g., cancer-specific death vs. other causes). Implements Fine-Gray 
-    #         subdistribution hazard models and Cumulative Incidence Function (CIF) 
-    #         analysis. Essential when competing events prevent observation of primary 
-    #         outcome and standard survival analysis may be biased.
+    # Competing Risks Analysis Options
+    - name: performCompetingRisks
+      title: 'Perform Competing Risks Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform competing risks analysis for scenarios with multiple event types 
+        (e.g., cancer-specific death vs. other causes). Implements Fine-Gray 
+        subdistribution hazard models and Cumulative Incidence Function (CIF) 
+        analysis. Essential when competing events prevent observation of primary 
+        outcome and standard survival analysis may be biased.
 
-    # - name: competingEventVar
-    #       title: 'Competing Event Variable'
-    #       type: Variable
-    #       suggested:
-    #         - nominal
-    #         - ordinal
-    #       permitted:
-    #         - factor
-    #         - numeric
-    #       default: null
-    #       description: >-
-    #         Optional variable indicating competing events (events other than primary 
-    #         outcome). If not specified, the analysis will attempt to detect competing 
-    #         risks from multi-level event variables. For cancer studies, this typically 
-    #         represents non-cancer deaths when primary outcome is cancer-specific death.
+    - name: competingEventVar
+      title: 'Competing Event Variable'
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description: >-
+        Optional variable indicating competing events (events other than primary 
+        outcome). If not specified, the analysis will attempt to detect competing 
+        risks from multi-level event variables. For cancer studies, this typically 
+        represents non-cancer deaths when primary outcome is cancer-specific death.
 
     # Optimal Cut-point Determination Options
-    # - name: performOptimalCutpoint
-    #   title: 'Optimal Cut-point Determination'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Determine optimal cut-points for continuous variables that create the most 
-    #     statistically significant separation in survival outcomes. Uses maximal 
-    #     selected rank statistics with appropriate multiple testing corrections. 
-    #     Essential for developing new staging criteria from continuous biomarkers 
-    #     or measurements.
+    - name: performOptimalCutpoint
+      title: 'Optimal Cut-point Determination'
+      type: Bool
+      default: false
+      description: >-
+        Determine optimal cut-points for continuous variables that create the most 
+        statistically significant separation in survival outcomes. Uses maximal 
+        selected rank statistics with appropriate multiple testing corrections. 
+        Essential for developing new staging criteria from continuous biomarkers 
+        or measurements.
 
-    # - name: continuousStageVariable
-    #   title: 'Continuous Variable for Cut-point Analysis'
-    #   type: Variable
-    #   suggested: [continuous]
-    #   permitted: [numeric]
-    #   default: null
-    #   description: >-
-    #     Continuous variable (e.g., tumor size, biomarker level, age) for optimal 
-    #     cut-point determination. The analysis will find the cut-point that maximizes 
-    #     the separation in survival outcomes while controlling for multiple testing.
+    - name: continuousStageVariable
+      title: 'Continuous Variable for Cut-point Analysis'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >-
+        Continuous variable (e.g., tumor size, biomarker level, age) for optimal 
+        cut-point determination. The analysis will find the cut-point that maximizes 
+        the separation in survival outcomes while controlling for multiple testing.
 
-    # - name: cutpointMethod
-    #   title: 'Cut-point Method'
-    #   type: List
-    #   options:
-    #     - title: "Maximal Selected Rank Statistics"
-    #       name: maxstat
-    #     - title: "Minimum p-value Approach"
-    #       name: minpvalue
-    #     - title: "Optimal Separation (survminer)"
-    #       name: surv_cutpoint
-    #     - title: "Multiple Methods Comparison"
-    #       name: comprehensive
-    #   default: maxstat
-    #   description: >-
-    #     Method for optimal cut-point determination. Maximal selected rank statistics 
-    #     provides the most rigorous approach with proper multiple testing correction.
+    - name: cutpointMethod
+      title: 'Cut-point Method'
+      type: List
+      options:
+        - title: "Maximal Selected Rank Statistics"
+          name: maxstat
+        - title: "Minimum p-value Approach"
+          name: minpvalue
+        - title: "Optimal Separation (survminer)"
+          name: surv_cutpoint
+        - title: "Multiple Methods Comparison"
+          name: comprehensive
+      default: maxstat
+      description: >-
+        Method for optimal cut-point determination. Maximal selected rank statistics 
+        provides the most rigorous approach with proper multiple testing correction.
 
-    # - name: cutpointRange
-    #   title: 'Cut-point Search Range'
-    #   type: String
-    #   default: "0.1, 0.9"
-    #   description: >-
-    #     Proportion range for cut-point search (e.g., "0.1, 0.9" excludes outer 
-    #     10% to maintain statistical power). Prevents extreme cut-points that 
-    #     create unbalanced groups.
+    - name: cutpointRange
+      title: 'Cut-point Search Range'
+      type: String
+      default: "0.1, 0.9"
+      description: >-
+        Proportion range for cut-point search (e.g., "0.1, 0.9" excludes outer 
+        10% to maintain statistical power). Prevents extreme cut-points that 
+        create unbalanced groups.
 
-    # - name: multipleTestingCorrection
-    #   title: 'Multiple Testing Correction'
-    #   type: List
-    #   options:
-    #     - title: "Bonferroni"
-    #       name: bonferroni
-    #     - title: "Benjamini-Hochberg (FDR)"
-    #       name: BH
-    #     - title: "Holm"
-    #       name: holm
-    #     - title: "None"
-    #       name: none
-    #   default: bonferroni
-    #   description: >-
-    #     Multiple testing correction method for cut-point determination. 
-    #     Bonferroni is most conservative; use when testing many cut-points.
+    - name: multipleTestingCorrection
+      title: 'Multiple Testing Correction'
+      type: List
+      options:
+        - title: "Bonferroni"
+          name: bonferroni
+        - title: "Benjamini-Hochberg (FDR)"
+          name: BH
+        - title: "Holm"
+          name: holm
+        - title: "None"
+          name: none
+      default: bonferroni
+      description: >-
+        Multiple testing correction method for cut-point determination. 
+        Bonferroni is most conservative; use when testing many cut-points.
 
-    # - name: validateCutpoint
-    #   title: 'Cross-validate Cut-point'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Perform cross-validation to assess stability of optimal cut-point. 
-    #     Helps identify robust cut-points that are not dependent on specific 
-    #     data characteristics.
+    - name: validateCutpoint
+      title: 'Cross-validate Cut-point'
+      type: Bool
+      default: false
+      description: >-
+        Perform cross-validation to assess stability of optimal cut-point. 
+        Helps identify robust cut-points that are not dependent on specific 
+        data characteristics.
 
-    # - name: cutpointBootstrap
-    #   title: 'Bootstrap Cut-point Validation'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Use bootstrap validation to assess cut-point stability and derive 
-    #     confidence intervals. Provides robust assessment of cut-point reliability.
+    - name: cutpointBootstrap
+      title: 'Bootstrap Cut-point Validation'
+      type: Bool
+      default: false
+      description: >-
+        Use bootstrap validation to assess cut-point stability and derive 
+        confidence intervals. Provides robust assessment of cut-point reliability.
 
-    # - name: cutpointBootstrapReps
-    #   title: 'Cut-point Bootstrap Repetitions'
-    #   type: Number
-    #   min: 100
-    #   max: 1000
-    #   default: 500
-    #   description: >-
-    #     Number of bootstrap repetitions for cut-point validation.
+    - name: cutpointBootstrapReps
+      title: 'Cut-point Bootstrap Repetitions'
+      type: Number
+      min: 100
+      max: 1000
+      default: 500
+      description: >-
+        Number of bootstrap repetitions for cut-point validation.
 
-    # - name: generateStagingSystem
-    #   title: 'Generate New Staging System'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Automatically generate a new staging system based on optimal cut-points. 
-    #     Creates categorical staging variable from continuous measurements using 
-    #     determined cut-points with appropriate stage labeling.
+    - name: generateStagingSystem
+      title: 'Generate New Staging System'
+      type: Bool
+      default: false
+      description: >-
+        Automatically generate a new staging system based on optimal cut-points. 
+        Creates categorical staging variable from continuous measurements using 
+        determined cut-points with appropriate stage labeling.
 
-    # - name: stagingSystemLevels
-    #   title: 'Number of Staging Levels'
-    #   type: Number
-    #   min: 2
-    #   max: 6
-    #   default: 3
-    #   description: >-
-    #     Number of staging levels to create from optimal cut-points (e.g., 3 for 
-    #     Low/Intermediate/High or 4 for Stages I-IV).
+    - name: stagingSystemLevels
+      title: 'Number of Staging Levels'
+      type: Number
+      min: 2
+      max: 6
+      default: 3
+      description: >-
+        Number of staging levels to create from optimal cut-points (e.g., 3 for 
+        Low/Intermediate/High or 4 for Stages I-IV).
 
-    # =================================================================
-    # SHAP Model Interpretability Options - NOT IMPLEMENTED
-    # TODO: Implement SHAP analysis for model interpretability
-    # =================================================================
-    #     # - name: performSHAPAnalysis
-    #       title: 'SHAP Model Interpretability'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform Shapley Additive Explanations (SHAP) analysis to explain which 
-    #         factors are driving the predictions of staging models. SHAP provides 
-    #         both global feature importance and individual patient-level explanations 
-    #         for complex staging decisions.
-    # 
-    #     - name: shapAnalysisType
-    #       title: 'SHAP Analysis Type'
-    #       type: List
-    #       options:
-    #         - title: "Global Feature Importance"
-    #           name: global
-    #         - title: "Individual Patient Explanations"
-    #           name: individual
-    #         - title: "Comprehensive Analysis"
-    #           name: comprehensive
-    #       default: comprehensive
-    #       description: >-
-    #         Type of SHAP analysis to perform. Global analysis shows overall feature 
-    #         importance across all patients, individual analysis explains specific 
-    #         patient predictions, comprehensive includes both approaches.
-    # 
-    #     - name: shapCovariates
-    #       title: 'Variables for SHAP Analysis'
-    #       type: Variables
-    #       suggested: [continuous, ordinal, nominal]
-    #       permitted: [numeric, factor]
-    #       default: null
-    #       description: >-
-    #         Additional variables to include in SHAP interpretability analysis 
-    #         alongside staging variables. Include key clinical variables that 
-    #         might influence staging decisions or patient outcomes.
-    # 
-    #     - name: shapSampleSize
-    #       title: 'SHAP Sample Size'
-    #       type: Number
-    #       min: 50
-    #       max: 1000
-    #       default: 100
-    #       description: >-
-    #         Number of patients to use for SHAP analysis. Larger samples provide 
-    #         more comprehensive explanations but require more computation time. 
-    #         Recommended: 100-200 for routine analysis, 500+ for detailed research.
-    # 
-    #     - name: shapBackgroundSamples
-    #       title: 'SHAP Background Samples'
-    #       type: Number
-    #       min: 10
-    #       max: 500
-    #       default: 50
-    #       description: >-
-    #         Number of background samples for SHAP baseline calculation. More 
-    #         samples provide more stable explanations but increase computation time.
-    # 
-    #     - name: shapExplanationType
-    #       title: 'SHAP Explanation Method'
-    #       type: List
-    #       options:
-    #         - title: "TreeSHAP (for tree-based models)"
-    #           name: tree
-    #         - title: "Kernel SHAP (model-agnostic)"
-    #           name: kernel
-    #         - title: "Linear SHAP (for linear models)"
-    #           name: linear
-    #         - title: "Auto-detect best method"
-    #           name: auto
-    #       default: auto
-    #       description: >-
-    #         SHAP explanation method to use. Auto-detect chooses the most appropriate 
-    #         method based on the model type. TreeSHAP is fastest for tree models, 
-    #         Kernel SHAP works with any model but is slower.
-    # 
-    #     - name: generateSHAPPlots
-    #       title: 'Generate SHAP Plots'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate SHAP visualization plots including summary plots, bar plots, 
-    #         and dependence plots for model interpretability.
-    # 
-    #     - name: shapPatientProfiles
-    #       title: 'Patient Profile Examples'
-    #       type: List
-    #       options:
-    #         - title: "High-risk patients"
-    #           name: high_risk
-    #         - title: "Low-risk patients"
-    #           name: low_risk
-    #         - title: "Representative patients"
-    #           name: representative
-    #         - title: "All profile types"
-    #           name: all
-    #       default: representative
-    #       description: >-
-    #         Types of patient profiles to include in individual SHAP explanations. 
-    #         Helps understand how different patient characteristics influence 
-    #         staging-based predictions.
-    # 
-    #     - name: shapInteractionAnalysis
-    #       title: 'SHAP Interaction Analysis'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform SHAP interaction analysis to identify important feature 
-    #         interactions. Shows how combinations of features affect predictions 
-    #         beyond individual feature effects.
-    # 
-    #     - name: shapClinicalThresholds
-    #       title: 'Clinical Risk Thresholds'
-    #       type: String
-    #       default: "0.25, 0.50, 0.75"
-    #       description: >-
-    #         Comma-separated risk thresholds for clinical decision boundaries in
-    #         SHAP analysis (e.g., "0.25, 0.50, 0.75" for low/moderate/high risk).
-    #         Used to interpret SHAP values in clinical context.
+    # SHAP Model Interpretability Options
+    - name: performSHAPAnalysis
+      title: 'SHAP Model Interpretability'
+      type: Bool
+      default: false
+      description: >-
+        Perform Shapley Additive Explanations (SHAP) analysis to explain which 
+        factors are driving the predictions of staging models. SHAP provides 
+        both global feature importance and individual patient-level explanations 
+        for complex staging decisions.
 
-    # =================================================================
-    # Competing Risks Analysis with Fine-Gray Models - NOT IMPLEMENTED
-    # TODO: Implement advanced competing risks analysis
-    # =================================================================
-    #     # - name: performCompetingRisksAdvanced
-    #       title: 'Advanced Competing Risks Analysis'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform comprehensive competing risks analysis using Fine-Gray 
-    #         subdistribution hazard models and Cumulative Incidence Function (CIF) 
-    #         analysis. Essential when competing events prevent observation of primary 
-    #         outcome and standard survival analysis may be biased.
-    # 
-    #     - name: competingRisksMethod
-    #       title: 'Competing Risks Method'
-    #       type: List
-    #       options:
-    #         - title: "Fine-Gray Subdistribution Hazard"
-    #           name: finegray
-    #         - title: "Cause-Specific Hazard Models"
-    #           name: causespecific
-    #         - title: "Comprehensive Analysis (both methods)"
-    #           name: comprehensive
-    #       default: comprehensive
-    #       description: >-
-    #         Method for competing risks analysis. Fine-Gray models cumulative 
-    #         incidence, cause-specific models instantaneous hazard rates. 
-    #         Comprehensive includes both approaches for complete assessment.
-    # 
-    #     - name: cifTimePoints
-    #       title: 'CIF Time Points (months)'
-    #       type: String
-    #       default: "12, 24, 36, 60"
-    #       description: >-
-    #         Time points for Cumulative Incidence Function analysis (e.g., 
-    #         "12, 24, 36, 60" for 1, 2, 3, and 5-year analysis). Use clinically 
-    #         relevant time points for the specific cancer type.
-    # 
-    #     - name: competingEventLevels
-    #       title: 'Competing Event Categories'
-    #       type: String
-    #       default: "cancer_death, other_death, censored"
-    #       description: >-
-    #         Comma-separated list of event categories for competing risks analysis. 
-    #         Typically includes primary event (cancer death), competing events 
-    #         (other causes), and censoring indicator.
-    # 
-    #     - name: primaryEventLevel
-    #       title: 'Primary Event of Interest'
-    #       type: String
-    #       default: "cancer_death"
-    #       description: >-
-    #         Specify the primary event of interest for competing risks analysis 
-    #         (e.g., "cancer_death", "disease_progression", "cardiovascular_death"). 
-    #         Must match one of the competing event categories.
-    # 
-    #     - name: generateCIFPlots
-    #       title: 'Generate CIF Plots'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate Cumulative Incidence Function plots showing probability of 
-    #         each event type over time. Essential for visualizing competing risks 
-    #         patterns and staging system comparisons.
-    # 
-    #     - name: performGrayTest
-    #       title: 'Gray Test for CIF Equality'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform Gray's test for equality of cumulative incidence functions 
-    #         across staging groups. Tests whether CIF curves differ significantly 
-    #         between stages for each event type.
-    # 
-    #     - name: cifConfidenceLevel
-    #       title: 'CIF Confidence Level'
-    #       type: Number
-    #       min: 0.80
-    #       max: 0.99
-    #       default: 0.95
-    #       description: >-
-    #         Confidence level for Cumulative Incidence Function confidence intervals 
-    #         and statistical tests.
-    # 
-    #     - name: competingRisksCovariates
-    #       title: 'Competing Risks Covariates'
-    #       type: Variables
-    #       suggested: [continuous, ordinal, nominal]
-    #       permitted: [numeric, factor]
-    #       default: null
-    #       description: >-
-    #         Additional variables to include in competing risks regression models. 
-    #         Include important prognostic factors that may influence both primary 
-    #         and competing events.
-    # 
-    #     - name: stratifyByStaging
-    #       title: 'Stratify Analysis by Staging System'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform separate competing risks analysis for each staging system 
-    #         (original vs new) to compare their performance in the presence of 
-    #         competing events.
-    # 
-    #     - name: calculateCRCIndex
-    #       title: 'Competing Risks C-Index'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Calculate C-index specifically adapted for competing risks analysis. 
-    #         Provides discrimination metrics that properly account for competing 
-    #         events when evaluating staging system performance.
-    # 
-    #     - name: generateCRSummary
-    #       title: 'Competing Risks Summary Table'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate comprehensive summary table with Fine-Gray regression results, 
-    #         cumulative incidence estimates, and staging system comparisons in 
-    #         competing risks context.
-    # 
-    # =================================================================
-    # Multi-State Models for Complex Disease Transitions - NOT IMPLEMENTED
-    # TODO: Implement multi-state survival models
-    # =================================================================
-    #     # - name: performMultiStateAnalysis
-    #       title: 'Multi-State Survival Models'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform multi-state survival analysis for complex disease progression 
-    #         scenarios where patients can transition between multiple health states 
-    #         over time. Essential for modeling disease progression, remission, 
-    #         relapse, and death in oncology.
-    # 
-    #     - name: multiStateModel
-    #       title: 'Multi-State Model Type'
-    #       type: List
-    #       options:
-    #         - title: "Illness-Death Model (3 states)"
-    #           name: illness_death
-    #         - title: "Progression Model (4 states)"
-    #           name: progression
-    #         - title: "Relapse-Death Model (4 states)"
-    #           name: relapse_death
-    #         - title: "Custom Model (user-defined)"
-    #           name: custom
-    #         - title: "Comprehensive Analysis (all models)"
-    #           name: comprehensive
-    #       default: illness_death
-    #       description: >-
-    #         Type of multi-state model to fit. Illness-Death models progression 
-    #         from healthy to disease to death. Progression models include stable, 
-    #         progressive, terminal states. Comprehensive fits multiple models for 
-    #         comparison.
-    # 
-    #     - name: stateVariable
-    #       title: 'Disease State Variable'
-    #       type: Variable
-    #       suggested:
-    #         - nominal
-    #         - ordinal
-    #       permitted:
-    #         - factor
-    #         - numeric
-    #       default: null
-    #       description: >-
-    #         Variable indicating patient disease states (e.g., stable, progressive, 
-    #         deceased, remission). Should contain all possible states that patients 
-    #         can transition between during follow-up.
-    # 
-    #     - name: transitionTimeVariable
-    #       title: 'Transition Time Variable'
-    #       type: Variable
-    #       suggested: [continuous]
-    #       permitted: [numeric]
-    #       default: null
-    #       description: >-
-    #         Time variable indicating when state transitions occurred. For multiple 
-    #         transitions per patient, use comma-separated times or separate records 
-    #         for each transition.
-    # 
-    #     - name: multiStateStates
-    #       title: 'State Definitions'
-    #       type: String
-    #       default: "healthy, disease, death"
-    #       description: >-
-    #         Comma-separated list of all possible states in order of progression 
-    #         (e.g., "healthy, disease, death" or "stable, progressive, remission, death"). 
-    #         Must match levels in the state variable.
-    # 
-    #     - name: absorptionStates
-    #       title: 'Absorption States'
-    #       type: String
-    #       default: "death"
-    #       description: >-
-    #         Comma-separated list of absorbing states that patients cannot leave 
-    #         once entered (e.g., "death", "terminal"). These represent final 
-    #         outcomes in the disease process.
-    # 
-    #     - name: multiStateCovariates
-    #       title: 'Multi-State Covariates'
-    #       type: Variables
-    #       suggested: [continuous, ordinal, nominal]
-    #       permitted: [numeric, factor]
-    #       default: null
-    #       description: >-
-    #         Additional variables to include in multi-state models as covariates. 
-    #         Include important prognostic factors that may influence transition 
-    #         rates between states.
-    # 
-    #     - name: calculateTransitionProbabilities
-    #       title: 'Calculate Transition Probabilities'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Calculate state transition probabilities between all possible state 
-    #         pairs. Provides insight into likelihood of disease progression, 
-    #         remission, and mortality transitions.
-    # 
-    #     - name: multiStateTimePoints
-    #       title: 'Multi-State Time Points (months)'
-    #       type: String
-    #       default: "6, 12, 24, 36, 60"
-    #       description: >-
-    #         Time points for transition probability calculations (e.g., 
-    #         "6, 12, 24, 36, 60" for 6-month intervals up to 5 years). Use 
-    #         clinically relevant time points for disease monitoring.
-    # 
-    #     - name: generateTransitionMatrix
-    #       title: 'Generate Transition Matrix'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate comprehensive transition intensity matrix showing hazard 
-    #         rates for all possible state transitions. Essential for understanding 
-    #         disease progression dynamics.
-    # 
-    #     - name: multiStateGraphics
-    #       title: 'Multi-State Visualizations'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate multi-state model visualizations including state transition 
-    #         diagrams, probability plots, and Aalen-Johansen estimator curves for 
-    #         state occupancy probabilities.
-    # 
-    #     - name: msStratifyByStaging
-    #       title: 'Stratify by Staging System'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform separate multi-state analysis for each staging system to 
-    #         compare their ability to predict disease transitions and progression 
-    #         patterns.
-    # 
-    #     - name: multiStateValidation
-    #       title: 'Multi-State Model Validation'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform model validation including goodness-of-fit testing, residual 
-    #         analysis, and cross-validation for multi-state models. Computationally 
-    #         intensive but provides robust model assessment.
-    # 
-    #     - name: generateMSMSummary
-    #       title: 'Multi-State Summary Table'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate comprehensive summary table with transition intensities, 
-    #         hazard ratios, and state occupancy probabilities comparing staging 
-    #         systems in multi-state framework.
-    # 
-    #     # Random Survival Forests for Non-Parametric Survival Modeling Options
-    #     - name: performRandomForestAnalysis
-    #       title: 'Random Survival Forests'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform Random Survival Forest analysis as a non-parametric alternative 
-    #         to Cox proportional hazards models. Provides robust predictions through 
-    #         ensemble methods without proportional hazards assumptions, ideal for 
-    #         complex interactions and non-linear relationships.
-    # 
-    #     - name: forestModelType
-    #       title: 'Forest Model Type'
-    #       type: List
-    #       options:
-    #         - title: "Random Survival Forest (RSF)"
-    #           name: rsf
-    #         - title: "Conditional Inference Forest"
-    #           name: cforest
-    #         - title: "Extremely Randomized Trees"
-    #           name: extraTrees
-    #         - title: "Ensemble Methods (all approaches)"
-    #           name: ensemble
-    #       default: rsf
-    #       description: >-
-    #         Type of random forest model to fit. RSF is the standard approach, 
-    #         conditional inference forests handle categorical variables better, 
-    #         extra trees provide additional randomization. Ensemble combines 
-    #         multiple approaches for maximum robustness.
-    # 
-    #     - name: forestNTrees
-    #       title: 'Number of Trees'
-    #       type: Number
-    #       min: 50
-    #       max: 2000
-    #       default: 500
-    #       description: >-
-    #         Number of trees in the random forest. More trees generally improve 
-    #         performance but increase computation time. 500 trees provide good 
-    #         balance between accuracy and speed for most applications.
-    # 
-    #     - name: forestMTry
-    #       title: 'Variables per Split (mtry)'
-    #       type: String
-    #       default: "auto"
-    #       description: >-
-    #         Number of variables randomly selected at each split. Use "auto" for 
-    #         automatic selection (sqrt of total variables), or specify a number. 
-    #         Lower values increase randomization, higher values may improve accuracy.
-    # 
-    #     - name: forestMinNodeSize
-    #       title: 'Minimum Node Size'
-    #       type: Number
-    #       min: 1
-    #       max: 50
-    #       default: 3
-    #       description: >-
-    #         Minimum number of observations in terminal nodes. Larger values prevent 
-    #         overfitting but may reduce model flexibility. Recommended: 3-10 for 
-    #         survival data depending on sample size.
-    # 
-    #     - name: forestCovariates
-    #       title: 'Forest Covariates'
-    #       type: Variables
-    #       suggested: [continuous, ordinal, nominal]
-    #       permitted: [numeric, factor]
-    #       default: null
-    #       description: >-
-    #         Additional variables to include in random forest models alongside 
-    #         staging variables. Include important clinical variables for 
-    #         comprehensive non-parametric survival modeling.
-    # 
-    #     - name: calculateVariableImportance
-    #       title: 'Calculate Variable Importance'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Calculate variable importance measures using permutation-based methods. 
-    #         Shows which variables contribute most to survival predictions, 
-    #         complementing SHAP analysis with forest-specific importance metrics.
-    # 
-    #     - name: forestImportanceType
-    #       title: 'Importance Measure'
-    #       type: List
-    #       options:
-    #         - title: "Permutation Importance"
-    #           name: permutation
-    #         - title: "Variable Hunting (VIMP)"
-    #           name: vimp
-    #         - title: "Minimal Depth"
-    #           name: minimal_depth
-    #         - title: "Comprehensive (all measures)"
-    #           name: comprehensive
-    #       default: permutation
-    #       description: >-
-    #         Type of variable importance measure. Permutation importance is most 
-    #         interpretable, VIMP is RF-specific, minimal depth shows variable 
-    #         selection frequency. Comprehensive provides all measures.
-    # 
-    #     - name: performForestValidation
-    #       title: 'Forest Cross-Validation'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform out-of-bag validation and cross-validation for random forest 
-    #         models. Provides robust assessment of model performance including 
-    #         prediction error rates and concordance indices.
-    # 
-    #     - name: forestPredictionTimePoints
-    #       title: 'Prediction Time Points (months)'
-    #       type: String
-    #       default: "12, 24, 36, 60"
-    #       description: >-
-    #         Time points for survival probability predictions from random forest 
-    #         models (e.g., "12, 24, 36, 60" for 1, 2, 3, and 5-year predictions). 
-    #         Use clinically relevant time points for staging comparison.
-    # 
-    #     - name: generateSurvivalPredictions
-    #       title: 'Generate Survival Predictions'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate individual patient survival probability predictions at 
-    #         specified time points. Provides personalized risk assessments 
-    #         based on random forest ensemble predictions.
-    # 
-    #     - name: forestDiscriminationMetrics
-    #       title: 'Forest Discrimination Analysis'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Calculate discrimination metrics specifically for random forest models 
-    #         including C-index, Integrated Brier Score, and time-dependent AUC. 
-    #         Compares forest performance with traditional Cox models.
-    # 
-    #     - name: forestStagingComparison
-    #       title: 'Forest-Based Staging Comparison'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Use random forest models to compare staging systems through 
-    #         non-parametric ensemble methods. Provides robust staging comparison 
-    #         without proportional hazards assumptions.
-    # 
-    #     - name: forestBootstrap
-    #       title: 'Bootstrap Forest Validation'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform bootstrap validation of random forest models with multiple 
-    #         bootstrap samples. Provides confidence intervals for forest-based 
-    #         predictions and importance measures.
-    # 
-    #     - name: forestBootstrapSamples
-    #       title: 'Bootstrap Samples'
-    #       type: Number
-    #       min: 50
-    #       max: 500
-    #       default: 100
-    #       description: >-
-    #         Number of bootstrap samples for forest validation. More samples 
-    #         provide more stable confidence intervals but increase computation time.
-    # 
-    #     - name: generateForestSummary
-    #       title: 'Forest Analysis Summary'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate comprehensive summary of random forest analysis including 
-    #         model performance, variable importance, staging comparison, and
-    #         clinical recommendations based on ensemble predictions.
+    - name: shapAnalysisType
+      title: 'SHAP Analysis Type'
+      type: List
+      options:
+        - title: "Global Feature Importance"
+          name: global
+        - title: "Individual Patient Explanations"
+          name: individual
+        - title: "Comprehensive Analysis"
+          name: comprehensive
+      default: comprehensive
+      description: >-
+        Type of SHAP analysis to perform. Global analysis shows overall feature 
+        importance across all patients, individual analysis explains specific 
+        patient predictions, comprehensive includes both approaches.
 
-    # =================================================================
-    # Cure Models for Populations with Cured Fraction - NOT IMPLEMENTED
-    # TODO: Implement cure model analysis for staging systems
-    # =================================================================
-    #     # - name: performCureModelAnalysis
-    #       title: 'Cure Models Analysis'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform cure model analysis for populations where a fraction of patients 
-    #         may be effectively cured. Uses mixture models to separate susceptible 
-    #         and cured populations, particularly relevant for cancer staging analysis.
-    # 
-    #     - name: cureModelType
-    #       title: 'Cure Model Type'
-    #       type: List
-    #       options:
-    #         - name: mixture
-    #           title: 'Mixture Cure Model'
-    #         - name: promotion
-    #           title: 'Promotion Time Model'
-    #         - name: both
-    #           title: 'Both Model Types'
-    #       default: mixture
-    #       description: >-
-    #         Type of cure model to fit. Mixture models assume a cured fraction with 
-    #         infinite survival, promotion time models use biological mechanisms, 
-    #         and both provides comprehensive comparison.
-    # 
-    #     - name: cureDistribution
-    #       title: 'Survival Distribution'
-    #       type: List
-    #       options:
-    #         - name: weibull
-    #           title: 'Weibull'
-    #         - name: exponential
-    #           title: 'Exponential'
-    #         - name: lognormal
-    #           title: 'Log-Normal'
-    #         - name: loglogistic
-    #           title: 'Log-Logistic'
-    #       default: weibull
-    #       description: >-
-    #         Underlying survival distribution for the susceptible population in 
-    #         cure models. Weibull is most flexible, exponential is simplest, 
-    #         log-normal and log-logistic provide alternative hazard shapes.
-    # 
-    #     - name: cureAnalyzeOldStage
-    #       title: 'Analyze Original Staging'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Fit cure models to original staging system to estimate cure fractions 
-    #         and survival patterns for susceptible patients in each stage.
-    # 
-    #     - name: cureAnalyzeNewStage
-    #       title: 'Analyze New Staging'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Fit cure models to new staging system to estimate cure fractions and 
-    #         survival patterns, enabling comparison of staging discrimination for 
-    #         both cured and susceptible populations.
-    # 
-    #     - name: cureFractionEstimation
-    #       title: 'Cure Fraction Method'
-    #       type: List
-    #       options:
-    #         - name: parametric
-    #           title: 'Parametric Estimation'
-    #         - name: nonparametric
-    #           title: 'Non-parametric (Kaplan-Meier)'
-    #         - name: both
-    #           title: 'Both Methods'
-    #       default: parametric
-    #       description: >-
-    #         Method for estimating cure fractions. Parametric uses maximum likelihood 
-    #         with specified distributions, non-parametric uses Kaplan-Meier plateau 
-    #         detection, both provides validation.
-    # 
-    #     - name: cureConfidenceLevel
-    #       title: 'Confidence Level'
-    #       type: Number
-    #       min: 0.80
-    #       max: 0.99
-    #       default: 0.95
-    #       description: >-
-    #         Confidence level for cure model parameter estimates and cure fraction 
-    #         confidence intervals. Standard 95% provides balance between precision 
-    #         and coverage.
-    # 
-    #     - name: cureBootstrapCI
-    #       title: 'Bootstrap Confidence Intervals'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Calculate bootstrap confidence intervals for cure fractions and model 
-    #         parameters. Provides robust uncertainty quantification especially for 
-    #         small samples or complex models.
-    # 
-    #     - name: cureBootstrapReps
-    #       title: 'Bootstrap Replications'
-    #       type: Number
-    #       min: 100
-    #       max: 2000
-    #       default: 500
-    #       description: >-
-    #         Number of bootstrap replications for confidence interval calculation. 
-    #         More replications provide more stable intervals but increase 
-    #         computation time.
-    # 
-    #     - name: cureTimeHorizon
-    #       title: 'Cure Assessment Time (months)'
-    #       type: Number
-    #       min: 12
-    #       max: 240
-    #       default: 120
-    #       description: >-
-    #         Time horizon for cure assessment in months. Patients surviving beyond 
-    #         this time without events are considered potentially cured. Typical 
-    #         values: 60-120 months for most cancers.
-    # 
-    #     - name: curePlateauThreshold
-    #       title: 'Plateau Detection Threshold'
-    #       type: Number
-    #       min: 0.01
-    #       max: 0.10
-    #       default: 0.05
-    #       description: >-
-    #         Threshold for detecting survival curve plateau in non-parametric cure 
-    #         fraction estimation. Lower values detect smaller plateaus but may be 
-    #         more sensitive to noise.
-    # 
-    #     - name: cureCovariates
-    #       title: 'Cure Model Covariates'
-    #       type: Variables
-    #       suggested: [continuous, ordinal, nominal]
-    #       permitted: [numeric, factor]
-    #       default: null
-    #       description: >-
-    #         Additional variables to include in cure model analysis alongside staging 
-    #         variables. Can affect both cure probability and survival of susceptible 
-    #         patients.
-    # 
-    #     - name: cureModelComparison
-    #       title: 'Model Comparison Analysis'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Compare cure models between staging systems using likelihood ratio tests, 
-    #         AIC/BIC criteria, and cure fraction differences. Assesses which staging 
-    #         system better identifies cured patients.
-    # 
-    #     - name: cureStageSpecificAnalysis
-    #       title: 'Stage-Specific Cure Analysis'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform separate cure model analysis for each stage group to understand 
-    #         stage-specific cure patterns and survival of susceptible patients. 
-    #         Essential for staging validation.
-    # 
-    #     - name: cureGoodnessOfFit
-    #       title: 'Goodness-of-Fit Testing'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Perform goodness-of-fit tests for cure models including Kolmogorov-Smirnov 
-    #         tests and visual diagnostic plots. Validates model assumptions and 
-    #         identifies potential misspecification.
-    # 
-    #     - name: generateCureSummary
-    #       title: 'Cure Model Summary'
-    #       type: Bool
-    #       default: false
-    #       description: >-
-    #         Generate comprehensive summary of cure model analysis including cure 
-    #         fractions by stage, model comparison results, and clinical interpretation 
-    #         for staging system evaluation.
-    # 
-    #     - name: performIntervalCensoringAnalysis
-    #       title: 'Interval Censoring Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform interval censoring analysis for events detected between visits.
-    #           This handles cases where the exact event time is unknown but falls 
-    #           within a known interval (e.g., between clinic visits). Uses icenReg 
-    #           package for non-parametric and parametric interval-censored survival 
-    #           analysis.
-    # 
-    #     - name: intervalCensoringLeftTime
-    #       title: 'Left Interval Time Variable'
-    #       type: Variable
-    #       suggested:
-    #         - continuous
-    #       permitted:
-    #         - numeric
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variable containing the left endpoint of the censoring interval.
-    #           For exact observations, this should equal the right endpoint.
-    #           For left-censored observations, use 0 or NA.
-    # 
-    #     - name: intervalCensoringRightTime
-    #       title: 'Right Interval Time Variable'  
-    #       type: Variable
-    #       suggested:
-    #         - continuous
-    #       permitted:
-    #         - numeric
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variable containing the right endpoint of the censoring interval.
-    #           For right-censored observations, use Inf or a large value.
-    #           For exact observations, this should equal the left endpoint.
-    # 
-    #     - name: intervalCensoringDistribution
-    #       title: 'Distribution for Parametric Model'
-    #       type: List
-    #       options:
-    #         - name: weibull
-    #           title: 'Weibull'
-    #         - name: loglogistic
-    #           title: 'Log-logistic'  
-    #         - name: lognormal
-    #           title: 'Log-normal'
-    #         - name: exponential
-    #           title: 'Exponential'
-    #         - name: gamma
-    #           title: 'Gamma'
-    #       default: weibull
-    #       description:
-    #         R: >
-    #           Distribution assumption for parametric interval-censored regression.
-    #           Weibull is most commonly used and provides good flexibility.
-    # 
-    #     - name: intervalCensoringModel
-    #       title: 'Model Type'
-    #       type: List
-    #       options:
-    #         - name: nonparametric
-    #           title: 'Non-parametric (NPMLE)'
-    #         - name: parametric
-    #           title: 'Parametric Regression'
-    #         - name: both
-    #           title: 'Both Models'
-    #       default: both
-    #       description:
-    #         R: >
-    #           Type of interval censoring model to fit. Non-parametric uses
-    #           non-parametric maximum likelihood estimation (NPMLE). Parametric
-    #           fits accelerated failure time models with specified distribution.
-    # 
-    #     - name: intervalCensoringBootstrap
-    #       title: 'Bootstrap Confidence Intervals'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Calculate bootstrap confidence intervals for non-parametric estimates.
-    #           This provides uncertainty quantification for the survival function
-    #           estimates with interval-censored data.
-    # 
-    #     - name: intervalCensoringBootstrapSamples
-    #       title: 'Bootstrap Samples'
-    #       type: Integer
-    #       default: 1000
-    #       min: 100
-    #       max: 10000
-    #       description:
-    #         R: >
-    #           Number of bootstrap samples for confidence interval calculation.
-    #           More samples provide more accurate intervals but increase computation time.
-    # 
-    #     - name: intervalCensoringCompareStages
-    #       title: 'Compare Staging Systems'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Compare survival functions between different staging systems
-    #           accounting for interval censoring. Provides likelihood ratio tests
-    #           and information criteria for model comparison.
-    # 
-    #     - name: intervalCensoringPlots
-    #       title: 'Generate Survival Plots'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Generate survival plots specifically designed for interval-censored data,
-    #           including non-parametric survival function estimates and comparison
-    #           plots between staging systems.
-    # 
-    #     - name: intervalCensoringDiagnostics
-    #       title: 'Model Diagnostics'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform model diagnostics including convergence assessment,
-    #           residual analysis for parametric models, and goodness-of-fit tests
-    #           for interval-censored regression models.
-    # 
-    #     - name: intervalCensoringPredictionTime
-    #       title: 'Prediction Time Points'
-    #       type: String
-    #       default: '12, 24, 36, 60'
-    #       description:
-    #         R: >
-    #           Comma-separated list of time points (in months) for survival probability
-    #           predictions. These will be used for staging system comparison and
-    #           clinical interpretation of interval-censored survival estimates.
-    # 
-    #     - name: intervalCensoringConfidenceLevel
-    #       title: 'Confidence Level'
-    #       type: Number
-    #       default: 0.95
-    #       min: 0.8
-    #       max: 0.99
-    #       description:
-    #         R: >
-    #           Confidence level for interval estimates and hypothesis tests.
-    #           Standard choices are 0.90, 0.95, or 0.99.
-    # 
-    #     - name: intervalCensoringAdjustVariables
-    #       title: 'Adjustment Variables'
-    #       type: Variables
-    #       suggested:
-    #         - continuous
-    #         - nominal
-    #         - ordinal
-    #       permitted:
-    #         - numeric
-    #         - factor
-    #       default: null
-    #       description:
-    #         R: >
-    #           Additional variables to include in parametric interval-censored regression
-    #           models for adjusted survival analysis. These will be included as covariates
-    #           in the accelerated failure time model.
-    # 
-    #     - name: performInformativeCensoringAnalysis
-    #       title: 'Informative Censoring Detection'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform tests for informative censoring to validate the assumption that
-    #           censoring is non-informative. Informative censoring occurs when the
-    #           censoring mechanism is related to the failure time, potentially biasing
-    #           survival estimates. This analysis provides tests and adjustments for
-    #           non-random censoring patterns.
-    # 
-    #     - name: informativeCensoringTestMethod
-    #       title: 'Test Method for Informative Censoring'
-    #       type: List
-    #       options:
-    #         - name: all_tests
-    #           title: 'All Available Tests'
-    #         - name: correlation_test
-    #           title: 'Correlation Test'
-    #         - name: regression_test
-    #           title: 'Regression-Based Test'
-    #         - name: competing_risks
-    #           title: 'Competing Risks Approach'
-    #         - name: landmark_analysis
-    #           title: 'Landmark Analysis'
-    #       default: all_tests
-    #       description:
-    #         R: >
-    #           Method for testing informative censoring. Correlation tests examine
-    #           relationship between censoring and survival times. Regression tests
-    #           model censoring as outcome. Competing risks treats censoring as
-    #           competing event. Landmark analysis examines censoring patterns.
-    # 
-    #     - name: informativeCensoringCovariates
-    #       title: 'Censoring Mechanism Covariates'
-    #       type: Variables
-    #       suggested:
-    #         - continuous
-    #         - nominal
-    #         - ordinal
-    #       permitted:
-    #         - numeric
-    #         - factor
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variables that may be associated with the censoring mechanism.
-    #           These could include clinical factors, treatment decisions, or
-    #           administrative factors that might influence when patients are
-    #           censored from the study.
-    # 
-    #     - name: informativeCensoringLandmarkTimes
-    #       title: 'Landmark Time Points'
-    #       type: String
-    #       default: '12, 24, 36, 60'
-    #       description:
-    #         R: >
-    #           Comma-separated list of landmark time points (in months) for
-    #           landmark analysis of censoring patterns. Analysis examines
-    #           whether censoring probabilities differ across staging groups
-    #           at these specific time points.
-    # 
-    #     - name: informativeCensoringAdjustmentMethod
-    #       title: 'Adjustment Method'
-    #       type: List
-    #       options:
-    #         - name: none
-    #           title: 'No Adjustment'
-    #         - name: ipw
-    #           title: 'Inverse Probability Weighting'
-    #         - name: multiple_imputation
-    #           title: 'Multiple Imputation'
-    #         - name: sensitivity_analysis
-    #           title: 'Sensitivity Analysis'
-    #       default: sensitivity_analysis
-    #       description:
-    #         R: >
-    #           Method for adjusting survival estimates when informative censoring
-    #           is detected. IPW uses inverse probability weighting. Multiple
-    #           imputation imputes censored failure times. Sensitivity analysis
-    #           explores range of possible bias effects.
-    # 
-    #     - name: informativeCensoringIPWVariables
-    #       title: 'IPW Model Variables'
-    #       type: Variables
-    #       suggested:
-    #         - continuous
-    #         - nominal
-    #         - ordinal
-    #       permitted:
-    #         - numeric
-    #         - factor
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variables to include in inverse probability weighting model for
-    #           censoring probability estimation. Should include factors that
-    #           predict censoring but are not affected by the outcome.
-    # 
-    #     - name: informativeCensoringSensitivityRange
-    #       title: 'Sensitivity Analysis Range'
-    #       type: String
-    #       default: '0.8, 0.9, 1.0, 1.1, 1.2'
-    #       description:
-    #         R: >
-    #           Comma-separated list of sensitivity parameters for bias analysis.
-    #           These represent hazard ratio multipliers for exploring potential
-    #           bias from informative censoring (1.0 = no bias assumption).
-    # 
-    #     - name: informativeCensoringBootstrap
-    #       title: 'Bootstrap Confidence Intervals'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Calculate bootstrap confidence intervals for adjusted survival
-    #           estimates and bias-corrected parameters. Provides uncertainty
-    #           quantification for informative censoring adjustments.
-    # 
-    #     - name: informativeCensoringBootstrapSamples
-    #       title: 'Bootstrap Samples'
-    #       type: Integer
-    #       default: 1000
-    #       min: 100
-    #       max: 5000
-    #       description:
-    #         R: >
-    #           Number of bootstrap samples for confidence interval calculation
-    #           in informative censoring analysis. More samples provide more
-    #           accurate intervals but increase computation time.
-    # 
-    #     - name: informativeCensoringAlpha
-    #       title: 'Significance Level'
-    #       type: Number
-    #       default: 0.05
-    #       min: 0.01
-    #       max: 0.10
-    #       description:
-    #         R: >
-    #           Significance level for testing informative censoring hypotheses.
-    #           Used for determining whether censoring appears to be informative
-    #           and for confidence interval construction.
-    # 
-    #     - name: informativeCensoringPlots
-    #       title: 'Generate Diagnostic Plots'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Generate diagnostic plots for informative censoring assessment
-    #           including censoring probability over time, correlation plots,
-    #           and sensitivity analysis visualizations.
-    # 
-    #     - name: informativeCensoringCompareStages
-    #       title: 'Compare Censoring Across Stages'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Compare censoring patterns across different staging groups to
-    #           assess whether censoring differs by stage, which could indicate
-    #           stage-related informative censoring that affects staging
-    #           system evaluation.
-    # 
-    #     - name: performConcordanceProbabilityAnalysis
-    #       title: 'Concordance Probability Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform advanced concordance probability analysis for heavily censored data.
-    #           This provides alternative concordance measures beyond traditional C-index,
-    #           including Harrell's C-index modifications, Uno's C-index for heavily censored
-    #           data, and time-dependent concordance measures specifically designed for
-    #           staging system evaluation with high censoring rates.
-    # 
-    #     - name: concordanceProbabilityMethods
-    #       title: 'Concordance Methods'
-    #       type: List
-    #       options:
-    #         - name: all_methods
-    #           title: 'All Available Methods'
-    #         - name: harrell_c
-    #           title: 'Harrell C-index'
-    #         - name: uno_c
-    #           title: 'Uno C-index'
-    #         - name: time_dependent
-    #           title: 'Time-Dependent Concordance'
-    #         - name: ipcw_concordance
-    #           title: 'IPCW Concordance'
-    #         - name: weighted_concordance
-    #           title: 'Weighted Concordance'
-    #       default: all_methods
-    #       description:
-    #         R: >
-    #           Concordance probability estimation methods. Harrell C-index is traditional
-    #           but may be biased with heavy censoring. Uno C-index uses inverse probability
-    #           weighting for censoring. Time-dependent measures evaluate concordance at
-    #           specific time points. IPCW and weighted methods provide robust alternatives.
-    # 
-    #     - name: concordanceProbabilityTimePoints
-    #       title: 'Time Points for Assessment'
-    #       type: String
-    #       default: '12, 24, 36, 60, 120'
-    #       description:
-    #         R: >
-    #           Comma-separated list of time points (in months) for time-dependent
-    #           concordance assessment. These will be used for evaluating staging
-    #           system discrimination at clinically relevant time horizons.
-    # 
-    #     - name: concordanceProbabilityWeighting
-    #       title: 'Weighting Strategy'
-    #       type: List
-    #       options:
-    #         - name: uniform
-    #           title: 'Uniform Weighting'
-    #         - name: sample_size
-    #           title: 'Sample Size Weighting'
-    #         - name: event_rate
-    #           title: 'Event Rate Weighting'
-    #         - name: follow_up
-    #           title: 'Follow-up Time Weighting'
-    #         - name: inverse_variance
-    #           title: 'Inverse Variance Weighting'
-    #       default: uniform
-    #       description:
-    #         R: >
-    #           Weighting strategy for concordance probability estimation.
-    #           Uniform gives equal weight to all pairs. Sample size weights by
-    #           stage frequency. Event rate weights by observed events. Follow-up
-    #           weights by observation time. Inverse variance uses precision weighting.
-    # 
-    #     - name: concordanceProbabilityBootstrap
-    #       title: 'Bootstrap Confidence Intervals'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Calculate bootstrap confidence intervals for concordance probability
-    #           estimates. This provides uncertainty quantification for discrimination
-    #           measures, especially important for heavily censored data where
-    #           traditional standard errors may be unreliable.
-    # 
-    #     - name: concordanceProbabilityBootstrapSamples
-    #       title: 'Bootstrap Samples'
-    #       type: Integer
-    #       default: 1000
-    #       min: 100
-    #       max: 5000
-    #       description:
-    #         R: >
-    #           Number of bootstrap samples for confidence interval calculation.
-    #           More samples provide more accurate intervals but increase computation
-    #           time. Recommended minimum 500 for reliable confidence intervals.
-    # 
-    #     - name: concordanceProbabilityConfidenceLevel
-    #       title: 'Confidence Level'
-    #       type: Number
-    #       default: 0.95
-    #       min: 0.8
-    #       max: 0.99
-    #       description:
-    #         R: >
-    #           Confidence level for concordance probability confidence intervals.
-    #           Standard choices are 0.90, 0.95, or 0.99 for 90%, 95%, or 99%
-    #           confidence intervals respectively.
-    # 
-    #     - name: concordanceProbabilityCompareStages
-    #       title: 'Compare Staging Systems'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Compare concordance probabilities between different staging systems
-    #           using hypothesis tests and confidence interval overlap assessment.
-    #           Provides statistical evidence for staging system discrimination
-    #           differences accounting for heavy censoring.
-    # 
-    #     - name: concordanceProbabilityAdjustVariables
-    #       title: 'Adjustment Variables'
-    #       type: Variables
-    #       suggested:
-    #         - continuous
-    #         - nominal
-    #         - ordinal
-    #       permitted:
-    #         - numeric
-    #         - factor
-    #       default: null
-    #       description:
-    #         R: >
-    #           Additional variables to include in adjusted concordance analysis.
-    #           These variables will be included alongside staging in multivariable
-    #           models to assess staging contribution to discrimination beyond
-    #           other prognostic factors.
-    # 
-    #     - name: concordanceProbabilityRobustnessAnalysis
-    #       title: 'Robustness Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform robustness analysis for concordance probability estimates
-    #           including sensitivity to censoring assumptions, outlier influence,
-    #           and temporal stability assessment for comprehensive validation
-    #           of staging system discrimination.
-    # 
-    #     - name: concordanceProbabilityAlpha
-    #       title: 'Significance Level'
-    #       type: Number
-    #       default: 0.05
-    #       min: 0.01
-    #       max: 0.10
-    #       description:
-    #         R: >
-    #           Significance level for concordance probability hypothesis tests
-    #           and confidence interval construction. Used for testing differences
-    #           between staging systems and assessing statistical significance
-    #           of discrimination improvements.
-    # 
-    #     - name: concordanceProbabilityDiagnostics
-    #       title: 'Diagnostic Assessment'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform diagnostic assessment of concordance probability estimates
-    #           including convergence checks, influence diagnostics, and
-    #           sensitivity analysis to ensure reliable discrimination assessment
-    #           for staging system evaluation.
-    # 
-    #     - name: performWinRatioAnalysis
-    #       title: 'Win Ratio Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform win ratio analysis for composite endpoint analysis in staging
-    #           comparison. The win ratio is a novel method for analyzing composite
-    #           endpoints that respects the clinical hierarchy of outcomes and provides
-    #           intuitive interpretation for staging system evaluation.
-    # 
-    #     - name: winRatioEndpoints
-    #       title: 'Endpoint Hierarchy'
-    #       type: List
-    #       options:
-    #         - name: death_progression_response
-    #           title: 'Death > Disease Progression > Response'
-    #         - name: death_recurrence_remission
-    #           title: 'Death > Recurrence > Remission'
-    #         - name: death_hospitalization_qol
-    #           title: 'Death > Hospitalization > Quality of Life'
-    #         - name: custom
-    #           title: 'Custom Hierarchy'
-    #       default: death_progression_response
-    #       description:
-    #         R: >
-    #           Clinical hierarchy of endpoints for win ratio analysis. More important
-    #           outcomes are prioritized in the analysis. Death is typically the most
-    #           important endpoint, followed by disease-specific outcomes. The hierarchy
-    #           determines how patient pairs are compared.
-    # 
-    #     - name: winRatioDeathVariable
-    #       title: 'Death/Primary Endpoint Variable'
-    #       type: Variable
-    #       suggested:
-    #         - nominal
-    #       permitted:
-    #         - numeric
-    #         - factor
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variable indicating death or primary endpoint occurrence (1 = event, 0 = no event).
-    #           This is typically the most important outcome in the hierarchy and is
-    #           compared first when evaluating patient pairs.
-    # 
-    #     - name: winRatioSecondaryEndpoint
-    #       title: 'Secondary Endpoint Variable'
-    #       type: Variable
-    #       suggested:
-    #         - nominal
-    #         - continuous
-    #       permitted:
-    #         - numeric
-    #         - factor
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variable for secondary endpoint (e.g., disease progression, recurrence).
-    #           This endpoint is evaluated when the primary endpoint comparison is tied.
-    #           Can be binary (event/no event) or continuous (time to event).
-    # 
-    #     - name: winRatioTertiaryEndpoint
-    #       title: 'Tertiary Endpoint Variable'
-    #       type: Variable
-    #       suggested:
-    #         - nominal
-    #         - continuous
-    #       permitted:
-    #         - numeric
-    #         - factor
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variable for tertiary endpoint (e.g., response, quality of life).
-    #           This endpoint is evaluated when both primary and secondary comparisons
-    #           are tied. Can be binary or continuous.
-    # 
-    #     - name: winRatioTimeVariables
-    #       title: 'Time Variables for Endpoints'
-    #       type: Variables
-    #       suggested:
-    #         - continuous
-    #       permitted:
-    #         - numeric
-    #       default: null
-    #       description:
-    #         R: >
-    #           Time variables corresponding to each endpoint in the hierarchy.
-    #           Should be provided in the same order as the endpoints. Used for
-    #           time-to-event comparisons when endpoints are not binary.
-    # 
-    #     - name: winRatioMatchingStrategy
-    #       title: 'Matching Strategy'
-    #       type: List
-    #       options:
-    #         - name: all_pairs
-    #           title: 'All Possible Pairs'
-    #         - name: matched_pairs
-    #           title: 'Matched Pairs Only'
-    #         - name: stratified
-    #           title: 'Stratified by Stage'
-    #         - name: propensity_matched
-    #           title: 'Propensity Score Matched'
-    #       default: all_pairs
-    #       description:
-    #         R: >
-    #           Strategy for forming patient pairs for comparison. All pairs compares
-    #           every patient from one group with every patient from another. Matched
-    #           pairs uses pre-specified matching. Stratified performs within-stage
-    #           comparisons. Propensity matching balances baseline characteristics.
-    # 
-    #     - name: winRatioConfidenceMethod
-    #       title: 'Confidence Interval Method'
-    #       type: List
-    #       options:
-    #         - name: bootstrap
-    #           title: 'Bootstrap'
-    #         - name: asymptotic
-    #           title: 'Asymptotic'
-    #         - name: permutation
-    #           title: 'Permutation'
-    #       default: bootstrap
-    #       description:
-    #         R: >
-    #           Method for calculating confidence intervals for the win ratio.
-    #           Bootstrap is most robust but computationally intensive. Asymptotic
-    #           uses large sample theory. Permutation provides exact p-values.
-    # 
-    #     - name: winRatioBootstrapSamples
-    #       title: 'Bootstrap Samples'
-    #       type: Integer
-    #       default: 1000
-    #       min: 100
-    #       max: 5000
-    #       description:
-    #         R: >
-    #           Number of bootstrap samples for confidence interval calculation
-    #           when using bootstrap method. More samples provide more accurate
-    #           intervals but increase computation time.
-    # 
-    #     - name: winRatioConfidenceLevel
-    #       title: 'Confidence Level'
-    #       type: Number
-    #       default: 0.95
-    #       min: 0.8
-    #       max: 0.99
-    #       description:
-    #         R: >
-    #           Confidence level for win ratio confidence intervals and hypothesis
-    #           tests. Standard choices are 0.90, 0.95, or 0.99 for 90%, 95%, or
-    #           99% confidence intervals respectively.
-    # 
-    #     - name: winRatioHandleTies
-    #       title: 'Tie Handling Strategy'
-    #       type: List
-    #       options:
-    #         - name: split
-    #           title: 'Split Ties (0.5 each)'
-    #         - name: ignore
-    #           title: 'Ignore Tied Pairs'
-    #         - name: next_endpoint
-    #           title: 'Use Next Endpoint'
-    #       default: next_endpoint
-    #       description:
-    #         R: >
-    #           Strategy for handling tied comparisons. Split assigns 0.5 wins to each.
-    #           Ignore excludes tied pairs from analysis. Next endpoint proceeds to
-    #           compare the next outcome in the hierarchy for tied pairs.
-    # 
-    #     - name: winRatioSensitivityAnalysis
-    #       title: 'Sensitivity Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform sensitivity analysis for win ratio including assessment of
-    #           endpoint ordering impact, missing data influence, and robustness
-    #           to matching strategy choices.
-    # 
-    #     - name: winRatioGeneralizedPairwise
-    #       title: 'Generalized Pairwise Comparison'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Use generalized pairwise comparison (GPC) framework which extends
-    #           win ratio to include continuous outcomes and provides additional
-    #           metrics like net benefit and win odds.
-    # 
-    #     # Frailty Models for Clustering Analysis
-    #     - name: performFrailtyModelsAnalysis
-    #       title: 'Frailty Models Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform frailty models analysis for clustered survival data using 
-    #           mixed-effects Cox models (coxme) for multi-institutional data with 
-    #           center-specific random effects and clustering adjustments.
-    # 
-    #     - name: frailtyClusterVariable
-    #       title: 'Cluster Variable'
-    #       type: Variable
-    #       suggested:
-    #         - nominal
-    #         - ordinal
-    #       default: null
-    #       description:
-    #         R: >
-    #           Variable defining clusters/institutions for frailty modeling (e.g., 
-    #           hospital, center, surgeon). Used to account for unobserved 
-    #           heterogeneity and clustering effects in survival analysis.
-    # 
-    #     - name: frailtyDistribution
-    #       title: 'Frailty Distribution'
-    #       type: List
-    #       options:
-    #         - name: gamma
-    #           title: 'Gamma Distribution'
-    #         - name: gaussian
-    #           title: 'Gaussian (Normal) Distribution'
-    #         - name: log-normal
-    #           title: 'Log-Normal Distribution'
-    #       default: gamma
-    #       description:
-    #         R: >
-    #           Distribution assumption for the frailty (random effects) terms.
-    #           Gamma distribution is most common and provides multiplicative 
-    #           frailty effects on the hazard function.
-    # 
-    #     - name: frailtyBootstrap
-    #       title: 'Bootstrap Validation'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform bootstrap validation for frailty model parameters and 
-    #           variance components to assess model stability and provide 
-    #           robust confidence intervals.
-    # 
-    #     - name: frailtyBootstrapSamples
-    #       title: 'Bootstrap Samples'
-    #       type: Integer
-    #       min: 100
-    #       max: 2000
-    #       default: 500
-    #       description:
-    #         R: >
-    #           Number of bootstrap samples for frailty model validation. 
-    #           Higher values provide more stable estimates but increase 
-    #           computational time.
-    # 
-    #     - name: frailtyVarianceComponents
-    #       title: 'Variance Components Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Analyze variance components to quantify the proportion of 
-    #           total variation explained by cluster-level random effects 
-    #           vs individual-level factors.
-    # 
-    #     - name: frailtyHeterogeneityTest
-    #       title: 'Heterogeneity Testing'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Test for significant frailty/heterogeneity using likelihood 
-    #           ratio tests comparing frailty models to standard Cox models 
-    #           without random effects.
-    # 
-    #     - name: frailtyClusterComparison
-    #       title: 'Cluster-Specific Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform cluster-specific survival analysis comparing staging 
-    #           systems within each cluster/institution to assess consistency 
-    #           of staging performance across centers.
-    # 
-    #     - name: frailtyModelSelection
-    #       title: 'Model Selection'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform systematic model selection comparing different frailty 
-    #           distributions and model specifications using AIC/BIC criteria 
-    #           and likelihood ratio tests.
-    # 
-    #     - name: frailtyPredictiveAccuracy
-    #       title: 'Predictive Accuracy Assessment'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Assess predictive accuracy of frailty models using cross-validation 
-    #           and concordance measures accounting for clustering structure in 
-    #           the data.
-    # 
-    #     - name: frailtyDiagnostics
-    #       title: 'Model Diagnostics'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Comprehensive model diagnostics including residual analysis, 
-    #           influence detection, and goodness-of-fit assessment for frailty 
-    #           models with clustering adjustments.
-    # 
-    #     - name: frailtyAdvancedInference
-    #       title: 'Advanced Statistical Inference'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Advanced statistical inference including profile likelihood 
-    #           confidence intervals, score tests, and robust variance 
-    #           estimation for complex frailty model specifications.
-    # 
-    #     # Clinical Utility Index Analysis
-    #     - name: performClinicalUtilityAnalysis
-    #       title: 'Clinical Utility Index Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform clinical utility index analysis combining sensitivity/specificity 
-    #           with disease prevalence to assess clinical decision-making value of 
-    #           staging systems beyond statistical discrimination.
-    # 
-    #     - name: clinicalUtilityPrevalence
-    #       title: 'Disease Prevalence'
-    #       type: Number
-    #       min: 0.01
-    #       max: 0.99
-    #       default: 0.2
-    #       description:
-    #         R: >
-    #           Disease prevalence (proportion with events) for clinical utility 
-    #           calculations. Can be estimated from study data or specified based 
-    #           on population characteristics.
-    # 
-    #     - name: clinicalUtilityTimePoint
-    #       title: 'Time Point for Analysis (months)'
-    #       type: Integer
-    #       min: 1
-    #       max: 240
-    #       default: 60
-    #       description:
-    #         R: >
-    #           Time point (in months) for clinical utility assessment. Should 
-    #           represent clinically relevant decision-making horizon for the 
-    #           specific cancer type and staging system.
-    # 
-    #     - name: clinicalUtilityThresholds
-    #       title: 'Risk Threshold Range'
-    #       type: List
-    #       options:
-    #         - name: conservative
-    #           title: 'Conservative (5-25%)'
-    #         - name: standard
-    #           title: 'Standard (10-50%)'
-    #         - name: aggressive
-    #           title: 'Aggressive (15-75%)'
-    #         - name: comprehensive
-    #           title: 'Comprehensive (5-95%)'
-    #       default: standard
-    #       description:
-    #         R: >
-    #           Range of risk thresholds for clinical utility assessment. Different 
-    #           ranges appropriate for different clinical decision contexts and 
-    #           treatment aggressiveness preferences.
-    # 
-    #     - name: clinicalUtilityNNT
-    #       title: 'Number Needed to Treat Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Calculate Number Needed to Treat (NNT) and Number Needed to Harm (NNH) 
-    #           based on staging-guided interventions with configurable treatment 
-    #           effect assumptions.
-    # 
-    #     - name: clinicalUtilityTreatmentEffect
-    #       title: 'Treatment Effect (Hazard Ratio)'
-    #       type: Number
-    #       min: 0.1
-    #       max: 2.0
-    #       default: 0.7
-    #       description:
-    #         R: >
-    #           Assumed treatment effect (hazard ratio) for calculating NNT/NNH. 
-    #           Should reflect realistic treatment benefits for staging-guided 
-    #           interventions in the specific clinical context.
-    # 
-    #     - name: clinicalUtilityComparison
-    #       title: 'Comparative Utility Assessment'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Compare clinical utility between staging systems using net benefit 
-    #           difference analysis and utility improvement quantification across 
-    #           different risk thresholds.
-    # 
-    #     - name: clinicalUtilityCostEffectiveness
-    #       title: 'Cost-Effectiveness Integration'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Include basic cost-effectiveness considerations in clinical utility 
-    #           assessment with configurable cost assumptions for staging-guided 
-    #           interventions and outcomes.
-    # 
-    #     - name: clinicalUtilityCostPerIntervention
-    #       title: 'Cost Per Intervention ($)'
-    #       type: Integer
-    #       min: 100
-    #       max: 100000
-    #       default: 5000
-    #       description:
-    #         R: >
-    #           Estimated cost per staging-guided intervention for cost-effectiveness 
-    #           analysis. Should reflect realistic healthcare costs in the relevant 
-    #           healthcare system and setting.
-    # 
-    #     - name: clinicalUtilityBootstrap
-    #       title: 'Bootstrap Validation'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Perform bootstrap validation for clinical utility metrics including 
-    #           confidence intervals for NNT, net benefit differences, and utility 
-    #           improvement measures.
-    # 
-    #     - name: clinicalUtilityBootstrapSamples
-    #       title: 'Bootstrap Samples'
-    #       type: Integer
-    #       min: 100
-    #       max: 2000
-    #       default: 500
-    #       description:
-    #         R: >
-    #           Number of bootstrap samples for clinical utility validation. Higher 
-    #           values provide more stable estimates but increase computational time.
-    # 
-    #     - name: clinicalUtilityTimeVarying
-    #       title: 'Time-Varying Utility Analysis'
-    #       type: Bool
-    #       default: false
-    #       description:
-    #         R: >
-    #           Assess clinical utility across multiple time points to understand 
-    #           how staging system value changes over time horizon and identify 
-    #           optimal decision timing.
-    # 
-    # 
-    # ...
+    - name: shapCovariates
+      title: 'Variables for SHAP Analysis'
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description: >-
+        Additional variables to include in SHAP interpretability analysis 
+        alongside staging variables. Include key clinical variables that 
+        might influence staging decisions or patient outcomes.
+
+    - name: shapSampleSize
+      title: 'SHAP Sample Size'
+      type: Number
+      min: 50
+      max: 1000
+      default: 100
+      description: >-
+        Number of patients to use for SHAP analysis. Larger samples provide 
+        more comprehensive explanations but require more computation time. 
+        Recommended: 100-200 for routine analysis, 500+ for detailed research.
+
+    - name: shapBackgroundSamples
+      title: 'SHAP Background Samples'
+      type: Number
+      min: 10
+      max: 500
+      default: 50
+      description: >-
+        Number of background samples for SHAP baseline calculation. More 
+        samples provide more stable explanations but increase computation time.
+
+    - name: shapExplanationType
+      title: 'SHAP Explanation Method'
+      type: List
+      options:
+        - title: "TreeSHAP (for tree-based models)"
+          name: tree
+        - title: "Kernel SHAP (model-agnostic)"
+          name: kernel
+        - title: "Linear SHAP (for linear models)"
+          name: linear
+        - title: "Auto-detect best method"
+          name: auto
+      default: auto
+      description: >-
+        SHAP explanation method to use. Auto-detect chooses the most appropriate 
+        method based on the model type. TreeSHAP is fastest for tree models, 
+        Kernel SHAP works with any model but is slower.
+
+    - name: generateSHAPPlots
+      title: 'Generate SHAP Plots'
+      type: Bool
+      default: true
+      description: >-
+        Generate SHAP visualization plots including summary plots, bar plots, 
+        and dependence plots for model interpretability.
+
+    - name: shapPatientProfiles
+      title: 'Patient Profile Examples'
+      type: List
+      options:
+        - title: "High-risk patients"
+          name: high_risk
+        - title: "Low-risk patients"
+          name: low_risk
+        - title: "Representative patients"
+          name: representative
+        - title: "All profile types"
+          name: all
+      default: representative
+      description: >-
+        Types of patient profiles to include in individual SHAP explanations. 
+        Helps understand how different patient characteristics influence 
+        staging-based predictions.
+
+    - name: shapInteractionAnalysis
+      title: 'SHAP Interaction Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform SHAP interaction analysis to identify important feature 
+        interactions. Shows how combinations of features affect predictions 
+        beyond individual feature effects.
+
+    - name: shapClinicalThresholds
+      title: 'Clinical Risk Thresholds'
+      type: String
+      default: "0.25, 0.50, 0.75"
+      description: >-
+        Comma-separated risk thresholds for clinical decision boundaries in 
+        SHAP analysis (e.g., "0.25, 0.50, 0.75" for low/moderate/high risk). 
+        Used to interpret SHAP values in clinical context.
+
+    # Competing Risks Analysis with Fine-Gray Models Options
+    - name: performCompetingRisksAdvanced
+      title: 'Advanced Competing Risks Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform comprehensive competing risks analysis using Fine-Gray 
+        subdistribution hazard models and Cumulative Incidence Function (CIF) 
+        analysis. Essential when competing events prevent observation of primary 
+        outcome and standard survival analysis may be biased.
+
+    - name: competingRisksMethod
+      title: 'Competing Risks Method'
+      type: List
+      options:
+        - title: "Fine-Gray Subdistribution Hazard"
+          name: finegray
+        - title: "Cause-Specific Hazard Models"
+          name: causespecific
+        - title: "Comprehensive Analysis (both methods)"
+          name: comprehensive
+      default: comprehensive
+      description: >-
+        Method for competing risks analysis. Fine-Gray models cumulative 
+        incidence, cause-specific models instantaneous hazard rates. 
+        Comprehensive includes both approaches for complete assessment.
+
+    - name: cifTimePoints
+      title: 'CIF Time Points (months)'
+      type: String
+      default: "12, 24, 36, 60"
+      description: >-
+        Time points for Cumulative Incidence Function analysis (e.g., 
+        "12, 24, 36, 60" for 1, 2, 3, and 5-year analysis). Use clinically 
+        relevant time points for the specific cancer type.
+
+    - name: competingEventLevels
+      title: 'Competing Event Categories'
+      type: String
+      default: "cancer_death, other_death, censored"
+      description: >-
+        Comma-separated list of event categories for competing risks analysis. 
+        Typically includes primary event (cancer death), competing events 
+        (other causes), and censoring indicator.
+
+    - name: primaryEventLevel
+      title: 'Primary Event of Interest'
+      type: String
+      default: "cancer_death"
+      description: >-
+        Specify the primary event of interest for competing risks analysis 
+        (e.g., "cancer_death", "disease_progression", "cardiovascular_death"). 
+        Must match one of the competing event categories.
+
+    - name: generateCIFPlots
+      title: 'Generate CIF Plots'
+      type: Bool
+      default: true
+      description: >-
+        Generate Cumulative Incidence Function plots showing probability of 
+        each event type over time. Essential for visualizing competing risks 
+        patterns and staging system comparisons.
+
+    - name: performGrayTest
+      title: 'Gray Test for CIF Equality'
+      type: Bool
+      default: true
+      description: >-
+        Perform Gray's test for equality of cumulative incidence functions 
+        across staging groups. Tests whether CIF curves differ significantly 
+        between stages for each event type.
+
+    - name: cifConfidenceLevel
+      title: 'CIF Confidence Level'
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description: >-
+        Confidence level for Cumulative Incidence Function confidence intervals 
+        and statistical tests.
+
+    - name: competingRisksCovariates
+      title: 'Competing Risks Covariates'
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description: >-
+        Additional variables to include in competing risks regression models. 
+        Include important prognostic factors that may influence both primary 
+        and competing events.
+
+    - name: stratifyByStaging
+      title: 'Stratify Analysis by Staging System'
+      type: Bool
+      default: true
+      description: >-
+        Perform separate competing risks analysis for each staging system 
+        (original vs new) to compare their performance in the presence of 
+        competing events.
+
+    - name: calculateCRCIndex
+      title: 'Competing Risks C-Index'
+      type: Bool
+      default: true
+      description: >-
+        Calculate C-index specifically adapted for competing risks analysis. 
+        Provides discrimination metrics that properly account for competing 
+        events when evaluating staging system performance.
+
+    - name: generateCRSummary
+      title: 'Competing Risks Summary Table'
+      type: Bool
+      default: true
+      description: >-
+        Generate comprehensive summary table with Fine-Gray regression results, 
+        cumulative incidence estimates, and staging system comparisons in 
+        competing risks context.
+
+    # Multi-State Models for Complex Disease Transitions Options
+    - name: performMultiStateAnalysis
+      title: 'Multi-State Survival Models'
+      type: Bool
+      default: false
+      description: >-
+        Perform multi-state survival analysis for complex disease progression 
+        scenarios where patients can transition between multiple health states 
+        over time. Essential for modeling disease progression, remission, 
+        relapse, and death in oncology.
+
+    - name: multiStateModel
+      title: 'Multi-State Model Type'
+      type: List
+      options:
+        - title: "Illness-Death Model (3 states)"
+          name: illness_death
+        - title: "Progression Model (4 states)"
+          name: progression
+        - title: "Relapse-Death Model (4 states)"
+          name: relapse_death
+        - title: "Custom Model (user-defined)"
+          name: custom
+        - title: "Comprehensive Analysis (all models)"
+          name: comprehensive
+      default: illness_death
+      description: >-
+        Type of multi-state model to fit. Illness-Death models progression 
+        from healthy to disease to death. Progression models include stable, 
+        progressive, terminal states. Comprehensive fits multiple models for 
+        comparison.
+
+    - name: stateVariable
+      title: 'Disease State Variable'
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description: >-
+        Variable indicating patient disease states (e.g., stable, progressive, 
+        deceased, remission). Should contain all possible states that patients 
+        can transition between during follow-up.
+
+    - name: transitionTimeVariable
+      title: 'Transition Time Variable'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >-
+        Time variable indicating when state transitions occurred. For multiple 
+        transitions per patient, use comma-separated times or separate records 
+        for each transition.
+
+    - name: multiStateStates
+      title: 'State Definitions'
+      type: String
+      default: "healthy, disease, death"
+      description: >-
+        Comma-separated list of all possible states in order of progression 
+        (e.g., "healthy, disease, death" or "stable, progressive, remission, death"). 
+        Must match levels in the state variable.
+
+    - name: absorptionStates
+      title: 'Absorption States'
+      type: String
+      default: "death"
+      description: >-
+        Comma-separated list of absorbing states that patients cannot leave 
+        once entered (e.g., "death", "terminal"). These represent final 
+        outcomes in the disease process.
+
+    - name: multiStateCovariates
+      title: 'Multi-State Covariates'
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description: >-
+        Additional variables to include in multi-state models as covariates. 
+        Include important prognostic factors that may influence transition 
+        rates between states.
+
+    - name: calculateTransitionProbabilities
+      title: 'Calculate Transition Probabilities'
+      type: Bool
+      default: true
+      description: >-
+        Calculate state transition probabilities between all possible state 
+        pairs. Provides insight into likelihood of disease progression, 
+        remission, and mortality transitions.
+
+    - name: multiStateTimePoints
+      title: 'Multi-State Time Points (months)'
+      type: String
+      default: "6, 12, 24, 36, 60"
+      description: >-
+        Time points for transition probability calculations (e.g., 
+        "6, 12, 24, 36, 60" for 6-month intervals up to 5 years). Use 
+        clinically relevant time points for disease monitoring.
+
+    - name: generateTransitionMatrix
+      title: 'Generate Transition Matrix'
+      type: Bool
+      default: true
+      description: >-
+        Generate comprehensive transition intensity matrix showing hazard 
+        rates for all possible state transitions. Essential for understanding 
+        disease progression dynamics.
+
+    - name: multiStateGraphics
+      title: 'Multi-State Visualizations'
+      type: Bool
+      default: true
+      description: >-
+        Generate multi-state model visualizations including state transition 
+        diagrams, probability plots, and Aalen-Johansen estimator curves for 
+        state occupancy probabilities.
+
+    - name: msStratifyByStaging
+      title: 'Stratify by Staging System'
+      type: Bool
+      default: true
+      description: >-
+        Perform separate multi-state analysis for each staging system to 
+        compare their ability to predict disease transitions and progression 
+        patterns.
+
+    - name: multiStateValidation
+      title: 'Multi-State Model Validation'
+      type: Bool
+      default: false
+      description: >-
+        Perform model validation including goodness-of-fit testing, residual 
+        analysis, and cross-validation for multi-state models. Computationally 
+        intensive but provides robust model assessment.
+
+    - name: generateMSMSummary
+      title: 'Multi-State Summary Table'
+      type: Bool
+      default: true
+      description: >-
+        Generate comprehensive summary table with transition intensities, 
+        hazard ratios, and state occupancy probabilities comparing staging 
+        systems in multi-state framework.
+
+    # Random Survival Forests for Non-Parametric Survival Modeling Options
+    - name: performRandomForestAnalysis
+      title: 'Random Survival Forests'
+      type: Bool
+      default: false
+      description: >-
+        Perform Random Survival Forest analysis as a non-parametric alternative 
+        to Cox proportional hazards models. Provides robust predictions through 
+        ensemble methods without proportional hazards assumptions, ideal for 
+        complex interactions and non-linear relationships.
+
+    - name: forestModelType
+      title: 'Forest Model Type'
+      type: List
+      options:
+        - title: "Random Survival Forest (RSF)"
+          name: rsf
+        - title: "Conditional Inference Forest"
+          name: cforest
+        - title: "Extremely Randomized Trees"
+          name: extraTrees
+        - title: "Ensemble Methods (all approaches)"
+          name: ensemble
+      default: rsf
+      description: >-
+        Type of random forest model to fit. RSF is the standard approach, 
+        conditional inference forests handle categorical variables better, 
+        extra trees provide additional randomization. Ensemble combines 
+        multiple approaches for maximum robustness.
+
+    - name: forestNTrees
+      title: 'Number of Trees'
+      type: Number
+      min: 50
+      max: 2000
+      default: 500
+      description: >-
+        Number of trees in the random forest. More trees generally improve 
+        performance but increase computation time. 500 trees provide good 
+        balance between accuracy and speed for most applications.
+
+    - name: forestMTry
+      title: 'Variables per Split (mtry)'
+      type: String
+      default: "auto"
+      description: >-
+        Number of variables randomly selected at each split. Use "auto" for 
+        automatic selection (sqrt of total variables), or specify a number. 
+        Lower values increase randomization, higher values may improve accuracy.
+
+    - name: forestMinNodeSize
+      title: 'Minimum Node Size'
+      type: Number
+      min: 1
+      max: 50
+      default: 3
+      description: >-
+        Minimum number of observations in terminal nodes. Larger values prevent 
+        overfitting but may reduce model flexibility. Recommended: 3-10 for 
+        survival data depending on sample size.
+
+    - name: forestCovariates
+      title: 'Forest Covariates'
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description: >-
+        Additional variables to include in random forest models alongside 
+        staging variables. Include important clinical variables for 
+        comprehensive non-parametric survival modeling.
+
+    - name: calculateVariableImportance
+      title: 'Calculate Variable Importance'
+      type: Bool
+      default: true
+      description: >-
+        Calculate variable importance measures using permutation-based methods. 
+        Shows which variables contribute most to survival predictions, 
+        complementing SHAP analysis with forest-specific importance metrics.
+
+    - name: forestImportanceType
+      title: 'Importance Measure'
+      type: List
+      options:
+        - title: "Permutation Importance"
+          name: permutation
+        - title: "Variable Hunting (VIMP)"
+          name: vimp
+        - title: "Minimal Depth"
+          name: minimal_depth
+        - title: "Comprehensive (all measures)"
+          name: comprehensive
+      default: permutation
+      description: >-
+        Type of variable importance measure. Permutation importance is most 
+        interpretable, VIMP is RF-specific, minimal depth shows variable 
+        selection frequency. Comprehensive provides all measures.
+
+    - name: performForestValidation
+      title: 'Forest Cross-Validation'
+      type: Bool
+      default: false
+      description: >-
+        Perform out-of-bag validation and cross-validation for random forest 
+        models. Provides robust assessment of model performance including 
+        prediction error rates and concordance indices.
+
+    - name: forestPredictionTimePoints
+      title: 'Prediction Time Points (months)'
+      type: String
+      default: "12, 24, 36, 60"
+      description: >-
+        Time points for survival probability predictions from random forest 
+        models (e.g., "12, 24, 36, 60" for 1, 2, 3, and 5-year predictions). 
+        Use clinically relevant time points for staging comparison.
+
+    - name: generateSurvivalPredictions
+      title: 'Generate Survival Predictions'
+      type: Bool
+      default: true
+      description: >-
+        Generate individual patient survival probability predictions at 
+        specified time points. Provides personalized risk assessments 
+        based on random forest ensemble predictions.
+
+    - name: forestDiscriminationMetrics
+      title: 'Forest Discrimination Analysis'
+      type: Bool
+      default: true
+      description: >-
+        Calculate discrimination metrics specifically for random forest models 
+        including C-index, Integrated Brier Score, and time-dependent AUC. 
+        Compares forest performance with traditional Cox models.
+
+    - name: forestStagingComparison
+      title: 'Forest-Based Staging Comparison'
+      type: Bool
+      default: true
+      description: >-
+        Use random forest models to compare staging systems through 
+        non-parametric ensemble methods. Provides robust staging comparison 
+        without proportional hazards assumptions.
+
+    - name: forestBootstrap
+      title: 'Bootstrap Forest Validation'
+      type: Bool
+      default: false
+      description: >-
+        Perform bootstrap validation of random forest models with multiple 
+        bootstrap samples. Provides confidence intervals for forest-based 
+        predictions and importance measures.
+
+    - name: forestBootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Number
+      min: 50
+      max: 500
+      default: 100
+      description: >-
+        Number of bootstrap samples for forest validation. More samples 
+        provide more stable confidence intervals but increase computation time.
+
+    - name: generateForestSummary
+      title: 'Forest Analysis Summary'
+      type: Bool
+      default: true
+      description: >-
+        Generate comprehensive summary of random forest analysis including 
+        model performance, variable importance, staging comparison, and 
+        clinical recommendations based on ensemble predictions.
+
+    # ============================================================================
+    # Cure Models for Populations with Cured Fraction
+    # ============================================================================
+
+    - name: performCureModelAnalysis
+      title: 'Cure Models Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform cure model analysis for populations where a fraction of patients 
+        may be effectively cured. Uses mixture models to separate susceptible 
+        and cured populations, particularly relevant for cancer staging analysis.
+
+    - name: cureModelType
+      title: 'Cure Model Type'
+      type: List
+      options:
+        - name: mixture
+          title: 'Mixture Cure Model'
+        - name: promotion
+          title: 'Promotion Time Model'
+        - name: both
+          title: 'Both Model Types'
+      default: mixture
+      description: >-
+        Type of cure model to fit. Mixture models assume a cured fraction with 
+        infinite survival, promotion time models use biological mechanisms, 
+        and both provides comprehensive comparison.
+
+    - name: cureDistribution
+      title: 'Survival Distribution'
+      type: List
+      options:
+        - name: weibull
+          title: 'Weibull'
+        - name: exponential
+          title: 'Exponential'
+        - name: lognormal
+          title: 'Log-Normal'
+        - name: loglogistic
+          title: 'Log-Logistic'
+      default: weibull
+      description: >-
+        Underlying survival distribution for the susceptible population in 
+        cure models. Weibull is most flexible, exponential is simplest, 
+        log-normal and log-logistic provide alternative hazard shapes.
+
+    - name: cureAnalyzeOldStage
+      title: 'Analyze Original Staging'
+      type: Bool
+      default: true
+      description: >-
+        Fit cure models to original staging system to estimate cure fractions 
+        and survival patterns for susceptible patients in each stage.
+
+    - name: cureAnalyzeNewStage
+      title: 'Analyze New Staging'
+      type: Bool
+      default: true
+      description: >-
+        Fit cure models to new staging system to estimate cure fractions and 
+        survival patterns, enabling comparison of staging discrimination for 
+        both cured and susceptible populations.
+
+    - name: cureFractionEstimation
+      title: 'Cure Fraction Method'
+      type: List
+      options:
+        - name: parametric
+          title: 'Parametric Estimation'
+        - name: nonparametric
+          title: 'Non-parametric (Kaplan-Meier)'
+        - name: both
+          title: 'Both Methods'
+      default: parametric
+      description: >-
+        Method for estimating cure fractions. Parametric uses maximum likelihood 
+        with specified distributions, non-parametric uses Kaplan-Meier plateau 
+        detection, both provides validation.
+
+    - name: cureConfidenceLevel
+      title: 'Confidence Level'
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description: >-
+        Confidence level for cure model parameter estimates and cure fraction 
+        confidence intervals. Standard 95% provides balance between precision 
+        and coverage.
+
+    - name: cureBootstrapCI
+      title: 'Bootstrap Confidence Intervals'
+      type: Bool
+      default: true
+      description: >-
+        Calculate bootstrap confidence intervals for cure fractions and model 
+        parameters. Provides robust uncertainty quantification especially for 
+        small samples or complex models.
+
+    - name: cureBootstrapReps
+      title: 'Bootstrap Replications'
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description: >-
+        Number of bootstrap replications for confidence interval calculation. 
+        More replications provide more stable intervals but increase 
+        computation time.
+
+    - name: cureTimeHorizon
+      title: 'Cure Assessment Time (months)'
+      type: Number
+      min: 12
+      max: 240
+      default: 120
+      description: >-
+        Time horizon for cure assessment in months. Patients surviving beyond 
+        this time without events are considered potentially cured. Typical 
+        values: 60-120 months for most cancers.
+
+    - name: curePlateauThreshold
+      title: 'Plateau Detection Threshold'
+      type: Number
+      min: 0.01
+      max: 0.10
+      default: 0.05
+      description: >-
+        Threshold for detecting survival curve plateau in non-parametric cure 
+        fraction estimation. Lower values detect smaller plateaus but may be 
+        more sensitive to noise.
+
+    - name: cureCovariates
+      title: 'Cure Model Covariates'
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description: >-
+        Additional variables to include in cure model analysis alongside staging 
+        variables. Can affect both cure probability and survival of susceptible 
+        patients.
+
+    - name: cureModelComparison
+      title: 'Model Comparison Analysis'
+      type: Bool
+      default: true
+      description: >-
+        Compare cure models between staging systems using likelihood ratio tests, 
+        AIC/BIC criteria, and cure fraction differences. Assesses which staging 
+        system better identifies cured patients.
+
+    - name: cureStageSpecificAnalysis
+      title: 'Stage-Specific Cure Analysis'
+      type: Bool
+      default: true
+      description: >-
+        Perform separate cure model analysis for each stage group to understand 
+        stage-specific cure patterns and survival of susceptible patients. 
+        Essential for staging validation.
+
+    - name: cureGoodnessOfFit
+      title: 'Goodness-of-Fit Testing'
+      type: Bool
+      default: true
+      description: >-
+        Perform goodness-of-fit tests for cure models including Kolmogorov-Smirnov 
+        tests and visual diagnostic plots. Validates model assumptions and 
+        identifies potential misspecification.
+
+    - name: generateCureSummary
+      title: 'Cure Model Summary'
+      type: Bool
+      default: true
+      description: >-
+        Generate comprehensive summary of cure model analysis including cure 
+        fractions by stage, model comparison results, and clinical interpretation 
+        for staging system evaluation.
+
+    - name: performIntervalCensoringAnalysis
+      title: 'Interval Censoring Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform interval censoring analysis for events detected between visits.
+          This handles cases where the exact event time is unknown but falls 
+          within a known interval (e.g., between clinic visits). Uses icenReg 
+          package for non-parametric and parametric interval-censored survival 
+          analysis.
+
+    - name: intervalCensoringLeftTime
+      title: 'Left Interval Time Variable'
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Variable containing the left endpoint of the censoring interval.
+          For exact observations, this should equal the right endpoint.
+          For left-censored observations, use 0 or NA.
+
+    - name: intervalCensoringRightTime
+      title: 'Right Interval Time Variable'  
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Variable containing the right endpoint of the censoring interval.
+          For right-censored observations, use Inf or a large value.
+          For exact observations, this should equal the left endpoint.
+
+    - name: intervalCensoringDistribution
+      title: 'Distribution for Parametric Model'
+      type: List
+      options:
+        - name: weibull
+          title: 'Weibull'
+        - name: loglogistic
+          title: 'Log-logistic'  
+        - name: lognormal
+          title: 'Log-normal'
+        - name: exponential
+          title: 'Exponential'
+        - name: gamma
+          title: 'Gamma'
+      default: weibull
+      description:
+        R: >
+          Distribution assumption for parametric interval-censored regression.
+          Weibull is most commonly used and provides good flexibility.
+
+    - name: intervalCensoringModel
+      title: 'Model Type'
+      type: List
+      options:
+        - name: nonparametric
+          title: 'Non-parametric (NPMLE)'
+        - name: parametric
+          title: 'Parametric Regression'
+        - name: both
+          title: 'Both Models'
+      default: both
+      description:
+        R: >
+          Type of interval censoring model to fit. Non-parametric uses
+          non-parametric maximum likelihood estimation (NPMLE). Parametric
+          fits accelerated failure time models with specified distribution.
+
+    - name: intervalCensoringBootstrap
+      title: 'Bootstrap Confidence Intervals'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate bootstrap confidence intervals for non-parametric estimates.
+          This provides uncertainty quantification for the survival function
+          estimates with interval-censored data.
+
+    - name: intervalCensoringBootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+        R: >
+          Number of bootstrap samples for confidence interval calculation.
+          More samples provide more accurate intervals but increase computation time.
+
+    - name: intervalCensoringCompareStages
+      title: 'Compare Staging Systems'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Compare survival functions between different staging systems
+          accounting for interval censoring. Provides likelihood ratio tests
+          and information criteria for model comparison.
+
+    - name: intervalCensoringPlots
+      title: 'Generate Survival Plots'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Generate survival plots specifically designed for interval-censored data,
+          including non-parametric survival function estimates and comparison
+          plots between staging systems.
+
+    - name: intervalCensoringDiagnostics
+      title: 'Model Diagnostics'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform model diagnostics including convergence assessment,
+          residual analysis for parametric models, and goodness-of-fit tests
+          for interval-censored regression models.
+
+    - name: intervalCensoringPredictionTime
+      title: 'Prediction Time Points'
+      type: String
+      default: '12, 24, 36, 60'
+      description:
+        R: >
+          Comma-separated list of time points (in months) for survival probability
+          predictions. These will be used for staging system comparison and
+          clinical interpretation of interval-censored survival estimates.
+
+    - name: intervalCensoringConfidenceLevel
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+        R: >
+          Confidence level for interval estimates and hypothesis tests.
+          Standard choices are 0.90, 0.95, or 0.99.
+
+    - name: intervalCensoringAdjustVariables
+      title: 'Adjustment Variables'
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Additional variables to include in parametric interval-censored regression
+          models for adjusted survival analysis. These will be included as covariates
+          in the accelerated failure time model.
+
+    - name: performInformativeCensoringAnalysis
+      title: 'Informative Censoring Detection'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform tests for informative censoring to validate the assumption that
+          censoring is non-informative. Informative censoring occurs when the
+          censoring mechanism is related to the failure time, potentially biasing
+          survival estimates. This analysis provides tests and adjustments for
+          non-random censoring patterns.
+
+    - name: informativeCensoringTestMethod
+      title: 'Test Method for Informative Censoring'
+      type: List
+      options:
+        - name: all_tests
+          title: 'All Available Tests'
+        - name: correlation_test
+          title: 'Correlation Test'
+        - name: regression_test
+          title: 'Regression-Based Test'
+        - name: competing_risks
+          title: 'Competing Risks Approach'
+        - name: landmark_analysis
+          title: 'Landmark Analysis'
+      default: all_tests
+      description:
+        R: >
+          Method for testing informative censoring. Correlation tests examine
+          relationship between censoring and survival times. Regression tests
+          model censoring as outcome. Competing risks treats censoring as
+          competing event. Landmark analysis examines censoring patterns.
+
+    - name: informativeCensoringCovariates
+      title: 'Censoring Mechanism Covariates'
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variables that may be associated with the censoring mechanism.
+          These could include clinical factors, treatment decisions, or
+          administrative factors that might influence when patients are
+          censored from the study.
+
+    - name: informativeCensoringLandmarkTimes
+      title: 'Landmark Time Points'
+      type: String
+      default: '12, 24, 36, 60'
+      description:
+        R: >
+          Comma-separated list of landmark time points (in months) for
+          landmark analysis of censoring patterns. Analysis examines
+          whether censoring probabilities differ across staging groups
+          at these specific time points.
+
+    - name: informativeCensoringAdjustmentMethod
+      title: 'Adjustment Method'
+      type: List
+      options:
+        - name: none
+          title: 'No Adjustment'
+        - name: ipw
+          title: 'Inverse Probability Weighting'
+        - name: multiple_imputation
+          title: 'Multiple Imputation'
+        - name: sensitivity_analysis
+          title: 'Sensitivity Analysis'
+      default: sensitivity_analysis
+      description:
+        R: >
+          Method for adjusting survival estimates when informative censoring
+          is detected. IPW uses inverse probability weighting. Multiple
+          imputation imputes censored failure times. Sensitivity analysis
+          explores range of possible bias effects.
+
+    - name: informativeCensoringIPWVariables
+      title: 'IPW Model Variables'
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variables to include in inverse probability weighting model for
+          censoring probability estimation. Should include factors that
+          predict censoring but are not affected by the outcome.
+
+    - name: informativeCensoringSensitivityRange
+      title: 'Sensitivity Analysis Range'
+      type: String
+      default: '0.8, 0.9, 1.0, 1.1, 1.2'
+      description:
+        R: >
+          Comma-separated list of sensitivity parameters for bias analysis.
+          These represent hazard ratio multipliers for exploring potential
+          bias from informative censoring (1.0 = no bias assumption).
+
+    - name: informativeCensoringBootstrap
+      title: 'Bootstrap Confidence Intervals'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate bootstrap confidence intervals for adjusted survival
+          estimates and bias-corrected parameters. Provides uncertainty
+          quantification for informative censoring adjustments.
+
+    - name: informativeCensoringBootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 5000
+      description:
+        R: >
+          Number of bootstrap samples for confidence interval calculation
+          in informative censoring analysis. More samples provide more
+          accurate intervals but increase computation time.
+
+    - name: informativeCensoringAlpha
+      title: 'Significance Level'
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.10
+      description:
+        R: >
+          Significance level for testing informative censoring hypotheses.
+          Used for determining whether censoring appears to be informative
+          and for confidence interval construction.
+
+    - name: informativeCensoringPlots
+      title: 'Generate Diagnostic Plots'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Generate diagnostic plots for informative censoring assessment
+          including censoring probability over time, correlation plots,
+          and sensitivity analysis visualizations.
+
+    - name: informativeCensoringCompareStages
+      title: 'Compare Censoring Across Stages'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Compare censoring patterns across different staging groups to
+          assess whether censoring differs by stage, which could indicate
+          stage-related informative censoring that affects staging
+          system evaluation.
+
+    - name: performConcordanceProbabilityAnalysis
+      title: 'Concordance Probability Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform advanced concordance probability analysis for heavily censored data.
+          This provides alternative concordance measures beyond traditional C-index,
+          including Harrell's C-index modifications, Uno's C-index for heavily censored
+          data, and time-dependent concordance measures specifically designed for
+          staging system evaluation with high censoring rates.
+
+    - name: concordanceProbabilityMethods
+      title: 'Concordance Methods'
+      type: List
+      options:
+        - name: all_methods
+          title: 'All Available Methods'
+        - name: harrell_c
+          title: 'Harrell C-index'
+        - name: uno_c
+          title: 'Uno C-index'
+        - name: time_dependent
+          title: 'Time-Dependent Concordance'
+        - name: ipcw_concordance
+          title: 'IPCW Concordance'
+        - name: weighted_concordance
+          title: 'Weighted Concordance'
+      default: all_methods
+      description:
+        R: >
+          Concordance probability estimation methods. Harrell C-index is traditional
+          but may be biased with heavy censoring. Uno C-index uses inverse probability
+          weighting for censoring. Time-dependent measures evaluate concordance at
+          specific time points. IPCW and weighted methods provide robust alternatives.
+
+    - name: concordanceProbabilityTimePoints
+      title: 'Time Points for Assessment'
+      type: String
+      default: '12, 24, 36, 60, 120'
+      description:
+        R: >
+          Comma-separated list of time points (in months) for time-dependent
+          concordance assessment. These will be used for evaluating staging
+          system discrimination at clinically relevant time horizons.
+
+    - name: concordanceProbabilityWeighting
+      title: 'Weighting Strategy'
+      type: List
+      options:
+        - name: uniform
+          title: 'Uniform Weighting'
+        - name: sample_size
+          title: 'Sample Size Weighting'
+        - name: event_rate
+          title: 'Event Rate Weighting'
+        - name: follow_up
+          title: 'Follow-up Time Weighting'
+        - name: inverse_variance
+          title: 'Inverse Variance Weighting'
+      default: uniform
+      description:
+        R: >
+          Weighting strategy for concordance probability estimation.
+          Uniform gives equal weight to all pairs. Sample size weights by
+          stage frequency. Event rate weights by observed events. Follow-up
+          weights by observation time. Inverse variance uses precision weighting.
+
+    - name: concordanceProbabilityBootstrap
+      title: 'Bootstrap Confidence Intervals'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate bootstrap confidence intervals for concordance probability
+          estimates. This provides uncertainty quantification for discrimination
+          measures, especially important for heavily censored data where
+          traditional standard errors may be unreliable.
+
+    - name: concordanceProbabilityBootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 5000
+      description:
+        R: >
+          Number of bootstrap samples for confidence interval calculation.
+          More samples provide more accurate intervals but increase computation
+          time. Recommended minimum 500 for reliable confidence intervals.
+
+    - name: concordanceProbabilityConfidenceLevel
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+        R: >
+          Confidence level for concordance probability confidence intervals.
+          Standard choices are 0.90, 0.95, or 0.99 for 90%, 95%, or 99%
+          confidence intervals respectively.
+
+    - name: concordanceProbabilityCompareStages
+      title: 'Compare Staging Systems'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Compare concordance probabilities between different staging systems
+          using hypothesis tests and confidence interval overlap assessment.
+          Provides statistical evidence for staging system discrimination
+          differences accounting for heavy censoring.
+
+    - name: concordanceProbabilityAdjustVariables
+      title: 'Adjustment Variables'
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Additional variables to include in adjusted concordance analysis.
+          These variables will be included alongside staging in multivariable
+          models to assess staging contribution to discrimination beyond
+          other prognostic factors.
+
+    - name: concordanceProbabilityRobustnessAnalysis
+      title: 'Robustness Analysis'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform robustness analysis for concordance probability estimates
+          including sensitivity to censoring assumptions, outlier influence,
+          and temporal stability assessment for comprehensive validation
+          of staging system discrimination.
+
+    - name: concordanceProbabilityAlpha
+      title: 'Significance Level'
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.10
+      description:
+        R: >
+          Significance level for concordance probability hypothesis tests
+          and confidence interval construction. Used for testing differences
+          between staging systems and assessing statistical significance
+          of discrimination improvements.
+
+    - name: concordanceProbabilityDiagnostics
+      title: 'Diagnostic Assessment'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform diagnostic assessment of concordance probability estimates
+          including convergence checks, influence diagnostics, and
+          sensitivity analysis to ensure reliable discrimination assessment
+          for staging system evaluation.
+
+    - name: performWinRatioAnalysis
+      title: 'Win Ratio Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform win ratio analysis for composite endpoint analysis in staging
+          comparison. The win ratio is a novel method for analyzing composite
+          endpoints that respects the clinical hierarchy of outcomes and provides
+          intuitive interpretation for staging system evaluation.
+
+    - name: winRatioEndpoints
+      title: 'Endpoint Hierarchy'
+      type: List
+      options:
+        - name: death_progression_response
+          title: 'Death > Disease Progression > Response'
+        - name: death_recurrence_remission
+          title: 'Death > Recurrence > Remission'
+        - name: death_hospitalization_qol
+          title: 'Death > Hospitalization > Quality of Life'
+        - name: custom
+          title: 'Custom Hierarchy'
+      default: death_progression_response
+      description:
+        R: >
+          Clinical hierarchy of endpoints for win ratio analysis. More important
+          outcomes are prioritized in the analysis. Death is typically the most
+          important endpoint, followed by disease-specific outcomes. The hierarchy
+          determines how patient pairs are compared.
+
+    - name: winRatioDeathVariable
+      title: 'Death/Primary Endpoint Variable'
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variable indicating death or primary endpoint occurrence (1 = event, 0 = no event).
+          This is typically the most important outcome in the hierarchy and is
+          compared first when evaluating patient pairs.
+
+    - name: winRatioSecondaryEndpoint
+      title: 'Secondary Endpoint Variable'
+      type: Variable
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variable for secondary endpoint (e.g., disease progression, recurrence).
+          This endpoint is evaluated when the primary endpoint comparison is tied.
+          Can be binary (event/no event) or continuous (time to event).
+
+    - name: winRatioTertiaryEndpoint
+      title: 'Tertiary Endpoint Variable'
+      type: Variable
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variable for tertiary endpoint (e.g., response, quality of life).
+          This endpoint is evaluated when both primary and secondary comparisons
+          are tied. Can be binary or continuous.
+
+    - name: winRatioTimeVariables
+      title: 'Time Variables for Endpoints'
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Time variables corresponding to each endpoint in the hierarchy.
+          Should be provided in the same order as the endpoints. Used for
+          time-to-event comparisons when endpoints are not binary.
+
+    - name: winRatioMatchingStrategy
+      title: 'Matching Strategy'
+      type: List
+      options:
+        - name: all_pairs
+          title: 'All Possible Pairs'
+        - name: matched_pairs
+          title: 'Matched Pairs Only'
+        - name: stratified
+          title: 'Stratified by Stage'
+        - name: propensity_matched
+          title: 'Propensity Score Matched'
+      default: all_pairs
+      description:
+        R: >
+          Strategy for forming patient pairs for comparison. All pairs compares
+          every patient from one group with every patient from another. Matched
+          pairs uses pre-specified matching. Stratified performs within-stage
+          comparisons. Propensity matching balances baseline characteristics.
+
+    - name: winRatioConfidenceMethod
+      title: 'Confidence Interval Method'
+      type: List
+      options:
+        - name: bootstrap
+          title: 'Bootstrap'
+        - name: asymptotic
+          title: 'Asymptotic'
+        - name: permutation
+          title: 'Permutation'
+      default: bootstrap
+      description:
+        R: >
+          Method for calculating confidence intervals for the win ratio.
+          Bootstrap is most robust but computationally intensive. Asymptotic
+          uses large sample theory. Permutation provides exact p-values.
+
+    - name: winRatioBootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 5000
+      description:
+        R: >
+          Number of bootstrap samples for confidence interval calculation
+          when using bootstrap method. More samples provide more accurate
+          intervals but increase computation time.
+
+    - name: winRatioConfidenceLevel
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+        R: >
+          Confidence level for win ratio confidence intervals and hypothesis
+          tests. Standard choices are 0.90, 0.95, or 0.99 for 90%, 95%, or
+          99% confidence intervals respectively.
+
+    - name: winRatioHandleTies
+      title: 'Tie Handling Strategy'
+      type: List
+      options:
+        - name: split
+          title: 'Split Ties (0.5 each)'
+        - name: ignore
+          title: 'Ignore Tied Pairs'
+        - name: next_endpoint
+          title: 'Use Next Endpoint'
+      default: next_endpoint
+      description:
+        R: >
+          Strategy for handling tied comparisons. Split assigns 0.5 wins to each.
+          Ignore excludes tied pairs from analysis. Next endpoint proceeds to
+          compare the next outcome in the hierarchy for tied pairs.
+
+    - name: winRatioSensitivityAnalysis
+      title: 'Sensitivity Analysis'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform sensitivity analysis for win ratio including assessment of
+          endpoint ordering impact, missing data influence, and robustness
+          to matching strategy choices.
+
+    - name: winRatioGeneralizedPairwise
+      title: 'Generalized Pairwise Comparison'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Use generalized pairwise comparison (GPC) framework which extends
+          win ratio to include continuous outcomes and provides additional
+          metrics like net benefit and win odds.
+
+    # Frailty Models for Clustering Analysis
+    - name: performFrailtyModelsAnalysis
+      title: 'Frailty Models Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform frailty models analysis for clustered survival data using 
+          mixed-effects Cox models (coxme) for multi-institutional data with 
+          center-specific random effects and clustering adjustments.
+
+    - name: frailtyClusterVariable
+      title: 'Cluster Variable'
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      description:
+        R: >
+          Variable defining clusters/institutions for frailty modeling (e.g., 
+          hospital, center, surgeon). Used to account for unobserved 
+          heterogeneity and clustering effects in survival analysis.
+
+    - name: frailtyDistribution
+      title: 'Frailty Distribution'
+      type: List
+      options:
+        - name: gamma
+          title: 'Gamma Distribution'
+        - name: gaussian
+          title: 'Gaussian (Normal) Distribution'
+        - name: log-normal
+          title: 'Log-Normal Distribution'
+      default: gamma
+      description:
+        R: >
+          Distribution assumption for the frailty (random effects) terms.
+          Gamma distribution is most common and provides multiplicative 
+          frailty effects on the hazard function.
+
+    - name: frailtyBootstrap
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform bootstrap validation for frailty model parameters and 
+          variance components to assess model stability and provide 
+          robust confidence intervals.
+
+    - name: frailtyBootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      min: 100
+      max: 2000
+      default: 500
+      description:
+        R: >
+          Number of bootstrap samples for frailty model validation. 
+          Higher values provide more stable estimates but increase 
+          computational time.
+
+    - name: frailtyVarianceComponents
+      title: 'Variance Components Analysis'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Analyze variance components to quantify the proportion of 
+          total variation explained by cluster-level random effects 
+          vs individual-level factors.
+
+    - name: frailtyHeterogeneityTest
+      title: 'Heterogeneity Testing'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Test for significant frailty/heterogeneity using likelihood 
+          ratio tests comparing frailty models to standard Cox models 
+          without random effects.
+
+    - name: frailtyClusterComparison
+      title: 'Cluster-Specific Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform cluster-specific survival analysis comparing staging 
+          systems within each cluster/institution to assess consistency 
+          of staging performance across centers.
+
+    - name: frailtyModelSelection
+      title: 'Model Selection'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform systematic model selection comparing different frailty 
+          distributions and model specifications using AIC/BIC criteria 
+          and likelihood ratio tests.
+
+    - name: frailtyPredictiveAccuracy
+      title: 'Predictive Accuracy Assessment'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Assess predictive accuracy of frailty models using cross-validation 
+          and concordance measures accounting for clustering structure in 
+          the data.
+
+    - name: frailtyDiagnostics
+      title: 'Model Diagnostics'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Comprehensive model diagnostics including residual analysis, 
+          influence detection, and goodness-of-fit assessment for frailty 
+          models with clustering adjustments.
+
+    - name: frailtyAdvancedInference
+      title: 'Advanced Statistical Inference'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Advanced statistical inference including profile likelihood 
+          confidence intervals, score tests, and robust variance 
+          estimation for complex frailty model specifications.
+
+    # Clinical Utility Index Analysis
+    - name: performClinicalUtilityAnalysis
+      title: 'Clinical Utility Index Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform clinical utility index analysis combining sensitivity/specificity 
+          with disease prevalence to assess clinical decision-making value of 
+          staging systems beyond statistical discrimination.
+
+    - name: clinicalUtilityPrevalence
+      title: 'Disease Prevalence'
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.2
+      description:
+        R: >
+          Disease prevalence (proportion with events) for clinical utility 
+          calculations. Can be estimated from study data or specified based 
+          on population characteristics.
+
+    - name: clinicalUtilityTimePoint
+      title: 'Time Point for Analysis (months)'
+      type: Integer
+      min: 1
+      max: 240
+      default: 60
+      description:
+        R: >
+          Time point (in months) for clinical utility assessment. Should 
+          represent clinically relevant decision-making horizon for the 
+          specific cancer type and staging system.
+
+    - name: clinicalUtilityThresholds
+      title: 'Risk Threshold Range'
+      type: List
+      options:
+        - name: conservative
+          title: 'Conservative (5-25%)'
+        - name: standard
+          title: 'Standard (10-50%)'
+        - name: aggressive
+          title: 'Aggressive (15-75%)'
+        - name: comprehensive
+          title: 'Comprehensive (5-95%)'
+      default: standard
+      description:
+        R: >
+          Range of risk thresholds for clinical utility assessment. Different 
+          ranges appropriate for different clinical decision contexts and 
+          treatment aggressiveness preferences.
+
+    - name: clinicalUtilityNNT
+      title: 'Number Needed to Treat Analysis'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate Number Needed to Treat (NNT) and Number Needed to Harm (NNH) 
+          based on staging-guided interventions with configurable treatment 
+          effect assumptions.
+
+    - name: clinicalUtilityTreatmentEffect
+      title: 'Treatment Effect (Hazard Ratio)'
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.7
+      description:
+        R: >
+          Assumed treatment effect (hazard ratio) for calculating NNT/NNH. 
+          Should reflect realistic treatment benefits for staging-guided 
+          interventions in the specific clinical context.
+
+    - name: clinicalUtilityComparison
+      title: 'Comparative Utility Assessment'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Compare clinical utility between staging systems using net benefit 
+          difference analysis and utility improvement quantification across 
+          different risk thresholds.
+
+    - name: clinicalUtilityCostEffectiveness
+      title: 'Cost-Effectiveness Integration'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Include basic cost-effectiveness considerations in clinical utility 
+          assessment with configurable cost assumptions for staging-guided 
+          interventions and outcomes.
+
+    - name: clinicalUtilityCostPerIntervention
+      title: 'Cost Per Intervention ($)'
+      type: Integer
+      min: 100
+      max: 100000
+      default: 5000
+      description:
+        R: >
+          Estimated cost per staging-guided intervention for cost-effectiveness 
+          analysis. Should reflect realistic healthcare costs in the relevant 
+          healthcare system and setting.
+
+    - name: clinicalUtilityBootstrap
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform bootstrap validation for clinical utility metrics including 
+          confidence intervals for NNT, net benefit differences, and utility 
+          improvement measures.
+
+    - name: clinicalUtilityBootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      min: 100
+      max: 2000
+      default: 500
+      description:
+        R: >
+          Number of bootstrap samples for clinical utility validation. Higher 
+          values provide more stable estimates but increase computational time.
+
+    - name: clinicalUtilityTimeVarying
+      title: 'Time-Varying Utility Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Assess clinical utility across multiple time points to understand 
+          how staging system value changes over time horizon and identify 
+          optimal decision timing.
+
+
+...

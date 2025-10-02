@@ -13,6 +13,8 @@ ihcheterogeneity(
   biopsy4 = NULL,
   biopsies = NULL,
   spatial_id = NULL,
+  compareCompartments = FALSE,
+  compartmentTests = FALSE,
   analysis_type = "comprehensive",
   sampling_strategy = "unknown",
   cv_threshold = 20,
@@ -48,7 +50,17 @@ analysis}
 
 \item{biopsies}{additional simulated biopsy measurements}
 
-\item{spatial_id}{identifier for spatial regions or tissue areas}
+\item{spatial_id}{identifier for spatial regions or tissue areas (e.g.,
+Central/Invasive, Preinvasive/Invasive)}
+
+\item{compareCompartments}{Perform statistical comparison of heterogeneity
+patterns between spatial compartments. Requires spatial_id variable.
+Compares ICC, CV, and bias across compartments.}
+
+\item{compartmentTests}{Perform statistical tests to determine if
+heterogeneity differs significantly between compartments. Uses Levene's
+test for variance equality and Kruskal-Wallis for distributional
+differences.}
 
 \item{analysis_type}{primary focus of biopsy simulation analysis}
 
@@ -95,6 +107,8 @@ A results object containing:
 \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
 \code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
 \code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
+\code{results$compartmentComparison} \tab \tab \tab \tab \tab Statistical comparison of heterogeneity metrics between compartments \cr
+\code{results$compartmentTests} \tab \tab \tab \tab \tab Formal statistical tests comparing heterogeneity across compartments \cr
 \code{results$biopsyplot} \tab \tab \tab \tab \tab Distribution comparison across regional measurements and reference (if provided) \cr
 \code{results$variabilityplot} \tab \tab \tab \tab \tab Coefficient of variation by case \cr
 \code{results$spatialplot} \tab \tab \tab \tab \tab Spatial distribution of biomarker values \cr

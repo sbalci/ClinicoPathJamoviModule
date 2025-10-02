@@ -8,6 +8,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             sft = FALSE,
+            showText = FALSE,
             wght = "unweighted",
             exct = FALSE,
             kripp = FALSE,
@@ -33,6 +34,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..sft <- jmvcore::OptionBool$new(
                 "sft",
                 sft,
+                default=FALSE)
+            private$..showText <- jmvcore::OptionBool$new(
+                "showText",
+                showText,
                 default=FALSE)
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
@@ -74,6 +79,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
+            self$.addOption(private$..showText)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
             self$.addOption(private$..kripp)
@@ -85,6 +91,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         vars = function() private$..vars$value,
         sft = function() private$..sft$value,
+        showText = function() private$..showText$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
         kripp = function() private$..kripp$value,
@@ -95,6 +102,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..vars = NA,
         ..sft = NA,
+        ..showText = NA,
         ..wght = NA,
         ..exct = NA,
         ..kripp = NA,
@@ -130,8 +138,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
-                title="",
-                visible="(vars:length() < 2)"))
+                title=""))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="irrtable",
@@ -185,7 +192,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="text",
                 title="Table",
-                visible="(sft)",
+                visible="(sft && showText)",
                 clearWith=list(
                     "vars",
                     "wght",
@@ -231,7 +238,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="weightedKappaGuide",
                 title="Weighted Kappa Interpretation Guide",
-                visible="(wght:unweighted == false)"))
+                visible="(showAbout && (wght:unweighted == FALSE))"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -279,6 +286,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sft Display frequency tables showing the distribution of ratings for
 #'   each rater. Useful for understanding rating patterns and identifying
 #'   potential biases.
+#' @param showText Display simple preformatted text version of frequency
+#'   tables. Provides a plain-text alternative to the HTML formatted tables.
 #' @param wght For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
 #'   kappa accounts for degree of disagreement. Linear weights: Adjacent
 #'   disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
@@ -322,6 +331,7 @@ agreement <- function(
     data,
     vars,
     sft = FALSE,
+    showText = FALSE,
     wght = "unweighted",
     exct = FALSE,
     kripp = FALSE,
@@ -344,6 +354,7 @@ agreement <- function(
     options <- agreementOptions$new(
         vars = vars,
         sft = sft,
+        showText = showText,
         wght = wght,
         exct = exct,
         kripp = kripp,

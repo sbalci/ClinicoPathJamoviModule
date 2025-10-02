@@ -76,6 +76,8 @@ jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::rea
     caseId = NULL,
     clinicalVars = vars())
 
+data <- jmvReadWrite::read_omv(fleInp = "/Users/serdarbalci/Desktop/meddecide_debug.omv")
+
 
 
 update .u.yaml to make it user friendly. make all relevant features to be together.

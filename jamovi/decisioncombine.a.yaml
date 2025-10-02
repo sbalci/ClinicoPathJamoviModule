@@ -1,60 +1,32 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
-menuSubtitle: Combine tests and evaluate performance
+menuSubtitle: Combine and evaluate test patterns
 version: '0.0.31'
 jas: '1.2'
 
 description:
     main: |
-        Advanced medical diagnostic test combination analysis for categorical tests 
-        with comprehensive clinical interpretation. This function systematically 
-        evaluates all possible test result combinations (2-test: 4 patterns, 
-        3-test: 8 patterns) against a gold standard using state-of-the-art 
-        statistical methods. Features include Wilson score confidence intervals 
-        for enhanced accuracy, performance heatmaps, decision trees, and 
-        publication-quality visualizations with clinical decision thresholds. 
-        Provides actionable recommendations for screening vs. confirmatory testing 
-        strategies with detailed clinical interpretation guidelines. Essential for 
-        evidence-based diagnostic protocol development and categorical test 
-        validation studies.
+        Systematic evaluation of diagnostic test combinations. Analyzes all possible
+        test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold
+        standard to identify optimal testing strategies. Calculates sensitivity,
+        specificity, PPV, NPV, and accuracy for each pattern combination.
     R:
         dontrun: false
         usage: |
-            # Basic two-test combination analysis
-            result1 <- decisioncombine(
-              data = histopathology,
-              gold = "Golden Standart",
-              goldPositive = "1",
-              test1 = "New Test", 
-              test1Positive = "1",
-              test2 = "Rater 1",
-              test2Positive = "1",
-              showVisualization = TRUE,
-              plotType = "all"  # Shows all visualization types
-            )
-            
-            # Comprehensive three-test analysis with clinical recommendations
-            result2 <- decisioncombine(
+            # Two-test combination analysis
+            result <- decisioncombine(
               data = histopathology,
               gold = "Golden Standart",
               goldPositive = "1",
               test1 = "New Test",
-              test1Positive = "1", 
+              test1Positive = "1",
               test2 = "Rater 1",
               test2Positive = "1",
-              test3 = "Rater 2",
-              test3Positive = "1",
-              showIndividual = TRUE,
-              showVisualization = TRUE,
-              plotType = "heatmap",  # Focus on performance heatmap
-              addCombinationPattern = TRUE  # Export patterns for further analysis
+              showIndividual = TRUE
             )
-            
-            # Access clinical recommendations from HTML output
-            # result2$combinationsAnalysis contains clinical recommendations
 
 options:
     - name: data
@@ -63,14 +35,14 @@ options:
           R: The data as a data frame.
 
     - name: gold
-      title: Golden Standard (Reference Test)
+      title: Gold Standard (Reference Test)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
           ui: >
-            Select the most reliable diagnostic method available (e.g., biopsy, final pathology report, expert consensus). 
-            This is the "truth" against which we compare other tests. Must be categorical with exactly 2 levels.
+            Select the reference standard (e.g., biopsy, final diagnosis).
+            This represents the "truth" for comparison. Must have exactly 2 levels.
           R: >
             The gold standard reference variable representing true disease status.
 
@@ -80,12 +52,10 @@ options:
       variable: (gold)
       description:
           ui: >
-            Select the level that indicates disease is PRESENT in your gold standard variable 
-            (e.g., "1", "positive", "malignant"). This represents the condition you want to detect.
+            Select the level indicating disease presence (e.g., "1", "positive", "malignant").
           R: >
-            The level indicating presence of disease in the gold standard variable.
+            The level indicating presence of disease in the gold standard.
 
-    # For the first test
     - name: test1
       title: Test 1 (Required)
       type: Variable
@@ -93,10 +63,9 @@ options:
       permitted: [ factor ]
       description:
           ui: >
-            Select the first diagnostic test to evaluate. This should be a test you want to validate 
-            (e.g., imaging result, biomarker, clinical assessment). Must be categorical with 2+ levels.
+            First diagnostic test to evaluate. Must have at least 2 levels.
           R: >
-            The first diagnostic test variable being evaluated for performance.
+            The first diagnostic test variable.
 
     - name: test1Positive
       title: Test 1 Positive Level
@@ -104,142 +73,191 @@ options:
       variable: (test1)
       description:
           ui: >
-            Select the level that represents a POSITIVE result for Test 1 
-            (e.g., "abnormal", "high", "positive"). This should indicate suspected disease presence.
+            Select the level representing a positive result for Test 1.
           R: >
             The level representing a positive result for Test 1.
 
-    # For the second test
     - name: test2
-      title: Test 2 (Optional - Required for Combinations)
+      title: Test 2 (Required for Combinations)
       type: Variable
-      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
           ui: >
-            Select a second diagnostic test to combine with Test 1. This enables combination analysis 
-            (e.g., combine imaging + biomarker, or two different biomarkers). Leave empty for single test analysis.
+            Second diagnostic test for combination analysis. Leave empty for single test only.
           R: >
             The second diagnostic test variable for combination analysis.
 
     - name: test2Positive
-      title: Positive Level
+      title: Test 2 Positive Level
       type: Level
       variable: (test2)
+      description:
+          R: >
+            The level representing a positive result for Test 2.
 
-    # For the third test
     - name: test3
-      title: Test 3
+      title: Test 3 (Optional)
       type: Variable
       default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            Optional third test for 3-way combination analysis (8 patterns).
+          R: >
+            The third diagnostic test variable for 3-way combination analysis.
 
     - name: test3Positive
-      title: Positive Level
+      title: Test 3 Positive Level
       type: Level
       variable: (test3)
-
-
-
-    - name: od
-      title: Original Data
-      type: Bool
-      default: false
       description:
           R: >
-            Boolean selection whether to show frequency tables. Default is 'false'.
-
-
+            The level representing a positive result for Test 3.
 
     - name: showIndividual
-      title: 'Show Individual Test Results'
-      type: Bool
-      default: false
-
-    - name: addCombinationPattern
-      title: 'Add Combination Pattern to Data'
-      type: Bool
-      default: false
-      description:
-          R: >
-            Export a new variable to the original data frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
-
-    # Visualization options
-    - name: showVisualization
-      title: Show Advanced Visualizations
+      title: Show Individual Test Statistics
       type: Bool
       default: false
       description:
           ui: >
-            Generate publication-quality visualizations to help interpret results:
-            • Performance Heatmap: Color-coded overview of all test combinations
-            • Decision Tree: Clinical decision-making flowchart
-            • Venn Diagram: Test agreement visualization
-            • Forest Plot: Confidence intervals for all metrics
+            Display diagnostic statistics for each individual test before combinations.
           R: >
-            Display comprehensive visualizations for categorical test combination analysis.
+            Boolean to show individual test performance tables.
 
-    - name: plotType
-      title: Visualization Type
-      type: List
-      options:
-        - title: Performance Heatmap
-          name: heatmap
-        - title: Clinical Decision Tree
-          name: tree
-        - title: Test Agreement Venn Diagram
-          name: venn
-        - title: Forest Plot with Wilson CIs
-          name: forest
-        - title: All Visualizations
-          name: all
-      default: heatmap
+    - name: showFrequency
+      title: Show Frequency Tables
+      type: Bool
+      default: false
       description:
           ui: >
-            Select visualization type for categorical test analysis. Forest plots use Wilson score 
-            confidence intervals for enhanced accuracy. 'All Visualizations' provides comprehensive 
-            publication-ready output.
+            Display frequency distribution tables for the gold standard and cross-tabulation of test results.
           R: >
-            Visualization selection: heatmap (performance matrix), tree (clinical decision hierarchy), 
-            venn (test agreement), forest (Wilson CIs), all (comprehensive output).
+            Boolean to show frequency tables.
 
-    - name: plotHeight
-      title: Plot Height (pixels)
-      type: Integer
-      default: 600
-      min: 400
-      max: 1200
+    - name: showBarPlot
+      title: Show Bar Chart
+      type: Bool
+      default: false
       description:
+          ui: >
+            Display grouped bar chart comparing performance metrics across test combinations.
           R: >
-            Height of the plot in pixels.
+            Boolean to display bar chart visualization.
 
-    - name: plotWidth
-      title: Plot Width (pixels)
-      type: Integer
-      default: 800
-      min: 600
-      max: 1600
+    - name: showHeatmap
+      title: Show Heatmap
+      type: Bool
+      default: false
       description:
+          ui: >
+            Display heatmap showing all metrics for all test patterns with color-coded performance values.
           R: >
-            Width of the plot in pixels.
+            Boolean to display heatmap visualization.
 
-    - name: colorScheme
-      title: Color Scheme
+    - name: showForest
+      title: Show Forest Plot
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display forest plot showing confidence intervals for key diagnostic metrics across patterns.
+          R: >
+            Boolean to display forest plot.
+
+    - name: showDecisionTree
+      title: Show Decision Tree
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display hierarchical decision tree visualization showing test combination patterns with performance-based recommendations.
+          R: >
+            Boolean to display decision tree visualization.
+
+    - name: showRecommendation
+      title: Show Optimal Pattern Recommendation
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display recommendation for the optimal test combination pattern based on Youden's J index and overall performance.
+          R: >
+            Boolean to show optimal pattern recommendation table.
+
+    - name: addPatternToData
+      title: Add Test Pattern to Data
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add a new column to the dataset containing the test combination pattern for each case (e.g., "+/+", "+/-", "-/-").
+          R: >
+            Boolean to add test pattern column to the dataset.
+
+    - name: filterStatistic
+      title: Filter by Statistic
       type: List
       options:
-        - title: Clinical (Red-Green)
-          name: clinical
-        - title: Viridis
-          name: viridis
-        - title: Blue-Yellow
-          name: blueyellow
-        - title: Grayscale
-          name: grayscale
-      default: clinical
+        - name: all
+          title: All Statistics
+        - name: prevalence
+          title: Prevalence
+        - name: sens
+          title: Sensitivity
+        - name: spec
+          title: Specificity
+        - name: ppv
+          title: PPV
+        - name: npv
+          title: NPV
+        - name: acc
+          title: Accuracy
+        - name: balancedAccuracy
+          title: Balanced Accuracy
+        - name: youden
+          title: Youden's J
+        - name: lrPos
+          title: LR+
+        - name: lrNeg
+          title: LR-
+        - name: dor
+          title: Diagnostic OR
+      default: all
       description:
+          ui: >
+            Filter tables and plots to show only the selected diagnostic statistic.
           R: >
-            Color scheme for visualizations. Clinical uses red for negative and green for positive.
+            Character indicating which statistic to display (default: all).
+
+    - name: filterPattern
+      title: Filter by Pattern Type
+      type: List
+      options:
+        - name: all
+          title: All Patterns
+        - name: allPositive
+          title: All Tests Positive
+        - name: allNegative
+          title: All Tests Negative
+        - name: majorityPositive
+          title: Majority Positive
+        - name: majorityNegative
+          title: Majority Negative
+        - name: mixed
+          title: Mixed/Discordant
+        - name: parallel
+          title: Parallel Strategy
+        - name: serial
+          title: Serial Strategy
+        - name: majority
+          title: Majority Rule Strategy
+      default: all
+      description:
+          ui: >
+            Filter tables and plots by pattern type. Options include all positive (+/+, +/+/+), all negative (-/-, -/-/-), majority positive/negative, mixed results, and clinical strategies (Parallel, Serial, Majority rule).
+          R: >
+            Character indicating which pattern type to display (default: all).
 
 ...

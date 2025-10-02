@@ -97,22 +97,19 @@ parallelplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
-                title="Instructions",
-                visible="(vars:length == 0)"))
+                title="Instructions"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Parallel Coordinates Plot",
                 width=800,
                 height=600,
-                renderFun=".plot",
-                visible="(vars:length > 1)"))
+                renderFun=".plot"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
                 title="Variable Summary",
                 rows="(vars)",
-                visible="(vars:length > 1)",
                 columns=list(
                     list(
                         `name`="variable", 

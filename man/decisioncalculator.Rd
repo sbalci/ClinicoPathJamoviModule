@@ -14,6 +14,10 @@ decisioncalculator(
   fnote = FALSE,
   ci = FALSE,
   fagan = FALSE,
+  showWelcome = TRUE,
+  showSummary = FALSE,
+  showAbout = FALSE,
+  showGlossary = FALSE,
   multiplecuts = FALSE,
   cutoff1 = "Conservative",
   tp1 = 85,
@@ -48,6 +52,16 @@ footnotes.}
 
 \item{fagan}{Boolean selection whether to generate a Fagan nomogram plot.}
 
+\item{showWelcome}{Boolean selection whether to show welcome message.}
+
+\item{showSummary}{Boolean selection whether to show plain-language summary
+of results.}
+
+\item{showAbout}{Boolean selection whether to show about and assumptions
+panels.}
+
+\item{showGlossary}{Boolean selection whether to show clinical glossary.}
+
 \item{multiplecuts}{Boolean selection whether to evaluate multiple cut-off
 scenarios.}
 
@@ -74,6 +88,11 @@ scenarios.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr

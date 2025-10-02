@@ -1,7 +1,11 @@
 #' @title Combine Medical Decision Tests
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#'
+#' @import ggplot2
+#' @importFrom dplyr %>% mutate case_when
+#' @importFrom forcats as_factor fct_relevel
+#' @importFrom epiR epi.tests
+#' @importFrom stats qnorm
 
 decisioncombineClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
@@ -9,2263 +13,1706 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
         inherit = decisioncombineBase,
         private = list(
             .init = function() {
-                # Initialization - no cTable needed anymore
+                # Dynamic image sizing based on number of tests
+                has_test3 <- !is.null(self$options$test3) && self$options$test3 != ""
+
+                if (has_test3) {
+                    # 3-test tree needs more width (8 patterns at bottom)
+                    self$results$decisionTreePlot$setSize(1400, 800)
+                } else {
+                    # 2-test tree with default size
+                    self$results$decisionTreePlot$setSize(900, 700)
+                }
             },
 
             .run = function() {
-                # Check if we have the minimum required variables for analysis
-                if (!private$.hasRequiredInputs()) {
-                    private$.displayWelcomeMessage()
+                # Main analysis flow - fail fast approach
+
+                # Check if we have minimum required variables
+                if (!private$.hasRequiredVars()) {
                     return()
                 }
-                
-                # Main analysis orchestrator - delegates to focused methods
-                tryCatch({
-                    # Step 1: Validate inputs
-                    private$.validateInputs()
-                    
-                    # Step 2: Process and clean data
-                    processed_data <- private$.processData()
-                    
-                    # Step 3: Generate frequency tables if requested
-                    if (self$options$od) {
-                        private$.generateFrequencyTables(processed_data)
+
+                # Step 1: Validate inputs
+                private$.validateInputs()
+
+                # Step 2: Prepare data
+                data_prep <- private$.prepareData()
+
+                # Step 3: Individual test analysis (if requested)
+                if (self$options$showIndividual) {
+                    if (!is.null(self$options$test1) && self$options$test1 != "") {
+                        private$.analyzeIndividualTest(data_prep, 1)
                     }
-                    
-                    # Step 4: Calculate individual test statistics if requested
-                    if (self$options$showIndividual) {
-                        private$.calculateIndividualTests(processed_data)
+                    if (!is.null(self$options$test2) && self$options$test2 != "") {
+                        private$.analyzeIndividualTest(data_prep, 2)
                     }
-                    
-                    # Step 5: Perform combination analysis
-                    if (length(processed_data$test_variables) >= 2) {
-                        private$.performCombinationAnalysis(processed_data)
+                    if (!is.null(self$options$test3) && self$options$test3 != "") {
+                        private$.analyzeIndividualTest(data_prep, 3)
                     }
-                    
-                }, error = function(e) {
-                    # Consistent error handling with informative messages
-                    stop(paste("Analysis failed:", conditionMessage(e), "Please check your data and variable selections."))
-                })
-            },
-            
-            .validateInputs = function() {
-                # Comprehensive input validation with informative error messages
-                if (length(self$options$gold) == 0) {
-                    stop("Gold standard variable is required. Please select a gold standard variable from your dataset.")
                 }
+
+                # Step 4: Frequency tables (if requested)
+                if (self$options$showFrequency) {
+                    private$.generateFrequencyTables(data_prep)
+                }
+
+                # Step 5: Combination analysis
+                private$.analyzeCombinations(data_prep)
+
+                # Step 6: Prepare plot data (if any plots requested)
+                if (self$options$showBarPlot || self$options$showHeatmap || self$options$showForest || self$options$showDecisionTree) {
+                    private$.preparePlotData(data_prep)
+                }
+
+                # Step 7: Generate optimal pattern recommendation (if requested)
+                if (self$options$showRecommendation) {
+                    private$.generateOptimalRecommendation()
+                }
+
+                # Step 8: Add test pattern to data (if requested)
+                if (self$options$addPatternToData) {
+                    private$.addPatternColumn(data_prep)
+                }
+            },
+
+            .hasRequiredVars = function() {
+                # Check if minimum required variables are selected
+                # Returns FALSE to silently skip analysis, not throw error
 
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    stop("Data contains no (complete) rows. Please check your dataset for missing values.")
+                    return(FALSE)
                 }
-                
-                test_vars <- c(self$options$test1, self$options$test2, self$options$test3)
-                test_vars <- test_vars[!is.null(test_vars) & test_vars != ""]
-                
-                if (length(test_vars) == 0) {
-                    stop("At least one test variable is required for analysis. Please select Test 1 and optionally Test 2 and Test 3.")
+
+                if (length(self$options$gold) == 0 || self$options$gold == "") {
+                    return(FALSE)
                 }
-                
+
                 if (is.null(self$options$goldPositive) || self$options$goldPositive == "") {
-                    stop("Positive level for gold standard must be specified. Please select the positive level from the dropdown.")
+                    return(FALSE)
                 }
-                
-                # Validate positive levels for selected tests
-                if (!is.null(self$options$test1) && self$options$test1 != "" && 
-                    (is.null(self$options$test1Positive) || self$options$test1Positive == "")) {
-                    stop(paste("Positive level for Test 1 (", self$options$test1, ") must be specified."))
+
+                if (length(self$options$test1) == 0 || self$options$test1 == "") {
+                    return(FALSE)
                 }
-                
-                if (!is.null(self$options$test2) && self$options$test2 != "" && 
-                    (is.null(self$options$test2Positive) || self$options$test2Positive == "")) {
-                    stop(paste("Positive level for Test 2 (", self$options$test2, ") must be specified."))
+
+                if (is.null(self$options$test1Positive) || self$options$test1Positive == "") {
+                    return(FALSE)
                 }
-                
-                if (!is.null(self$options$test3) && self$options$test3 != "" && 
-                    (is.null(self$options$test3Positive) || self$options$test3Positive == "")) {
-                    stop(paste("Positive level for Test 3 (", self$options$test3, ") must be specified."))
+
+                return(TRUE)
+            },
+
+            .validateInputs = function() {
+                # Strict validation with clear error messages
+
+                if (is.null(self$data) || nrow(self$data) == 0) {
+                    stop("No data available. Please load data before running analysis.")
                 }
-                
-                # Validate gold standard has at least 2 levels for meaningful analysis
-                gold_levels <- unique(self$data[[self$options$gold]])
-                gold_levels <- gold_levels[!is.na(gold_levels)]
-                if (length(gold_levels) < 2) {
-                    stop(paste("Gold standard variable '", self$options$gold, "' must have at least 2 levels for diagnostic analysis. Currently found levels: ", paste(gold_levels, collapse = ", ")))
+
+                if (length(self$options$gold) == 0 || self$options$gold == "") {
+                    stop("Gold standard variable is required. Please select a reference test.")
                 }
-                
-                # Validate test variables have at least 2 levels
-                test_vars <- c(self$options$test1, self$options$test2, self$options$test3)
-                test_vars <- test_vars[!is.null(test_vars) & test_vars != ""]
-                for (test_var in test_vars) {
-                    if (test_var %in% names(self$data)) {
-                        test_levels <- unique(self$data[[test_var]])
-                        test_levels <- test_levels[!is.na(test_levels)]
-                        if (length(test_levels) < 2) {
-                            warning(paste("Test variable '", test_var, "' has only one level: ", paste(test_levels, collapse = ", "), ". This may limit diagnostic analysis."))
-                        }
+
+                if (is.null(self$options$goldPositive) || self$options$goldPositive == "") {
+                    stop("Please select the disease present level for the gold standard.")
+                }
+
+                if (! (self$options$gold %in% names(self$data))) {
+                    stop("Selected gold standard variable not found in the dataset.")
+                }
+
+                gold_values <- self$data[[self$options$gold]]
+                gold_non_missing <- gold_values[!is.na(gold_values)]
+                if (! (self$options$goldPositive %in% unique(gold_non_missing))) {
+                    stop("Chosen disease present level for the gold standard is not observed in the data.")
+                }
+                if (length(unique(gold_non_missing)) < 2) {
+                    stop("Gold standard variable must contain at least two distinct levels after removing missing values.")
+                }
+
+                if (length(self$options$test1) == 0 || self$options$test1 == "") {
+                    stop("Test 1 is required. Please select at least one test variable.")
+                }
+
+                if (is.null(self$options$test1Positive) || self$options$test1Positive == "") {
+                    stop("Please select the positive level for Test 1.")
+                }
+
+                if (! (self$options$test1 %in% names(self$data))) {
+                    stop("Selected Test 1 variable not found in the dataset.")
+                }
+
+                test1_values <- self$data[[self$options$test1]]
+                test1_non_missing <- test1_values[!is.na(test1_values)]
+                if (! (self$options$test1Positive %in% unique(test1_non_missing))) {
+                    stop("Chosen positive level for Test 1 is not observed in the data.")
+                }
+                if (length(unique(test1_non_missing)) < 2) {
+                    stop("Test 1 must contain at least two distinct levels after removing missing values.")
+                }
+
+                # Check if we have at least 2 tests for combination analysis
+                has_test2 <- !is.null(self$options$test2) && self$options$test2 != ""
+
+                if (has_test2) {
+                    if (is.null(self$options$test2Positive) || self$options$test2Positive == "") {
+                        stop("Please select the positive level for Test 2.")
+                    }
+                    if (! (self$options$test2 %in% names(self$data))) {
+                        stop("Selected Test 2 variable not found in the dataset.")
+                    }
+                    test2_values <- self$data[[self$options$test2]]
+                    test2_non_missing <- test2_values[!is.na(test2_values)]
+                    if (! (self$options$test2Positive %in% unique(test2_non_missing))) {
+                        stop("Chosen positive level for Test 2 is not observed in the data.")
+                    }
+                    if (length(unique(test2_non_missing)) < 2) {
+                        stop("Test 2 must contain at least two distinct levels after removing missing values.")
                     }
                 }
-                
-                invisible(TRUE)
-            },
-            
-            .processData = function() {
-                # Data processing and preparation with memory management
-                n_obs <- nrow(self$data)
-                
-                # Memory and performance management
-                private$.checkMemoryLimits(n_obs)
-                
-                # Process gold standard variable
-                goldPLevel <- jmvcore::constructFormula(terms = self$options$goldPositive)
-                goldPLevel <- jmvcore::decomposeFormula(formula = goldPLevel)
-                goldPLevel <- unlist(goldPLevel)
 
-                goldVariable <- jmvcore::constructFormula(terms = self$options$gold)
-                goldVariable <- jmvcore::decomposeFormula(formula = goldVariable)
-                goldVariable <- unlist(goldVariable)
-
-                # Create working copy with factor conversion
-                mydata <- self$data
-                mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
-                
-                # Get test variables and their positive levels
-                test_variables <- c(self$options$test1, self$options$test2, self$options$test3)
-                test_variables <- test_variables[!is.null(test_variables) & test_variables != ""]
-                
-                test_positives <- list()
-                if (!is.null(self$options$test1) && self$options$test1 != "") {
-                    test_positives[[self$options$test1]] <- self$options$test1Positive
+                # Check test3 only if provided
+                has_test3 <- !is.null(self$options$test3) && self$options$test3 != ""
+                if (has_test3) {
+                    if (is.null(self$options$test3Positive) || self$options$test3Positive == "") {
+                        stop("Please select the positive level for Test 3.")
+                    }
+                    if (! (self$options$test3 %in% names(self$data))) {
+                        stop("Selected Test 3 variable not found in the dataset.")
+                    }
+                    test3_values <- self$data[[self$options$test3]]
+                    test3_non_missing <- test3_values[!is.na(test3_values)]
+                    if (! (self$options$test3Positive %in% unique(test3_non_missing))) {
+                        stop("Chosen positive level for Test 3 is not observed in the data.")
+                    }
+                    if (length(unique(test3_non_missing)) < 2) {
+                        stop("Test 3 must contain at least two distinct levels after removing missing values.")
+                    }
                 }
+
+                # Minimum data requirement
+                if (nrow(self$data) < 4) {
+                    stop("Insufficient data: At least 4 cases are required for analysis.")
+                }
+            },
+
+            .prepareData = function() {
+                # Data preparation following decision.b.R pattern
+
+                # Get variable names
+                goldVar <- self$options$gold
+                test1Var <- self$options$test1
+
+                # Collect all variables needed
+                vars_needed <- c(goldVar, test1Var)
+
                 if (!is.null(self$options$test2) && self$options$test2 != "") {
-                    test_positives[[self$options$test2]] <- self$options$test2Positive
+                    vars_needed <- c(vars_needed, self$options$test2)
                 }
+
                 if (!is.null(self$options$test3) && self$options$test3 != "") {
-                    test_positives[[self$options$test3]] <- self$options$test3Positive
-                }
-                
-                # Remove rows with missing values in analysis variables
-                analysis_vars <- c(goldVariable, test_variables)
-                complete_rows <- complete.cases(mydata[analysis_vars])
-                
-                if (sum(complete_rows) == 0) {
-                    stop("No complete cases found for analysis variables. Please check for missing values in your gold standard and test variables.")
-                }
-                
-                mydata_clean <- mydata[complete_rows, ]
-                
-                # Report data usage
-                n_analysis <- nrow(mydata_clean)
-                if (n_obs != n_analysis) {
-                    message(paste("Using", n_analysis, "of", n_obs, "observations (", 
-                                 n_obs - n_analysis, "observations removed due to missing values)"))
-                }
-                
-                # Add binary recoded variables
-                mydata_clean$goldVariable2 <- dplyr::case_when(
-                    mydata_clean[[goldVariable]] == goldPLevel ~ "Positive",
-                    is.na(mydata_clean[[goldVariable]]) ~ NA_character_,
-                    TRUE ~ "Negative"
-                )
-                mydata_clean$goldVariable2 <- forcats::fct_relevel(mydata_clean$goldVariable2, "Positive")
-                
-                # Return processed data structure
-                return(list(
-                    original_data = mydata,
-                    clean_data = mydata_clean,
-                    gold_variable = goldVariable,
-                    gold_positive_level = goldPLevel,
-                    test_variables = test_variables,
-                    test_positives = test_positives,
-                    n_original = n_obs,
-                    n_analysis = n_analysis
-                ))
-            },
-            
-            .checkMemoryLimits = function(n_obs) {
-                # Enhanced memory limit checking with warnings
-                large_dataset_threshold <- 1000
-                very_large_threshold <- 10000
-                memory_critical_threshold <- 100000
-                
-                if (n_obs > large_dataset_threshold) {
-                    message(paste("Processing dataset with", n_obs, "observations"))
-                    
-                    if (n_obs > very_large_threshold) {
-                        message("Large dataset detected - using optimized memory management")
-                        
-                        # Check available memory
-                        tryCatch({
-                            gc(verbose = FALSE)
-                        }, error = function(e) {
-                            warning("Memory management may be constrained. Consider reducing dataset size if analysis fails.")
-                        })
-                        
-                        if (n_obs > memory_critical_threshold) {
-                            stop(paste("Dataset too large (", n_obs, " observations). ",
-                                      "Please consider subsetting your data or using a more powerful system. ",
-                                      "Maximum recommended size is", memory_critical_threshold, "observations."))
-                        }
-                        
-                        if (n_obs > 50000) {
-                            warning("Very large dataset may require substantial processing time and memory. Consider running during off-peak hours.")
-                        }
-                    }
-                }
-                
-                invisible(TRUE)
-            },
-
-            .generateFrequencyTables = function(processed_data) {
-                # Generate frequency tables for original data display
-                mydata <- processed_data$original_data
-                goldVariable <- processed_data$gold_variable
-
-                # Create frequency table for gold standard (use original data before NA removal)
-                freq_table <- table(mydata[[goldVariable]], useNA = "ifany")
-                total_n <- sum(freq_table, na.rm = TRUE)
-                
-                # Populate gold standard frequency table
-                goldFreqTable <- self$results$goldStandardFreqTable
-                for (level in names(freq_table)) {
-                    level_display <- if (is.na(level)) "Missing" else as.character(level)
-                    freq_count <- as.numeric(freq_table[level])
-                    # Handle NA or zero counts properly
-                    freq_pct <- if (!is.na(freq_count) && total_n > 0) freq_count / total_n else 0
-                    
-                    goldFreqTable$addRow(rowKey = level_display, values = list(
-                        level = level_display,
-                        frequency = freq_count,
-                        percentage = freq_pct
-                    ))
+                    vars_needed <- c(vars_needed, self$options$test3)
                 }
 
-                # Create cross-tabulation tables for all tests with gold standard
-                test_vars <- processed_data$test_variables
+                # Get subset of data
+                subset_data <- self$data[, vars_needed, drop = FALSE]
 
-                if (length(test_vars) > 0) {
-                    crossTabTable <- self$results$crossTabTable
-                    goldPLevel <- processed_data$gold_positive_level
-                    
-                    for (test_var in test_vars) {
-                        # Create cross-tabulation (use original data with NAs shown)
-                        cross_tab <- table(mydata[[test_var]], mydata[[goldVariable]], useNA = "ifany")
-                        
-                        # Add rows for each test level
-                        for (i in seq_along(rownames(cross_tab))) {
-                            test_level <- rownames(cross_tab)[i]
-                            # Handle NA rows if present
-                            test_level_display <- if (is.na(test_level)) "Missing" else as.character(test_level)
-                            
-                            # Calculate values for each gold standard level using safe indexing
-                            gold_pos_count <- 0
-                            tryCatch({
-                                # Use numeric indexing which is safer with tables
-                                col_idx <- which(colnames(cross_tab) == goldPLevel)
-                                if (length(col_idx) > 0) {
-                                    gold_pos_count <- as.numeric(cross_tab[i, col_idx[1]])
-                                }
-                            }, error = function(e) {
-                                # If any error, default to 0
-                                gold_pos_count <- 0
-                            })
-                            
-                            # Calculate gold negative count (all non-positive levels)
-                            row_total <- sum(cross_tab[i, ], na.rm = TRUE)
-                            gold_neg_count <- row_total - gold_pos_count
-                            
-                            crossTabTable$addRow(
-                                rowKey = paste0(test_var, "_", test_level_display), 
-                                values = list(
-                                    test_var = test_var,
-                                    test_level = test_level_display,
-                                    gold_positive = gold_pos_count,
-                                    gold_negative = gold_neg_count,
-                                    total = row_total
-                                )
-                            )
-                        }
-                    }
+                # Remove NAs
+                mydata <- jmvcore::naOmit(subset_data)
+
+                if (nrow(mydata) == 0) {
+                    stop("No complete cases available after removing missing data.")
                 }
-            },
-            
-            .calculateIndividualTests = function(processed_data) {
-                # Calculate individual test performance statistics
-                mydata2 <- processed_data$clean_data
-                test_variables <- processed_data$test_variables
-                test_positives <- processed_data$test_positives
-                
-                # Process individual tests
-                for (i in seq_along(test_variables)) {
-                    testVariable <- test_variables[i]
-                    testPLevel <- test_positives[[testVariable]]
 
-                    # Process test data
-                    mydata2[[testVariable]] <- forcats::as_factor(mydata2[[testVariable]])
+                # Convert to factors
+                for (var in vars_needed) {
+                    mydata[[var]] <- forcats::as_factor(mydata[[var]])
+                }
 
-                    # Add binary recode for this test
-                    binary_col_name <- paste0(testVariable, "_bin")
-                    mydata2[[binary_col_name]] <- dplyr::case_when(
-                        mydata2[[testVariable]] == testPLevel ~ 1, 
-                        is.na(mydata2[[testVariable]]) ~ NA_real_, 
-                        TRUE ~ 0
-                    )
-
-                    # Create recode for contingency table
-                    recode_col_name <- paste0(testVariable, "_recode")
-                    mydata2[[recode_col_name]] <- dplyr::case_when(
-                        mydata2[[testVariable]] == testPLevel ~ "Positive",
-                        is.na(mydata2[[testVariable]]) ~ NA_character_,
-                        TRUE ~ "Negative"
-                    )
-                    mydata2[[recode_col_name]] <- forcats::fct_relevel(mydata2[[recode_col_name]], "Positive")
-
-                    # Create contingency table with error handling
-                    tryCatch({
-                        conf_table <- table(mydata2[[recode_col_name]], mydata2[["goldVariable2"]])
-                        
-                        # Validate table structure
-                        if (!all(dim(conf_table) == c(2, 2))) {
-                            stop(paste("Invalid contingency table structure for", testVariable, 
-                                      "- ensure both test and gold standard have exactly two levels"))
-                        }
-                        
-                        # Extract values safely with bounds checking
-                        TP <- if (nrow(conf_table) >= 1 && ncol(conf_table) >= 1) conf_table[1, 1] else 0
-                        FP <- if (nrow(conf_table) >= 1 && ncol(conf_table) >= 2) conf_table[1, 2] else 0
-                        FN <- if (nrow(conf_table) >= 2 && ncol(conf_table) >= 1) conf_table[2, 1] else 0
-                        TN <- if (nrow(conf_table) >= 2 && ncol(conf_table) >= 2) conf_table[2, 2] else 0
-                    }, error = function(e) {
-                        stop(paste("Error creating contingency table for", testVariable, ":", e$message))
-                    })
-
-                    # Get appropriate individual table
-                    indTable <- NULL
-                    if (testVariable == self$options$test1) {
-                        indTable <- self$results$indTable1
-                    } else if (testVariable == self$options$test2) {
-                        indTable <- self$results$indTable2
-                    } else if (testVariable == self$options$test3) {
-                        indTable <- self$results$indTable3
-                    }
-
-                    if (!is.null(indTable)) {
-                        indTable$addRow(
-                            rowKey = "Test Positive",
-                            values = list(
-                                newtest = "Test Positive",
-                                GP = TP,
-                                GN = FP,
-                                Total = TP + FP
-                            )
+                # Recode gold standard
+                mydata <- mydata %>%
+                    dplyr::mutate(
+                        goldVariable2 = dplyr::case_when(
+                            is.na(.data[[goldVar]]) ~ NA_character_,
+                            .data[[goldVar]] == self$options$goldPositive ~ "Positive",
+                            TRUE ~ "Negative"
                         )
-
-                        indTable$addRow(
-                            rowKey = "Test Negative",
-                            values = list(
-                                newtest = "Test Negative",
-                                GP = FN,
-                                GN = TN,
-                                Total = FN + TN
-                            )
-                        )
-
-                        indTable$addRow(
-                            rowKey = "Total",
-                            values = list(
-                                newtest = "Total",
-                                GP = TP + FN,
-                                GN = FP + TN,
-                                Total = TP + FP + FN + TN
-                            )
-                        )
-                    }
-                }
-            },
-            
-            .performCombinationAnalysis = function(processed_data) {
-                # Main combination analysis orchestrator
-                mydata2 <- processed_data$clean_data
-                test_variables <- processed_data$test_variables
-                gold_variable <- processed_data$gold_variable
-                
-                # Add comprehensive test combination analysis
-                mydata2 <- private$.analyzeCombinations(mydata2, test_variables, gold_variable)
-                
-                # Export combination pattern to data if requested
-                if (self$options$addCombinationPattern && self$results$addCombinationPattern$isNotFilled()) {
-                    # Create combination pattern for export
-                    if ("combination_pattern" %in% names(mydata2)) {
-                        # Export the combination pattern to the dataset
-                        self$results$addCombinationPattern$setRowNums(rownames(processed_data$original_data))
-                        self$results$addCombinationPattern$setValues(mydata2$combination_pattern)
-                    }
-                }
-                
-                # Store visualization enablement state for plot rendering
-                if (self$options$showVisualization) {
-                    # This ensures plots are only prepared when visualization is enabled
-                    private$.prepareVisualizationData(mydata2, test_variables)
-                }
-            },
-
-            
-            .validatePlotData = function(plotData) {
-                # Validate that plot data contains all required fields and is not null
-                required_fields <- c("patterns", "sensitivity", "specificity", "ppv", "npv", "accuracy")
-                
-                if (is.null(plotData) || length(plotData) == 0) {
-                    stop("Plot data is null or empty")
-                }
-                
-                missing_fields <- setdiff(required_fields, names(plotData))
-                if (length(missing_fields) > 0) {
-                    stop(paste("Missing required plot data fields:", paste(missing_fields, collapse = ", ")))
-                }
-                
-                # Check data consistency
-                data_lengths <- sapply(plotData[required_fields], length)
-                if (length(unique(data_lengths)) > 1) {
-                    stop("Plot data fields have inconsistent lengths")
-                }
-                
-                # Check for empty data
-                if (data_lengths[1] == 0) {
-                    stop("Plot data contains no observations")
-                }
-                
-                invisible(TRUE)
-            },
-            
-            .generatePatternInfo = function(testVariables) {
-                # Consolidated helper function to generate all possible test combination patterns with descriptions
-                n_tests <- length(testVariables)
-                
-                if (n_tests == 2) {
-                    patterns <- c("+/+", "+/-", "-/+", "-/-")
-                    if (!is.null(testVariables) && length(testVariables) >= 2) {
-                        descriptions <- c(
-                            "Both tests positive",
-                            paste(testVariables[1], "positive,", testVariables[2], "negative"),
-                            paste(testVariables[1], "negative,", testVariables[2], "positive"),
-                            "Both tests negative"
-                        )
-                    } else {
-                        descriptions <- patterns
-                    }
-                } else if (n_tests == 3) {
-                    patterns <- c("+/+/+", "+/+/-", "+/-/+", "+/-/-", 
-                                 "-/+/+", "-/+/-", "-/-/+", "-/-/-")
-                    descriptions <- character(length(patterns))
-                    
-                    if (!is.null(testVariables) && length(testVariables) >= 3) {
-                        for (i in seq_along(patterns)) {
-                            pattern <- patterns[i]
-                            test_results <- strsplit(pattern, "/")[[1]]
-                            desc_parts <- character(length(test_results))
-                            
-                            for (j in seq_along(test_results)) {
-                                if (test_results[j] == "+") {
-                                    desc_parts[j] <- paste(testVariables[j], "pos")
-                                } else {
-                                    desc_parts[j] <- paste(testVariables[j], "neg")
-                                }
-                            }
-                            descriptions[i] <- paste(desc_parts, collapse = ", ")
-                        }
-                    } else {
-                        descriptions <- patterns
-                    }
-                } else {
-                    stop(paste("Pattern generation only supports 2 or 3 tests, got", n_tests))
-                }
-                
-                return(list(patterns = patterns, descriptions = descriptions))
-            },
-            
-            
-            .calculateDiagnosticStats = function(tp, fp, fn, tn) {
-                # Comprehensive diagnostic statistics calculation with clinical interpretation
-                # Following established clinical guidelines for diagnostic test evaluation
-                total_pos <- tp + fn  # Total diseased (condition positive)
-                total_neg <- fp + tn  # Total healthy (condition negative)
-                total_test_pos <- tp + fp  # Total test positive
-                total_test_neg <- fn + tn  # Total test negative
-                total <- tp + fp + fn + tn
-                
-                # Power analysis and sample size adequacy check
-                min_events_per_cell <- 5  # Minimum for reliable statistical inference
-                inadequate_power <- any(c(tp, fp, fn, tn) < min_events_per_cell)
-                
-                if (inadequate_power) {
-                    warning(paste("Small cell counts detected (TP=", tp, ", FP=", fp, ", FN=", fn, ", TN=", tn, ").",
-                                 "Results may be unreliable. Consider larger sample size or different grouping."))
-                }
-                
-                # Calculate basic diagnostic statistics with clinical bounds checking
-                sens <- if(total_pos > 0) tp / total_pos else NA  # True Positive Rate
-                spec <- if(total_neg > 0) tn / total_neg else NA  # True Negative Rate
-                ppv <- if(total_test_pos > 0) tp / total_test_pos else NA  # Precision
-                npv <- if(total_test_neg > 0) tn / total_test_neg else NA  # Negative Precision
-                acc <- if(total > 0) (tp + tn) / total else NA  # Overall Accuracy
-                
-                # Calculate simplified performance score for categorical tests
-                # Using balanced accuracy: (Sensitivity + Specificity) / 2
-                auc <- if(!is.na(sens) && !is.na(spec)) {
-                    (sens + spec) / 2  # Balanced accuracy for categorical tests
-                } else NA
-                
-                # Calculate additional clinical metrics
-                youden_index <- if(!is.na(sens) && !is.na(spec)) sens + spec - 1 else NA
-                balanced_accuracy <- if(!is.na(sens) && !is.na(spec)) (sens + spec) / 2 else NA
-                
-                # Calculate likelihood ratios with clinical interpretation bounds
-                plr <- if(!is.na(sens) && !is.na(spec) && spec < 1) sens / (1 - spec) else Inf
-                nlr <- if(!is.na(sens) && !is.na(spec) && spec > 0) (1 - sens) / spec else 0
-                
-                # Clinical quality assessment based on established thresholds
-                clinical_quality <- "Unknown"
-                if (!is.na(youden_index) && !is.na(acc)) {
-                    if (youden_index > 0.8 && acc > 0.9) {
-                        clinical_quality <- "Excellent - Highly recommended for clinical use"
-                    } else if (youden_index > 0.6 && acc > 0.8) {
-                        clinical_quality <- "Good - Suitable for clinical use with appropriate context"
-                    } else if (youden_index > 0.4 && acc > 0.7) {
-                        clinical_quality <- "Fair - Use with caution, consider additional testing"
-                    } else if (youden_index > 0.2) {
-                        clinical_quality <- "Poor - Limited clinical utility"
-                    } else {
-                        clinical_quality <- "Very Poor - Not recommended for clinical use"
-                    }
-                }
-                
-                # Wilson score confidence interval function
-                calcCI <- function(x, n) {
-                    if (is.na(x) || n == 0) return(c(NA, NA))
-                    p <- x / n
-                    z <- 1.96  # 95% CI
-                    denominator <- 1 + (z^2 / n)
-                    centre <- (p + (z^2 / (2 * n))) / denominator
-                    half_width <- z * sqrt((p * (1 - p) / n) + (z^2 / (4 * n^2))) / denominator
-                    c(max(0, centre - half_width), min(1, centre + half_width))
-                }
-                
-                sens_ci <- calcCI(tp, total_pos)
-                spec_ci <- calcCI(tn, total_neg)
-                ppv_ci <- calcCI(tp, total_test_pos)
-                npv_ci <- calcCI(tn, total_test_neg)
-                acc_ci <- calcCI(tp + tn, total)
-                
-                list(
-                    sens = sens, spec = spec, ppv = ppv, npv = npv, acc = acc, auc = auc,
-                    youden_index = youden_index, balanced_accuracy = balanced_accuracy,
-                    plr = plr, nlr = nlr, clinical_quality = clinical_quality,
-                    sens_ci = sens_ci, spec_ci = spec_ci, ppv_ci = ppv_ci,
-                    npv_ci = npv_ci, acc_ci = acc_ci,
-                    tp = tp, fp = fp, fn = fn, tn = tn
-                )
-            },
-
-            .plotPerformanceHeatmap = function(image, ...) {
-                # Validate plot data first
-                plotData <- image$state
-                tryCatch({
-                    private$.validatePlotData(plotData)
-                }, error = function(e) {
-                    plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                        label = paste("Data validation error:", e$message),
-                                        size = 6, color = "red", hjust = 0.5, vjust = 0.5) +
-                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                        ggplot2::theme_void() +
-                        ggplot2::labs(title = "Performance Heatmap - Data Error")
-                    print(plot)
-                    return(TRUE)
-                })
-                
-                # Get plot options including dimensions
-                color_scheme <- self$options$colorScheme
-                plot_width <- self$options$plotWidth
-                plot_height <- self$options$plotHeight
-                
-                # Set image dimensions if provided
-                if (!is.null(plot_width) && !is.null(plot_height)) {
-                    image$setSize(width = plot_width, height = plot_height)
-                }
-                
-                # Create publication-ready heatmap data with comprehensive metrics
-                heatmap_data <- data.frame(
-                    Pattern = factor(plotData$patterns, levels = plotData$patterns),
-                    Description = plotData$descriptions,
-                    Sensitivity = round(plotData$sensitivity * 100, 1),
-                    Specificity = round(plotData$specificity * 100, 1), 
-                    PPV = round(plotData$ppv * 100, 1),
-                    NPV = round(plotData$npv * 100, 1),
-                    Accuracy = round(plotData$accuracy * 100, 1),
-                    n_positive = plotData$tp + plotData$fn,
-                    n_negative = plotData$fp + plotData$tn,
-                    stringsAsFactors = FALSE
-                )
-                
-                # Reshape for heatmap with additional information
-                heatmap_long <- heatmap_data %>%
-                    tidyr::pivot_longer(
-                        cols = c(Sensitivity, Specificity, PPV, NPV, Accuracy),
-                        names_to = "Metric", 
-                        values_to = "Value"
                     ) %>%
                     dplyr::mutate(
-                        Metric = factor(Metric, 
-                                      levels = c("Sensitivity", "Specificity", "PPV", "NPV", "Accuracy"),
-                                      labels = c("Sensitivity\n(True +)", "Specificity\n(True -)", 
-                                               "PPV\n(Pred +)", "NPV\n(Pred -)", "Accuracy\n(Overall)"))
+                        goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
                     )
-                
-                # Professional color schemes
-                if (color_scheme == "clinical") {
-                    fill_colors <- c(low = "#d73027", mid = "#fee08b", high = "#1a9850")
-                } else if (color_scheme == "viridis") {
-                    fill_colors <- c(low = "#440154", mid = "#21908C", high = "#FDE725")
-                } else if (color_scheme == "blueyellow") {
-                    fill_colors <- c(low = "#08519c", mid = "#6baed6", high = "#ffffcc")
-                } else { # grayscale
-                    fill_colors <- c(low = "#252525", mid = "#737373", high = "#f0f0f0")
-                }
-                
-                # Create publication-quality heatmap
-                plot <- ggplot2::ggplot(heatmap_long, ggplot2::aes(x = Metric, y = Pattern, fill = Value)) +
-                    ggplot2::geom_tile(color = "white", size = 1.2, alpha = 0.9) +
-                    ggplot2::geom_text(
-                        ggplot2::aes(label = paste0(Value, "%")), 
-                        color = "white", 
-                        size = 4.5, 
-                        fontface = "bold",
-                        family = "serif"
-                    ) +
-                    ggplot2::scale_fill_gradient2(
-                        low = fill_colors["low"], 
-                        mid = fill_colors["mid"], 
-                        high = fill_colors["high"],
-                        midpoint = 75, 
-                        name = "Performance\n(%)",
-                        limits = c(0, 100),
-                        guide = ggplot2::guide_colorbar(
-                            barwidth = 1.5,
-                            barheight = 12,
-                            title.position = "top",
-                            title.hjust = 0.5,
-                            frame.colour = "black",
-                            ticks.colour = "black"
+
+                # Recode Test 1
+                mydata <- mydata %>%
+                    dplyr::mutate(
+                        test1Variable2 = dplyr::case_when(
+                            is.na(.data[[test1Var]]) ~ NA_character_,
+                            .data[[test1Var]] == self$options$test1Positive ~ "Positive",
+                            TRUE ~ "Negative"
                         )
-                    ) +
-                    ggplot2::labs(
-                        title = "Diagnostic Test Combination Performance Matrix",
-                        subtitle = paste0("Performance metrics across ", length(unique(plotData$patterns)), 
-                                         " test combination patterns (n=", 
-                                         sum(plotData$tp + plotData$fp + plotData$fn + plotData$tn)/length(plotData$patterns), ")"),
-                        x = "Diagnostic Performance Metrics",
-                        y = "Test Combination Patterns",
-                        caption = "Higher values indicate better diagnostic performance. PPV: Positive Predictive Value; NPV: Negative Predictive Value"
-                    ) +
-                    ggplot2::theme_classic(base_size = 12, base_family = "serif") +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 16, face = "bold", margin = ggplot2::margin(b = 10)),
-                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, color = "gray30", margin = ggplot2::margin(b = 15)),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, size = 9, color = "gray40", margin = ggplot2::margin(t = 10)),
-                        axis.title.x = ggplot2::element_text(size = 13, face = "bold", margin = ggplot2::margin(t = 15)),
-                        axis.title.y = ggplot2::element_text(size = 13, face = "bold", margin = ggplot2::margin(r = 15)),
-                        axis.text.x = ggplot2::element_text(size = 11, face = "bold", color = "black"),
-                        axis.text.y = ggplot2::element_text(size = 11, face = "bold", color = "black"),
-                        axis.ticks = ggplot2::element_line(color = "black", size = 0.5),
-                        axis.line = ggplot2::element_line(color = "black", size = 0.8),
-                        legend.position = "right",
-                        legend.title = ggplot2::element_text(size = 11, face = "bold"),
-                        legend.text = ggplot2::element_text(size = 10),
-                        panel.border = ggplot2::element_rect(color = "black", fill = NA, size = 1.2),
-                        plot.margin = ggplot2::margin(20, 20, 20, 20)
+                    ) %>%
+                    dplyr::mutate(
+                        test1Variable2 = forcats::fct_relevel(test1Variable2, "Positive")
                     )
-                
-                print(plot)
-                TRUE
+
+                # Recode Test 2 if present
+                if (!is.null(self$options$test2) && self$options$test2 != "") {
+                    test2Var <- self$options$test2
+                    mydata <- mydata %>%
+                        dplyr::mutate(
+                            test2Variable2 = dplyr::case_when(
+                                is.na(.data[[test2Var]]) ~ NA_character_,
+                                .data[[test2Var]] == self$options$test2Positive ~ "Positive",
+                                TRUE ~ "Negative"
+                            )
+                        ) %>%
+                        dplyr::mutate(
+                            test2Variable2 = forcats::fct_relevel(test2Variable2, "Positive")
+                        )
+                }
+
+                # Recode Test 3 if present
+                if (!is.null(self$options$test3) && self$options$test3 != "") {
+                    test3Var <- self$options$test3
+                    mydata <- mydata %>%
+                        dplyr::mutate(
+                            test3Variable2 = dplyr::case_when(
+                                is.na(.data[[test3Var]]) ~ NA_character_,
+                                .data[[test3Var]] == self$options$test3Positive ~ "Positive",
+                                TRUE ~ "Negative"
+                            )
+                        ) %>%
+                        dplyr::mutate(
+                            test3Variable2 = forcats::fct_relevel(test3Variable2, "Positive")
+                        )
+                }
+
+                return(mydata)
             },
-            
-            .findOptimalCutpoint = function(plotData) {
-                # Identify optimal cut-point using multiple criteria
-                # Returns the pattern with best overall performance
-                
-                if (is.null(plotData) || length(plotData$patterns) == 0) {
-                    return(list(pattern = "None", method = "No data", rationale = "No data available"))
+
+            .analyzeIndividualTest = function(data_prep, test_num) {
+                # Analyze individual test performance
+
+                test_var_name <- paste0("test", test_num, "Variable2")
+
+                if (!test_var_name %in% names(data_prep)) {
+                    return()
                 }
-                
-                # Calculate Youden's J statistic for each pattern
-                youden_scores <- plotData$sensitivity + plotData$specificity - 1
-                
-                # Find optimal patterns by different criteria
-                youden_optimal <- which.max(youden_scores)
-                accuracy_optimal <- which.max(plotData$accuracy)
-                
-                # Calculate distance from perfect classifier (100% sensitivity, 100% specificity)
-                performance_distances <- sqrt((1 - plotData$specificity)^2 + (1 - plotData$sensitivity)^2)
-                distance_optimal <- which.min(performance_distances)
-                
-                # Determine best overall pattern with clinical reasoning
-                optimal_pattern <- youden_optimal
-                method <- "Youden's J Index"
-                rationale <- paste0(
-                    "Selected based on maximum Youden's J statistic (", 
-                    round(youden_scores[youden_optimal], 3), 
-                    "), which optimizes sensitivity + specificity - 1. ",
-                    "This provides balanced performance for screening and confirmation."
-                )
-                
-                # Check if accuracy-based selection differs significantly
-                if (accuracy_optimal != youden_optimal) {
-                    acc_diff <- abs(plotData$accuracy[accuracy_optimal] - plotData$accuracy[youden_optimal])
-                    if (acc_diff > 0.05) {  # >5% difference
-                        rationale <- paste0(rationale, " Note: Pattern '", 
-                                           plotData$patterns[accuracy_optimal], 
-                                           "' has higher accuracy (", 
-                                           round(plotData$accuracy[accuracy_optimal] * 100, 1), 
-                                           "% vs ", round(plotData$accuracy[youden_optimal] * 100, 1), 
-                                           "%) but lower balanced performance.")
-                    }
+
+                # Create contingency table
+                cont_table <- table(data_prep[[test_var_name]], data_prep$goldVariable2)
+
+                # Validate table structure
+                if (!all(dim(cont_table) == c(2, 2))) {
+                    return()
                 }
-                
-                return(list(
-                    pattern = plotData$patterns[optimal_pattern],
-                    method = method,
-                    rationale = rationale,
-                    youden_index = youden_scores[optimal_pattern],
-                    sensitivity = plotData$sensitivity[optimal_pattern],
-                    specificity = plotData$specificity[optimal_pattern],
-                    accuracy = plotData$accuracy[optimal_pattern]
+
+                # Extract counts
+                tp <- cont_table[1, 1]
+                fp <- cont_table[1, 2]
+                fn <- cont_table[2, 1]
+                tn <- cont_table[2, 2]
+
+                # Get results tables
+                if (test_num == 1) {
+                    contTable <- self$results$individualTest1$test1Contingency
+                    statsTable <- self$results$individualTest1$test1Stats
+                } else if (test_num == 2) {
+                    contTable <- self$results$individualTest2$test2Contingency
+                    statsTable <- self$results$individualTest2$test2Stats
+                } else {
+                    contTable <- self$results$individualTest3$test3Contingency
+                    statsTable <- self$results$individualTest3$test3Stats
+                }
+
+                # Populate contingency table
+                contTable$addRow(rowKey = "Positive", values = list(
+                    testResult = "Test Positive",
+                    goldPos = tp,
+                    goldNeg = fp,
+                    total = tp + fp
+                ))
+                contTable$addRow(rowKey = "Negative", values = list(
+                    testResult = "Test Negative",
+                    goldPos = fn,
+                    goldNeg = tn,
+                    total = fn + tn
+                ))
+                contTable$addRow(rowKey = "Total", values = list(
+                    testResult = "Total",
+                    goldPos = tp + fn,
+                    goldNeg = fp + tn,
+                    total = tp + fp + fn + tn
+                ))
+
+                # Calculate statistics using epiR
+                result <- epiR::epi.tests(cont_table, conf.level = 0.95)
+
+                # Extract values - epiR returns $detail as a data frame
+                detail_df <- as.data.frame(result$detail)
+
+                sens <- detail_df[detail_df$statistic == "se", "est"]
+                spec <- detail_df[detail_df$statistic == "sp", "est"]
+                ppv <- detail_df[detail_df$statistic == "pv.pos", "est"]
+                npv <- detail_df[detail_df$statistic == "pv.neg", "est"]
+
+                # Populate statistics table
+                statsTable$addRow(rowKey = "sens", values = list(
+                    statistic = "Sensitivity",
+                    estimate = sens
+                ))
+                statsTable$addRow(rowKey = "spec", values = list(
+                    statistic = "Specificity",
+                    estimate = spec
+                ))
+                statsTable$addRow(rowKey = "ppv", values = list(
+                    statistic = "PPV",
+                    estimate = ppv
+                ))
+                statsTable$addRow(rowKey = "npv", values = list(
+                    statistic = "NPV",
+                    estimate = npv
                 ))
             },
-            
-            
-            .plotDecisionTree = function(image, ...) {
-                # Validate plot data first
-                plotData <- image$state
-                
-                # Get plot dimensions if provided
-                plot_width <- self$options$plotWidth
-                plot_height <- self$options$plotHeight
-                
-                # Set image dimensions if provided
-                if (!is.null(plot_width) && !is.null(plot_height)) {
-                    image$setSize(width = plot_width, height = plot_height)
-                }
-                
-                tryCatch({
-                    private$.validatePlotData(plotData)
-                }, error = function(e) {
-                    plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                        label = paste("Data validation error:", e$message),
-                                        size = 6, color = "red", hjust = 0.5, vjust = 0.5) +
-                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                        ggplot2::theme_void() +
-                        ggplot2::labs(title = "Decision Tree - Data Error")
-                    print(plot)
-                    return(TRUE)
-                })
-                
-                # Create publication-ready decision tree with hierarchical layout
-                n_patterns <- length(plotData$patterns)
-                
-                # Sort patterns by accuracy for better visualization
-                pattern_order <- order(plotData$accuracy, decreasing = TRUE)
-                sorted_patterns <- plotData$patterns[pattern_order]
-                sorted_accuracy <- plotData$accuracy[pattern_order]
-                sorted_sensitivity <- plotData$sensitivity[pattern_order]
-                sorted_specificity <- plotData$specificity[pattern_order]
-                
-                # Create hierarchical tree structure
-                # Root node
-                root_node <- data.frame(
-                    x = 0.5, y = 0.95,
-                    label = "Diagnostic\nDecision",
-                    type = "root",
-                    value = NA,
-                    level = 0,
-                    stringsAsFactors = FALSE
-                )
-                
-                # Test strategy nodes (level 1)
-                strategy_x <- seq(0.15, 0.85, length.out = min(n_patterns, 4))
-                if (n_patterns > 4) {
-                    # Adjust for more patterns
-                    strategy_x <- seq(0.1, 0.9, length.out = n_patterns)
-                }
-                
-                strategy_nodes <- data.frame(
-                    x = strategy_x[1:n_patterns],
-                    y = rep(0.7, n_patterns),
-                    label = sorted_patterns,
-                    type = "strategy",
-                    value = sorted_accuracy,
-                    level = 1,
-                    stringsAsFactors = FALSE
-                )
-                
-                # Performance outcome nodes (level 2)
-                outcome_nodes <- data.frame(
-                    x = strategy_x[1:n_patterns],
-                    y = rep(0.45, n_patterns),
-                    label = paste0("Acc: ", round(sorted_accuracy * 100, 1), "%\n",
-                                 "Sens: ", round(sorted_sensitivity * 100, 1), "%\n",
-                                 "Spec: ", round(sorted_specificity * 100, 1), "%"),
-                    type = "outcome",
-                    value = sorted_accuracy,
-                    level = 2,
-                    stringsAsFactors = FALSE
-                )
-                
-                # Clinical decision nodes (level 3)
-                clinical_nodes <- data.frame(
-                    x = strategy_x[1:n_patterns],
-                    y = rep(0.15, n_patterns),
-                    label = ifelse(sorted_accuracy > 0.8, "Recommended\nfor Clinical Use", 
-                                 ifelse(sorted_accuracy > 0.7, "Consider with\nCaution", 
-                                       "Not Recommended")),
-                    type = "clinical",
-                    value = sorted_accuracy,
-                    level = 3,
-                    stringsAsFactors = FALSE
-                )
-                
-                # Combine all nodes
-                all_nodes <- rbind(root_node, strategy_nodes, outcome_nodes, clinical_nodes)
-                
-                # Create edges with different styles
-                edges <- data.frame()
-                
-                # Root to strategy edges
-                for (i in 1:n_patterns) {
-                    edges <- rbind(edges, data.frame(
-                        x = 0.5, y = 0.95,
-                        xend = strategy_x[i], yend = 0.7,
-                        type = "decision", width = 1.2,
-                        stringsAsFactors = FALSE
+
+            .generateFrequencyTables = function(data_prep) {
+                # Generate frequency distribution tables for gold standard and test combinations
+
+                # Gold standard frequency table
+                goldTable <- self$results$goldFreqTable
+                gold_freq <- table(data_prep$goldVariable2)
+                total_n <- sum(gold_freq)
+
+                for (level_name in names(gold_freq)) {
+                    count <- as.integer(gold_freq[level_name])
+                    percent <- count / total_n
+
+                    goldTable$addRow(rowKey = level_name, values = list(
+                        level = level_name,
+                        count = count,
+                        percent = percent
                     ))
                 }
-                
-                # Strategy to outcome edges
-                for (i in 1:n_patterns) {
-                    edges <- rbind(edges, data.frame(
-                        x = strategy_x[i], y = 0.7,
-                        xend = strategy_x[i], yend = 0.45,
-                        type = "evaluation", width = 1.0,
-                        stringsAsFactors = FALSE
-                    ))
-                }
-                
-                # Outcome to clinical decision edges
-                for (i in 1:n_patterns) {
-                    edges <- rbind(edges, data.frame(
-                        x = strategy_x[i], y = 0.45,
-                        xend = strategy_x[i], yend = 0.15,
-                        type = "clinical", width = 0.8,
-                        stringsAsFactors = FALSE
-                    ))
-                }
-                
-                # Create publication-quality decision tree
-                plot <- ggplot2::ggplot() +
-                    
-                    # Draw edges with different styles
-                    ggplot2::geom_segment(
-                        data = edges,
-                        ggplot2::aes(x = x, y = y, xend = xend, yend = yend, 
-                                    color = type, size = width),
-                        alpha = 0.7
-                    ) +
-                    
-                    # Draw nodes with size based on performance
-                    ggplot2::geom_point(
-                        data = all_nodes,
-                        ggplot2::aes(x = x, y = y, fill = type, size = ifelse(is.na(value), 8, value * 10 + 3)),
-                        shape = 21, color = "black", stroke = 1.2, alpha = 0.9
-                    ) +
-                    
-                    # Add node labels with background for readability
-                    ggplot2::geom_label(
-                        data = all_nodes,
-                        ggplot2::aes(x = x, y = y, label = label, fill = type),
-                        color = "black", fontface = "bold", size = 3.5,
-                        alpha = 0.9, label.padding = ggplot2::unit(0.3, "lines"),
-                        label.r = ggplot2::unit(0.2, "lines")
-                    ) +
-                    
-                    # Professional color schemes
-                    ggplot2::scale_fill_manual(
-                        name = "Node Type",
-                        values = c(
-                            "root" = "#3498db",
-                            "strategy" = "#2ecc71", 
-                            "outcome" = "#f39c12",
-                            "clinical" = "#e74c3c"
-                        )
-                    ) +
-                    
-                    ggplot2::scale_color_manual(
-                        name = "Edge Type",
-                        values = c(
-                            "decision" = "#34495e",
-                            "evaluation" = "#27ae60",
-                            "clinical" = "#c0392b"
-                        )
-                    ) +
-                    
-                    ggplot2::scale_size_identity() +
-                    
-                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                    
-                    ggplot2::labs(
-                        title = "Clinical Decision Tree: Test Combination Strategy",
-                        subtitle = paste0("Hierarchical evaluation of ", n_patterns, 
-                                         " test combination patterns with performance-based recommendations"),
-                        caption = "Node size reflects diagnostic accuracy. Recommendations based on 70% and 80% performance thresholds."
-                    ) +
-                    
-                    ggplot2::theme_void(base_size = 12, base_family = "serif") +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 16, face = "bold",
-                                                          margin = ggplot2::margin(b = 10)),
-                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, color = "gray30",
-                                                             margin = ggplot2::margin(b = 15)),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, size = 9, color = "gray40",
-                                                            margin = ggplot2::margin(t = 15)),
-                        legend.position = "bottom",
-                        legend.box = "horizontal",
-                        legend.title = ggplot2::element_text(size = 11, face = "bold"),
-                        legend.text = ggplot2::element_text(size = 10),
-                        plot.margin = ggplot2::margin(20, 20, 20, 20)
-                    ) +
-                    
-                    ggplot2::guides(
-                        fill = ggplot2::guide_legend(
-                            override.aes = list(size = 6, alpha = 1),
-                            title.position = "top", title.hjust = 0.5
-                        ),
-                        color = ggplot2::guide_legend(
-                            override.aes = list(size = 2, alpha = 1),
-                            title.position = "top", title.hjust = 0.5
-                        )
+
+                # Cross-tabulation of test patterns with gold standard
+                crossTable <- self$results$crossTabTable
+
+                has_test2 <- "test2Variable2" %in% names(data_prep)
+                has_test3 <- "test3Variable2" %in% names(data_prep)
+
+                if (!has_test2) {
+                    # Single test cross-tab
+                    patterns <- c("Test 1+", "Test 1-")
+                    conditions <- list(
+                        data_prep$test1Variable2 == "Positive",
+                        data_prep$test1Variable2 == "Negative"
                     )
-                
-                print(plot)
-                TRUE
-            },
-            
-            .plotVennDiagram = function(image, ...) {
-                # Validate plot data first
-                plotData <- image$state
-                
-                # Get plot dimensions if provided
-                plot_width <- self$options$plotWidth
-                plot_height <- self$options$plotHeight
-                
-                # Set image dimensions if provided
-                if (!is.null(plot_width) && !is.null(plot_height)) {
-                    image$setSize(width = plot_width, height = plot_height)
-                }
-                
-                tryCatch({
-                    private$.validatePlotData(plotData)
-                }, error = function(e) {
-                    plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                        label = paste("Data validation error:", e$message),
-                                        size = 6, color = "red", hjust = 0.5, vjust = 0.5) +
-                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                        ggplot2::theme_void() +
-                        ggplot2::labs(title = "Venn Diagram - Data Error")
-                    print(plot)
-                    return(TRUE)
-                })
-                
-                # Create publication-ready test concordance analysis
-                # Calculate actual pattern frequencies for the diagram
-                patterns <- plotData$patterns
-                n_total <- sum(plotData$tp + plotData$fp + plotData$fn + plotData$tn) / length(patterns)
-                
-                # Extract key pattern frequencies (for 2-test combinations)
-                if (length(patterns) >= 4) {
-                    both_pos_idx <- which(patterns == "+/+")
-                    test1_only_idx <- which(patterns == "+/-")
-                    test2_only_idx <- which(patterns == "-/+")
-                    both_neg_idx <- which(patterns == "-/-")
-                    
-                    # Calculate frequencies as proportions
-                    freq_both_pos <- if(length(both_pos_idx) > 0) {
-                        (plotData$tp[both_pos_idx] + plotData$fp[both_pos_idx]) / n_total
-                    } else { 0.1 }
-                    
-                    freq_test1_only <- if(length(test1_only_idx) > 0) {
-                        (plotData$tp[test1_only_idx] + plotData$fp[test1_only_idx]) / n_total
-                    } else { 0.15 }
-                    
-                    freq_test2_only <- if(length(test2_only_idx) > 0) {
-                        (plotData$tp[test2_only_idx] + plotData$fp[test2_only_idx]) / n_total
-                    } else { 0.15 }
-                    
-                    freq_both_neg <- if(length(both_neg_idx) > 0) {
-                        (plotData$tp[both_neg_idx] + plotData$fp[both_neg_idx]) / n_total
-                    } else { 0.6 }
-                    
-                    # Calculate performance metrics for key patterns
-                    perf_both_pos <- if(length(both_pos_idx) > 0) plotData$accuracy[both_pos_idx] else 0
-                    perf_test1_only <- if(length(test1_only_idx) > 0) plotData$accuracy[test1_only_idx] else 0
-                    perf_test2_only <- if(length(test2_only_idx) > 0) plotData$accuracy[test2_only_idx] else 0
-                    
+                } else if (!has_test3) {
+                    # Two-test cross-tab
+                    patterns <- c("+/+", "+/-", "-/+", "-/-")
+                    conditions <- list(
+                        data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive",
+                        data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Negative",
+                        data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Positive",
+                        data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Negative"
+                    )
                 } else {
-                    # Default values if patterns don't match expected format
-                    freq_both_pos <- 0.2; freq_test1_only <- 0.15; freq_test2_only <- 0.15; freq_both_neg <- 0.5
-                    perf_both_pos <- perf_test1_only <- perf_test2_only <- 0.75
-                }
-                
-                # Create professional Venn diagram with proportional areas
-                circle_radius <- 0.25
-                overlap_distance <- 0.15  # Distance between circle centers
-                
-                # Generate circle coordinates
-                theta <- seq(0, 2*pi, length.out = 200)
-                
-                # Test 1 circle (left)
-                circle1_x <- 0.4
-                circle1_y <- 0.5
-                circle1_points <- data.frame(
-                    x = circle1_x + circle_radius * cos(theta),
-                    y = circle1_y + circle_radius * sin(theta),
-                    test = "Test 1"
-                )
-                
-                # Test 2 circle (right)
-                circle2_x <- 0.6
-                circle2_y <- 0.5
-                circle2_points <- data.frame(
-                    x = circle2_x + circle_radius * cos(theta),
-                    y = circle2_y + circle_radius * sin(theta),
-                    test = "Test 2"
-                )
-                
-                # Create annotation data with performance metrics
-                annotations <- data.frame(
-                    x = c(0.3, 0.7, 0.5, 0.5),
-                    y = c(0.5, 0.5, 0.5, 0.2),
-                    label = c(
-                        paste0("Test 1 Only\n", round(freq_test1_only * 100, 1), "%\nAcc: ", round(perf_test1_only * 100, 1), "%"),
-                        paste0("Test 2 Only\n", round(freq_test2_only * 100, 1), "%\nAcc: ", round(perf_test2_only * 100, 1), "%"),
-                        paste0("Both Tests\nPositive\n", round(freq_both_pos * 100, 1), "%\nAcc: ", round(perf_both_pos * 100, 1), "%"),
-                        paste0("Neither Test Positive: ", round(freq_both_neg * 100, 1), "%")
-                    ),
-                    color = c("#3498db", "#e74c3c", "#27ae60", "#7f8c8d"),
-                    size = c(4, 4, 4.5, 3.5),
-                    fontface = c("bold", "bold", "bold", "plain"),
-                    stringsAsFactors = FALSE
-                )
-                
-                # Calculate Cohen's kappa or agreement statistics
-                kappa_approx <- (perf_both_pos - 0.5) * 2  # Simplified kappa approximation
-                
-                # Create publication-quality Venn diagram
-                plot <- ggplot2::ggplot() +
-                    
-                    # Test 1 circle
-                    ggplot2::geom_polygon(
-                        data = circle1_points,
-                        ggplot2::aes(x = x, y = y),
-                        fill = "#3498db", alpha = 0.4, color = "#2980b9", size = 2
-                    ) +
-                    
-                    # Test 2 circle
-                    ggplot2::geom_polygon(
-                        data = circle2_points,
-                        ggplot2::aes(x = x, y = y),
-                        fill = "#e74c3c", alpha = 0.4, color = "#c0392b", size = 2
-                    ) +
-                    
-                    # Test labels outside circles
-                    ggplot2::annotate(
-                        "text", x = 0.2, y = 0.7,
-                        label = "Test 1\n(Positive Results)",
-                        size = 5, fontface = "bold", color = "#2980b9",
-                        hjust = 0.5, vjust = 0.5
-                    ) +
-                    
-                    ggplot2::annotate(
-                        "text", x = 0.8, y = 0.7,
-                        label = "Test 2\n(Positive Results)",
-                        size = 5, fontface = "bold", color = "#c0392b",
-                        hjust = 0.5, vjust = 0.5
-                    ) +
-                    
-                    # Add performance annotations
-                    ggplot2::geom_text(
-                        data = annotations,
-                        ggplot2::aes(x = x, y = y, label = label, color = I(color), 
-                                   size = I(size), fontface = I(fontface))
-                    ) +
-                    
-                    # Add agreement statistics box
-                    ggplot2::annotate(
-                        "rect", 
-                        xmin = 0.05, xmax = 0.95, ymin = 0.02, ymax = 0.12,
-                        fill = "white", color = "#34495e", size = 1, alpha = 0.9
-                    ) +
-                    
-                    ggplot2::annotate(
-                        "text", x = 0.5, y = 0.07,
-                        label = paste0(
-                            "Test Concordance Analysis | Sample Size: n = ", round(n_total), 
-                            " | Agreement Score: ", round(kappa_approx, 2),
-                            "\nBest Combined Strategy: Both tests positive (Accuracy: ", 
-                            round(perf_both_pos * 100, 1), "%)"
-                        ),
-                        size = 3.5, color = "#2c3e50", fontface = "bold",
-                        hjust = 0.5, vjust = 0.5
-                    ) +
-                    
-                    # Formatting
-                    ggplot2::coord_fixed(ratio = 1) +
-                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 0.8) +
-                    
-                    ggplot2::labs(
-                        title = "Test Concordance and Agreement Analysis",
-                        subtitle = paste0("Overlap analysis of diagnostic test combinations showing ",
-                                         "frequency distributions and performance metrics"),
-                        caption = "Areas are proportional to observed frequencies. Accuracy values show diagnostic performance for each test combination pattern."
-                    ) +
-                    
-                    ggplot2::theme_void(base_size = 12, base_family = "serif") +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 16, face = "bold",
-                                                          margin = ggplot2::margin(b = 10)),
-                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, color = "gray30",
-                                                             margin = ggplot2::margin(b = 15)),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, size = 9, color = "gray40",
-                                                            margin = ggplot2::margin(t = 10)),
-                        plot.margin = ggplot2::margin(20, 20, 20, 20)
+                    # Three-test cross-tab
+                    patterns <- c("+/+/+", "+/+/-", "+/-/+", "+/-/-",
+                                  "-/+/+", "-/+/-", "-/-/+", "-/-/-")
+                    conditions <- list(
+                        data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Positive",
+                        data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Negative",
+                        data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Positive",
+                        data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Negative",
+                        data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Positive",
+                        data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Negative",
+                        data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Positive",
+                        data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Negative"
                     )
-                
-                print(plot)
-                TRUE
+                }
+
+                for (i in seq_along(patterns)) {
+                    pattern_matches <- conditions[[i]]
+                    gold_pos_count <- sum(pattern_matches & data_prep$goldVariable2 == "Positive", na.rm = TRUE)
+                    gold_neg_count <- sum(pattern_matches & data_prep$goldVariable2 == "Negative", na.rm = TRUE)
+
+                    crossTable$addRow(rowKey = patterns[i], values = list(
+                        testCombo = patterns[i],
+                        goldPos = as.integer(gold_pos_count),
+                        goldNeg = as.integer(gold_neg_count),
+                        total = as.integer(gold_pos_count + gold_neg_count)
+                    ))
+                }
             },
-            
-            .plotForest = function(image, ...) {
-                # Validate plot data first
-                plotData <- image$state
-                
-                # Get plot dimensions if provided
-                plot_width <- self$options$plotWidth
-                plot_height <- self$options$plotHeight
-                
-                # Set image dimensions if provided
-                if (!is.null(plot_width) && !is.null(plot_height)) {
-                    image$setSize(width = plot_width, height = plot_height)
+
+            .analyzeCombinations = function(data_prep) {
+                # Generate and analyze all test combinations
+
+                has_test2 <- "test2Variable2" %in% names(data_prep)
+                has_test3 <- "test3Variable2" %in% names(data_prep)
+
+                if (!has_test2) {
+                    # Single test only - no combinations
+                    private$.analyzeSinglePattern(data_prep, "Test 1",
+                                                 data_prep$test1Variable2 == "Positive")
+                    return()
                 }
-                
-                tryCatch({
-                    private$.validatePlotData(plotData)
-                }, error = function(e) {
-                    plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                        label = paste("Data validation error:", e$message),
-                                        size = 6, color = "red", hjust = 0.5, vjust = 0.5) +
-                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                        ggplot2::theme_void() +
-                        ggplot2::labs(title = "Forest Plot - Data Error")
-                    print(plot)
-                    return(TRUE)
-                })
-                
-                # Calculate Wilson score confidence intervals for each metric
-                # Wilson CI is preferred over normal approximation for medical diagnostics
-                # because it provides more accurate intervals for proportions, especially
-                # with small sample sizes or extreme values (near 0 or 1)
-                calcWilsonCI <- function(x, n, conf.level = 0.95) {
-                    if (n == 0 || is.na(x) || is.na(n)) return(c(NA, NA))
-                    
-                    # Wilson score interval calculation
-                    # More accurate than normal approximation for clinical proportions
-                    p <- x / n
-                    z <- qnorm((1 + conf.level) / 2)  # 1.96 for 95% CI
-                    
-                    # Wilson formula: accounts for discrete nature of binomial data
-                    denominator <- 1 + (z^2 / n)
-                    centre <- (p + (z^2 / (2 * n))) / denominator
-                    half_width <- z * sqrt((p * (1 - p) / n) + (z^2 / (4 * n^2))) / denominator
-                    
-                    # Ensure bounds are within [0,1] for clinical interpretability
-                    c(max(0, centre - half_width), min(1, centre + half_width))
+
+                if (!has_test3) {
+                    # Two-test combinations (4 patterns)
+                    private$.analyzeTwoTestPatterns(data_prep)
+                } else {
+                    # Three-test combinations (8 patterns)
+                    private$.analyzeThreeTestPatterns(data_prep)
                 }
-                
-                # Prepare comprehensive forest plot data
-                n_patterns <- length(plotData$patterns)
-                
-                # Calculate sample sizes for CI calculation
-                n_positive <- plotData$tp + plotData$fn
-                n_negative <- plotData$fp + plotData$tn
-                n_test_positive <- plotData$tp + plotData$fp
-                n_test_negative <- plotData$fn + plotData$tn
-                n_total <- plotData$tp + plotData$fp + plotData$fn + plotData$tn
-                
-                # Create comprehensive forest data with proper CIs
-                metrics_data <- list(
-                    list(name = "Sensitivity", estimates = plotData$sensitivity, 
-                         n_success = plotData$tp, n_total = n_positive, color = "#1f77b4"),
-                    list(name = "Specificity", estimates = plotData$specificity, 
-                         n_success = plotData$tn, n_total = n_negative, color = "#ff7f0e"),
-                    list(name = "PPV", estimates = plotData$ppv, 
-                         n_success = plotData$tp, n_total = n_test_positive, color = "#2ca02c"),
-                    list(name = "NPV", estimates = plotData$npv, 
-                         n_success = plotData$tn, n_total = n_test_negative, color = "#d62728"),
-                    list(name = "Accuracy", estimates = plotData$accuracy, 
-                         n_success = plotData$tp + plotData$tn, n_total = n_total, color = "#9467bd")
+            },
+
+            .calcWilsonCI = function(x, n, conf.level = 0.95) {
+                # Wilson score confidence interval
+                # More accurate than normal approximation, especially for small samples
+                if (is.na(x) || n == 0) return(c(NA_real_, NA_real_))
+
+                p <- x / n
+                z <- stats::qnorm((1 + conf.level) / 2)
+
+                # Wilson score formula
+                denominator <- 1 + (z^2 / n)
+                centre <- (p + (z^2 / (2 * n))) / denominator
+                half_width <- z * sqrt((p * (1 - p) / n) + (z^2 / (4 * n^2))) / denominator
+
+                # Return bounds, constrained to [0, 1]
+                c(max(0, centre - half_width), min(1, centre + half_width))
+            },
+
+            .calcYoudenCI = function(youden, sens, spec, total_pos, total_neg, conf.level = 0.95) {
+                if (is.na(youden) || is.na(sens) || is.na(spec) || total_pos == 0 || total_neg == 0) {
+                    return(c(NA_real_, NA_real_))
+                }
+
+                z <- stats::qnorm((1 + conf.level) / 2)
+                var_sens <- sens * (1 - sens) / total_pos
+                var_spec <- spec * (1 - spec) / total_neg
+                se <- sqrt(var_sens + var_spec)
+
+                if (!is.finite(se) || se == 0) {
+                    return(c(youden, youden))
+                }
+
+                lower <- youden - z * se
+                upper <- youden + z * se
+                c(max(-1, lower), min(1, upper))
+            },
+
+            .haldaneCorrection = function(tp, fp, fn, tn) {
+                if (any(c(tp, fp, fn, tn) == 0)) {
+                    return(list(
+                        tp = tp + 0.5,
+                        fp = fp + 0.5,
+                        fn = fn + 0.5,
+                        tn = tn + 0.5
+                    ))
+                }
+
+                list(tp = tp, fp = fp, fn = fn, tn = tn)
+            },
+
+            .calcLRCI = function(tp, fp, fn, tn, type = c("pos", "neg"), conf.level = 0.95) {
+                type <- match.arg(type)
+                corrected <- private$.haldaneCorrection(tp, fp, fn, tn)
+
+                tp_c <- corrected$tp
+                fp_c <- corrected$fp
+                fn_c <- corrected$fn
+                tn_c <- corrected$tn
+
+                total_pos <- tp_c + fn_c
+                total_neg <- fp_c + tn_c
+
+                if (total_pos <= 0 || total_neg <= 0) {
+                    return(c(NA_real_, NA_real_))
+                }
+
+                sens_c <- tp_c / total_pos
+                spec_c <- tn_c / total_neg
+
+                if (type == "pos") {
+                    lr <- sens_c / (1 - spec_c)
+                    se <- sqrt((1 / tp_c) - (1 / total_pos) + (1 / fp_c) - (1 / total_neg))
+                } else {
+                    lr <- (1 - sens_c) / spec_c
+                    se <- sqrt((1 / fn_c) - (1 / total_pos) + (1 / tn_c) - (1 / total_neg))
+                }
+
+                if (!is.finite(lr) || !is.finite(se) || se <= 0) {
+                    return(c(NA_real_, NA_real_))
+                }
+
+                z <- stats::qnorm((1 + conf.level) / 2)
+                lower <- exp(log(lr) - z * se)
+                upper <- exp(log(lr) + z * se)
+                c(lower, upper)
+            },
+
+            .calcDORCI = function(tp, fp, fn, tn, conf.level = 0.95) {
+                corrected <- private$.haldaneCorrection(tp, fp, fn, tn)
+
+                tp_c <- corrected$tp
+                fp_c <- corrected$fp
+                fn_c <- corrected$fn
+                tn_c <- corrected$tn
+
+                se <- sqrt(1 / tp_c + 1 / fp_c + 1 / fn_c + 1 / tn_c)
+                if (!is.finite(se) || se <= 0) {
+                    return(c(NA_real_, NA_real_))
+                }
+
+                z <- stats::qnorm((1 + conf.level) / 2)
+                dor_corrected <- (tp_c * tn_c) / (fp_c * fn_c)
+                if (!is.finite(dor_corrected) || dor_corrected <= 0) {
+                    return(c(NA_real_, NA_real_))
+                }
+                lower <- exp(log(dor_corrected) - z * se)
+                upper <- exp(log(dor_corrected) + z * se)
+                c(lower, upper)
+            },
+
+            .computeDiagnostics = function(tp, fp, fn, tn, conf.level = 0.95) {
+                total_pos <- tp + fn
+                total_neg <- fp + tn
+                total <- total_pos + total_neg
+
+                sens <- if (total_pos > 0) tp / total_pos else NA_real_
+                spec <- if (total_neg > 0) tn / total_neg else NA_real_
+                ppv <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
+                npv <- if ((tn + fn) > 0) tn / (tn + fn) else NA_real_
+                acc <- if (total > 0) (tp + tn) / total else NA_real_
+                prevalence <- if (total > 0) total_pos / total else NA_real_
+
+                sens_ci <- private$.calcWilsonCI(tp, total_pos, conf.level)
+                spec_ci <- private$.calcWilsonCI(tn, total_neg, conf.level)
+                ppv_ci <- private$.calcWilsonCI(tp, tp + fp, conf.level)
+                npv_ci <- private$.calcWilsonCI(tn, tn + fn, conf.level)
+                acc_ci <- private$.calcWilsonCI(tp + tn, total, conf.level)
+                prev_ci <- private$.calcWilsonCI(total_pos, total, conf.level)
+
+                youden <- if (!is.na(sens) && !is.na(spec)) sens + spec - 1 else NA_real_
+                youden_ci <- private$.calcYoudenCI(youden, sens, spec, total_pos, total_neg, conf.level)
+                balanced_accuracy <- if (!is.na(youden)) (youden + 1) / 2 else NA_real_
+                ba_ci <- if (all(is.finite(youden_ci))) (youden_ci + 1) / 2 else c(NA_real_, NA_real_)
+
+                lr_pos <- if (!is.na(sens) && !is.na(spec)) {
+                    denom <- 1 - spec
+                    if (denom == 0) {
+                        if (sens == 0) 0 else Inf
+                    } else {
+                        sens / denom
+                    }
+                } else {
+                    NA_real_
+                }
+
+                lr_neg <- if (!is.na(sens) && !is.na(spec)) {
+                    denom <- spec
+                    if (denom == 0) {
+                        if (sens == 1) 0 else Inf
+                    } else {
+                        (1 - sens) / denom
+                    }
+                } else {
+                    NA_real_
+                }
+
+                lr_pos_ci <- private$.calcLRCI(tp, fp, fn, tn, type = "pos", conf.level = conf.level)
+                lr_neg_ci <- private$.calcLRCI(tp, fp, fn, tn, type = "neg", conf.level = conf.level)
+
+                dor <- if (fp == 0 || fn == 0) {
+                    if (tp > 0 && tn > 0) Inf else NA_real_
+                } else if (tp == 0 || tn == 0) {
+                    0
+                } else {
+                    (tp * tn) / (fp * fn)
+                }
+                dor_ci <- private$.calcDORCI(tp, fp, fn, tn, conf.level = conf.level)
+
+                list(
+                    tp = tp,
+                    fp = fp,
+                    fn = fn,
+                    tn = tn,
+                    sens = sens,
+                    sens_ci = sens_ci,
+                    spec = spec,
+                    spec_ci = spec_ci,
+                    ppv = ppv,
+                    ppv_ci = ppv_ci,
+                    npv = npv,
+                    npv_ci = npv_ci,
+                    acc = acc,
+                    acc_ci = acc_ci,
+                    prevalence = prevalence,
+                    prevalence_ci = prev_ci,
+                    youden = youden,
+                    youden_ci = youden_ci,
+                    balanced_accuracy = balanced_accuracy,
+                    balanced_accuracy_ci = ba_ci,
+                    lr_pos = lr_pos,
+                    lr_pos_ci = lr_pos_ci,
+                    lr_neg = lr_neg,
+                    lr_neg_ci = lr_neg_ci,
+                    dor = dor,
+                    dor_ci = dor_ci
                 )
-                
-                # Build forest data frame with proper confidence intervals
-                forest_data <- data.frame()
-                y_pos <- 0
-                
-                for (i in seq_along(plotData$patterns)) {
-                    for (j in seq_along(metrics_data)) {
-                        y_pos <- y_pos + 1
-                        metric <- metrics_data[[j]]
-                        
-                        # Calculate Wilson CI
-                        ci <- calcWilsonCI(metric$n_success[i], metric$n_total[i])
-                        
-                        forest_data <- rbind(forest_data, data.frame(
-                            Pattern = plotData$patterns[i],
-                            Description = plotData$descriptions[i],
-                            Metric = metric$name,
-                            Estimate = metric$estimates[i],
-                            Lower = ci[1],
-                            Upper = ci[2],
-                            Y_Position = y_pos,
-                            Color = metric$color,
-                            N_Success = metric$n_success[i],
-                            N_Total = metric$n_total[i],
+            },
+
+            .matchesPatternFilter = function(pattern_name) {
+                # Determine if a pattern matches the current filter setting
+                filter <- self$options$filterPattern
+
+                if (filter == "all") {
+                    return(TRUE)
+                }
+
+                # Strategy patterns
+                is_parallel <- grepl("\\[Strategy\\] Parallel", pattern_name, fixed = FALSE)
+                is_serial <- grepl("\\[Strategy\\] Serial", pattern_name, fixed = FALSE)
+                is_majority <- grepl("\\[Strategy\\] Majority", pattern_name, fixed = FALSE)
+                is_discordant <- grepl("\\[Strategy\\] Discordant", pattern_name, fixed = FALSE)
+
+                # Filter by strategy type
+                if (filter == "parallel" && is_parallel) return(TRUE)
+                if (filter == "serial" && is_serial) return(TRUE)
+                if (filter == "majority" && is_majority) return(TRUE)
+
+                # Don't include strategies in pattern-based filters
+                if (is_parallel || is_serial || is_majority || is_discordant) {
+                    return(FALSE)
+                }
+
+                # Count positive and negative tests in pattern
+                n_pos <- nchar(gsub("[^+]", "", pattern_name))
+                n_neg <- nchar(gsub("[^-]", "", pattern_name))
+                total_tests <- n_pos + n_neg
+
+                # Skip if not a test pattern (e.g., "Test 1")
+                if (total_tests == 0) {
+                    return(filter == "all")
+                }
+
+                # Apply filters
+                if (filter == "allPositive") {
+                    return(n_neg == 0 && n_pos > 0)
+                } else if (filter == "allNegative") {
+                    return(n_pos == 0 && n_neg > 0)
+                } else if (filter == "majorityPositive") {
+                    return(n_pos > n_neg && n_pos > 0 && n_neg > 0)
+                } else if (filter == "majorityNegative") {
+                    return(n_neg > n_pos && n_pos > 0 && n_neg > 0)
+                } else if (filter == "mixed") {
+                    return(n_pos == n_neg && n_pos > 0)
+                }
+
+                return(FALSE)
+            },
+
+            .analyzeSinglePattern = function(data_prep, pattern_name, condition, row_key = NULL) {
+                # Analyze a single test pattern
+
+                # Check if this pattern matches the filter
+                if (!private$.matchesPatternFilter(pattern_name)) {
+                    return()
+                }
+
+                # Create binary variable for this pattern
+                data_prep$pattern_result <- ifelse(condition, "Positive", "Negative")
+                data_prep$pattern_result <- forcats::fct_relevel(
+                    forcats::as_factor(data_prep$pattern_result),
+                    "Positive"
+                )
+
+                # Create contingency table
+                cont_table <- table(data_prep$pattern_result, data_prep$goldVariable2)
+
+                if (!all(dim(cont_table) == c(2, 2))) {
+                    return()
+                }
+
+                tp <- cont_table[1, 1]
+                fp <- cont_table[1, 2]
+                fn <- cont_table[2, 1]
+                tn <- cont_table[2, 2]
+
+                stats <- private$.computeDiagnostics(tp, fp, fn, tn)
+
+                combTable <- self$results$combinationTable
+                ciTable <- self$results$combinationTableCI
+                row_id <- if (is.null(row_key)) pattern_name else row_key
+
+                combTable$addRow(rowKey = row_id, values = list(
+                    pattern = pattern_name,
+                    tp = stats$tp,
+                    fp = stats$fp,
+                    fn = stats$fn,
+                    tn = stats$tn,
+                    prevalence = stats$prevalence,
+                    sens = stats$sens,
+                    spec = stats$spec,
+                    ppv = stats$ppv,
+                    npv = stats$npv,
+                    acc = stats$acc,
+                    balancedAccuracy = stats$balanced_accuracy,
+                    youden = stats$youden,
+                    lrPos = stats$lr_pos,
+                    lrNeg = stats$lr_neg,
+                    dor = stats$dor
+                ))
+
+                # Helper to add CI row with filtering
+                add_ci_row <- function(stat_name, estimate, ci, suffix, filter_key) {
+                    if (all(is.na(c(estimate, ci)))) {
+                        return()
+                    }
+
+                    # Apply statistic filter
+                    filter_stat <- self$options$filterStatistic
+                    if (filter_stat != "all" && filter_stat != filter_key) {
+                        return()
+                    }
+
+                    ciTable$addRow(rowKey = paste0(row_id, "_", suffix), values = list(
+                        pattern = pattern_name,
+                        statistic = stat_name,
+                        estimate = estimate,
+                        lower = ci[1],
+                        upper = ci[2]
+                    ))
+                }
+
+                add_ci_row("Prevalence", stats$prevalence, stats$prevalence_ci, "prev", "prevalence")
+                add_ci_row("Sensitivity", stats$sens, stats$sens_ci, "sens", "sens")
+                add_ci_row("Specificity", stats$spec, stats$spec_ci, "spec", "spec")
+                add_ci_row("PPV", stats$ppv, stats$ppv_ci, "ppv", "ppv")
+                add_ci_row("NPV", stats$npv, stats$npv_ci, "npv", "npv")
+                add_ci_row("Accuracy", stats$acc, stats$acc_ci, "acc", "acc")
+                add_ci_row("Balanced Accuracy", stats$balanced_accuracy, stats$balanced_accuracy_ci, "ba", "balancedAccuracy")
+                add_ci_row("Youden's J", stats$youden, stats$youden_ci, "youden", "youden")
+                add_ci_row("LR+", stats$lr_pos, stats$lr_pos_ci, "lrpos", "lrPos")
+                add_ci_row("LR-", stats$lr_neg, stats$lr_neg_ci, "lrneg", "lrNeg")
+                add_ci_row("Diagnostic Odds Ratio", stats$dor, stats$dor_ci, "dor", "dor")
+            },
+
+            .analyzeTwoTestPatterns = function(data_prep) {
+                # Generate 4 patterns for 2-test combinations
+
+                patterns <- list(
+                    "+/+" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive",
+                    "+/-" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Negative",
+                    "-/+" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Positive",
+                    "-/-" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Negative"
+                )
+
+                for (pattern_name in names(patterns)) {
+                    private$.analyzeSinglePattern(data_prep, pattern_name, patterns[[pattern_name]])
+                }
+
+                # Standard clinical strategies for two tests
+                private$.analyzeSinglePattern(
+                    data_prep,
+                    "[Strategy] Parallel (≥1 positive)",
+                    data_prep$test1Variable2 == "Positive" | data_prep$test2Variable2 == "Positive",
+                    row_key = "strategy_parallel_two"
+                )
+
+                private$.analyzeSinglePattern(
+                    data_prep,
+                    "[Strategy] Serial (both positive)",
+                    data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive",
+                    row_key = "strategy_serial_two"
+                )
+
+                private$.analyzeSinglePattern(
+                    data_prep,
+                    "[Strategy] Discordant results",
+                    xor(data_prep$test1Variable2 == "Positive", data_prep$test2Variable2 == "Positive"),
+                    row_key = "strategy_discordant_two"
+                )
+            },
+
+            .analyzeThreeTestPatterns = function(data_prep) {
+                # Generate 8 patterns for 3-test combinations
+
+                patterns <- list(
+                    "+/+/+" = data_prep$test1Variable2 == "Positive" &
+                              data_prep$test2Variable2 == "Positive" &
+                              data_prep$test3Variable2 == "Positive",
+                    "+/+/-" = data_prep$test1Variable2 == "Positive" &
+                              data_prep$test2Variable2 == "Positive" &
+                              data_prep$test3Variable2 == "Negative",
+                    "+/-/+" = data_prep$test1Variable2 == "Positive" &
+                              data_prep$test2Variable2 == "Negative" &
+                              data_prep$test3Variable2 == "Positive",
+                    "+/-/-" = data_prep$test1Variable2 == "Positive" &
+                              data_prep$test2Variable2 == "Negative" &
+                              data_prep$test3Variable2 == "Negative",
+                    "-/+/+" = data_prep$test1Variable2 == "Negative" &
+                              data_prep$test2Variable2 == "Positive" &
+                              data_prep$test3Variable2 == "Positive",
+                    "-/+/-" = data_prep$test1Variable2 == "Negative" &
+                              data_prep$test2Variable2 == "Positive" &
+                              data_prep$test3Variable2 == "Negative",
+                    "-/-/+" = data_prep$test1Variable2 == "Negative" &
+                              data_prep$test2Variable2 == "Negative" &
+                              data_prep$test3Variable2 == "Positive",
+                    "-/-/-" = data_prep$test1Variable2 == "Negative" &
+                              data_prep$test2Variable2 == "Negative" &
+                              data_prep$test3Variable2 == "Negative"
+                )
+
+                for (pattern_name in names(patterns)) {
+                    private$.analyzeSinglePattern(data_prep, pattern_name, patterns[[pattern_name]])
+                }
+
+                # Clinical strategies for three tests
+                private$.analyzeSinglePattern(
+                    data_prep,
+                    "[Strategy] Parallel (≥1 positive)",
+                    data_prep$test1Variable2 == "Positive" |
+                        data_prep$test2Variable2 == "Positive" |
+                        data_prep$test3Variable2 == "Positive",
+                    row_key = "strategy_parallel_three"
+                )
+
+                private$.analyzeSinglePattern(
+                    data_prep,
+                    "[Strategy] Serial (all positive)",
+                    data_prep$test1Variable2 == "Positive" &
+                        data_prep$test2Variable2 == "Positive" &
+                        data_prep$test3Variable2 == "Positive",
+                    row_key = "strategy_serial_three"
+                )
+
+                private$.analyzeSinglePattern(
+                    data_prep,
+                    "[Strategy] Majority rule (≥2 positive)",
+                    rowSums(cbind(
+                        data_prep$test1Variable2 == "Positive",
+                        data_prep$test2Variable2 == "Positive",
+                        data_prep$test3Variable2 == "Positive"
+                    )) >= 2,
+                    row_key = "strategy_majority_three"
+                )
+            },
+
+            .preparePlotData = function(data_prep) {
+                # Store data for all plotting functions
+                # Extract both main table and CI table for comprehensive plotting
+
+                combTable <- self$results$combinationTable
+                ciTable <- self$results$combinationTableCI
+
+                if (combTable$rowCount == 0) {
+                    return()
+                }
+
+                # Convert tables to data frames
+                table_df <- as.data.frame(combTable)
+                ci_df <- if (ciTable$rowCount > 0) as.data.frame(ciTable) else NULL
+
+                # Store in all plot image states
+                if (self$options$showBarPlot) {
+                    self$results$barPlot$setState(list(data = table_df))
+                }
+
+                if (self$options$showHeatmap) {
+                    self$results$heatmapPlot$setState(list(data = table_df))
+                }
+
+                if (self$options$showForest) {
+                    self$results$forestPlot$setState(list(data = table_df, ci = ci_df))
+                }
+
+                if (self$options$showDecisionTree) {
+                    self$results$decisionTreePlot$setState(list(data = table_df, data_prep = data_prep))
+                }
+            },
+
+            .plotBarChart = function(image, ...) {
+                # Grouped bar chart for key metrics
+
+                state <- image$state
+                if (is.null(state) || is.null(state$data)) {
+                    return(FALSE)
+                }
+
+                df <- state$data
+                filter_stat <- self$options$filterStatistic
+
+                # Define all possible metrics with their column names
+                all_metrics <- list(
+                    prevalence = list(col = "prevalence", label = "Prevalence"),
+                    sens = list(col = "sens", label = "Sensitivity"),
+                    spec = list(col = "spec", label = "Specificity"),
+                    ppv = list(col = "ppv", label = "PPV"),
+                    npv = list(col = "npv", label = "NPV"),
+                    acc = list(col = "acc", label = "Accuracy"),
+                    balancedAccuracy = list(col = "balancedAccuracy", label = "Balanced Acc"),
+                    youden = list(col = "youden", label = "Youden's J"),
+                    lrPos = list(col = "lrPos", label = "LR+"),
+                    lrNeg = list(col = "lrNeg", label = "LR-"),
+                    dor = list(col = "dor", label = "Diagnostic OR")
+                )
+
+                # Determine which metrics to display
+                if (filter_stat == "all") {
+                    # Show the 5 most interpretable metrics for bar chart
+                    selected <- c("sens", "spec", "ppv", "npv", "acc")
+                } else {
+                    # Show only the selected metric
+                    selected <- filter_stat
+                }
+
+                # Build long format data for selected metrics
+                df_long <- data.frame()
+                for (metric_key in selected) {
+                    if (metric_key %in% names(all_metrics)) {
+                        metric_info <- all_metrics[[metric_key]]
+                        if (metric_info$col %in% names(df)) {
+                            df_long <- rbind(df_long, data.frame(
+                                Pattern = df$pattern,
+                                Metric = metric_info$label,
+                                Value = df[[metric_info$col]],
+                                stringsAsFactors = FALSE
+                            ))
+                        }
+                    }
+                }
+
+                # Remove NA values
+                df_long <- df_long[!is.na(df_long$Value), ]
+
+                if (nrow(df_long) == 0) {
+                    return(FALSE)
+                }
+
+                # Create grouped bar plot
+                p <- ggplot2::ggplot(df_long, ggplot2::aes(x = Pattern, y = Value, fill = Metric)) +
+                    ggplot2::geom_bar(stat = "identity", position = "dodge") +
+                    ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
+                    ggplot2::labs(
+                        title = "Diagnostic Performance by Test Combination",
+                        x = "Test Combination Pattern",
+                        y = "Performance Metric",
+                        fill = "Metric"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                        legend.position = "bottom"
+                    )
+
+                print(p)
+                return(TRUE)
+            },
+
+            .plotHeatmap = function(image, ...) {
+                # Heatmap showing all metrics for all patterns
+
+                state <- image$state
+                if (is.null(state) || is.null(state$data)) {
+                    return(FALSE)
+                }
+
+                df <- state$data
+                filter_stat <- self$options$filterStatistic
+
+                # Define all metrics suitable for heatmap (proportions and indices)
+                all_heatmap_metrics <- list(
+                    prevalence = "Prevalence",
+                    sens = "Sensitivity",
+                    spec = "Specificity",
+                    ppv = "PPV",
+                    npv = "NPV",
+                    acc = "Accuracy",
+                    balancedAccuracy = "Balanced Acc",
+                    youden = "Youden's J"
+                )
+
+                # Determine which metrics to display
+                if (filter_stat == "all") {
+                    # Show all heatmap-suitable metrics
+                    selected_metrics <- all_heatmap_metrics
+                } else if (filter_stat %in% names(all_heatmap_metrics)) {
+                    # Show only the selected metric
+                    selected_metrics <- all_heatmap_metrics[filter_stat]
+                } else {
+                    # If selected metric is not suitable for heatmap (lrPos, lrNeg, dor), show nothing
+                    return(FALSE)
+                }
+
+                # Create long format
+                df_long <- data.frame()
+                for (metric_col in names(selected_metrics)) {
+                    if (metric_col %in% names(df)) {
+                        df_long <- rbind(df_long, data.frame(
+                            Pattern = df$pattern,
+                            Metric = selected_metrics[[metric_col]],
+                            Value = df[[metric_col]],
                             stringsAsFactors = FALSE
                         ))
                     }
                 }
-                
-                # Create publication-quality forest plot
-                plot <- ggplot2::ggplot(forest_data, ggplot2::aes(x = Estimate, y = Y_Position)) +
-                    
-                    # Reference lines
-                    ggplot2::geom_vline(xintercept = 0.5, linetype = "dashed", 
-                                      color = "gray60", size = 1, alpha = 0.8) +
-                    ggplot2::geom_vline(xintercept = c(0.8, 0.9), linetype = "dotted", 
-                                      color = "gray70", size = 0.8, alpha = 0.6) +
-                    
-                    # Confidence intervals
-                    ggplot2::geom_errorbarh(
-                        ggplot2::aes(xmin = Lower, xmax = Upper, color = Metric),
-                        height = 0.3, size = 1.2, alpha = 0.8
+
+                # Remove NA values
+                df_long <- df_long[!is.na(df_long$Value), ]
+
+                if (nrow(df_long) == 0) {
+                    return(FALSE)
+                }
+
+                # Create heatmap
+                p <- ggplot2::ggplot(df_long, ggplot2::aes(x = Metric, y = Pattern, fill = Value)) +
+                    ggplot2::geom_tile(color = "white") +
+                    ggplot2::scale_fill_gradient2(
+                        low = "#d73027",
+                        mid = "#ffffbf",
+                        high = "#1a9850",
+                        midpoint = 0.5,
+                        limits = c(0, 1),
+                        labels = scales::percent,
+                        name = "Value"
                     ) +
-                    
-                    # Point estimates
-                    ggplot2::geom_point(
-                        ggplot2::aes(color = Metric, size = N_Total), 
-                        shape = 18, alpha = 0.9, stroke = 0.5
-                    ) +
-                    
-                    # Add pattern labels on the left
-                    ggplot2::geom_text(
-                        data = forest_data[forest_data$Metric == "Sensitivity", ],
-                        ggplot2::aes(x = -0.05, y = Y_Position + 2, label = Pattern),
-                        hjust = 1, size = 4, fontface = "bold", family = "serif"
-                    ) +
-                    
-                    # Add metric labels on the right with values and CIs
-                    ggplot2::geom_text(
-                        ggplot2::aes(x = 1.05, y = Y_Position, 
-                                   label = paste0(Metric, ": ", 
-                                                 round(Estimate * 100, 1), "% ",
-                                                 "(", round(Lower * 100, 1), "%-",
-                                                 round(Upper * 100, 1), "%)"),
-                                   color = Metric),
-                        hjust = 0, size = 3.2, fontface = "bold", show.legend = FALSE
-                    ) +
-                    
-                    # Professional color scheme
-                    ggplot2::scale_color_manual(
-                        name = "Diagnostic\nMetric",
-                        values = c("Sensitivity" = "#1f77b4", "Specificity" = "#ff7f0e", 
-                                 "PPV" = "#2ca02c", "NPV" = "#d62728", "Accuracy" = "#9467bd"),
-                        guide = ggplot2::guide_legend(
-                            override.aes = list(size = 4, alpha = 1),
-                            keywidth = 1.5, keyheight = 1.5
-                        )
-                    ) +
-                    
-                    ggplot2::scale_size_continuous(
-                        name = "Sample\nSize",
-                        range = c(2, 6),
-                        guide = ggplot2::guide_legend(
-                            override.aes = list(alpha = 0.8),
-                            keywidth = 1.5, keyheight = 1.5
-                        )
-                    ) +
-                    
-                    ggplot2::scale_x_continuous(
-                        name = "Performance Estimate with 95% Confidence Interval",
-                        limits = c(-0.1, 1.6),
-                        breaks = seq(0, 1, 0.2),
-                        labels = scales::percent_format(accuracy = 1),
-                        expand = c(0, 0)
-                    ) +
-                    
-                    ggplot2::scale_y_continuous(name = "", breaks = NULL, expand = c(0.02, 0.02)) +
-                    
+                    ggplot2::geom_text(ggplot2::aes(label = sprintf("%.2f", Value)),
+                                      size = 3, color = "black") +
                     ggplot2::labs(
-                        title = "Forest Plot: Diagnostic Performance with Confidence Intervals",
-                        subtitle = paste0("Wilson score 95% confidence intervals for ", 
-                                         length(unique(plotData$patterns)), 
-                                         " test combination patterns"),
-                        caption = "PPV: Positive Predictive Value; NPV: Negative Predictive Value. Dotted lines at 80% and 90% performance thresholds."
+                        title = "Heatmap: All Diagnostic Metrics by Test Pattern",
+                        x = "Diagnostic Metric",
+                        y = "Test Pattern"
                     ) +
-                    
-                    ggplot2::theme_classic(base_size = 12, base_family = "serif") +
+                    ggplot2::theme_minimal() +
                     ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 16, face = "bold",
-                                                          margin = ggplot2::margin(b = 10)),
-                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, color = "gray30",
-                                                             margin = ggplot2::margin(b = 15)),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, size = 9, color = "gray40",
-                                                            margin = ggplot2::margin(t = 15)),
-                        axis.title.x = ggplot2::element_text(size = 13, face = "bold",
-                                                            margin = ggplot2::margin(t = 15)),
-                        axis.text.x = ggplot2::element_text(size = 11, color = "black"),
-                        axis.text.y = ggplot2::element_blank(),
-                        axis.ticks.y = ggplot2::element_blank(),
-                        axis.line.y = ggplot2::element_blank(),
-                        axis.line.x = ggplot2::element_line(color = "black", size = 0.8),
-                        axis.ticks.x = ggplot2::element_line(color = "black", size = 0.5),
-                        legend.position = "bottom",
-                        legend.box = "horizontal",
-                        legend.title = ggplot2::element_text(size = 11, face = "bold"),
-                        legend.text = ggplot2::element_text(size = 10),
-                        panel.grid.major.x = ggplot2::element_line(color = "gray90", size = 0.5),
-                        panel.grid.minor.x = ggplot2::element_blank(),
-                        panel.grid.major.y = ggplot2::element_blank(),
-                        panel.grid.minor.y = ggplot2::element_blank(),
-                        panel.border = ggplot2::element_blank(),
-                        plot.margin = ggplot2::margin(20, 20, 20, 20)
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                        panel.grid = ggplot2::element_blank()
                     )
-                
-                print(plot)
-                TRUE
-            },
-            
-            .generateClinicalSummary = function(results, optimal_pattern = NULL) {
-                # Generate plain-language clinical summary for pathologists/clinicians
-                if (is.null(optimal_pattern) || is.null(results)) {
-                    return("<p><strong>Clinical Summary:</strong> Analysis in progress...</p>")
-                }
-                
-                # Extract key performance metrics for optimal pattern
-                optimal_idx <- which(results$patterns == optimal_pattern$pattern)
-                if (length(optimal_idx) == 0) return("<p><strong>Clinical Summary:</strong> Unable to determine optimal pattern.</p>")
-                
-                sens <- results$sensitivity[optimal_idx] * 100
-                spec <- results$specificity[optimal_idx] * 100 
-                ppv <- results$ppv[optimal_idx] * 100
-                npv <- results$npv[optimal_idx] * 100
-                acc <- results$accuracy[optimal_idx] * 100
-                
-                # Clinical quality assessment
-                clinical_quality <- dplyr::case_when(
-                    sens >= 90 && spec >= 90 ~ "excellent",
-                    sens >= 80 && spec >= 80 ~ "good", 
-                    sens >= 70 || spec >= 70 ~ "moderate",
-                    TRUE ~ "limited"
-                )
-                
-                # Clinical recommendation
-                clinical_use <- dplyr::case_when(
-                    sens > 90 ~ "This combination is excellent for <strong>ruling OUT</strong> disease (high sensitivity).",
-                    spec > 90 ~ "This combination is excellent for <strong>ruling IN</strong> disease (high specificity).",
-                    sens > 80 && spec > 80 ~ "This combination provides good overall diagnostic performance.",
-                    TRUE ~ "Consider clinical context and additional testing when interpreting results."
-                )
-                
-                # Generate natural language summary
-                summary_html <- paste0(
-                    "<div style='background-color: #f8f9fa; border-left: 4px solid #28a745; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='color: #155724; margin-top: 0;'>📋 Clinical Summary</h4>",
-                    "<p><strong>Optimal Test Combination:</strong> ", optimal_pattern$pattern, "</p>",
-                    "<p><strong>Performance:</strong> ", 
-                    sprintf("%.1f%% sensitivity, %.1f%% specificity, %.1f%% overall accuracy", sens, spec, acc), "</p>",
-                    "<p><strong>Clinical Interpretation:</strong> ", clinical_use, "</p>",
-                    "<p><strong>Predictive Values:</strong> ", 
-                    sprintf("%.1f%% positive predictive value, %.1f%% negative predictive value", ppv, npv), "</p>",
-                    "<p style='margin-bottom: 0;'><strong>Quality Assessment:</strong> ", 
-                    stringr::str_to_title(clinical_quality), " diagnostic performance for this test combination pattern.</p>",
-                    "</div>"
-                )
-                
-                return(summary_html)
+
+                print(p)
+                return(TRUE)
             },
 
-            .generateCopyReadyReport = function(results, optimal_pattern = NULL, test_names = NULL) {
-                # Generate copy-ready report sentences for clinical documentation
-                if (is.null(optimal_pattern) || is.null(results) || is.null(test_names)) {
-                    return("<p><em>Report template will be generated once analysis is complete.</em></p>")
-                }
-                
-                # Extract key performance metrics for optimal pattern
-                optimal_idx <- which(results$patterns == optimal_pattern$pattern)
-                if (length(optimal_idx) == 0) return("<p><em>Unable to generate report template.</em></p>")
-                
-                sens <- results$sensitivity[optimal_idx] * 100
-                spec <- results$specificity[optimal_idx] * 100 
-                ppv <- results$ppv[optimal_idx] * 100
-                npv <- results$npv[optimal_idx] * 100
-                acc <- results$accuracy[optimal_idx] * 100
-                
-                # Format test names
-                test_list <- paste(test_names, collapse = " and ")
-                n_tests <- length(test_names)
-                
-                # Generate copy-ready sentences
-                report_sentences <- paste0(
-                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 10px 0; border-radius: 5px;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>📄 Copy-Ready Report Template</h4>",
-                    "<div style='font-family: monospace; background-color: #f8f9fa; padding: 10px; border-left: 3px solid #6c757d; margin: 10px 0;'>",
-                    "<p><strong>Methods:</strong> We evaluated the diagnostic performance of ", test_list, 
-                    " compared to the gold standard reference test using ", n_tests, "-test combination analysis. ",
-                    "Wilson score confidence intervals were calculated for enhanced accuracy with categorical data.</p>",
-                    
-                    "<p><strong>Results:</strong> The optimal test combination pattern (", optimal_pattern$pattern, ") achieved ",
-                    sprintf("%.1f%% sensitivity (95%% CI: [calculated]), %.1f%% specificity (95%% CI: [calculated]), ", sens, spec),
-                    sprintf("and %.1f%% overall accuracy. ", acc),
-                    sprintf("Positive and negative predictive values were %.1f%% and %.1f%%, respectively.</p>", ppv, npv),
-                    
-                    "<p><strong>Clinical Interpretation:</strong> ",
-                    if (sens > 90) {
-                        "The high sensitivity makes this combination excellent for ruling out disease in clinical practice."
-                    } else if (spec > 90) {
-                        "The high specificity makes this combination excellent for confirming disease presence."
-                    } else if (sens > 80 && spec > 80) {
-                        "This combination provides good overall diagnostic performance for clinical decision-making."
-                    } else {
-                        "Results should be interpreted in appropriate clinical context with consideration of additional testing."
-                    },
-                    "</p>",
-                    "</div>",
-                    "<p style='font-size: 12px; color: #6c757d; margin-bottom: 0;'><em>Note: Copy the text above for use in manuscripts, reports, or clinical documentation. ",
-                    "Replace [calculated] with actual confidence interval values from the analysis tables.</em></p>",
-                    "</div>"
-                )
-                
-                return(report_sentences)
-            },
+            .plotForest = function(image, ...) {
+                # Forest plot showing confidence intervals for key metrics
 
-            .generateAnalysisSummaryHTML = function(num_tests, test_names, n_total_cases, 
-                                                   n_positive_cases, n_negative_cases, 
-                                                   patterns, descriptions, optimal_cutpoint = NULL) {
-                # Generate structured, professional HTML summary
-                html <- paste0(
-                    "<div style='font-family: serif; max-width: 800px; margin: 0 auto;'>",
-                    "<h3 style='color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
-                    "Diagnostic Test Combination Analysis",
-                    "</h3>",
-                    
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0;'>",
-                    "<h4 style='margin-top: 0; color: #2c3e50;'>Study Overview</h4>",
-                    "<p><strong>Tests Analyzed:</strong> ", test_names, " (", num_tests, " tests)</p>",
-                    "<p><strong>Total Sample Size:</strong> ", n_total_cases, " cases</p>",
-                    "<p><strong>Disease Prevalence:</strong> ", n_positive_cases, " positive cases (", 
-                    round(n_positive_cases / n_total_cases * 100, 1), "%), ",
-                    n_negative_cases, " negative cases (", 
-                    round(n_negative_cases / n_total_cases * 100, 1), "%)</p>",
-                    "<p><strong>Combination Patterns:</strong> ", length(patterns), " unique patterns analyzed</p>",
-                    "</div>",
-                    
-                    "<h4 style='color: #2c3e50; margin-top: 30px;'>Test Combination Patterns</h4>",
-                    "<div style='background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 15px;'>",
-                    "<table style='width: 100%; border-collapse: collapse;'>",
-                    "<thead>",
-                    "<tr style='background-color: #3498db; color: white;'>",
-                    "<th style='padding: 10px; text-align: left; border: 1px solid #ddd;'>Pattern</th>",
-                    "<th style='padding: 10px; text-align: left; border: 1px solid #ddd;'>Description</th>",
-                    "</tr>",
-                    "</thead>",
-                    "<tbody>"
+                state <- image$state
+                if (is.null(state) || is.null(state$ci)) {
+                    return(FALSE)
+                }
+
+                ci_df <- state$ci
+                filter_stat <- self$options$filterStatistic
+
+                # Map filter options to statistic names in CI table
+                filter_to_statistic <- list(
+                    prevalence = "Prevalence",
+                    sens = "Sensitivity",
+                    spec = "Specificity",
+                    ppv = "PPV",
+                    npv = "NPV",
+                    acc = "Accuracy",
+                    balancedAccuracy = "Balanced Accuracy",
+                    youden = "Youden's J",
+                    lrPos = "LR+",
+                    lrNeg = "LR-",
+                    dor = "Diagnostic OR"
                 )
-                
-                # Add pattern descriptions
-                for (i in seq_along(patterns)) {
-                    row_color <- if (i %% 2 == 0) "#f2f2f2" else "white"
-                    html <- paste0(html,
-                        "<tr style='background-color: ", row_color, ";'>",
-                        "<td style='padding: 8px; border: 1px solid #ddd; font-family: monospace; font-weight: bold;'>",
-                        patterns[i], "</td>",
-                        "<td style='padding: 8px; border: 1px solid #ddd;'>", descriptions[i], "</td>",
-                        "</tr>"
-                    )
-                }
-                
-                html <- paste0(html,
-                    "</tbody>",
-                    "</table>",
-                    "</div>",
-                    
-                    "<div style='background-color: #e8f4fd; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0;'>",
-                    "<h4 style='margin-top: 0; color: #2c3e50;'>Diagnostic Performance Metrics</h4>",
-                    "<ul style='line-height: 1.6;'>",
-                    "<li><strong>Sensitivity:</strong> Probability of test combination being positive when disease is present (True Positive Rate)</li>",
-                    "<li><strong>Specificity:</strong> Probability of test combination being negative when disease is absent (True Negative Rate)</li>",
-                    "<li><strong>Positive Predictive Value (PPV):</strong> Probability of disease when test combination is positive</li>",
-                    "<li><strong>Negative Predictive Value (NPV):</strong> Probability of no disease when test combination is negative</li>",
-                    "<li><strong>Accuracy:</strong> Overall probability of correct classification</li>",
-                    "</ul>",
-                    "</div>",
-                    
-                    "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>Clinical Interpretation Guidelines</h4>",
-                    "<p>• <strong>Sensitivity >90%</strong>: Excellent for screening - minimal false negatives, good rule-out test</p>",
-                    "<p>• <strong>Specificity >90%</strong>: Excellent for confirmation - minimal false positives, good rule-in test</p>",
-                    "<p>• <strong>PPV >80%</strong>: High confidence when test positive - disease likely present</p>",
-                    "<p>• <strong>NPV >90%</strong>: High confidence when test negative - disease likely absent</p>",
-                    "<p>• <strong>Youden Index >0.5</strong>: Good discriminatory ability independent of prevalence</p>",
-                    "<p>• <strong>Balanced Accuracy >80%</strong>: Good overall performance for imbalanced datasets</p>",
-                    "</div>"
-                )
-                
-                # Add optimal cut-point recommendation if available
-                if (!is.null(optimal_cutpoint)) {
-                    html <- paste0(html,
-                        "<div style='background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 20px 0;'>",
-                        "<h4 style='margin-top: 0; color: #155724;'>🎯 Recommended Optimal Strategy</h4>",
-                        "<p><strong>Best Pattern:</strong> ", optimal_cutpoint$pattern, "</p>",
-                        "<p><strong>Selection Method:</strong> ", optimal_cutpoint$method, "</p>",
-                        "<p><strong>Performance Metrics:</strong></p>",
-                        "<ul style='line-height: 1.6; margin-left: 20px;'>",
-                        "<li>Sensitivity: ", round(optimal_cutpoint$sensitivity * 100, 1), "%</li>",
-                        "<li>Specificity: ", round(optimal_cutpoint$specificity * 100, 1), "%</li>",
-                        "<li>Accuracy: ", round(optimal_cutpoint$accuracy * 100, 1), "%</li>",
-                        "<li>Youden Index: ", round(optimal_cutpoint$youden_index, 3), "</li>",
-                        "</ul>",
-                        "<p><strong>Clinical Rationale:</strong> ", optimal_cutpoint$rationale, "</p>",
-                        "</div>"
-                    )
-                }
-                
-                # Add clinical decision thresholds
-                html <- paste0(html,
-                    "<div style='background-color: #e2e3e5; padding: 15px; border-left: 4px solid #6c757d; margin: 20px 0;'>",
-                    "<h4 style='margin-top: 0; color: #495057;'>📊 Clinical Decision Thresholds</h4>",
-                    "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>",
-                    "<div>",
-                    "<h5 style='color: #28a745; margin-bottom: 5px;'>Screening Tests (Rule-Out)</h5>",
-                    "<p style='font-size: 0.9em; margin-bottom: 5px;'>• Sensitivity ≥95%: Excellent</p>",
-                    "<p style='font-size: 0.9em; margin-bottom: 5px;'>• NPV ≥95%: High confidence</p>",
-                    "<p style='font-size: 0.9em; margin-bottom: 5px;'>• Goal: Minimize false negatives</p>",
-                    "</div>",
-                    "<div>",
-                    "<h5 style='color: #dc3545; margin-bottom: 5px;'>Confirmatory Tests (Rule-In)</h5>",
-                    "<p style='font-size: 0.9em; margin-bottom: 5px;'>• Specificity ≥95%: Excellent</p>",
-                    "<p style='font-size: 0.9em; margin-bottom: 5px;'>• PPV ≥90%: High confidence</p>",
-                    "<p style='font-size: 0.9em; margin-bottom: 5px;'>• Goal: Minimize false positives</p>",
-                    "</div>",
-                    "</div>",
-                    "<p style='margin-top: 15px; font-style: italic; color: #6c757d;'>",
-                    "Consider clinical context, disease prevalence, treatment consequences, and cost-effectiveness when selecting optimal test combinations.",
-                    "</p>",
-                    "</div>",
-                    "</div>"
-                )
-                
-                return(html)
-            },
-            
-            .generateCombinationInterpretation = function(stats, pattern, description) {
-                # Generate clinical interpretation for individual test combination results
-                if (is.null(stats)) {
-                    return("No statistical results available")
-                } else if (any(is.na(c(stats$sens, stats$spec)))) {
-                    return("Sensitivity/specificity cannot be calculated - check data completeness")
-                } else if (any(is.na(c(stats$ppv, stats$npv)))) {
-                    return("Predictive values unavailable - may be due to extreme prevalence")
-                } else if (any(is.na(stats$acc))) {
-                    return("Accuracy calculation incomplete")
-                }
-                
-                # Performance quality assessment
-                sens <- stats$sens * 100
-                spec <- stats$spec * 100
-                ppv <- stats$ppv * 100
-                npv <- stats$npv * 100
-                acc <- stats$acc * 100
-                
-                # Determine combination strengths
-                strengths <- c()
-                recommendations <- c()
-                
-                # Sensitivity analysis
-                if (sens >= 95) {
-                    strengths <- c(strengths, "Excellent rule-out test")
-                    recommendations <- c(recommendations, "ideal for screening")
-                } else if (sens >= 85) {
-                    strengths <- c(strengths, "Good rule-out ability")
-                } else if (sens < 70) {
-                    recommendations <- c(recommendations, "may miss cases")
-                }
-                
-                # Specificity analysis  
-                if (spec >= 95) {
-                    strengths <- c(strengths, "Excellent rule-in test")
-                    recommendations <- c(recommendations, "ideal for confirmation")
-                } else if (spec >= 85) {
-                    strengths <- c(strengths, "Good rule-in ability")
-                } else if (spec < 70) {
-                    recommendations <- c(recommendations, "may have false positives")
-                }
-                
-                # PPV/NPV analysis
-                if (ppv >= 90) {
-                    strengths <- c(strengths, "High positive confidence")
-                }
-                if (npv >= 90) {
-                    strengths <- c(strengths, "High negative confidence")
-                }
-                
-                # Overall accuracy assessment
-                if (acc >= 90) {
-                    strengths <- c(strengths, "Excellent overall accuracy")
-                } else if (acc >= 80) {
-                    strengths <- c(strengths, "Good overall accuracy")
-                } else if (acc < 70) {
-                    recommendations <- c(recommendations, "limited clinical utility")
-                }
-                
-                # Construct interpretation
-                interpretation <- ""
-                if (length(strengths) > 0) {
-                    interpretation <- paste(strengths, collapse = "; ")
-                }
-                
-                if (length(recommendations) > 0) {
-                    if (interpretation != "") {
-                        interpretation <- paste0(interpretation, " — ", paste(recommendations, collapse = "; "))
-                    } else {
-                        interpretation <- paste(recommendations, collapse = "; ")
-                    }
-                }
-                
-                # Fallback if no specific interpretation
-                if (interpretation == "") {
-                    if (acc >= 70) {
-                        interpretation <- "Moderate diagnostic performance"
-                    } else {
-                        interpretation <- "Limited diagnostic utility"
-                    }
-                }
-                
-                return(interpretation)
-            },
-            
-            .applyMultipleTestingCorrection = function(p_values, method = "holm") {
-                # Apply multiple testing correction for combination comparisons
-                # Methods: "holm" (default), "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
-                if (length(p_values) <= 1 || all(is.na(p_values))) {
-                    return(p_values)
-                }
-                
-                # Filter out NA values for correction
-                valid_p <- !is.na(p_values)
-                if (sum(valid_p) == 0) {
-                    return(p_values)
-                }
-                
-                corrected <- rep(NA, length(p_values))
-                corrected[valid_p] <- stats::p.adjust(p_values[valid_p], method = method)
-                
-                return(corrected)
-            },
-            
-            .processChunkedData = function(mydata2, chunk_size = 10000) {
-                # Process very large datasets in chunks to manage memory
-                n_rows <- nrow(mydata2)
-                
-                if (n_rows <= chunk_size) {
-                    return(list(mydata2))  # Single chunk
-                }
-                
-                # Split into chunks
-                n_chunks <- ceiling(n_rows / chunk_size)
-                chunks <- list()
-                
-                message(paste("Processing", n_rows, "observations in", n_chunks, "chunks for memory efficiency"))
-                
-                for (i in seq_len(n_chunks)) {
-                    start_idx <- (i - 1) * chunk_size + 1
-                    end_idx <- min(i * chunk_size, n_rows)
-                    
-                    chunks[[i]] <- mydata2[start_idx:end_idx, , drop = FALSE]
-                    
-                    # Progress indicator for large processing
-                    if (n_chunks > 5 && i %% max(1, floor(n_chunks / 5)) == 0) {
-                        message(paste("Processing chunk", i, "of", n_chunks, "(", round(i/n_chunks*100, 1), "% complete)"))
-                    }
-                }
-                
-                return(chunks)
-            },
-            
-            .processChunkedBinaryConversion = function(mydata2, testVariables) {
-                # Efficient binary conversion for large datasets using chunked processing
-                chunk_size <- 10000
-                n_rows <- nrow(mydata2)
-                
-                # Create binary column names
-                test1_bin <- paste0(testVariables[1], "_bin")
-                test2_bin <- paste0(testVariables[2], "_bin")
-                test3_bin <- if (length(testVariables) >= 3) paste0(testVariables[3], "_bin") else NULL
-                
-                # Initialize binary columns
-                mydata2[[test1_bin]] <- numeric(n_rows)
-                mydata2[[test2_bin]] <- numeric(n_rows)
-                if (!is.null(test3_bin)) {
-                    mydata2[[test3_bin]] <- numeric(n_rows)
-                }
-                
-                # Process in chunks
-                for (i in seq(1, n_rows, chunk_size)) {
-                    end_idx <- min(i + chunk_size - 1, n_rows)
-                    chunk_indices <- i:end_idx
-                    
-                    # Vectorized binary conversion for chunk
-                    mydata2[[test1_bin]][chunk_indices] <- as.numeric(
-                        mydata2[[testVariables[1]]][chunk_indices] == self$options$test1Positive
-                    )
-                    mydata2[[test2_bin]][chunk_indices] <- as.numeric(
-                        mydata2[[testVariables[2]]][chunk_indices] == self$options$test2Positive
-                    )
-                    if (!is.null(test3_bin)) {
-                        mydata2[[test3_bin]][chunk_indices] <- as.numeric(
-                            mydata2[[testVariables[3]]][chunk_indices] == self$options$test3Positive
-                        )
-                    }
-                }
-                
-                return(mydata2)
-            },
-            
-            .analyzeCombinations = function(mydata2, testVariables, goldVariable) {
-                # Comprehensive analysis of all test combinations with full diagnostic statistics
-                if (length(testVariables) < 2) return(mydata2)
-                
-                # Check if chunked processing is needed
-                chunks <- private$.processChunkedData(mydata2, chunk_size = 50000)
-                
-                if (length(chunks) > 1) {
-                    # Process each chunk and combine results
-                    processed_chunks <- lapply(chunks, function(chunk) {
-                        private$.analyzeSingleChunk(chunk, testVariables, goldVariable)
-                    })
-                    
-                    # Combine chunk results
-                    mydata2 <- do.call(rbind, processed_chunks)
+
+                # Determine which statistics to display
+                if (filter_stat == "all") {
+                    # Show the 5 most interpretable metrics
+                    key_metrics <- c("Sensitivity", "Specificity", "PPV", "NPV", "Accuracy")
+                } else if (filter_stat %in% names(filter_to_statistic)) {
+                    # Show only the selected metric
+                    key_metrics <- filter_to_statistic[[filter_stat]]
                 } else {
-                    # Single chunk processing
-                    mydata2 <- private$.analyzeSingleChunk(mydata2, testVariables, goldVariable)
+                    # No valid metric selected
+                    return(FALSE)
                 }
-                
-                return(mydata2)
+
+                # Filter CI data
+                ci_df <- ci_df[ci_df$statistic %in% key_metrics, ]
+
+                if (nrow(ci_df) == 0) {
+                    return(FALSE)
+                }
+
+                # Remove rows with missing CIs
+                ci_df <- ci_df[!is.na(ci_df$estimate) & !is.na(ci_df$lower) & !is.na(ci_df$upper), ]
+
+                if (nrow(ci_df) == 0) {
+                    return(FALSE)
+                }
+
+                # Create combined label
+                ci_df$label <- paste0(ci_df$pattern, " - ", ci_df$statistic)
+
+                # Reverse order for better readability (top to bottom)
+                ci_df$label <- factor(ci_df$label, levels = rev(ci_df$label))
+
+                # Create forest plot
+                p <- ggplot2::ggplot(ci_df, ggplot2::aes(x = estimate, y = label)) +
+                    ggplot2::geom_point(size = 3) +
+                    ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper),
+                                           height = 0.2) +
+                    ggplot2::geom_vline(xintercept = 0.5, linetype = "dashed",
+                                       color = "gray50") +
+                    ggplot2::scale_x_continuous(
+                        labels = scales::percent,
+                        limits = c(0, 1)
+                    ) +
+                    ggplot2::labs(
+                        title = "Forest Plot: 95% Confidence Intervals",
+                        x = "Estimate with 95% CI",
+                        y = "Pattern - Metric"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        panel.grid.minor = ggplot2::element_blank()
+                    )
+
+                print(p)
+                return(TRUE)
             },
-            
-            .analyzeSingleChunk = function(mydata2, testVariables, goldVariable) {
-                # Analyze a single chunk of data for combinations
-                
-                # Process large datasets efficiently with progress indicators
-                large_dataset_threshold <- 1000
-                very_large_threshold <- 10000
-                n_obs <- nrow(mydata2)
-                
-                if (n_obs > large_dataset_threshold) {
-                    message(paste("Processing dataset with", n_obs, "observations"))
-                    
-                    if (n_obs > very_large_threshold) {
-                        # For very large datasets, implement memory-efficient processing
-                        message("Large dataset detected - using optimized memory management")
-                        
-                        # Force garbage collection to free memory
-                        gc(verbose = FALSE)
-                        
-                        # Process in chunks if dataset is extremely large (>50k)
-                        if (n_obs > 50000) {
-                            message("Warning: Very large dataset may require substantial processing time")
+
+            .plotDecisionTree = function(image, ...) {
+                # Decision tree: Test sequence → Gold standard outcome
+                # Shows Test1 → Test2 → Test3 (if present) → Gold Standard (Disease+/-)
+
+                state <- image$state
+                if (is.null(state) || is.null(state$data) || is.null(state$data_prep)) {
+                    return(FALSE)
+                }
+
+                df <- state$data
+                data_prep <- state$data_prep
+                n_patterns <- nrow(df)
+                if (n_patterns == 0) {
+                    return(FALSE)
+                }
+
+                # Get total number of cases
+                total_n <- sum(df$tp[1], df$fp[1], df$tn[1], df$fn[1], na.rm = TRUE)
+
+                # Check if Test3 exists
+                has_test3 <- !is.null(self$options$test3) && self$options$test3 != ""
+
+                # Create node and edge data structures
+                nodes <- data.frame(
+                    id = character(),
+                    label = character(),
+                    x = numeric(),
+                    y = numeric(),
+                    acc = numeric(),
+                    n_cases = numeric(),
+                    level = integer(),
+                    stringsAsFactors = FALSE
+                )
+
+                edges <- data.frame(
+                    from_id = character(),
+                    to_id = character(),
+                    n_flow = numeric(),
+                    stringsAsFactors = FALSE
+                )
+
+                # Root node (all cases)
+                nodes <- rbind(nodes, data.frame(
+                    id = "root",
+                    label = sprintf("All Cases\nn=%d", total_n),
+                    x = 0,
+                    y = 0,
+                    acc = mean(df$acc, na.rm = TRUE),
+                    n_cases = total_n,
+                    level = 0,
+                    stringsAsFactors = FALSE
+                ))
+
+                if (!has_test3) {
+                    # 2-test tree: Root → Test1 → Test2 → Gold Standard
+                    # Access original test data for counting actual cases
+                    test1_var <- data_prep$test1Variable2
+                    test2_var <- data_prep$test2Variable2
+
+                    # Level 1: Test1 (+/-)
+                    test1_results <- c("+", "-")
+                    x_l1 <- c(-1, 1)
+
+                    for (i in seq_along(test1_results)) {
+                        t1 <- test1_results[i]
+                        pattern_regex <- paste0("^", gsub("\\+", "\\\\+", t1), "/")
+                        matching_rows <- grep(pattern_regex, df$pattern)
+
+                        if (length(matching_rows) > 0) {
+                            # Count actual cases where Test1 matches this result
+                            t1_level <- if (t1 == "+") "Positive" else "Negative"
+                            n_cases_t1 <- sum(test1_var == t1_level, na.rm = TRUE)
+
+                            node_id_t1 <- paste0("T1_", t1)
+                            nodes <- rbind(nodes, data.frame(
+                                id = node_id_t1,
+                                label = sprintf("Test1: %s\nn=%d", t1, n_cases_t1),
+                                x = x_l1[i],
+                                y = -1,
+                                acc = mean(df$acc[matching_rows]),
+                                n_cases = n_cases_t1,
+                                level = 1,
+                                stringsAsFactors = FALSE
+                            ))
+
+                            edges <- rbind(edges, data.frame(
+                                from_id = "root",
+                                to_id = node_id_t1,
+                                n_flow = n_cases_t1,
+                                stringsAsFactors = FALSE
+                            ))
+
+                            # Level 2: Test2 (+/-)
+                            test2_results <- c("+", "-")
+                            x_l2 <- c(x_l1[i] - 0.6, x_l1[i] + 0.6)
+
+                            for (j in seq_along(test2_results)) {
+                                t2 <- test2_results[j]
+                                pattern <- paste0(t1, "/", t2)
+                                row_idx <- which(df$pattern == pattern)
+
+                                if (length(row_idx) > 0) {
+                                    # Count actual cases where Test1=t1 AND Test2=t2
+                                    t2_level <- if (t2 == "+") "Positive" else "Negative"
+                                    n_cases_t2 <- sum(test1_var == t1_level & test2_var == t2_level, na.rm = TRUE)
+
+                                    node_id_t2 <- paste0("T2_", pattern)
+                                    nodes <- rbind(nodes, data.frame(
+                                        id = node_id_t2,
+                                        label = sprintf("%s\nn=%d", pattern, n_cases_t2),
+                                        x = x_l2[j],
+                                        y = -2,
+                                        acc = df$acc[row_idx],
+                                        n_cases = n_cases_t2,
+                                        level = 2,
+                                        stringsAsFactors = FALSE
+                                    ))
+
+                                    edges <- rbind(edges, data.frame(
+                                        from_id = node_id_t1,
+                                        to_id = node_id_t2,
+                                        n_flow = n_cases_t2,
+                                        stringsAsFactors = FALSE
+                                    ))
+
+                                    # Level 3: Gold Standard (Disease +/-)
+                                    n_disease_pos <- df$tp[row_idx] + df$fp[row_idx]
+                                    n_disease_neg <- df$tn[row_idx] + df$fn[row_idx]
+
+                                    if (n_disease_pos > 0) {
+                                        node_id_gold_pos <- paste0("Gold_", pattern, "_pos")
+                                        nodes <- rbind(nodes, data.frame(
+                                            id = node_id_gold_pos,
+                                            label = sprintf("Disease+\nn=%d", n_disease_pos),
+                                            x = x_l2[j] - 0.35,
+                                            y = -3,
+                                            acc = df$tp[row_idx] / n_disease_pos,  # Sens
+                                            n_cases = n_disease_pos,
+                                            level = 3,
+                                            stringsAsFactors = FALSE
+                                        ))
+
+                                        edges <- rbind(edges, data.frame(
+                                            from_id = node_id_t2,
+                                            to_id = node_id_gold_pos,
+                                            n_flow = n_disease_pos,
+                                            stringsAsFactors = FALSE
+                                        ))
+                                    }
+
+                                    if (n_disease_neg > 0) {
+                                        node_id_gold_neg <- paste0("Gold_", pattern, "_neg")
+                                        nodes <- rbind(nodes, data.frame(
+                                            id = node_id_gold_neg,
+                                            label = sprintf("Disease-\nn=%d", n_disease_neg),
+                                            x = x_l2[j] + 0.35,
+                                            y = -3,
+                                            acc = df$tn[row_idx] / n_disease_neg,  # Spec
+                                            n_cases = n_disease_neg,
+                                            level = 3,
+                                            stringsAsFactors = FALSE
+                                        ))
+
+                                        edges <- rbind(edges, data.frame(
+                                            from_id = node_id_t2,
+                                            to_id = node_id_gold_neg,
+                                            n_flow = n_disease_neg,
+                                            stringsAsFactors = FALSE
+                                        ))
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-                
-                # Binary variables for positive/negative states
-                test1_bin <- paste0(testVariables[1], "_bin")
-                test2_bin <- paste0(testVariables[2], "_bin")
-                test3_bin <- if (length(testVariables) >= 3) paste0(testVariables[3], "_bin") else NULL
-                
-                # Binary conversion for each test based on positive levels
-                # Performance optimization: use vectorized operations for large datasets
-                n_rows <- nrow(mydata2)
-                if (n_rows > 50000) {
-                    # For very large datasets, process in chunks to manage memory
-                    mydata2 <- private$.processChunkedBinaryConversion(mydata2, testVariables)
                 } else {
-                    # Standard processing for smaller datasets
-                    mydata2[[test1_bin]] <- as.numeric(mydata2[[testVariables[1]]] == self$options$test1Positive)
-                }
-                
-                # Ensure all binary conversions are completed
-                if (!test1_bin %in% names(mydata2)) {
-                    mydata2[[test1_bin]] <- as.numeric(mydata2[[testVariables[1]]] == self$options$test1Positive)
-                }
-                mydata2[[test2_bin]] <- as.numeric(mydata2[[testVariables[2]]] == self$options$test2Positive)
-                if (!is.null(test3_bin)) {
-                    mydata2[[test3_bin]] <- as.numeric(mydata2[[testVariables[3]]] == self$options$test3Positive)
-                }
-                
-                # Create combination patterns
-                if (length(testVariables) == 2) {
-                    # Create combination patterns using base R (more efficient)
-                    mydata2$combination_pattern <- ifelse(
-                        mydata2[[test1_bin]] == 1 & mydata2[[test2_bin]] == 1, "+/+",
-                        ifelse(mydata2[[test1_bin]] == 1 & mydata2[[test2_bin]] == 0, "+/-",
-                               ifelse(mydata2[[test1_bin]] == 0 & mydata2[[test2_bin]] == 1, "-/+",
-                                      ifelse(mydata2[[test1_bin]] == 0 & mydata2[[test2_bin]] == 0, "-/-",
-                                             "Unknown"))))
-                    
-                } else if (length(testVariables) == 3) {
-                    # For 3 tests - create pattern combinations
-                    mydata2$combination_pattern <- paste(
-                        ifelse(mydata2[[test1_bin]] == 1, "+", "-"),
-                        ifelse(mydata2[[test2_bin]] == 1, "+", "-"),
-                        ifelse(mydata2[[test3_bin]] == 1, "+", "-"),
-                        sep = "/"
-                    )
-                }
-                
-                # Ensure no NA patterns
-                mydata2$combination_pattern[is.na(mydata2$combination_pattern) | 
-                                          mydata2$combination_pattern == ""] <- "Unknown"
-                
-                # Create contingency table for analysis
-                combo_table <- table(mydata2$combination_pattern, mydata2$goldVariable2)
-                
-                # Generate pattern descriptions using consolidated function
-                pattern_result <- private$.generatePatternInfo(testVariables)
-                patterns <- pattern_result$patterns
-                descriptions <- pattern_result$descriptions
-                
-                # Calculate totals for the gold standard (safe column access)
-                total_positive_gold <- if("Positive" %in% colnames(combo_table)) {
-                    sum(combo_table[, "Positive"], na.rm = TRUE)
-                } else {
-                    0
-                }
-                total_negative_gold <- if("Negative" %in% colnames(combo_table)) {
-                    sum(combo_table[, "Negative"], na.rm = TRUE) 
-                } else {
-                    0
-                }
-                
-                # Create structured HTML summary with better formatting
-                num_tests <- length(testVariables)
-                test_names <- paste(testVariables, collapse = ", ")
-                n_total_cases <- sum(total_positive_gold, total_negative_gold)
-                
-                # Add validation to prevent zero total cases
-                if (n_total_cases == 0) {
-                    stop("Invalid data: No valid gold standard cases found. Please check your gold standard variable and positive level selection.")
-                }
-                
-                # Initialize plot data index before use
-                plot_data_index <- 0
-                
-                # Find optimal cut-point for recommendations (will be calculated after data collection)
-                optimal_cutpoint <- NULL
-                
-                # Professional HTML structure with optimal cut-point recommendations
-                summary_html <- private$.generateAnalysisSummaryHTML(
-                    num_tests = num_tests,
-                    test_names = test_names,
-                    n_total_cases = n_total_cases,
-                    n_positive_cases = total_positive_gold,
-                    n_negative_cases = total_negative_gold,
-                    patterns = patterns,
-                    descriptions = descriptions,
-                    optimal_cutpoint = optimal_cutpoint
-                )
-                
-                # Initialize plot data collection with pre-allocation for better performance
-                n_patterns <- length(patterns)
-                plot_data <- list(
-                    patterns = character(n_patterns),
-                    sensitivity = numeric(n_patterns),
-                    specificity = numeric(n_patterns),
-                    ppv = numeric(n_patterns),
-                    npv = numeric(n_patterns),
-                    accuracy = numeric(n_patterns),
-                    descriptions = character(n_patterns),
-                    tp = numeric(n_patterns),
-                    fp = numeric(n_patterns),
-                    fn = numeric(n_patterns),
-                    tn = numeric(n_patterns)
-                )
-                
-                # Populate diagnostic statistics tables
-                for (i in seq_along(patterns)) {
-                    pattern <- patterns[i]
-                    description <- descriptions[i]
-                    
-                    if (pattern %in% rownames(combo_table)) {
-                        # For each combination pattern, treat it as a "test" vs gold standard
-                        # TP: Pattern present AND disease present
-                        # FP: Pattern present AND disease absent
-                        # FN: Pattern absent AND disease present  
-                        # TN: Pattern absent AND disease absent
-                        
-                        tp <- combo_table[pattern, "Positive"]
-                        fp <- combo_table[pattern, "Negative"]
-                        fn <- total_positive_gold - tp
-                        tn <- total_negative_gold - fp
-                        
-                        # Calculate diagnostic statistics
-                        stats <- private$.calculateDiagnosticStats(tp, fp, fn, tn)
-                        
-                        # Generate clinical interpretation for this combination
-                        clinical_interpretation <- private$.generateCombinationInterpretation(stats, pattern, description)
-                        
-                        # Add to main statistics table with enhanced formatting
-                        self$results$combStatsTable$addRow(
-                            rowKey = pattern,
-                            values = list(
-                                combination = paste0(
-                                    "<div style='font-weight: bold; color: #2c3e50;'>", pattern, "</div>",
-                                    "<div style='font-size: 0.9em; color: #555; margin-top: 2px;'>", description, "</div>",
-                                    "<div style='color: #0066cc; font-size: 0.85em; margin-top: 4px; font-style: italic; padding: 2px 6px; background-color: #f8f9fa; border-radius: 3px;'>", 
-                                    clinical_interpretation, "</div>"
-                                ),
-                                sens = stats$sens,
-                                spec = stats$spec,
-                                ppv = stats$ppv,
-                                npv = stats$npv,
-                                acc = stats$acc
-                            )
-                        )
-                        
-                        # Collect data for visualization using indexed assignment (more efficient)
-                        plot_data_index <- plot_data_index + 1
-                        plot_data$patterns[plot_data_index] <- pattern
-                        plot_data$sensitivity[plot_data_index] <- stats$sens
-                        plot_data$specificity[plot_data_index] <- stats$spec
-                        plot_data$ppv[plot_data_index] <- stats$ppv
-                        plot_data$npv[plot_data_index] <- stats$npv
-                        plot_data$accuracy[plot_data_index] <- stats$acc
-                        plot_data$descriptions[plot_data_index] <- description
-                        plot_data$tp[plot_data_index] <- tp
-                        plot_data$fp[plot_data_index] <- fp
-                        plot_data$fn[plot_data_index] <- fn
-                        plot_data$tn[plot_data_index] <- tn
-                        
-                        # Add to CI table (multiple rows per combination)
-                        stat_names <- c("Sensitivity", "Specificity", "PPV", "NPV", "Accuracy")
-                        stat_values <- list(stats$sens, stats$spec, stats$ppv, stats$npv, stats$acc)
-                        stat_cis <- list(stats$sens_ci, stats$spec_ci, stats$ppv_ci, stats$npv_ci, stats$acc_ci)
-                        
-                        for (j in seq_along(stat_names)) {
-                            if (!is.na(stat_values[[j]])) {
-                                self$results$combStatsTableCI$addRow(
-                                    rowKey = paste0(pattern, "_", j),
-                                    values = list(
-                                        combination = pattern,
-                                        statistic = stat_names[j],
-                                        estimate = stat_values[[j]],
-                                        lower = stat_cis[[j]][1],
-                                        upper = stat_cis[[j]][2]
-                                    )
-                                )
+                    # 3-test tree: Build level by level with actual flows
+                    # Access original test data for counting actual cases
+                    test1_var <- data_prep$test1Variable2
+                    test2_var <- data_prep$test2Variable2
+                    test3_var <- data_prep$test3Variable2
+
+                    # Level 1: Test1 splits (+/-)
+                    test1_results <- c("+", "-")
+                    x_l1 <- c(-3, 3)  # Wider spacing for 3-test tree
+
+                    for (i in seq_along(test1_results)) {
+                        t1 <- test1_results[i]
+                        # Find all patterns starting with this test1 result
+                        pattern_regex <- paste0("^", gsub("\\+", "\\\\+", t1), "/")
+                        matching_rows <- grep(pattern_regex, df$pattern)
+
+                        if (length(matching_rows) > 0) {
+                            # Count actual cases where Test1 matches this result
+                            t1_level <- if (t1 == "+") "Positive" else "Negative"
+                            n_cases <- sum(test1_var == t1_level, na.rm = TRUE)
+                            avg_acc <- mean(df$acc[matching_rows], na.rm = TRUE)
+
+                            node_id <- paste0("T1_", t1)
+                            nodes <- rbind(nodes, data.frame(
+                                id = node_id,
+                                label = sprintf("Test1: %s\nn=%d", t1, n_cases),
+                                x = x_l1[i],
+                                y = -1,
+                                acc = avg_acc,
+                                n_cases = n_cases,
+                                level = 1,
+                                stringsAsFactors = FALSE
+                            ))
+
+                            edges <- rbind(edges, data.frame(
+                                from_id = "root",
+                                to_id = node_id,
+                                n_flow = n_cases,
+                                stringsAsFactors = FALSE
+                            ))
+
+                            # Level 2: Test2 splits (+/-)
+                            test2_results <- c("+", "-")
+                            x_l2_base <- x_l1[i]
+                            x_l2 <- c(x_l2_base - 1.2, x_l2_base + 1.2)  # Wider spacing for 3-test
+
+                            for (j in seq_along(test2_results)) {
+                                t2 <- test2_results[j]
+                                pattern_regex2 <- paste0("^", gsub("\\+", "\\\\+", t1), "/",
+                                                        gsub("\\+", "\\\\+", t2), "/")
+                                matching_rows2 <- grep(pattern_regex2, df$pattern)
+
+                                if (length(matching_rows2) > 0) {
+                                    # Count actual cases where Test1=t1 AND Test2=t2
+                                    t2_level <- if (t2 == "+") "Positive" else "Negative"
+                                    n_cases2 <- sum(test1_var == t1_level & test2_var == t2_level, na.rm = TRUE)
+                                    avg_acc2 <- mean(df$acc[matching_rows2], na.rm = TRUE)
+
+                                    node_id2 <- paste0("T2_", t1, t2)
+                                    nodes <- rbind(nodes, data.frame(
+                                        id = node_id2,
+                                        label = sprintf("%s/%s\nn=%d", t1, t2, n_cases2),
+                                        x = x_l2[j],
+                                        y = -2,
+                                        acc = avg_acc2,
+                                        n_cases = n_cases2,
+                                        level = 2,
+                                        stringsAsFactors = FALSE
+                                    ))
+
+                                    edges <- rbind(edges, data.frame(
+                                        from_id = node_id,
+                                        to_id = node_id2,
+                                        n_flow = n_cases2,
+                                        stringsAsFactors = FALSE
+                                    ))
+
+                                    # Level 3: Test3 (+/-)
+                                    test3_results <- c("+", "-")
+
+                                    for (k in seq_along(test3_results)) {
+                                        t3 <- test3_results[k]
+                                        full_pattern <- paste0(t1, "/", t2, "/", t3)
+                                        row_idx <- which(df$pattern == full_pattern)
+
+                                        if (length(row_idx) > 0) {
+                                            # Count actual cases where Test1=t1 AND Test2=t2 AND Test3=t3
+                                            t3_level <- if (t3 == "+") "Positive" else "Negative"
+                                            n_cases3 <- sum(test1_var == t1_level & test2_var == t2_level & test3_var == t3_level, na.rm = TRUE)
+
+                                            # X position for Test3 nodes - wider spacing to prevent overlap
+                                            pattern_num <- match(full_pattern,
+                                                               c("+/+/+", "+/+/-", "+/-/+", "+/-/-",
+                                                                 "-/+/+", "-/+/-", "-/-/+", "-/-/-"))
+                                            x_l3 <- seq(-5.5, 5.5, length.out = 8)[pattern_num]
+
+                                            node_id_t3 <- paste0("T3_", full_pattern)
+                                            nodes <- rbind(nodes, data.frame(
+                                                id = node_id_t3,
+                                                label = sprintf("%s\nn=%d", full_pattern, n_cases3),
+                                                x = x_l3,
+                                                y = -3,
+                                                acc = df$acc[row_idx],
+                                                n_cases = n_cases3,
+                                                level = 3,
+                                                stringsAsFactors = FALSE
+                                            ))
+
+                                            edges <- rbind(edges, data.frame(
+                                                from_id = node_id2,
+                                                to_id = node_id_t3,
+                                                n_flow = n_cases3,
+                                                stringsAsFactors = FALSE
+                                            ))
+
+                                            # Level 4: Gold Standard (Disease +/-)
+                                            n_disease_pos <- df$tp[row_idx] + df$fp[row_idx]
+                                            n_disease_neg <- df$tn[row_idx] + df$fn[row_idx]
+
+                                            if (n_disease_pos > 0) {
+                                                node_id_gold_pos <- paste0("Gold_", full_pattern, "_pos")
+                                                nodes <- rbind(nodes, data.frame(
+                                                    id = node_id_gold_pos,
+                                                    label = sprintf("Disease+\nn=%d", n_disease_pos),
+                                                    x = x_l3 - 0.35,  # Increased spacing from 0.2 to 0.35
+                                                    y = -4,
+                                                    acc = df$tp[row_idx] / n_disease_pos,
+                                                    n_cases = n_disease_pos,
+                                                    level = 4,
+                                                    stringsAsFactors = FALSE
+                                                ))
+
+                                                edges <- rbind(edges, data.frame(
+                                                    from_id = node_id_t3,
+                                                    to_id = node_id_gold_pos,
+                                                    n_flow = n_disease_pos,
+                                                    stringsAsFactors = FALSE
+                                                ))
+                                            }
+
+                                            if (n_disease_neg > 0) {
+                                                node_id_gold_neg <- paste0("Gold_", full_pattern, "_neg")
+                                                nodes <- rbind(nodes, data.frame(
+                                                    id = node_id_gold_neg,
+                                                    label = sprintf("Disease-\nn=%d", n_disease_neg),
+                                                    x = x_l3 + 0.35,  # Increased spacing from 0.2 to 0.35
+                                                    y = -4,
+                                                    acc = df$tn[row_idx] / n_disease_neg,
+                                                    n_cases = n_disease_neg,
+                                                    level = 4,
+                                                    stringsAsFactors = FALSE
+                                                ))
+
+                                                edges <- rbind(edges, data.frame(
+                                                    from_id = node_id_t3,
+                                                    to_id = node_id_gold_neg,
+                                                    n_flow = n_disease_neg,
+                                                    stringsAsFactors = FALSE
+                                                ))
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                
-                # After data collection, calculate optimal cut-point for recommendations
-                if (plot_data_index > 0) {
-                    # Create temporary plot data for optimal cut-point analysis
-                    temp_plot_data <- list(
-                        patterns = plot_data$patterns[1:plot_data_index],
-                        sensitivity = plot_data$sensitivity[1:plot_data_index],
-                        specificity = plot_data$specificity[1:plot_data_index],
-                        accuracy = plot_data$accuracy[1:plot_data_index]
+
+                # Calculate flow proportions for line thickness
+                if (nrow(edges) > 0) {
+                    edges$flow_prop <- edges$n_flow / total_n
+                    # Scale line width: 0.3 to 3 based on proportion (reduced from 0.5-10)
+                    edges$line_width <- 0.3 + (edges$flow_prop * 2.7)
+
+                    # Add start/end coordinates
+                    edges$x_start <- sapply(edges$from_id, function(fid) nodes$x[nodes$id == fid])
+                    edges$y_start <- sapply(edges$from_id, function(fid) nodes$y[nodes$id == fid])
+                    edges$x_end <- sapply(edges$to_id, function(tid) nodes$x[nodes$id == tid])
+                    edges$y_end <- sapply(edges$to_id, function(tid) nodes$y[nodes$id == tid])
+                } else {
+                    return(FALSE)
+                }
+
+                # Color borders by accuracy - no fill, just colored borders
+                nodes$border_color <- ifelse(nodes$acc >= 0.8, "#2d5a3d",    # Dark green
+                                            ifelse(nodes$acc >= 0.7, "#5a8c65", # Medium green
+                                                  ifelse(nodes$acc >= 0.6, "#b8935f", # Brown
+                                                        "#994444")))          # Dark red
+
+                # Border width based on performance
+                nodes$border_width <- ifelse(nodes$acc >= 0.7, 2, 1.5)
+
+                # Create plot with variable-width edges showing flow
+                p <- ggplot2::ggplot() +
+                    # Draw edges with width proportional to flow
+                    ggplot2::geom_segment(data = edges,
+                                         ggplot2::aes(x = x_start, y = y_start,
+                                                     xend = x_end, yend = y_end,
+                                                     linewidth = line_width),
+                                         color = "gray60", alpha = 0.6,
+                                         arrow = ggplot2::arrow(length = ggplot2::unit(0.15, "inches"),
+                                                               type = "closed")) +
+                    # Draw node boxes - white fill with colored borders
+                    ggplot2::geom_tile(data = nodes,
+                                      ggplot2::aes(x = x, y = y, color = border_color, linewidth = border_width),
+                                      fill = "white",
+                                      width = 0.45, height = 0.35) +
+                    # Add labels
+                    ggplot2::geom_text(data = nodes,
+                                      ggplot2::aes(x = x, y = y, label = label),
+                                      size = 3, fontface = "bold", lineheight = 0.85,
+                                      color = "black") +
+                    ggplot2::scale_color_identity() +
+                    ggplot2::scale_linewidth_identity() +
+                    ggplot2::coord_cartesian(clip = "off") +
+                    ggplot2::labs(
+                        title = "Decision Tree: Test Sequence → Gold Standard",
+                        subtitle = paste0("Root → Test1 → Test2",
+                                        if (has_test3) " → Test3" else "",
+                                        " → Disease+/- | Line thickness = case flow"),
+                        caption = "Border color: Dark Green = Excellent (≥80%) | Green = Good (≥70%) | Brown = Fair (≥60%) | Red = Limited (<60%)"
+                    ) +
+                    ggplot2::theme_void() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 15,
+                                                          margin = ggplot2::margin(b = 5)),
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 10,
+                                                             color = "gray40",
+                                                             margin = ggplot2::margin(b = 15)),
+                        plot.caption = ggplot2::element_text(hjust = 0.5, size = 9,
+                                                            color = "gray50",
+                                                            margin = ggplot2::margin(t = 10)),
+                        plot.margin = ggplot2::margin(25, 25, 25, 25),
+                        plot.background = ggplot2::element_rect(fill = "white", color = NA)
                     )
-                    optimal_cutpoint <- private$.findOptimalCutpoint(temp_plot_data)
-                    
-                    # Regenerate HTML summary with optimal cut-point
-                    summary_html <- private$.generateAnalysisSummaryHTML(
-                        num_tests = num_tests,
-                        test_names = test_names,
-                        n_total_cases = n_total_cases,
-                        n_positive_cases = total_positive_gold,
-                        n_negative_cases = total_negative_gold,
-                        patterns = patterns,
-                        descriptions = descriptions,
-                        optimal_cutpoint = optimal_cutpoint
-                    )
-                }
-                
-                # Generate clinical summary if we have valid results
-                clinical_summary_html <- ""
-                if (plot_data_index > 0 && !is.null(optimal_cutpoint)) {
-                    # Prepare results structure for clinical summary
-                    results_for_summary <- list(
-                        patterns = patterns[1:plot_data_index],
-                        sensitivity = plot_data$sensitivity[1:plot_data_index],
-                        specificity = plot_data$specificity[1:plot_data_index],
-                        ppv = plot_data$ppv[1:plot_data_index],
-                        npv = plot_data$npv[1:plot_data_index],
-                        accuracy = plot_data$accuracy[1:plot_data_index]
-                    )
-                    
-                    clinical_summary_html <- private$.generateClinicalSummary(results_for_summary, optimal_cutpoint)
-                    
-                    # Generate copy-ready report
-                    report_template_html <- private$.generateCopyReadyReport(results_for_summary, optimal_cutpoint, test_names)
-                }
-                
-                # Combine all HTML components
-                combined_html <- paste0(clinical_summary_html, report_template_html, summary_html)
-                
-                # Set content
-                if ("combinationsAnalysis" %in% names(self$results)) {
-                    self$results$combinationsAnalysis$setContent(combined_html)
-                }
-                
-                # Trim plot data to actual size and validate
-                if (plot_data_index > 0) {
-                    # Trim to actual data size for efficiency
-                    plot_data$patterns <- plot_data$patterns[1:plot_data_index]
-                    plot_data$sensitivity <- plot_data$sensitivity[1:plot_data_index]
-                    plot_data$specificity <- plot_data$specificity[1:plot_data_index]
-                    plot_data$ppv <- plot_data$ppv[1:plot_data_index]
-                    plot_data$npv <- plot_data$npv[1:plot_data_index]
-                    plot_data$accuracy <- plot_data$accuracy[1:plot_data_index]
-                    plot_data$descriptions <- plot_data$descriptions[1:plot_data_index]
-                    plot_data$tp <- plot_data$tp[1:plot_data_index]
-                    plot_data$fp <- plot_data$fp[1:plot_data_index]
-                    plot_data$fn <- plot_data$fn[1:plot_data_index]
-                    plot_data$tn <- plot_data$tn[1:plot_data_index]
-                    
-                    # Validate plot data
-                    private$.validatePlotData(plot_data)
-                    # Set data for heatmap
-                    if ("performanceHeatmap" %in% names(self$results)) {
-                        heatmap_image <- self$results$performanceHeatmap
-                        heatmap_image$setState(plot_data)
-                    }
-                    
-                    # Note: ROC curves removed as not appropriate for categorical tests
-                    
-                    # Set data for decision tree
-                    if ("decisionTree" %in% names(self$results)) {
-                        tree_image <- self$results$decisionTree
-                        tree_image$setState(plot_data)
-                    }
-                    
-                    # Set data for Venn diagram
-                    if ("vennDiagram" %in% names(self$results)) {
-                        venn_image <- self$results$vennDiagram
-                        venn_image$setState(plot_data)
-                    }
-                    
-                    # Set data for forest plot
-                    if ("forestPlot" %in% names(self$results)) {
-                        forest_image <- self$results$forestPlot
-                        forest_image$setState(plot_data)
-                    }
-                }
-                
-                # Return mydata2 with combination_pattern column
-                return(mydata2)
+
+                print(p)
+                return(TRUE)
             },
-            
-            .hasRequiredInputs = function() {
-                # Check if the minimum required inputs are provided, including positive levels
-                has_gold <- !is.null(self$options$gold) && length(self$options$gold) > 0 && self$options$gold != ""
-                has_gold_positive <- !is.null(self$options$goldPositive) && self$options$goldPositive != ""
-                has_test1 <- !is.null(self$options$test1) && self$options$test1 != ""
-                has_test1_positive <- !is.null(self$options$test1Positive) && self$options$test1Positive != ""
-                has_data <- !is.null(self$data) && nrow(self$data) > 0
-                
-                return(has_gold && has_gold_positive && has_test1 && has_test1_positive && has_data)
-            },
-            
-            .displayWelcomeMessage = function() {
-                # Display comprehensive welcome message and analysis guide
-                html <- self$results$combinationsAnalysis
-                
-                welcome_html <- paste0(
-                    '<div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px;">',
-                    
-                    '<h1 style="color: #2E86C1; text-align: center; border-bottom: 3px solid #2E86C1; padding-bottom: 15px;">',
-                    '🔬 Diagnostic Test Combination Analysis</h1>',
-                    
-                    # About This Analysis Section
-                    '<div style="background: linear-gradient(135deg, #EBF5FB 0%, #D6EAF8 100%); padding: 25px; border-radius: 10px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">',
-                    '<h2 style="color: #1B4F72; margin-top: 0;">📚 About This Analysis</h2>',
-                    '<p style="font-size: 16px; line-height: 1.8; color: #34495E;">',
-                    'This advanced statistical tool evaluates how well different combinations of diagnostic tests perform ',
-                    'compared to a gold standard reference. It systematically analyzes all possible test result patterns ',
-                    '(e.g., Test1+/Test2+, Test1+/Test2-, etc.) to find the optimal combination for your clinical scenario.',
-                    '</p>',
-                    '</div>',
-                    
-                    # When to Use This
-                    '<div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #856404; margin-top: 0;">🎯 When to Use This Analysis</h3>',
-                    '<ul style="line-height: 1.8; color: #856404;">',
-                    '<li><strong>Test Validation:</strong> Comparing new diagnostic methods to established gold standards</li>',
-                    '<li><strong>Protocol Development:</strong> Optimizing diagnostic workflows by combining multiple tests</li>',
-                    '<li><strong>Clinical Research:</strong> Evaluating biomarker panels or multi-modal diagnostic approaches</li>',
-                    '<li><strong>Quality Assessment:</strong> Measuring inter-rater agreement between diagnostic methods</li>',
-                    '</ul>',
-                    '</div>',
-                    
-                    # Step-by-Step Guide
-                    '<div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 20px; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #0c5460; margin-top: 0;">📋 Step-by-Step Guide</h3>',
-                    '<ol style="line-height: 1.8; color: #0c5460;">',
-                    '<li><strong>Select Gold Standard:</strong> Choose your reference test (e.g., biopsy, final diagnosis)</li>',
-                    '<li><strong>Define Disease Level:</strong> Specify which level indicates disease presence</li>',
-                    '<li><strong>Choose Test Variables:</strong> Select 1-3 diagnostic tests to combine and evaluate</li>',
-                    '<li><strong>Set Positive Levels:</strong> Define what constitutes a "positive" result for each test</li>',
-                    '<li><strong>Configure Options:</strong> Enable visualizations and set export preferences</li>',
-                    '<li><strong>Run Analysis:</strong> Get comprehensive performance metrics and clinical recommendations</li>',
-                    '</ol>',
-                    '</div>',
-                    
-                    # What You Get
-                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;">',
-                    '<div style="background-color: #F8F9FA; padding: 20px; border-left: 5px solid #17A2B8; border-radius: 5px;">',
-                    '<h3 style="color: #138496; margin-top: 0;">📊 Analysis Results</h3>',
-                    '<ul style="line-height: 1.8; color: #495057;">',
-                    '<li>Systematic evaluation of all test combinations</li>',
-                    '<li>Wilson score confidence intervals</li>',
-                    '<li>Performance-based optimal pattern identification</li>',
-                    '<li>Publication-quality visualizations</li>',
-                    '<li>Clinical decision recommendations</li>',
-                    '</ul>',
-                    '</div>',
-                    
-                    '<div style="background-color: #F8F9FA; padding: 20px; border-left: 5px solid #28A745; border-radius: 5px;">',
-                    '<h3 style="color: #155724; margin-top: 0;">📈 Clinical Outputs</h3>',
-                    '<ul style="line-height: 1.8; color: #495057;">',
-                    '<li><strong>Clinical Summary:</strong> Plain-language interpretation of results</li>',
-                    '<li><strong>Copy-Ready Report:</strong> Templates for manuscripts and documentation</li>',
-                    '<li><strong>Performance Metrics:</strong> Sensitivity, specificity, PPV, NPV with CIs</li>',
-                    '<li><strong>Optimal Pattern:</strong> Best test combination recommendation</li>',
-                    '<li><strong>Visualizations:</strong> Heatmaps, decision trees, forest plots</li>',
-                    '</ul>',
-                    '</div>',
-                    '</div>',
-                    
-                    '<div style="background-color: #FFF3CD; padding: 20px; border: 1px solid #FFEEBA; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #856404; margin-top: 0;">⚡ Quick Start Checklist</h3>',
-                    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">',
-                    
-                    private$.getRequiredVariableStatus(),
-                    
-                    '</div>',
-                    '</div>',
-                    
-                    '<div style="background-color: #E8F5E8; padding: 20px; border-left: 5px solid #27AE60; border-radius: 5px; margin: 20px 0;">',
-                    '<h3 style="color: #1E8449; margin-top: 0;">📋 Supported Analysis Types</h3>',
-                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">',
-                    '<div>',
-                    '<h4 style="color: #27AE60;">Two-Test Combinations (4 patterns)</h4>',
-                    '<p style="margin: 10px 0;">Perfect for comparing two diagnostic methods or validating new tests against established ones.</p>',
-                    '</div>',
-                    '<div>',
-                    '<h4 style="color: #27AE60;">Three-Test Combinations (8 patterns)</h4>',
-                    '<p style="margin: 10px 0;">Comprehensive analysis for complex diagnostic scenarios with multiple complementary tests.</p>',
-                    '</div>',
-                    '</div>',
-                    '</div>',
-                    
-                    '<div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #F1F3F4; border-radius: 8px;">',
-                    '<p style="font-size: 14px; color: #6C757D; margin: 0;">',
-                    '💡 <strong>Pro Tip:</strong> Enable "Show Advanced Visualizations" for publication-ready plots with automated optimal cut-point analysis.',
-                    '</p>',
-                    '</div>',
-                    
-                    '</div>'
+
+            .generateOptimalRecommendation = function() {
+                # Find and recommend the optimal test combination pattern
+
+                combTable <- self$results$combinationTable
+                if (combTable$rowCount == 0) {
+                    return()
+                }
+
+                # Convert table to data frame
+                df <- as.data.frame(combTable)
+
+                # Calculate Youden's J for all patterns
+                df$youden <- df$sens + df$spec - 1
+                df$youden[is.na(df$youden)] <- -Inf
+
+                # Find optimal pattern by Youden's J
+                optimal_idx <- which.max(df$youden)
+
+                if (length(optimal_idx) == 0 || is.na(optimal_idx)) {
+                    return()
+                }
+
+                optimal_pattern <- df$pattern[optimal_idx]
+                optimal_youden <- df$youden[optimal_idx]
+                optimal_sens <- df$sens[optimal_idx]
+                optimal_spec <- df$spec[optimal_idx]
+                optimal_acc <- df$acc[optimal_idx]
+
+                # Generate clinical rationale
+                rationale <- sprintf(
+                    "Selected based on maximum Youden's J statistic (%.3f), which optimizes sensitivity + specificity - 1. ",
+                    optimal_youden
                 )
-                
-                html$setContent(welcome_html)
-            },
-            
-            .getRequiredVariableStatus = function() {
-                # Generate status checkboxes for required variables
-                has_data <- !is.null(self$data) && nrow(self$data) > 0
-                has_gold <- !is.null(self$options$gold) && length(self$options$gold) > 0 && self$options$gold != ""
-                has_gold_positive <- !is.null(self$options$goldPositive) && self$options$goldPositive != ""
-                has_test1 <- !is.null(self$options$test1) && self$options$test1 != ""
-                has_test1_positive <- !is.null(self$options$test1Positive) && self$options$test1Positive != ""
-                
-                status_items <- c(
-                    private$.createStatusItem("Data loaded", has_data),
-                    private$.createStatusItem("Gold Standard selected", has_gold),
-                    private$.createStatusItem("Gold Standard positive level", has_gold_positive),
-                    private$.createStatusItem("Test 1 selected", has_test1),
-                    private$.createStatusItem("Test 1 positive level", has_test1_positive)
-                )
-                
-                return(paste(status_items, collapse = ""))
-            },
-            
-            .createStatusItem = function(label, is_complete) {
-                icon <- if (is_complete) "✅" else "⚠️"
-                color <- if (is_complete) "#28A745" else "#FFC107"
-                
-                return(paste0(
-                    '<div style="display: flex; align-items: center; margin-bottom: 8px;">',
-                    '<span style="font-size: 18px; margin-right: 10px;">', icon, '</span>',
-                    '<span style="color: ', color, '; font-weight: ', 
-                    if (is_complete) "normal" else "bold", ';">', label, '</span>',
-                    '</div>'
+
+                # Add clinical interpretation
+                if (optimal_sens >= 0.90 && optimal_spec >= 0.90) {
+                    rationale <- paste0(rationale, "This pattern provides excellent balanced performance for both ruling in and ruling out disease.")
+                } else if (optimal_sens >= 0.90) {
+                    rationale <- paste0(rationale, "High sensitivity makes this pattern excellent for screening and ruling out disease (negative result = low probability of disease).")
+                } else if (optimal_spec >= 0.90) {
+                    rationale <- paste0(rationale, "High specificity makes this pattern excellent for confirmation and ruling in disease (positive result = high probability of disease).")
+                } else if (optimal_sens >= 0.80 && optimal_spec >= 0.80) {
+                    rationale <- paste0(rationale, "This pattern provides good balanced diagnostic performance for clinical decision-making.")
+                } else {
+                    rationale <- paste0(rationale, "Consider clinical context and additional testing when interpreting results from this combination.")
+                }
+
+                # Populate recommendation table
+                recTable <- self$results$recommendationTable
+                recTable$setRow(rowNo = 1, values = list(
+                    pattern = optimal_pattern,
+                    method = "Youden's J Index",
+                    youden = optimal_youden,
+                    sens = optimal_sens,
+                    spec = optimal_spec,
+                    acc = optimal_acc,
+                    rationale = rationale
                 ))
             },
-            
-            .prepareVisualizationData = function(mydata2, test_variables) {
-                # Helper method to prepare data for visualizations when enabled
-                # This ensures visualization data is only prepared when showVisualization is TRUE
-                
-                if (!self$options$showVisualization) {
-                    return(invisible(NULL))
-                }
-                
-                # Log that visualizations are being prepared
-                message("Preparing visualization data for enabled plot types")
-                
-                # Check which plot type is selected
-                plot_type <- self$options$plotType
-                
-                if (plot_type == "all") {
-                    message("All visualization types will be rendered")
-                } else {
-                    message(paste("Preparing data for", plot_type, "visualization"))
-                }
-                
-                # Additional preparation logic can be added here if needed
-                # For now, the main preparation happens in .analyzeCombinations
-                
-                invisible(TRUE)
-            }
 
+            .addPatternColumn = function(data_prep) {
+                # Add test combination pattern to the original dataset
+
+                if (is.null(data_prep) || is.null(self$data)) {
+                    return()
+                }
+
+                # Get test variables
+                test1Var <- data_prep$test1Variable
+                test2Var <- data_prep$test2Variable
+                test3Var <- data_prep$test3Variable
+
+                # Create pattern labels
+                n_rows <- nrow(self$data)
+                patterns <- character(n_rows)
+
+                for (i in 1:n_rows) {
+                    t1 <- if (!is.null(test1Var)) as.character(test1Var[i]) else NA
+                    t2 <- if (!is.null(test2Var)) as.character(test2Var[i]) else NA
+                    t3 <- if (!is.null(test3Var)) as.character(test3Var[i]) else NA
+
+                    # Build pattern string
+                    pattern_parts <- c()
+
+                    if (!is.na(t1)) {
+                        symbol1 <- if (t1 == self$options$test1Positive) "+" else "-"
+                        pattern_parts <- c(pattern_parts, symbol1)
+                    }
+
+                    if (!is.na(t2) && !is.null(test2Var)) {
+                        symbol2 <- if (t2 == self$options$test2Positive) "+" else "-"
+                        pattern_parts <- c(pattern_parts, symbol2)
+                    }
+
+                    if (!is.na(t3) && !is.null(test3Var)) {
+                        symbol3 <- if (t3 == self$options$test3Positive) "+" else "-"
+                        pattern_parts <- c(pattern_parts, symbol3)
+                    }
+
+                    patterns[i] <- if (length(pattern_parts) > 0) {
+                        paste(pattern_parts, collapse = "/")
+                    } else {
+                        NA_character_
+                    }
+                }
+
+                # Add or update the pattern column
+                column_name <- "TestPattern"
+
+                # Check if column already exists
+                if (column_name %in% names(self$data)) {
+                    self$data[[column_name]] <- patterns
+                } else {
+                    self$data[[column_name]] <- jmvcore::Data$new()
+                    self$data[[column_name]]$setValues(patterns)
+                }
+            }
         )
     )
