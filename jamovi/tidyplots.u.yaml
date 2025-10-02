@@ -3,7 +3,6 @@ name: tidyplots
 jus: '3.0'
 stage: 0
 compilerMode: tame
-
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -44,7 +43,6 @@ children:
             name: facet
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Plot Type
     collapsed: false
@@ -79,19 +77,12 @@ children:
             name: stackType
             enable: (plotType=="barstack" || plotType=="areastack")
       - type: Label
-        label: Area Type
-        children:
-          - type: ComboBox
-            name: areaType
-            enable: (plotType=="area")
-      - type: Label
         label: Point Shape
         children:
           - type: TextBox
             name: pointShape
             format: number
             enable: (plotType=="points" && pointType=="beeswarm")
-
   - type: CollapseBox
     label: Central Tendency
     collapsed: true
@@ -128,7 +119,6 @@ children:
           - type: ComboBox
             name: countType
             enable: (showCount)
-
   - type: CollapseBox
     label: Uncertainty & Spread
     collapsed: true
@@ -165,7 +155,6 @@ children:
           - type: ComboBox
             name: rangeType
             enable: (showRange)
-
   - type: CollapseBox
     label: Distribution
     collapsed: true
@@ -178,14 +167,10 @@ children:
           - type: ComboBox
             name: distributionType
             enable: (showDistribution)
-
   - type: CollapseBox
     label: Special Options
     collapsed: true
     children:
-      - type: CheckBox
-        name: showOutliers
-        enable: (plotType=="boxplot")
       - type: CheckBox
         name: violinPoints
         enable: (plotType=="violin")
@@ -196,7 +181,6 @@ children:
             name: histogramBins
             format: number
             enable: (plotType=="histogram")
-
   - type: CollapseBox
     label: Statistical Testing
     collapsed: true
@@ -205,7 +189,6 @@ children:
         name: showPValue
       - type: CheckBox
         name: showSignificance
-
   - type: CollapseBox
     label: Reference Lines
     collapsed: true
@@ -226,7 +209,6 @@ children:
             name: referenceY
             format: string
             enable: (showReferenceLines)
-
   - type: CollapseBox
     label: Colors & Theme
     collapsed: true
@@ -260,7 +242,6 @@ children:
         enable: (!removeLegend)
       - type: CheckBox
         name: removePadding
-
   - type: CollapseBox
     label: Labels & Titles
     collapsed: true
@@ -295,7 +276,6 @@ children:
           - type: TextBox
             name: plotCaption
             format: string
-
   - type: CollapseBox
     label: Plot Size
     collapsed: true
@@ -312,7 +292,15 @@ children:
           - type: TextBox
             name: plotHeight
             format: number
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showHowTo
+      - type: CheckBox
+        name: showGlossary
+      - type: CheckBox
+        name: showSummary
   - type: CollapseBox
     label: Axis Options
     collapsed: true

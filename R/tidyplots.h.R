@@ -34,10 +34,8 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             rangeType = "errorbar",
             showDistribution = FALSE,
             distributionType = "density",
-            showOutliers = TRUE,
             violinPoints = FALSE,
             histogramBins = 30,
-            areaType = "absolute",
             showPValue = FALSE,
             showSignificance = FALSE,
             showReferenceLines = FALSE,
@@ -51,6 +49,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             yLabel = "",
             legendTitle = "",
             plotCaption = "",
+            showHowTo = FALSE,
+            showGlossary = FALSE,
+            showSummary = FALSE,
             plotWidth = 20,
             plotHeight = 20,
             pointShape = 16,
@@ -273,10 +274,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "density",
                     "rug"),
                 default="density")
-            private$..showOutliers <- jmvcore::OptionBool$new(
-                "showOutliers",
-                showOutliers,
-                default=TRUE)
             private$..violinPoints <- jmvcore::OptionBool$new(
                 "violinPoints",
                 violinPoints,
@@ -287,13 +284,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=30,
                 min=5,
                 max=100)
-            private$..areaType <- jmvcore::OptionList$new(
-                "areaType",
-                areaType,
-                options=list(
-                    "absolute",
-                    "relative"),
-                default="absolute")
             private$..showPValue <- jmvcore::OptionBool$new(
                 "showPValue",
                 showPValue,
@@ -320,15 +310,23 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "friendly",
                     "seaside",
+                    "friendly_long",
                     "apple",
-                    "custom",
+                    "ibm",
+                    "candy",
+                    "alger",
+                    "metro",
                     "rainbow",
+                    "custom",
                     "viridis",
                     "inferno",
-                    "magma",
+                    "mako",
                     "turbo",
+                    "rocket",
                     "blue2red",
-                    "blue2brown"),
+                    "blue2brown",
+                    "spectral",
+                    "icefire"),
                 default="friendly")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
@@ -362,6 +360,18 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plotCaption",
                 plotCaption,
                 default="")
+            private$..showHowTo <- jmvcore::OptionBool$new(
+                "showHowTo",
+                showHowTo,
+                default=FALSE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
             private$..plotWidth <- jmvcore::OptionInteger$new(
                 "plotWidth",
                 plotWidth,
@@ -472,10 +482,8 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..rangeType)
             self$.addOption(private$..showDistribution)
             self$.addOption(private$..distributionType)
-            self$.addOption(private$..showOutliers)
             self$.addOption(private$..violinPoints)
             self$.addOption(private$..histogramBins)
-            self$.addOption(private$..areaType)
             self$.addOption(private$..showPValue)
             self$.addOption(private$..showSignificance)
             self$.addOption(private$..showReferenceLines)
@@ -489,6 +497,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..yLabel)
             self$.addOption(private$..legendTitle)
             self$.addOption(private$..plotCaption)
+            self$.addOption(private$..showHowTo)
+            self$.addOption(private$..showGlossary)
+            self$.addOption(private$..showSummary)
             self$.addOption(private$..plotWidth)
             self$.addOption(private$..plotHeight)
             self$.addOption(private$..pointShape)
@@ -536,10 +547,8 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rangeType = function() private$..rangeType$value,
         showDistribution = function() private$..showDistribution$value,
         distributionType = function() private$..distributionType$value,
-        showOutliers = function() private$..showOutliers$value,
         violinPoints = function() private$..violinPoints$value,
         histogramBins = function() private$..histogramBins$value,
-        areaType = function() private$..areaType$value,
         showPValue = function() private$..showPValue$value,
         showSignificance = function() private$..showSignificance$value,
         showReferenceLines = function() private$..showReferenceLines$value,
@@ -553,6 +562,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         yLabel = function() private$..yLabel$value,
         legendTitle = function() private$..legendTitle$value,
         plotCaption = function() private$..plotCaption$value,
+        showHowTo = function() private$..showHowTo$value,
+        showGlossary = function() private$..showGlossary$value,
+        showSummary = function() private$..showSummary$value,
         plotWidth = function() private$..plotWidth$value,
         plotHeight = function() private$..plotHeight$value,
         pointShape = function() private$..pointShape$value,
@@ -599,10 +611,8 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..rangeType = NA,
         ..showDistribution = NA,
         ..distributionType = NA,
-        ..showOutliers = NA,
         ..violinPoints = NA,
         ..histogramBins = NA,
-        ..areaType = NA,
         ..showPValue = NA,
         ..showSignificance = NA,
         ..showReferenceLines = NA,
@@ -616,6 +626,9 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..yLabel = NA,
         ..legendTitle = NA,
         ..plotCaption = NA,
+        ..showHowTo = NA,
+        ..showGlossary = NA,
+        ..showSummary = NA,
         ..plotWidth = NA,
         ..plotHeight = NA,
         ..pointShape = NA,
@@ -640,6 +653,9 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        howto = function() private$.items[["howto"]],
+        glossary = function() private$.items[["glossary"]],
+        summary = function() private$.items[["summary"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -661,6 +677,21 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="instructions",
                 title="Instructions",
                 visible="(!xvar || !yvar)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="howto",
+                title="How to Use This Analysis",
+                visible="(showHowTo)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Statistical Terms Explained",
+                visible="(showGlossary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Plot Summary",
+                visible="(showSummary)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -680,7 +711,6 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "lineType",
                     "barType",
                     "stackType",
-                    "areaType",
                     "showMean",
                     "meanType",
                     "showMedian",
@@ -699,7 +729,6 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rangeType",
                     "showDistribution",
                     "distributionType",
-                    "showOutliers",
                     "violinPoints",
                     "histogramBins",
                     "showPValue",
@@ -791,10 +820,8 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param rangeType .
 #' @param showDistribution .
 #' @param distributionType .
-#' @param showOutliers .
 #' @param violinPoints .
 #' @param histogramBins .
-#' @param areaType .
 #' @param showPValue .
 #' @param showSignificance .
 #' @param showReferenceLines .
@@ -808,6 +835,9 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param yLabel .
 #' @param legendTitle .
 #' @param plotCaption .
+#' @param showHowTo .
+#' @param showGlossary .
+#' @param showSummary .
 #' @param plotWidth .
 #' @param plotHeight .
 #' @param pointShape .
@@ -828,6 +858,9 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$howto} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -862,10 +895,8 @@ tidyplots <- function(
     rangeType = "errorbar",
     showDistribution = FALSE,
     distributionType = "density",
-    showOutliers = TRUE,
     violinPoints = FALSE,
     histogramBins = 30,
-    areaType = "absolute",
     showPValue = FALSE,
     showSignificance = FALSE,
     showReferenceLines = FALSE,
@@ -879,6 +910,9 @@ tidyplots <- function(
     yLabel = "",
     legendTitle = "",
     plotCaption = "",
+    showHowTo = FALSE,
+    showGlossary = FALSE,
+    showSummary = FALSE,
     plotWidth = 20,
     plotHeight = 20,
     pointShape = 16,
@@ -944,10 +978,8 @@ tidyplots <- function(
         rangeType = rangeType,
         showDistribution = showDistribution,
         distributionType = distributionType,
-        showOutliers = showOutliers,
         violinPoints = violinPoints,
         histogramBins = histogramBins,
-        areaType = areaType,
         showPValue = showPValue,
         showSignificance = showSignificance,
         showReferenceLines = showReferenceLines,
@@ -961,6 +993,9 @@ tidyplots <- function(
         yLabel = yLabel,
         legendTitle = legendTitle,
         plotCaption = plotCaption,
+        showHowTo = showHowTo,
+        showGlossary = showGlossary,
+        showSummary = showSummary,
         plotWidth = plotWidth,
         plotHeight = plotHeight,
         pointShape = pointShape,

@@ -34,10 +34,8 @@ tidyplots(
   rangeType = "errorbar",
   showDistribution = FALSE,
   distributionType = "density",
-  showOutliers = TRUE,
   violinPoints = FALSE,
   histogramBins = 30,
-  areaType = "absolute",
   showPValue = FALSE,
   showSignificance = FALSE,
   showReferenceLines = FALSE,
@@ -51,6 +49,9 @@ tidyplots(
   yLabel = "",
   legendTitle = "",
   plotCaption = "",
+  showHowTo = FALSE,
+  showGlossary = FALSE,
+  showSummary = FALSE,
   plotWidth = 20,
   plotHeight = 20,
   pointShape = 16,
@@ -129,13 +130,9 @@ tidyplots(
 
 \item{distributionType}{.}
 
-\item{showOutliers}{.}
-
 \item{violinPoints}{.}
 
 \item{histogramBins}{.}
-
-\item{areaType}{.}
 
 \item{showPValue}{.}
 
@@ -162,6 +159,12 @@ tidyplots(
 \item{legendTitle}{.}
 
 \item{plotCaption}{.}
+
+\item{showHowTo}{.}
+
+\item{showGlossary}{.}
+
+\item{showSummary}{.}
 
 \item{plotWidth}{.}
 
@@ -201,6 +204,9 @@ tidyplots(
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$howto} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }

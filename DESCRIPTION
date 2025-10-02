@@ -102,6 +102,7 @@ Imports:
     igraph,
     qgraph,
     ggraph,
+    dendextend,
     visNetwork,
     tidyr,
     stringr,
