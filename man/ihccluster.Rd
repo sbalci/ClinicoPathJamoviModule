@@ -9,7 +9,12 @@ ihccluster(
   catVars = NULL,
   contVars = NULL,
   caseId = NULL,
+  spatialCompartment = NULL,
+  performSpatialAnalysis = FALSE,
+  spatialComparisonMode = "both",
   method = "pam",
+  distanceMethod = "gower",
+  linkageMethod = "ward",
   nClusters = 3,
   autoSelectK = TRUE,
   kRange = "medium",
@@ -28,12 +33,30 @@ ihccluster(
   markerSummary = TRUE,
   clusterProfiles = TRUE,
   associationTests = TRUE,
+  multipleTestingCorrection = "bonferroni",
   markerOptimization = FALSE,
   showMarkerCorrelation = FALSE,
   clusterQualityMetrics = TRUE,
   iterativeRefinement = FALSE,
   refinementIterations = 3,
+  reproducibilityTest = FALSE,
+  nSplits = 10,
+  supervisedClustering = FALSE,
+  supervisedVariable = NULL,
+  calculateRatios = FALSE,
+  ratioNumerator = NULL,
+  ratioDenominator = NULL,
+  ratioName = "Marker_Ratio",
+  ratioClassification = FALSE,
+  ratioLowCutoff = 1,
+  ratioHighCutoff = 2,
   exportClusters = FALSE,
+  knownDiagnosis = NULL,
+  calculateDiagnosticMetrics = FALSE,
+  identifyOptimalPanel = FALSE,
+  panelSize = "pairs",
+  flagOutliers = TRUE,
+  outlierThreshold = 0.25,
   clinicalVars = NULL,
   survivalTime = NULL,
   survivalEvent = NULL,
@@ -54,7 +77,19 @@ continuous measures}
 
 \item{caseId}{Case identifier for tracking}
 
+\item{spatialCompartment}{Groups cases by spatial location (e.g.,
+Central/Invasive, Preinvasive/Invasive, Primary/Metastatic)}
+
+\item{performSpatialAnalysis}{Compare clustering patterns across spatial
+compartments}
+
+\item{spatialComparisonMode}{How to analyze spatial compartments}
+
 \item{method}{Clustering algorithm to use}
+
+\item{distanceMethod}{Distance metric for clustering}
+
+\item{linkageMethod}{Hierarchical clustering linkage method}
 
 \item{nClusters}{Leave blank for automatic selection using silhouette}
 
@@ -93,6 +128,9 @@ markers)}
 
 \item{associationTests}{Test marker-cluster associations}
 
+\item{multipleTestingCorrection}{Correction method for marker association
+tests}
+
 \item{markerOptimization}{Analyze marker importance and identify optimal
 panel}
 
@@ -106,7 +144,51 @@ selection (advanced)}
 
 \item{refinementIterations}{Number of iterative refinement cycles}
 
+\item{reproducibilityTest}{Random split validation with Cohen kappa
+(Sterlacci 2019)}
+
+\item{nSplits}{Number of random splits for reproducibility testing}
+
+\item{supervisedClustering}{Cluster within each known diagnosis group
+separately}
+
+\item{supervisedVariable}{Variable defining groups (e.g., histotype,
+diagnosis)}
+
+\item{calculateRatios}{Calculate ratios between continuous markers (e.g.,
+CD4/CD8 ratio)}
+
+\item{ratioNumerator}{Numerator marker for ratio calculation}
+
+\item{ratioDenominator}{Denominator marker for ratio calculation}
+
+\item{ratioName}{Name for the computed ratio variable}
+
+\item{ratioClassification}{Classify ratio as Low/Intermediate/High using
+cutoffs}
+
+\item{ratioLowCutoff}{Values ≤ this are classified as Low}
+
+\item{ratioHighCutoff}{Values ≥ this are classified as High}
+
 \item{exportClusters}{Save cluster assignments to dataset}
+
+\item{knownDiagnosis}{Known diagnoses for calculating marker performance
+metrics (sensitivity, specificity, PPV, NPV)}
+
+\item{calculateDiagnosticMetrics}{Compute sensitivity, specificity, PPV,
+NPV for each marker when diagnosis is known}
+
+\item{identifyOptimalPanel}{Find minimal marker combinations with maximum
+diagnostic discrimination}
+
+\item{panelSize}{Size of antibody panel combinations to evaluate}
+
+\item{flagOutliers}{Identify cases with ambiguous/atypical immunoprofiles
+based on silhouette scores}
+
+\item{outlierThreshold}{Silhouette score threshold below which cases are
+flagged as outliers}
 
 \item{clinicalVars}{Clinical variables to compare across clusters}
 
@@ -129,6 +211,7 @@ available)}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$binaryConversionNote} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$clusterSizes} \tab \tab \tab \tab \tab a table \cr
 \code{results$silhouetteStats} \tab \tab \tab \tab \tab a table \cr
@@ -137,9 +220,17 @@ A results object containing:
 \code{results$associationTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$consensusStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$reproducibilityStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$supervisedSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$supervisedResults} \tab \tab \tab \tab \tab a html \cr
+\code{results$ratioSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$ratioClassificationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$markerImportance} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterQuality} \tab \tab \tab \tab \tab a table \cr
 \code{results$refinementHistory} \tab \tab \tab \tab \tab a table \cr
+\code{results$markerPerformance} \tab \tab \tab \tab \tab Sensitivity, specificity, PPV, NPV for each marker by diagnosis \cr
+\code{results$optimalPanels} \tab \tab \tab \tab \tab Ranked marker combinations for differential diagnosis \cr
+\code{results$outlierCases} \tab \tab \tab \tab \tab Cases with ambiguous cluster assignment or low silhouette scores \cr
 \code{results$silhouettePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$dendrogramPlot} \tab \tab \tab \tab \tab an image \cr
@@ -153,6 +244,11 @@ A results object containing:
 \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$executiveSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$spatialCompartmentSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$spatialConcordance} \tab \tab \tab \tab \tab a table \cr
+\code{results$spatialClusterComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$spatialMarkerDifferences} \tab \tab \tab \tab \tab a table \cr
+\code{results$spatialHeatmapPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$sizes} \tab \tab \tab \tab \tab a table \cr
 \code{results$distr} \tab \tab \tab \tab \tab a table \cr
 \code{results$assoc} \tab \tab \tab \tab \tab a table \cr

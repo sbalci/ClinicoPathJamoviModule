@@ -14,14 +14,16 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             test2Positive = NULL,
             test3 = NULL,
             test3Positive = NULL,
-            od = FALSE,
             showIndividual = FALSE,
-            addCombinationPattern = FALSE,
-            showVisualization = FALSE,
-            plotType = "heatmap",
-            plotHeight = 600,
-            plotWidth = 800,
-            colorScheme = "clinical", ...) {
+            showFrequency = FALSE,
+            showBarPlot = FALSE,
+            showHeatmap = FALSE,
+            showForest = FALSE,
+            showDecisionTree = FALSE,
+            showRecommendation = FALSE,
+            addPatternToData = FALSE,
+            filterStatistic = "all",
+            filterPattern = "all", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -54,7 +56,6 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
                 test2,
-                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -75,53 +76,69 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "test3Positive",
                 test3Positive,
                 variable="(test3)")
-            private$..od <- jmvcore::OptionBool$new(
-                "od",
-                od,
-                default=FALSE)
             private$..showIndividual <- jmvcore::OptionBool$new(
                 "showIndividual",
                 showIndividual,
                 default=FALSE)
-            private$..addCombinationPattern <- jmvcore::OptionBool$new(
-                "addCombinationPattern",
-                addCombinationPattern,
+            private$..showFrequency <- jmvcore::OptionBool$new(
+                "showFrequency",
+                showFrequency,
                 default=FALSE)
-            private$..showVisualization <- jmvcore::OptionBool$new(
-                "showVisualization",
-                showVisualization,
+            private$..showBarPlot <- jmvcore::OptionBool$new(
+                "showBarPlot",
+                showBarPlot,
                 default=FALSE)
-            private$..plotType <- jmvcore::OptionList$new(
-                "plotType",
-                plotType,
+            private$..showHeatmap <- jmvcore::OptionBool$new(
+                "showHeatmap",
+                showHeatmap,
+                default=FALSE)
+            private$..showForest <- jmvcore::OptionBool$new(
+                "showForest",
+                showForest,
+                default=FALSE)
+            private$..showDecisionTree <- jmvcore::OptionBool$new(
+                "showDecisionTree",
+                showDecisionTree,
+                default=FALSE)
+            private$..showRecommendation <- jmvcore::OptionBool$new(
+                "showRecommendation",
+                showRecommendation,
+                default=FALSE)
+            private$..addPatternToData <- jmvcore::OptionBool$new(
+                "addPatternToData",
+                addPatternToData,
+                default=FALSE)
+            private$..filterStatistic <- jmvcore::OptionList$new(
+                "filterStatistic",
+                filterStatistic,
                 options=list(
-                    "heatmap",
-                    "tree",
-                    "venn",
-                    "forest",
-                    "all"),
-                default="heatmap")
-            private$..plotHeight <- jmvcore::OptionInteger$new(
-                "plotHeight",
-                plotHeight,
-                default=600,
-                min=400,
-                max=1200)
-            private$..plotWidth <- jmvcore::OptionInteger$new(
-                "plotWidth",
-                plotWidth,
-                default=800,
-                min=600,
-                max=1600)
-            private$..colorScheme <- jmvcore::OptionList$new(
-                "colorScheme",
-                colorScheme,
+                    "all",
+                    "prevalence",
+                    "sens",
+                    "spec",
+                    "ppv",
+                    "npv",
+                    "acc",
+                    "balancedAccuracy",
+                    "youden",
+                    "lrPos",
+                    "lrNeg",
+                    "dor"),
+                default="all")
+            private$..filterPattern <- jmvcore::OptionList$new(
+                "filterPattern",
+                filterPattern,
                 options=list(
-                    "clinical",
-                    "viridis",
-                    "blueyellow",
-                    "grayscale"),
-                default="clinical")
+                    "all",
+                    "allPositive",
+                    "allNegative",
+                    "majorityPositive",
+                    "majorityNegative",
+                    "mixed",
+                    "parallel",
+                    "serial",
+                    "majority"),
+                default="all")
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
@@ -131,14 +148,16 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test2Positive)
             self$.addOption(private$..test3)
             self$.addOption(private$..test3Positive)
-            self$.addOption(private$..od)
             self$.addOption(private$..showIndividual)
-            self$.addOption(private$..addCombinationPattern)
-            self$.addOption(private$..showVisualization)
-            self$.addOption(private$..plotType)
-            self$.addOption(private$..plotHeight)
-            self$.addOption(private$..plotWidth)
-            self$.addOption(private$..colorScheme)
+            self$.addOption(private$..showFrequency)
+            self$.addOption(private$..showBarPlot)
+            self$.addOption(private$..showHeatmap)
+            self$.addOption(private$..showForest)
+            self$.addOption(private$..showDecisionTree)
+            self$.addOption(private$..showRecommendation)
+            self$.addOption(private$..addPatternToData)
+            self$.addOption(private$..filterStatistic)
+            self$.addOption(private$..filterPattern)
         }),
     active = list(
         gold = function() private$..gold$value,
@@ -149,14 +168,16 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test2Positive = function() private$..test2Positive$value,
         test3 = function() private$..test3$value,
         test3Positive = function() private$..test3Positive$value,
-        od = function() private$..od$value,
         showIndividual = function() private$..showIndividual$value,
-        addCombinationPattern = function() private$..addCombinationPattern$value,
-        showVisualization = function() private$..showVisualization$value,
-        plotType = function() private$..plotType$value,
-        plotHeight = function() private$..plotHeight$value,
-        plotWidth = function() private$..plotWidth$value,
-        colorScheme = function() private$..colorScheme$value),
+        showFrequency = function() private$..showFrequency$value,
+        showBarPlot = function() private$..showBarPlot$value,
+        showHeatmap = function() private$..showHeatmap$value,
+        showForest = function() private$..showForest$value,
+        showDecisionTree = function() private$..showDecisionTree$value,
+        showRecommendation = function() private$..showRecommendation$value,
+        addPatternToData = function() private$..addPatternToData$value,
+        filterStatistic = function() private$..filterStatistic$value,
+        filterPattern = function() private$..filterPattern$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
@@ -166,33 +187,34 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..test2Positive = NA,
         ..test3 = NA,
         ..test3Positive = NA,
-        ..od = NA,
         ..showIndividual = NA,
-        ..addCombinationPattern = NA,
-        ..showVisualization = NA,
-        ..plotType = NA,
-        ..plotHeight = NA,
-        ..plotWidth = NA,
-        ..colorScheme = NA)
+        ..showFrequency = NA,
+        ..showBarPlot = NA,
+        ..showHeatmap = NA,
+        ..showForest = NA,
+        ..showDecisionTree = NA,
+        ..showRecommendation = NA,
+        ..addPatternToData = NA,
+        ..filterStatistic = NA,
+        ..filterPattern = NA)
 )
 
 decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineResults",
     inherit = jmvcore::Group,
     active = list(
-        goldStandardFreqTable = function() private$.items[["goldStandardFreqTable"]],
+        combinationTable = function() private$.items[["combinationTable"]],
+        combinationTableCI = function() private$.items[["combinationTableCI"]],
+        goldFreqTable = function() private$.items[["goldFreqTable"]],
         crossTabTable = function() private$.items[["crossTabTable"]],
-        indTable1 = function() private$.items[["indTable1"]],
-        indTable2 = function() private$.items[["indTable2"]],
-        indTable3 = function() private$.items[["indTable3"]],
-        combinationsAnalysis = function() private$.items[["combinationsAnalysis"]],
-        combStatsTable = function() private$.items[["combStatsTable"]],
-        combStatsTableCI = function() private$.items[["combStatsTableCI"]],
-        addCombinationPattern = function() private$.items[["addCombinationPattern"]],
-        performanceHeatmap = function() private$.items[["performanceHeatmap"]],
-        decisionTree = function() private$.items[["decisionTree"]],
-        vennDiagram = function() private$.items[["vennDiagram"]],
-        forestPlot = function() private$.items[["forestPlot"]]),
+        individualTest1 = function() private$.items[["individualTest1"]],
+        individualTest2 = function() private$.items[["individualTest2"]],
+        individualTest3 = function() private$.items[["individualTest3"]],
+        barPlot = function() private$.items[["barPlot"]],
+        heatmapPlot = function() private$.items[["heatmapPlot"]],
+        forestPlot = function() private$.items[["forestPlot"]],
+        decisionTreePlot = function() private$.items[["decisionTreePlot"]],
+        recommendationTable = function() private$.items[["recommendationTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -205,178 +227,35 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="goldStandardFreqTable",
-                title="Gold Standard Frequencies",
-                visible="(od)",
+                name="combinationTable",
+                title="Test Combination Performance",
                 rows=0,
                 columns=list(
                     list(
-                        `name`="level", 
-                        `title`="Level", 
-                        `type`="text"),
-                    list(
-                        `name`="frequency", 
-                        `title`="Frequency", 
-                        `type`="number"),
-                    list(
-                        `name`="percentage", 
-                        `title`="Percentage", 
-                        `type`="number", 
-                        `format`="percent")),
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="crossTabTable",
-                title="Cross-tabulation Tables",
-                visible="(od)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="test_var", 
-                        `title`="Test Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="test_level", 
-                        `title`="Test Level", 
-                        `type`="text"),
-                    list(
-                        `name`="gold_positive", 
-                        `title`="Gold Standard Positive", 
-                        `type`="number"),
-                    list(
-                        `name`="gold_negative", 
-                        `title`="Gold Standard Negative", 
-                        `type`="number"),
-                    list(
-                        `name`="total", 
-                        `title`="Total", 
-                        `type`="number")),
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="indTable1",
-                title="Test 1 Results",
-                visible="(showIndividual && !is.null(test1))",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="newtest", 
-                        `title`="", 
-                        `type`="text"),
-                    list(
-                        `name`="GP", 
-                        `title`="Gold Positive", 
-                        `type`="number"),
-                    list(
-                        `name`="GN", 
-                        `title`="Gold Negative", 
-                        `type`="number"),
-                    list(
-                        `name`="Total", 
-                        `title`="Total", 
-                        `type`="number")),
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="indTable2",
-                title="Test 2 Results",
-                visible="(showIndividual && !is.null(test2))",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="newtest", 
-                        `title`="", 
-                        `type`="text"),
-                    list(
-                        `name`="GP", 
-                        `title`="Gold Positive", 
-                        `type`="number"),
-                    list(
-                        `name`="GN", 
-                        `title`="Gold Negative", 
-                        `type`="number"),
-                    list(
-                        `name`="Total", 
-                        `title`="Total", 
-                        `type`="number")),
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="indTable3",
-                title="Test 3 Results",
-                visible="(showIndividual && !is.null(test3))",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="newtest", 
-                        `title`="", 
-                        `type`="text"),
-                    list(
-                        `name`="GP", 
-                        `title`="Gold Positive", 
-                        `type`="number"),
-                    list(
-                        `name`="GN", 
-                        `title`="Gold Negative", 
-                        `type`="number"),
-                    list(
-                        `name`="Total", 
-                        `title`="Total", 
-                        `type`="number")),
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="combinationsAnalysis",
-                title="Test Combination Patterns Analysis",
-                visible=TRUE,
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="combStatsTable",
-                title="Combination Diagnostic Statistics",
-                visible=TRUE,
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="combination", 
+                        `name`="pattern", 
                         `title`="Pattern", 
                         `type`="text"),
+                    list(
+                        `name`="tp", 
+                        `title`="TP", 
+                        `type`="integer"),
+                    list(
+                        `name`="fp", 
+                        `title`="FP", 
+                        `type`="integer"),
+                    list(
+                        `name`="fn", 
+                        `title`="FN", 
+                        `type`="integer"),
+                    list(
+                        `name`="tn", 
+                        `title`="TN", 
+                        `type`="integer"),
+                    list(
+                        `name`="prevalence", 
+                        `title`="Prevalence", 
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="sens", 
                         `title`="Sensitivity", 
@@ -401,23 +280,40 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="acc", 
                         `title`="Accuracy", 
                         `type`="number", 
-                        `format`="pc")),
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
+                        `format`="pc"),
+                    list(
+                        `name`="balancedAccuracy", 
+                        `title`="Balanced Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden's J", 
+                        `type`="number", 
+                        `format`="number"),
+                    list(
+                        `name`="lrPos", 
+                        `title`="LR+", 
+                        `type`="number", 
+                        `format`="number"),
+                    list(
+                        `name`="lrNeg", 
+                        `title`="LR-", 
+                        `type`="number", 
+                        `format`="number"),
+                    list(
+                        `name`="dor", 
+                        `title`="Diagnostic OR", 
+                        `type`="number", 
+                        `format`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="combStatsTableCI",
-                title="Combination Diagnostic Statistics with 95% Confidence Intervals",
-                visible=TRUE,
+                name="combinationTableCI",
+                title="Combination Statistics with 95% Confidence Intervals",
                 rows=0,
                 columns=list(
                     list(
-                        `name`="combination", 
+                        `name`="pattern", 
                         `title`="Pattern", 
                         `type`="text"),
                     list(
@@ -428,97 +324,308 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="estimate", 
                         `title`="Estimate", 
                         `type`="number", 
-                        `format`="pc"),
+                        `format`="number"),
                     list(
                         `name`="lower", 
                         `title`="Lower", 
-                        `superTitle`="95% Wilson CI", 
+                        `superTitle`="95% CI", 
                         `type`="number", 
-                        `format`="pc"),
+                        `format`="number"),
                     list(
                         `name`="upper", 
                         `title`="Upper", 
-                        `superTitle`="95% Wilson CI", 
+                        `superTitle`="95% CI", 
                         `type`="number", 
-                        `format`="pc")),
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
-            self$add(jmvcore::Output$new(
+                        `format`="number"))))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="addCombinationPattern",
-                title="Test Combination Patterns",
-                varTitle="TestCombination",
-                varDescription="Test combination pattern exported to dataset (e.g., +/+ = both positive, +/- = test1 pos/test2 neg, -/+ = test1 neg/test2 pos, -/- = both negative). Enables further analysis of pattern-specific outcomes.",
-                measureType="nominal",
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "test1Positive",
-                    "test2Positive",
-                    "test3Positive")))
+                name="goldFreqTable",
+                title="Gold Standard Frequency Distribution",
+                rows=0,
+                visible="(showFrequency)",
+                columns=list(
+                    list(
+                        `name`="level", 
+                        `title`="Level", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percent", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="crossTabTable",
+                title="Test Results Cross-Tabulation",
+                rows=0,
+                visible="(showFrequency)",
+                columns=list(
+                    list(
+                        `name`="testCombo", 
+                        `title`="Test Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="goldPos", 
+                        `title`="Gold Positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="goldNeg", 
+                        `title`="Gold Negative", 
+                        `type`="integer"),
+                    list(
+                        `name`="total", 
+                        `title`="Total", 
+                        `type`="integer"))))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    test1Contingency = function() private$.items[["test1Contingency"]],
+                    test1Stats = function() private$.items[["test1Stats"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="individualTest1",
+                            title="Test 1 Performance")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="test1Contingency",
+                            title="Contingency Table",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="testResult", 
+                                    `title`="", 
+                                    `type`="text"),
+                                list(
+                                    `name`="goldPos", 
+                                    `title`="Gold Positive", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="goldNeg", 
+                                    `title`="Gold Negative", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="total", 
+                                    `title`="Total", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="test1Stats",
+                            title="Diagnostic Statistics",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="statistic", 
+                                    `title`="Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="pc"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    test2Contingency = function() private$.items[["test2Contingency"]],
+                    test2Stats = function() private$.items[["test2Stats"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="individualTest2",
+                            title="Test 2 Performance")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="test2Contingency",
+                            title="Contingency Table",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="testResult", 
+                                    `title`="", 
+                                    `type`="text"),
+                                list(
+                                    `name`="goldPos", 
+                                    `title`="Gold Positive", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="goldNeg", 
+                                    `title`="Gold Negative", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="total", 
+                                    `title`="Total", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="test2Stats",
+                            title="Diagnostic Statistics",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="statistic", 
+                                    `title`="Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="pc"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    test3Contingency = function() private$.items[["test3Contingency"]],
+                    test3Stats = function() private$.items[["test3Stats"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="individualTest3",
+                            title="Test 3 Performance")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="test3Contingency",
+                            title="Contingency Table",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="testResult", 
+                                    `title`="", 
+                                    `type`="text"),
+                                list(
+                                    `name`="goldPos", 
+                                    `title`="Gold Positive", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="goldNeg", 
+                                    `title`="Gold Negative", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="total", 
+                                    `title`="Total", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="test3Stats",
+                            title="Diagnostic Statistics",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="statistic", 
+                                    `title`="Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="pc"))))}))$new(options=options))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="performanceHeatmap",
-                title="Diagnostic Performance Heatmap",
+                name="barPlot",
+                title="Bar Chart - Performance Comparison",
                 width=800,
-                height=600,
-                visible="(showVisualization && (plotType == 'heatmap' || plotType == 'all'))",
-                renderFun=".plotPerformanceHeatmap",
+                height=500,
+                visible="(showBarPlot)",
+                renderFun=".plotBarChart",
                 clearWith=list(
+                    "gold",
                     "test1",
                     "test2",
                     "test3",
-                    "colorScheme",
-                    "plotWidth",
-                    "plotHeight")))
+                    "filterStatistic",
+                    "filterPattern")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="decisionTree",
-                title="Decision Tree Visualization",
-                width=800,
+                name="heatmapPlot",
+                title="Heatmap - All Metrics by Pattern",
+                width=900,
                 height=600,
-                visible="(showVisualization && (plotType == 'tree' || plotType == 'all'))",
-                renderFun=".plotDecisionTree",
+                visible="(showHeatmap)",
+                renderFun=".plotHeatmap",
                 clearWith=list(
+                    "gold",
                     "test1",
                     "test2",
                     "test3",
-                    "plotWidth",
-                    "plotHeight")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="vennDiagram",
-                title="Test Agreement Venn Diagram",
-                width=800,
-                height=600,
-                visible="(showVisualization && (plotType == 'venn' || plotType == 'all'))",
-                renderFun=".plotVennDiagram",
-                clearWith=list(
-                    "test1",
-                    "test2",
-                    "test3",
-                    "plotWidth",
-                    "plotHeight")))
+                    "filterStatistic",
+                    "filterPattern")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="forestPlot",
-                title="Forest Plot with Wilson Confidence Intervals",
+                title="Forest Plot - Confidence Intervals",
                 width=800,
                 height=600,
-                visible="(showVisualization && (plotType == 'forest' || plotType == 'all'))",
+                visible="(showForest)",
                 renderFun=".plotForest",
                 clearWith=list(
+                    "gold",
                     "test1",
                     "test2",
                     "test3",
-                    "plotWidth",
-                    "plotHeight")))}))
+                    "filterStatistic",
+                    "filterPattern")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="decisionTreePlot",
+                title="Decision Tree - Test Combination Strategy",
+                width=900,
+                height=700,
+                visible="(showDecisionTree)",
+                renderFun=".plotDecisionTree",
+                clearWith=list(
+                    "gold",
+                    "test1",
+                    "test2",
+                    "test3",
+                    "filterStatistic",
+                    "filterPattern")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="recommendationTable",
+                title="Optimal Pattern Recommendation",
+                rows=1,
+                visible="(showRecommendation)",
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Recommended Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="method", 
+                        `title`="Selection Method", 
+                        `type`="text"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden's J", 
+                        `type`="number", 
+                        `format`="number"),
+                    list(
+                        `name`="sens", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="spec", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="acc", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="rationale", 
+                        `title`="Clinical Rationale", 
+                        `type`="text"))))}))
 
 decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineBase",
@@ -543,22 +650,17 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 
 #' Combine Medical Decision Tests
 #'
-#' Advanced medical diagnostic test combination analysis for categorical tests 
-#' with comprehensive clinical interpretation. This function systematically 
-#' evaluates all possible test result combinations (2-test: 4 patterns, 
-#' 3-test: 8 patterns) against a gold standard using state-of-the-art 
-#' statistical methods. Features include Wilson score confidence intervals 
-#' for enhanced accuracy, performance heatmaps, decision trees, and 
-#' publication-quality visualizations with clinical decision thresholds. 
-#' Provides actionable recommendations for screening vs. confirmatory testing 
-#' strategies with detailed clinical interpretation guidelines. Essential for 
-#' evidence-based diagnostic protocol development and categorical test 
-#' validation studies.
+#' Systematic evaluation of diagnostic test combinations. Analyzes all 
+#' possible
+#' test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a 
+#' gold
+#' standard to identify optimal testing strategies. Calculates sensitivity,
+#' specificity, PPV, NPV, and accuracy for each pattern combination.
 #' 
 #'
 #' @examples
-#' # Basic two-test combination analysis
-#' result1 <- decisioncombine(
+#' # Two-test combination analysis
+#' result <- decisioncombine(
 #'   data = histopathology,
 #'   gold = "Golden Standart",
 #'   goldPositive = "1",
@@ -566,78 +668,58 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test1Positive = "1",
 #'   test2 = "Rater 1",
 #'   test2Positive = "1",
-#'   showVisualization = TRUE,
-#'   plotType = "all"  # Shows all visualization types
+#'   showIndividual = TRUE
 #' )
-#'
-#' # Comprehensive three-test analysis with clinical recommendations
-#' result2 <- decisioncombine(
-#'   data = histopathology,
-#'   gold = "Golden Standart",
-#'   goldPositive = "1",
-#'   test1 = "New Test",
-#'   test1Positive = "1",
-#'   test2 = "Rater 1",
-#'   test2Positive = "1",
-#'   test3 = "Rater 2",
-#'   test3Positive = "1",
-#'   showIndividual = TRUE,
-#'   showVisualization = TRUE,
-#'   plotType = "heatmap",  # Focus on performance heatmap
-#'   addCombinationPattern = TRUE  # Export patterns for further analysis
-#' )
-#'
-#' # Access clinical recommendations from HTML output
-#' # result2$combinationsAnalysis contains clinical recommendations
 #'
 #' @param data The data as a data frame.
 #' @param gold The gold standard reference variable representing true disease
 #'   status.
 #' @param goldPositive The level indicating presence of disease in the gold
-#'   standard variable.
-#' @param test1 The first diagnostic test variable being evaluated for
-#'   performance.
+#'   standard.
+#' @param test1 The first diagnostic test variable.
 #' @param test1Positive The level representing a positive result for Test 1.
 #' @param test2 The second diagnostic test variable for combination analysis.
-#' @param test2Positive .
-#' @param test3 .
-#' @param test3Positive .
-#' @param od Boolean selection whether to show frequency tables. Default is
-#'   'false'.
-#' @param showIndividual .
-#' @param addCombinationPattern Export a new variable to the original data
-#'   frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
-#' @param showVisualization Display comprehensive visualizations for
-#'   categorical test combination analysis.
-#' @param plotType Visualization selection: heatmap (performance matrix), tree
-#'   (clinical decision hierarchy),  venn (test agreement), forest (Wilson CIs),
-#'   all (comprehensive output).
-#' @param plotHeight Height of the plot in pixels.
-#' @param plotWidth Width of the plot in pixels.
-#' @param colorScheme Color scheme for visualizations. Clinical uses red for
-#'   negative and green for positive.
+#' @param test2Positive The level representing a positive result for Test 2.
+#' @param test3 The third diagnostic test variable for 3-way combination
+#'   analysis.
+#' @param test3Positive The level representing a positive result for Test 3.
+#' @param showIndividual Boolean to show individual test performance tables.
+#' @param showFrequency Boolean to show frequency tables.
+#' @param showBarPlot Boolean to display bar chart visualization.
+#' @param showHeatmap Boolean to display heatmap visualization.
+#' @param showForest Boolean to display forest plot.
+#' @param showDecisionTree Boolean to display decision tree visualization.
+#' @param showRecommendation Boolean to show optimal pattern recommendation
+#'   table.
+#' @param addPatternToData Boolean to add test pattern column to the dataset.
+#' @param filterStatistic Character indicating which statistic to display
+#'   (default: all).
+#' @param filterPattern Character indicating which pattern type to display
+#'   (default: all).
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$goldStandardFreqTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$crossTabTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$indTable1} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$indTable2} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$indTable3} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$combinationsAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis of all possible test combinations \cr
-#'   \code{results$combStatsTable} \tab \tab \tab \tab \tab Primary diagnostic performance metrics for each test combination pattern. Wilson score confidence intervals used for enhanced accuracy with small samples. \cr
-#'   \code{results$combStatsTableCI} \tab \tab \tab \tab \tab Detailed confidence intervals using Wilson score method, which provides more accurate bounds for diagnostic proportions than normal approximation, especially for small samples or extreme values. \cr
-#'   \code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$performanceHeatmap} \tab \tab \tab \tab \tab Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding. \cr
-#'   \code{results$decisionTree} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$vennDiagram} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$forestPlot} \tab \tab \tab \tab \tab Comprehensive forest plot displaying all diagnostic metrics with Wilson score confidence intervals, providing more accurate uncertainty estimates than normal approximation methods. \cr
+#'   \code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
+#'   \code{results$combinationTableCI} \tab \tab \tab \tab \tab 95\% confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios. \cr
+#'   \code{results$goldFreqTable} \tab \tab \tab \tab \tab Frequency distribution of the gold standard (reference) test showing counts and percentages for each level \cr
+#'   \code{results$crossTabTable} \tab \tab \tab \tab \tab Cross-tabulation showing how test combination patterns align with gold standard results \cr
+#'   \code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$individualTest1$test1Stats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$individualTest2$test2Contingency} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$individualTest2$test2Stats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$individualTest3$test3Contingency} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$individualTest3$test3Stats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$barPlot} \tab \tab \tab \tab \tab Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations \cr
+#'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
+#'   \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95\% confidence intervals for key diagnostic metrics \cr
+#'   \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Hierarchical decision tree showing test patterns with performance-based recommendations \cr
+#'   \code{results$recommendationTable} \tab \tab \tab \tab \tab Recommended optimal test combination pattern based on Youden index and clinical performance metrics \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$goldStandardFreqTable$asDF}
+#' \code{results$combinationTable$asDF}
 #'
-#' \code{as.data.frame(results$goldStandardFreqTable)}
+#' \code{as.data.frame(results$combinationTable)}
 #'
 #' @export
 decisioncombine <- function(
@@ -646,18 +728,20 @@ decisioncombine <- function(
     goldPositive,
     test1,
     test1Positive,
-    test2 = NULL,
+    test2,
     test2Positive,
     test3 = NULL,
     test3Positive,
-    od = FALSE,
     showIndividual = FALSE,
-    addCombinationPattern = FALSE,
-    showVisualization = FALSE,
-    plotType = "heatmap",
-    plotHeight = 600,
-    plotWidth = 800,
-    colorScheme = "clinical") {
+    showFrequency = FALSE,
+    showBarPlot = FALSE,
+    showHeatmap = FALSE,
+    showForest = FALSE,
+    showDecisionTree = FALSE,
+    showRecommendation = FALSE,
+    addPatternToData = FALSE,
+    filterStatistic = "all",
+    filterPattern = "all") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncombine requires jmvcore to be installed (restart may be required)")
@@ -688,14 +772,16 @@ decisioncombine <- function(
         test2Positive = test2Positive,
         test3 = test3,
         test3Positive = test3Positive,
-        od = od,
         showIndividual = showIndividual,
-        addCombinationPattern = addCombinationPattern,
-        showVisualization = showVisualization,
-        plotType = plotType,
-        plotHeight = plotHeight,
-        plotWidth = plotWidth,
-        colorScheme = colorScheme)
+        showFrequency = showFrequency,
+        showBarPlot = showBarPlot,
+        showHeatmap = showHeatmap,
+        showForest = showForest,
+        showDecisionTree = showDecisionTree,
+        showRecommendation = showRecommendation,
+        addPatternToData = addPatternToData,
+        filterStatistic = filterStatistic,
+        filterPattern = filterPattern)
 
     analysis <- decisioncombineClass$new(
         options = options,

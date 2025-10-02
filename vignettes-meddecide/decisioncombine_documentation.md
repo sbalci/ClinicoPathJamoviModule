@@ -8,6 +8,12 @@ The decisioncombine module is a specialized tool for combining multiple diagnost
 
 The module's features can be broadly categorized as follows:
 
+### Data preparation
+
+- The analysis operates on complete cases for the gold standard and any selected tests, automatically omitting rows with missing values in those variables while leaving the source dataset untouched.
+- Both "Positive" and "Negative" levels are retained for the internal gold-standard factor even when the imported dataset contains only one of those states, ensuring downstream tables and plots keep a consistent two-column structure.
+- If you plan to analyse excluded records separately, export the cleaned dataset alongside the original data before running additional workflows.
+
 *   **Core Combination Methods:** Implement various strategies for combining test results (e.g., serial, parallel, weighted averaging).
 *   **Performance Evaluation:** Assess the performance of the combined model using metrics like sensitivity, specificity, and AUC.
 *   **Optimization:** Identify optimal combination strategies based on desired performance criteria.

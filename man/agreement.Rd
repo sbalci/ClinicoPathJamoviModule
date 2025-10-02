@@ -8,302 +8,81 @@ agreement(
   data,
   vars,
   sft = FALSE,
-  heatmap = FALSE,
-  heatmapDetails = FALSE,
-  heatmapTheme = "viridis",
+  showText = FALSE,
   wght = "unweighted",
   exct = FALSE,
-  multiraterMethod = "auto",
-  fleissCI = TRUE,
   kripp = FALSE,
   krippMethod = "nominal",
-  consensus = FALSE,
-  consensus_method = "majority",
-  tie_breaking = "exclude",
-  show_consensus_table = TRUE,
-  showClinicalSummary = TRUE,
-  showAboutAnalysis = FALSE,
-  showAssumptions = FALSE,
-  showWeightedKappaGuide = TRUE,
-  showStatisticalGlossary = FALSE,
-  diagnosticStyleAnalysis = FALSE,
-  styleClusterMethod = "ward",
-  styleDistanceMetric = "agreement",
-  styleGroups = 3,
-  raterCharacteristics = FALSE,
-  experienceVar,
-  trainingVar,
-  institutionVar,
-  specialtyVar,
-  identifyDiscordantCases = FALSE,
-  caseID,
-  icc = FALSE,
   bootstrap = FALSE,
-  bootstrapSamples = 1000,
-  pairwiseAnalysis = FALSE,
-  categoryAnalysis = FALSE,
-  outlierAnalysis = FALSE,
-  pathologyContext = FALSE,
-  gwetAC = FALSE,
-  pabak = FALSE,
-  sampleSizePlanning = FALSE,
-  targetKappa = 0.8,
-  targetPrecision = 0.1,
-  raterBiasAnalysis = FALSE,
-  agreementTrendAnalysis = FALSE,
-  caseDifficultyScoring = FALSE,
-  agreementStabilityAnalysis = FALSE,
-  showInlineComments = FALSE,
-  enhancedErrorGuidance = TRUE,
-  showProgressIndicators = TRUE
+  showSummary = FALSE,
+  showAbout = FALSE
 )
 }
 \arguments{
-\item{data}{The data as a data frame. Each row represents a case/subject,
-and columns represent different raters/observers.}
+\item{data}{The data as a data frame. The data should be in long format,
+where each row is a unique observation.}
 
-\item{vars}{Variables representing different raters/observers. Each
-variable should contain the ratings/diagnoses  given by each observer for
-the same set of cases.}
+\item{vars}{A string naming the variable from \code{data} that contains the
+diagnosis given by the observer, variable can be categorical or ordinal.}
 
-\item{sft}{Show frequency tables for each rater and cross-tabulation tables
-for pairwise comparisons.}
+\item{sft}{Display frequency tables showing the distribution of ratings for
+each rater. Useful for understanding rating patterns and identifying
+potential biases.}
 
-\item{heatmap}{Show agreement heatmap visualization with color-coded
-agreement levels.}
+\item{showText}{Display simple preformatted text version of frequency
+tables. Provides a plain-text alternative to the HTML formatted tables.}
 
-\item{heatmapDetails}{Show detailed heatmap with kappa values and
-confidence intervals for all rater pairs.}
+\item{wght}{For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
+kappa accounts for degree of disagreement. Linear weights: Adjacent
+disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
+disagreements (G1 vs G3) are penalized more heavily. Use 'Unweighted' for
+nominal categories with no inherent order.}
 
-\item{heatmapTheme}{Choose color scheme for the agreement heatmap
-visualization.}
+\item{exct}{Use exact p-value calculation instead of normal approximation.
+Recommended for small sample sizes (< 30 cases) with 3 or more raters.
+Note: Not applicable for 2-rater analysis (use Cohen's kappa).}
 
-\item{wght}{Weighting scheme for kappa analysis. Use 'squared' or 'equal'
-only with ordinal variables. Weighted kappa accounts for the degree of
-disagreement.}
+\item{kripp}{Alternative reliability measure that handles missing data and
+supports various data types. Useful when raters didn't rate all cases or
+when comparing different measurement levels.}
 
-\item{exct}{Use exact method for Fleiss' kappa calculation with 3 or more
-raters. More accurate but computationally intensive.}
-
-\item{multiraterMethod}{Choose specific method for multi-rater agreement
-analysis or use automatic selection.}
-
-\item{fleissCI}{Calculate 95\\% confidence intervals for Fleiss' kappa using
-asymptotic standard errors.}
-
-\item{kripp}{Calculate Krippendorff's alpha, a generalized measure of
-reliability for any number of observers and data types.}
-
-\item{krippMethod}{Measurement level for Krippendorff's alpha calculation.
-Choose based on your data type.}
-
-\item{consensus}{Perform consensus scoring analysis to determine
-agreed-upon ratings from multiple raters.}
-
-\item{consensus_method}{Method for determining consensus scores from
-multiple raters.}
-
-\item{tie_breaking}{How to handle cases where no consensus can be reached
-using the selected method.}
-
-\item{show_consensus_table}{Display detailed consensus scoring results
-including individual rater scores and consensus outcomes.}
-
-\item{showClinicalSummary}{Show clinical summary with plain-language
-interpretation of agreement statistics and their practical implications.}
-
-\item{showAboutAnalysis}{Show educational information about inter-rater
-reliability analysis, when to use it, and what the outputs mean.}
-
-\item{showAssumptions}{Show important assumptions, data requirements,
-common pitfalls, and interpretation guidelines for the analysis.}
-
-\item{showWeightedKappaGuide}{Show explanatory guide for weighted kappa
-options, including when to use linear vs quadratic weighting schemes.}
-
-\item{showStatisticalGlossary}{Show glossary of statistical terms (kappa,
-ICC, alpha, etc.) with clinical interpretations and usage guidelines.}
-
-\item{diagnosticStyleAnalysis}{Enable diagnostic style clustering analysis
-using the Usubutun method to identify pathologist "schools" or diagnostic
-approaches.}
-
-\item{styleClusterMethod}{Hierarchical clustering method for diagnostic
-style analysis. Ward's linkage is the Usubutun standard.}
-
-\item{styleDistanceMetric}{Distance metric for measuring diagnostic
-similarity between raters for style clustering.}
-
-\item{styleGroups}{Number of diagnostic style groups to identify. Usubutun
-et al. found 3 groups optimal for most analyses.}
-
-\item{raterCharacteristics}{Include rater background characteristics
-(experience, training, institution) in style analysis.}
-
-\item{experienceVar}{Optional variable containing rater experience
-information (years of experience, level of training, etc.)}
-
-\item{trainingVar}{Optional variable containing rater training institution
-or background information}
-
-\item{institutionVar}{Optional variable containing rater current
-institution or location information}
-
-\item{specialtyVar}{Optional variable containing rater medical specialty or
-subspecialty information}
-
-\item{identifyDiscordantCases}{Identify cases that distinguish different
-diagnostic styles - useful for training and consensus development.}
-
-\item{caseID}{Optional variable containing case identifiers. If not
-specified, cases will be numbered automatically.}
-
-\item{icc}{Calculate ICC for continuous or ordinal data. Provides
-additional reliability measures beyond kappa.}
-
-\item{bootstrap}{Calculate bootstrap confidence intervals for
-Krippendorff's alpha and other statistics.}
-
-\item{bootstrapSamples}{Number of bootstrap samples for confidence interval
+\item{krippMethod}{Specifies the measurement level for Krippendorff's alpha
 calculation.}
 
-\item{pairwiseAnalysis}{Detailed analysis of agreement between each pair of
-raters.}
+\item{bootstrap}{Calculate bootstrap confidence intervals for
+Krippendorff's alpha.}
 
-\item{categoryAnalysis}{Agreement analysis for each diagnostic category
-separately.}
+\item{showSummary}{Display a natural-language interpretation of results
+with color-coded agreement levels and clinical guidance. Recommended for
+reports and presentations.}
 
-\item{outlierAnalysis}{Identify cases with unusually poor agreement across
-raters.}
-
-\item{pathologyContext}{Calculate pathology-specific metrics including
-diagnostic accuracy, sensitivity, and specificity when gold standard is
-available.}
-
-\item{gwetAC}{Calculate Gwet's AC1 and AC2 coefficients, which are more
-robust than kappa for high agreement scenarios and less affected by
-prevalence.}
-
-\item{pabak}{Calculate Prevalence-Adjusted Bias-Adjusted Kappa (PABAK) to
-address prevalence and bias issues in agreement studies.}
-
-\item{sampleSizePlanning}{Perform sample size planning calculations for
-agreement studies with specified precision requirements.}
-
-\item{targetKappa}{Target kappa value for sample size planning
-calculations.}
-
-\item{targetPrecision}{Target precision for confidence interval width in
-sample size planning.}
-
-\item{raterBiasAnalysis}{Analyze systematic tendencies and biases for each
-rater compared to the consensus or average ratings.}
-
-\item{agreementTrendAnalysis}{Analyze how agreement changes over time or
-case sequence, useful for training effect assessment.}
-
-\item{caseDifficultyScoring}{Quantify inherent case difficulty based on
-inter-rater disagreement patterns and provide difficulty scores.}
-
-\item{agreementStabilityAnalysis}{Bootstrap-based stability measures to
-assess the consistency of agreement statistics across different samples.}
-
-\item{showInlineComments}{Show detailed statistical explanations and
-interpretations inline with results for educational purposes.}
-
-\item{enhancedErrorGuidance}{Provide detailed error messages and
-suggestions for resolving common issues in agreement analysis.}
-
-\item{showProgressIndicators}{Display progress indicators for
-computationally intensive operations like bootstrap calculations.}
+\item{showAbout}{Display an explanatory panel describing what this analysis
+does, when to use it, and how to interpret results.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$categoryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$outlierTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnosticAccuracyTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnosticStyleTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$styleSummaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$discordantCasesTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+\code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
+\code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$consensusSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$pairwisePlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$categoryPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$confusionMatrixPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$diagnosticStyleDendrogram} \tab \tab \tab \tab \tab an image \cr
-\code{results$diagnosticStyleHeatmap} \tab \tab \tab \tab \tab an image \cr
-\code{results$diagnosticStyleCombined} \tab \tab \tab \tab \tab an image \cr
-\code{results$raterFrequencyTables$frequencyTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$crosstabTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
-\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
-\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
-\code{results$statisticalGlossary} \tab \tab \tab \tab \tab a html \cr
-\code{results$gwetACTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$pabakTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$sampleSizeTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$agreementTrendTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$caseDifficultyTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$stabilityTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$trendPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$biasPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$difficultyPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$inlineComments} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$overviewTable$asDF}
+\code{results$irrtable$asDF}
 
-\code{as.data.frame(results$overviewTable)}
+\code{as.data.frame(results$irrtable)}
 }
 \description{
-Comprehensive interrater reliability analysis including Cohen's kappa (2
-raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
-analysis. Provides agreement statistics, visualization, and clinical
-interpretation for categorical rating data.
+Function for Interrater Reliability.
 }
 \examples{
-# Load example data
-data('pathology_ratings', package = 'ClinicoPath')
-
-# Basic agreement analysis with 2 raters
-agreement(pathology_ratings,
-          vars = c('rater1', 'rater2'))
-
-# Advanced analysis with 3+ raters including visualization
-agreement(pathology_ratings,
-          vars = c('rater1', 'rater2', 'rater3'),
-          multiraterMethod = 'fleiss',
-          fleissCI = TRUE,
-          heatmap = TRUE,
-          heatmapDetails = TRUE,
-          sft = TRUE)
-
-# Krippendorff's alpha for ordinal data
-agreement(pathology_ratings,
-          vars = c('rater1', 'rater2', 'rater3'),
-          multiraterMethod = 'krippendorff',
-          kripp = TRUE,
-          krippMethod = 'ordinal')
-
-# Consensus analysis
-agreement(pathology_ratings,
-          vars = c('rater1', 'rater2', 'rater3'),
-          consensus = TRUE,
-          consensus_method = 'majority',
-          tie_breaking = 'arbitration',
-          show_consensus_table = TRUE)
-
+\donttest{
+# example will be added
+}
 }

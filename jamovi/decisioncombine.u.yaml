@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Golden Standard
+        label: Gold Standard (Reference Test)
         children:
           - type: VariablesListBox
             name: gold
@@ -17,7 +17,8 @@ children:
             isTarget: true
           - type: LevelSelector
             name: goldPositive
-            enable: (!is.null(gold))
+            label: Disease Present Level
+
       - type: TargetLayoutBox
         label: Test 1 (Required)
         children:
@@ -27,9 +28,10 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test1Positive
-            enable: (!is.null(test1))
+            label: Positive Level
+
       - type: TargetLayoutBox
-        label: Test 2 (Required for Combination Analysis)
+        label: Test 2 (Required for Combinations)
         children:
           - type: VariablesListBox
             name: test2
@@ -37,7 +39,8 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test2Positive
-            enable: (!is.null(test2))
+            label: Positive Level
+
       - type: TargetLayoutBox
         label: Test 3 (Optional)
         children:
@@ -47,50 +50,47 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test3Positive
-            enable: (!is.null(test3))
-  - type: Label
-    label: Analysis Options
+            label: Positive Level
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: CheckBox
+        name: showIndividual
+        label: Show Individual Test Statistics
+      - type: CheckBox
+        name: showFrequency
+        label: Show Frequency Tables
+      - type: CheckBox
+        name: showRecommendation
+        label: Show Optimal Pattern Recommendation
+      - type: CheckBox
+        name: addPatternToData
+        label: Add Test Pattern to Data
+      - type: Label
+        label: Visualizations
         children:
           - type: CheckBox
-            name: od
-            label: "Show Original Data Tables"
+            name: showBarPlot
+            label: Bar Chart
           - type: CheckBox
-            name: showIndividual
-            label: "Show Individual Test Results"
-  - type: Label
-    label: Advanced Visualizations
+            name: showHeatmap
+            label: Heatmap
+          - type: CheckBox
+            name: showForest
+            label: Forest Plot
+          - type: CheckBox
+            name: showDecisionTree
+            label: Decision Tree
+
+  - type: CollapseBox
+    label: Filters
+    collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: showVisualization
-            label: "Show Advanced Visualizations"
-          - type: ComboBox
-            name: plotType
-            enable: (showVisualization)
-          - type: ComboBox
-            name: colorScheme
-            enable: >-
-              (showVisualization && (plotType == 'heatmap' || plotType ==
-              'all'))
-          - type: TextBox
-            name: plotWidth
-            format: number
-            enable: (showVisualization)
-          - type: TextBox
-            name: plotHeight
-            format: number
-            enable: (showVisualization)
-  - type: Label
-    label: Export to Data
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: addCombinationPattern
-            label: "Export Test Combination Pattern to Dataset"
+      - type: ComboBox
+        name: filterStatistic
+        label: Show Statistic
+      - type: ComboBox
+        name: filterPattern
+        label: Show Pattern Type

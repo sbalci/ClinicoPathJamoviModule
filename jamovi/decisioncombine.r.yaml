@@ -4,166 +4,35 @@ title: Combine Medical Decision Tests
 jrs: '1.1'
 
 items:
-    - name: goldStandardFreqTable
-      title: Gold Standard Frequencies
+    - name: combinationTable
+      title: 'Test Combination Performance'
       type: Table
-      visible: (od)
       rows: 0
       columns:
-        - name: level
-          title: 'Level'
-          type: text
-        - name: frequency
-          title: 'Frequency'
-          type: number
-        - name: percentage
-          title: 'Percentage'
-          type: number
-          format: percent
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-
-    - name: crossTabTable
-      title: Cross-tabulation Tables
-      type: Table
-      visible: (od)
-      rows: 0
-      columns:
-        - name: test_var
-          title: 'Test Variable'
-          type: text
-        - name: test_level
-          title: 'Test Level'
-          type: text
-        - name: gold_positive
-          title: 'Gold Standard Positive'
-          type: number
-        - name: gold_negative
-          title: 'Gold Standard Negative'
-          type: number
-        - name: total
-          title: 'Total'
-          type: number
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-
-    # Individual test tables
-    - name: indTable1
-      title: 'Test 1 Results'
-      type: Table
-      visible: (showIndividual && !is.null(test1))
-      rows: 0
-      columns:
-        - name: newtest
-          title: ''
-          type: text
-        - name: GP
-          title: 'Gold Positive'
-          type: number
-        - name: GN
-          title: 'Gold Negative'
-          type: number
-        - name: Total
-          title: 'Total'
-          type: number
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-
-    - name: indTable2
-      title: 'Test 2 Results'
-      type: Table
-      visible: (showIndividual && !is.null(test2))
-      rows: 0
-      columns:
-        - name: newtest
-          title: ''
-          type: text
-        - name: GP
-          title: 'Gold Positive'
-          type: number
-        - name: GN
-          title: 'Gold Negative'
-          type: number
-        - name: Total
-          title: 'Total'
-          type: number
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-
-    - name: indTable3
-      title: 'Test 3 Results'
-      type: Table
-      visible: (showIndividual && !is.null(test3))
-      rows: 0
-      columns:
-        - name: newtest
-          title: ''
-          type: text
-        - name: GP
-          title: 'Gold Positive'
-          type: number
-        - name: GN
-          title: 'Gold Negative'
-          type: number
-        - name: Total
-          title: 'Total'
-          type: number
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-
-    - name: combinationsAnalysis
-      title: 'Test Combination Patterns Analysis'
-      type: Html
-      visible: true
-      description: 'Comprehensive analysis of all possible test combinations'
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-
-    # Combination statistics tables
-    - name: combStatsTable
-      title: 'Combination Diagnostic Statistics'
-      type: Table
-      visible: true
-      rows: 0
-      columns:
-        - name: combination
+        - name: pattern
           title: 'Pattern'
           type: text
+        - name: tp
+          title: 'TP'
+          type: integer
+        - name: fp
+          title: 'FP'
+          type: integer
+        - name: fn
+          title: 'FN'
+          type: integer
+        - name: tn
+          title: 'TN'
+          type: integer
+        - name: prevalence
+          title: 'Prevalence'
+          type: number
+          format: pc
         - name: sens
           title: 'Sensitivity'
           type: number
           format: pc
-        - name: spec  
+        - name: spec
           title: 'Specificity'
           type: number
           format: pc
@@ -179,22 +48,34 @@ items:
           title: 'Accuracy'
           type: number
           format: pc
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-      description: 'Primary diagnostic performance metrics for each test combination pattern. Wilson score confidence intervals used for enhanced accuracy with small samples.'
+        - name: balancedAccuracy
+          title: 'Balanced Accuracy'
+          type: number
+          format: pc
+        - name: youden
+          title: "Youden's J"
+          type: number
+          format: number
+        - name: lrPos
+          title: 'LR+'
+          type: number
+          format: number
+        - name: lrNeg
+          title: 'LR-'
+          type: number
+          format: number
+        - name: dor
+          title: 'Diagnostic OR'
+          type: number
+          format: number
+      description: "Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios"
 
-    - name: combStatsTableCI
-      title: 'Combination Diagnostic Statistics with 95% Confidence Intervals'
+    - name: combinationTableCI
+      title: 'Combination Statistics with 95% Confidence Intervals'
       type: Table
-      visible: true
-      rows: 0  
+      rows: 0
       columns:
-        - name: combination
+        - name: pattern
           title: 'Pattern'
           type: text
         - name: statistic
@@ -203,101 +84,255 @@ items:
         - name: estimate
           title: 'Estimate'
           type: number
-          format: pc
+          format: number
         - name: lower
           title: 'Lower'
-          superTitle: '95% Wilson CI'
+          superTitle: '95% CI'
           type: number
-          format: pc
+          format: number
         - name: upper
           title: 'Upper'
-          superTitle: '95% Wilson CI'
+          superTitle: '95% CI'
+          type: number
+          format: number
+      description: '95% confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios.'
+
+    - name: goldFreqTable
+      title: 'Gold Standard Frequency Distribution'
+      type: Table
+      rows: 0
+      visible: (showFrequency)
+      columns:
+        - name: level
+          title: 'Level'
+          type: text
+        - name: count
+          title: 'Count'
+          type: integer
+        - name: percent
+          title: 'Percent'
           type: number
           format: pc
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
-      description: 'Detailed confidence intervals using Wilson score method, which provides more accurate bounds for diagnostic proportions than normal approximation, especially for small samples or extreme values.'
+      description: 'Frequency distribution of the gold standard (reference) test showing counts and percentages for each level'
 
-    - name: addCombinationPattern
-      title: 'Test Combination Patterns'
-      type: Output
-      varTitle: TestCombination
-      varDescription: 'Test combination pattern exported to dataset (e.g., +/+ = both positive, +/- = test1 pos/test2 neg, -/+ = test1 neg/test2 pos, -/- = both negative). Enables further analysis of pattern-specific outcomes.'
-      measureType: nominal
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - test1Positive
-        - test2Positive
-        - test3Positive
+    - name: crossTabTable
+      title: 'Test Results Cross-Tabulation'
+      type: Table
+      rows: 0
+      visible: (showFrequency)
+      columns:
+        - name: testCombo
+          title: 'Test Pattern'
+          type: text
+        - name: goldPos
+          title: 'Gold Positive'
+          type: integer
+        - name: goldNeg
+          title: 'Gold Negative'
+          type: integer
+        - name: total
+          title: 'Total'
+          type: integer
+      description: 'Cross-tabulation showing how test combination patterns align with gold standard results'
 
-    # Visualization outputs
-    - name: performanceHeatmap
-      title: 'Diagnostic Performance Heatmap'
+    - name: individualTest1
+      title: 'Test 1 Performance'
+      type: Group
+      items:
+        - name: test1Contingency
+          title: 'Contingency Table'
+          type: Table
+          rows: 0
+          columns:
+            - name: testResult
+              title: ''
+              type: text
+            - name: goldPos
+              title: 'Gold Positive'
+              type: integer
+            - name: goldNeg
+              title: 'Gold Negative'
+              type: integer
+            - name: total
+              title: 'Total'
+              type: integer
+        - name: test1Stats
+          title: 'Diagnostic Statistics'
+          type: Table
+          rows: 0
+          columns:
+            - name: statistic
+              title: 'Statistic'
+              type: text
+            - name: estimate
+              title: 'Estimate'
+              type: number
+              format: pc
+
+    - name: individualTest2
+      title: 'Test 2 Performance'
+      type: Group
+      items:
+        - name: test2Contingency
+          title: 'Contingency Table'
+          type: Table
+          rows: 0
+          columns:
+            - name: testResult
+              title: ''
+              type: text
+            - name: goldPos
+              title: 'Gold Positive'
+              type: integer
+            - name: goldNeg
+              title: 'Gold Negative'
+              type: integer
+            - name: total
+              title: 'Total'
+              type: integer
+        - name: test2Stats
+          title: 'Diagnostic Statistics'
+          type: Table
+          rows: 0
+          columns:
+            - name: statistic
+              title: 'Statistic'
+              type: text
+            - name: estimate
+              title: 'Estimate'
+              type: number
+              format: pc
+
+    - name: individualTest3
+      title: 'Test 3 Performance'
+      type: Group
+      items:
+        - name: test3Contingency
+          title: 'Contingency Table'
+          type: Table
+          rows: 0
+          columns:
+            - name: testResult
+              title: ''
+              type: text
+            - name: goldPos
+              title: 'Gold Positive'
+              type: integer
+            - name: goldNeg
+              title: 'Gold Negative'
+              type: integer
+            - name: total
+              title: 'Total'
+              type: integer
+        - name: test3Stats
+          title: 'Diagnostic Statistics'
+          type: Table
+          rows: 0
+          columns:
+            - name: statistic
+              title: 'Statistic'
+              type: text
+            - name: estimate
+              title: 'Estimate'
+              type: number
+              format: pc
+
+    - name: barPlot
+      title: 'Bar Chart - Performance Comparison'
       type: Image
       width: 800
-      height: 600
-      visible: (showVisualization && (plotType == 'heatmap' || plotType == 'all'))
-      renderFun: .plotPerformanceHeatmap
+      height: 500
+      visible: (showBarPlot)
+      renderFun: .plotBarChart
       clearWith:
+        - gold
         - test1
         - test2
         - test3
-        - colorScheme
-        - plotWidth
-        - plotHeight
-      description: 'Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding.'
+        - filterStatistic
+        - filterPattern
+      description: 'Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations'
 
-
-    - name: decisionTree
-      title: 'Decision Tree Visualization'
+    - name: heatmapPlot
+      title: 'Heatmap - All Metrics by Pattern'
       type: Image
-      width: 800
+      width: 900
       height: 600
-      visible: (showVisualization && (plotType == 'tree' || plotType == 'all'))
-      renderFun: .plotDecisionTree
+      visible: (showHeatmap)
+      renderFun: .plotHeatmap
       clearWith:
+        - gold
         - test1
         - test2
         - test3
-        - plotWidth
-        - plotHeight
-
-    - name: vennDiagram
-      title: 'Test Agreement Venn Diagram'
-      type: Image
-      width: 800
-      height: 600
-      visible: (showVisualization && (plotType == 'venn' || plotType == 'all'))
-      renderFun: .plotVennDiagram
-      clearWith:
-        - test1
-        - test2
-        - test3
-        - plotWidth
-        - plotHeight
+        - filterStatistic
+        - filterPattern
+      description: 'Color-coded heatmap showing all diagnostic metrics for each test pattern'
 
     - name: forestPlot
-      title: 'Forest Plot with Wilson Confidence Intervals'
+      title: 'Forest Plot - Confidence Intervals'
       type: Image
       width: 800
       height: 600
-      visible: (showVisualization && (plotType == 'forest' || plotType == 'all'))
+      visible: (showForest)
       renderFun: .plotForest
       clearWith:
+        - gold
         - test1
         - test2
         - test3
-        - plotWidth
-        - plotHeight
-      description: 'Comprehensive forest plot displaying all diagnostic metrics with Wilson score confidence intervals, providing more accurate uncertainty estimates than normal approximation methods.'
+        - filterStatistic
+        - filterPattern
+      description: 'Forest plot displaying 95% confidence intervals for key diagnostic metrics'
 
+    - name: decisionTreePlot
+      title: 'Decision Tree - Test Combination Strategy'
+      type: Image
+      width: 900
+      height: 700
+      visible: (showDecisionTree)
+      renderFun: .plotDecisionTree
+      clearWith:
+        - gold
+        - test1
+        - test2
+        - test3
+        - filterStatistic
+        - filterPattern
+      description: 'Hierarchical decision tree showing test patterns with performance-based recommendations'
+
+    - name: recommendationTable
+      title: 'Optimal Pattern Recommendation'
+      type: Table
+      rows: 1
+      visible: (showRecommendation)
+      columns:
+        - name: pattern
+          title: 'Recommended Pattern'
+          type: text
+        - name: method
+          title: 'Selection Method'
+          type: text
+        - name: youden
+          title: "Youden's J"
+          type: number
+          format: number
+        - name: sens
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: spec
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: acc
+          title: 'Accuracy'
+          type: number
+          format: pc
+        - name: rationale
+          title: 'Clinical Rationale'
+          type: text
+      description: 'Recommended optimal test combination pattern based on Youden index and clinical performance metrics'
 
 refs:
     - DiagnosticTests

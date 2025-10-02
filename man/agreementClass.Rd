@@ -3,9 +3,14 @@
 \name{agreementClass}
 \alias{agreementClass}
 \title{Interrater Reliability Analysis}
+\value{
+Table
+}
 \description{
-Interrater reliability analysis including Cohen's kappa, Fleiss' kappa,
-Krippendorff's alpha, and agreement visualization.
+This function calculates interrater reliability for ordinal or categorical data.
+}
+\details{
+The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::agreementBase} -> \code{agreementClass}

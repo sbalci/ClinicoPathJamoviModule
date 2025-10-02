@@ -1133,7 +1133,7 @@ analyses:
   - title: Comparing Survival Outcomes
     name: comparingSurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuTitle: Comparing Survival Outcomes
     menuSubgroup: ClinicoPath Survival
     menuSubtitle: SimpleSurvival
@@ -1208,7 +1208,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -1229,7 +1229,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1324,32 +1324,17 @@ analyses:
     menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
-    menuSubtitle: Combine tests and evaluate performance
+    menuSubtitle: Combine and evaluate test patterns
     description: >
-      Advanced medical diagnostic test combination analysis for categorical
-      tests 
+      Systematic evaluation of diagnostic test combinations. Analyzes all
+      possible
 
-      with comprehensive clinical interpretation. This function systematically 
+      test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a
+      gold
 
-      evaluates all possible test result combinations (2-test: 4 patterns, 
+      standard to identify optimal testing strategies. Calculates sensitivity,
 
-      3-test: 8 patterns) against a gold standard using state-of-the-art 
-
-      statistical methods. Features include Wilson score confidence intervals 
-
-      for enhanced accuracy, performance heatmaps, decision trees, and 
-
-      publication-quality visualizations with clinical decision thresholds. 
-
-      Provides actionable recommendations for screening vs. confirmatory
-      testing 
-
-      strategies with detailed clinical interpretation guidelines. Essential
-      for 
-
-      evidence-based diagnostic protocol development and categorical test 
-
-      validation studies.
+      specificity, PPV, NPV, and accuracy for each pattern combination.
     ribbon: analyses
     category: analyses
   - title: Screening Test Calculator
@@ -2238,7 +2223,7 @@ analyses:
     name: survivalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Model Validation
     menuSubtitle: Model Performance Assessment and Validation
@@ -2424,7 +2409,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPath
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
@@ -2437,6 +2422,7 @@ analyses:
       validation 
 
       and biomarker diagnostic accuracy synthesis.
+    menuSubgroup: IHC Analysis
   - title: Classification Performance Metrics for Digital Pathology
     name: mlpathology
     ns: ClinicoPath
@@ -4848,6 +4834,57 @@ analyses:
       raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
       analysis. Provides agreement statistics, visualization, and clinical
       interpretation for categorical rating data.
+  - title: Combine Medical Decision Tests 1
+    name: decisioncombine1
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Decision
+    menuTitle: Combine Medical Decision Tests 1
+    menuSubtitle: Combine tests and evaluate performance
+    description: >
+      Advanced medical diagnostic test combination analysis for categorical
+      tests 
+
+      with comprehensive clinical interpretation. This function systematically 
+
+      evaluates all possible test result combinations (2-test: 4 patterns, 
+
+      3-test: 8 patterns) against a gold standard using state-of-the-art 
+
+      statistical methods. Features include Wilson score confidence intervals 
+
+      for enhanced accuracy, performance heatmaps, decision trees, and 
+
+      publication-quality visualizations with clinical decision thresholds. 
+
+      Provides actionable recommendations for screening vs. confirmatory
+      testing 
+
+      strategies with detailed clinical interpretation guidelines. Essential
+      for 
+
+      evidence-based diagnostic protocol development and categorical test 
+
+      validation studies.
+  - title: Advanced TNM Stage Migration Analysis 1
+    name: stagemigration1
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Stage Migration Analysis
+    menuTitle: Advanced TNM Stage Migration Analysis 1
+    menuSubtitle: State-of-the-Art Staging System Validation
+    description: >-
+      Comprehensive analysis for validating TNM staging system improvements
+      using state-of-the-art  statistical methods. This analysis provides
+      pathologists with robust tools to evaluate whether  a new staging system
+      provides superior prognostic discrimination compared to existing systems.
+
+      Includes advanced metrics: Net Reclassification Improvement (NRI),
+      Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
+      decision curve analysis, bootstrap validation,  and comprehensive clinical
+      interpretation guidance.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

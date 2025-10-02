@@ -15,6 +15,10 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             fnote = FALSE,
             ci = FALSE,
             fagan = FALSE,
+            showWelcome = TRUE,
+            showSummary = FALSE,
+            showAbout = FALSE,
+            showGlossary = FALSE,
             multiplecuts = FALSE,
             cutoff1 = "Conservative",
             tp1 = 85,
@@ -71,6 +75,22 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..showWelcome <- jmvcore::OptionBool$new(
+                "showWelcome",
+                showWelcome,
+                default=TRUE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showAbout <- jmvcore::OptionBool$new(
+                "showAbout",
+                showAbout,
+                default=FALSE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
             private$..multiplecuts <- jmvcore::OptionBool$new(
                 "multiplecuts",
                 multiplecuts,
@@ -125,6 +145,10 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..showWelcome)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showAbout)
+            self$.addOption(private$..showGlossary)
             self$.addOption(private$..multiplecuts)
             self$.addOption(private$..cutoff1)
             self$.addOption(private$..tp1)
@@ -147,6 +171,10 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value,
         fagan = function() private$..fagan$value,
+        showWelcome = function() private$..showWelcome$value,
+        showSummary = function() private$..showSummary$value,
+        showAbout = function() private$..showAbout$value,
+        showGlossary = function() private$..showGlossary$value,
         multiplecuts = function() private$..multiplecuts$value,
         cutoff1 = function() private$..cutoff1$value,
         tp1 = function() private$..tp1$value,
@@ -168,6 +196,10 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..fnote = NA,
         ..ci = NA,
         ..fagan = NA,
+        ..showWelcome = NA,
+        ..showSummary = NA,
+        ..showAbout = NA,
+        ..showGlossary = NA,
         ..multiplecuts = NA,
         ..cutoff1 = NA,
         ..tp1 = NA,
@@ -185,6 +217,11 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     "decisioncalculatorResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
+        summary = function() private$.items[["summary"]],
+        about = function() private$.items[["about"]],
+        assumptions = function() private$.items[["assumptions"]],
+        glossary = function() private$.items[["glossary"]],
         cTable = function() private$.items[["cTable"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
@@ -204,6 +241,31 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "DiagnosticTests",
                     "sensspecwiki",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="",
+                visible="(showWelcome)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Summary",
+                visible="(showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About This Analysis",
+                visible="(showAbout)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Assumptions & Caveats",
+                visible="(showAbout)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Clinical Terms Glossary",
+                visible="(showGlossary)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
@@ -568,6 +630,12 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   footnotes.
 #' @param ci Boolean selection whether to calculate 95\% confidence intervals.
 #' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
+#' @param showWelcome Boolean selection whether to show welcome message.
+#' @param showSummary Boolean selection whether to show plain-language summary
+#'   of results.
+#' @param showAbout Boolean selection whether to show about and assumptions
+#'   panels.
+#' @param showGlossary Boolean selection whether to show clinical glossary.
 #' @param multiplecuts Boolean selection whether to evaluate multiple cut-off
 #'   scenarios.
 #' @param cutoff1 Name identifier for cut-off scenario 1.
@@ -582,6 +650,11 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param fn2 .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
@@ -609,6 +682,10 @@ decisioncalculator <- function(
     fnote = FALSE,
     ci = FALSE,
     fagan = FALSE,
+    showWelcome = TRUE,
+    showSummary = FALSE,
+    showAbout = FALSE,
+    showGlossary = FALSE,
     multiplecuts = FALSE,
     cutoff1 = "Conservative",
     tp1 = 85,
@@ -635,6 +712,10 @@ decisioncalculator <- function(
         fnote = fnote,
         ci = ci,
         fagan = fagan,
+        showWelcome = showWelcome,
+        showSummary = showSummary,
+        showAbout = showAbout,
+        showGlossary = showGlossary,
         multiplecuts = multiplecuts,
         cutoff1 = cutoff1,
         tp1 = tp1,
