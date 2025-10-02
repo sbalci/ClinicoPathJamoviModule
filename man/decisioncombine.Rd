@@ -10,12 +10,20 @@ decisioncombine(
   goldPositive,
   test1,
   test1Positive,
-  test2 = NULL,
-  test2Positive = NULL,
+  test2,
+  test2Positive,
   test3 = NULL,
-  test3Positive = NULL,
+  test3Positive,
   showIndividual = FALSE,
-  showPlot = FALSE
+  showFrequency = FALSE,
+  showBarPlot = FALSE,
+  showHeatmap = FALSE,
+  showForest = FALSE,
+  showDecisionTree = FALSE,
+  showRecommendation = FALSE,
+  addPatternToData = FALSE,
+  filterStatistic = "all",
+  filterPattern = "all"
 )
 }
 \arguments{
@@ -42,20 +50,45 @@ analysis.}
 
 \item{showIndividual}{Boolean to show individual test performance tables.}
 
-\item{showPlot}{Boolean to display performance visualization.}
+\item{showFrequency}{Boolean to show frequency tables.}
+
+\item{showBarPlot}{Boolean to display bar chart visualization.}
+
+\item{showHeatmap}{Boolean to display heatmap visualization.}
+
+\item{showForest}{Boolean to display forest plot.}
+
+\item{showDecisionTree}{Boolean to display decision tree visualization.}
+
+\item{showRecommendation}{Boolean to show optimal pattern recommendation
+table.}
+
+\item{addPatternToData}{Boolean to add test pattern column to the dataset.}
+
+\item{filterStatistic}{Character indicating which statistic to display
+(default: all).}
+
+\item{filterPattern}{Character indicating which pattern type to display
+(default: all).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$combinationTable} \tab \tab \tab \tab \tab Diagnostic performance metrics for each test combination pattern and strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
-\code{results$combinationTableCI} \tab \tab \tab \tab \tab Wilson score confidence intervals (and log-scale intervals for likelihood ratios/diagnostic odds ratios) providing robust uncertainty estimates for diagnostic metrics. \cr
+\code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
+\code{results$combinationTableCI} \tab \tab \tab \tab \tab 95\\% confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios. \cr
+\code{results$goldFreqTable} \tab \tab \tab \tab \tab Frequency distribution of the gold standard (reference) test showing counts and percentages for each level \cr
+\code{results$crossTabTable} \tab \tab \tab \tab \tab Cross-tabulation showing how test combination patterns align with gold standard results \cr
 \code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTest1$test1Stats} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTest2$test2Contingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTest2$test2Stats} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTest3$test3Contingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTest3$test3Stats} \tab \tab \tab \tab \tab a table \cr
-\code{results$performancePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$barPlot} \tab \tab \tab \tab \tab Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations \cr
+\code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
+\code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95\\% confidence intervals for key diagnostic metrics \cr
+\code{results$decisionTreePlot} \tab \tab \tab \tab \tab Hierarchical decision tree showing test patterns with performance-based recommendations \cr
+\code{results$recommendationTable} \tab \tab \tab \tab \tab Recommended optimal test combination pattern based on Youden index and clinical performance metrics \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -70,9 +103,7 @@ possible
 test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a
 gold
 standard to identify optimal testing strategies. Calculates sensitivity,
-specificity, PPV, NPV, accuracy, prevalence, balanced accuracy, Youden's J,
-likelihood ratios, and diagnostic odds ratios for each pattern and common
-clinical combination strategy.
+specificity, PPV, NPV, and accuracy for each pattern combination.
 }
 \examples{
 # Two-test combination analysis

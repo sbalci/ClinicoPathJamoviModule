@@ -1,7 +1,7 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
 version: '0.0.31'
@@ -235,10 +235,45 @@ options:
       default: false
       description:
           ui: >
-            Perform McNemar's test to statistically compare test performance. 
-            Use when you need to determine if differences between tests are 
-            statistically significant (p<0.05 indicates significant difference). 
+            Perform McNemar's test to statistically compare test performance.
+            Use when you need to determine if differences between tests are
+            statistically significant (p<0.05 indicates significant difference).
             Also provides confidence intervals for metric differences.
           R: >
             Perform statistical comparison between tests (McNemar's test and confidence intervals for differences).
+
+    - name: showSummary
+      title: 'Show Summary'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display a plain-language summary paragraph of comparison results.
+            Useful for understanding clinical implications at a glance without
+            needing to interpret detailed statistical tables.
+          R: >
+            Boolean to show natural language summary of statistical comparisons.
+
+    - name: showExplanations
+      title: 'Show Explanations'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display educational content including statistical glossary, assumptions,
+            and interpretation guidance. Helpful for understanding what each test means
+            and how to interpret the results clinically.
+          R: >
+            Boolean to show explanations, glossary, and educational content.
+
+    - name: showReportSentence
+      title: 'Show Report Sentence'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Generate manuscript-ready sentences describing the statistical comparison results.
+            Useful for drafting methods and results sections of research papers.
+          R: >
+            Boolean to show manuscript-ready report sentence.
 ...

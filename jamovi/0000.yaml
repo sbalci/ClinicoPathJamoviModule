@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.82
+version: 0.0.31.83
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-10-01'
+date: '2025-10-02'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1321,7 +1321,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
@@ -1426,7 +1426,7 @@ analyses:
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuTitle: Decision Tree Graph
     menuSubgroup: Decision
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization

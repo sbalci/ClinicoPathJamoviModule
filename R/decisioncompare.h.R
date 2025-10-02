@@ -21,7 +21,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             ci = FALSE,
             plot = FALSE,
             radarplot = FALSE,
-            statComp = FALSE, ...) {
+            statComp = FALSE,
+            showSummary = FALSE,
+            showExplanations = FALSE,
+            showReportSentence = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -108,6 +111,18 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "statComp",
                 statComp,
                 default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
+            private$..showReportSentence <- jmvcore::OptionBool$new(
+                "showReportSentence",
+                showReportSentence,
+                default=FALSE)
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
@@ -125,6 +140,9 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..plot)
             self$.addOption(private$..radarplot)
             self$.addOption(private$..statComp)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showExplanations)
+            self$.addOption(private$..showReportSentence)
         }),
     active = list(
         gold = function() private$..gold$value,
@@ -142,7 +160,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ci = function() private$..ci$value,
         plot = function() private$..plot$value,
         radarplot = function() private$..radarplot$value,
-        statComp = function() private$..statComp$value),
+        statComp = function() private$..statComp$value,
+        showSummary = function() private$..showSummary$value,
+        showExplanations = function() private$..showExplanations$value,
+        showReportSentence = function() private$..showReportSentence$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
@@ -159,7 +180,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..ci = NA,
         ..plot = NA,
         ..radarplot = NA,
-        ..statComp = NA)
+        ..statComp = NA,
+        ..showSummary = NA,
+        ..showExplanations = NA,
+        ..showReportSentence = NA)
 )
 
 decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -179,6 +203,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         diffTable = function() private$.items[["diffTable"]],
         plot1 = function() private$.items[["plot1"]],
         plotRadar = function() private$.items[["plotRadar"]],
+        summaryReport = function() private$.items[["summaryReport"]],
+        reportSentence = function() private$.items[["reportSentence"]],
+        explanationsContent = function() private$.items[["explanationsContent"]],
         clinicalReport = function() private$.items[["clinicalReport"]],
         aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
     private = list(),
@@ -404,9 +431,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="mcnemarTable",
-                title="McNemar's Test for Test Comparison",
+                title="Statistical Comparison of Test Accuracy",
                 visible="(statComp)",
                 rows=0,
+                notes=list(
+                    `note`="For 2 tests: McNemar's test compares overall diagnostic accuracy between paired tests. For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests with Holm-Bonferroni correction for multiple comparisons. Tests examine discordant pairs (cases where tests disagree) to determine if differences in accuracy are statistically significant.\n"),
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -414,7 +443,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `type`="text"),
                     list(
                         `name`="stat", 
-                        `title`="McNemar's Chi-squared", 
+                        `title`="Chi-squared", 
                         `type`="number"),
                     list(
                         `name`="df", 
@@ -487,6 +516,21 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "radarplot"),
                 refs=list(
                     "ggplot2")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summaryReport",
+                title="Summary",
+                visible="(statComp && showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentence",
+                title="Manuscript-Ready Report",
+                visible="(statComp && showReportSentence)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanationsContent",
+                title="Statistical Explanations & Glossary",
+                visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalReport",
@@ -601,6 +645,11 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   visualization.
 #' @param statComp Perform statistical comparison between tests (McNemar's
 #'   test and confidence intervals for differences).
+#' @param showSummary Boolean to show natural language summary of statistical
+#'   comparisons.
+#' @param showExplanations Boolean to show explanations, glossary, and
+#'   educational content.
+#' @param showReportSentence Boolean to show manuscript-ready report sentence.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
@@ -616,6 +665,9 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summaryReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -644,7 +696,10 @@ decisioncompare <- function(
     ci = FALSE,
     plot = FALSE,
     radarplot = FALSE,
-    statComp = FALSE) {
+    statComp = FALSE,
+    showSummary = FALSE,
+    showExplanations = FALSE,
+    showReportSentence = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncompare requires jmvcore to be installed (restart may be required)")
@@ -682,7 +737,10 @@ decisioncompare <- function(
         ci = ci,
         plot = plot,
         radarplot = radarplot,
-        statComp = statComp)
+        statComp = statComp,
+        showSummary = showSummary,
+        showExplanations = showExplanations,
+        showReportSentence = showReportSentence)
 
     analysis <- decisioncompareClass$new(
         options = options,

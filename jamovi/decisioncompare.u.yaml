@@ -48,38 +48,50 @@ children:
           - type: LevelSelector
             name: test3Positive
             enable: (test3)
-  - type: Label
-    label: Table Options
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: od
-          - type: CheckBox
-            name: fnote
-          - type: CheckBox
-            name: ci
-            enable: (!pp)
-          - type: CheckBox
-            name: plot
-          - type: CheckBox
-            name: radarplot
 
-  - type: Label
-    label: Prior Probability
+  - type: CollapseBox
+    label: Statistical Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: ci
+        enable: (!pp)
+      - type: CheckBox
+        name: statComp
+
+  - type: CollapseBox
+    label: Prevalence Settings
+    collapsed: true
     children:
       - type: CheckBox
         name: pp
         enable: (!ci)
       - type: TextBox
         name: pprob
-        label: ''
+        label: Prior Probability
         format: number
         enable: (pp)
 
-  - type: Label
-    label: Statistical Comparison
+  - type: CollapseBox
+    label: Visualizations
+    collapsed: true
     children:
       - type: CheckBox
-        name: statComp
+        name: plot
+      - type: CheckBox
+        name: radarplot
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: od
+      - type: CheckBox
+        name: fnote
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanations
+      - type: CheckBox
+        name: showReportSentence
