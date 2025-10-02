@@ -9,6 +9,7 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             vars = NULL,
             clusterMethod = "ward.D2",
             distanceMethod = "euclidean",
+            standardize = TRUE,
             showLabels = TRUE,
             colorGroups = FALSE,
             group = NULL,
@@ -19,7 +20,12 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             colorScheme = "default",
             highlightClusters = FALSE,
             nClusters = 3,
-            maxLabels = 50, ...) {
+            maxLabels = 50,
+            showRowDendro = TRUE,
+            showColDendro = TRUE,
+            heatmapScale = "row",
+            heatmapPalette = "bluered",
+            showCellBorders = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -58,6 +64,10 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "binary",
                     "minkowski"),
                 default="euclidean")
+            private$..standardize <- jmvcore::OptionBool$new(
+                "standardize",
+                standardize,
+                default=TRUE)
             private$..showLabels <- jmvcore::OptionBool$new(
                 "showLabels",
                 showLabels,
@@ -92,7 +102,8 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "linear",
                     "circular",
-                    "base"),
+                    "base",
+                    "heatmap"),
                 default="linear")
             private$..edgeType <- jmvcore::OptionList$new(
                 "edgeType",
@@ -128,10 +139,40 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=0,
                 max=200,
                 default=50)
+            private$..showRowDendro <- jmvcore::OptionBool$new(
+                "showRowDendro",
+                showRowDendro,
+                default=TRUE)
+            private$..showColDendro <- jmvcore::OptionBool$new(
+                "showColDendro",
+                showColDendro,
+                default=TRUE)
+            private$..heatmapScale <- jmvcore::OptionList$new(
+                "heatmapScale",
+                heatmapScale,
+                options=list(
+                    "none",
+                    "row",
+                    "column"),
+                default="row")
+            private$..heatmapPalette <- jmvcore::OptionList$new(
+                "heatmapPalette",
+                heatmapPalette,
+                options=list(
+                    "bluered",
+                    "viridis",
+                    "RdYlBu",
+                    "spectral"),
+                default="bluered")
+            private$..showCellBorders <- jmvcore::OptionBool$new(
+                "showCellBorders",
+                showCellBorders,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..clusterMethod)
             self$.addOption(private$..distanceMethod)
+            self$.addOption(private$..standardize)
             self$.addOption(private$..showLabels)
             self$.addOption(private$..colorGroups)
             self$.addOption(private$..group)
@@ -143,11 +184,17 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..highlightClusters)
             self$.addOption(private$..nClusters)
             self$.addOption(private$..maxLabels)
+            self$.addOption(private$..showRowDendro)
+            self$.addOption(private$..showColDendro)
+            self$.addOption(private$..heatmapScale)
+            self$.addOption(private$..heatmapPalette)
+            self$.addOption(private$..showCellBorders)
         }),
     active = list(
         vars = function() private$..vars$value,
         clusterMethod = function() private$..clusterMethod$value,
         distanceMethod = function() private$..distanceMethod$value,
+        standardize = function() private$..standardize$value,
         showLabels = function() private$..showLabels$value,
         colorGroups = function() private$..colorGroups$value,
         group = function() private$..group$value,
@@ -158,11 +205,17 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         colorScheme = function() private$..colorScheme$value,
         highlightClusters = function() private$..highlightClusters$value,
         nClusters = function() private$..nClusters$value,
-        maxLabels = function() private$..maxLabels$value),
+        maxLabels = function() private$..maxLabels$value,
+        showRowDendro = function() private$..showRowDendro$value,
+        showColDendro = function() private$..showColDendro$value,
+        heatmapScale = function() private$..heatmapScale$value,
+        heatmapPalette = function() private$..heatmapPalette$value,
+        showCellBorders = function() private$..showCellBorders$value),
     private = list(
         ..vars = NA,
         ..clusterMethod = NA,
         ..distanceMethod = NA,
+        ..standardize = NA,
         ..showLabels = NA,
         ..colorGroups = NA,
         ..group = NA,
@@ -173,16 +226,23 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..colorScheme = NA,
         ..highlightClusters = NA,
         ..nClusters = NA,
-        ..maxLabels = NA)
+        ..maxLabels = NA,
+        ..showRowDendro = NA,
+        ..showColDendro = NA,
+        ..heatmapScale = NA,
+        ..heatmapPalette = NA,
+        ..showCellBorders = NA)
 )
 
 dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dendrogramResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
         plot = function() private$.items[["plot"]],
         clusterInfo = function() private$.items[["clusterInfo"]],
-        summary = function() private$.items[["summary"]]),
+        summary = function() private$.items[["summary"]],
+        clusterSummary = function() private$.items[["clusterSummary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -192,6 +252,11 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Dendrogram",
                 refs=list(
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="",
+                visible="(vars)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -230,7 +295,25 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="missing", 
                         `title`="Missing", 
-                        `type`="integer"))))}))
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clusterSummary",
+                title="Cluster Membership",
+                columns=list(
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster", 
+                        `type`="integer"),
+                    list(
+                        `name`="size", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percent", 
+                        `type`="number", 
+                        `format`="zto"))))}))
 
 dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dendrogramBase",
@@ -260,6 +343,7 @@ dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param vars .
 #' @param clusterMethod .
 #' @param distanceMethod .
+#' @param standardize .
 #' @param showLabels .
 #' @param colorGroups .
 #' @param group .
@@ -271,11 +355,18 @@ dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param highlightClusters .
 #' @param nClusters .
 #' @param maxLabels .
+#' @param showRowDendro .
+#' @param showColDendro .
+#' @param heatmapScale .
+#' @param heatmapPalette .
+#' @param showCellBorders .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$clusterInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterSummary} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -290,6 +381,7 @@ dendrogram <- function(
     vars,
     clusterMethod = "ward.D2",
     distanceMethod = "euclidean",
+    standardize = TRUE,
     showLabels = TRUE,
     colorGroups = FALSE,
     group,
@@ -300,7 +392,12 @@ dendrogram <- function(
     colorScheme = "default",
     highlightClusters = FALSE,
     nClusters = 3,
-    maxLabels = 50) {
+    maxLabels = 50,
+    showRowDendro = TRUE,
+    showColDendro = TRUE,
+    heatmapScale = "row",
+    heatmapPalette = "bluered",
+    showCellBorders = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dendrogram requires jmvcore to be installed (restart may be required)")
@@ -319,6 +416,7 @@ dendrogram <- function(
         vars = vars,
         clusterMethod = clusterMethod,
         distanceMethod = distanceMethod,
+        standardize = standardize,
         showLabels = showLabels,
         colorGroups = colorGroups,
         group = group,
@@ -329,7 +427,12 @@ dendrogram <- function(
         colorScheme = colorScheme,
         highlightClusters = highlightClusters,
         nClusters = nClusters,
-        maxLabels = maxLabels)
+        maxLabels = maxLabels,
+        showRowDendro = showRowDendro,
+        showColDendro = showColDendro,
+        heatmapScale = heatmapScale,
+        heatmapPalette = heatmapPalette,
+        showCellBorders = showCellBorders)
 
     analysis <- dendrogramClass$new(
         options = options,

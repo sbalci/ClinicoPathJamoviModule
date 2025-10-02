@@ -22,11 +22,19 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             maxLabels <- self$options$maxLabels
             plotWidth <- self$options$plotWidth
             plotHeight <- self$options$plotHeight
+            standardize <- self$options$standardize
             
             # Check if we have variables selected
             if (length(vars) == 0) {
-                self$results$clusterInfo$setContent(
-                    "<p>Please select variables for clustering analysis.</p>"
+                self$results$welcome$setContent(
+                    "<div class='jmv-welcome' style='margin: 2em; padding: 2em; background: #f8f9fa; border-left: 4px solid #007bff;'>
+                    <h3 style='margin-top: 0; color: #007bff;'>Hierarchical Clustering Dendrogram</h3>
+                    <p style='margin-bottom: 1em;'>Select <strong>2 or more numeric variables</strong> to begin clustering analysis.</p>
+                    <p style='font-size: 0.9em; color: #6c757d; margin-bottom: 0;'>
+                    This module performs hierarchical clustering and visualizes the results as a dendrogram tree structure.
+                    Configure clustering method, distance metric, and visualization options in the left panel.
+                    </p>
+                    </div>"
                 )
                 return()
             }
@@ -34,80 +42,154 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get data
             data <- self$data
             
-            # Prepare data for clustering
-            clusterData <- data[vars]
-            
-            # Remove rows with missing values
-            clusterData <- na.omit(clusterData)
-            
-            if (nrow(clusterData) < 2) {
+            # Prepare numeric data for clustering
+            clusterData <- jmvcore::select(data, vars)
+            clusterData <- as.data.frame(lapply(clusterData, jmvcore::toNumeric), stringsAsFactors = FALSE)
+
+            if (!is.null(rownames(data)) && is.null(rownames(clusterData)))
+                rownames(clusterData) <- rownames(data)
+
+            # Remove rows with missing values but keep bookkeeping
+            completeCases <- stats::complete.cases(clusterData)
+            removedRows <- sum(!completeCases)
+
+            if (sum(completeCases) < 2) {
                 self$results$clusterInfo$setContent(
-                    "<p>Insufficient data for clustering. Need at least 2 complete observations.</p>"
+                    "<p>Insufficient complete observations for clustering. At least 2 complete rows are required.</p>"
                 )
                 return()
             }
+
+            clusterData <- clusterData[completeCases, , drop = FALSE]
             
             # Validate group variable if specified
             groupData <- NULL
-            if (colorGroups && !is.null(group) && group != "") {
+            groupLevels <- NULL
+            if (colorGroups) {
+                if (is.null(group) || group == "") {
+                    self$results$clusterInfo$setContent(
+                        "<p>Please select a grouping variable when 'Color by groups' is enabled.</p>"
+                    )
+                    return()
+                }
+
                 if (!group %in% names(data)) {
                     self$results$clusterInfo$setContent(
-                        paste0("<p>Error: Grouping variable '", group, "' not found in data.</p>")
+                        paste0("<p>Error: Grouping variable '", group, "' was not found in the dataset.</p>")
                     )
                     return()
                 }
+
                 groupData <- data[[group]]
-                if (length(groupData) != nrow(data)) {
-                    self$results$clusterInfo$setContent(
-                        "<p>Error: Grouping variable length does not match data dimensions.</p>"
-                    )
-                    return()
-                }
+                groupData <- droplevels(as.factor(groupData))
+                groupLevels <- levels(groupData)
+                groupData <- groupData[completeCases]
+                names(groupData) <- rownames(clusterData)
             }
             
             # Fill summary table
             summaryTable <- self$results$summary
+            if ("clearRows" %in% names(summaryTable))
+                summaryTable$clearRows()
             for (var in vars) {
                 varData <- clusterData[[var]]
-                if (is.numeric(varData)) {
-                    summaryTable$addRow(rowKey = var, values = list(
-                        variable = var,
-                        n = length(varData),
-                        mean = mean(varData, na.rm = TRUE),
-                        sd = sd(varData, na.rm = TRUE),
-                        missing = sum(is.na(data[[var]]))
-                    ))
-                }
+                summaryTable$addRow(rowKey = var, values = list(
+                    variable = var,
+                    n = length(varData),
+                    mean = mean(varData, na.rm = TRUE),
+                    sd = stats::sd(varData, na.rm = TRUE),
+                    missing = sum(is.na(data[[var]]))
+                ))
             }
             
-            # Compute distance matrix
-            distMatrix <- dist(clusterData, method = distanceMethod)
+            prep <- private$.prepareClusterData(clusterData, standardize, distanceMethod)
+            if (!prep$ok) {
+                self$results$clusterInfo$setContent(prep$message)
+                return()
+            }
+
+            clusteringMatrix <- prep$matrix
+            distMatrix <- stats::dist(clusteringMatrix, method = distanceMethod)
             
             # Perform hierarchical clustering
-            hclustResult <- hclust(distMatrix, method = clusterMethod)
-            
-            # Create cluster information
-            nObs <- nrow(clusterData)
-            clusterInfoText <- paste0(
-                "<h3>Hierarchical Clustering Results</h3>",
-                "<p><strong>Number of observations:</strong> ", nObs, "</p>",
-                "<p><strong>Number of variables:</strong> ", length(vars), "</p>",
-                "<p><strong>Variables used:</strong> ", paste(vars, collapse = ", "), "</p>",
-                "<p><strong>Distance method:</strong> ", distanceMethod, "</p>",
-                "<p><strong>Clustering method:</strong> ", clusterMethod, "</p>",
-                "<p><strong>Plot type:</strong> ", plotType, "</p>"
-            )
-            
-            if (highlightClusters) {
-                clusterInfoText <- paste0(clusterInfoText,
-                    "<p><strong>Highlighted clusters:</strong> ", nClusters, "</p>"
+            hclustResult <- stats::hclust(distMatrix, method = clusterMethod)
+
+            maxClusters <- nrow(clusterData)
+            effectiveClusters <- max(1, min(nClusters, maxClusters))
+            clusterMembership <- stats::cutree(hclustResult, k = effectiveClusters)
+
+            clusterSummary <- self$results$clusterSummary
+            if ("clearRows" %in% names(clusterSummary))
+                clusterSummary$clearRows()
+
+            clusterCounts <- as.data.frame(table(clusterMembership), stringsAsFactors = FALSE)
+            names(clusterCounts) <- c("cluster", "n")
+            clusterCounts$cluster <- as.integer(as.character(clusterCounts$cluster))
+            clusterCounts <- clusterCounts[order(clusterCounts$cluster), , drop = FALSE]
+            totalAssigned <- sum(clusterCounts$n)
+            clusterCounts$percent <- if (totalAssigned > 0) round(clusterCounts$n / totalAssigned * 100, 1) else NA_real_
+
+            for (i in seq_len(nrow(clusterCounts))) {
+                clusterSummary$addRow(
+                    rowKey = as.character(clusterCounts$cluster[i]),
+                    values = list(
+                        cluster = clusterCounts$cluster[i],
+                        size = clusterCounts$n[i],
+                        percent = clusterCounts$percent[i]
+                    )
                 )
             }
-            
+
+            highlightClusters <- highlightClusters && effectiveClusters > 1
+
+            infoBullets <- list(
+                paste0("<strong>Number of observations used:</strong> ", nrow(clusterData)),
+                paste0("<strong>Variables used:</strong> ", paste(vars, collapse = ", ")),
+                paste0("<strong>Distance method:</strong> ", distanceMethod),
+                paste0("<strong>Clustering method:</strong> ", clusterMethod),
+                paste0("<strong>Plot type:</strong> ", plotType)
+            )
+
+            if (removedRows > 0)
+                infoBullets <- c(infoBullets, paste0("<strong>Rows removed due to missing values:</strong> ", removedRows))
+
+            if (prep$standardizeApplied)
+                infoBullets <- c(infoBullets, "<strong>Scaling:</strong> Variables standardized to mean 0 and SD 1.")
+            else if (standardize && distanceMethod == "binary")
+                infoBullets <- c(infoBullets, "<strong>Scaling:</strong> Not applied; binary distances require raw 0/1 data.")
+
+            if (length(prep$zeroVariance) > 0)
+                infoBullets <- c(infoBullets, paste0("<strong>Zero-variance variables:</strong> ", paste(prep$zeroVariance, collapse = ", "), " (no contribution to distances)."))
+
+            if (highlightClusters) {
+                highlightText <- paste0("<strong>Highlighted clusters:</strong> ", effectiveClusters)
+                if (nClusters != effectiveClusters)
+                    highlightText <- paste0(highlightText, " (requested ", nClusters, ")")
+                infoBullets <- c(infoBullets, highlightText)
+            } else {
+                summaryText <- paste0("<strong>Cluster summary:</strong> ", effectiveClusters, " cluster", if (effectiveClusters == 1) "" else "s")
+                if (nClusters != effectiveClusters)
+                    summaryText <- paste0(summaryText, " (requested ", nClusters, ")")
+                infoBullets <- c(infoBullets, summaryText)
+            }
+
+            if (colorGroups)
+                infoBullets <- c(infoBullets, paste0("<strong>Grouping variable:</strong> ", group))
+
+            if (length(prep$messages) > 0)
+                infoBullets <- c(infoBullets, prep$messages)
+
+            clusterInfoText <- paste0(
+                "<h3>Hierarchical Clustering Results</h3>",
+                "<ul><li>",
+                paste(infoBullets, collapse = "</li><li>"),
+                "</li></ul>"
+            )
             self$results$clusterInfo$setContent(clusterInfoText)
-            
+
             # Store clustering result for plotting
             image <- self$results$plot
+            image$setSize(plotWidth, plotHeight)
             image$setState(list(
                 hclustResult = hclustResult,
                 data = clusterData,
@@ -116,15 +198,18 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 colorGroups = colorGroups,
                 group = group,
                 groupData = groupData,
+                groupLevels = groupLevels,
                 vars = vars,
                 plotType = plotType,
                 edgeType = edgeType,
                 colorScheme = colorScheme,
                 highlightClusters = highlightClusters,
-                nClusters = nClusters,
+                requestedClusters = nClusters,
+                effectiveClusters = effectiveClusters,
+                clusterMembership = clusterMembership,
+                clusterSummary = clusterCounts,
                 maxLabels = maxLabels,
-                plotWidth = plotWidth,
-                plotHeight = plotHeight
+                standardizeApplied = prep$standardizeApplied
             ))
         },
         
@@ -137,171 +222,432 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             hclustResult <- state$hclustResult
             data <- state$data
-            originalData <- state$originalData
             showLabels <- state$showLabels
             colorGroups <- state$colorGroups
-            group <- state$group
             groupData <- state$groupData
-            vars <- state$vars
             plotType <- state$plotType
             edgeType <- state$edgeType
             colorScheme <- state$colorScheme
             highlightClusters <- state$highlightClusters
-            nClusters <- state$nClusters
             maxLabels <- state$maxLabels
-            
+            clusterMembership <- state$clusterMembership
+            effectiveClusters <- state$effectiveClusters
+            groupLevels <- state$groupLevels
+
             # Convert to dendrogram
             dendro <- as.dendrogram(hclustResult)
-            
-            if (plotType == "base") {
+
+            if (plotType == "heatmap") {
+                # tidyHeatmap-based heatmap with dendrograms
+                return(private$.plotTidyHeatmap(
+                    data = data,
+                    hclustResult = hclustResult,
+                    showRowDendro = self$options$showRowDendro,
+                    showColDendro = self$options$showColDendro,
+                    heatmapScale = self$options$heatmapScale,
+                    heatmapPalette = self$options$heatmapPalette,
+                    showCellBorders = self$options$showCellBorders,
+                    colorGroups = colorGroups,
+                    groupData = groupData,
+                    groupLevels = groupLevels,
+                    colorScheme = colorScheme
+                ))
+            } else if (plotType == "base") {
                 # Basic R dendrogram plot
-                return(private$.plotBaseDendrogram(hclustResult, dendro, data, showLabels, 
-                                                 colorGroups, group, originalData, highlightClusters, 
-                                                 nClusters, colorScheme, maxLabels))
+                return(private$.plotBaseDendrogram(
+                    hclustResult = hclustResult,
+                    dendro = dendro,
+                    showLabels = showLabels,
+                    colorGroups = colorGroups,
+                    groupData = groupData,
+                    highlightClusters = highlightClusters,
+                    effectiveClusters = effectiveClusters,
+                    colorScheme = colorScheme,
+                    maxLabels = maxLabels,
+                    clusterMembership = clusterMembership
+                ))
             } else if (plotType == "linear" || plotType == "circular") {
                 # ggraph-based dendrograms
-                return(private$.plotGgraphDendrogram(hclustResult, dendro, data, showLabels, 
-                                                   colorGroups, group, originalData, plotType, 
-                                                   edgeType, colorScheme, highlightClusters, 
-                                                   nClusters, maxLabels, ggtheme))
+                return(private$.plotGgraphDendrogram(
+                    hclustResult = hclustResult,
+                    dendro = dendro,
+                    showLabels = showLabels,
+                    colorGroups = colorGroups,
+                    groupData = groupData,
+                    groupLevels = groupLevels,
+                    plotType = plotType,
+                    edgeType = edgeType,
+                    colorScheme = colorScheme,
+                    highlightClusters = highlightClusters,
+                    effectiveClusters = effectiveClusters,
+                    maxLabels = maxLabels,
+                    ggtheme = ggtheme,
+                    clusterMembership = clusterMembership
+                ))
             }
             
             return(FALSE)
         },
         
-        .plotBaseDendrogram = function(hclustResult, dendro, data, showLabels, colorGroups, 
-                                     group, originalData, highlightClusters, nClusters, colorScheme, maxLabels) {
-            
-            if (highlightClusters && requireNamespace('dendextend', quietly = TRUE)) {
-                # Enhanced dendrogram with dendextend
-                tryCatch({
-                    # Set colors based on clusters
-                    colors <- private$.getColors(nClusters, colorScheme)
-                    
-                    dendro <- dendro %>%
-                        dendextend::set("labels_col", value = colors, k = nClusters) %>%
-                        dendextend::set("branches_k_color", value = colors, k = nClusters) %>%
-                        dendextend::set("branches_lwd", 2) %>%
-                        dendextend::set("labels_cex", 0.8)
-                    
-                    plot(dendro, main = "Hierarchical Clustering Dendrogram with Highlighted Clusters")
-                }, error = function(e) {
-                    warning("Error using dendextend package, falling back to basic plot: ", e$message)
-                    # Fall back to basic plot with rectangles
-                    plot(hclustResult, 
-                         main = "Hierarchical Clustering Dendrogram",
-                         xlab = "Observations", 
-                         ylab = "Distance",
-                         cex = 0.8)
-                    colors <- private$.getColors(nClusters, colorScheme)
-                    rect.hclust(hclustResult, k = nClusters, border = colors)
-                })
-                
-            } else {
-                # Basic dendrogram plot
-                plot(hclustResult, 
-                     main = "Hierarchical Clustering Dendrogram",
-                     xlab = "Observations", 
-                     ylab = "Distance",
-                     cex = 0.8)
-                
-                if (highlightClusters) {
-                    # Add colored rectangles around clusters
-                    colors <- private$.getColors(nClusters, colorScheme)
-                    rect.hclust(hclustResult, k = nClusters, border = colors)
-                }
+        .plotTidyHeatmap = function(data, hclustResult, showRowDendro, showColDendro,
+                                   heatmapScale, heatmapPalette, showCellBorders,
+                                   colorGroups, groupData, groupLevels, colorScheme) {
+
+            tidyHeatmapAvailable <- requireNamespace('tidyHeatmap', quietly = TRUE) &&
+                requireNamespace('ComplexHeatmap', quietly = TRUE) &&
+                requireNamespace('tibble', quietly = TRUE)
+
+            if (!tidyHeatmapAvailable) {
+                warning("tidyHeatmap or ComplexHeatmap packages not available. Please install with:\n",
+                       "install.packages('tidyHeatmap')\n",
+                       "BiocManager::install('ComplexHeatmap')")
+                return(FALSE)
             }
-            
+
+            # Prepare data in tidy format for tidyHeatmap
+            # Convert matrix to long format: row, column, value
+            dataMatrix <- t(as.matrix(data))  # Transpose for typical heatmap view
+
+            tidyData <- tibble::as_tibble(dataMatrix, rownames = "feature") %>%
+                tidyr::pivot_longer(
+                    cols = -feature,
+                    names_to = "sample",
+                    values_to = "value"
+                )
+
+            # Set up color palette
+            palette <- private$.getHeatmapPalette(heatmapPalette)
+
+            # Scale data if requested
+            scaleOption <- if (heatmapScale == "none") "none"
+                          else if (heatmapScale == "row") "row"
+                          else "column"
+
+            # Create base heatmap
+            hm <- tidyData %>%
+                tidyHeatmap::heatmap(
+                    .row = feature,
+                    .column = sample,
+                    .value = value,
+                    scale = scaleOption,
+                    palette_value = palette,
+                    cluster_rows = showRowDendro,
+                    cluster_columns = showColDendro,
+                    show_row_names = TRUE,
+                    show_column_names = TRUE,
+                    column_names_gp = grid::gpar(fontsize = 10),
+                    row_names_gp = grid::gpar(fontsize = 10)
+                )
+
+            # Add cell borders if requested
+            if (showCellBorders) {
+                hm <- hm %>%
+                    tidyHeatmap::heatmap(
+                        rect_gp = grid::gpar(col = "white", lwd = 0.5)
+                    )
+            }
+
+            # Add group annotation if requested
+            if (colorGroups && !is.null(groupData) && !is.null(groupLevels)) {
+                groupColors <- private$.getColors(length(groupLevels), colorScheme)
+                names(groupColors) <- groupLevels
+
+                # Add annotation for samples (columns)
+                annotationData <- tibble::tibble(
+                    sample = names(groupData),
+                    group = as.character(groupData)
+                )
+
+                tidyData <- tidyData %>%
+                    dplyr::left_join(annotationData, by = "sample")
+
+                hm <- tidyData %>%
+                    tidyHeatmap::heatmap(
+                        .row = feature,
+                        .column = sample,
+                        .value = value,
+                        scale = scaleOption,
+                        palette_value = palette,
+                        cluster_rows = showRowDendro,
+                        cluster_columns = showColDendro
+                    ) %>%
+                    tidyHeatmap::annotation_tile(group, palette = groupColors)
+            }
+
+            # Print the heatmap
+            ComplexHeatmap::draw(hm)
             return(TRUE)
         },
-        
-        .plotGgraphDendrogram = function(hclustResult, dendro, data, showLabels, colorGroups, 
-                                       group, originalData, plotType, edgeType, colorScheme, 
-                                       highlightClusters, nClusters, maxLabels, ggtheme) {
-            
-            if (!requireNamespace('ggraph', quietly = TRUE) || !requireNamespace('igraph', quietly = TRUE)) {
-                # Fall back to base plot instead of showing error message
+
+        .plotBaseDendrogram = function(hclustResult, dendro, showLabels, colorGroups,
+                                     groupData, highlightClusters, effectiveClusters,
+                                     colorScheme, maxLabels, clusterMembership) {
+
+            labelCount <- length(labels(dendro))
+            showLeafLabels <- showLabels && labelCount <= maxLabels
+            leaflab <- if (showLeafLabels) "perpendicular" else "none"
+
+            dendextendAvailable <- requireNamespace('dendextend', quietly = TRUE)
+
+            if (dendextendAvailable && (highlightClusters || (colorGroups && !is.null(groupData)))) {
+                style <- private$.decorateDendrogram(
+                    dendro = dendro,
+                    highlightClusters = highlightClusters,
+                    effectiveClusters = effectiveClusters,
+                    colorScheme = colorScheme,
+                    clusterMembership = clusterMembership,
+                    colorGroups = colorGroups,
+                    groupData = groupData
+                )
+
+                plot(style$dendro,
+                     main = "Hierarchical Clustering Dendrogram",
+                     ylab = "Height",
+                     leaflab = leaflab,
+                     cex = 0.8)
+
+                if (!is.null(style$legend)) {
+                    legend(
+                        "topright",
+                        title = style$legend$title,
+                        legend = style$legend$labels,
+                        fill = style$legend$colours,
+                        border = NA,
+                        bty = "n",
+                        cex = 0.8
+                    )
+                }
+            } else {
+                plot(hclustResult,
+                     main = "Hierarchical Clustering Dendrogram",
+                     xlab = "Observations",
+                     ylab = "Distance",
+                     labels = if (showLeafLabels) NULL else FALSE,
+                     cex = 0.8)
+
+                if (highlightClusters && effectiveClusters > 1) {
+                    colors <- private$.getColors(effectiveClusters, colorScheme)
+                    stats::rect.hclust(hclustResult, k = effectiveClusters, border = colors)
+                }
+
+                if (colorGroups && !is.null(groupData) && !dendextendAvailable)
+                    warning("Install the 'dendextend' package to colour leaves by group in base plots.")
+            }
+
+            return(TRUE)
+        },
+
+        .plotGgraphDendrogram = function(hclustResult, dendro, showLabels, colorGroups,
+                                       groupData, groupLevels, plotType, edgeType, colorScheme,
+                                       highlightClusters, effectiveClusters, maxLabels, ggtheme,
+                                       clusterMembership) {
+
+            packagesAvailable <- requireNamespace('ggraph', quietly = TRUE) &&
+                requireNamespace('igraph', quietly = TRUE) &&
+                requireNamespace('ggplot2', quietly = TRUE)
+
+            if (!packagesAvailable) {
                 warning("ggraph/igraph packages not available, falling back to base plot")
-                return(private$.plotBaseDendrogram(hclustResult, dendro, data, showLabels, 
-                                                 colorGroups, group, originalData, highlightClusters, 
-                                                 nClusters, colorScheme, maxLabels))
+                return(private$.plotBaseDendrogram(
+                    hclustResult = hclustResult,
+                    dendro = dendro,
+                    showLabels = showLabels,
+                    colorGroups = colorGroups,
+                    groupData = groupData,
+                    highlightClusters = highlightClusters,
+                    effectiveClusters = effectiveClusters,
+                    colorScheme = colorScheme,
+                    maxLabels = maxLabels,
+                    clusterMembership = clusterMembership
+                ))
             }
-            
-            # Convert dendrogram to graph format for ggraph
+
             edges_df <- private$.dendrogramToEdges(dendro)
-            vertices_df <- private$.createVertices(edges_df, data, colorGroups, group, groupData)
-            
-            # Create graph object
-            mygraph <- igraph::graph_from_data_frame(edges_df, vertices = vertices_df)
-            
-            # Determine if circular layout
+            vertices_df <- private$.createVertices(
+                edges_df = edges_df,
+                clusterMembership = clusterMembership,
+                groupData = groupData,
+                colorGroups = colorGroups
+            )
+
             circular <- (plotType == "circular")
-            
-            # Create base plot
-            p <- ggraph::ggraph(mygraph, layout = 'dendrogram', circular = circular)
-            
-            # Add edges based on edge type
+            if (circular)
+                vertices_df <- private$.calculateCircularAngles(vertices_df)
+
+            mygraph <- igraph::graph_from_data_frame(edges_df, vertices = vertices_df)
+
+            p <- ggraph::ggraph(mygraph, layout = "dendrogram", circular = circular)
+
             if (edgeType == "diagonal") {
-                p <- p + ggraph::geom_edge_diagonal(colour = "grey", alpha = 0.7)
+                p <- p + ggraph::geom_edge_diagonal(colour = "grey70", alpha = 0.7)
             } else if (edgeType == "link") {
-                p <- p + ggraph::geom_edge_link(colour = "grey", alpha = 0.7)
+                p <- p + ggraph::geom_edge_link(colour = "grey70", alpha = 0.7)
             } else {
-                p <- p + ggraph::geom_edge_elbow(colour = "grey", alpha = 0.7)
+                p <- p + ggraph::geom_edge_elbow(colour = "grey70", alpha = 0.7)
             }
-            
-            # Add cluster coloring if requested
-            if (highlightClusters) {
-                cluster_colors <- private$.getClusterColors(hclustResult, nClusters, colorScheme)
-                vertices_df$cluster <- cluster_colors[match(vertices_df$name, names(cluster_colors))]
-                
-                p <- p + ggraph::geom_node_point(ggplot2::aes(color = cluster, filter = leaf), 
-                                               size = 2, alpha = 0.8)
+
+            colourScale <- NULL
+
+            if (colorGroups && !is.null(groupData)) {
+                levelsToUse <- groupLevels
+                if (is.null(levelsToUse) || length(levelsToUse) == 0)
+                    levelsToUse <- sort(unique(as.character(groupData)))
+
+                palette <- private$.getColors(max(1, length(levelsToUse)), colorScheme)
+                palette <- palette[seq_len(max(1, length(levelsToUse)))]
+                names(palette) <- levelsToUse
+
+                vertices_df$group <- factor(vertices_df$group, levels = levelsToUse)
+                p <- p + ggraph::geom_node_point(
+                    ggplot2::aes(color = group, filter = leaf),
+                    size = 2.2,
+                    alpha = 0.85
+                )
+                colourScale <- ggplot2::scale_color_manual(
+                    values = palette,
+                    na.value = "grey70",
+                    name = "Group"
+                )
+            } else if (highlightClusters && effectiveClusters > 1) {
+                palette <- private$.getColors(effectiveClusters, colorScheme)
+                clusterLevels <- sort(unique(clusterMembership))
+                vertices_df$cluster <- factor(vertices_df$cluster, levels = clusterLevels)
+                p <- p + ggraph::geom_node_point(
+                    ggplot2::aes(color = cluster, filter = leaf),
+                    size = 2.2,
+                    alpha = 0.85
+                )
+                colourScale <- ggplot2::scale_color_manual(
+                    values = palette,
+                    name = "Cluster"
+                )
             } else {
-                p <- p + ggraph::geom_node_point(ggplot2::aes(filter = leaf), 
-                                               size = 1.5, alpha = 0.8)
+                p <- p + ggraph::geom_node_point(
+                    ggplot2::aes(filter = leaf),
+                    size = 1.8,
+                    alpha = 0.8,
+                    colour = "steelblue"
+                )
             }
-            
-            # Add labels if requested
-            if (showLabels && nrow(data) <= maxLabels) {  # Use configurable label limit
+
+            leafCount <- length(clusterMembership)
+            if (showLabels && leafCount <= maxLabels) {
                 if (circular) {
-                    # Special handling for circular layout
-                    vertices_df <- private$.calculateCircularAngles(vertices_df)
                     p <- p + ggraph::geom_node_text(
-                        ggplot2::aes(x = x*1.1, y = y*1.1, 
-                                   label = name, 
-                                   angle = angle, 
-                                   hjust = hjust,
-                                   filter = leaf), 
-                        size = 3, alpha = 0.9
+                        ggplot2::aes(
+                            x = x * 1.1,
+                            y = y * 1.1,
+                            label = name,
+                            angle = angle,
+                            hjust = hjust,
+                            filter = leaf
+                        ),
+                        size = 3,
+                        alpha = 0.9
                     )
                 } else {
                     p <- p + ggraph::geom_node_text(
-                        ggplot2::aes(label = name, filter = leaf), 
-                        angle = 90, hjust = 1, size = 3, alpha = 0.9
+                        ggplot2::aes(label = name, filter = leaf),
+                        angle = 90,
+                        hjust = 1,
+                        size = 3,
+                        alpha = 0.9
                     )
                 }
             }
-            
-            # Apply color scheme
-            if (highlightClusters) {
-                colors <- private$.getColors(nClusters, colorScheme)
-                p <- p + ggplot2::scale_color_manual(values = colors)
-            }
-            
-            # Add title and theme
+
+            if (!is.null(colourScale))
+                p <- p + colourScale
+
             title <- if (circular) "Circular Hierarchical Clustering Dendrogram" else "Hierarchical Clustering Dendrogram"
-            p <- p + 
+            p <- p +
                 ggplot2::labs(title = title) +
                 ggplot2::theme_void() +
                 ggplot2::theme(
                     plot.title = ggplot2::element_text(hjust = 0.5, size = 14),
-                    legend.position = if (highlightClusters) "bottom" else "none"
+                    legend.position = if (!is.null(colourScale)) "bottom" else "none"
                 )
-            
+
+            if (!is.null(ggtheme))
+                p <- p + ggtheme
+
             print(p)
             return(TRUE)
         },
-        
+
+        .prepareClusterData = function(clusterData, standardize, distanceMethod) {
+            result <- list(
+                ok = TRUE,
+                matrix = NULL,
+                standardizeApplied = FALSE,
+                zeroVariance = character(0),
+                messages = character(0),
+                message = NULL
+            )
+
+            if (distanceMethod == "binary") {
+                nonBinary <- vapply(clusterData, function(column) {
+                    any(!column %in% c(0, 1), na.rm = TRUE)
+                }, logical(1))
+
+                if (any(nonBinary)) {
+                    badVars <- names(clusterData)[nonBinary]
+                    result$ok <- FALSE
+                    result$message <- paste0(
+                        "<p>Binary distance requires variables coded as 0/1 only. Non-binary values detected in: ",
+                        paste(badVars, collapse = ", "),
+                        ".</p>"
+                    )
+                    return(result)
+                }
+
+                result$matrix <- as.matrix(clusterData)
+                return(result)
+            }
+
+            zeroVariance <- names(clusterData)[vapply(clusterData, function(column) {
+                sd_val <- stats::sd(column, na.rm = TRUE)
+                is.na(sd_val) || sd_val == 0
+            }, logical(1))]
+
+            result$zeroVariance <- zeroVariance
+
+            if (standardize) {
+                scaled <- lapply(clusterData, private$.scaleColumn)
+                scaled <- as.data.frame(scaled, stringsAsFactors = FALSE)
+                rownames(scaled) <- rownames(clusterData)
+                result$matrix <- as.matrix(scaled)
+                result$standardizeApplied <- TRUE
+            } else {
+                result$matrix <- as.matrix(clusterData)
+            }
+
+            if (length(zeroVariance) > 0) {
+                result$messages <- c(
+                    result$messages,
+                    paste0(
+                        "<strong>Note:</strong> Zero-variance variables (",
+                        paste(zeroVariance, collapse = ", "),
+                        ") were present and contribute no separation."
+                    )
+                )
+            }
+
+            return(result)
+        },
+
+        .scaleColumn = function(column) {
+            sd_val <- stats::sd(column, na.rm = TRUE)
+            if (is.na(sd_val) || sd_val == 0) {
+                scaled <- rep(0, length(column))
+            } else {
+                mean_val <- mean(column, na.rm = TRUE)
+                scaled <- (column - mean_val) / sd_val
+            }
+            names(scaled) <- names(column)
+            return(scaled)
+        },
+
         .dendrogramToEdges = function(dendro) {
             # Convert dendrogram to edge list for ggraph
             edges <- data.frame(from = character(0), to = character(0), stringsAsFactors = FALSE)
@@ -329,43 +675,98 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             extractEdges(dendro, "root")
             return(edges)
         },
+
+        .decorateDendrogram = function(dendro, highlightClusters, effectiveClusters,
+                                      colorScheme, clusterMembership, colorGroups, groupData) {
+
+            if (!requireNamespace('dendextend', quietly = TRUE))
+                return(list(dendro = dendro, legend = NULL))
+
+            styled <- dendro
+            legendInfo <- NULL
+
+            # Color by groups takes precedence over cluster highlighting
+            if (colorGroups && !is.null(groupData)) {
+                groupLevels <- levels(groupData)
+                if (is.null(groupLevels) || length(groupLevels) == 0)
+                    groupLevels <- sort(unique(as.character(groupData)))
+
+                palette <- private$.getColors(max(1, length(groupLevels)), colorScheme)
+                palette <- palette[seq_len(max(1, length(groupLevels)))]
+                names(palette) <- groupLevels
+
+                # Get leaf labels from dendrogram
+                leafLabels <- labels(styled)
+
+                # Match leaf labels to group data
+                # groupData is a named factor where names are row names
+                groupAssignments <- as.character(groupData[leafLabels])
+
+                # Handle any NAs
+                if (any(is.na(groupAssignments))) {
+                    warning("Some leaf labels could not be matched to group data")
+                    groupAssignments[is.na(groupAssignments)] <- groupLevels[1]
+                }
+
+                labelColours <- palette[groupAssignments]
+                labelColours[is.na(labelColours)] <- "grey40"
+
+                dendextend::labels_colors(styled) <- labelColours
+                styled <- dendextend::set(styled, "labels_cex", 0.8)
+
+                legendInfo <- list(
+                    title = "Group",
+                    labels = names(palette),
+                    colours = palette
+                )
+            } else if (highlightClusters && effectiveClusters > 1 && !is.null(clusterMembership)) {
+                palette <- private$.getColors(effectiveClusters, colorScheme)
+                styled <- dendextend::color_branches(styled, k = effectiveClusters, col = palette)
+                styled <- dendextend::set(styled, "branches_lwd", 1.5)
+
+                leafLabels <- labels(styled)
+                membership <- clusterMembership[match(leafLabels, names(clusterMembership))]
+                labelColours <- palette[membership]
+                if (any(is.na(labelColours)))
+                    labelColours[is.na(labelColours)] <- palette[1]
+
+                dendextend::labels_colors(styled) <- labelColours
+                styled <- dendextend::set(styled, "labels_cex", 0.8)
+
+                legendInfo <- list(
+                    title = "Cluster",
+                    labels = paste0("Cluster ", seq_len(effectiveClusters)),
+                    colours = palette
+                )
+            }
+
+            return(list(dendro = styled, legend = legendInfo))
+        },
         
-        .createVertices = function(edges_df, data, colorGroups, group, groupData) {
-            # Create vertices dataframe
+        .createVertices = function(edges_df, clusterMembership, groupData, colorGroups) {
             all_nodes <- unique(c(edges_df$from, edges_df$to))
             vertices_df <- data.frame(
                 name = all_nodes,
                 leaf = !all_nodes %in% edges_df$from,
                 stringsAsFactors = FALSE
             )
-            
-            # Add group information if available and validated
-            if (colorGroups && !is.null(groupData)) {
-                # Match vertices to group data using more robust matching
-                vertices_df$group <- NA
-                leaf_indices <- which(vertices_df$leaf)
-                
-                # Get the original row indices that correspond to the clustering data
-                original_indices <- as.numeric(rownames(data))
-                if (is.null(original_indices)) {
-                    original_indices <- seq_len(nrow(data))
-                }
-                
-                for (i in leaf_indices) {
-                    vertex_name <- vertices_df$name[i]
-                    # Try to match by vertex name to row names or index
-                    if (vertex_name %in% rownames(data)) {
-                        data_row_idx <- which(rownames(data) == vertex_name)
-                        if (length(data_row_idx) > 0) {
-                            original_idx <- original_indices[data_row_idx[1]]
-                            if (original_idx <= length(groupData)) {
-                                vertices_df$group[i] <- as.character(groupData[original_idx])
-                            }
-                        }
-                    }
-                }
+
+            if (!is.null(clusterMembership)) {
+                vertices_df$cluster <- clusterMembership[match(vertices_df$name, names(clusterMembership))]
+            } else {
+                vertices_df$cluster <- NA_integer_
             }
-            
+
+            if (colorGroups && !is.null(groupData)) {
+                # groupData is a named factor, preserve names when converting
+                groupVec <- as.character(groupData)
+                names(groupVec) <- names(groupData)
+                # Match vertex names to group data names
+                vertices_df$group <- groupVec[match(vertices_df$name, names(groupVec))]
+            } else {
+                vertices_df$group <- NA_character_
+            }
+
             return(vertices_df)
         },
         
@@ -387,27 +788,52 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .getColors = function(n, colorScheme) {
-            # Get color palette based on scheme
-            if (colorScheme == "viridis" && requireNamespace('viridis', quietly = TRUE)) {
-                return(viridis::viridis(n))
-            } else if (colorScheme == "RdYlBu") {
-                return(RColorBrewer::brewer.pal(min(n, 11), "RdYlBu"))
-            } else if (colorScheme == "Set1") {
-                return(RColorBrewer::brewer.pal(min(n, 9), "Set1"))
-            } else if (colorScheme == "Dark2") {
-                return(RColorBrewer::brewer.pal(min(n, 8), "Dark2"))
-            } else {
-                # Default rainbow colors
-                return(rainbow(n))
+            n <- max(1, n)
+
+            if (colorScheme == "viridis") {
+                if (requireNamespace('viridisLite', quietly = TRUE))
+                    return(viridisLite::viridis(n))
+                if (requireNamespace('viridis', quietly = TRUE))
+                    return(viridis::viridis(n))
             }
+
+            if (colorScheme %in% c("RdYlBu", "Set1", "Dark2") && requireNamespace('RColorBrewer', quietly = TRUE)) {
+                palInfo <- RColorBrewer::brewer.pal_info[colorScheme, ]
+                maxCols <- palInfo$maxcolors
+                minCols <- palInfo$mincolors
+                baseCols <- RColorBrewer::brewer.pal(max(minCols, min(maxCols, n)), colorScheme)
+                if (n <= length(baseCols))
+                    return(baseCols[seq_len(n)])
+                return(grDevices::colorRampPalette(baseCols)(n))
+            }
+
+            if (n == 1)
+                return("#1f77b4")
+
+            return(grDevices::rainbow(n))
         },
-        
-        .getClusterColors = function(hclustResult, nClusters, colorScheme) {
-            # Get cluster assignments and colors
-            clusters <- cutree(hclustResult, k = nClusters)
-            colors <- private$.getColors(nClusters, colorScheme)
-            cluster_colors <- colors[clusters]
-            names(cluster_colors) <- names(clusters)
-            return(cluster_colors)
+
+        .getHeatmapPalette = function(paletteName) {
+            if (paletteName == "viridis") {
+                if (requireNamespace('viridisLite', quietly = TRUE))
+                    return(viridisLite::viridis(100))
+                if (requireNamespace('viridis', quietly = TRUE))
+                    return(viridis::viridis(100))
+            }
+
+            if (paletteName == "RdYlBu" && requireNamespace('RColorBrewer', quietly = TRUE)) {
+                return(grDevices::colorRampPalette(
+                    RColorBrewer::brewer.pal(11, "RdYlBu")
+                )(100))
+            }
+
+            if (paletteName == "spectral" && requireNamespace('RColorBrewer', quietly = TRUE)) {
+                return(grDevices::colorRampPalette(
+                    RColorBrewer::brewer.pal(11, "Spectral")
+                )(100))
+            }
+
+            # Default blue-red palette
+            return(grDevices::colorRampPalette(c("blue", "white", "red"))(100))
         })
 )

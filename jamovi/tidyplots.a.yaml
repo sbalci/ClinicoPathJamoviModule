@@ -1,7 +1,8 @@
 ---
 name: tidyplots
 title: Comprehensive Tidy Plots
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
+menuSubgroup: All-In-One
 version: '0.0.31'
 jas: '1.2'
 
@@ -300,11 +301,6 @@ options:
       default: density
 
     # === SPECIAL PLOT OPTIONS ===
-    - name: showOutliers
-      title: Show Outlier Points (Boxplot)
-      type: Bool
-      default: true
-
     - name: violinPoints
       title: Add Points to Violin Plot
       type: Bool
@@ -316,16 +312,6 @@ options:
       default: 30
       min: 5
       max: 100
-
-    - name: areaType
-      title: Area Type
-      type: List
-      options:
-        - name: absolute
-          title: Absolute
-        - name: relative
-          title: Relative (Stacked)
-      default: absolute
 
     # === STATISTICAL TESTING ===
     - name: showPValue
@@ -364,26 +350,42 @@ options:
           title: Colorblind Friendly
         - name: seaside
           title: Seaside
+        - name: friendly_long
+          title: Colorblind Friendly (Extended)
         - name: apple
           title: Apple
-        - name: custom
-          title: Custom Colors
+        - name: ibm
+          title: IBM
+        - name: candy
+          title: Candy
+        - name: alger
+          title: Alger
+        - name: metro
+          title: Metro
         - name: rainbow
           title: Rainbow
+        - name: custom
+          title: Custom Colors
         # Continuous schemes
         - name: viridis
           title: Viridis
         - name: inferno
           title: Inferno
-        - name: magma
-          title: Magma
+        - name: mako
+          title: Mako
         - name: turbo
           title: Turbo
+        - name: rocket
+          title: Rocket
         # Diverging schemes
         - name: blue2red
           title: Blue to Red
         - name: blue2brown
           title: Blue to Brown
+        - name: spectral
+          title: Spectral
+        - name: icefire
+          title: Ice Fire
       default: friendly
 
     # === CUSTOMIZATION ===
@@ -426,6 +428,22 @@ options:
       title: Plot Caption
       type: String
       default: ''
+
+    # === DOCUMENTATION OPTIONS ===
+    - name: showHowTo
+      title: Show Usage Guide
+      type: Bool
+      default: false
+
+    - name: showGlossary
+      title: Show Statistical Glossary
+      type: Bool
+      default: false
+
+    - name: showSummary
+      title: Show Plain-Language Summary
+      type: Bool
+      default: false
 
     # === PLOT SIZE ===
     - name: plotWidth

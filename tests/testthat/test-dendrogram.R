@@ -350,3 +350,39 @@ test_that("dendrogram color schemes", {
   }
   
 })
+
+test_that("dendrogram handles standardization toggle", {
+  data("histopathology", package = "ClinicoPath")
+
+  expect_error(
+    dendrogram(
+      data = histopathology,
+      vars = c("Age", "OverallTime"),
+      clusterMethod = "complete",
+      distanceMethod = "euclidean",
+      standardize = FALSE,
+      highlightClusters = TRUE,
+      nClusters = 3
+    ),
+    NA
+  )
+})
+
+test_that("dendrogram supports binary distance for binary data", {
+  binary_df <- data.frame(
+    marker1 = c(0, 1, 0, 1, 0, 1),
+    marker2 = c(1, 1, 0, 0, 1, 0)
+  )
+
+  expect_error(
+    dendrogram(
+      data = binary_df,
+      vars = c("marker1", "marker2"),
+      clusterMethod = "single",
+      distanceMethod = "binary",
+      standardize = FALSE,
+      highlightClusters = FALSE
+    ),
+    NA
+  )
+})

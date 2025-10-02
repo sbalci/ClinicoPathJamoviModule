@@ -1,7 +1,7 @@
 ---
 name:  dendrogram
 title: Dendrogram
-menuGroup: meddecideT
+menuGroup: OncoPathT
 menuSubgroup: Drafts
 version: '0.0.31'
 jas: '1.2'
@@ -56,6 +56,11 @@ options:
           name: minkowski
       default: euclidean
 
+    - name: standardize
+      title: Standardize variables (z-score)
+      type: Bool
+      default: true
+
     - name: showLabels
       title: Show sample labels
       type: Bool
@@ -96,6 +101,8 @@ options:
           name: circular
         - title: Basic R Plot
           name: base
+        - title: Heatmap with Dendrograms
+          name: heatmap
       default: linear
 
     - name: edgeType
@@ -144,4 +151,45 @@ options:
       min: 0
       max: 200
       default: 50
+
+    - name: showRowDendro
+      title: Show row dendrogram
+      type: Bool
+      default: true
+
+    - name: showColDendro
+      title: Show column dendrogram
+      type: Bool
+      default: true
+
+    - name: heatmapScale
+      title: Heatmap Scaling
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Scale by Row
+          name: row
+        - title: Scale by Column
+          name: column
+      default: row
+
+    - name: heatmapPalette
+      title: Heatmap Color Palette
+      type: List
+      options:
+        - title: Blue-Red
+          name: bluered
+        - title: Viridis
+          name: viridis
+        - title: RdYlBu
+          name: RdYlBu
+        - title: Spectral
+          name: spectral
+      default: bluered
+
+    - name: showCellBorders
+      title: Show cell borders
+      type: Bool
+      default: false
 ...

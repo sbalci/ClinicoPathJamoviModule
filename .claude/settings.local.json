@@ -100,7 +100,9 @@
       "Bash(head -5 })",
       "Bash({ echo \"=== CSV files NOT in data/ ===\" find . -name \"*.csv\" -not -path \"./data/*\" -not -path \"./.git/*\" -not -path \"./node_modules/*\")",
       "Bash(head -20 })",
-      "Bash(do echo \"=== $file ===\" ls -lh data/$file.* vignettes/data/$file.*)"
+      "Bash(do echo \"=== $file ===\" ls -lh data/$file.* vignettes/data/$file.*)",
+      "WebFetch(domain:chstock.github.io)",
+      "WebFetch(domain:stemangiola.github.io)"
     ],
     "deny": [],
     "ask": [],

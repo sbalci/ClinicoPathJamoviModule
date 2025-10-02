@@ -9,6 +9,21 @@ items:
       type: Html
       visible: (!xvar || !yvar)
 
+    - name: howto
+      title: "How to Use This Analysis"
+      type: Html
+      visible: (showHowTo)
+
+    - name: glossary
+      title: "Statistical Terms Explained"
+      type: Html
+      visible: (showGlossary)
+
+    - name: summary
+      title: "Plot Summary"
+      type: Html
+      visible: (showSummary)
+
     - name: plot
       title: Plot
       type: Image
@@ -27,7 +42,6 @@ items:
           - lineType
           - barType
           - stackType
-          - areaType
           - showMean
           - meanType
           - showMedian
@@ -46,7 +60,6 @@ items:
           - rangeType
           - showDistribution
           - distributionType
-          - showOutliers
           - violinPoints
           - histogramBins
           - showPValue

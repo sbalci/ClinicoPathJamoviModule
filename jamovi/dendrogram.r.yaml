@@ -4,6 +4,11 @@ title: Dendrogram
 jrs:   '1.1'
 
 items:
+    - name:  welcome
+      title: ''
+      type:  Html
+      visible: (vars)
+
     - name:  plot
       title: Dendrogram Plot
       type:  Image
@@ -18,7 +23,7 @@ items:
     - name:  summary
       title: Summary Statistics
       type:  Table
-      rows:  (vars)
+      rows:  0
       columns:
         - name: variable
           title: Variable
@@ -37,6 +42,21 @@ items:
         - name: missing
           title: Missing
           type: integer
+
+    - name:  clusterSummary
+      title: Cluster Membership
+      type:  Table
+      columns:
+        - name: cluster
+          title: Cluster
+          type: integer
+        - name: size
+          title: N
+          type: integer
+        - name: percent
+          title: Percent
+          type: number
+          format: zto
 
 refs:
     - ClinicoPathJamoviModule

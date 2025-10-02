@@ -9,6 +9,7 @@ dendrogram(
   vars,
   clusterMethod = "ward.D2",
   distanceMethod = "euclidean",
+  standardize = TRUE,
   showLabels = TRUE,
   colorGroups = FALSE,
   group,
@@ -30,6 +31,8 @@ dendrogram(
 \item{clusterMethod}{.}
 
 \item{distanceMethod}{.}
+
+\item{standardize}{.}
 
 \item{showLabels}{.}
 
@@ -56,9 +59,11 @@ dendrogram(
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$clusterInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterSummary} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
