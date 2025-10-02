@@ -21,7 +21,10 @@ decisioncompare(
   ci = FALSE,
   plot = FALSE,
   radarplot = FALSE,
-  statComp = FALSE
+  statComp = FALSE,
+  showSummary = FALSE,
+  showExplanations = FALSE,
+  showReportSentence = FALSE
 )
 }
 \arguments{
@@ -67,6 +70,14 @@ visualization.}
 
 \item{statComp}{Perform statistical comparison between tests (McNemar's
 test and confidence intervals for differences).}
+
+\item{showSummary}{Boolean to show natural language summary of statistical
+comparisons.}
+
+\item{showExplanations}{Boolean to show explanations, glossary, and
+educational content.}
+
+\item{showReportSentence}{Boolean to show manuscript-ready report sentence.}
 }
 \value{
 A results object containing:
@@ -84,6 +95,9 @@ A results object containing:
 \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
+\code{results$summaryReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+\code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 }

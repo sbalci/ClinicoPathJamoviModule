@@ -1,187 +1,149 @@
 context("Medical Decision Test Comparison")
 
-# Load required data
-if (requireNamespace("ClinicoPath", quietly = TRUE)) {
-  data("histopathology", package = "ClinicoPath")
-}
+# Synthetic dataset with known diagnostic characteristics
+diagnostic_sample <- local({
+  pos_block <- data.frame(
+    gold = rep("Positive", 60),
+    testA = c(rep("Positive", 54), rep("Negative", 6)),
+    testB = c(rep("Positive", 48), rep("Negative", 12)),
+    testC = c(rep("Positive", 45), rep("Negative", 15))
+  )
+  neg_block <- data.frame(
+    gold = rep("Negative", 60),
+    testA = c(rep("Positive", 9), rep("Negative", 51)),
+    testB = c(rep("Positive", 6), rep("Negative", 54)),
+    testC = c(rep("Positive", 12), rep("Negative", 48))
+  )
+  combined <- rbind(pos_block, neg_block)
+  combined <- within(combined, {
+    gold <- factor(gold, levels = c("Positive", "Negative"))
+    testA <- factor(testA, levels = c("Positive", "Negative"))
+    testB <- factor(testB, levels = c("Positive", "Negative"))
+    testC <- factor(testC, levels = c("Positive", "Negative"))
+  })
+  combined
+})
+
+basic_args <- list(
+  gold = "gold",
+  goldPositive = "Positive",
+  test1 = "testA",
+  test1Positive = "Positive",
+  test2 = "testB",
+  test2Positive = "Positive",
+  test3 = NULL,
+  test3Positive = NULL
+)
 
 test_that("decisioncompare works with basic 2 test comparison", {
-  skip_if_not_installed("ClinicoPath")
-  
-  # Test basic functionality with 2 tests
-  result <- ClinicoPath::decisioncompare(
-    data = histopathology,
-    gold = "Golden Standart",
-    goldPositive = "1",
-    test1 = "New Test", 
-    test1Positive = "1",
-    test2 = "Measurement1",
-    test2Positive = "1",
-    test3 = NULL,
-    test3Positive = NULL
-  )
-  
-  # Check that result is returned
+  result <- do.call(decisioncompare, c(list(data = diagnostic_sample), basic_args))
+
   expect_true(!is.null(result))
-  
-  # Check that comparison table exists and has content
-  expect_true(result$comparisonTable$rowCount() > 0)
-  
-  # Check that individual test tables exist
-  expect_true(result$cTable1$rowCount() > 0)
-  expect_true(result$cTable2$rowCount() > 0)
+  expect_true(result$comparisonTable$rowCount > 0)
+  expect_true(result$cTable1$rowCount > 0)
+  expect_true(result$cTable2$rowCount > 0)
 })
 
 test_that("decisioncompare works with confidence intervals", {
-  skip_if_not_installed("ClinicoPath")
-  
-  result <- ClinicoPath::decisioncompare(
-    data = histopathology,
-    gold = "Golden Standart", 
-    goldPositive = "1",
-    test1 = "New Test",
-    test1Positive = "1",
-    test2 = "Measurement1", 
-    test2Positive = "1",
-    test3 = NULL,
-    test3Positive = NULL,
-    ci = TRUE
-  )
-  
-  # Check CI tables are visible when requested
+  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, ci = TRUE), basic_args))
+
   expect_true(result$epirTable1$visible)
   expect_true(result$epirTable2$visible)
 })
 
 test_that("decisioncompare works with statistical comparison", {
-  skip_if_not_installed("ClinicoPath") 
-  
-  result <- ClinicoPath::decisioncompare(
-    data = histopathology,
-    gold = "Golden Standart",
-    goldPositive = "1", 
-    test1 = "New Test",
-    test1Positive = "1",
-    test2 = "Measurement1",
-    test2Positive = "1",
-    test3 = NULL,
-    test3Positive = NULL,
-    statComp = TRUE
-  )
-  
-  # Check that statistical comparison tables have content
-  expect_true(result$mcnemarTable$rowCount() > 0)
-  expect_true(result$diffTable$rowCount() > 0)
+  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, statComp = TRUE), basic_args))
+
+  expect_true(result$mcnemarTable$rowCount > 0)
+  expect_true(result$diffTable$rowCount > 0)
 })
 
 test_that("decisioncompare works with 3 tests", {
-  skip_if_not_installed("ClinicoPath")
-  
-  result <- ClinicoPath::decisioncompare(
-    data = histopathology,
-    gold = "Golden Standart",
-    goldPositive = "1",
-    test1 = "New Test", 
-    test1Positive = "1",
-    test2 = "Measurement1",
-    test2Positive = "1", 
-    test3 = "Measurement2",
-    test3Positive = "1",
+  result <- decisioncompare(
+    data = diagnostic_sample,
+    gold = "gold",
+    goldPositive = "Positive",
+    test1 = "testA",
+    test1Positive = "Positive",
+    test2 = "testB",
+    test2Positive = "Positive",
+    test3 = "testC",
+    test3Positive = "Positive",
     statComp = TRUE
   )
-  
-  # Check that all 3 test tables exist
-  expect_true(result$cTable1$rowCount() > 0)
-  expect_true(result$cTable2$rowCount() > 0)
-  expect_true(result$cTable3$rowCount() > 0)
-  
-  # Check comparison table has 3 tests
-  expect_equal(result$comparisonTable$rowCount(), 3)
-  
-  # Check that statistical comparisons include multiple pairs
-  expect_true(result$mcnemarTable$rowCount() >= 3) # Should have 3 pairwise comparisons
+
+  expect_true(result$cTable1$rowCount > 0)
+  expect_true(result$cTable2$rowCount > 0)
+  expect_true(result$cTable3$rowCount > 0)
+  expect_true(all(c("testA", "testB", "testC") %in% result$comparisonTable$rowKeys))
+  expect_true(result$mcnemarTable$rowCount >= 3)
 })
 
 test_that("decisioncompare works with footnotes and original data", {
-  skip_if_not_installed("ClinicoPath")
-  
-  result <- ClinicoPath::decisioncompare(
-    data = histopathology,
-    gold = "Golden Standart",
-    goldPositive = "1",
-    test1 = "New Test",
-    test1Positive = "1", 
-    test2 = "Measurement1",
-    test2Positive = "1",
-    test3 = NULL,
-    test3Positive = NULL,
-    fnote = TRUE,
-    od = TRUE
-  )
-  
-  # Check that original data is displayed
+  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, fnote = TRUE, od = TRUE), basic_args))
+
   expect_true(!is.null(result$text1$content))
   expect_true(!is.null(result$text2$content))
 })
 
 test_that("decisioncompare handles missing data gracefully", {
-  skip_if_not_installed("ClinicoPath") 
-  
-  # Create data with some missing values
-  test_data <- histopathology[1:50, ]
-  test_data$`Golden Standart`[1:5] <- NA
-  
-  result <- ClinicoPath::decisioncompare(
-    data = test_data,
-    gold = "Golden Standart",
-    goldPositive = "1",
-    test1 = "New Test",
-    test1Positive = "1",
-    test2 = "Measurement1", 
-    test2Positive = "1",
-    test3 = NULL,
-    test3Positive = NULL
-  )
-  
-  # Should still work with missing data removed
+  test_data <- diagnostic_sample
+  test_data$testA[seq_len(5)] <- NA
+
+  result <- do.call(decisioncompare, c(list(data = test_data), basic_args))
+
   expect_true(!is.null(result))
-  expect_true(result$comparisonTable$rowCount() > 0)
+  expect_true(result$comparisonTable$rowCount > 0)
 })
 
 test_that("decisioncompare fails gracefully with invalid input", {
-  skip_if_not_installed("ClinicoPath")
-  
-  # Test with no gold standard
-  expect_error(
-    ClinicoPath::decisioncompare(
-      data = histopathology,
-      test1 = "New Test",
-      test1Positive = "1",
-      test2 = NULL,
-      test2Positive = NULL,
-      test3 = NULL,
-      test3Positive = NULL
-    )
-  )
+  expect_error(decisioncompare(data = diagnostic_sample))
 })
 
 test_that("decisioncompare plotting functionality works", {
-  skip_if_not_installed("ClinicoPath")
-  
-  result <- ClinicoPath::decisioncompare(
-    data = histopathology,
-    gold = "Golden Standart",
-    goldPositive = "1",
-    test1 = "New Test",
-    test1Positive = "1", 
-    test2 = "Measurement1",
-    test2Positive = "1",
-    test3 = NULL,
-    test3Positive = NULL,
-    plot = TRUE
-  )
-  
-  # Check that plot object exists
+  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, plot = TRUE), basic_args))
+
   expect_true(!is.null(result$plot1))
   expect_true(result$plot1$visible)
+})
+
+test_that("paired difference estimates use paired variance", {
+  synthetic <- data.frame(
+    gold = factor(c("Positive", "Positive", "Negative", "Negative", "Positive", "Negative", "Positive", "Negative"),
+                  levels = c("Positive", "Negative")),
+    testA = factor(c("Positive", "Negative", "Negative", "Negative", "Positive", "Positive", "Positive", "Negative"),
+                   levels = c("Positive", "Negative")),
+    testB = factor(c("Positive", "Positive", "Negative", "Negative", "Negative", "Negative", "Positive", "Negative"),
+                   levels = c("Positive", "Negative"))
+  )
+
+  result <- decisioncompare(
+    data = synthetic,
+    gold = "gold",
+    goldPositive = "Positive",
+    test1 = "testA",
+    test1Positive = "Positive",
+    test2 = "testB",
+    test2Positive = "Positive",
+    test3 = NULL,
+    test3Positive = NULL,
+    statComp = TRUE
+  )
+
+  diff_df <- result$diffTable$asDF
+
+  expect_equal(nrow(diff_df), 3)
+  expect_setequal(diff_df$metric, c("Sensitivity", "Specificity", "Accuracy"))
+
+  sens_row <- diff_df[diff_df$metric == "Sensitivity", ]
+  expect_equal(sens_row$diff, 0, tolerance = 1e-6)
+  expect_true(sens_row$lower <= sens_row$diff && sens_row$upper >= sens_row$diff)
+
+  spec_row <- diff_df[diff_df$metric == "Specificity", ]
+  expect_equal(spec_row$diff, -0.25, tolerance = 1e-6)
+  expect_true(spec_row$lower <= spec_row$diff && spec_row$upper >= spec_row$diff)
+
+  acc_row <- diff_df[diff_df$metric == "Accuracy", ]
+  expect_equal(acc_row$diff, -0.125, tolerance = 1e-6)
+  expect_true(acc_row$lower <= acc_row$diff && acc_row$upper >= acc_row$diff)
 })

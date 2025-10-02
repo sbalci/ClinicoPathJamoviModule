@@ -7,12 +7,12 @@ items:
     - name: text1
       title: Original Data
       type: Preformatted
-      visible: (od)
+      visible: false # (od)
 
     - name: text2
       title: Original Data
       type: Html
-      visible: (od)
+      visible: false (od)
 
     # Tables for Test 1
     - name: cTable1
@@ -187,16 +187,21 @@ items:
 
     # Statistical Comparison Tables
     - name: mcnemarTable
-      title: "McNemar's Test for Test Comparison"
+      title: "Statistical Comparison of Test Accuracy"
       type: Table
       visible: (statComp)
       rows: 0
+      notes:
+        note: >
+          For 2 tests: McNemar's test compares overall diagnostic accuracy between paired tests.
+          For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests with Holm-Bonferroni correction for multiple comparisons.
+          Tests examine discordant pairs (cases where tests disagree) to determine if differences in accuracy are statistically significant.
       columns:
         - name: comparison
           title: 'Comparison'
           type: text
         - name: stat
-          title: "McNemar's Chi-squared"
+          title: "Chi-squared"
           type: number
         - name: df
           title: 'df'
@@ -264,12 +269,30 @@ items:
       refs:
           - ggplot2
 
+    # Summary Report
+    - name: summaryReport
+      title: 'Summary'
+      type: Html
+      visible: (statComp && showSummary)
+
+    # Report Sentence
+    - name: reportSentence
+      title: 'Manuscript-Ready Report'
+      type: Html
+      visible: (statComp && showReportSentence)
+
+    # Explanations and Glossary
+    - name: explanationsContent
+      title: 'Statistical Explanations & Glossary'
+      type: Html
+      visible: (showExplanations)
+
     # Clinical Report
     - name: clinicalReport
       title: 'Clinical Summary & Report Templates'
       type: Html
       visible: true
-      
+
     # About This Analysis
     - name: aboutAnalysis
       title: 'About This Analysis'

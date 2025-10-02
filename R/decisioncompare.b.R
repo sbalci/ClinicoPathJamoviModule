@@ -20,6 +20,109 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 fair_neg = 0.5         # LR- 0.2-0.5 = weak but potentially useful
             ),
 
+            # Statistical significance thresholds
+            P_THRESHOLD_STRONG = 0.001,      # Strong statistical evidence
+            P_THRESHOLD_SIGNIFICANT = 0.05,  # Conventional alpha level
+
+            # Sample size adequacy thresholds
+            MIN_DISCORDANT_PAIRS = 10,       # Minimum for reliable McNemar's test
+
+            # Cache for test results to avoid redundant calculations
+            .cached_test_results = NULL,
+
+            # Escape variable names for safe display and table keys
+            .escapeVar = function(x) {
+                if (is.null(x) || length(x) == 0) return(x)
+                make.names(gsub("[^A-Za-z0-9_. -]", "_", as.character(x)))
+            },
+
+            # Ensure that requested positive level exists in data
+            .assertLevelExists = function(x, level, var_name, test_name = NULL) {
+                if (is.null(level) || level == "") {
+                    missing_for <- ifelse(is.null(test_name),
+                                         private$.escapeVar(var_name),
+                                         paste(private$.escapeVar(var_name), "(", private$.escapeVar(test_name), ")"))
+                    variable <- missing_for
+                    stop(jmvcore::format("No positive level supplied for {variable}. Please select the level that represents a positive result."))
+                }
+
+                if (!level %in% levels(x)) {
+                    label <- ifelse(is.null(test_name),
+                                   private$.escapeVar(var_name),
+                                   paste0(private$.escapeVar(test_name), " (", private$.escapeVar(var_name), ")"))
+                    variable <- label
+                    stop(jmvcore::format("The positive level '{level}' was not found in {variable}. Check spelling, capitalisation, and ensure the data uses the requested level."))
+                }
+            },
+
+            # Build a complete 2x2 confusion matrix with zero-filled cells
+            .buildConfusionMatrix = function(test_values, gold_values) {
+                lvls <- c("Positive", "Negative")
+                tab <- table(test_values, gold_values, useNA = "no")
+                matrix <- matrix(0, nrow = 2, ncol = 2,
+                                 dimnames = list(test = lvls, gold = lvls))
+                common_rows <- intersect(rownames(tab), lvls)
+                common_cols <- intersect(colnames(tab), lvls)
+                if (length(common_rows) > 0 && length(common_cols) > 0) {
+                    matrix[common_rows, common_cols] <- tab[common_rows, common_cols, drop = FALSE]
+                }
+                return(matrix)
+            },
+
+            # Safe proportion helper that reports issues once per test/metric
+            .computeRate = function(numerator, denominator, metric_label, test_label) {
+                if (is.na(denominator) || denominator == 0) {
+                    warning(jmvcore::format("Unable to compute {metric} for {test}: denominator is zero. The result is set to NA.",
+                                              metric = metric_label, test = test_label), call. = FALSE)
+                    return(NA_real_)
+                }
+                return(numerator / denominator)
+            },
+
+            # Extract aligned test and gold vectors for pairwise comparisons
+            .extractComparisonVectors = function(test_results, test1, test2) {
+                list(
+                    test1 = test_results[[test1]]$test_results,
+                    test2 = test_results[[test2]]$test_results,
+                    gold = test_results[[test1]]$gold_reference
+                )
+            },
+
+            # Compute paired proportion difference with correlated standard error
+            .pairedProportionDifference = function(x, y) {
+                valid <- !is.na(x) & !is.na(y)
+                n <- sum(valid)
+                if (n == 0) {
+                    return(NULL)
+                }
+
+                x <- x[valid]
+                y <- y[valid]
+
+                both_pos <- sum(x == 1 & y == 1)
+                x_only <- sum(x == 1 & y == 0)
+                y_only <- sum(x == 0 & y == 1)
+                both_neg <- sum(x == 0 & y == 0)
+
+                diff_num <- x_only - y_only
+                diff <- diff_num / n
+
+                var_term <- ((x_only + y_only) * n - diff_num^2)
+                se <- if (var_term <= 0) 0 else sqrt(var_term / n^3)
+
+                z <- stats::qnorm(0.975)
+                lower <- max(-1, diff - z * se)
+                upper <- min(1, diff + z * se)
+
+                list(
+                    diff = diff,
+                    lower = lower,
+                    upper = upper,
+                    n = n,
+                    counts = c(both_pos = both_pos, x_only = x_only, y_only = y_only, both_neg = both_neg)
+                )
+            },
+
             # Initialization - visibility now handled by .r.yaml
             .init = function() {
                 # Initialize table rows for dynamic population
@@ -33,108 +136,101 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             
             # Main analysis orchestrator - refactored for clarity
             .run = function() {
+                # Step 1: Check if minimum required variables are selected
+                if (!private$.hasRequiredVars()) {
+                    return()  # Wait for user to select required variables
+                }
+
                 tryCatch({
-                    # Step 1: Comprehensive input validation
+                    # Step 2: Comprehensive input validation
                     private$.validateInputs()
-                    
-                    # Step 2: Process and clean data
+
+                    # Step 3: Process and clean data
                     processed_data <- private$.prepareData()
-                    
-                    # Step 3: Process each test and calculate metrics
+
+                    # Step 4: Process each test and calculate metrics
                     test_results <- private$.processAllTests(processed_data)
-                    
-                    # Step 4: Populate comparison table
+
+                    # Cache test results to avoid redundant calculations
+                    private$.cached_test_results <- test_results
+
+                    # Step 5: Populate comparison table
                     private$.populateComparisonTable(test_results)
-                    
-                    # Step 5: Handle original data display if requested
+
+                    # Step 6: Handle original data display if requested
                     if (self$options$od) {
                         private$.displayOriginalData(processed_data)
                     }
-                    
-                    # Step 6: Perform statistical comparisons if requested
+
+                    # Step 7: Perform statistical comparisons if requested
                     if (self$options$statComp && length(test_results) >= 2) {
                         private$.performStatisticalComparisons(test_results)
                     }
-                    
-                    # Step 7: Setup visualizations if requested
+
+                    # Step 8a: Generate summary if requested
+                    if (self$options$showSummary && self$options$statComp && length(test_results) >= 2) {
+                        private$.generateSummary(test_results)
+                    }
+
+                    # Step 8b: Generate report sentence if requested
+                    if (self$options$showReportSentence && self$options$statComp && length(test_results) >= 2) {
+                        private$.generateReportSentence(test_results)
+                    }
+
+                    # Step 8c: Generate explanations if requested
+                    if (self$options$showExplanations) {
+                        private$.generateExplanations()
+                    }
+
+                    # Step 8: Setup visualizations if requested
                     if (self$options$plot || self$options$radarplot) {
                         private$.setupVisualizations(test_results)
                     }
-                    
-                    # Step 8: Generate clinical report and summary
+
+                    # Step 9: Generate clinical report and summary
                     private$.generateClinicalReport(test_results, processed_data)
-                    
+
                 }, error = function(e) {
-                    stop(jmvcore::.("Analysis failed: {error}. Please check your data and variable selections.", error = conditionMessage(e)))
+                    # Re-throw the original error without wrapping
+                    stop(conditionMessage(e), call. = FALSE)
                 })
+            },
+
+            # Check if minimum required variables are selected
+            .hasRequiredVars = function() {
+                # Gold standard is required
+                if (is.null(self$options$gold) || length(self$options$gold) == 0) {
+                    return(FALSE)
+                }
+
+                # At least 2 tests are required
+                test_count <- 0
+                if (!is.null(self$options$test1) && self$options$test1 != "") test_count <- test_count + 1
+                if (!is.null(self$options$test2) && self$options$test2 != "") test_count <- test_count + 1
+                if (!is.null(self$options$test3) && self$options$test3 != "") test_count <- test_count + 1
+
+                if (test_count < 2) {
+                    return(FALSE)
+                }
+
+                return(TRUE)
             },
 
             
             # Comprehensive input validation with informative error messages
             .validateInputs = function() {
-                # Check for required gold standard
-                if (length(self$options$gold) == 0) {
-                    stop(jmvcore::.("Gold standard variable is required. Please select a gold standard variable from your dataset."))
-                }
-                
                 # Check for valid data
                 if (is.null(self$data) || nrow(self$data) == 0) {
                     stop(jmvcore::.("No data provided for analysis. Please ensure your dataset contains data."))
                 }
-                
-                # Enhanced test validation with specific missing test identification
-                private$.validateTestSelection()
-                
-                # Validate prevalence setting
-                if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
-                    stop(jmvcore::.("Prior probability must be between 0 and 1. Current value: {value}", value = self$options$pprob))
-                }
-                
-                # Check for conflicting options
-                if (self$options$pp && self$options$ci) {
-                    stop(jmvcore::.("Prior probability and confidence intervals cannot both be enabled. Please choose one option."))
-                }
-            },
-            
-            # Enhanced test selection validation with specific guidance
-            .validateTestSelection = function() {
-                tests <- list(
-                    "Test 1" = self$options$test1,
-                    "Test 2" = self$options$test2, 
-                    "Test 3" = self$options$test3
-                )
-                
-                # Check which tests are properly specified
-                valid_tests <- character(0)
-                missing_tests <- character(0)
-                
-                for (test_name in names(tests)) {
-                    test_value <- tests[[test_name]]
-                    if (!is.null(test_value) && test_value != "") {
-                        valid_tests <- c(valid_tests, test_name)
-                    } else {
-                        missing_tests <- c(missing_tests, test_name)
-                    }
-                }
-                
-                # Require at least 2 tests for comparison
-                if (length(valid_tests) < 2) {
-                    if (length(valid_tests) == 0) {
-                        stop(jmvcore::.("No test variables selected. Please select at least Test 1 and Test 2 for comparison analysis."))
-                    } else if (length(valid_tests) == 1) {
-                        available <- paste(valid_tests, collapse = ", ")
-                        needed <- paste(missing_tests[1:2], collapse = " or ")
-                        stop(jmvcore::.("Only {available} is selected. Please also select {needed} to perform comparison analysis.", available = available, needed = needed))
-                    }
-                }
-                
+
                 # Validate that positive levels are specified for selected tests
                 test_positive_pairs <- list(
                     list(test = self$options$test1, positive = self$options$test1Positive, name = "Test 1"),
                     list(test = self$options$test2, positive = self$options$test2Positive, name = "Test 2"),
                     list(test = self$options$test3, positive = self$options$test3Positive, name = "Test 3")
                 )
-                
+
                 missing_positives <- character(0)
                 for (pair in test_positive_pairs) {
                     if (!is.null(pair$test) && pair$test != "") {
@@ -143,10 +239,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                         }
                     }
                 }
-                
+
                 if (length(missing_positives) > 0) {
-                    stop(jmvcore::.("Positive level not specified for: {tests}. Please select the positive result level for each test variable.", 
-                                   tests = paste(missing_positives, collapse = ", ")))
+                    msg <- paste(missing_positives, collapse = ", ")
+                    stop(jmvcore::.("Please specify positive levels for: {msg}"))
+                }
+
+                # Validate prevalence setting
+                if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
+                    value <- self$options$pprob
+                    stop(jmvcore::.("Prior probability must be between 0 and 1. Current value: {value}"))
+                }
+
+                # Check for conflicting options
+                if (self$options$pp && self$options$ci) {
+                    stop(jmvcore::.("Prior probability and confidence intervals cannot both be enabled. Please choose one option."))
                 }
             },
             
@@ -164,14 +271,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 # Extract variable names
-                goldPLevel <- jmvcore::constructFormula(terms = self$options$goldPositive) %>%
-                             jmvcore::decomposeFormula() %>% unlist()
-                goldVariable <- jmvcore::constructFormula(terms = self$options$gold) %>%
-                               jmvcore::decomposeFormula() %>% unlist()
-                
-                # Convert to factors
+                goldVariable <- self$options$gold
+                goldPLevel <- self$options$goldPositive
+
+                if (is.null(goldVariable) || goldVariable == "") {
+                    stop(jmvcore::.("Gold standard variable must be specified"))
+                }
+
+                # Convert to factor and validate positive level
                 mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
-                
+                private$.assertLevelExists(mydata[[goldVariable]], goldPLevel, goldVariable)
+
                 return(list(
                     data = mydata,
                     goldVariable = goldVariable,
@@ -270,40 +380,41 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
 
             # Process a single test and calculate all metrics
             .processSingleTest = function(mydata, testVariable, testPLevel, goldVariable, goldPLevel, test_index) {
-                # Convert to factor
+                # Convert to factor and validate positive level
                 mydata[[testVariable]] <- forcats::as_factor(mydata[[testVariable]])
-                
-                # Recode data to positive/negative with efficient pipeline
+                private$.assertLevelExists(mydata[[testVariable]], testPLevel, testVariable, testVariable)
+
+                # Recode data to positive/negative with explicit handling of missing values
                 mydata2 <- mydata %>%
                     dplyr::mutate(
                         testVariable2 = dplyr::case_when(
+                            is.na(.data[[testVariable]]) ~ NA_character_,
                             .data[[testVariable]] == testPLevel ~ "Positive",
-                            NA ~ NA_character_,
                             TRUE ~ "Negative"
                         ),
                         goldVariable2 = dplyr::case_when(
+                            is.na(.data[[goldVariable]]) ~ NA_character_,
                             .data[[goldVariable]] == goldPLevel ~ "Positive",
-                            NA ~ NA_character_,
                             TRUE ~ "Negative"
                         )
                     ) %>%
                     dplyr::mutate(
-                        testVariable2 = forcats::fct_relevel(testVariable2, "Positive"),
-                        goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
+                        testVariable2 = forcats::fct_relevel(factor(testVariable2, levels = c("Positive", "Negative")), "Positive"),
+                        goldVariable2 = forcats::fct_relevel(factor(goldVariable2, levels = c("Positive", "Negative")), "Positive")
                     )
-                
-                # Create confusion table
-                conf_table <- table(mydata2[["testVariable2"]], mydata2[["goldVariable2"]])
-                
+
+                # Create confusion table with zero-filled cells
+                conf_table <- private$.buildConfusionMatrix(mydata2[["testVariable2"]], mydata2[["goldVariable2"]])
+
                 # Extract confusion matrix values
-                TP <- conf_table[1, 1]
-                FP <- conf_table[1, 2]
-                FN <- conf_table[2, 1]
-                TN <- conf_table[2, 2]
-                
+                TP <- conf_table["Positive", "Positive"]
+                FP <- conf_table["Positive", "Negative"]
+                FN <- conf_table["Negative", "Positive"]
+                TN <- conf_table["Negative", "Negative"]
+
                 # Calculate basic metrics
-                metrics <- private$.calculateDiagnosticMetrics(TP, FP, FN, TN)
-                
+                metrics <- private$.calculateDiagnosticMetrics(TP, FP, FN, TN, testVariable)
+
                 # Populate contingency table
                 private$.populateContingencyTable(test_index, testVariable, TP, FP, FN, TN)
                 
@@ -317,40 +428,63 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     metrics = metrics,
                     conf_table = conf_table,
                     test_results = mydata2[["testVariable2"]],
+                    gold_reference = mydata2[["goldVariable2"]],
                     TP = TP, FP = FP, FN = FN, TN = TN
                 ))
             },
 
             # Helper function to calculate diagnostic metrics with prevalence logic
-            .calculateDiagnosticMetrics = function(TP, FP, FN, TN) {
+            .calculateDiagnosticMetrics = function(TP, FP, FN, TN, test_label) {
                 TotalPop <- TP + TN + FP + FN
                 DiseaseP <- TP + FN
                 DiseaseN <- TN + FP
                 TestP <- TP + FP
                 TestN <- TN + FN
-                
+
                 # Basic metrics
-                Sens <- TP / DiseaseP
-                Spec <- TN / DiseaseN
-                AccurT <- (TP + TN) / TotalPop
-                
+                Sens <- private$.computeRate(TP, DiseaseP, "sensitivity", test_label)
+                Spec <- private$.computeRate(TN, DiseaseN, "specificity", test_label)
+                AccurT <- private$.computeRate(TP + TN, TotalPop, "accuracy", test_label)
+
                 # Calculate PPV and NPV based on prevalence setting
                 if (self$options$pp && !is.na(self$options$pprob)) {
                     # Use provided prevalence with Bayes' theorem
                     PriorProb <- self$options$pprob
-                    PPV <- (Sens * PriorProb) / ((Sens * PriorProb) + ((1 - Spec) * (1 - PriorProb)))
-                    NPV <- (Spec * (1 - PriorProb)) / (((1 - Sens) * PriorProb) + (Spec * (1 - PriorProb)))
+                    if (is.na(Sens) || is.na(Spec)) {
+                        PPV <- NA_real_
+                        NPV <- NA_real_
+                    } else {
+                        denom_ppv <- (Sens * PriorProb) + ((1 - Spec) * (1 - PriorProb))
+                        denom_npv <- ((1 - Sens) * PriorProb) + (Spec * (1 - PriorProb))
+                        PPV <- private$.computeRate(Sens * PriorProb, denom_ppv, "positive predictive value", test_label)
+                        NPV <- private$.computeRate(Spec * (1 - PriorProb), denom_npv, "negative predictive value", test_label)
+                    }
                 } else {
                     # Use sample-based calculation
-                    PPV <- TP / TestP
-                    NPV <- TN / TestN
-                    PriorProb <- DiseaseP / TotalPop
+                    PPV <- private$.computeRate(TP, TestP, "positive predictive value", test_label)
+                    NPV <- private$.computeRate(TN, TestN, "negative predictive value", test_label)
+                    PriorProb <- private$.computeRate(DiseaseP, TotalPop, "prevalence", test_label)
                 }
-                
+
                 # Likelihood ratios
-                LRP <- Sens / (1 - Spec)
-                LRN <- (1 - Sens) / Spec
-                
+                spec_is_one <- !is.na(Spec) && abs(Spec - 1) < sqrt(.Machine$double.eps)
+                spec_is_zero <- !is.na(Spec) && abs(Spec - 0) < sqrt(.Machine$double.eps)
+
+                LRP <- if (is.na(Sens) || is.na(Spec)) {
+                    NA_real_
+                } else if (spec_is_one) {
+                    Inf
+                } else {
+                    private$.computeRate(Sens, 1 - Spec, "positive likelihood ratio", test_label)
+                }
+                LRN <- if (is.na(Sens) || is.na(Spec)) {
+                    NA_real_
+                } else if (spec_is_zero) {
+                    Inf
+                } else {
+                    private$.computeRate(1 - Sens, Spec, "negative likelihood ratio", test_label)
+                }
+
                 return(list(
                     Sens = Sens, Spec = Spec, AccurT = AccurT,
                     PPV = PPV, NPV = NPV, LRP = LRP, LRN = LRN,
@@ -406,13 +540,18 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             # Populate comparison table with all test results
             .populateComparisonTable = function(test_results) {
                 comparisonTable <- self$results$comparisonTable
+
+                try(comparisonTable$clearRows(), silent = TRUE)
                 
                 for (test_name in names(test_results)) {
                     result <- test_results[[test_name]]
                     metrics <- result$metrics
-                    
+
+                    # Use escaped variable name consistently for row keys
+                    escaped_test_name <- private$.escapeVar(test_name)
+
                     comparisonTable$addRow(
-                        rowKey = test_name,
+                        rowKey = escaped_test_name,
                         values = list(
                             test = test_name,
                             Sens = metrics$Sens,
@@ -424,22 +563,22 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                             LRN = metrics$LRN
                         )
                     )
-                    
+
                     # Add clinical interpretation
                     clinical_interpretation <- private$.generateClinicalInterpretation(metrics)
-                    comparisonTable$addFormat(rowKey = test_name, col = "test", format = jmvcore::Cell.BEGIN_GROUP)
+                    comparisonTable$addFormat(rowKey = escaped_test_name, col = "test", format = jmvcore::Cell.BEGIN_GROUP)
                     comparisonTable$addRow(
-                        rowKey = paste0(test_name, "_interp"),
+                        rowKey = paste0(escaped_test_name, "_interp"),
                         values = list(
                             test = paste0("  → ", clinical_interpretation),
                             Sens = "", Spec = "", AccurT = "", PPV = "", NPV = "", LRP = "", LRN = ""
                         )
                     )
-                    comparisonTable$addFormat(rowKey = paste0(test_name, "_interp"), col = "test", format = jmvcore::Cell.END_GROUP)
-                    
+                    comparisonTable$addFormat(rowKey = paste0(escaped_test_name, "_interp"), col = "test", format = jmvcore::Cell.END_GROUP)
+
                     # Add footnotes if requested
                     if (self$options$fnote) {
-                        private$.addComparisonTableFootnotes(comparisonTable, test_name)
+                        private$.addComparisonTableFootnotes(comparisonTable, escaped_test_name)
                     }
                 }
             },
@@ -544,8 +683,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                         }
                     }, error = function(e) {
                         n_sample <- sum(conf_table)
-                        enhanced_msg <- jmvcore::.("Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}", 
-                                                  test = testVariable, n = n_sample, error = conditionMessage(e))
+                        enhanced_msg <- jmvcore::format("Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}", 
+                                                        test = testVariable, n = n_sample, error = conditionMessage(e))
                         warning(enhanced_msg)
                     })
                 }
@@ -555,115 +694,317 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             .performStatisticalComparisons = function(test_results) {
                 mcnemarTable <- self$results$mcnemarTable
                 diffTable <- self$results$diffTable
-                
-                # Generate all pairwise combinations
+
+                try(mcnemarTable$clearRows(), silent = TRUE)
+                try(diffTable$clearRows(), silent = TRUE)
+
                 test_names <- names(test_results)
-                test_pairs <- combn(test_names, 2, simplify = FALSE)
-                
-                # Progress reporting for multiple comparisons
-                n_comparisons <- length(test_pairs)
-                if (n_comparisons > 1) {
-                    message(sprintf("Performing %d pairwise statistical comparisons...", n_comparisons))
+                n_tests <- length(test_names)
+
+                # For 3+ tests, perform Cochran's Q test first
+                if (n_tests >= 3) {
+                    private$.performCochranQ(test_results, mcnemarTable)
                 }
-                
+
+                # Generate all pairwise combinations
+                test_pairs <- combn(test_names, 2, simplify = FALSE)
+                n_comparisons <- length(test_pairs)
+
+                # Calculate p-value adjustment for multiple comparisons
+                # Use Holm-Bonferroni method (less conservative than Bonferroni)
+                p_values <- numeric(n_comparisons)
+                comparison_names <- character(n_comparisons)
+
+                if (n_comparisons > 1) {
+                    message(sprintf("Performing %d pairwise comparisons with Holm-Bonferroni correction...", n_comparisons))
+                }
+
+                # First pass: collect p-values
                 for (i in seq_along(test_pairs)) {
                     pair <- test_pairs[[i]]
                     test1 <- pair[1]
                     test2 <- pair[2]
-                    comparison_name <- paste(test1, "vs", test2)
-                    
-                    # Progress indicator for large numbers of comparisons
-                    if (n_comparisons > 3 && i %% max(1, floor(n_comparisons/3)) == 0) {
-                        message(sprintf("Completed %d/%d comparisons...", i, n_comparisons))
-                    }
-                    
-                    # McNemar's test
-                    private$.performMcNemarTest(test_results, test1, test2, comparison_name, mcnemarTable)
-                    
+                    comparison_names[i] <- paste(test1, "vs", test2)
+
+                    # Get p-value from McNemar test
+                    p_values[i] <- private$.getMcNemarPValue(test_results, test1, test2)
+                }
+
+                # Apply Holm-Bonferroni correction
+                p_adjusted <- stats::p.adjust(p_values, method = "holm")
+
+                # Second pass: populate table with adjusted p-values
+                for (i in seq_along(test_pairs)) {
+                    pair <- test_pairs[[i]]
+                    test1 <- pair[1]
+                    test2 <- pair[2]
+                    comparison_name <- comparison_names[i]
+
+                    # McNemar's test with adjusted p-value
+                    private$.performMcNemarTest(test_results, test1, test2, comparison_name,
+                                               mcnemarTable, p_adjusted[i])
+
                     # Confidence intervals for differences
                     private$.calculateDifferences(test_results, test1, test2, comparison_name, diffTable)
                 }
-                
+
                 if (n_comparisons > 1) {
-                    message(sprintf("Statistical comparisons completed successfully (%d total comparisons).", n_comparisons))
+                    message(sprintf("Statistical comparisons completed (%d comparisons, Holm-Bonferroni corrected).", n_comparisons))
                 }
+            },
+
+            # Perform Cochran's Q test for 3+ tests (global test)
+            .performCochranQ = function(test_results, mcnemarTable) {
+                tryCatch({
+                    # Extract test results and gold standard
+                    test_names <- names(test_results)
+                    n_tests <- length(test_names)
+
+                    # Get common valid cases
+                    gold <- test_results[[test_names[1]]]$gold_reference
+                    all_tests_matrix <- sapply(test_names, function(tn) {
+                        ifelse(test_results[[tn]]$test_results == "Positive", 1, 0)
+                    })
+
+                    valid_idx <- complete.cases(all_tests_matrix)
+                    if (sum(valid_idx) == 0) {
+                        return()
+                    }
+
+                    all_tests_matrix <- all_tests_matrix[valid_idx, , drop = FALSE]
+
+                    # Cochran's Q statistic
+                    # Q = (k-1) * [k*sum(Ci^2) - (sum(Ci))^2] / [k*sum(Ri) - sum(Ri^2)]
+                    k <- n_tests
+                    n <- nrow(all_tests_matrix)
+
+                    Ci <- colSums(all_tests_matrix)  # Column sums (successes per test)
+                    Ri <- rowSums(all_tests_matrix)  # Row sums (successes per subject)
+
+                    numerator <- k * sum(Ci^2) - (sum(Ci))^2
+                    denominator <- k * sum(Ri) - sum(Ri^2)
+
+                    if (denominator == 0) {
+                        return()  # All tests identical
+                    }
+
+                    Q <- (k - 1) * numerator / denominator
+                    df <- k - 1
+                    p_value <- stats::pchisq(Q, df, lower.tail = FALSE)
+
+                    interpretation <- dplyr::case_when(
+                        p_value < 0.001 ~ "Highly significant overall difference among tests (p<0.001)",
+                        p_value < 0.01 ~ "Significant overall difference among tests (p<0.01)",
+                        p_value < 0.05 ~ "Statistically significant overall difference among tests (p<0.05)",
+                        TRUE ~ "No significant overall difference among tests (p≥0.05)"
+                    )
+
+                    mcnemarTable$addRow(
+                        rowKey = "cochran_q_global",
+                        values = list(
+                            comparison = sprintf("Overall (%d tests)", n_tests),
+                            stat = Q,
+                            df = df,
+                            p = p_value,
+                            interpretation = interpretation
+                        )
+                    )
+
+                    if (p_value >= private$P_THRESHOLD_SIGNIFICANT) {
+                        mcnemarTable$addFootnote(
+                            rowKey = "cochran_q_global",
+                            col = "interpretation",
+                            "Cochran's Q test shows no significant difference. Pairwise comparisons below may not be meaningful."
+                        )
+                    }
+
+                }, error = function(e) {
+                    error_msg <- conditionMessage(e)
+                    message(sprintf("Cochran's Q calculation failed: %s", error_msg))
+
+                    # Add visible error row to table
+                    mcnemarTable$addRow(
+                        rowKey = "cochran_q_error",
+                        values = list(
+                            comparison = sprintf("Overall (%d tests) - ERROR", n_tests),
+                            stat = NA,
+                            df = NA,
+                            p = NA,
+                            interpretation = sprintf(
+                                "⚠️ Could not calculate: %s. Check that all tests have valid paired data.",
+                                error_msg
+                            )
+                        )
+                    )
+
+                    # Add warning footnote
+                    mcnemarTable$setNote(
+                        "Cochran's Q test failed. Pairwise comparisons may still be valid but should be interpreted cautiously.",
+                        symbol = "⚠"
+                    )
+                })
+            },
+
+            # Get McNemar p-value only (for adjustment calculation)
+            .getMcNemarPValue = function(test_results, test1, test2) {
+                test1_results <- test_results[[test1]]$test_results
+                test2_results <- test_results[[test2]]$test_results
+
+                tryCatch({
+                    valid_idx <- !is.na(test1_results) & !is.na(test2_results)
+                    if (sum(valid_idx) == 0) return(1)
+
+                    lvls <- c("Positive", "Negative")
+                    mcnemar_table <- table(
+                        factor(test1_results[valid_idx], levels = lvls),
+                        factor(test2_results[valid_idx], levels = lvls),
+                        useNA = "no"
+                    )
+
+                    if (sum(mcnemar_table) == 0) return(1)
+
+                    mcnemar_result <- stats::mcnemar.test(mcnemar_table)
+                    return(mcnemar_result$p.value)
+                }, error = function(e) {
+                    return(1)
+                })
             },
             
             # Perform McNemar's test with clinical interpretation
-            .performMcNemarTest = function(test_results, test1, test2, comparison_name, mcnemarTable) {
+            .performMcNemarTest = function(test_results, test1, test2, comparison_name, mcnemarTable, p_adjusted = NULL) {
                 test1_results <- test_results[[test1]]$test_results
                 test2_results <- test_results[[test2]]$test_results
-                
+
                 tryCatch({
-                    mcnemar_table <- table(test1_results, test2_results)
+                    valid_idx <- !is.na(test1_results) & !is.na(test2_results)
+                    if (sum(valid_idx) == 0) {
+                        comparison <- comparison_name
+                        warning(jmvcore::format("Could not perform McNemar's test for {comparison}: no paired observations after removing missing values."))
+                        return()
+                    }
+
+                    lvls <- c("Positive", "Negative")
+                    mcnemar_table <- table(
+                        factor(test1_results[valid_idx], levels = lvls),
+                        factor(test2_results[valid_idx], levels = lvls),
+                        useNA = "no"
+                    )
+
+                    if (sum(mcnemar_table) == 0) {
+                        comparison <- comparison_name
+                        warning(jmvcore::format("Could not perform McNemar's test for {comparison}: no data available after filtering."))
+                        return()
+                    }
                     mcnemar_result <- stats::mcnemar.test(mcnemar_table)
-                    
-                    # Clinical interpretation of p-value
+
+                    # Check sample size adequacy (number of discordant pairs)
+                    b <- mcnemar_table["Positive", "Negative"]  # Test1+/Test2-
+                    c <- mcnemar_table["Negative", "Positive"]  # Test1-/Test2+
+                    n_discordant <- b + c
+
+                    # Use adjusted p-value if provided, otherwise use raw p-value
+                    p_to_interpret <- if (!is.null(p_adjusted)) p_adjusted else mcnemar_result$p.value
+
+                    # Clinical interpretation of p-value (using constants)
                     interpretation <- dplyr::case_when(
-                        mcnemar_result$p.value < 0.001 ~ "Highly significant difference (p<0.001)",
-                        mcnemar_result$p.value < 0.01 ~ "Significant difference (p<0.01)", 
-                        mcnemar_result$p.value < 0.05 ~ "Statistically significant difference (p<0.05)",
-                        mcnemar_result$p.value < 0.1 ~ "Marginally significant difference (p<0.1)",
+                        p_to_interpret < private$P_THRESHOLD_STRONG ~ "Highly significant difference (p<0.001)",
+                        p_to_interpret < 0.01 ~ "Significant difference (p<0.01)",
+                        p_to_interpret < private$P_THRESHOLD_SIGNIFICANT ~ "Statistically significant difference (p<0.05)",
+                        p_to_interpret < 0.1 ~ "Marginally significant difference (p<0.1)",
                         TRUE ~ "No significant difference (p≥0.1)"
                     )
-                    
+
+                    # Add suffix to interpretation if adjusted
+                    if (!is.null(p_adjusted)) {
+                        interpretation <- paste0(interpretation, " (Holm-Bonferroni corrected)")
+                    }
+
                     mcnemarTable$addRow(
                         rowKey = comparison_name,
                         values = list(
                             comparison = comparison_name,
                             stat = mcnemar_result$statistic,
                             df = mcnemar_result$parameter,
-                            p = mcnemar_result$p.value,
+                            p = p_to_interpret,
                             interpretation = interpretation
                         )
                     )
+
+                    # Add sample size adequacy warning if needed
+                    if (n_discordant < private$MIN_DISCORDANT_PAIRS) {
+                        mcnemarTable$addFootnote(
+                            rowKey = comparison_name,
+                            col = "p",
+                            sprintf("⚠️ Small number of discordant pairs (n=%d). Results may be unreliable (recommend n≥%d).",
+                                    n_discordant, private$MIN_DISCORDANT_PAIRS)
+                        )
+                    }
                 }, error = function(e) {
                     n1 <- length(test1_results)
                     n2 <- length(test2_results)
-                    enhanced_msg <- jmvcore::.("Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}", 
-                                              comparison = comparison_name, n1 = n1, n2 = n2, error = conditionMessage(e))
+                    comparison <- comparison_name
+                    error <- conditionMessage(e)
+                    enhanced_msg <- jmvcore::format("Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}",
+                                                    comparison = comparison, n1 = n1, n2 = n2, error = error)
                     warning(enhanced_msg)
                 })
             },
             
-            # Calculate confidence intervals for metric differences
+            # Calculate confidence intervals for paired metric differences
             .calculateDifferences = function(test_results, test1, test2, comparison_name, diffTable) {
-                metrics <- c("Sens", "Spec", "PPV", "NPV")
-                
-                for (metric in metrics) {
-                    tryCatch({
-                        value1 <- test_results[[test1]]$metrics[[metric]]
-                        value2 <- test_results[[test2]]$metrics[[metric]]
-                        diff <- value1 - value2
-                        
-                        # Calculate sample sizes
-                        n1 <- sum(test_results[[test1]]$conf_table)
-                        n2 <- sum(test_results[[test2]]$conf_table)
-                        
-                        # Standard error for difference
-                        se_diff <- sqrt((value1 * (1 - value1) / n1) + (value2 * (1 - value2) / n2))
-                        
-                        # 95% CI
-                        z <- 1.96
-                        lower <- diff - z * se_diff
-                        upper <- diff + z * se_diff
-                        
-                        diffTable$addRow(
-                            rowKey = paste(comparison_name, metric, sep = "_"),
-                            values = list(
-                                comparison = comparison_name,
-                                metric = metric,
-                                diff = diff,
-                                lower = lower,
-                                upper = upper
-                            )
-                        )
-                    }, error = function(e) {
-                        enhanced_msg <- jmvcore::.("Could not calculate {metric} difference for {comparison} (n1={n1}, n2={n2}). Check for extreme values or zero denominators. Error: {error}", 
-                                                  metric = metric, comparison = comparison_name, n1 = n1, n2 = n2, error = conditionMessage(e))
-                        warning(enhanced_msg)
-                    })
+                comp <- private$.extractComparisonVectors(test_results, test1, test2)
+                t1 <- comp$test1
+                t2 <- comp$test2
+                gold <- comp$gold
+
+                common_idx <- !is.na(t1) & !is.na(t2) & !is.na(gold)
+
+                if (sum(common_idx) == 0) {
+                    warning(jmvcore::format("Unable to compute paired differences for {comparison}: no observations with complete data across both tests and the gold standard.",
+                                             comparison = comparison_name))
+                    return()
                 }
+
+                add_diff_row <- function(result, metric_label, metric_key) {
+                    if (is.null(result)) {
+                        warning(jmvcore::format("Unable to compute {metric} difference for {comparison}: insufficient paired data.",
+                                                 metric = metric_label, comparison = comparison_name), call. = FALSE)
+                        return()
+                    }
+                    diffTable$addRow(
+                        rowKey = paste(comparison_name, metric_key, sep = "_"),
+                        values = list(
+                            comparison = comparison_name,
+                            metric = metric_label,
+                            diff = result$diff,
+                            lower = result$lower,
+                            upper = result$upper
+                        )
+                    )
+                }
+
+                # Sensitivity difference (gold positive)
+                sens_idx <- common_idx & gold == "Positive"
+                sens_diff <- if (sum(sens_idx) == 0) NULL else private$.pairedProportionDifference(
+                    x = ifelse(t1[sens_idx] == "Positive", 1, 0),
+                    y = ifelse(t2[sens_idx] == "Positive", 1, 0)
+                )
+                add_diff_row(sens_diff, jmvcore::.("Sensitivity"), "Sens")
+
+                # Specificity difference (gold negative)
+                spec_idx <- common_idx & gold == "Negative"
+                spec_diff <- if (sum(spec_idx) == 0) NULL else private$.pairedProportionDifference(
+                    x = ifelse(t1[spec_idx] == "Negative", 1, 0),
+                    y = ifelse(t2[spec_idx] == "Negative", 1, 0)
+                )
+                add_diff_row(spec_diff, jmvcore::.("Specificity"), "Spec")
+
+                # Accuracy difference (all subjects)
+                acc_diff <- private$.pairedProportionDifference(
+                    x = ifelse(t1[common_idx] == gold[common_idx], 1, 0),
+                    y = ifelse(t2[common_idx] == gold[common_idx], 1, 0)
+                )
+                add_diff_row(acc_diff, jmvcore::.("Accuracy"), "AccurT")
             },
 
             # Setup visualizations with improved data structure
@@ -843,8 +1184,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 tryCatch(
                     func(...),
                     error = function(e) {
-                        enhanced_msg <- jmvcore::.("Statistical calculation failed for {context}: {error}. Check data quality, sample sizes, and ensure no extreme values or division by zero.", 
-                                                  context = context_info, error = conditionMessage(e))
+                        enhanced_msg <- jmvcore::format("Statistical calculation failed for {context}: {error}. Check data quality, sample sizes, and ensure no extreme values or division by zero.", 
+                                                         context = context_info, error = conditionMessage(e))
                         warning(enhanced_msg)
                         return(default_return)
                     }
@@ -871,21 +1212,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     '<h2 style="color: #2c3e50; border-bottom: 2px solid #3498db;">📋 Clinical Summary</h2>',
                     results_section,
                     
-                    '<h3 style="color: #27ae60; margin-top: 30px;">📝 Copy-Ready Report Sentences</h3>',
+                    '<h3 style="color: #27ae60; margin-top: 30px;">📝 Report Sentences</h3>',
                     '<div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;">',
                     '<h4 style="margin-top: 0;">Methods Section:</h4>',
                     '<p style="font-style: italic; line-height: 1.6;">', methods_section, '</p>',
-                    '<button onclick="navigator.clipboard.writeText(this.parentNode.querySelector(\'p\').innerText)" ',
-                    'style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">',
-                    '📋 Copy Methods Text</button>',
                     '</div>',
-                    
+
                     '<div style="background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 15px 0;">',
                     '<h4 style="margin-top: 0;">Results Section:</h4>',
                     '<p style="font-style: italic; line-height: 1.6;">', results_section, '</p>',
-                    '<button onclick="navigator.clipboard.writeText(this.parentNode.querySelector(\'p\').innerText)" ',
-                    'style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">',
-                    '📋 Copy Results Text</button>',
                     '</div>',
                     
                     '<h3 style="color: #8e44ad; margin-top: 30px;">💡 Clinical Recommendations</h3>',
@@ -1149,6 +1484,271 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
 
                 print(plot)
                 TRUE
+            },
+
+            # Generate natural language summary of comparison results
+            .generateSummary = function(test_results) {
+                n_tests <- length(test_results)
+                test_names <- names(test_results)
+
+                html <- "<div style='background-color:#f9f9f9; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>"
+                html <- paste0(html, "<h4 style='margin-top:0;'>📊 Summary</h4>")
+
+                if (n_tests == 3) {
+                    # Check if Cochran's Q was performed
+                    mcnemar_table <- self$results$mcnemarTable
+                    if (length(mcnemar_table$rowKeys) > 0 && grepl("overall", tolower(mcnemar_table$rowKeys[1]), fixed = FALSE)) {
+                        q_row <- mcnemar_table$rowKeys[1]
+                        q_stat <- mcnemar_table$getCell(rowKey = q_row, col = "stat")$value
+                        q_p <- mcnemar_table$getCell(rowKey = q_row, col = "p")$value
+
+                        html <- paste0(html, sprintf(
+                            "<p><b>Overall comparison:</b> Cochran's Q test (χ² = %.2f, p = %.3f) ",
+                            q_stat, q_p
+                        ))
+
+                        if (q_p < private$P_THRESHOLD_SIGNIFICANT) {
+                            html <- paste0(html,
+                                "<span style='color:#d32f2f;'><b>found significant differences</b></span> ",
+                                "among the three tests. This means the tests do NOT perform equally—at least one differs significantly from the others.</p>"
+                            )
+
+                            # Identify best test
+                            accs <- sapply(test_names, function(tn) {
+                                test_results[[tn]]$metrics$AccurT
+                            })
+                            best_test <- test_names[which.max(accs)]
+                            best_acc <- max(accs, na.rm = TRUE)
+
+                            html <- paste0(html, sprintf(
+                                "<p><b>Clinical interpretation:</b> <span style='color:#1976d2;'><b>%s</b></span> ",
+                                best_test
+                            ), sprintf(
+                                "shows the highest diagnostic accuracy (%.1f%%). Review pairwise comparisons below to see which differences are statistically significant after multiple comparison correction.</p>",
+                                best_acc * 100
+                            ))
+                        } else {
+                            html <- paste0(html,
+                                "<span style='color:#388e3c;'><b>found no significant differences</b></span> ",
+                                "among the three tests. All tests show similar diagnostic accuracy. ",
+                                "Selection can be based on practical considerations such as cost, turnaround time, or availability.</p>"
+                            )
+                        }
+                    }
+                } else if (n_tests == 2) {
+                    # Extract McNemar results
+                    mcnemar_table <- self$results$mcnemarTable
+                    if (length(mcnemar_table$rowKeys) > 0) {
+                        mcn_row <- mcnemar_table$rowKeys[1]
+                        mcn_stat <- mcnemar_table$getCell(rowKey = mcn_row, col = "stat")$value
+                        mcn_p <- mcnemar_table$getCell(rowKey = mcn_row, col = "p")$value
+
+                        test1_name <- test_names[1]
+                        test2_name <- test_names[2]
+
+                        acc1 <- test_results[[test1_name]]$metrics$AccurT
+                        acc2 <- test_results[[test2_name]]$metrics$AccurT
+
+                        html <- paste0(html, sprintf(
+                            "<p><b>Comparison:</b> %s (accuracy: %.1f%%) vs %s (accuracy: %.1f%%)</p>",
+                            test1_name, acc1*100, test2_name, acc2*100
+                        ))
+
+                        html <- paste0(html, sprintf(
+                            "<p><b>McNemar's test:</b> χ² = %.2f, p = %.3f — ",
+                            mcn_stat, mcn_p
+                        ))
+
+                        if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) {
+                            better_test <- if (acc1 > acc2) test1_name else test2_name
+                            html <- paste0(html, sprintf(
+                                "<span style='color:#d32f2f;'><b>Significant difference detected.</b></span> ",
+                                "%s shows significantly better diagnostic accuracy.</p>",
+                                better_test
+                            ))
+                        } else {
+                            html <- paste0(html,
+                                "<span style='color:#388e3c;'><b>No significant difference.</b></span> ",
+                                "Both tests perform similarly. Consider practical factors when choosing.</p>"
+                            )
+                        }
+                    }
+                }
+
+                html <- paste0(html, "</div>")
+                self$results$summaryReport$setContent(html)
+            },
+
+            # Generate manuscript-ready report sentence
+            .generateReportSentence = function(test_results) {
+                n_tests <- length(test_results)
+                test_names <- names(test_results)
+
+                html <- "<div style='background-color:#f0f0f0; padding:15px; border:1px solid #ccc; margin:10px 0;'>"
+                html <- paste0(html, "<h4 style='margin-top:0;'>📝 Manuscript-Ready Report</h4>")
+                html <- paste0(html, "<p style='font-size:10pt; color:#666; margin-bottom:10px;'>",
+                              "Copy and adapt to your manuscript. Verify all statistical values and add clinical context.</p>")
+
+                html <- paste0(html, "<div style='background-color:#fff; padding:12px; font-family:serif; font-size:11pt; line-height:1.8;'>")
+
+                if (n_tests == 3) {
+                    mcnemar_table <- self$results$mcnemarTable
+                    if (length(mcnemar_table$rowKeys) > 0 && grepl("overall", tolower(mcnemar_table$rowKeys[1]), fixed = FALSE)) {
+                        q_row <- mcnemar_table$rowKeys[1]
+                        q_stat <- mcnemar_table$getCell(rowKey = q_row, col = "stat")$value
+                        q_df <- mcnemar_table$getCell(rowKey = q_row, col = "df")$value
+                        q_p <- mcnemar_table$getCell(rowKey = q_row, col = "p")$value
+
+                        report <- sprintf(
+                            "Cochran's Q test revealed %s significant difference in diagnostic accuracy among the three tests (χ²(%d) = %.2f, p = %.3f). ",
+                            if (q_p < private$P_THRESHOLD_SIGNIFICANT) "a" else "no",
+                            q_df, q_stat, q_p
+                        )
+
+                        if (q_p < private$P_THRESHOLD_SIGNIFICANT) {
+                            report <- paste0(report,
+                                "Post-hoc pairwise comparisons with Holm-Bonferroni correction were conducted to identify specific differences between tests. "
+                            )
+
+                            # Find best test
+                            accs <- sapply(test_names, function(tn) {
+                                test_results[[tn]]$metrics$AccurT
+                            })
+                            best_test <- test_names[which.max(accs)]
+
+                            report <- paste0(report, sprintf(
+                                "%s demonstrated the highest overall diagnostic accuracy.",
+                                best_test
+                            ))
+                        }
+
+                        html <- paste0(html, report)
+                    }
+                } else if (n_tests == 2) {
+                    mcnemar_table <- self$results$mcnemarTable
+                    if (length(mcnemar_table$rowKeys) > 0) {
+                        mcn_row <- mcnemar_table$rowKeys[1]
+                        mcn_stat <- mcnemar_table$getCell(rowKey = mcn_row, col = "stat")$value
+                        mcn_df <- mcnemar_table$getCell(rowKey = mcn_row, col = "df")$value
+                        mcn_p <- mcnemar_table$getCell(rowKey = mcn_row, col = "p")$value
+
+                        test1_name <- test_names[1]
+                        test2_name <- test_names[2]
+
+                        report <- sprintf(
+                            "McNemar's test comparing %s and %s showed %s significant difference in diagnostic accuracy (χ²(%d) = %.2f, p = %.3f).",
+                            test1_name, test2_name,
+                            if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) "a" else "no",
+                            mcn_df, mcn_stat, mcn_p
+                        )
+
+                        if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) {
+                            acc1 <- test_results[[test1_name]]$metrics$AccurT
+                            acc2 <- test_results[[test2_name]]$metrics$AccurT
+                            better_test <- if (acc1 > acc2) test1_name else test2_name
+
+                            report <- paste0(report, sprintf(
+                                " %s demonstrated significantly better diagnostic performance.",
+                                better_test
+                            ))
+                        }
+
+                        html <- paste0(html, report)
+                    }
+                }
+
+                html <- paste0(html, "</div></div>")
+                self$results$reportSentence$setContent(html)
+            },
+
+            # Generate explanations and glossary content
+            .generateExplanations = function() {
+                html <- "<div style='font-family: Arial, sans-serif; line-height:1.6;'>"
+
+                # Glossary section
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db;'>📚 Statistical Glossary</h4>")
+                html <- paste0(html, "<dl style='margin-left:15px;'>")
+
+                html <- paste0(html,
+                    "<dt><b>McNemar's Test</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Compares diagnostic accuracy of two tests on the same patients. Focuses on <i>discordant pairs</i> (cases where tests disagree). Appropriate for paired/matched data only. P < 0.05 indicates tests differ significantly in accuracy.</dd>"
+                )
+
+                html <- paste0(html,
+                    "<dt><b>Cochran's Q Test</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Extension of McNemar's for 3+ tests. Tests whether any differences exist among tests. If significant (p < 0.05), proceed to pairwise comparisons with multiple comparison correction.</dd>"
+                )
+
+                html <- paste0(html,
+                    "<dt><b>Holm-Bonferroni Correction</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Adjusts p-values when making multiple comparisons to control Type I error (false positives). More powerful than standard Bonferroni correction. Applied automatically when comparing 3 tests.</dd>"
+                )
+
+                html <- paste0(html,
+                    "<dt><b>Discordant Pairs</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Cases where Test A and Test B give different results (e.g., Test A positive, Test B negative). McNemar's test examines if these imbalances are significant. At least 10 discordant pairs recommended for reliable results.</dd>"
+                )
+
+                html <- paste0(html,
+                    "<dt><b>Sensitivity</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Proportion of diseased cases correctly identified (True Positive Rate). High sensitivity means few false negatives. Important when missing disease is costly.</dd>"
+                )
+
+                html <- paste0(html,
+                    "<dt><b>Specificity</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Proportion of non-diseased cases correctly identified (True Negative Rate). High specificity means few false positives. Important when false alarms are problematic.</dd>"
+                )
+
+                html <- paste0(html,
+                    "<dt><b>PPV (Positive Predictive Value)</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Probability that a positive test result truly indicates disease. Depends on disease prevalence—higher in populations with higher disease rates.</dd>"
+                )
+
+                html <- paste0(html,
+                    "<dt><b>NPV (Negative Predictive Value)</b></dt>",
+                    "<dd style='margin-bottom:12px;'>Probability that a negative test result truly indicates absence of disease. Also depends on prevalence.</dd>"
+                )
+
+                html <- paste0(html, "</dl>")
+
+                # Assumptions section
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db; margin-top:25px;'>⚙️ Assumptions & Requirements</h4>")
+                html <- paste0(html, "<ul style='margin-left:15px;'>")
+                html <- paste0(html,
+                    "<li><b>Paired Data:</b> All tests must be performed on the same patients/samples (not independent groups)</li>",
+                    "<li><b>Adequate Sample Size:</b> At least 10 discordant pairs recommended for McNemar's test reliability</li>",
+                    "<li><b>Binary Tests:</b> Each test must have exactly 2 levels (positive/negative or similar)</li>",
+                    "<li><b>Gold Standard:</b> Reference test must represent true disease status (e.g., biopsy, final diagnosis)</li>",
+                    "<li><b>Complete Cases:</b> Cases with missing data in any test are excluded from comparisons</li>"
+                )
+                html <- paste0(html, "</ul>")
+
+                # When to use section
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db; margin-top:25px;'>🎯 When to Use This Analysis</h4>")
+                html <- paste0(html, "<ul style='margin-left:15px;'>")
+                html <- paste0(html,
+                    "<li>Comparing diagnostic accuracy of 2-3 tests performed on same patients</li>",
+                    "<li>Evaluating if a new test is significantly better/worse than standard test</li>",
+                    "<li>Optimizing test selection based on performance metrics</li>",
+                    "<li>Validating diagnostic tools in clinical or pathology practice</li>"
+                )
+                html <- paste0(html, "</ul>")
+
+                # Limitations section
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #e74c3c; margin-top:25px;'>⚠️ Limitations</h4>")
+                html <- paste0(html, "<ul style='margin-left:15px; color:#c0392b;'>")
+                html <- paste0(html,
+                    "<li>McNemar's test compares overall accuracy only—does not separately test sensitivity vs specificity differences</li>",
+                    "<li>Requires paired observations—cannot compare tests performed on different patient groups</li>",
+                    "<li>Cannot handle continuous test results—use ROC curve comparison (DeLong's test) instead</li>",
+                    "<li>Small number of discordant pairs reduces statistical power and reliability</li>",
+                    "<li>P-values do not indicate clinical importance—consider effect sizes and practical implications</li>"
+                )
+                html <- paste0(html, "</ul>")
+
+                html <- paste0(html, "</div>")
+
+                self$results$explanationsContent$setContent(html)
             }
         )
     )
