@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.83
+version: 0.0.31.84
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-10-02'
+date: '2025-10-03'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1013,6 +1013,21 @@ analyses:
       and database standardization workflows.
     ribbon: analyses
     category: analyses
+  - title: DateTime Converter
+    name: datetimeconverter
+    ns: ClinicoPath
+    menuGroup: SurvivalT
+    menuSubgroup: Data Preparation
+    menuTitle: DateTime Converter
+    menuSubtitle: Convert datetime and extract components
+    description: >-
+      Convert datetime variables to standardized format and extract datetime
+      components (year, month, day, hour, minute, day name, week number,
+      quarter, etc.). Features automatic format detection, quality assessment,
+      and preview of converted data. Perfect for preparing datetime data for
+      analysis and creating time-based variables.
+    ribbon: analyses
+    category: analyses
   - title: Subgroup Analysis Forest Plot
     name: subgroupforest
     ns: ClinicoPath
@@ -1230,7 +1245,7 @@ analyses:
     name: decisioncalculator
     ns: ClinicoPath
     menuGroup: meddecide
-    menuSubgroup: Decision
+    menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
     description: |
@@ -1357,9 +1372,9 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecide
     menuTitle: Co-Testing Analysis
-    menuSubgroup: Decision
+    menuSubgroup: Decision Calculators
     menuSubtitle: Analyze combined test results
     description: >
       Function for analyzing combined results of two concurrent diagnostic
@@ -1370,9 +1385,9 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecide
     menuTitle: Sequential Testing Analysis
-    menuSubgroup: Decision
+    menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
     description: >-
       Analyzes how diagnostic accuracy changes when applying two tests in
@@ -1461,7 +1476,7 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: OncoPathT
     menuTitle: Dendrogram
     menuSubgroup: Drafts
     ribbon: analyses
@@ -1601,8 +1616,8 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
-    menuSubgroup: Auto Visualization
+    menuGroup: JJStatsPlotT
+    menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-
       Automatically selects and generates the most appropriate statistical
@@ -1766,6 +1781,7 @@ analyses:
       visualization capabilities. Comprehensive implementation of tidyplots for
       jamovi with advanced statistical visualization features including multiple
       plot types, statistical testing, and extensive customization options.
+    menuSubgroup: All-In-One
   - title: River Plots
     name: jjriverplot
     ns: ClinicoPath

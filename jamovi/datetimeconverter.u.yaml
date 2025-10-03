@@ -1,0 +1,122 @@
+title: DateTime Converter
+name: datetimeconverter
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: DateTime Variable
+        children:
+          - type: VariablesListBox
+            name: datetime_var
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Format Selection
+        children:
+          - type: ComboBox
+            name: datetime_format
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Preview Options
+        children:
+          - type: TextBox
+            name: preview_rows
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Corrected DateTime
+        children:
+          - type: Output
+            name: corrected_datetime
+
+  - type: CollapseBox
+    label: Date Components
+    collapsed: false
+    children:
+      - type: Label
+        label: 'Extract (Preview)'
+        children:
+          - type: CheckBox
+            name: extract_year
+          - type: CheckBox
+            name: extract_month
+          - type: CheckBox
+            name: extract_monthname
+          - type: CheckBox
+            name: extract_day
+      - type: Label
+        label: 'Add to Data'
+        children:
+          - type: Output
+            name: year_out
+          - type: Output
+            name: month_out
+          - type: Output
+            name: monthname_out
+          - type: Output
+            name: day_out
+
+  - type: CollapseBox
+    label: Time Components
+    collapsed: true
+    children:
+      - type: Label
+        label: 'Extract (Preview)'
+        children:
+          - type: CheckBox
+            name: extract_hour
+          - type: CheckBox
+            name: extract_minute
+          - type: CheckBox
+            name: extract_second
+      - type: Label
+        label: 'Add to Data'
+        children:
+          - type: Output
+            name: hour_out
+          - type: Output
+            name: minute_out
+          - type: Output
+            name: second_out
+
+  - type: CollapseBox
+    label: Other Components
+    collapsed: true
+    children:
+      - type: Label
+        label: 'Extract (Preview)'
+        children:
+          - type: CheckBox
+            name: extract_dayname
+          - type: CheckBox
+            name: extract_weeknum
+          - type: CheckBox
+            name: extract_quarter
+          - type: CheckBox
+            name: extract_dayofyear
+      - type: Label
+        label: 'Add to Data'
+        children:
+          - type: Output
+            name: dayname_out
+          - type: Output
+            name: weeknum_out
+          - type: Output
+            name: quarter_out
+          - type: Output
+            name: dayofyear_out

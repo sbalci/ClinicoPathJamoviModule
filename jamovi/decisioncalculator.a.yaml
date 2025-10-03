@@ -2,7 +2,7 @@
 name:  decisioncalculator
 title: Medical Decision Calculator
 menuGroup: meddecide
-menuSubgroup: Decision
+menuSubgroup: Decision Calculators
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
 version: '0.0.31'
 jas: '1.2'
