@@ -272,7 +272,7 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="summary",
                 title="Summary Statistics",
-                rows="(vars)",
+                rows=0,
                 columns=list(
                     list(
                         `name`="variable", 

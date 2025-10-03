@@ -1,0 +1,283 @@
+---
+name: datetimeconverter
+title: DateTime Converter
+menuGroup: Survival
+menuSubgroup: Data Preparation
+menuSubtitle: Convert datetime and extract components
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >-
+        Convert datetime variables to standardized format and extract datetime components
+        (year, month, day, hour, minute, day name, week number, quarter, etc.).
+        Features automatic format detection, quality assessment, and preview of converted data.
+        Perfect for preparing datetime data for analysis and creating time-based variables.
+    R:
+        dontrun: false
+        usage: |
+            # Basic datetime conversion: '0.0.31'
+            datetimeconverter(
+              data = study_data,
+              datetime_var = "event_date",
+              datetime_format = "auto"
+            )
+
+            # Extract components:
+            datetimeconverter(
+              data = study_data,
+              datetime_var = "timestamp",
+              datetime_format = "ymd_hms",
+              extract_year = TRUE,
+              extract_month = TRUE,
+              extract_dayname = TRUE
+            )
+
+options:
+    # === CORE DATA INPUT ===
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame containing datetime variable to convert.
+
+    # === DATETIME VARIABLE ===
+    - name: datetime_var
+      title: DateTime Variable
+      type: Variable
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Variable containing datetime information in various formats.
+            Can handle character strings, numeric values, or factors with datetime representations.
+
+    # === FORMAT CONFIGURATION ===
+    - name: datetime_format
+      title: DateTime Format
+      type: List
+      options:
+        - name: auto
+          title: Auto-detect Format
+        - name: ymdhms
+          title: YYYY-MM-DD HH:MM:SS
+        - name: ymd
+          title: YYYY-MM-DD
+        - name: dmy
+          title: DD-MM-YYYY (or DD/MM/YYYY)
+        - name: mdy
+          title: MM-DD-YYYY (or MM/DD/YYYY)
+        - name: dmyhms
+          title: DD-MM-YYYY HH:MM:SS
+        - name: mdyhms
+          title: MM-DD-YYYY HH:MM:SS
+        - name: dmyhm
+          title: DD-MM-YYYY HH:MM
+        - name: mdyhm
+          title: MM-DD-YYYY HH:MM
+        - name: ymdhm
+          title: YYYY-MM-DD HH:MM
+        - name: ydm
+          title: YYYY-DD-MM
+        - name: myd
+          title: MM-YYYY-DD
+        - name: dym
+          title: DD-YYYY-MM
+      default: auto
+      description:
+          R: >
+            DateTime format specification. 'Auto-detect' attempts to identify the format automatically.
+            Manual selection ensures accurate parsing for specific datetime formats.
+
+    # === PREVIEW OPTIONS ===
+    - name: preview_rows
+      title: Number of Rows to Preview
+      type: Number
+      min: 10
+      max: 100
+      default: 20
+      description:
+          R: >
+            Number of rows to display in preview tables. Shows original values,
+            corrected datetimes, and extracted components for quality checking.
+
+    # === EXTRACTION OPTIONS (for preview) ===
+    - name: extract_year
+      title: Extract Year
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display year component in preview table.
+
+    - name: extract_month
+      title: Extract Month
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display month component in preview table.
+
+    - name: extract_monthname
+      title: Extract Month Name
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display month name in preview table.
+
+    - name: extract_day
+      title: Extract Day
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display day component in preview table.
+
+    - name: extract_hour
+      title: Extract Hour
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display hour component in preview table.
+
+    - name: extract_minute
+      title: Extract Minute
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display minute component in preview table.
+
+    - name: extract_second
+      title: Extract Second
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display second component in preview table.
+
+    - name: extract_dayname
+      title: Extract Day Name
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display day name in preview table.
+
+    - name: extract_weeknum
+      title: Extract Week Number
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display week number in preview table.
+
+    - name: extract_quarter
+      title: Extract Quarter
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display quarter in preview table.
+
+    - name: extract_dayofyear
+      title: Extract Day of Year
+      type: Bool
+      default: false
+      description:
+          R: >
+            Extract and display day of year in preview table.
+
+    # === OUTPUT OPTIONS (add to data) ===
+    - name: corrected_datetime
+      title: Add Corrected DateTime to Data
+      type: Output
+      description:
+          R: >
+            Appends corrected datetime as a new variable (converted to numeric) for downstream analysis.
+
+    # === COMPONENT EXTRACTION ===
+    - name: year_out
+      title: Add Year to Data
+      type: Output
+      description:
+          R: >
+            Add extracted year component (YYYY format, e.g., 2024) as new column to data.
+
+    - name: month_out
+      title: Extract Month Number
+      type: Output
+      description:
+          R: >
+            Extract month as numeric value (1-12).
+
+    - name: monthname_out
+      title: Extract Month Name
+      type: Output
+      description:
+          R: >
+            Extract month as text name (January, February, etc.).
+
+    - name: day_out
+      title: Extract Day of Month
+      type: Output
+      description:
+          R: >
+            Extract day of month (1-31).
+
+    - name: hour_out
+      title: Extract Hour
+      type: Output
+      description:
+          R: >
+            Extract hour component (0-23, 24-hour format).
+
+    - name: minute_out
+      title: Extract Minute
+      type: Output
+      description:
+          R: >
+            Extract minute component (0-59).
+
+    - name: second_out
+      title: Extract Second
+      type: Output
+      description:
+          R: >
+            Extract second component (0-59).
+
+    - name: dayname_out
+      title: Extract Day Name
+      type: Output
+      description:
+          R: >
+            Extract day of week as text name (Monday, Tuesday, etc.).
+
+    - name: weeknum_out
+      title: Extract Week Number
+      type: Output
+      description:
+          R: >
+            Extract week number of the year (1-53).
+
+    - name: quarter_out
+      title: Extract Quarter
+      type: Output
+      description:
+          R: >
+            Extract quarter of the year (1-4).
+
+    - name: dayofyear_out
+      title: Extract Day of Year
+      type: Output
+      description:
+          R: >
+            Extract day of year (1-366).
+
+...

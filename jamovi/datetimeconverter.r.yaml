@@ -1,0 +1,151 @@
+---
+name:  datetimeconverter
+title: DateTime Converter
+jrs:   '1.1'
+
+items:
+    - name: welcome
+      title: 'Getting Started'
+      type: Html
+
+    - name: formatInfo
+      title: 'Format Detection'
+      type: Html
+
+    - name: qualityMetrics
+      title: 'Quality Assessment'
+      type: Html
+
+    - name: previewTable
+      title: 'Conversion Preview'
+      type: Html
+
+    - name: componentPreview
+      title: 'Extracted Components Preview'
+      type: Html
+
+    - name: corrected_datetime
+      title: Corrected DateTime
+      type: Output
+      varTitle: '`Corrected DateTime - from ${ datetime_var }`'
+      varDescription: '`DateTime variable ${ datetime_var } converted to standardized format (as character string)`'
+      measureType: nominal
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: year_out
+      title: Year
+      type: Output
+      varTitle: '`Year - from ${ datetime_var }`'
+      varDescription: '`Extracted year component from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: month_out
+      title: Month
+      type: Output
+      varTitle: '`Month - from ${ datetime_var }`'
+      varDescription: '`Extracted month component (1-12) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: monthname_out
+      title: Month Name
+      type: Output
+      varTitle: '`Month Name - from ${ datetime_var }`'
+      varDescription: '`Extracted month name from ${ datetime_var }`'
+      measureType: nominal
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: day_out
+      title: Day
+      type: Output
+      varTitle: '`Day - from ${ datetime_var }`'
+      varDescription: '`Extracted day of month (1-31) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: hour_out
+      title: Hour
+      type: Output
+      varTitle: '`Hour - from ${ datetime_var }`'
+      varDescription: '`Extracted hour component (0-23) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: minute_out
+      title: Minute
+      type: Output
+      varTitle: '`Minute - from ${ datetime_var }`'
+      varDescription: '`Extracted minute component (0-59) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: second_out
+      title: Second
+      type: Output
+      varTitle: '`Second - from ${ datetime_var }`'
+      varDescription: '`Extracted second component (0-59) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: dayname_out
+      title: Day Name
+      type: Output
+      varTitle: '`Day Name - from ${ datetime_var }`'
+      varDescription: '`Extracted day of week name from ${ datetime_var }`'
+      measureType: nominal
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: weeknum_out
+      title: Week Number
+      type: Output
+      varTitle: '`Week Number - from ${ datetime_var }`'
+      varDescription: '`Extracted week number of year (1-53) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: quarter_out
+      title: Quarter
+      type: Output
+      varTitle: '`Quarter - from ${ datetime_var }`'
+      varDescription: '`Extracted quarter (1-4) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: dayofyear_out
+      title: Day of Year
+      type: Output
+      varTitle: '`Day of Year - from ${ datetime_var }`'
+      varDescription: '`Extracted day of year (1-366) from ${ datetime_var }`'
+      measureType: continuous
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+refs:
+    - ClinicoPathJamoviModule
+    - lubridate
+
+...
