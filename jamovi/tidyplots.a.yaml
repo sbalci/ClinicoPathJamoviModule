@@ -1,7 +1,7 @@
 ---
 name: tidyplots
 title: Comprehensive Tidy Plots
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: All-In-One
 version: '0.0.31'
 jas: '1.2'
@@ -444,36 +444,6 @@ options:
       title: Show Plain-Language Summary
       type: Bool
       default: false
-
-    # === PLOT SIZE ===
-    - name: autoSize
-      title: Auto-size Plot to Canvas
-      type: Bool
-      default: true
-      description:
-          R: >
-            If enabled, plot will fill the available canvas space (recommended for jamovi).
-            If disabled, you can set custom width and height in millimeters.
-
-    - name: plotWidth
-      title: Plot Width (mm)
-      type: Integer
-      default: 150
-      min: 50
-      max: 500
-      description:
-          R: >
-            Width in millimeters. Only used when Auto-size is disabled.
-
-    - name: plotHeight
-      title: Plot Height (mm)
-      type: Integer
-      default: 120
-      min: 50
-      max: 500
-      description:
-          R: >
-            Height in millimeters. Only used when Auto-size is disabled.
 
     # === POINT OPTIONS ===
     - name: pointShape

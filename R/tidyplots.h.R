@@ -52,9 +52,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showHowTo = FALSE,
             showGlossary = FALSE,
             showSummary = FALSE,
-            autoSize = TRUE,
-            plotWidth = 150,
-            plotHeight = 120,
             pointShape = 16,
             removeLegend = FALSE,
             removeLegendTitle = FALSE,
@@ -373,22 +370,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showSummary",
                 showSummary,
                 default=FALSE)
-            private$..autoSize <- jmvcore::OptionBool$new(
-                "autoSize",
-                autoSize,
-                default=TRUE)
-            private$..plotWidth <- jmvcore::OptionInteger$new(
-                "plotWidth",
-                plotWidth,
-                default=150,
-                min=50,
-                max=500)
-            private$..plotHeight <- jmvcore::OptionInteger$new(
-                "plotHeight",
-                plotHeight,
-                default=120,
-                min=50,
-                max=500)
             private$..pointShape <- jmvcore::OptionInteger$new(
                 "pointShape",
                 pointShape,
@@ -505,9 +486,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showHowTo)
             self$.addOption(private$..showGlossary)
             self$.addOption(private$..showSummary)
-            self$.addOption(private$..autoSize)
-            self$.addOption(private$..plotWidth)
-            self$.addOption(private$..plotHeight)
             self$.addOption(private$..pointShape)
             self$.addOption(private$..removeLegend)
             self$.addOption(private$..removeLegendTitle)
@@ -571,9 +549,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showHowTo = function() private$..showHowTo$value,
         showGlossary = function() private$..showGlossary$value,
         showSummary = function() private$..showSummary$value,
-        autoSize = function() private$..autoSize$value,
-        plotWidth = function() private$..plotWidth$value,
-        plotHeight = function() private$..plotHeight$value,
         pointShape = function() private$..pointShape$value,
         removeLegend = function() private$..removeLegend$value,
         removeLegendTitle = function() private$..removeLegendTitle$value,
@@ -636,9 +611,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showHowTo = NA,
         ..showGlossary = NA,
         ..showSummary = NA,
-        ..autoSize = NA,
-        ..plotWidth = NA,
-        ..plotHeight = NA,
         ..pointShape = NA,
         ..removeLegend = NA,
         ..removeLegendTitle = NA,
@@ -706,8 +678,6 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Plot",
                 renderFun=".plot",
                 requiresData=TRUE,
-                width=2000,
-                height=1400,
                 clearWith=list(
                     "xvar",
                     "yvar",
@@ -752,9 +722,6 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "yLabel",
                     "legendTitle",
                     "plotCaption",
-                    "autoSize",
-                    "plotWidth",
-                    "plotHeight",
                     "pointShape",
                     "removeLegend",
                     "removeLegendTitle",
@@ -847,13 +814,6 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showHowTo .
 #' @param showGlossary .
 #' @param showSummary .
-#' @param autoSize If enabled, plot will fill the available canvas space
-#'   (recommended for jamovi). If disabled, you can set custom width and height
-#'   in millimeters.
-#' @param plotWidth Width in millimeters. Only used when Auto-size is
-#'   disabled.
-#' @param plotHeight Height in millimeters. Only used when Auto-size is
-#'   disabled.
 #' @param pointShape .
 #' @param removeLegend .
 #' @param removeLegendTitle .
@@ -927,9 +887,6 @@ tidyplots <- function(
     showHowTo = FALSE,
     showGlossary = FALSE,
     showSummary = FALSE,
-    autoSize = TRUE,
-    plotWidth = 150,
-    plotHeight = 120,
     pointShape = 16,
     removeLegend = FALSE,
     removeLegendTitle = FALSE,
@@ -1011,9 +968,6 @@ tidyplots <- function(
         showHowTo = showHowTo,
         showGlossary = showGlossary,
         showSummary = showSummary,
-        autoSize = autoSize,
-        plotWidth = plotWidth,
-        plotHeight = plotHeight,
         pointShape = pointShape,
         removeLegend = removeLegend,
         removeLegendTitle = removeLegendTitle,
