@@ -1,0 +1,155 @@
+title: Auto-Plot (esquisse)
+name: esquisseauto
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: X Variable (Required)
+        children:
+          - type: VariablesListBox
+            name: xvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Y Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: yvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Color Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: colorvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Fill Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: fillvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Size Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: sizevar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Group Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: groupvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Facet Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: facetvar
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    style: inline
+    children:
+      - type: Label
+        label: Plot Type Selection
+        children:
+          - type: CheckBox
+            name: autoGeom
+          - type: ComboBox
+            name: manualGeom
+            enable: (!autoGeom)
+
+  - type: LayoutBox
+    margin: large
+    style: inline
+    children:
+      - type: Label
+        label: Customization
+        children:
+          - type: ComboBox
+            name: plotTheme
+          - type: CheckBox
+            name: addSmoother
+          - type: CheckBox
+            name: flipAxes
+
+  - type: CollapseBox
+    label: Labels & Titles
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plotTitle
+            format: string
+            width: largest
+          - type: TextBox
+            name: plotSubtitle
+            format: string
+            width: largest
+          - type: TextBox
+            name: plotCaption
+            format: string
+            width: largest
+          - type: TextBox
+            name: xLabel
+            format: string
+            width: largest
+          - type: TextBox
+            name: yLabel
+            format: string
+            width: largest
+
+  - type: CollapseBox
+    label: Legend Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: legendTitle
+            format: string
+            width: largest
+          - type: ComboBox
+            name: legendPosition
+
+  - type: CollapseBox
+    label: Axis Formatting
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: xAxisAngle
+            format: number
+          - type: TextBox
+            name: yAxisAngle
+            format: number
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showCode
+          - type: CheckBox
+            name: showInstructions
+...

@@ -1,0 +1,57 @@
+---
+name: esquisseauto
+title: Auto-Plot (esquisse)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: How to Use Auto-Plot
+      type: Html
+      visible: (showInstructions)
+
+    - name: plotinfo
+      title: Plot Information
+      type: Html
+
+    - name: plot
+      title: Plot
+      type: Image
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - xvar
+          - yvar
+          - colorvar
+          - fillvar
+          - sizevar
+          - groupvar
+          - facetvar
+          - autoGeom
+          - manualGeom
+          - plotTheme
+          - plotTitle
+          - plotSubtitle
+          - plotCaption
+          - xLabel
+          - yLabel
+          - legendTitle
+          - legendPosition
+          - xAxisAngle
+          - yAxisAngle
+          - addSmoother
+          - flipAxes
+
+    - name: generatedCode
+      title: Generated R Code
+      type: Preformatted
+      visible: (showCode)
+
+refs:
+    - ClinicoPathJamoviModule
+    - esquisse
+    - ggplot2
+    - dplyr
+    - jmvcore
+    - R6
+
+...

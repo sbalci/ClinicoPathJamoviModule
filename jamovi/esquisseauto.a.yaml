@@ -1,0 +1,276 @@
+---
+name: esquisseauto
+title: Auto-Plot (esquisse)
+menuGroup: JJStatsPlotD
+menuSubgroup: All-In-One
+menuSubtitle: Automatic plot selection using esquisse
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >-
+        Automatically selects and generates the most appropriate plot type based on variable
+        data types using the esquisse package. Supports 40+ plot type combinations including
+        histograms, scatter plots, box plots, violin plots, bar charts, line plots, and more.
+        Perfect for quick data visualization with intelligent defaults.
+    R:
+        dontrun: false
+        usage: |
+            # Auto-select plot type based on variables
+            esquisseauto(
+                data = mtcars,
+                xvar = "cyl",
+                yvar = "mpg"
+            )
+
+            # With color grouping
+            esquisseauto(
+                data = iris,
+                xvar = "Species",
+                yvar = "Sepal.Length",
+                colorvar = "Species"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: xvar
+      title: X Variable
+      type: Variable
+      description:
+          R: >
+            Variable for x-axis. Can be continuous, discrete, or time-based.
+
+    - name: yvar
+      title: Y Variable (Optional)
+      type: Variable
+      description:
+          R: >
+            Variable for y-axis. Leave empty for univariate plots (histograms, bar charts).
+            Can be continuous, discrete, or time-based.
+
+    - name: colorvar
+      title: Color Variable (Optional)
+      type: Variable
+      description:
+          R: >
+            Variable to use for coloring points/bars/lines. Creates grouped visualizations.
+
+    - name: fillvar
+      title: Fill Variable (Optional)
+      type: Variable
+      description:
+          R: >
+            Variable to use for filling bars/areas. Different from color (outline).
+
+    - name: sizevar
+      title: Size Variable (Optional)
+      type: Variable
+      description:
+          R: >
+            Variable to use for sizing points/lines. Typically continuous variables.
+
+    - name: groupvar
+      title: Group Variable (Optional)
+      type: Variable
+      description:
+          R: >
+            Variable to use for grouping (useful for line plots to connect points).
+
+    - name: facetvar
+      title: Facet Variable (Optional)
+      type: Variable
+      description:
+          R: >
+            Variable to use for creating faceted (small multiple) plots.
+
+    - name: autoGeom
+      title: Auto-Select Plot Type
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatically select the most appropriate plot type based on variable types.
+            Disable to manually choose from available geoms.
+
+    - name: manualGeom
+      title: Manual Geom Selection
+      type: List
+      options:
+        - title: Auto (Let esquisse decide)
+          name: auto
+        - title: Point (Scatter)
+          name: point
+        - title: Jitter
+          name: jitter
+        - title: Line
+          name: line
+        - title: Bar
+          name: bar
+        - title: Column
+          name: col
+        - title: Boxplot
+          name: boxplot
+        - title: Violin
+          name: violin
+        - title: Histogram
+          name: histogram
+        - title: Density
+          name: density
+        - title: Tile (Heatmap)
+          name: tile
+        - title: Smooth (Trend line)
+          name: smooth
+        - title: Area
+          name: area
+      default: auto
+      description:
+          R: >
+            Manually select plot type. Only used when Auto-Select is disabled.
+
+    - name: plotTheme
+      title: Plot Theme
+      type: List
+      options:
+        - title: Minimal (Clean)
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Gray (ggplot2 default)
+          name: gray
+        - title: Black & White
+          name: bw
+        - title: Light
+          name: light
+        - title: Dark
+          name: dark
+        - title: Void (No axes)
+          name: void
+      default: minimal
+      description:
+          R: >
+            Visual theme for the plot.
+
+    - name: plotTitle
+      title: Plot Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom title for the plot. Leave empty for automatic title.
+
+    - name: plotSubtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+      description:
+          R: >
+            Subtitle text displayed below the title. Leave empty for no subtitle.
+
+    - name: plotCaption
+      title: Plot Caption
+      type: String
+      default: ''
+      description:
+          R: >
+            Caption text displayed at bottom-right of plot (e.g., data source, notes).
+
+    - name: xLabel
+      title: X-Axis Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom label for x-axis. Leave empty to use variable name.
+
+    - name: yLabel
+      title: Y-Axis Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom label for y-axis. Leave empty to use variable name.
+
+    - name: legendTitle
+      title: Legend Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom title for the legend. Leave empty to use variable name.
+
+    - name: legendPosition
+      title: Legend Position
+      type: List
+      options:
+        - title: Right (Default)
+          name: right
+        - title: Left
+          name: left
+        - title: Top
+          name: top
+        - title: Bottom
+          name: bottom
+        - title: None (Remove)
+          name: none
+      default: right
+      description:
+          R: >
+            Position of the legend or hide it completely.
+
+    - name: xAxisAngle
+      title: X-Axis Label Angle
+      type: Number
+      min: 0
+      max: 90
+      default: 0
+      description:
+          R: >
+            Rotation angle for x-axis labels (0-90 degrees). Useful for long labels.
+
+    - name: yAxisAngle
+      title: Y-Axis Label Angle
+      type: Number
+      min: 0
+      max: 90
+      default: 0
+      description:
+          R: >
+            Rotation angle for y-axis labels (0-90 degrees).
+
+    - name: showCode
+      title: Show Generated Code
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display the R code generated by esquisse for reproducing this plot.
+
+    - name: addSmoother
+      title: Add Smoother/Trend Line
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add a smoothed trend line to scatter plots.
+
+    - name: flipAxes
+      title: Flip X and Y Axes
+      type: Bool
+      default: false
+      description:
+          R: >
+            Swap x and y axes (useful for horizontal bar charts).
+
+    - name: showInstructions
+      title: Show Usage Instructions
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display helpful instructions about how to use this module.
+
+...
