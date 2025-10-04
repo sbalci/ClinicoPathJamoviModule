@@ -65,15 +65,15 @@ children:
               - type: TextBox
                 name: mytitle
                 format: string
-                width: large
+                width: largest
               - type: TextBox
                 name: xtitle
                 format: string
-                width: large
+                width: largest
               - type: TextBox
                 name: ytitle
                 format: string
-                width: large
+                width: largest
       - type: Label
         label: Display Options
         fitToGrid: true
@@ -171,3 +171,60 @@ children:
               - type: TextBox
                 name: plotheight
                 format: number
+
+  - type: CollapseBox
+    label: Plot with Aesthetics
+    collapsed: true
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Color Variable (Optional)
+            children:
+              - type: VariablesListBox
+                name: colorvar
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Size Variable (Optional)
+            children:
+              - type: VariablesListBox
+                name: sizevar
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Shape Variable (Optional)
+            children:
+              - type: VariablesListBox
+                name: shapevar
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Alpha Variable (Optional)
+            children:
+              - type: VariablesListBox
+                name: alphavar
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Label Variable (Optional)
+            children:
+              - type: VariablesListBox
+                name: labelvar
+                maxItemCount: 1
+                isTarget: true
+      - type: Label
+        label: Plot Enhancements
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showRugPlot
+              - type: ComboBox
+                name: marginalType
+              - type: ComboBox
+                name: smoothMethod

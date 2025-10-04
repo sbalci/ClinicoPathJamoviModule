@@ -8,6 +8,14 @@ clearWith:
     - dep
     - group
     - grvar
+    - colorvar
+    - sizevar
+    - shapevar
+    - alphavar
+    - labelvar
+    - showRugPlot
+    - marginalType
+    - smoothMethod
     - originaltheme
     - typestatistics
     - conflevel
@@ -33,6 +41,7 @@ items:
     - name:  todo
       title: To Do
       type:  Html
+
     - name: plot2
       title: '`${dep} vs {group} by {grvar}`'
       type: Image
@@ -49,6 +58,20 @@ items:
       height: 450
       renderFun: .plot
       requiresData: true
+
+
+    - name: plot3
+      title: '`Plot with Aesthetics - ${dep} vs {group}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot3
+      requiresData: true
+      visible: (!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))
+
+
+
+
 
 refs:
     - ggplot2

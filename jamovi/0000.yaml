@@ -1771,7 +1771,7 @@ analyses:
   - title: Comprehensive Tidy Plots
     name: tidyplots
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotD
     menuTitle: Comprehensive Tidy Plots
     ribbon: analyses
     category: analyses
@@ -4905,7 +4905,7 @@ analyses:
     name: esquisseauto
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotD
     menuSubgroup: All-In-One
     menuTitle: Auto-Plot (esquisse)
     menuSubtitle: Automatic plot selection using esquisse
