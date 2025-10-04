@@ -1,7 +1,7 @@
 ---
 name:  jjscatterstats
 title: Scatter Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
 version: '0.0.31'
@@ -91,8 +91,101 @@ options:
       permitted: [ factor ]
       description:
           R: >
-            Optional categorical variable to create separate correlation plots for each group 
+            Optional categorical variable to create separate correlation plots for each group
             (e.g., by treatment group, tumor stage, or gender). Creates multiple panels for comparison.
+
+    - name: colorvar
+      title: 'Color Variable (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            Optional variable to map point colors. When specified, switches to enhanced scatter plot
+            with full ggplot2 aesthetic control instead of ggstatsplot correlation analysis.
+
+    - name: sizevar
+      title: 'Size Variable (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Optional continuous variable to map point sizes. When specified, switches to enhanced scatter plot
+            with full ggplot2 aesthetic control instead of ggstatsplot correlation analysis.
+
+    - name: shapevar
+      title: 'Shape Variable (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional categorical variable to map point shapes. When specified, switches to enhanced scatter plot.
+            Works best with variables having 6 or fewer levels.
+
+    - name: alphavar
+      title: 'Alpha Variable (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Optional continuous variable to map point transparency (alpha). When specified, switches to enhanced scatter plot.
+
+    - name: labelvar
+      title: 'Label Variable (Optional)'
+      type: Variable
+      default: NULL
+      suggested: [ nominal, id ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            Optional variable to label points. Uses ggrepel to avoid overlapping labels.
+
+    - name: showRugPlot
+      title: 'Show Rug Plot'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add rug plot along axes to show data distribution.
+
+    - name: marginalType
+      title: 'Marginal Plot Type'
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Histogram
+          name: histogram
+        - title: Density
+          name: density
+        - title: Boxplot
+          name: boxplot
+      default: none
+      description:
+          R: >
+            Add marginal distribution plots using ggExtra package.
+
+    - name: smoothMethod
+      title: 'Smooth Method'
+      type: List
+      options:
+        - title: Linear Model (lm)
+          name: lm
+        - title: LOESS (loess)
+          name: loess
+        - title: GAM (gam)
+          name: gam
+      default: lm
+      description:
+          R: >
+            Method for smooth trend line in enhanced scatter plot.
 
 
 

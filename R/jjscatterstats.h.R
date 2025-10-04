@@ -9,6 +9,14 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             dep = NULL,
             group = NULL,
             grvar = NULL,
+            colorvar = NULL,
+            sizevar = NULL,
+            shapevar = NULL,
+            alphavar = NULL,
+            labelvar = NULL,
+            showRugPlot = FALSE,
+            marginalType = "none",
+            smoothMethod = "lm",
             typestatistics = "parametric",
             mytitle = "",
             xtitle = "",
@@ -57,6 +65,72 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..colorvar <- jmvcore::OptionVariable$new(
+                "colorvar",
+                colorvar,
+                default=NULL,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..sizevar <- jmvcore::OptionVariable$new(
+                "sizevar",
+                sizevar,
+                default=NULL,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..shapevar <- jmvcore::OptionVariable$new(
+                "shapevar",
+                shapevar,
+                default=NULL,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..alphavar <- jmvcore::OptionVariable$new(
+                "alphavar",
+                alphavar,
+                default=NULL,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..labelvar <- jmvcore::OptionVariable$new(
+                "labelvar",
+                labelvar,
+                default=NULL,
+                suggested=list(
+                    "nominal",
+                    "id"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..showRugPlot <- jmvcore::OptionBool$new(
+                "showRugPlot",
+                showRugPlot,
+                default=FALSE)
+            private$..marginalType <- jmvcore::OptionList$new(
+                "marginalType",
+                marginalType,
+                options=list(
+                    "none",
+                    "histogram",
+                    "density",
+                    "boxplot"),
+                default="none")
+            private$..smoothMethod <- jmvcore::OptionList$new(
+                "smoothMethod",
+                smoothMethod,
+                options=list(
+                    "lm",
+                    "loess",
+                    "gam"),
+                default="lm")
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -152,6 +226,14 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
+            self$.addOption(private$..colorvar)
+            self$.addOption(private$..sizevar)
+            self$.addOption(private$..shapevar)
+            self$.addOption(private$..alphavar)
+            self$.addOption(private$..labelvar)
+            self$.addOption(private$..showRugPlot)
+            self$.addOption(private$..marginalType)
+            self$.addOption(private$..smoothMethod)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..mytitle)
             self$.addOption(private$..xtitle)
@@ -175,6 +257,14 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
+        colorvar = function() private$..colorvar$value,
+        sizevar = function() private$..sizevar$value,
+        shapevar = function() private$..shapevar$value,
+        alphavar = function() private$..alphavar$value,
+        labelvar = function() private$..labelvar$value,
+        showRugPlot = function() private$..showRugPlot$value,
+        marginalType = function() private$..marginalType$value,
+        smoothMethod = function() private$..smoothMethod$value,
         typestatistics = function() private$..typestatistics$value,
         mytitle = function() private$..mytitle$value,
         xtitle = function() private$..xtitle$value,
@@ -197,6 +287,14 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
+        ..colorvar = NA,
+        ..sizevar = NA,
+        ..shapevar = NA,
+        ..alphavar = NA,
+        ..labelvar = NA,
+        ..showRugPlot = NA,
+        ..marginalType = NA,
+        ..smoothMethod = NA,
         ..typestatistics = NA,
         ..mytitle = NA,
         ..xtitle = NA,
@@ -223,7 +321,8 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     active = list(
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        plot3 = function() private$.items[["plot3"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -239,6 +338,14 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "dep",
                     "group",
                     "grvar",
+                    "colorvar",
+                    "sizevar",
+                    "shapevar",
+                    "alphavar",
+                    "labelvar",
+                    "showRugPlot",
+                    "marginalType",
+                    "smoothMethod",
                     "originaltheme",
                     "typestatistics",
                     "conflevel",
@@ -277,7 +384,16 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot3",
+                title="Plot with Aesthetics - `${dep} vs {group}`",
+                width=600,
+                height=450,
+                renderFun=".plot3",
+                requiresData=TRUE,
+                visible="(!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))"))}))
 
 jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjscatterstatsBase",
@@ -356,8 +472,24 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   the vertical axis. Use numeric variables that you want to correlate with
 #'   the x-axis variable.
 #' @param grvar Optional categorical variable to create separate correlation
-#'   plots for each group  (e.g., by treatment group, tumor stage, or gender).
+#'   plots for each group (e.g., by treatment group, tumor stage, or gender).
 #'   Creates multiple panels for comparison.
+#' @param colorvar Optional variable to map point colors. When specified,
+#'   switches to enhanced scatter plot with full ggplot2 aesthetic control
+#'   instead of ggstatsplot correlation analysis.
+#' @param sizevar Optional continuous variable to map point sizes. When
+#'   specified, switches to enhanced scatter plot with full ggplot2 aesthetic
+#'   control instead of ggstatsplot correlation analysis.
+#' @param shapevar Optional categorical variable to map point shapes. When
+#'   specified, switches to enhanced scatter plot. Works best with variables
+#'   having 6 or fewer levels.
+#' @param alphavar Optional continuous variable to map point transparency
+#'   (alpha). When specified, switches to enhanced scatter plot.
+#' @param labelvar Optional variable to label points. Uses ggrepel to avoid
+#'   overlapping labels.
+#' @param showRugPlot Add rug plot along axes to show data distribution.
+#' @param marginalType Add marginal distribution plots using ggExtra package.
+#' @param smoothMethod Method for smooth trend line in enhanced scatter plot.
 #' @param typestatistics Choose based on your data distribution. Pearson
 #'   assumes normality (common for lab values after transformation).  Spearman
 #'   works for any monotonic relationship (tumor grades, symptom scores).
@@ -389,6 +521,7 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -397,6 +530,14 @@ jjscatterstats <- function(
     dep,
     group,
     grvar = NULL,
+    colorvar = NULL,
+    sizevar = NULL,
+    shapevar = NULL,
+    alphavar = NULL,
+    labelvar = NULL,
+    showRugPlot = FALSE,
+    marginalType = "none",
+    smoothMethod = "lm",
     typestatistics = "parametric",
     mytitle = "",
     xtitle = "",
@@ -422,19 +563,38 @@ jjscatterstats <- function(
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
+    if ( ! missing(colorvar)) colorvar <- jmvcore::resolveQuo(jmvcore::enquo(colorvar))
+    if ( ! missing(sizevar)) sizevar <- jmvcore::resolveQuo(jmvcore::enquo(sizevar))
+    if ( ! missing(shapevar)) shapevar <- jmvcore::resolveQuo(jmvcore::enquo(shapevar))
+    if ( ! missing(alphavar)) alphavar <- jmvcore::resolveQuo(jmvcore::enquo(alphavar))
+    if ( ! missing(labelvar)) labelvar <- jmvcore::resolveQuo(jmvcore::enquo(labelvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL),
-            `if`( ! missing(grvar), grvar, NULL))
+            `if`( ! missing(grvar), grvar, NULL),
+            `if`( ! missing(colorvar), colorvar, NULL),
+            `if`( ! missing(sizevar), sizevar, NULL),
+            `if`( ! missing(shapevar), shapevar, NULL),
+            `if`( ! missing(alphavar), alphavar, NULL),
+            `if`( ! missing(labelvar), labelvar, NULL))
 
     for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in shapevar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjscatterstatsOptions$new(
         dep = dep,
         group = group,
         grvar = grvar,
+        colorvar = colorvar,
+        sizevar = sizevar,
+        shapevar = shapevar,
+        alphavar = alphavar,
+        labelvar = labelvar,
+        showRugPlot = showRugPlot,
+        marginalType = marginalType,
+        smoothMethod = smoothMethod,
         typestatistics = typestatistics,
         mytitle = mytitle,
         xtitle = xtitle,
