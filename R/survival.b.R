@@ -704,26 +704,38 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     timetypedata <- self$options$timetypedata
 
 
-                    # Define a mapping from timetypedata to lubridate functions
-                    lubridate_functions <- list(
-                        ymdhms = lubridate::ymd_hms,
-                        ymd = lubridate::ymd,
-                        ydm = lubridate::ydm,
-                        mdy = lubridate::mdy,
-                        myd = lubridate::myd,
-                        dmy = lubridate::dmy,
-                        dym = lubridate::dym
-                    )
-                    
-                    # Apply the appropriate lubridate function based on timetypedata
-                    if (timetypedata %in% names(lubridate_functions)) {
-                        date_parser <- lubridate_functions[[timetypedata]]
-                        mydata[["start"]] <- date_parser(mydata[[dxdate]])
-                        mydata[["end"]] <- date_parser(mydata[[fudate]])
+                    # Check if input is numeric (Unix epoch) or text (requires parsing)
+                    is_numeric_dx <- is.numeric(mydata[[dxdate]])
+                    is_numeric_fu <- is.numeric(mydata[[fudate]])
+
+                    if (is_numeric_dx && is_numeric_fu) {
+                        # Handle numeric Unix epoch input (from DateTime Converter)
+                        mydata[["start"]] <- as.POSIXct(mydata[[dxdate]], origin="1970-01-01", tz="UTC")
+                        mydata[["end"]] <- as.POSIXct(mydata[[fudate]], origin="1970-01-01", tz="UTC")
+                    } else if (!is_numeric_dx && !is_numeric_fu) {
+                        # Handle text datetime input via lubridate
+                        lubridate_functions <- list(
+                            ymdhms = lubridate::ymd_hms,
+                            ymd = lubridate::ymd,
+                            ydm = lubridate::ydm,
+                            mdy = lubridate::mdy,
+                            myd = lubridate::myd,
+                            dmy = lubridate::dmy,
+                            dym = lubridate::dym
+                        )
+
+                        if (timetypedata %in% names(lubridate_functions)) {
+                            date_parser <- lubridate_functions[[timetypedata]]
+                            mydata[["start"]] <- date_parser(mydata[[dxdate]])
+                            mydata[["end"]] <- date_parser(mydata[[fudate]])
+                        } else {
+                            stop(sprintf(.("Unknown date format: %s. Supported formats are: %s"),
+                                       timetypedata,
+                                       paste(names(lubridate_functions), collapse = ", ")))
+                        }
                     } else {
-                        stop(sprintf(.("Unknown date format: %s. Supported formats are: %s"),
-                                   timetypedata, 
-                                   paste(names(lubridate_functions), collapse = ", ")))
+                        # Mixed types error
+                        stop(.("Diagnosis date and follow-up date must be in the same format (both numeric or both text)"))
                     }
 
 
