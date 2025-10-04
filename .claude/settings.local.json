@@ -103,7 +103,8 @@
       "Bash(do echo \"=== $file ===\" ls -lh data/$file.* vignettes/data/$file.*)",
       "WebFetch(domain:chstock.github.io)",
       "WebFetch(domain:stemangiola.github.io)",
-      "WebFetch(domain:lubridate.tidyverse.org)"
+      "WebFetch(domain:lubridate.tidyverse.org)",
+      "WebFetch(domain:dreamrs.github.io)"
     ],
     "deny": [],
     "ask": [],

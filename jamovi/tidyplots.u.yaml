@@ -252,46 +252,45 @@ children:
           - type: TextBox
             name: plotTitle
             format: string
+            width: largest
       - type: Label
         label: X Axis Label
         children:
           - type: TextBox
             name: xLabel
             format: string
+            width: largest
       - type: Label
         label: Y Axis Label
         children:
           - type: TextBox
             name: yLabel
             format: string
+            width: largest
       - type: Label
         label: Legend Title
         children:
           - type: TextBox
             name: legendTitle
             format: string
+            width: largest
       - type: Label
         label: Plot Caption
         children:
           - type: TextBox
             name: plotCaption
             format: string
+            width: largest
   - type: CollapseBox
     label: Plot Size
     collapsed: true
     children:
       - type: Label
         label: Plot Width
-        children:
-          - type: TextBox
-            name: plotWidth
-            format: number
+        children: []
       - type: Label
         label: Plot Height
-        children:
-          - type: TextBox
-            name: plotHeight
-            format: number
+        children: []
   - type: LayoutBox
     margin: large
     children:
@@ -301,8 +300,6 @@ children:
         name: showGlossary
       - type: CheckBox
         name: showSummary
-      - type: CheckBox
-        name: autoSize
   - type: CollapseBox
     label: Axis Options
     collapsed: true

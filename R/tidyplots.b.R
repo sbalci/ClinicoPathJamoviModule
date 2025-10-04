@@ -28,7 +28,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .init = function() {
             # Initialize plot size - make it much larger by default
-            self$results$plot$setSize(1600, 1000)
+            # self$results$plot$setSize(1600, 1000)
 
             # Populate usage guide (always available)
             private$.generateHowToGuide()
@@ -551,16 +551,9 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p <- p |> tidyplots::adjust_font(size = self$options$fontSize)
             }
 
-            # Apply size adjustments using tidyplots adjust_size
-            if (isTRUE(self$options$autoSize)) {
-                # Use NA to let plot fill available canvas space (ggplot2 default behavior)
-                message("DEBUG: Using auto-size (NA) to fill canvas")
-                p <- p |> tidyplots::adjust_size(width = NA, height = NA)
-            } else if (!is.null(self$options$plotWidth) && !is.null(self$options$plotHeight)) {
-                # Use user-specified dimensions in millimeters
-                message(paste("DEBUG: Setting plot size to", self$options$plotWidth, "x", self$options$plotHeight, "mm"))
-                p <- p |> tidyplots::adjust_size(width = self$options$plotWidth, height = self$options$plotHeight, unit = "mm")
-            }
+            # Force tidyplots to fill available canvas space instead of using fixed 50mm default
+            # Using NA tells tidyplots to use ggplot2's default behavior (fill available space)
+            p <- p |> tidyplots::adjust_size(width = NA, height = NA)
 
             return(p)
         },

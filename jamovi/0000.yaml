@@ -882,7 +882,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -899,7 +899,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -916,7 +916,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -925,7 +925,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1016,7 +1016,7 @@ analyses:
   - title: DateTime Converter
     name: datetimeconverter
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT2
     menuSubgroup: Data Preparation
     menuTitle: DateTime Converter
     menuSubtitle: Convert datetime and extract components
@@ -1223,7 +1223,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -1244,7 +1244,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1276,7 +1276,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1336,7 +1336,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
@@ -1372,7 +1372,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Analyze combined test results
@@ -1385,7 +1385,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT2
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
@@ -1771,7 +1771,7 @@ analyses:
   - title: Comprehensive Tidy Plots
     name: tidyplots
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuTitle: Comprehensive Tidy Plots
     ribbon: analyses
     category: analyses
@@ -2425,7 +2425,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPath
+    menuGroup: OncoPathT2
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
@@ -4901,6 +4901,20 @@ analyses:
       Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
       decision curve analysis, bootstrap validation,  and comprehensive clinical
       interpretation guidance.
+  - title: Auto-Plot (esquisse)
+    name: esquisseauto
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: JJStatsPlotT
+    menuSubgroup: All-In-One
+    menuTitle: Auto-Plot (esquisse)
+    menuSubtitle: Automatic plot selection using esquisse
+    description: >-
+      Automatically selects and generates the most appropriate plot type based
+      on variable data types using the esquisse package. Supports 40+ plot type
+      combinations including histograms, scatter plots, box plots, violin plots,
+      bar charts, line plots, and more. Perfect for quick data visualization
+      with intelligent defaults.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
