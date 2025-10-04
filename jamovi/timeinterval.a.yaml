@@ -157,6 +157,18 @@ options:
             Identify and flag potentially extreme time intervals for quality review.
             Uses statistical outlier detection methods.
 
+    - name: extreme_multiplier
+      title: Extreme Threshold Multiplier
+      type: Number
+      default: 2.0
+      min: 1.5
+      max: 5.0
+      description:
+          R: >
+            Multiplier for 99th percentile to define extreme values.
+            Default 2.0 means values >2× the 99th percentile are flagged.
+            Higher values are more conservative (fewer flagged values).
+
     # === OUTPUT OPTIONS ===
     - name: add_times
       title: Add Calculated Times to Dataset
@@ -186,6 +198,15 @@ options:
           R: >
             Confidence level for statistical intervals (mean confidence intervals).
             Standard epidemiological practice uses 95% confidence intervals.
+
+    - name: show_summary
+      title: Show Natural-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate a plain-language interpretation of results suitable for
+            copying into reports or clinical notes.
 
 
 ...

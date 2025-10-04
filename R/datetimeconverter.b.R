@@ -236,6 +236,27 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # ===================================================================
+        # CHARACTER CONVERSION UTILITY
+        # ===================================================================
+
+        .safeCharacterConversion = function(source_vector) {
+            # Three-layer NA protection for factor/datetime to character conversion
+            # Prevents "0" or empty strings from appearing as NA values
+
+            char_vector <- rep(NA_character_, length(source_vector))
+            valid_idx <- !is.na(source_vector)
+
+            if (any(valid_idx)) {
+                char_vector[valid_idx] <- as.character(source_vector[valid_idx])
+            }
+
+            # Safety filter: remove spurious values
+            char_vector[char_vector == "0" | char_vector == "" | is.na(char_vector)] <- NA_character_
+
+            return(char_vector)
+        },
+
+        # ===================================================================
         # DATETIME PARSING
         # ===================================================================
 
@@ -375,6 +396,66 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # ===================================================================
         # HTML PREVIEW GENERATION
         # ===================================================================
+
+        .updateOutputTitles = function(datetime_var) {
+            if (is.null(datetime_var) || datetime_var == "")
+                return()
+
+            fmt <- function(template) {
+                if (is.null(template))
+                    return(NULL)
+                gsub('\\$?\\{ *datetime_var *\\}', datetime_var, template)
+            }
+
+            update_output <- function(result, title_template = NULL, description_template = NULL) {
+                if (is.null(result))
+                    return()
+                if (!is.null(title_template))
+                    result$setTitle(fmt(title_template))
+                if (!is.null(description_template))
+                    result$setDescription(fmt(description_template))
+            }
+
+            update_output(self$results$corrected_datetime_char,
+                "Corrected DateTime - from {datetime_var}",
+                "DateTime variable {datetime_var} converted to standardized format (as character string)")
+            update_output(self$results$corrected_datetime_numeric,
+                "Corrected DateTime Numeric - from {datetime_var}",
+                "DateTime variable {datetime_var} as Unix epoch seconds for calculations")
+            update_output(self$results$year_out,
+                "Year - from {datetime_var}",
+                "Extracted year component from {datetime_var}")
+            update_output(self$results$month_out,
+                "Month - from {datetime_var}",
+                "Extracted month component (1-12) from {datetime_var}")
+            update_output(self$results$monthname_out,
+                "Month Name - from {datetime_var}",
+                "Extracted month name from {datetime_var}")
+            update_output(self$results$day_out,
+                "Day - from {datetime_var}",
+                "Extracted day of month (1-31) from {datetime_var}")
+            update_output(self$results$hour_out,
+                "Hour - from {datetime_var}",
+                "Extracted hour component (0-23) from {datetime_var}")
+            update_output(self$results$minute_out,
+                "Minute - from {datetime_var}",
+                "Extracted minute component (0-59) from {datetime_var}")
+            update_output(self$results$second_out,
+                "Second - from {datetime_var}",
+                "Extracted second component (0-59) from {datetime_var}")
+            update_output(self$results$dayname_out,
+                "Day Name - from {datetime_var}",
+                "Extracted day of week name from {datetime_var}")
+            update_output(self$results$weeknum_out,
+                "Week Number - from {datetime_var}",
+                "Extracted week number of year (1-53) from {datetime_var}")
+            update_output(self$results$quarter_out,
+                "Quarter - from {datetime_var}",
+                "Extracted quarter (1-4) from {datetime_var}")
+            update_output(self$results$dayofyear_out,
+                "Day of Year - from {datetime_var}",
+                "Extracted day of year (1-366) from {datetime_var}")
+        },
 
         .generatePreviewTable = function(original, parsed, n = 50) {
             # Generate HTML preview table
@@ -557,6 +638,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             data <- self$data
             datetime_var <- self$options$datetime_var
 
+            private$.updateOutputTitles(datetime_var)
+
             if (nrow(data) == 0) {
                 stop("Dataset is empty")
             }
@@ -620,11 +703,20 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$options$datetime_format, "</code>.</em></p>")
             }
 
+            # Add time zone note
+            tz_note <- ""
+            if (detected_format %in% c("excel_serial", "unix_epoch")) {
+                tz_note <- "<li>Conversions from numeric formats (Excel, Unix) assume UTC time zone.</li>"
+            } else if (!prepared$already_parsed) {
+                tz_note <- paste0("<li>String-to-datetime conversions assume the system's local time zone (", Sys.timezone(), ").</li>")
+            }
+
             notes_html <- ""
-            if (length(preprocessing_notes) > 0) {
+            if (length(preprocessing_notes) > 0 || nzchar(tz_note)) {
                 notes_html <- paste0(
                     "<ul style='margin-top: 10px;'>",
                     paste0("<li>", preprocessing_notes, "</li>", collapse = ""),
+                    tz_note,
                     "</ul>"
                 )
             }
@@ -708,13 +800,19 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add outputs to dataset when requested
             # Use isNotFilled() to prevent duplicate writes
 
-            if (self$options$corrected_datetime && self$results$corrected_datetime$isNotFilled()) {
-                self$results$corrected_datetime$setRowNums(rownames(data))
-                # Convert datetime to character string for readability
-                # Preserve NA values properly
-                corrected_char <- as.character(parsed_dates)
-                corrected_char[is.na(parsed_dates)] <- NA_character_
-                self$results$corrected_datetime$setValues(corrected_char)
+            # Add corrected datetime as character
+            if (self$options$corrected_datetime_char && self$results$corrected_datetime_char$isNotFilled()) {
+                self$results$corrected_datetime_char$setRowNums(rownames(data))
+                self$results$corrected_datetime_char$setValues(
+                    private$.safeCharacterConversion(parsed_dates)
+                )
+            }
+
+            # Add corrected datetime as numeric
+            if (self$options$corrected_datetime_numeric && self$results$corrected_datetime_numeric$isNotFilled()) {
+                self$results$corrected_datetime_numeric$setRowNums(rownames(data))
+                corrected_numeric <- as.numeric(parsed_dates)
+                self$results$corrected_datetime_numeric$setValues(corrected_numeric)
             }
 
             # Add component outputs
@@ -728,13 +826,23 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$month_out$setValues(as.numeric(components$month))
             }
 
+
+                # # Add Calculated Time to Data
+                # if (self$options$tint && self$options$calculatedtime && 
+                #     self$results$calculatedtime$isNotFilled()) {
+                #     self$results$calculatedtime$setRowNums(results$cleanData$row_names)
+                #     self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
+                # }
+
+
+
+
+
             if (self$options$monthname_out && self$results$monthname_out$isNotFilled()) {
                 self$results$monthname_out$setRowNums(rownames(data))
-                monthname_char <- as.character(components$monthname)
-                # Ensure NA values stay NA, and filter out any "0", "", or other invalid values
-                monthname_char[is.na(components$monthname)] <- NA_character_
-                monthname_char[monthname_char == "0" | monthname_char == ""] <- NA_character_
-                self$results$monthname_out$setValues(monthname_char)
+                self$results$monthname_out$setValues(
+                    private$.safeCharacterConversion(components$monthname)
+                )
             }
 
             if (self$options$day_out && self$results$day_out$isNotFilled()) {
@@ -759,11 +867,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (self$options$dayname_out && self$results$dayname_out$isNotFilled()) {
                 self$results$dayname_out$setRowNums(rownames(data))
-                dayname_char <- as.character(components$dayname)
-                # Ensure NA values stay NA, and filter out any "0", "", or other invalid values
-                dayname_char[is.na(components$dayname)] <- NA_character_
-                dayname_char[dayname_char == "0" | dayname_char == ""] <- NA_character_
-                self$results$dayname_out$setValues(dayname_char)
+                self$results$dayname_out$setValues(
+                    private$.safeCharacterConversion(components$dayname)
+                )
             }
 
             if (self$options$weeknum_out && self$results$weeknum_out$isNotFilled()) {

@@ -24,7 +24,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             intervalEnd = NULL,
             adminCensoring = FALSE,
             adminDate = NULL,
-            outputTable = TRUE,
+            outputTable = FALSE,
             diagnostics = FALSE,
             visualization = FALSE, ...) {
 
@@ -128,7 +128,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..outputTable <- jmvcore::OptionBool$new(
                 "outputTable",
                 outputTable,
-                default=TRUE)
+                default=FALSE)
             private$..diagnostics <- jmvcore::OptionBool$new(
                 "diagnostics",
                 diagnostics,
@@ -484,7 +484,7 @@ outcomeorganizer <- function(
     intervalEnd,
     adminCensoring = FALSE,
     adminDate,
-    outputTable = TRUE,
+    outputTable = FALSE,
     diagnostics = FALSE,
     visualization = FALSE) {
 

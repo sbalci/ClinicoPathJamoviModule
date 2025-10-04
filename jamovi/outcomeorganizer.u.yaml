@@ -4,137 +4,166 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
+  - type: CollapseBox
+    label: Basic Outcome Settings
+    collapsed: false
     children:
-      - type: TargetLayoutBox
-        label: Outcome Variable
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
         children:
-          - type: VariablesListBox
-            name: outcome
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: outcomeLevel
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Recurrence/Progression Variable
+          - type: TargetLayoutBox
+            label: Outcome Variable
+            children:
+              - type: VariablesListBox
+                name: outcome
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: recurrence
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: recurrenceLevel
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Patient ID
+          - type: LevelSelector
+            name: outcomeLevel
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: patientID
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
+          - type: ComboBox
+            name: analysistype
+
+  - type: CollapseBox
+    label: Multiple Event Types
+    collapsed: true
     children:
-      - type: ComboBox
-        name: analysistype
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: multievent
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: dod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: dooc
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: awd
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: awod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: useHierarchy
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: eventPriority
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: intervalCensoring
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Interval Start Variable
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: intervalStart
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Interval End Variable
+          - type: CheckBox
+            name: multievent
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: intervalEnd
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: adminCensoring
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Administrative Censoring Date
+          - type: LevelSelector
+            name: dod
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: adminDate
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
+          - type: LevelSelector
+            name: dooc
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LevelSelector
+            name: awd
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LevelSelector
+            name: awod
+
+  - type: CollapseBox
+    label: Recurrence/Progression
+    collapsed: true
     children:
-      - type: CheckBox
-        name: outputTable
-      - type: CheckBox
-        name: diagnostics
-      - type: CheckBox
-        name: visualization
-      - type: Output
-        name: addOutcome
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Recurrence/Progression Variable
+            children:
+              - type: VariablesListBox
+                name: recurrence
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LevelSelector
+            name: recurrenceLevel
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Patient ID
+            children:
+              - type: VariablesListBox
+                name: patientID
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: useHierarchy
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: eventPriority
+            format: number
+
+  - type: CollapseBox
+    label: Censoring Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: intervalCensoring
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Interval Start Variable
+            children:
+              - type: VariablesListBox
+                name: intervalStart
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Interval End Variable
+            children:
+              - type: VariablesListBox
+                name: intervalEnd
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: adminCensoring
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Administrative Censoring Date
+            children:
+              - type: VariablesListBox
+                name: adminDate
+                maxItemCount: 1
+                isTarget: true
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: outputTable
+          - type: CheckBox
+            name: diagnostics
+          - type: CheckBox
+            name: visualization
+          - type: Output
+            name: addOutcome

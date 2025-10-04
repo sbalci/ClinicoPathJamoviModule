@@ -14,9 +14,11 @@ timeinterval(
   landmark_time = 6,
   remove_negative = FALSE,
   remove_extreme = FALSE,
+  extreme_multiplier = 2,
   add_times = FALSE,
   include_quality_metrics = FALSE,
-  confidence_level = 95
+  confidence_level = 95,
+  show_summary = FALSE
 )
 }
 \arguments{
@@ -52,6 +54,10 @@ date before start date). Recommended for data quality assurance.}
 \item{remove_extreme}{Identify and flag potentially extreme time intervals
 for quality review. Uses statistical outlier detection methods.}
 
+\item{extreme_multiplier}{Multiplier for 99th percentile to define extreme
+values. Default 2.0 means values >2× the 99th percentile are flagged.
+Higher values are more conservative (fewer flagged values).}
+
 \item{add_times}{Appends calculated time intervals as a new variable for
 downstream analysis. Useful for subsequent survival analysis or person-time
 calculations.}
@@ -63,6 +69,9 @@ statistics.}
 \item{confidence_level}{Confidence level for statistical intervals (mean
 confidence intervals). Standard epidemiological practice uses 95\\%
 confidence intervals.}
+
+\item{show_summary}{Generate a plain-language interpretation of results
+suitable for copying into reports or clinical notes.}
 }
 \value{
 A results object containing:
@@ -71,6 +80,7 @@ A results object containing:
 \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 }
 }

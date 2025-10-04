@@ -14,9 +14,11 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             landmark_time = 6,
             remove_negative = FALSE,
             remove_extreme = FALSE,
+            extreme_multiplier = 2,
             add_times = FALSE,
             include_quality_metrics = FALSE,
-            confidence_level = 95, ...) {
+            confidence_level = 95,
+            show_summary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -81,6 +83,12 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "remove_extreme",
                 remove_extreme,
                 default=FALSE)
+            private$..extreme_multiplier <- jmvcore::OptionNumber$new(
+                "extreme_multiplier",
+                extreme_multiplier,
+                default=2,
+                min=1.5,
+                max=5)
             private$..add_times <- jmvcore::OptionBool$new(
                 "add_times",
                 add_times,
@@ -95,6 +103,10 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=95,
                 min=90,
                 max=99)
+            private$..show_summary <- jmvcore::OptionBool$new(
+                "show_summary",
+                show_summary,
+                default=FALSE)
 
             self$.addOption(private$..dx_date)
             self$.addOption(private$..fu_date)
@@ -104,9 +116,11 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..landmark_time)
             self$.addOption(private$..remove_negative)
             self$.addOption(private$..remove_extreme)
+            self$.addOption(private$..extreme_multiplier)
             self$.addOption(private$..add_times)
             self$.addOption(private$..include_quality_metrics)
             self$.addOption(private$..confidence_level)
+            self$.addOption(private$..show_summary)
         }),
     active = list(
         dx_date = function() private$..dx_date$value,
@@ -117,9 +131,11 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         landmark_time = function() private$..landmark_time$value,
         remove_negative = function() private$..remove_negative$value,
         remove_extreme = function() private$..remove_extreme$value,
+        extreme_multiplier = function() private$..extreme_multiplier$value,
         add_times = function() private$..add_times$value,
         include_quality_metrics = function() private$..include_quality_metrics$value,
-        confidence_level = function() private$..confidence_level$value),
+        confidence_level = function() private$..confidence_level$value,
+        show_summary = function() private$..show_summary$value),
     private = list(
         ..dx_date = NA,
         ..fu_date = NA,
@@ -129,9 +145,11 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..landmark_time = NA,
         ..remove_negative = NA,
         ..remove_extreme = NA,
+        ..extreme_multiplier = NA,
         ..add_times = NA,
         ..include_quality_metrics = NA,
-        ..confidence_level = NA)
+        ..confidence_level = NA,
+        ..show_summary = NA)
 )
 
 timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -142,6 +160,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         personTimeInfo = function() private$.items[["personTimeInfo"]],
         qualityAssessment = function() private$.items[["qualityAssessment"]],
         summary = function() private$.items[["summary"]],
+        nlSummary = function() private$.items[["nlSummary"]],
         calculated_time = function() private$.items[["calculated_time"]]),
     private = list(),
     public=list(
@@ -164,11 +183,17 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityAssessment",
-                title="Data Quality Assessment"))
+                title="Data Quality Assessment",
+                visible="(include_quality_metrics)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
                 title="Statistical Summary & Person-Time Analysis"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nlSummary",
+                title="Clinical Summary (Copy-Ready)",
+                visible="(show_summary)"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculated_time",
@@ -257,6 +282,9 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   date before start date). Recommended for data quality assurance.
 #' @param remove_extreme Identify and flag potentially extreme time intervals
 #'   for quality review. Uses statistical outlier detection methods.
+#' @param extreme_multiplier Multiplier for 99th percentile to define extreme
+#'   values. Default 2.0 means values >2× the 99th percentile are flagged.
+#'   Higher values are more conservative (fewer flagged values).
 #' @param add_times Appends calculated time intervals as a new variable for
 #'   downstream analysis. Useful for subsequent survival analysis or person-time
 #'   calculations.
@@ -266,12 +294,15 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param confidence_level Confidence level for statistical intervals (mean
 #'   confidence intervals). Standard epidemiological practice uses 95\%
 #'   confidence intervals.
+#' @param show_summary Generate a plain-language interpretation of results
+#'   suitable for copying into reports or clinical notes.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
@@ -286,9 +317,11 @@ timeinterval <- function(
     landmark_time = 6,
     remove_negative = FALSE,
     remove_extreme = FALSE,
+    extreme_multiplier = 2,
     add_times = FALSE,
     include_quality_metrics = FALSE,
-    confidence_level = 95) {
+    confidence_level = 95,
+    show_summary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timeinterval requires jmvcore to be installed (restart may be required)")
@@ -311,9 +344,11 @@ timeinterval <- function(
         landmark_time = landmark_time,
         remove_negative = remove_negative,
         remove_extreme = remove_extreme,
+        extreme_multiplier = extreme_multiplier,
         add_times = add_times,
         include_quality_metrics = include_quality_metrics,
-        confidence_level = confidence_level)
+        confidence_level = confidence_level,
+        show_summary = show_summary)
 
     analysis <- timeintervalClass$new(
         options = options,

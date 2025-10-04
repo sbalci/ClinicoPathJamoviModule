@@ -187,7 +187,7 @@ options:
     - name: outputTable
       title: "Show Output Table"
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             If true, displays a table showing the frequency of each recoded outcome value.

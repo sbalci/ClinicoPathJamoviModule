@@ -104,7 +104,7 @@ marginalrecurrentClass <- R6::R6Class(
             prepared_data <- results$prepared_data
             
             # Fit the model
-            model_results <- private$.fitMarginalModel(prepared_data)
+            model_results <- private$.fitMarginalModel(prepared_data, results)
             if (is.null(model_results)) {
                 return()
             }
@@ -126,113 +126,189 @@ marginalrecurrentClass <- R6::R6Class(
         },
 
         .prepareData = function(data, subjectID, time, event, terminal_time, terminal_event, covariates) {
-            
-            # Convert variables to appropriate names
-            subject_data <- as.character(data[[subjectID]])
-            time_data <- as.numeric(data[[time]])
-            event_data <- as.numeric(data[[event]])
-            
-            # Check for valid data
-            if (any(is.na(time_data)) || any(is.na(event_data)) || any(is.na(subject_data))) {
-                self$results$todo$setContent("<p>Error: Missing values detected in required variables.</p>")
+
+            subject_data <- data[[subjectID]]
+            time_data <- suppressWarnings(as.numeric(data[[time]]))
+            event_data <- tryCatch(
+                private$.coerceIndicator(data[[event]], "Event indicator"),
+                error = function(e) {
+                    self$results$todo$setContent(paste0("<p>", e$message, "</p>"))
+                    return(NULL)
+                }
+            )
+
+            if (is.null(event_data))
+                return(list(prepared_data = NULL))
+
+            if (is.null(subject_data) || is.null(time_data) || is.null(event_data)) {
+                self$results$todo$setContent("<p>Error: Missing required variables for the analysis.</p>")
                 return(list(prepared_data = NULL))
             }
 
-            # Create base data frame
+            subject_vector <- as.character(subject_data)
+
+            if (any(is.na(subject_vector)) || any(is.na(time_data)) || any(is.na(event_data))) {
+                self$results$todo$setContent("<p>Error: Missing values detected in required variables. Please remove or impute missing entries.</p>")
+                return(list(prepared_data = NULL))
+            }
+
+            if (all(event_data == 0)) {
+                self$results$todo$setContent("<p>Error: No recurrent events were observed. The model requires at least one event.</p>")
+                return(list(prepared_data = NULL))
+            }
+
             df <- data.frame(
-                id = subject_data,
+                id = subject_vector,
                 time = time_data,
                 event = event_data,
                 stringsAsFactors = FALSE
             )
 
-            # Add terminal event data if available
-            if (!is.null(terminal_time) && !is.null(terminal_event)) {
-                df$terminal_time <- as.numeric(data[[terminal_time]])
-                df$terminal_event <- as.numeric(data[[terminal_event]])
+            has_terminal_cols <- !is.null(terminal_time) && !is.null(terminal_event) &&
+                terminal_time %in% names(data) && terminal_event %in% names(data)
+
+            terminal_data <- NULL
+            if (has_terminal_cols) {
+                df$terminal_time <- suppressWarnings(as.numeric(data[[terminal_time]]))
+                terminal_data <- tryCatch(
+                    private$.coerceIndicator(data[[terminal_event]], "Terminal event indicator", allow_all_zero = TRUE),
+                    error = function(e) {
+                        self$results$todo$setContent(paste0("<p>", e$message, "</p>"))
+                        return(NULL)
+                    }
+                )
+
+                if (is.null(terminal_data))
+                    return(list(prepared_data = NULL))
             }
 
-            # Add covariates if available
-            covariate_data <- NULL
             if (!is.null(covariates) && length(covariates) > 0) {
                 covariate_data <- data[covariates]
-                for (i in 1:ncol(covariate_data)) {
-                    if (is.factor(covariate_data[[i]])) {
-                        covariate_data[[i]] <- as.numeric(covariate_data[[i]]) - 1
+                for (col_name in names(covariate_data)) {
+                    if (is.character(covariate_data[[col_name]])) {
+                        covariate_data[[col_name]] <- factor(covariate_data[[col_name]])
                     }
                 }
                 df <- cbind(df, covariate_data)
             }
 
+            order_idx <- order(df$id, df$time)
+            df <- df[order_idx, , drop = FALSE]
+            if (!is.null(terminal_data)) {
+                terminal_data <- terminal_data[order_idx]
+            }
+
+            if (has_terminal_cols) {
+                df$terminal_event <- 0
+                ids <- unique(df$id)
+                new_rows <- list()
+
+                for (id_value in ids) {
+                    row_idx <- which(df$id == id_value)
+                    has_terminal_flag <- any(terminal_data[row_idx] == 1, na.rm = TRUE)
+                    if (!has_terminal_flag)
+                        next
+
+                    term_time <- suppressWarnings(max(df$terminal_time[row_idx], na.rm = TRUE))
+                    if (!is.finite(term_time)) {
+                        term_time <- max(df$time[row_idx], na.rm = TRUE)
+                    }
+
+                    existing_idx <- row_idx[which(abs(df$time[row_idx] - term_time) < .Machine$double.eps^0.5 & df$event[row_idx] == 0)]
+                    if (length(existing_idx) > 0) {
+                        df$terminal_event[tail(existing_idx, 1)] <- 1
+                    } else {
+                        template <- df[row_idx[length(row_idx)], , drop = FALSE]
+                        template$time <- term_time
+                        template$event <- 0
+                        template$terminal_time <- term_time
+                        template$terminal_event <- 1
+                        new_rows[[length(new_rows) + 1]] <- template
+                    }
+                }
+
+                if (length(new_rows) > 0) {
+                    df <- rbind(df, do.call(rbind, new_rows))
+                }
+
+                df <- df[order(df$id, df$time), , drop = FALSE]
+                df$terminal_event <- as.numeric(df$terminal_event)
+            }
+
+            terminal_events_count <- if (has_terminal_cols) sum(df$terminal_event, na.rm = TRUE) else 0
+
             return(list(
                 prepared_data = df,
                 covariate_names = covariates,
-                n_subjects = length(unique(subject_data)),
-                n_events = sum(event_data)
+                n_subjects = length(unique(subject_vector)),
+                n_events = sum(event_data),
+                has_terminal = terminal_events_count > 0,
+                n_terminal_events = terminal_events_count
             ))
         },
 
-        .fitMarginalModel = function(prepared_data) {
-            
-            model_type <- self$options$model_type
-            baseline_type <- self$options$baseline_type
+        .fitMarginalModel = function(prepared_data, data_info = NULL) {
+
+            if (!requireNamespace("reReg", quietly = TRUE)) {
+                error_msg <- "The 'reReg' package is required but not available. Please install it."
+                self$results$todo$setContent(paste0("<p style='color: red;'>", error_msg, "</p>"))
+                return(NULL)
+            }
+
             covariates <- self$options$covariates
-            bootstrap <- self$options$bootstrap
+            model_type <- self$options$model_type
+
+            use_bootstrap <- isTRUE(self$options$bootstrap)
             bootstrap_samples <- self$options$bootstrap_samples
-            robust_se <- self$options$robust_se
-            confidence_level <- self$options$confidence_level
+            se_method <- if (isTRUE(self$options$robust_se)) "sand" else "boot"
+
+            if (se_method == "boot" && !use_bootstrap) {
+                jmvcore::log("Bootstrap standard errors requested without bootstrap samples; switching to sandwich (robust) errors.")
+                se_method <- "sand"
+            }
+
+            B <- if (use_bootstrap) bootstrap_samples else 0
+
+            has_terminal <- FALSE
+            if (!is.null(data_info)) {
+                has_terminal <- isTRUE(data_info$has_terminal) && data_info$n_terminal_events > 0
+            } else {
+                has_terminal <- "terminal_event" %in% names(prepared_data) &&
+                    sum(prepared_data$terminal_event, na.rm = TRUE) > 0
+            }
+
+            model_data <- prepared_data[order(prepared_data$id, prepared_data$time), , drop = FALSE]
+
+            terminal_indicator <- if ("terminal_event" %in% names(model_data)) model_data$terminal_event else rep(0, nrow(model_data))
+
+            model_data$..recur_response <- reReg::Recur(
+                time = model_data$time,
+                id = model_data$id,
+                event = model_data$event,
+                terminal = terminal_indicator
+            )
+
+            if (!is.null(covariates) && length(covariates) > 0) {
+                rhs <- paste(covariates, collapse = " + ")
+                model_formula <- stats::as.formula(paste("..recur_response ~", rhs))
+            } else {
+                model_formula <- stats::as.formula("..recur_response ~ 1")
+            }
+
+            model_code <- private$.determineModelCode(model_type, has_terminal)
 
             tryCatch({
-                # Prepare formula
-                if (!is.null(covariates) && length(covariates) > 0) {
-                    formula_str <- paste("reReg(time, event, id) ~", paste(covariates, collapse = " + "))
-                    model_formula <- as.formula(formula_str)
-                } else {
-                    model_formula <- reReg(time, event, id) ~ 1
-                }
-
-                # Set baseline function
-                baseline_func <- switch(baseline_type,
-                    "nonparametric" = "spline",
-                    "weibull" = "weibull", 
-                    "loglinear" = "spline"
+                fit <- reReg::reReg(
+                    formula = model_formula,
+                    data = model_data,
+                    model = model_code,
+                    se = se_method,
+                    B = B
                 )
-
-                # Fit model based on type
-                if (!requireNamespace("reReg", quietly = TRUE)) {
-                    error_msg <- "The 'reReg' package is required but not available. Please install it."
-                    self$results$todo$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                    return(NULL)
-                }
-                
-                if (model_type == "marginal") {
-                    fit <- reReg::reReg(model_formula, 
-                                      data = prepared_data,
-                                      model = "marginal",
-                                      baseline = baseline_func,
-                                      se = if (robust_se) "boot" else "sand",
-                                      B = if (bootstrap) bootstrap_samples else 0)
-                } else if (model_type == "accelerated") {
-                    fit <- reReg::reReg(model_formula,
-                                      data = prepared_data, 
-                                      model = "accelerated",
-                                      baseline = baseline_func,
-                                      se = if (robust_se) "boot" else "sand",
-                                      B = if (bootstrap) bootstrap_samples else 0)
-                } else if (model_type == "gamma_frailty") {
-                    fit <- reReg::reReg(model_formula,
-                                      data = prepared_data,
-                                      model = "gamma_frailty", 
-                                      baseline = baseline_func,
-                                      se = if (robust_se) "boot" else "sand",
-                                      B = if (bootstrap) bootstrap_samples else 0)
-                }
-
                 return(fit)
-                
             }, error = function(e) {
                 error_msg <- paste("Model fitting error:", e$message)
-                self$results$todo$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                self$results$todo$setContent(paste0("<p style='color: red;'>", error_msg, "</p>"))
                 return(NULL)
             })
         },
@@ -328,34 +404,53 @@ marginalrecurrentClass <- R6::R6Class(
         },
 
         .populateCumulativeRate = function(model_results, prepared_data) {
-            
+
             if (is.null(model_results) || !self$options$include_cumulative) return()
 
             table <- self$results$cumulativeRate
-            
+
+            lam_fun <- model_results[["Lam0"]]
+            if (is.null(lam_fun) || !is.function(lam_fun)) {
+                table$addRow(rowKey = 1, values = list(time = NA, cumrate = NA, se = NA, lower = NA, upper = NA))
+                return()
+            }
+
+            observed_times <- model_results$DF$time2
+            if (is.null(observed_times)) {
+                observed_times <- prepared_data$time
+            }
+
+            time_points <- private$.getTimePoints(observed_times)
+
+            lam_upper_fun <- model_results[["Lam0.upper"]]
+            lam_lower_fun <- model_results[["Lam0.lower"]]
+            ci_available <- is.function(lam_upper_fun) && is.function(lam_lower_fun)
+
+            if (ci_available) {
+                table$setNote("ci", NULL)
+            } else {
+                table$setNote("ci", "Confidence intervals require enabling bootstrap (set Bootstrap = TRUE).")
+            }
+
             tryCatch({
-                # Get time points for cumulative rate
-                time_points <- private$.getTimePoints(prepared_data$time)
-                
-                # Calculate cumulative rate function
-                cumrate_est <- predict(model_results, newdata = data.frame(time = time_points))
-                
-                if (!is.null(cumrate_est)) {
-                    conf_level <- self$options$confidence_level
-                    
-                    for (i in 1:length(time_points)) {
-                        table$addRow(rowKey = i, values = list(
-                            time = time_points[i],
-                            cumrate = if (length(cumrate_est) >= i) cumrate_est[i] else NA,
-                            se = NA,  # Standard errors would need to be extracted from model
-                            lower = NA,
-                            upper = NA
-                        ))
-                    }
+                cum_values <- lam_fun(time_points)
+                upper_vals <- lower_vals <- rep(NA_real_, length(time_points))
+
+                if (ci_available) {
+                    upper_vals <- lam_upper_fun(time_points)
+                    lower_vals <- lam_lower_fun(time_points)
                 }
-                
+
+                for (i in seq_along(time_points)) {
+                    table$addRow(rowKey = i, values = list(
+                        time = time_points[i],
+                        cumrate = cum_values[i],
+                        se = NA,
+                        lower = lower_vals[i],
+                        upper = upper_vals[i]
+                    ))
+                }
             }, error = function(e) {
-                # Add error note if calculation fails
                 table$addRow(rowKey = 1, values = list(
                     time = NA,
                     cumrate = NA,
@@ -367,30 +462,54 @@ marginalrecurrentClass <- R6::R6Class(
         },
 
         .populateSurvivalFunction = function(model_results, prepared_data) {
-            
+
             if (is.null(model_results) || !self$options$include_survival) return()
 
             table <- self$results$survivalFunction
-            
-            # Only populate if terminal event data is available
-            if (!("terminal_time" %in% colnames(prepared_data))) return()
-            
+
+            haz_fun <- model_results[["Haz0"]]
+            if (is.null(haz_fun) || !is.function(haz_fun)) {
+                table$addRow(rowKey = 1, values = list(time = NA, survival = NA, se = NA, lower = NA, upper = NA))
+                return()
+            }
+
+            observed_times <- model_results$DF$time2
+            if (is.null(observed_times)) {
+                observed_times <- prepared_data$time
+            }
+
+            time_points <- private$.getTimePoints(observed_times)
+
+            frailty_scale <- tryCatch(exp(model_results$log.muZ), error = function(e) 1)
+
+            haz_upper_fun <- model_results[["Haz0.upper"]]
+            haz_lower_fun <- model_results[["Haz0.lower"]]
+
+            if (is.function(haz_upper_fun) && is.function(haz_lower_fun)) {
+                table$setNote("ci", NULL)
+            } else {
+                table$setNote("ci", "Confidence intervals require enabling bootstrap (set Bootstrap = TRUE).")
+            }
+
             tryCatch({
-                # Calculate survival function for terminal events
-                time_points <- private$.getTimePoints(prepared_data$terminal_time)
-                
-                # This would need to be implemented based on reReg's survival function capabilities
-                # For now, provide a placeholder structure
-                for (i in 1:length(time_points)) {
+                baseline_haz <- haz_fun(time_points) * frailty_scale
+                survival_vals <- exp(-baseline_haz)
+
+                upper_vals <- lower_vals <- rep(NA_real_, length(time_points))
+                if (is.function(haz_upper_fun) && is.function(haz_lower_fun)) {
+                    upper_vals <- exp(-haz_upper_fun(time_points) * frailty_scale)
+                    lower_vals <- exp(-haz_lower_fun(time_points) * frailty_scale)
+                }
+
+                for (i in seq_along(time_points)) {
                     table$addRow(rowKey = i, values = list(
                         time = time_points[i],
-                        survival = NA,  # Would calculate actual survival estimates
+                        survival = survival_vals[i],
                         se = NA,
-                        lower = NA,
-                        upper = NA
+                        lower = lower_vals[i],
+                        upper = upper_vals[i]
                     ))
                 }
-                
             }, error = function(e) {
                 table$addRow(rowKey = 1, values = list(
                     time = NA,
@@ -431,6 +550,69 @@ marginalrecurrentClass <- R6::R6Class(
                 p = NA,
                 interpretation = "Adequacy of baseline function specification"
             ))
+        },
+
+        .determineModelCode = function(model_type, has_terminal) {
+
+            if (identical(model_type, "accelerated")) {
+                return(if (has_terminal) "ar|ar" else "ar")
+            }
+
+            if (identical(model_type, "gamma_frailty")) {
+                return(if (has_terminal) "cox.HW" else "cox")
+            }
+
+            return(if (has_terminal) "cox|cox" else "cox")
+        },
+
+        .coerceIndicator = function(x, label, allow_all_zero = FALSE) {
+
+            if (is.null(x))
+                return(NULL)
+
+            if (is.factor(x)) {
+                values <- as.numeric(x) - 1
+            } else if (is.logical(x)) {
+                values <- as.numeric(x)
+            } else if (is.character(x)) {
+                lvl <- unique(x)
+                if (length(lvl) == 2) {
+                    values <- as.numeric(x == lvl[2])
+                } else {
+                    stop(paste(label, "must contain exactly two unique categories."), call. = FALSE)
+                }
+            } else {
+                values <- suppressWarnings(as.numeric(x))
+            }
+
+            if (any(is.na(values))) {
+                stop(paste(label, "contains missing or non-numeric values."), call. = FALSE)
+            }
+
+            uniq <- sort(unique(values))
+            if (length(uniq) > 2) {
+                stop(paste(label, "must be binary (two unique values)."), call. = FALSE)
+            }
+
+            if (!all(uniq %in% c(0, 1))) {
+                if (length(uniq) == 2) {
+                    values <- (values - min(uniq)) / diff(range(uniq))
+                } else if (length(uniq) == 1) {
+                    values <- values - min(uniq)
+                }
+            }
+
+            values <- as.numeric(round(values))
+
+            if (!allow_all_zero && all(values == 0)) {
+                stop(paste(label, "contains no positive events."), call. = FALSE)
+            }
+
+            if (!all(values %in% c(0, 1))) {
+                stop(paste(label, "coercion failed; ensure the variable only contains two levels."), call. = FALSE)
+            }
+
+            return(values)
         },
 
         .getTimePoints = function(time_data) {

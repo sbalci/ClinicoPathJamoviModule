@@ -1,10 +1,25 @@
 #' @title Comprehensive Time Interval Calculator for Survival Analysis
-#' 
-#' @description 
-#' Advanced time interval calculation tool designed for survival analysis, epidemiological 
-#' studies, and person-time analysis. Provides robust date parsing, time interval 
+#'
+#' @description
+#' Advanced time interval calculation tool designed for survival analysis, epidemiological
+#' studies, and person-time analysis. Provides robust date parsing, time interval
 #' calculation, landmark analysis, and comprehensive data quality assessment.
-#' 
+#'
+#' @param data Data frame containing date columns for analysis
+#' @param dx_date Name of column containing start dates (diagnosis, entry, treatment start)
+#' @param fu_date Name of column containing end dates (follow-up, event, study exit)
+#' @param time_format Date format: "auto", "ymd", "dmy", "mdy", "ydm", "myd", "dym", or "ymdhms"
+#' @param output_unit Output time unit: "days", "weeks", "months", or "years"
+#' @param use_landmark Enable landmark analysis (conditional survival from time point)
+#' @param landmark_time Landmark time point in output units
+#' @param remove_negative Remove negative intervals (end before start)
+#' @param remove_extreme Remove extreme outliers (>2× 99th percentile)
+#' @param add_times Add calculated intervals as new variable in dataset
+#' @param include_quality_metrics Include comprehensive quality assessment
+#' @param confidence_level Confidence level for mean intervals (90-99%)
+#'
+#' @return List containing calculated intervals, filtered data, quality metrics, and metadata
+#'
 #' @details
 #' This function provides comprehensive time interval calculation capabilities including:
 #' \itemize{
@@ -16,12 +31,31 @@
 #'   \item Statistical summaries with confidence intervals
 #'   \item Export capabilities for downstream analysis
 #' }
-#' 
+#'
+#' @examples
+#' # Basic time interval calculation:
+#' timeinterval(
+#'   data = study_data,
+#'   dx_date = "diagnosis_date",
+#'   fu_date = "followup_date",
+#'   time_format = "ymd",
+#'   output_unit = "months"
+#' )
+#'
+#' # With landmark analysis:
+#' timeinterval(
+#'   data = study_data,
+#'   dx_date = "start_date",
+#'   fu_date = "end_date",
+#'   use_landmark = TRUE,
+#'   landmark_time = 6,
+#'   output_unit = "months"
+#' )
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import lubridate
 #' @import glue
-#' @import dplyr
 #'
 
 timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -44,11 +78,21 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Validate date columns exist
             if (!dx_date %in% names(data)) {
-                stop(paste("Start date column '", dx_date, "' not found in data"))
+                available <- paste(head(names(data), 8), collapse = ", ")
+                suffix <- if(ncol(data) > 8) "..." else ""
+                stop(glue::glue(
+                    "Start date column '{dx_date}' not found.\n",
+                    "Available columns: {available}{suffix}"
+                ))
             }
-            
+
             if (!fu_date %in% names(data)) {
-                stop(paste("End date column '", fu_date, "' not found in data"))
+                available <- paste(head(names(data), 8), collapse = ", ")
+                suffix <- if(ncol(data) > 8) "..." else ""
+                stop(glue::glue(
+                    "End date column '{fu_date}' not found.\n",
+                    "Available columns: {available}{suffix}"
+                ))
             }
             
             # Check for completely missing date columns
@@ -185,9 +229,18 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
         
+        .calculateCI = function(mean, sd, n, conf_level) {
+            # Calculate confidence interval for mean
+            if (n <= 1) return(list(lower = NA, upper = NA))
+            alpha <- 1 - (conf_level / 100)
+            se <- sd / sqrt(n)
+            margin <- qt(1 - alpha/2, n - 1) * se
+            list(lower = mean - margin, upper = mean + margin)
+        },
+
         .assessDataQuality = function(calculated_time, start_dates, end_dates) {
             # Comprehensive data quality assessment
-            
+
             quality_metrics <- list(
                 total_observations = length(calculated_time),
                 missing_values = sum(is.na(calculated_time)),
@@ -245,7 +298,32 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Calculate time intervals
             calculated_time <- private$.calculateTimeIntervals(start_dates, end_dates, output_unit)
-            
+
+            # Apply data quality filters if requested (combined for performance)
+            original_data <- data
+            valid_idx <- rep(TRUE, length(calculated_time))
+            filter_applied <- FALSE
+
+            if (self$options$remove_negative) {
+                valid_idx <- valid_idx & (calculated_time >= 0 | is.na(calculated_time))
+                filter_applied <- TRUE
+            }
+
+            if (self$options$remove_extreme) {
+                q99 <- quantile(calculated_time, 0.99, na.rm = TRUE)
+                threshold <- q99 * self$options$extreme_multiplier
+                valid_idx <- valid_idx & (calculated_time <= threshold | is.na(calculated_time))
+                filter_applied <- TRUE
+            }
+
+            # Apply combined filter in single operation
+            if (filter_applied && !all(valid_idx)) {
+                calculated_time <- calculated_time[valid_idx]
+                data <- data[valid_idx, ]
+                start_dates <- start_dates[valid_idx]
+                end_dates <- end_dates[valid_idx]
+            }
+
             # Assess data quality
             quality_assessment <- private$.assessDataQuality(calculated_time, start_dates, end_dates)
             
@@ -288,7 +366,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 fu_date = self$options$fu_date,
                 time_format = self$options$time_format,
                 output_unit = self$options$output_unit,
-                landmark_time = self$options$landmark_time
+                landmark_time = if(self$options$use_landmark) self$options$landmark_time else NULL
             )
 
             # Add calculated times to results if requested
@@ -373,39 +451,35 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     total_person_time = sum(time_values, na.rm = TRUE)
                 )
 
-                # if (any(time_data$time < 0, na.rm = TRUE)) {
-                #     warnings$negative_intervals <- "Negative intervals found (end date before start date) and removed"
-                #     time_data$time[time_data$time < 0] <- NA
-                # }
-
-                # Apply landmark time if specified
-                # if (!is.null(landmark)) {
-                #     if (!is.numeric(landmark) || landmark < 0) {
-                #         stop("Landmark time must be a non-negative number")
-                #     }
-                #
-                #     original_n <- nrow(time_data)
-                #     time_data <- time_data[time_data$time >= landmark, ]
-                #     time_data$time <- time_data$time - landmark
-                #
-                #     if (nrow(time_data) < original_n) {
-                #         warnings$landmark_filtering <- sprintf(
-                #             "%d observations removed due to landmark time of %f %s",
-                #             original_n - nrow(time_data),
-                #             landmark,
-                #             output_units
-                #         )
-                #     }
-                # }
-
-
+                # Calculate confidence intervals if quality metrics requested
+                if (self$options$include_quality_metrics) {
+                    ci <- private$.calculateCI(
+                        summary_stats$mean,
+                        summary_stats$sd,
+                        summary_stats$n,
+                        self$options$confidence_level
+                    )
+                    summary_stats$ci_lower <- ci$lower
+                    summary_stats$ci_upper <- ci$upper
+                } else {
+                    summary_stats$ci_lower <- NA
+                    summary_stats$ci_upper <- NA
+                }
 
                 # Create summary text with person-time metrics
+                ci_text <- if (!is.na(summary_stats$ci_lower)) {
+                    paste0(" (", self$options$confidence_level, "% CI: ",
+                           round(summary_stats$ci_lower, 2), " to ",
+                           round(summary_stats$ci_upper, 2), ")")
+                } else {
+                    ""
+                }
+
                 summary_text <- glue::glue("
                     <br><b>Time Interval Summary ({self$options$output_unit})</b><br>
                     Number of observations: {summary_stats$n}<br>
                     Total person-time: {round(summary_stats$total_person_time, 2)} person-{self$options$output_unit}<br>
-                    Mean time: {round(summary_stats$mean, 2)}<br>
+                    Mean time: {round(summary_stats$mean, 2)}{ci_text}<br>
                     Median time: {round(summary_stats$median, 2)}<br>
                     Standard deviation: {round(summary_stats$sd, 2)}<br>
                     Range: {round(summary_stats$min, 2)} to {round(summary_stats$max, 2)}<br>
@@ -430,6 +504,165 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </div>"
                 
                 self$results$summary$setContent(error_summary)
+            }
+
+            # Generate natural-language summary if requested
+            if (self$options$show_summary && !is.null(time_values) && length(time_values) > 0) {
+                n_obs <- summary_stats$n
+                mean_time <- round(summary_stats$mean, 1)
+                median_time <- round(summary_stats$median, 1)
+                total_pt <- round(summary_stats$total_person_time, 1)
+                unit <- self$options$output_unit
+
+                landmark_text <- if (self$options$use_landmark && !is.null(calculated_times$landmark)) {
+                    sprintf(
+                        " after excluding %d participants with follow-up < %s %s (landmark analysis)",
+                        calculated_times$landmark$excluded_count,
+                        self$options$landmark_time,
+                        unit
+                    )
+                } else {
+                    ""
+                }
+
+                quality_text <- if (summary_stats$negative > 0 || summary_stats$missing > 0) {
+                    warnings <- c()
+                    if (summary_stats$negative > 0)
+                        warnings <- c(warnings, sprintf("%d negative intervals", summary_stats$negative))
+                    if (summary_stats$missing > 0)
+                        warnings <- c(warnings, sprintf("%d missing values", summary_stats$missing))
+                    sprintf(" Note: %s were detected.", paste(warnings, collapse = " and "))
+                } else {
+                    ""
+                }
+
+                summary_html <- glue::glue("
+                    <div style='background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0;'>
+                        <h3 style='margin-top: 0; color: #004080;'>📋 Clinical Summary</h3>
+                        <p style='font-size: 1.1em; line-height: 1.6;'>
+                        <strong>Time interval analysis</strong> was performed on <strong>{n_obs} participants</strong>{landmark_text}.
+                        The mean follow-up was <strong>{mean_time} {unit}</strong> (median: {median_time} {unit}),
+                        contributing a total of <strong>{total_pt} person-{unit}</strong> of observation.{quality_text}
+                        </p>
+
+                        <div style='background-color: #f0f7ff; padding: 15px; margin-top: 15px; border-radius: 5px;'>
+                            <p style='font-size: 0.95em; color: #333; margin: 0;'>
+                            <strong>📄 Copy-Ready Sentence:</strong><br>
+                            <em style='color: #555;'>\"Follow-up data were available for {n_obs} participants
+                            (mean {mean_time} {unit}, median {median_time} {unit}), contributing {total_pt} person-{unit}
+                            of observation time.\"</em>
+                            </p>
+                        </div>
+                    </div>
+                ")
+
+                self$results$nlSummary$setContent(summary_html)
+            }
+
+            # Generate contextual warnings for data quality issues
+            if (!is.null(calculated_times) && is.list(calculated_times) &&
+                !is.null(calculated_times$quality)) {
+                quality <- calculated_times$quality
+                warnings_html <- ""
+
+                # Negative intervals warning
+                if (quality$negative_intervals > 0 && !self$options$remove_negative) {
+                    pct <- round(100 * quality$negative_intervals / quality$total_observations, 1)
+                    warnings_html <- paste0(warnings_html, sprintf("
+                        <div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>
+                            <strong>⚠️ Warning: Negative Intervals Detected</strong><br>
+                            %d observations (%.1f%%) have end dates before start dates.<br>
+                            <strong>Recommendation:</strong> Enable 'Remove Negative Intervals' or review your date columns for errors.
+                        </div>
+                    ", quality$negative_intervals, pct))
+                }
+
+                # High missing data warning
+                if (quality$missing_values > 0) {
+                    pct <- round(100 * quality$missing_values / quality$total_observations, 1)
+                    if (pct > 10) {
+                        warnings_html <- paste0(warnings_html, sprintf("
+                            <div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>
+                                <strong>⚠️ Warning: High Missing Data</strong><br>
+                                %d observations (%.1f%%) have missing time intervals.<br>
+                                <strong>Recommendation:</strong> Investigate missing date values. This may affect study conclusions.
+                            </div>
+                        ", quality$missing_values, pct))
+                    }
+                }
+
+                # Future dates warning
+                if (quality$future_dates > 0) {
+                    warnings_html <- paste0(warnings_html, sprintf("
+                        <div style='background-color: #f8d7da; padding: 15px; margin: 10px 0; border-left: 4px solid #dc3545;'>
+                            <strong>🚨 Data Quality Issue: Future Dates</strong><br>
+                            %d date values are in the future.<br>
+                            <strong>Action Required:</strong> Review date columns for data entry errors or incorrect date formats.
+                        </div>
+                    ", quality$future_dates))
+                }
+
+                # Display warnings if any exist
+                if (warnings_html != "") {
+                    current_todo <- self$results$todo$content
+                    if (!is.null(current_todo) && current_todo != "") {
+                        # Append to existing content
+                        self$results$todo$setContent(paste0(current_todo, warnings_html))
+                    } else {
+                        self$results$todo$setContent(warnings_html)
+                    }
+                }
+            }
+
+            # Populate quality assessment if requested
+            if (self$options$include_quality_metrics && !is.null(calculated_times) &&
+                is.list(calculated_times) && !is.null(calculated_times$quality)) {
+                quality <- calculated_times$quality
+
+                quality_html <- glue::glue("
+                    <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0;'>
+                        <h4 style='margin-top: 0; color: #004085;'>📊 Data Quality Assessment</h4>
+
+                        <p><strong>Overall Quality:</strong> {quality$overall_quality}</p>
+
+                        <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+                            <tr style='background-color: #e9ecef;'>
+                                <th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Metric</th>
+                                <th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>Count</th>
+                                <th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>%</th>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Total Observations</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$total_observations}</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>100%</td>
+                            </tr>
+                            <tr style='background-color: #fff3cd;'>
+                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Missing Values</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_values}</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_values/quality$total_observations, 1)}%</td>
+                            </tr>
+                            <tr style='background-color: #f8d7da;'>
+                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Negative Intervals</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$negative_intervals}</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$negative_intervals/quality$total_observations, 1)}%</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Zero Intervals</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$zero_intervals}</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$zero_intervals/quality$total_observations, 1)}%</td>
+                            </tr>
+                            <tr style='background-color: #fff3cd;'>
+                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Extreme Values</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$extreme_values}</td>
+                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>
+                            </tr>
+                        </table>
+
+                        {if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong>⚠️ Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}
+                    </div>
+                ")
+
+                self$results$qualityAssessment$setContent(quality_html)
             }
         },
         

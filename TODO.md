@@ -109,3 +109,32 @@ prepare a realistic data to test the features in detail
 move csv files under data folder.
 move data generation files under data-raw folder.
 move documentation files under module specific vignettes folder.
+
+
+
+in survival function following code works, and displays correct dxdate and fudate:\
+      - name: calculatedtime
+        title: Add Calculated Time to Data
+        type: Output
+        varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+        varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`'
+        measureType: continuous
+        clearWith:
+            - tint
+            - dxdate
+            - fudate
+            - elapsedtime
+            - calculatedtime\
+  but in datetimeconverter function the following does not get the names correctly and displays new column name as is\
+      - name: monthname_out
+        title: Month Name
+        type: Output
+        varTitle: '`Month Name - from ${ datetime_var }`'
+        varDescription: '`Extracted month name from ${ datetime_var }`'
+        measureType: nominal
+        clearWith:
+            - datetime_var
+            - datetime_format
+            - monthname_out\
+  it displays as Month Name - from ${ datetime_var } instead of Month Name - from <actual variable name>
+  

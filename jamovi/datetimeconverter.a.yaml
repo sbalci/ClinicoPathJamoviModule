@@ -1,7 +1,7 @@
 ---
 name: datetimeconverter
 title: DateTime Converter
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: Data Preparation
 menuSubtitle: Convert datetime and extract components
 version: '0.0.31'
@@ -195,12 +195,19 @@ options:
             Extract and display day of year in preview table.
 
     # === OUTPUT OPTIONS (add to data) ===
-    - name: corrected_datetime
-      title: Add Corrected DateTime to Data
+    - name: corrected_datetime_char
+      title: Add Corrected DateTime (Text)
       type: Output
       description:
           R: >
-            Appends corrected datetime as a new variable (converted to numeric) for downstream analysis.
+            Appends the corrected datetime as a human-readable text variable.
+
+    - name: corrected_datetime_numeric
+      title: Add Corrected DateTime (Numeric)
+      type: Output
+      description:
+          R: >
+            Appends the corrected datetime as a numeric variable (Unix epoch seconds) for calculations and plotting.
 
     # === COMPONENT EXTRACTION ===
     - name: year_out
@@ -216,6 +223,17 @@ options:
       description:
           R: >
             Extract month as numeric value (1-12).
+
+
+    # - name: calculatedtime
+    #   title: Add Calculated Time to Data
+    #   type: Output
+    #   description:
+    #       R: >
+    #         If the time is in date format, the time will be calculated as the difference between the event date and the diagnosis date. If the follow-up date is available, the time will be calculated as the difference between the event date and the follow-up date.
+
+
+
 
     - name: monthname_out
       title: Extract Month Name
