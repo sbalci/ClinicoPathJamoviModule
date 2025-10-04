@@ -115,6 +115,27 @@ items:
           - awd
           - awod
 
+    - name: naturalSummary
+      title: 'Natural Language Summary (Copy-Ready)'
+      type: Html
+      visible: (showNaturalSummary)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+
+    - name: glossary
+      title: 'Survival Analysis Glossary'
+      type: Html
+      visible: (showGlossary)
+
     - name: addOutcome
       title: Add Recoded Outcome to Data
       type: Output

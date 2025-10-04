@@ -29,8 +29,8 @@ items:
       type: Image
       renderFun: .plot
       requiresData: true
-      width: 1600
-      height: 1000
+      width: 2000
+      height: 1400
       clearWith:
           - xvar
           - yvar
@@ -75,6 +75,7 @@ items:
           - yLabel
           - legendTitle
           - plotCaption
+          - autoSize
           - plotWidth
           - plotHeight
           - pointShape

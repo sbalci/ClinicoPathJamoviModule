@@ -26,7 +26,9 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             adminDate = NULL,
             outputTable = FALSE,
             diagnostics = FALSE,
-            visualization = FALSE, ...) {
+            visualization = FALSE,
+            showNaturalSummary = FALSE,
+            showGlossary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -137,6 +139,14 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "visualization",
                 visualization,
                 default=FALSE)
+            private$..showNaturalSummary <- jmvcore::OptionBool$new(
+                "showNaturalSummary",
+                showNaturalSummary,
+                default=FALSE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
             private$..addOutcome <- jmvcore::OptionOutput$new(
                 "addOutcome")
 
@@ -161,6 +171,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..outputTable)
             self$.addOption(private$..diagnostics)
             self$.addOption(private$..visualization)
+            self$.addOption(private$..showNaturalSummary)
+            self$.addOption(private$..showGlossary)
             self$.addOption(private$..addOutcome)
         }),
     active = list(
@@ -185,6 +197,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         outputTable = function() private$..outputTable$value,
         diagnostics = function() private$..diagnostics$value,
         visualization = function() private$..visualization$value,
+        showNaturalSummary = function() private$..showNaturalSummary$value,
+        showGlossary = function() private$..showGlossary$value,
         addOutcome = function() private$..addOutcome$value),
     private = list(
         ..outcome = NA,
@@ -208,6 +222,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..outputTable = NA,
         ..diagnostics = NA,
         ..visualization = NA,
+        ..showNaturalSummary = NA,
+        ..showGlossary = NA,
         ..addOutcome = NA)
 )
 
@@ -220,6 +236,8 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         outputTable = function() private$.items[["outputTable"]],
         diagnosticsTable = function() private$.items[["diagnosticsTable"]],
         outcomeViz = function() private$.items[["outcomeViz"]],
+        naturalSummary = function() private$.items[["naturalSummary"]],
+        glossary = function() private$.items[["glossary"]],
         addOutcome = function() private$.items[["addOutcome"]]),
     private = list(),
     public=list(
@@ -353,6 +371,27 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "dooc",
                     "awd",
                     "awod")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalSummary",
+                title="Natural Language Summary (Copy-Ready)",
+                visible="(showNaturalSummary)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "recurrence",
+                    "recurrenceLevel")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Survival Analysis Glossary",
+                visible="(showGlossary)"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addOutcome",
@@ -405,7 +444,51 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'
 #' @examples
 #' \donttest{
-#' # Example usage will be added
+#' # Example 1: Overall survival analysis
+#' data('lung', package = 'survival')
+#' outcomeorganizer(
+#'     data = lung,
+#'     outcome = status,
+#'     outcomeLevel = 2,
+#'     analysistype = 'os',
+#'     addOutcome = TRUE
+#' )
+#'
+#' # Example 2: Competing risks (disease death vs other death)
+#' # Create example data with multiple event types
+#' mydata <- data.frame(
+#'     vital_status = factor(c('Alive_NED', 'Alive_Disease', 'Dead_Disease', 'Dead_Other')),
+#'     time = c(10, 15, 20, 25)
+#' )
+#'
+#' outcomeorganizer(
+#'     data = mydata,
+#'     outcome = vital_status,
+#'     analysistype = 'compete',
+#'     multievent = TRUE,
+#'     dod = 'Dead_Disease',
+#'     dooc = 'Dead_Other',
+#'     awd = 'Alive_Disease',
+#'     awod = 'Alive_NED',
+#'     addOutcome = TRUE
+#' )
+#'
+#' # Example 3: Progression-free survival with recurrence
+#' mydata <- data.frame(
+#'     vital = factor(c('Alive', 'Alive', 'Dead', 'Alive')),
+#'     recurrence = factor(c('No', 'Yes', 'No', 'No')),
+#'     time = c(10, 15, 20, 25)
+#' )
+#'
+#' outcomeorganizer(
+#'     data = mydata,
+#'     outcome = vital,
+#'     outcomeLevel = 'Dead',
+#'     recurrence = recurrence,
+#'     recurrenceLevel = 'Yes',
+#'     analysistype = 'pfs',
+#'     addOutcome = TRUE
+#' )
 #'}
 #' @param data The data as a data frame.
 #' @param outcome The primary outcome variable to be recoded for survival
@@ -447,6 +530,9 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   recoding process.
 #' @param visualization If true, displays a visualization of the distribution
 #'   of recoded outcomes.
+#' @param showNaturalSummary Display a plain-language summary of the recoding
+#'   suitable for copying to reports.
+#' @param showGlossary Display definitions of survival analysis terms.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -454,6 +540,8 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$outputTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$diagnosticsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$outcomeViz} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$addOutcome} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
@@ -486,7 +574,9 @@ outcomeorganizer <- function(
     adminDate,
     outputTable = FALSE,
     diagnostics = FALSE,
-    visualization = FALSE) {
+    visualization = FALSE,
+    showNaturalSummary = FALSE,
+    showGlossary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("outcomeorganizer requires jmvcore to be installed (restart may be required)")
@@ -530,7 +620,9 @@ outcomeorganizer <- function(
         adminDate = adminDate,
         outputTable = outputTable,
         diagnostics = diagnostics,
-        visualization = visualization)
+        visualization = visualization,
+        showNaturalSummary = showNaturalSummary,
+        showGlossary = showGlossary)
 
     analysis <- outcomeorganizerClass$new(
         options = options,

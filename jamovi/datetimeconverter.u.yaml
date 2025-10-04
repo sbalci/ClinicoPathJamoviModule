@@ -41,7 +41,7 @@ children:
     margin: large
     children:
       - type: Label
-        label: Corrected DateTime
+        label: Add Corrected DateTime to Data
         children:
           - type: Output
             name: corrected_datetime_char

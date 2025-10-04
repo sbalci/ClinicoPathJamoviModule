@@ -12,7 +12,51 @@ description:
     R:
         dontrun: true
         usage: |
-            # Example usage will be added
+            # Example 1: Overall survival analysis
+            data('lung', package = 'survival')
+            outcomeorganizer(
+                data = lung,
+                outcome = status,
+                outcomeLevel = 2,
+                analysistype = 'os',
+                addOutcome = TRUE
+            )
+
+            # Example 2: Competing risks (disease death vs other death)
+            # Create example data with multiple event types
+            mydata <- data.frame(
+                vital_status = factor(c('Alive_NED', 'Alive_Disease', 'Dead_Disease', 'Dead_Other')),
+                time = c(10, 15, 20, 25)
+            )
+
+            outcomeorganizer(
+                data = mydata,
+                outcome = vital_status,
+                analysistype = 'compete',
+                multievent = TRUE,
+                dod = 'Dead_Disease',
+                dooc = 'Dead_Other',
+                awd = 'Alive_Disease',
+                awod = 'Alive_NED',
+                addOutcome = TRUE
+            )
+
+            # Example 3: Progression-free survival with recurrence
+            mydata <- data.frame(
+                vital = factor(c('Alive', 'Alive', 'Dead', 'Alive')),
+                recurrence = factor(c('No', 'Yes', 'No', 'No')),
+                time = c(10, 15, 20, 25)
+            )
+
+            outcomeorganizer(
+                data = mydata,
+                outcome = vital,
+                outcomeLevel = 'Dead',
+                recurrence = recurrence,
+                recurrenceLevel = 'Yes',
+                analysistype = 'pfs',
+                addOutcome = TRUE
+            )
 
 options:
     - name: data
@@ -207,6 +251,22 @@ options:
       description:
           R: >
             If true, displays a visualization of the distribution of recoded outcomes.
+
+    - name: showNaturalSummary
+      title: "Show Natural Language Summary"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a plain-language summary of the recoding suitable for copying to reports.
+
+    - name: showGlossary
+      title: "Show Survival Analysis Glossary"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display definitions of survival analysis terms.
 
     - name: addOutcome
       title: Add Recoded Outcome to Data

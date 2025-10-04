@@ -18,7 +18,9 @@ timeinterval(
   add_times = FALSE,
   include_quality_metrics = FALSE,
   confidence_level = 95,
-  show_summary = FALSE
+  show_summary = FALSE,
+  show_glossary = FALSE,
+  timezone = "system"
 )
 }
 \arguments{
@@ -72,15 +74,26 @@ confidence intervals.}
 
 \item{show_summary}{Generate a plain-language interpretation of results
 suitable for copying into reports or clinical notes.}
+
+\item{show_glossary}{Display definitions of key terms (person-time,
+incidence rate, landmark analysis, etc.) to help interpret results.}
+
+\item{timezone}{Timezone for datetime parsing. 'System Default' uses your
+computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
+Time. Ensures consistent time interval calculations across different
+systems and time zones.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
+\code{results$caveatsPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 }
 }

@@ -208,5 +208,30 @@ options:
             Generate a plain-language interpretation of results suitable for
             copying into reports or clinical notes.
 
+    - name: show_glossary
+      title: Show Glossary of Terms
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display definitions of key terms (person-time, incidence rate, landmark analysis, etc.)
+            to help interpret results.
+
+    # === TIMEZONE CONFIGURATION ===
+    - name: timezone
+      title: Timezone
+      type: List
+      options:
+        - name: system
+          title: System Default
+        - name: utc
+          title: UTC
+      default: system
+      description:
+          R: >
+            Timezone for datetime parsing. 'System Default' uses your computer's timezone.
+            'UTC' interprets datetimes as Coordinated Universal Time. Ensures consistent
+            time interval calculations across different systems and time zones.
+
 
 ...

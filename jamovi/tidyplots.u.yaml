@@ -301,6 +301,8 @@ children:
         name: showGlossary
       - type: CheckBox
         name: showSummary
+      - type: CheckBox
+        name: autoSize
   - type: CollapseBox
     label: Axis Options
     collapsed: true

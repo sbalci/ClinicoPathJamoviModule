@@ -165,5 +165,9 @@ children:
             name: diagnostics
           - type: CheckBox
             name: visualization
+          - type: CheckBox
+            name: showNaturalSummary
+          - type: CheckBox
+            name: showGlossary
           - type: Output
             name: addOutcome

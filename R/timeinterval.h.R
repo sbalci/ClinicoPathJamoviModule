@@ -18,7 +18,9 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             add_times = FALSE,
             include_quality_metrics = FALSE,
             confidence_level = 95,
-            show_summary = FALSE, ...) {
+            show_summary = FALSE,
+            show_glossary = FALSE,
+            timezone = "system", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -107,6 +109,17 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "show_summary",
                 show_summary,
                 default=FALSE)
+            private$..show_glossary <- jmvcore::OptionBool$new(
+                "show_glossary",
+                show_glossary,
+                default=FALSE)
+            private$..timezone <- jmvcore::OptionList$new(
+                "timezone",
+                timezone,
+                options=list(
+                    "system",
+                    "utc"),
+                default="system")
 
             self$.addOption(private$..dx_date)
             self$.addOption(private$..fu_date)
@@ -121,6 +134,8 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..include_quality_metrics)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..show_summary)
+            self$.addOption(private$..show_glossary)
+            self$.addOption(private$..timezone)
         }),
     active = list(
         dx_date = function() private$..dx_date$value,
@@ -135,7 +150,9 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         add_times = function() private$..add_times$value,
         include_quality_metrics = function() private$..include_quality_metrics$value,
         confidence_level = function() private$..confidence_level$value,
-        show_summary = function() private$..show_summary$value),
+        show_summary = function() private$..show_summary$value,
+        show_glossary = function() private$..show_glossary$value,
+        timezone = function() private$..timezone$value),
     private = list(
         ..dx_date = NA,
         ..fu_date = NA,
@@ -149,7 +166,9 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..add_times = NA,
         ..include_quality_metrics = NA,
         ..confidence_level = NA,
-        ..show_summary = NA)
+        ..show_summary = NA,
+        ..show_glossary = NA,
+        ..timezone = NA)
 )
 
 timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -157,10 +176,13 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        aboutPanel = function() private$.items[["aboutPanel"]],
         personTimeInfo = function() private$.items[["personTimeInfo"]],
         qualityAssessment = function() private$.items[["qualityAssessment"]],
+        caveatsPanel = function() private$.items[["caveatsPanel"]],
         summary = function() private$.items[["summary"]],
         nlSummary = function() private$.items[["nlSummary"]],
+        glossaryPanel = function() private$.items[["glossaryPanel"]],
         calculated_time = function() private$.items[["calculated_time"]]),
     private = list(),
     public=list(
@@ -178,12 +200,21 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 title="Getting Started"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="aboutPanel",
+                title="About This Analysis"))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="personTimeInfo",
                 title="Understanding Person-Time Analysis"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityAssessment",
                 title="Data Quality Assessment",
+                visible="(include_quality_metrics)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="caveatsPanel",
+                title="Caveats & Assumptions",
                 visible="(include_quality_metrics)"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -194,6 +225,11 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="nlSummary",
                 title="Clinical Summary (Copy-Ready)",
                 visible="(show_summary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossaryPanel",
+                title="Key Terms & Concepts",
+                visible="(show_glossary)"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculated_time",
@@ -296,13 +332,22 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   confidence intervals.
 #' @param show_summary Generate a plain-language interpretation of results
 #'   suitable for copying into reports or clinical notes.
+#' @param show_glossary Display definitions of key terms (person-time,
+#'   incidence rate, landmark analysis, etc.) to help interpret results.
+#' @param timezone Timezone for datetime parsing. 'System Default' uses your
+#'   computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
+#'   Time. Ensures consistent time interval calculations across different
+#'   systems and time zones.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$caveatsPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
@@ -321,7 +366,9 @@ timeinterval <- function(
     add_times = FALSE,
     include_quality_metrics = FALSE,
     confidence_level = 95,
-    show_summary = FALSE) {
+    show_summary = FALSE,
+    show_glossary = FALSE,
+    timezone = "system") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timeinterval requires jmvcore to be installed (restart may be required)")
@@ -348,7 +395,9 @@ timeinterval <- function(
         add_times = add_times,
         include_quality_metrics = include_quality_metrics,
         confidence_level = confidence_level,
-        show_summary = show_summary)
+        show_summary = show_summary,
+        show_glossary = show_glossary,
+        timezone = timezone)
 
     analysis <- timeintervalClass$new(
         options = options,
