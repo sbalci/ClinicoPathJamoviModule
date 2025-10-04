@@ -1,7 +1,7 @@
 ---
 name: datetimeconverter
 title: DateTime Converter
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: Convert datetime and extract components
 version: '0.0.31'
@@ -92,6 +92,21 @@ options:
           R: >
             DateTime format specification. 'Auto-detect' attempts to identify the format automatically.
             Manual selection ensures accurate parsing for specific datetime formats.
+
+    - name: timezone
+      title: Timezone
+      type: List
+      options:
+        - name: system
+          title: System Default
+        - name: utc
+          title: UTC
+      default: system
+      description:
+          R: >
+            Timezone for datetime parsing. 'System Default' uses your computer's timezone.
+            'UTC' interprets datetimes as Coordinated Universal Time. Note: Excel serial and
+            Unix epoch conversions always use UTC regardless of this setting.
 
     # === PREVIEW OPTIONS ===
     - name: preview_rows
@@ -194,6 +209,43 @@ options:
           R: >
             Extract and display day of year in preview table.
 
+    # === DISPLAY OPTIONS ===
+    - name: show_quality_metrics
+      title: Show Data Quality Assessment
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display comprehensive quality metrics including parsing success rate,
+            invalid dates, and data quality warnings.
+
+    - name: show_summary
+      title: Show Natural-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate a plain-language summary suitable for copying into reports
+            or clinical documentation.
+
+    - name: show_explanations
+      title: Show Explanatory Notes
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display educational content explaining what this function does,
+            when to use it, and how to interpret results.
+
+    - name: show_glossary
+      title: Show Glossary of Terms
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display definitions of datetime-related terms (Excel serial dates,
+            Unix epoch, timezones, etc.) to aid interpretation.
+
     # === OUTPUT OPTIONS (add to data) ===
     - name: corrected_datetime_char
       title: Add Corrected DateTime (Text)
@@ -207,7 +259,10 @@ options:
       type: Output
       description:
           R: >
-            Appends the corrected datetime as a numeric variable (Unix epoch seconds) for calculations and plotting.
+            Appends the corrected datetime as a numeric variable (Unix epoch seconds since 1970-01-01 00:00:00 UTC).
+            This numeric representation is OS-independent and timezone-independent, making it suitable for
+            calculations, comparisons, and plotting. The same datetime will always produce the same numeric value
+            regardless of your computer's timezone or operating system.
 
     # === COMPONENT EXTRACTION ===
     - name: year_out

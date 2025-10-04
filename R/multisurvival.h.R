@@ -101,11 +101,23 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..dxdate <- jmvcore::OptionVariable$new(
                 "dxdate",
                 dxdate,
-                default=NULL)
+                default=NULL,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
                 fudate,
-                default=NULL)
+                default=NULL,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
             private$..timetypedata <- jmvcore::OptionList$new(
                 "timetypedata",
                 timetypedata,
@@ -1709,10 +1721,14 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param tint If true, survival time will be calculated from \code{dxdate}
 #'   and \code{fudate}. If false, \code{elapsedtime} should be provided as a
 #'   pre-calculated numeric variable.
-#' @param dxdate Date of diagnosis. Required if \code{tint} = true. Must match
-#'   the format specified in \code{timetypedata}.
+#' @param dxdate Date of diagnosis. Required if \code{tint} = true. Accepts:
+#'   (1) Date/datetime text, (2) Numeric Unix epoch seconds (from DateTime
+#'   Converter's corrected_datetime_numeric output), (3) Numeric datetime values
+#'   from R. Time intervals calculated as difference from follow-up date.
 #' @param fudate Follow-up date or date of last observation. Required if
-#'   \code{tint} = true. Must match the format specified in \code{timetypedata}.
+#'   \code{tint} = true. Accepts: (1) Date/datetime text, (2) Numeric Unix epoch
+#'   seconds (from DateTime Converter's corrected_datetime_numeric output), (3)
+#'   Numeric datetime values from R. Must be in same format as diagnosis date.
 #' @param timetypedata Specifies the format of the date variables in the input
 #'   data. This is critical if \code{tint = true}, as \code{dxdate} and
 #'   \code{fudate} will be parsed according to this format to calculate survival

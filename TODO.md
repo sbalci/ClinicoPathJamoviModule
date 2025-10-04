@@ -14,12 +14,11 @@ source .venv/bin/activate
 > pdftotext
 
 > markitdown path-to-file.pdf -o document.md
-https://github.com/microsoft/markitdown
+<https://github.com/microsoft/markitdown>
 
 > marker_single /path/to/file.pdf --output_dir
-marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf --output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/ 
-https://github.com/datalab-to/marker
-
+marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf --output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/
+<https://github.com/datalab-to/marker>
 
 > /review-article-stats '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.html'
@@ -56,7 +55,6 @@ check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/
 
 jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("~/Desktop/survival_pancreas_T2_to_T3_upstage_10072025.csv");stagemigration(data = data, oldStage = T_AJCC8_gr, newStage = T_modified_gr, survivalTime = OverallTime, event = Outcome, eventLevel = "DEAD")
 
-
 jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/diagnostic_meta_test.csv");diagnosticmeta(
     data = data,
     study = study_name,
@@ -69,7 +67,6 @@ jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::rea
     meta_regression = TRUE,
     heterogeneity_analysis = TRUE)
 
-
 jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/ihc_breast_cancer.csv");ihccluster(
     data = data,
     catVars = vars(ER_Status, PR_Status),
@@ -77,8 +74,6 @@ jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::rea
     clinicalVars = vars())
 
 data <- jmvReadWrite::read_omv(fleInp = "/Users/serdarbalci/Desktop/meddecide_debug.omv")
-
-
 
 update .u.yaml to make it user friendly. make all relevant features to be together.
 
@@ -90,6 +85,7 @@ To lower the computation make all default checkboxes to be false in .a.yaml
 
 implement welcome/introductory message styling of decisionpanel.
 Key Styling Elements (matching decisionpanel):
+
 - Font: Arial, sans-serif
 - Line height: 1.4
 - Headers: #333 (dark gray) with 2px solid borders
@@ -112,29 +108,3 @@ move documentation files under module specific vignettes folder.
 
 
 
-in survival function following code works, and displays correct dxdate and fudate:\
-      - name: calculatedtime
-        title: Add Calculated Time to Data
-        type: Output
-        varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
-        varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`'
-        measureType: continuous
-        clearWith:
-            - tint
-            - dxdate
-            - fudate
-            - elapsedtime
-            - calculatedtime\
-  but in datetimeconverter function the following does not get the names correctly and displays new column name as is\
-      - name: monthname_out
-        title: Month Name
-        type: Output
-        varTitle: '`Month Name - from ${ datetime_var }`'
-        varDescription: '`Extracted month name from ${ datetime_var }`'
-        measureType: nominal
-        clearWith:
-            - datetime_var
-            - datetime_format
-            - monthname_out\
-  it displays as Month Name - from ${ datetime_var } instead of Month Name - from <actual variable name>
-  

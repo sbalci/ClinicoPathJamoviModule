@@ -8,6 +8,7 @@ datetimeconverter(
   data,
   datetime_var,
   datetime_format = "auto",
+  timezone = "system",
   preview_rows = 20,
   extract_year = FALSE,
   extract_month = FALSE,
@@ -19,7 +20,11 @@ datetimeconverter(
   extract_dayname = FALSE,
   extract_weeknum = FALSE,
   extract_quarter = FALSE,
-  extract_dayofyear = FALSE
+  extract_dayofyear = FALSE,
+  show_quality_metrics = FALSE,
+  show_summary = FALSE,
+  show_explanations = FALSE,
+  show_glossary = FALSE
 )
 }
 \arguments{
@@ -33,6 +38,11 @@ datetime representations.}
 \item{datetime_format}{DateTime format specification. 'Auto-detect'
 attempts to identify the format automatically. Manual selection ensures
 accurate parsing for specific datetime formats.}
+
+\item{timezone}{Timezone for datetime parsing. 'System Default' uses your
+computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
+Time. Note: Excel serial and Unix epoch conversions always use UTC
+regardless of this setting.}
 
 \item{preview_rows}{Number of rows to display in preview tables. Shows
 original values, corrected datetimes, and extracted components for quality
@@ -61,6 +71,18 @@ table.}
 \item{extract_quarter}{Extract and display quarter in preview table.}
 
 \item{extract_dayofyear}{Extract and display day of year in preview table.}
+
+\item{show_quality_metrics}{Display comprehensive quality metrics including
+parsing success rate, invalid dates, and data quality warnings.}
+
+\item{show_summary}{Generate a plain-language summary suitable for copying
+into reports or clinical documentation.}
+
+\item{show_explanations}{Display educational content explaining what this
+function does, when to use it, and how to interpret results.}
+
+\item{show_glossary}{Display definitions of datetime-related terms (Excel
+serial dates, Unix epoch, timezones, etc.) to aid interpretation.}
 }
 \value{
 A results object containing:
@@ -70,6 +92,11 @@ A results object containing:
 \code{results$qualityMetrics} \tab \tab \tab \tab \tab a html \cr
 \code{results$previewTable} \tab \tab \tab \tab \tab a html \cr
 \code{results$componentPreview} \tab \tab \tab \tab \tab a html \cr
+\code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
+\code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
+\code{results$caveatsPanel} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$corrected_datetime_char} \tab \tab \tab \tab \tab an output \cr
 \code{results$corrected_datetime_numeric} \tab \tab \tab \tab \tab an output \cr
 \code{results$year_out} \tab \tab \tab \tab \tab an output \cr

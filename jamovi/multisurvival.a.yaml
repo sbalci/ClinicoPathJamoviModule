@@ -1,10 +1,10 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: SurvivalT2
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -146,19 +146,26 @@ options:
       title: 'Diagnosis Date'
       type: Variable
       default: NULL
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
       description:
         R: >
-          Date of diagnosis. Required if `tint` = true.
-          Must match the format specified in `timetypedata`.
+          Date of diagnosis. Required if `tint` = true. Accepts: (1) Date/datetime text,
+          (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
+          (3) Numeric datetime values from R. Time intervals calculated as difference from follow-up date.
 
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
       default: NULL
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
       description:
         R: >
-          Follow-up date or date of last observation. Required if `tint` = true.
-          Must match the format specified in `timetypedata`.
+          Follow-up date or date of last observation. Required if `tint` = true. Accepts:
+          (1) Date/datetime text, (2) Numeric Unix epoch seconds (from DateTime Converter's
+          corrected_datetime_numeric output), (3) Numeric datetime values from R. Must be in
+          same format as diagnosis date.
 
 
 

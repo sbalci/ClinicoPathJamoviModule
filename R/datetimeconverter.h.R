@@ -8,6 +8,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         initialize = function(
             datetime_var = NULL,
             datetime_format = "auto",
+            timezone = "system",
             preview_rows = 20,
             extract_year = FALSE,
             extract_month = FALSE,
@@ -19,7 +20,11 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             extract_dayname = FALSE,
             extract_weeknum = FALSE,
             extract_quarter = FALSE,
-            extract_dayofyear = FALSE, ...) {
+            extract_dayofyear = FALSE,
+            show_quality_metrics = FALSE,
+            show_summary = FALSE,
+            show_explanations = FALSE,
+            show_glossary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -54,6 +59,13 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "myd",
                     "dym"),
                 default="auto")
+            private$..timezone <- jmvcore::OptionList$new(
+                "timezone",
+                timezone,
+                options=list(
+                    "system",
+                    "utc"),
+                default="system")
             private$..preview_rows <- jmvcore::OptionNumber$new(
                 "preview_rows",
                 preview_rows,
@@ -104,6 +116,22 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "extract_dayofyear",
                 extract_dayofyear,
                 default=FALSE)
+            private$..show_quality_metrics <- jmvcore::OptionBool$new(
+                "show_quality_metrics",
+                show_quality_metrics,
+                default=FALSE)
+            private$..show_summary <- jmvcore::OptionBool$new(
+                "show_summary",
+                show_summary,
+                default=FALSE)
+            private$..show_explanations <- jmvcore::OptionBool$new(
+                "show_explanations",
+                show_explanations,
+                default=FALSE)
+            private$..show_glossary <- jmvcore::OptionBool$new(
+                "show_glossary",
+                show_glossary,
+                default=FALSE)
             private$..corrected_datetime_char <- jmvcore::OptionOutput$new(
                 "corrected_datetime_char")
             private$..corrected_datetime_numeric <- jmvcore::OptionOutput$new(
@@ -133,6 +161,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 
             self$.addOption(private$..datetime_var)
             self$.addOption(private$..datetime_format)
+            self$.addOption(private$..timezone)
             self$.addOption(private$..preview_rows)
             self$.addOption(private$..extract_year)
             self$.addOption(private$..extract_month)
@@ -145,6 +174,10 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..extract_weeknum)
             self$.addOption(private$..extract_quarter)
             self$.addOption(private$..extract_dayofyear)
+            self$.addOption(private$..show_quality_metrics)
+            self$.addOption(private$..show_summary)
+            self$.addOption(private$..show_explanations)
+            self$.addOption(private$..show_glossary)
             self$.addOption(private$..corrected_datetime_char)
             self$.addOption(private$..corrected_datetime_numeric)
             self$.addOption(private$..year_out)
@@ -162,6 +195,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     active = list(
         datetime_var = function() private$..datetime_var$value,
         datetime_format = function() private$..datetime_format$value,
+        timezone = function() private$..timezone$value,
         preview_rows = function() private$..preview_rows$value,
         extract_year = function() private$..extract_year$value,
         extract_month = function() private$..extract_month$value,
@@ -174,6 +208,10 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         extract_weeknum = function() private$..extract_weeknum$value,
         extract_quarter = function() private$..extract_quarter$value,
         extract_dayofyear = function() private$..extract_dayofyear$value,
+        show_quality_metrics = function() private$..show_quality_metrics$value,
+        show_summary = function() private$..show_summary$value,
+        show_explanations = function() private$..show_explanations$value,
+        show_glossary = function() private$..show_glossary$value,
         corrected_datetime_char = function() private$..corrected_datetime_char$value,
         corrected_datetime_numeric = function() private$..corrected_datetime_numeric$value,
         year_out = function() private$..year_out$value,
@@ -190,6 +228,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     private = list(
         ..datetime_var = NA,
         ..datetime_format = NA,
+        ..timezone = NA,
         ..preview_rows = NA,
         ..extract_year = NA,
         ..extract_month = NA,
@@ -202,6 +241,10 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..extract_weeknum = NA,
         ..extract_quarter = NA,
         ..extract_dayofyear = NA,
+        ..show_quality_metrics = NA,
+        ..show_summary = NA,
+        ..show_explanations = NA,
+        ..show_glossary = NA,
         ..corrected_datetime_char = NA,
         ..corrected_datetime_numeric = NA,
         ..year_out = NA,
@@ -226,6 +269,11 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         qualityMetrics = function() private$.items[["qualityMetrics"]],
         previewTable = function() private$.items[["previewTable"]],
         componentPreview = function() private$.items[["componentPreview"]],
+        qualityAssessment = function() private$.items[["qualityAssessment"]],
+        nlSummary = function() private$.items[["nlSummary"]],
+        aboutPanel = function() private$.items[["aboutPanel"]],
+        caveatsPanel = function() private$.items[["caveatsPanel"]],
+        glossaryPanel = function() private$.items[["glossaryPanel"]],
         corrected_datetime_char = function() private$.items[["corrected_datetime_char"]],
         corrected_datetime_numeric = function() private$.items[["corrected_datetime_numeric"]],
         year_out = function() private$.items[["year_out"]],
@@ -269,6 +317,31 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="componentPreview",
                 title="Extracted Components Preview"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="qualityAssessment",
+                title="Data Quality Assessment",
+                visible="(show_quality_metrics)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nlSummary",
+                title="Summary (Copy-Ready)",
+                visible="(show_summary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutPanel",
+                title="About This Analysis",
+                visible="(show_explanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="caveatsPanel",
+                title="Caveats & Assumptions",
+                visible="(show_explanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossaryPanel",
+                title="Key Terms & Concepts",
+                visible="(show_glossary)"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="corrected_datetime_char",
@@ -457,6 +530,10 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param datetime_format DateTime format specification. 'Auto-detect'
 #'   attempts to identify the format automatically. Manual selection ensures
 #'   accurate parsing for specific datetime formats.
+#' @param timezone Timezone for datetime parsing. 'System Default' uses your
+#'   computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
+#'   Time. Note: Excel serial and Unix epoch conversions always use UTC
+#'   regardless of this setting.
 #' @param preview_rows Number of rows to display in preview tables. Shows
 #'   original values, corrected datetimes, and extracted components for quality
 #'   checking.
@@ -473,6 +550,14 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param extract_weeknum Extract and display week number in preview table.
 #' @param extract_quarter Extract and display quarter in preview table.
 #' @param extract_dayofyear Extract and display day of year in preview table.
+#' @param show_quality_metrics Display comprehensive quality metrics including
+#'   parsing success rate, invalid dates, and data quality warnings.
+#' @param show_summary Generate a plain-language summary suitable for copying
+#'   into reports or clinical documentation.
+#' @param show_explanations Display educational content explaining what this
+#'   function does, when to use it, and how to interpret results.
+#' @param show_glossary Display definitions of datetime-related terms (Excel
+#'   serial dates, Unix epoch, timezones, etc.) to aid interpretation.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -480,6 +565,11 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$qualityMetrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$previewTable} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$componentPreview} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$caveatsPanel} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$corrected_datetime_char} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$corrected_datetime_numeric} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$year_out} \tab \tab \tab \tab \tab an output \cr
@@ -500,6 +590,7 @@ datetimeconverter <- function(
     data,
     datetime_var,
     datetime_format = "auto",
+    timezone = "system",
     preview_rows = 20,
     extract_year = FALSE,
     extract_month = FALSE,
@@ -511,7 +602,11 @@ datetimeconverter <- function(
     extract_dayname = FALSE,
     extract_weeknum = FALSE,
     extract_quarter = FALSE,
-    extract_dayofyear = FALSE) {
+    extract_dayofyear = FALSE,
+    show_quality_metrics = FALSE,
+    show_summary = FALSE,
+    show_explanations = FALSE,
+    show_glossary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("datetimeconverter requires jmvcore to be installed (restart may be required)")
@@ -526,6 +621,7 @@ datetimeconverter <- function(
     options <- datetimeconverterOptions$new(
         datetime_var = datetime_var,
         datetime_format = datetime_format,
+        timezone = timezone,
         preview_rows = preview_rows,
         extract_year = extract_year,
         extract_month = extract_month,
@@ -537,7 +633,11 @@ datetimeconverter <- function(
         extract_dayname = extract_dayname,
         extract_weeknum = extract_weeknum,
         extract_quarter = extract_quarter,
-        extract_dayofyear = extract_dayofyear)
+        extract_dayofyear = extract_dayofyear,
+        show_quality_metrics = show_quality_metrics,
+        show_summary = show_summary,
+        show_explanations = show_explanations,
+        show_glossary = show_glossary)
 
     analysis <- datetimeconverterClass$new(
         options = options,

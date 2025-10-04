@@ -15,7 +15,6 @@ children:
             name: datetime_var
             maxItemCount: 1
             isTarget: true
-
   - type: LayoutBox
     margin: large
     children:
@@ -24,7 +23,6 @@ children:
         children:
           - type: ComboBox
             name: datetime_format
-
   - type: LayoutBox
     margin: large
     children:
@@ -34,7 +32,11 @@ children:
           - type: TextBox
             name: preview_rows
             format: number
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: timezone
   - type: LayoutBox
     margin: large
     children:
@@ -45,7 +47,6 @@ children:
             name: corrected_datetime_char
           - type: Output
             name: corrected_datetime_numeric
-
   - type: CollapseBox
     label: Date Components
     collapsed: false
@@ -61,21 +62,21 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: 'Extract (Preview)'
+                label: Extract (Preview)
                 fitToGrid: true
                 children:
                   - type: CheckBox
                     name: extract_year
+                    label: Extract Year from Variable (4-digit)
                   - type: CheckBox
                     name: extract_month
+                    label: Extract Month (Number)
                   - type: CheckBox
                     name: extract_monthname
+                    label: Extract Month (Name)
                   - type: CheckBox
                     name: extract_day
-      - type: LayoutBox
-        margin: large
-        stretchFactor: 1
-        children:
+                    label: Extract Day of Month
           - type: LayoutBox
             cell:
               column: 1
@@ -83,28 +84,24 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: 'Add to Data'
+                label: Add to Data
                 children:
                   - type: Output
                     name: year_out
+                    enable: (extract_year)
+                    label: Add Year to Data
                   - type: Output
                     name: month_out
+                    enable: (extract_month)
                     label: Add Month Number to Data
-
-              # - type: Output
-              #   name: calculatedtime
-              #   label: Add Calculated Time to Data
-
-
                   - type: Output
                     name: monthname_out
+                    enable: (extract_monthname)
+                    label: Add Month Name to Data
                   - type: Output
                     name: day_out
-
-
-
-
-
+                    enable: (extract_day)
+                    label: Add Day of Month to Data
   - type: CollapseBox
     label: Time Components
     collapsed: true
@@ -120,18 +117,17 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: 'Extract (Preview)'
+                label: Extract (Preview)
                 children:
                   - type: CheckBox
                     name: extract_hour
+                    label: Extract Hour (0-23)
                   - type: CheckBox
                     name: extract_minute
+                    label: Extract Minute (0-59)
                   - type: CheckBox
                     name: extract_second
-      - type: LayoutBox
-        margin: large
-        stretchFactor: 1
-        children:
+                    label: Extract Second (0-59)
           - type: LayoutBox
             cell:
               column: 1
@@ -139,14 +135,20 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: 'Add to Data'
+                label: Add to Data
                 children:
                   - type: Output
                     name: hour_out
+                    enable: (extract_hour)
+                    label: Add Hour to Data
                   - type: Output
                     name: minute_out
+                    enable: (extract_minute)
+                    label: Add Minute to Data
                   - type: Output
                     name: second_out
+                    enable: (extract_second)
+                    label: Add Second to Data
 
   - type: CollapseBox
     label: Other Components
@@ -163,20 +165,20 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: 'Extract (Preview)'
+                label: Extract (Preview)
                 children:
                   - type: CheckBox
                     name: extract_dayname
+                    label: Extract Day Name (e.g., Monday)
                   - type: CheckBox
                     name: extract_weeknum
+                    label: Extract Week Number (1-53)
                   - type: CheckBox
                     name: extract_quarter
+                    label: Extract Quarter (1-4)
                   - type: CheckBox
                     name: extract_dayofyear
-      - type: LayoutBox
-        margin: large
-        stretchFactor: 1
-        children:
+                    label: Extract Day of Year (1-366)
           - type: LayoutBox
             cell:
               column: 1
@@ -184,13 +186,34 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: 'Add to Data'
+                label: Add to Data
                 children:
                   - type: Output
                     name: dayname_out
+                    enable: (extract_dayname)
+                    label: Add Day Name to Data
                   - type: Output
                     name: weeknum_out
+                    enable: (extract_weeknum)
+                    label: Add Week Number to Data
                   - type: Output
                     name: quarter_out
+                    enable: (extract_quarter)
+                    label: Add Quarter to Data
                   - type: Output
                     name: dayofyear_out
+                    enable: (extract_dayofyear)
+                    label: Add Day of Year to Data
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: show_quality_metrics
+      - type: CheckBox
+        name: show_summary
+      - type: CheckBox
+        name: show_explanations
+      - type: CheckBox
+        name: show_glossary

@@ -1,7 +1,7 @@
 ---
 name:  survival
 title: Survival Analysis
-menuGroup: SurvivalT2
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
 version: '0.0.31'
@@ -65,16 +65,26 @@ options:
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
       description:
           R: >
-            The date of diagnosis. If the time is in date format, the time will be calculated as the difference between the event date and the diagnosis date.
+            The date of diagnosis. Accepts: (1) Date/datetime text formats (e.g., "2024-01-15"),
+            (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
+            (3) Numeric datetime values from R. Time intervals will be automatically calculated as the
+            difference between follow-up/event date and diagnosis date.
 
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
       description:
           R: >
-            The date of follow-up. If the time is in date format, the time will be calculated as the difference between the event date and the follow-up date.
+            The date of follow-up or event. Accepts: (1) Date/datetime text formats (e.g., "2024-01-15"),
+            (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
+            (3) Numeric datetime values from R. Must be in the same format as diagnosis date.
+            Time intervals calculated as difference from diagnosis date.
 
 
     - name: calculatedtime
