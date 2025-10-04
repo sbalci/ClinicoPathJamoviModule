@@ -1,7 +1,7 @@
 ---
 name: tidyplots
 title: Comprehensive Tidy Plots
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotD
 menuSubgroup: All-In-One
 version: '0.0.31'
 jas: '1.2'
