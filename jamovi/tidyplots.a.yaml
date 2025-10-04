@@ -446,19 +446,34 @@ options:
       default: false
 
     # === PLOT SIZE ===
+    - name: autoSize
+      title: Auto-size Plot to Canvas
+      type: Bool
+      default: true
+      description:
+          R: >
+            If enabled, plot will fill the available canvas space (recommended for jamovi).
+            If disabled, you can set custom width and height in millimeters.
+
     - name: plotWidth
-      title: Plot Width
+      title: Plot Width (mm)
       type: Integer
-      default: 20
-      min: 10
-      max: 100
+      default: 150
+      min: 50
+      max: 500
+      description:
+          R: >
+            Width in millimeters. Only used when Auto-size is disabled.
 
     - name: plotHeight
-      title: Plot Height
+      title: Plot Height (mm)
       type: Integer
-      default: 20
-      min: 10
-      max: 100
+      default: 120
+      min: 50
+      max: 500
+      description:
+          R: >
+            Height in millimeters. Only used when Auto-size is disabled.
 
     # === POINT OPTIONS ===
     - name: pointShape

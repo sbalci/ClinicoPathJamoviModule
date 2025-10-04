@@ -22,7 +22,6 @@ children:
             name: fu_date
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Date Format Configuration
     collapsed: false
@@ -31,7 +30,8 @@ children:
         name: time_format
       - type: ComboBox
         name: output_unit
-
+      - type: ComboBox
+        name: timezone
   - type: CollapseBox
     label: Landmark Analysis
     collapsed: true
@@ -46,7 +46,6 @@ children:
             name: landmark_time
             format: number
             enable: (use_landmark)
-
   - type: CollapseBox
     label: Data Quality Options
     collapsed: true
@@ -58,7 +57,7 @@ children:
       - type: TextBox
         name: extreme_multiplier
         format: number
-        suffix: 'x 99th %ile'
+        suffix: x 99th %ile
         enable: (remove_extreme)
       - type: CheckBox
         name: include_quality_metrics
@@ -67,7 +66,6 @@ children:
         format: number
         suffix: '%'
         enable: (include_quality_metrics)
-
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -76,3 +74,8 @@ children:
         name: add_times
       - type: CheckBox
         name: show_summary
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_glossary

@@ -26,7 +26,9 @@ outcomeorganizer(
   adminDate,
   outputTable = FALSE,
   diagnostics = FALSE,
-  visualization = FALSE
+  visualization = FALSE,
+  showNaturalSummary = FALSE,
+  showGlossary = FALSE
 )
 }
 \arguments{
@@ -91,6 +93,11 @@ recoding process.}
 
 \item{visualization}{If true, displays a visualization of the distribution
 of recoded outcomes.}
+
+\item{showNaturalSummary}{Display a plain-language summary of the recoding
+suitable for copying to reports.}
+
+\item{showGlossary}{Display definitions of survival analysis terms.}
 }
 \value{
 A results object containing:
@@ -100,6 +107,8 @@ A results object containing:
 \code{results$outputTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$diagnosticsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$outcomeViz} \tab \tab \tab \tab \tab an image \cr
+\code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$addOutcome} \tab \tab \tab \tab \tab an output \cr
 }
 
@@ -116,6 +125,50 @@ progression-free survival, and multistate models.
 }
 \examples{
 \donttest{
-# Example usage will be added
+# Example 1: Overall survival analysis
+data('lung', package = 'survival')
+outcomeorganizer(
+    data = lung,
+    outcome = status,
+    outcomeLevel = 2,
+    analysistype = 'os',
+    addOutcome = TRUE
+)
+
+# Example 2: Competing risks (disease death vs other death)
+# Create example data with multiple event types
+mydata <- data.frame(
+    vital_status = factor(c('Alive_NED', 'Alive_Disease', 'Dead_Disease', 'Dead_Other')),
+    time = c(10, 15, 20, 25)
+)
+
+outcomeorganizer(
+    data = mydata,
+    outcome = vital_status,
+    analysistype = 'compete',
+    multievent = TRUE,
+    dod = 'Dead_Disease',
+    dooc = 'Dead_Other',
+    awd = 'Alive_Disease',
+    awod = 'Alive_NED',
+    addOutcome = TRUE
+)
+
+# Example 3: Progression-free survival with recurrence
+mydata <- data.frame(
+    vital = factor(c('Alive', 'Alive', 'Dead', 'Alive')),
+    recurrence = factor(c('No', 'Yes', 'No', 'No')),
+    time = c(10, 15, 20, 25)
+)
+
+outcomeorganizer(
+    data = mydata,
+    outcome = vital,
+    outcomeLevel = 'Dead',
+    recurrence = recurrence,
+    recurrenceLevel = 'Yes',
+    analysistype = 'pfs',
+    addOutcome = TRUE
+)
 }
 }
