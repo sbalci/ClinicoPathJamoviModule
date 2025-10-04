@@ -22,41 +22,57 @@ children:
             name: fu_date
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Date Format Configuration
+    collapsed: false
     children:
       - type: ComboBox
         name: time_format
-  - type: LayoutBox
-    margin: large
-    children:
       - type: ComboBox
         name: output_unit
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Landmark Analysis
+    collapsed: true
     children:
       - type: CheckBox
         name: use_landmark
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: landmark_time
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: TextBox
+            name: landmark_time
+            format: number
+            enable: (use_landmark)
+
+  - type: CollapseBox
+    label: Data Quality Options
+    collapsed: true
     children:
       - type: CheckBox
         name: remove_negative
       - type: CheckBox
         name: remove_extreme
-      - type: CheckBox
-        name: add_times
+      - type: TextBox
+        name: extreme_multiplier
+        format: number
+        suffix: 'x 99th %ile'
+        enable: (remove_extreme)
       - type: CheckBox
         name: include_quality_metrics
-  - type: LayoutBox
-    margin: large
-    children:
       - type: TextBox
         name: confidence_level
         format: number
+        suffix: '%'
+        enable: (include_quality_metrics)
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: add_times
+      - type: CheckBox
+        name: show_summary

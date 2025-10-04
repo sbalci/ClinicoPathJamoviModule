@@ -20,7 +20,12 @@ dendrogram(
   colorScheme = "default",
   highlightClusters = FALSE,
   nClusters = 3,
-  maxLabels = 50
+  maxLabels = 50,
+  showRowDendro = TRUE,
+  showColDendro = TRUE,
+  heatmapScale = "row",
+  heatmapPalette = "bluered",
+  showCellBorders = FALSE
 )
 }
 \arguments{
@@ -55,6 +60,16 @@ dendrogram(
 \item{nClusters}{.}
 
 \item{maxLabels}{.}
+
+\item{showRowDendro}{.}
+
+\item{showColDendro}{.}
+
+\item{heatmapScale}{.}
+
+\item{heatmapPalette}{.}
+
+\item{showCellBorders}{.}
 }
 \value{
 A results object containing:

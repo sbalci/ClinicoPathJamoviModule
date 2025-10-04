@@ -42,81 +42,155 @@ children:
         label: Corrected DateTime
         children:
           - type: Output
-            name: corrected_datetime
+            name: corrected_datetime_char
+          - type: Output
+            name: corrected_datetime_numeric
 
   - type: CollapseBox
     label: Date Components
     collapsed: false
     children:
-      - type: Label
-        label: 'Extract (Preview)'
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: extract_year
-          - type: CheckBox
-            name: extract_month
-          - type: CheckBox
-            name: extract_monthname
-          - type: CheckBox
-            name: extract_day
-      - type: Label
-        label: 'Add to Data'
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: 'Extract (Preview)'
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: extract_year
+                  - type: CheckBox
+                    name: extract_month
+                  - type: CheckBox
+                    name: extract_monthname
+                  - type: CheckBox
+                    name: extract_day
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
         children:
-          - type: Output
-            name: year_out
-          - type: Output
-            name: month_out
-          - type: Output
-            name: monthname_out
-          - type: Output
-            name: day_out
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: 'Add to Data'
+                children:
+                  - type: Output
+                    name: year_out
+                  - type: Output
+                    name: month_out
+                    label: Add Month Number to Data
+
+              # - type: Output
+              #   name: calculatedtime
+              #   label: Add Calculated Time to Data
+
+
+                  - type: Output
+                    name: monthname_out
+                  - type: Output
+                    name: day_out
+
+
+
+
 
   - type: CollapseBox
     label: Time Components
     collapsed: true
     children:
-      - type: Label
-        label: 'Extract (Preview)'
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: extract_hour
-          - type: CheckBox
-            name: extract_minute
-          - type: CheckBox
-            name: extract_second
-      - type: Label
-        label: 'Add to Data'
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: 'Extract (Preview)'
+                children:
+                  - type: CheckBox
+                    name: extract_hour
+                  - type: CheckBox
+                    name: extract_minute
+                  - type: CheckBox
+                    name: extract_second
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
         children:
-          - type: Output
-            name: hour_out
-          - type: Output
-            name: minute_out
-          - type: Output
-            name: second_out
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: 'Add to Data'
+                children:
+                  - type: Output
+                    name: hour_out
+                  - type: Output
+                    name: minute_out
+                  - type: Output
+                    name: second_out
 
   - type: CollapseBox
     label: Other Components
     collapsed: true
     children:
-      - type: Label
-        label: 'Extract (Preview)'
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
         children:
-          - type: CheckBox
-            name: extract_dayname
-          - type: CheckBox
-            name: extract_weeknum
-          - type: CheckBox
-            name: extract_quarter
-          - type: CheckBox
-            name: extract_dayofyear
-      - type: Label
-        label: 'Add to Data'
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: 'Extract (Preview)'
+                children:
+                  - type: CheckBox
+                    name: extract_dayname
+                  - type: CheckBox
+                    name: extract_weeknum
+                  - type: CheckBox
+                    name: extract_quarter
+                  - type: CheckBox
+                    name: extract_dayofyear
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
         children:
-          - type: Output
-            name: dayname_out
-          - type: Output
-            name: weeknum_out
-          - type: Output
-            name: quarter_out
-          - type: Output
-            name: dayofyear_out
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: 'Add to Data'
+                children:
+                  - type: Output
+                    name: dayname_out
+                  - type: Output
+                    name: weeknum_out
+                  - type: Output
+                    name: quarter_out
+                  - type: Output
+                    name: dayofyear_out

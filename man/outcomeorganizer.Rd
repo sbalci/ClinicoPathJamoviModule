@@ -24,7 +24,7 @@ outcomeorganizer(
   intervalEnd,
   adminCensoring = FALSE,
   adminDate,
-  outputTable = TRUE,
+  outputTable = FALSE,
   diagnostics = FALSE,
   visualization = FALSE
 )

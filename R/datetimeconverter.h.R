@@ -104,8 +104,10 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "extract_dayofyear",
                 extract_dayofyear,
                 default=FALSE)
-            private$..corrected_datetime <- jmvcore::OptionOutput$new(
-                "corrected_datetime")
+            private$..corrected_datetime_char <- jmvcore::OptionOutput$new(
+                "corrected_datetime_char")
+            private$..corrected_datetime_numeric <- jmvcore::OptionOutput$new(
+                "corrected_datetime_numeric")
             private$..year_out <- jmvcore::OptionOutput$new(
                 "year_out")
             private$..month_out <- jmvcore::OptionOutput$new(
@@ -143,7 +145,8 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..extract_weeknum)
             self$.addOption(private$..extract_quarter)
             self$.addOption(private$..extract_dayofyear)
-            self$.addOption(private$..corrected_datetime)
+            self$.addOption(private$..corrected_datetime_char)
+            self$.addOption(private$..corrected_datetime_numeric)
             self$.addOption(private$..year_out)
             self$.addOption(private$..month_out)
             self$.addOption(private$..monthname_out)
@@ -171,7 +174,8 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         extract_weeknum = function() private$..extract_weeknum$value,
         extract_quarter = function() private$..extract_quarter$value,
         extract_dayofyear = function() private$..extract_dayofyear$value,
-        corrected_datetime = function() private$..corrected_datetime$value,
+        corrected_datetime_char = function() private$..corrected_datetime_char$value,
+        corrected_datetime_numeric = function() private$..corrected_datetime_numeric$value,
         year_out = function() private$..year_out$value,
         month_out = function() private$..month_out$value,
         monthname_out = function() private$..monthname_out$value,
@@ -198,7 +202,8 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..extract_weeknum = NA,
         ..extract_quarter = NA,
         ..extract_dayofyear = NA,
-        ..corrected_datetime = NA,
+        ..corrected_datetime_char = NA,
+        ..corrected_datetime_numeric = NA,
         ..year_out = NA,
         ..month_out = NA,
         ..monthname_out = NA,
@@ -221,7 +226,8 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         qualityMetrics = function() private$.items[["qualityMetrics"]],
         previewTable = function() private$.items[["previewTable"]],
         componentPreview = function() private$.items[["componentPreview"]],
-        corrected_datetime = function() private$.items[["corrected_datetime"]],
+        corrected_datetime_char = function() private$.items[["corrected_datetime_char"]],
+        corrected_datetime_numeric = function() private$.items[["corrected_datetime_numeric"]],
         year_out = function() private$.items[["year_out"]],
         month_out = function() private$.items[["month_out"]],
         monthname_out = function() private$.items[["monthname_out"]],
@@ -265,11 +271,21 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Extracted Components Preview"))
             self$add(jmvcore::Output$new(
                 options=options,
-                name="corrected_datetime",
-                title="Corrected DateTime",
-                varTitle="`Corrected DateTime - from ${ datetime_var }`",
-                varDescription="`DateTime variable ${ datetime_var } converted to standardized format (as character string)`",
+                name="corrected_datetime_char",
+                title="Corrected DateTime (Text)",
+                varTitle="Corrected DateTime (Text)",
+                varDescription="DateTime variable converted to standardized format (as character string)",
                 measureType="nominal",
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="corrected_datetime_numeric",
+                title="Corrected DateTime (Numeric)",
+                varTitle="`Corrected DateTime Numeric - from ${ datetime_var }`",
+                varDescription="`DateTime variable ${ datetime_var } as Unix epoch seconds for calculations`",
+                measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "datetime_format")))
@@ -292,7 +308,8 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
-                    "datetime_format")))
+                    "datetime_format",
+                    "month_out")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="monthname_out",
@@ -302,7 +319,8 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="nominal",
                 clearWith=list(
                     "datetime_var",
-                    "datetime_format")))
+                    "datetime_format",
+                    "monthname_out")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="day_out",
@@ -392,7 +410,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "datetimeconverter",
-                version = c(0,0,1),
+                version = c(0,0,31),
                 options = options,
                 results = datetimeconverterResults$new(options=options),
                 data = data,
@@ -414,7 +432,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' creating time-based variables.
 #'
 #' @examples
-#' # Basic datetime conversion:
+#' # Basic datetime conversion: '0.0.31'
 #' datetimeconverter(
 #'   data = study_data,
 #'   datetime_var = "event_date",
@@ -462,7 +480,8 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$qualityMetrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$previewTable} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$componentPreview} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$corrected_datetime} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$corrected_datetime_char} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$corrected_datetime_numeric} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$year_out} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$month_out} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$monthname_out} \tab \tab \tab \tab \tab an output \cr

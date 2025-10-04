@@ -15,11 +15,17 @@ items:
     - name: qualityAssessment
       title: Data Quality Assessment
       type: Html
-      
+      visible: (include_quality_metrics)
+
     - name: summary
       title: Statistical Summary & Person-Time Analysis
       type: Html
-      
+
+    - name: nlSummary
+      title: Clinical Summary (Copy-Ready)
+      type: Html
+      visible: (show_summary)
+
     - name: calculated_time
       title: Calculated Time Intervals
       type: Output

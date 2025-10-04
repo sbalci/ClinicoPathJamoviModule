@@ -24,12 +24,22 @@ items:
       title: 'Extracted Components Preview'
       type: Html
 
-    - name: corrected_datetime
-      title: Corrected DateTime
+    - name: corrected_datetime_char
+      title: Corrected DateTime (Text)
       type: Output
-      varTitle: '`Corrected DateTime - from ${ datetime_var }`'
-      varDescription: '`DateTime variable ${ datetime_var } converted to standardized format (as character string)`'
+      varTitle: 'Corrected DateTime (Text)'
+      varDescription: 'DateTime variable converted to standardized format (as character string)'
       measureType: nominal
+      clearWith:
+          - datetime_var
+          - datetime_format
+
+    - name: corrected_datetime_numeric
+      title: Corrected DateTime (Numeric)
+      type: Output
+      varTitle: '`Corrected DateTime Numeric - from ${ datetime_var }`'
+      varDescription: '`DateTime variable ${ datetime_var } as Unix epoch seconds for calculations`'
+      measureType: continuous
       clearWith:
           - datetime_var
           - datetime_format
@@ -47,12 +57,32 @@ items:
     - name: month_out
       title: Month
       type: Output
+      # varTitle: '`jmvcore::format("Month - from { datetime_var }", datetime_var=self$options$datetime_var)`'
       varTitle: '`Month - from ${ datetime_var }`'
       varDescription: '`Extracted month component (1-12) from ${ datetime_var }`'
       measureType: continuous
       clearWith:
           - datetime_var
           - datetime_format
+          - month_out
+
+
+
+    # - name: calculatedtime
+    #   title: Add Calculated Time to Data
+    #   type: Output
+    #   varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+    #   varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`'
+    #   measureType: continuous
+    #   clearWith:
+    #       - tint
+    #       - dxdate
+    #       - fudate
+    #       - elapsedtime
+    #       - calculatedtime
+
+
+
 
     - name: monthname_out
       title: Month Name
@@ -63,6 +93,7 @@ items:
       clearWith:
           - datetime_var
           - datetime_format
+          - monthname_out
 
     - name: day_out
       title: Day
@@ -73,6 +104,7 @@ items:
       clearWith:
           - datetime_var
           - datetime_format
+
 
     - name: hour_out
       title: Hour
