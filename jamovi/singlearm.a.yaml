@@ -1,7 +1,7 @@
 ---
 name:  singlearm
 title: Single Arm Survival
-menuGroup: SurvivalT2
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Survival for whole group, no explanatory factor'
 version: '0.0.31'
@@ -86,16 +86,22 @@ options:
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
       description: >-
-        The date of diagnosis or study entry for each patient. Should be in a consistent
-        date format (e.g., YYYY-MM-DD).
+        The date of diagnosis or study entry. Accepts: (1) Date/datetime text (e.g., "2024-01-15"),
+        (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
+        (3) Numeric datetime values from R. Time intervals calculated as difference from follow-up date.
 
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
       description: >-
-        The date of last follow-up or event for each patient. Should be in a consistent
-        date format (e.g., YYYY-MM-DD).
+        The date of last follow-up or event. Accepts: (1) Date/datetime text (e.g., "2024-01-15"),
+        (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
+        (3) Numeric datetime values from R. Must be in same format as diagnosis date.
 
 
     - name: calculatedtime

@@ -72,10 +72,22 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=FALSE)
             private$..dxdate <- jmvcore::OptionVariable$new(
                 "dxdate",
-                dxdate)
+                dxdate,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
-                fudate)
+                fudate,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
             private$..calculatedtime <- jmvcore::OptionOutput$new(
                 "calculatedtime")
             private$..contexpl <- jmvcore::OptionVariable$new(
@@ -1560,10 +1572,15 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   dates in your data. This is useful when you have separate columns for
 #'   diagnosis date and follow-up date and want to calculate the time elapsed
 #'   between them.
-#' @param dxdate The date of diagnosis or study entry for each patient. Should
-#'   be in a consistent date format (e.g., YYYY-MM-DD).
-#' @param fudate The date of last follow-up or event for each patient. Should
-#'   be in a consistent date format (e.g., YYYY-MM-DD).
+#' @param dxdate The date of diagnosis or study entry. Accepts: (1)
+#'   Date/datetime text (e.g., "2024-01-15"), (2) Numeric Unix epoch seconds
+#'   (from DateTime Converter's corrected_datetime_numeric output), (3) Numeric
+#'   datetime values from R. Time intervals calculated as difference from
+#'   follow-up date.
+#' @param fudate The date of last follow-up or event. Accepts: (1)
+#'   Date/datetime text (e.g., "2024-01-15"), (2) Numeric Unix epoch seconds
+#'   (from DateTime Converter's corrected_datetime_numeric output), (3) Numeric
+#'   datetime values from R. Must be in same format as diagnosis date.
 #' @param contexpl The continuous explanatory variable to be used in the
 #'   analysis.
 #' @param outcome The outcome variable to be used in the analysis.

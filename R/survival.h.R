@@ -82,10 +82,22 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=FALSE)
             private$..dxdate <- jmvcore::OptionVariable$new(
                 "dxdate",
-                dxdate)
+                dxdate,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
-                fudate)
+                fudate,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
             private$..calculatedtime <- jmvcore::OptionOutput$new(
                 "calculatedtime")
             private$..explanatory <- jmvcore::OptionVariable$new(
@@ -1617,12 +1629,16 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the event date and the diagnosis date. If the follow-up date is available,
 #'   the time will be  calculated as the difference between the event date and
 #'   the follow-up date.
-#' @param dxdate The date of diagnosis. If the time is in date format, the
-#'   time will be calculated as the difference between the event date and the
-#'   diagnosis date.
-#' @param fudate The date of follow-up. If the time is in date format, the
-#'   time will be calculated as the difference between the event date and the
-#'   follow-up date.
+#' @param dxdate The date of diagnosis. Accepts: (1) Date/datetime text
+#'   formats (e.g., "2024-01-15"), (2) Numeric Unix epoch seconds (from DateTime
+#'   Converter's corrected_datetime_numeric output), (3) Numeric datetime values
+#'   from R. Time intervals will be automatically calculated as the difference
+#'   between follow-up/event date and diagnosis date.
+#' @param fudate The date of follow-up or event. Accepts: (1) Date/datetime
+#'   text formats (e.g., "2024-01-15"), (2) Numeric Unix epoch seconds (from
+#'   DateTime Converter's corrected_datetime_numeric output), (3) Numeric
+#'   datetime values from R. Must be in the same format as diagnosis date. Time
+#'   intervals calculated as difference from diagnosis date.
 #' @param explanatory The explanatory variable that will be used to compare
 #'   the survival times of different groups.
 #' @param outcome The outcome variable that will be used to compare the

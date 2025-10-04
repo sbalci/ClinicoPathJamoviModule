@@ -24,6 +24,31 @@ items:
       title: 'Extracted Components Preview'
       type: Html
 
+    - name: qualityAssessment
+      title: 'Data Quality Assessment'
+      type: Html
+      visible: (show_quality_metrics)
+
+    - name: nlSummary
+      title: 'Summary (Copy-Ready)'
+      type: Html
+      visible: (show_summary)
+
+    - name: aboutPanel
+      title: 'About This Analysis'
+      type: Html
+      visible: (show_explanations)
+
+    - name: caveatsPanel
+      title: 'Caveats & Assumptions'
+      type: Html
+      visible: (show_explanations)
+
+    - name: glossaryPanel
+      title: 'Key Terms & Concepts'
+      type: Html
+      visible: (show_glossary)
+
     - name: corrected_datetime_char
       title: Corrected DateTime (Text)
       type: Output
