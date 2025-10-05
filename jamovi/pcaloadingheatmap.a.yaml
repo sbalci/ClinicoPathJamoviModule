@@ -1,0 +1,177 @@
+---
+name:  pcaloadingheatmap
+title: PCA Loading Heatmap & Barmap
+menuGroup: JJStatsPlotT2
+menuSubgroup: Multivariate Analysis
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Creates heatmap and barmap visualizations of PCA loadings for easy interpretation
+        of component structure. Heatmaps show all loadings as a color-coded matrix, while
+        barmaps display loading patterns as bar charts across components.
+
+        Both visualizations support optional significance indicators (stars) for loadings
+        above a specified cutoff threshold. These publication-ready plots help identify
+        which variables contribute most strongly to each component.
+
+    R:
+        dontrun: false
+        usage: |
+            # Example with mtcars dataset
+            data("mtcars")
+
+            # Create loading heatmap and barmap
+            pcaloadingheatmap(
+              data = mtcars,
+              vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
+              ncomp = 4,
+              cutoff = 0.5,
+              center = TRUE,
+              scale = TRUE,
+              textvalues = TRUE,
+              gradientcolor = TRUE
+            )
+
+    references:
+        - "Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812."
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: vars
+      title: Variables for PCA
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Continuous variables to include in Principal Component Analysis.
+            Select at least 3 numeric variables.
+
+    - name: ncomp
+      title: Number of Components to Display
+      type: Integer
+      min: 1
+      max: 10
+      default: 4
+      description:
+          R: >
+            Number of principal components to display (1 to 10).
+
+    - name: cutoff
+      title: Significance Cutoff Threshold
+      type: Number
+      min: 0
+      max: 1
+      default: 0.5
+      description:
+          R: >
+            Threshold for marking loadings as significant (0 to 1).
+            Loadings with |loading| >= cutoff will be marked with stars if star_values is enabled.
+
+    - name: center
+      title: Center Variables
+      type: Bool
+      default: true
+      description:
+          R: Center variables before PCA.
+
+    - name: scale
+      title: Scale Variables
+      type: Bool
+      default: true
+      description:
+          R: Scale variables before PCA.
+
+    - name: textvalues
+      title: Show Loading Values
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display numeric loading values in heatmap/barmap cells.
+
+    - name: starvalues
+      title: Show Significance Stars
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display stars (*) for loadings >= cutoff threshold.
+            Only relevant if textvalues is FALSE.
+
+    - name: textsize
+      title: Text Size
+      type: Number
+      min: 1
+      max: 10
+      default: 2
+      description:
+          R: Font size for text in plots.
+
+    - name: plotlegend
+      title: Show Legend (Barmap)
+      type: Bool
+      default: true
+      description:
+          R: Display legend in barmap plot.
+
+    - name: plotcutoff
+      title: Show Cutoff Lines (Barmap)
+      type: Bool
+      default: true
+      description:
+          R: Display horizontal lines at ±cutoff threshold in barmap.
+
+    - name: gradientcolor
+      title: Use Gradient Colors (Barmap)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use gradient colors proportional to loading values.
+            If FALSE, uses binary colors for positive/negative.
+
+    - name: colorlow
+      title: Color for Negative Loadings
+      type: String
+      default: "steelblue1"
+      description:
+          R: Color for negative loadings.
+
+    - name: colormid
+      title: Color for Zero Loading
+      type: String
+      default: "white"
+      description:
+          R: Midpoint color for zero loading.
+
+    - name: colorhigh
+      title: Color for Positive Loadings
+      type: String
+      default: "firebrick1"
+      description:
+          R: Color for positive loadings.
+
+    - name: plotwidth
+      title: Plot Width
+      type: Integer
+      min: 300
+      max: 2000
+      default: 600
+      description:
+          R: Width of plots in pixels.
+
+    - name: plotheight
+      title: Plot Height
+      type: Integer
+      min: 300
+      max: 2000
+      default: 450
+      description:
+          R: Height of plots in pixels.

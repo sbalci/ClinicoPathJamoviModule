@@ -1,0 +1,89 @@
+---
+name:  pcaloadingtest
+title: PCA Loading Significance Test
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: 'Instructions'
+      type: Html
+      visible: true
+
+    - name: results
+      title: Loading Significance Results
+      type: Table
+      description: Permutation-based significance testing for each variable-component loading
+      clearWith:
+        - vars
+        - ncomp
+        - nperm
+        - componentfilter
+        - center
+        - scale
+        - conflevel
+        - adjustmethod
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+
+        - name: component
+          title: Component
+          type: text
+
+        - name: original
+          title: Original Loading
+          type: number
+          format: zto,pvalue
+
+        - name: mean
+          title: Permuted Mean
+          type: number
+          format: zto,pvalue
+
+        - name: cilow
+          title: CI Lower
+          type: number
+          format: zto,pvalue
+
+        - name: cihigh
+          title: CI Upper
+          type: number
+          format: zto,pvalue
+
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+        - name: adjpvalue
+          title: Adjusted p-value
+          type: number
+          format: zto,pvalue
+
+        - name: significant
+          title: Sig.
+          type: text
+          content: '($key)'
+
+    - name: loadingplot
+      title: Loading Barplot with Permutation CIs
+      type: Image
+      description: Barplot showing loadings with confidence intervals from permutation
+      width:  700
+      height: 450
+      renderFun: .loadingplot
+      requiresData: true
+      clearWith:
+        - vars
+        - ncomp
+        - nperm
+        - componentfilter
+        - center
+        - scale
+        - conflevel
+        - colorlow
+        - colormid
+        - colorhigh
+        - plotwidth
+        - plotheight

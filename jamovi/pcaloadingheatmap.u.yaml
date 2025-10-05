@@ -1,0 +1,130 @@
+---
+name: pcaloadingheatmap
+title: PCA Loading Heatmap & Barmap
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables for PCA
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            maxItemCount: 100
+
+  - type: LayoutBox
+    margin: large
+    style: inline
+    children:
+      - type: Label
+        label: PCA Settings
+        children:
+          - type: LayoutBox
+            margin: large
+            style: list
+            children:
+              - type: TextBox
+                name: ncomp
+                label: Number of Components
+                format: number
+                enable: (vars)
+
+              - type: TextBox
+                name: cutoff
+                label: Significance Cutoff
+                suffix: (0-1)
+                format: number
+                enable: (vars)
+
+              - type: CheckBox
+                name: center
+                enable: (vars)
+
+              - type: CheckBox
+                name: scale
+                enable: (vars)
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: CheckBox
+            name: textvalues
+            enable: (vars)
+
+          - type: CheckBox
+            name: starvalues
+            enable: (vars)
+
+          - type: TextBox
+            name: textsize
+            label: Text Size
+            format: number
+            enable: (vars)
+
+          - type: CheckBox
+            name: plotlegend
+            enable: (vars)
+
+          - type: CheckBox
+            name: plotcutoff
+            enable: (vars)
+
+          - type: CheckBox
+            name: gradientcolor
+            enable: (vars)
+
+  - type: CollapseBox
+    label: Color Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: TextBox
+            name: colorlow
+            label: Negative Loading Color
+            format: string
+            enable: (vars)
+
+          - type: TextBox
+            name: colormid
+            label: Zero Loading Color
+            format: string
+            enable: (vars)
+
+          - type: TextBox
+            name: colorhigh
+            label: Positive Loading Color
+            format: string
+            enable: (vars)
+
+  - type: CollapseBox
+    label: Plot Size
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: TextBox
+            name: plotwidth
+            label: Width (pixels)
+            format: number
+            enable: (vars)
+
+          - type: TextBox
+            name: plotheight
+            label: Height (pixels)
+            format: number
+            enable: (vars)

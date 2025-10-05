@@ -1,0 +1,83 @@
+---
+name:  pcacomponenttest
+title: PCA Component Significance Test
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: 'Instructions'
+      type: Html
+      visible: true
+
+    - name: results
+      title: Component Significance Results
+      type: Table
+      description: Statistical significance of principal components based on permutation testing
+      clearWith:
+        - vars
+        - ncomp
+        - nperm
+        - center
+        - scale
+        - conflevel
+        - adjustmethod
+      columns:
+        - name: component
+          title: Component
+          type: text
+
+        - name: originalvaf
+          title: Original VAF
+          type: number
+          format: zto,pvalue
+
+        - name: meanvaf
+          title: Permuted Mean VAF
+          type: number
+          format: zto,pvalue
+
+        - name: cilow
+          title: CI Lower
+          type: number
+          format: zto,pvalue
+
+        - name: cihigh
+          title: CI Upper
+          type: number
+          format: zto,pvalue
+
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+        - name: adjpvalue
+          title: Adjusted p-value
+          type: number
+          format: zto,pvalue
+
+        - name: significant
+          title: Sig.
+          type: text
+          content: '($key)'
+
+    - name: vafplot
+      title: VAF Plot - Original vs Permuted
+      type: Image
+      description: Visualization comparing original VAF to permuted null distribution
+      width:  600
+      height: 450
+      renderFun: .vafplot
+      requiresData: true
+      clearWith:
+        - vars
+        - ncomp
+        - nperm
+        - center
+        - scale
+        - conflevel
+        - showpercent
+        - colororiginal
+        - colorpermuted
+        - plotwidth
+        - plotheight

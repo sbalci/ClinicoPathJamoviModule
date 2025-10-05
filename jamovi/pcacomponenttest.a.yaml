@@ -1,0 +1,175 @@
+---
+name:  pcacomponenttest
+title: PCA Component Significance Test
+menuGroup: ExplorationT2
+menuSubgroup: Multivariate Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Performs permutation-based significance testing to determine which principal
+        components explain more variance than expected by random chance. This provides
+        an objective, hypothesis-tested approach to component retention.
+
+        The test uses nonparametric permutation where variables are shuffled independently
+        to break data structure, generating a null distribution of variance accounted for (VAF).
+        Components with VAF significantly higher than the null distribution are retained.
+
+        This implements the method described in Buja & Eyuboglu (1992) and is based on
+        the syndRomics package approach.
+    R:
+        dontrun: false
+        usage: |
+            # Example with mtcars dataset
+            data("mtcars")
+
+            # Test significance of first 5 principal components
+            pcacomponenttest(
+              data = mtcars,
+              vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
+              ncomp = 5,
+              nperm = 1000,
+              center = TRUE,
+              scale = TRUE,
+              conflevel = 0.95,
+              adjustmethod = "BH"
+            )
+
+    references:
+        - "Buja A, Eyuboglu N. (1992). Remarks on Parallel Analysis. Multivariate Behavioral Research, 27(4):509-540."
+        - "Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812."
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: vars
+      title: Variables for PCA
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Continuous variables to include in Principal Component Analysis.
+            Select at least 3 numeric variables.
+
+    - name: ncomp
+      title: Number of Components to Test
+      type: Integer
+      min: 1
+      max: 20
+      default: 5
+      description:
+          R: >
+            Number of principal components to test for significance (1 to 20).
+            Testing will be performed for PC1 through PC[ncomp].
+
+    - name: nperm
+      title: Number of Permutations
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: >
+            Number of permutations to generate null distribution (100-10000).
+            Higher values provide more accurate p-values but take longer.
+            Minimum p-value = 1/(nperm+1). For p<0.001, use nperm>=1000.
+
+    - name: center
+      title: Center Variables
+      type: Bool
+      default: true
+      description:
+          R: >
+            Center variables to have mean = 0 before PCA.
+            Recommended: TRUE for most analyses.
+
+    - name: scale
+      title: Scale Variables
+      type: Bool
+      default: true
+      description:
+          R: >
+            Scale variables to have standard deviation = 1 before PCA.
+            Recommended: TRUE when variables have different units or scales.
+
+    - name: conflevel
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence intervals (0.80-0.99).
+            Default: 0.95 for 95% CI.
+
+    - name: adjustmethod
+      title: P-value Adjustment Method
+      type: List
+      options:
+        - name: BH
+          title: Benjamini-Hochberg (FDR)
+        - name: bonferroni
+          title: Bonferroni
+        - name: holm
+          title: Holm
+        - name: hochberg
+          title: Hochberg
+        - name: hommel
+          title: Hommel
+        - name: BY
+          title: Benjamini-Yekutieli
+        - name: none
+          title: None
+      default: BH
+      description:
+          R: >
+            Method for adjusting p-values for multiple testing.
+            BH (Benjamini-Hochberg) controls false discovery rate.
+
+    - name: showpercent
+      title: Show VAF as Percentage
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display variance accounted for (VAF) as percentage (0-100) instead of proportion (0-1).
+
+    - name: colororiginal
+      title: Color for Original VAF
+      type: String
+      default: "steelblue"
+      description:
+          R: >
+            Color for original VAF line/points. Use color names or hex codes.
+
+    - name: colorpermuted
+      title: Color for Permuted VAF
+      type: String
+      default: "orange"
+      description:
+          R: >
+            Color for permuted VAF line/points. Use color names or hex codes.
+
+    - name: plotwidth
+      title: Plot Width
+      type: Integer
+      min: 300
+      max: 2000
+      default: 600
+      description:
+          R: Width of the plot in pixels.
+
+    - name: plotheight
+      title: Plot Height
+      type: Integer
+      min: 300
+      max: 2000
+      default: 450
+      description:
+          R: Height of the plot in pixels.

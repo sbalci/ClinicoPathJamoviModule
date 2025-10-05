@@ -1,0 +1,123 @@
+---
+name: pcaloadingtest
+title: PCA Loading Significance Test
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables for PCA
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            maxItemCount: 100
+
+  - type: LayoutBox
+    margin: large
+    style: inline
+    children:
+      - type: Label
+        label: Test Settings
+        children:
+          - type: LayoutBox
+            margin: large
+            style: list
+            children:
+              - type: TextBox
+                name: ncomp
+                label: Number of Components
+                format: number
+                enable: (vars)
+
+              - type: TextBox
+                name: nperm
+                label: Permutations per Variable
+                format: number
+                enable: (vars)
+
+              - type: TextBox
+                name: componentfilter
+                label: Display Component (0 = All)
+                format: number
+                enable: (vars)
+
+              - type: TextBox
+                name: conflevel
+                label: Confidence Level
+                format: number
+                enable: (vars)
+
+              - type: ComboBox
+                name: adjustmethod
+                label: P-value Adjustment
+                enable: (vars)
+
+  - type: LayoutBox
+    margin: large
+    style: inline
+    children:
+      - type: Label
+        label: PCA Settings
+        children:
+          - type: LayoutBox
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: center
+                enable: (vars)
+
+              - type: CheckBox
+                name: scale
+                enable: (vars)
+
+  - type: CollapseBox
+    label: Plot Colors
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: TextBox
+            name: colorlow
+            label: Negative Loading Color
+            format: string
+            enable: (vars)
+
+          - type: TextBox
+            name: colormid
+            label: Zero Loading Color
+            format: string
+            enable: (vars)
+
+          - type: TextBox
+            name: colorhigh
+            label: Positive Loading Color
+            format: string
+            enable: (vars)
+
+  - type: CollapseBox
+    label: Plot Size
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: TextBox
+            name: plotwidth
+            label: Width (pixels)
+            format: number
+            enable: (vars)
+
+          - type: TextBox
+            name: plotheight
+            label: Height (pixels)
+            format: number
+            enable: (vars)

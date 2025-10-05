@@ -1,0 +1,59 @@
+---
+name:  pcaloadingheatmap
+title: PCA Loading Heatmap & Barmap
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: 'Instructions'
+      type: Html
+      visible: true
+
+    - name: heatmap
+      title: Loading Heatmap
+      type: Image
+      description: Heatmap visualization of PCA loadings across components
+      width:  600
+      height: 450
+      renderFun: .heatmap
+      requiresData: true
+      clearWith:
+        - vars
+        - ncomp
+        - cutoff
+        - center
+        - scale
+        - textvalues
+        - starvalues
+        - textsize
+        - colorlow
+        - colormid
+        - colorhigh
+        - plotwidth
+        - plotheight
+
+    - name: barmap
+      title: Loading Barmap
+      type: Image
+      description: Barmap visualization of PCA loadings showing magnitude and direction
+      width:  600
+      height: 450
+      renderFun: .barmap
+      requiresData: true
+      clearWith:
+        - vars
+        - ncomp
+        - cutoff
+        - center
+        - scale
+        - textvalues
+        - starvalues
+        - textsize
+        - plotlegend
+        - plotcutoff
+        - gradientcolor
+        - colorlow
+        - colormid
+        - colorhigh
+        - plotwidth
+        - plotheight

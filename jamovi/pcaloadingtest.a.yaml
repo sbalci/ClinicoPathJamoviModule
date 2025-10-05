@@ -1,0 +1,176 @@
+---
+name:  pcaloadingtest
+title: PCA Loading Significance Test
+menuGroup: ExplorationT2
+menuSubgroup: Multivariate Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Performs permutation-based significance testing for PCA loadings using the
+        permV method (Linting et al., 2011). This approach permutes one variable at
+        a time, providing variable-specific and component-specific significance thresholds
+        with higher statistical power and proper Type I error control.
+
+        Instead of arbitrary cutoffs (e.g., |loading| > 0.5), this test provides
+        objective, hypothesis-tested thresholds for each variable on each component.
+        Procrustes rotation is applied to handle sign reflection and component
+        indeterminacy issues.
+
+    R:
+        dontrun: false
+        usage: |
+            # Example with mtcars dataset
+            data("mtcars")
+
+            # Test loading significance for first 3 components
+            pcaloadingtest(
+              data = mtcars,
+              vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
+              ncomp = 3,
+              nperm = 1000,
+              center = TRUE,
+              scale = TRUE,
+              conflevel = 0.95,
+              adjustmethod = "BH"
+            )
+
+    references:
+        - "Linting M, van Os BJ, Meulman JJ. (2011). Statistical Significance of the Contribution of Variables to the PCA solution: An Alternative Permutation Strategy. Psychometrika, 76(3):440-460."
+        - "Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812."
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: vars
+      title: Variables for PCA
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Continuous variables to include in Principal Component Analysis.
+            Select at least 3 numeric variables.
+
+    - name: ncomp
+      title: Number of Components to Test
+      type: Integer
+      min: 1
+      max: 10
+      default: 3
+      description:
+          R: >
+            Number of principal components to test loadings for (1 to 10).
+
+    - name: nperm
+      title: Number of Permutations per Variable
+      type: Integer
+      min: 100
+      max: 5000
+      default: 1000
+      description:
+          R: >
+            Number of permutations per variable (100-5000).
+            Total permutations = nperm × number of variables.
+            Higher values provide more accurate p-values but take longer.
+
+    - name: componentfilter
+      title: Display Component (0 = All)
+      type: Integer
+      min: 0
+      max: 10
+      default: 0
+      description:
+          R: >
+            Filter results table by component. 0 shows all components,
+            1 shows only PC1, 2 shows only PC2, etc.
+
+    - name: center
+      title: Center Variables
+      type: Bool
+      default: true
+      description:
+          R: >
+            Center variables to have mean = 0 before PCA.
+
+    - name: scale
+      title: Scale Variables
+      type: Bool
+      default: true
+      description:
+          R: >
+            Scale variables to have standard deviation = 1 before PCA.
+
+    - name: conflevel
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence intervals (0.80-0.99).
+
+    - name: adjustmethod
+      title: P-value Adjustment Method
+      type: List
+      options:
+        - name: BH
+          title: Benjamini-Hochberg (FDR)
+        - name: bonferroni
+          title: Bonferroni
+        - name: holm
+          title: Holm
+        - name: none
+          title: None
+      default: BH
+      description:
+          R: >
+            Method for adjusting p-values within each component.
+            BH (Benjamini-Hochberg) controls false discovery rate.
+
+    - name: colorlow
+      title: Color for Negative Loadings
+      type: String
+      default: "steelblue1"
+      description:
+          R: >
+            Color for negative loadings in barplot.
+
+    - name: colormid
+      title: Color for Zero Loading
+      type: String
+      default: "white"
+      description:
+          R: >
+            Midpoint color for zero loading.
+
+    - name: colorhigh
+      title: Color for Positive Loadings
+      type: String
+      default: "firebrick1"
+      description:
+          R: >
+            Color for positive loadings in barplot.
+
+    - name: plotwidth
+      title: Plot Width
+      type: Integer
+      min: 300
+      max: 2000
+      default: 700
+      description:
+          R: Width of the plot in pixels.
+
+    - name: plotheight
+      title: Plot Height
+      type: Integer
+      min: 300
+      max: 2000
+      default: 450
+      description:
+          R: Height of the plot in pixels.
