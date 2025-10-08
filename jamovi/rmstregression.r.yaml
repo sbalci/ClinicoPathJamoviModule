@@ -193,4 +193,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - survRM2
+    - gridExtra
 ...

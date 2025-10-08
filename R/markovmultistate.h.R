@@ -314,7 +314,10 @@ markovmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "msm",
                     "survival",
                     "diagram",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "gridExtra",
+                    "tools",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -263,7 +263,12 @@ robustcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "robustbase",
                     "WRS2",
                     "boot",
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "WGCNA",
+                    "glue",
+                    "reshape2",
+                    "gridExtra",
+                    "GGally"),
                 clearWith=list(
                     "dep",
                     "method",

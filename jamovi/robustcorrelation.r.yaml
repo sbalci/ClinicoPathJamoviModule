@@ -218,4 +218,9 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - WGCNA
+    - glue
+    - reshape2
+    - gridExtra
+    - GGally
 ...

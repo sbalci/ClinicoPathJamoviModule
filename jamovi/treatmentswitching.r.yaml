@@ -219,4 +219,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - urvival
+    - urvminer
+    - glue
+    - parallel
 ...

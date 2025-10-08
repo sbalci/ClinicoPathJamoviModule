@@ -281,7 +281,13 @@ jggstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Enhanced Statistical Visualization",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "lm.beta",
+                    "ggstats",
+                    "broom",
+                    "survival",
+                    "lme4"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

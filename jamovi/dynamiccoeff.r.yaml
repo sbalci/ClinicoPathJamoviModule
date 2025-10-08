@@ -151,4 +151,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - tools
 ...

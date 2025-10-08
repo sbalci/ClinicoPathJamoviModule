@@ -132,4 +132,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - flexsurv
 ...

@@ -171,7 +171,11 @@ penalizedcoxregressionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
                 name="",
                 title="Penalized Cox Regression",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "glmnet",
+                    "penalized",
+                    "tools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

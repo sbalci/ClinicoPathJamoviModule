@@ -85,4 +85,11 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - janitor
+    - labelled
+    - glue
+    - finalfit
+    - survival
+    - cmprsk
+    - scales
 ...

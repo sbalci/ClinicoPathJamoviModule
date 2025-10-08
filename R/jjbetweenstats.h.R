@@ -316,7 +316,10 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ggplot2",
                     "ggstatsplot",
                     "ggpubr",
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "digest",
+                    "purrr"),
                 clearWith=list(
                     "dep",
                     "group",

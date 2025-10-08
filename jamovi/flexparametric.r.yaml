@@ -147,4 +147,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - flexsurv
+    - rstpm2
 ...

@@ -433,4 +433,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - reticulate
+    - randomForest
+    - jsonlite
+    - viridis
 ...

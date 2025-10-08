@@ -165,7 +165,8 @@ timevarycoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Time-Varying Covariates Cox Regression",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

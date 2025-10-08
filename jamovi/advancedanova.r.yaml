@@ -337,4 +337,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - car
+    - pwr
+    - PMCMRplus
+    - multcomp
 ...

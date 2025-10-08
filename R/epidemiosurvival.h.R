@@ -405,7 +405,10 @@ epidemiosurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Epidemiological Survival Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "urvminer",
+                    "survival",
+                    "epitools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

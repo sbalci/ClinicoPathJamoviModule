@@ -158,7 +158,10 @@ ihcadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Advanced IHC Clustering",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "cluster",
+                    "parallel",
+                    "grDevices"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

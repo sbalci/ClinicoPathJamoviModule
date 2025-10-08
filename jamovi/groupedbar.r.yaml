@@ -2,8 +2,7 @@
 name: groupedbar
 title: Grouped Bar Chart Comparison
 jrs: '1.1'
-refs: ClinicoPath
-    - ClinicoPathJamoviModule
+
 items:
     - name: instructions
       title: Instructions
@@ -122,4 +121,8 @@ items:
       visible: false
 
 
+
+refs:
+    - RColorBrewer
+    - viridis
 ...

@@ -240,7 +240,8 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "arcdiagram",
                     "igraph",
                     "RColorBrewer",
-                    "scales"))
+                    "scales",
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

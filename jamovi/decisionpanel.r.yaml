@@ -878,4 +878,9 @@ refs:
     - ROCR
     - ClinicoPathJamoviModule
 
+    - parallel
+    - digest
+    - rpart.plot
+    - scales
+    - tidyr
 ...

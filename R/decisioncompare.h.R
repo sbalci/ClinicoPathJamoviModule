@@ -218,7 +218,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 refs=list(
                     "DiagnosticTests",
                     "ClinicoPathJamoviModule",
-                    "stats"))
+                    "stats",
+                    "forcats",
+                    "knitr",
+                    "epiR",
+                    "tibble",
+                    "scales"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",

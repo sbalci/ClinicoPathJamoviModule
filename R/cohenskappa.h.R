@@ -183,7 +183,11 @@ cohenskappaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Cohen's Kappa Agreement",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "psych",
+                    "DescTools",
+                    "ggrepel"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

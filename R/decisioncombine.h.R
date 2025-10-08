@@ -224,7 +224,10 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Combine Medical Decision Tests",
                 refs=list(
                     "DiagnosticTests",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "forcats",
+                    "epiR",
+                    "scales"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="combinationTable",

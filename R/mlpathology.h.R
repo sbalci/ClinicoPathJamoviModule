@@ -214,7 +214,9 @@ mlpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Classification Performance Metrics for Digital Pathology",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "caret",
+                    "pROC"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -334,7 +334,8 @@ jsummarytoolsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Summary Statistics with summarytools",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "summarytools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

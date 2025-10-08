@@ -188,4 +188,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - RColorBrewer
+    - grDevices
+    - scales
+    - parallel
 ...

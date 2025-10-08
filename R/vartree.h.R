@@ -297,7 +297,11 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Variable Tree",
                 refs=list(
                     "vtree",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "labelled",
+                    "DiagrammeRsvg",
+                    "base"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -339,7 +339,11 @@ jggheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Advanced Heatmap Visualization",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "tidyr",
+                    "tibble",
+                    "scales"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

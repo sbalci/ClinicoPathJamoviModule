@@ -229,7 +229,9 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ClinicoPathJamoviModule",
                     "base",
                     "graphics",
-                    "grDevices"))
+                    "grDevices",
+                    "janitor",
+                    "labelled"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

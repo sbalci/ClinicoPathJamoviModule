@@ -696,7 +696,17 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "psych",
                     "ICC",
                     "PathologyKappa",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ggdendro",
+                    "gridExtra",
+                    "grid",
+                    "stringr",
+                    "reshape2",
+                    "scales",
+                    "cluster",
+                    "viridisLite",
+                    "grDevices",
+                    "pheatmap"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

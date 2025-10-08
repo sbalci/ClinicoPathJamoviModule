@@ -496,4 +496,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - reshape2
+    - gridExtra
+    - htmltools
 ...

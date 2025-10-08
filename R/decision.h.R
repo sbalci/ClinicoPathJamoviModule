@@ -194,7 +194,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "DiagnosticTests",
                     "ClinicoPathJamoviModule",
-                    "epiR"))
+                    "epiR",
+                    "forcats",
+                    "htmlTable"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rawContingency",

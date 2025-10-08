@@ -304,7 +304,10 @@ dynamicpredictionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Dynamic Survival Prediction",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "pROC",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -653,7 +653,22 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="IHC Clustering Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "proxy",
+                    "cluster",
+                    "FactoMineR",
+                    "klaR",
+                    "grDevices",
+                    "factoextra",
+                    "BiocManager",
+                    "circlize",
+                    "ComplexHeatmap",
+                    "grid",
+                    "survival",
+                    "survminer",
+                    "viridis",
+                    "corrplot",
+                    "pheatmap"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -2,8 +2,7 @@
 name: parametricfrailty
 title: Parametric Frailty Models
 jrs: '1.1'
-refs: survival
-    - ClinicoPathJamoviModule
+
 items:
     - name: overview
       title: Analysis Overview
@@ -279,4 +278,8 @@ items:
         - frailty_distribution
         - estimation_method
 
+
+refs:
+    - survival
+    - frailtySurv
 ...

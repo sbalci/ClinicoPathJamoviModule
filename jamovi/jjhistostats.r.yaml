@@ -156,4 +156,7 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - digest
+    - glue
+    - purrr
 ...

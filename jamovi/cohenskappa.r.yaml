@@ -175,4 +175,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - glue
+    - psych
+    - DescTools
+    - ggrepel
 ...

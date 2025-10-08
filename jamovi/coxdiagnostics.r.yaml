@@ -140,9 +140,11 @@ items:
       - show_interpretation
 
 refs:
-  - ClinicoPathJamoviModule
-  - survival
-  - survminer
-  - car
+    - ClinicoPathJamoviModule
+    - survival
+    - survminer
+    - car
 
+    - janitor
+    - labelled
 ...

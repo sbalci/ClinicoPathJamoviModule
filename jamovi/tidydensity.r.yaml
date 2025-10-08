@@ -129,4 +129,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - TidyDensity
+    - stringr
 ...

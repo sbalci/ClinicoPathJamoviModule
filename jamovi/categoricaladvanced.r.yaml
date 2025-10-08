@@ -129,4 +129,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - DescTools
 ...

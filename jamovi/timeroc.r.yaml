@@ -159,4 +159,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - glue
+    - pROC
+    - timeROC
+    - scales
 ...

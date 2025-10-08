@@ -154,7 +154,10 @@ conditionalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Conditional Survival Estimation",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "condSURV",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

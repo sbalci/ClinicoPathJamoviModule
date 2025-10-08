@@ -857,4 +857,19 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - proxy
+    - cluster
+    - FactoMineR
+    - klaR
+    - grDevices
+    - factoextra
+    - BiocManager
+    - circlize
+    - ComplexHeatmap
+    - grid
+    - survival
+    - survminer
+    - viridis
+    - corrplot
+    - pheatmap
 ...

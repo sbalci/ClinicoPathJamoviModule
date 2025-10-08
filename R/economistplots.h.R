@@ -350,7 +350,10 @@ economistplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ClinicoPathJamoviModule",
                     "ggeconodist",
                     "ggplot2",
-                    "dplyr"))
+                    "dplyr",
+                    "remotes",
+                    "moments",
+                    "systemfonts"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

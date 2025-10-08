@@ -263,7 +263,9 @@ generalpseudoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Generalized Pseudo-Observations",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "betareg"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

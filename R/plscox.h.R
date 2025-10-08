@@ -276,7 +276,12 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Partial Least Squares Cox Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "plsRcox",
+                    "survival",
+                    "ggrepel",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

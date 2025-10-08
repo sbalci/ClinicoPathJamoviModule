@@ -52,4 +52,9 @@ refs:
 
 
 
+    - glue
+    - scales
+    - purrr
+    - gt
+    - htmltools
 ...

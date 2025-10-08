@@ -56,4 +56,7 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - glue
+    - lubridate
+    - tools
 ...

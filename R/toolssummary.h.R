@@ -114,7 +114,8 @@ toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Tools for data summary",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "summarytools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

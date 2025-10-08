@@ -74,7 +74,10 @@ oneSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="One Survival Outcome",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "survival",
+                    "ggfortify"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",

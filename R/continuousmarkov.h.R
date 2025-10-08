@@ -274,7 +274,9 @@ continuousmarkovResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Continuous-Time Markov Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "msm",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

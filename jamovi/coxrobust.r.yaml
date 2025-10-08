@@ -208,4 +208,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - coxrobust
 ...

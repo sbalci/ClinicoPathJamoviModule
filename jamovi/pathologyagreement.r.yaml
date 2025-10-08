@@ -154,4 +154,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - psych
+    - epiR
 ...

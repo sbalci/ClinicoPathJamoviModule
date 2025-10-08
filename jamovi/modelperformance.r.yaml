@@ -119,4 +119,6 @@ refs:
     - ClinicoPathJamoviModule
     - survival
 
+    - pROC
+    - DescTools
 ...

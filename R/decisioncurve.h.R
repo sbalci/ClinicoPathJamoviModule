@@ -303,7 +303,8 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "rmda",
                     "ggplot2",
                     "dplyr",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "tidyr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

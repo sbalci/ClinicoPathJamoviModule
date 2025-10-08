@@ -426,4 +426,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - urvminer
+    - survival
+    - epitools
 ...

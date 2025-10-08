@@ -237,7 +237,9 @@ jppsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Predictive Power Score Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    ".step",
+                    "ppsr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -365,7 +365,12 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Decision tree",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "mlr3",
+                    "pROC",
+                    "rpart.plot",
+                    "caret",
+                    "boot"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelSettings",

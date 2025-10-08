@@ -318,4 +318,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - glmnet
 ...

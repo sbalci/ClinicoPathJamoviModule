@@ -104,7 +104,17 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Cross Table",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "labelled",
+                    "glue",
+                    "arsenal",
+                    "finalfit",
+                    "gtsummary",
+                    "tangram",
+                    "RVAideMemoire",
+                    "ca",
+                    "vcd"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",

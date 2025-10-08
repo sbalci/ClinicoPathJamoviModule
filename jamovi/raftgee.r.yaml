@@ -188,4 +188,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - aftgee
+    - survival
 ...

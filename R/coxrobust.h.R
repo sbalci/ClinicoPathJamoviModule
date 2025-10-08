@@ -298,7 +298,9 @@ coxrobustResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Robust Cox Regression",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "coxrobust"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

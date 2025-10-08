@@ -260,7 +260,8 @@ smoothhazardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Smooth Hazard Estimation & Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

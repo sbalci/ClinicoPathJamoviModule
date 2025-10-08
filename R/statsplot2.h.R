@@ -110,7 +110,12 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggstatsplot",
                     "ggalluvial",
                     "easyalluvial",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "jjstatsplot",
+                    "jmv",
+                    "patchwork",
+                    "cowplot"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

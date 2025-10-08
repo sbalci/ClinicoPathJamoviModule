@@ -495,7 +495,12 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "partykit",
                     "DiagrammeR",
                     "ROCR",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "parallel",
+                    "digest",
+                    "rpart.plot",
+                    "scales",
+                    "tidyr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",

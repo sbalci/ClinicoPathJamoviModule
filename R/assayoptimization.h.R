@@ -274,7 +274,9 @@ assayoptimizationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Assay Optimization & Experimental Design",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "stringr",
+                    "pwr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -294,4 +294,6 @@ refs:
     - survival
     - ggplot2
     - stats
+    - e1071
+    - tools
 ...

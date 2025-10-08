@@ -242,4 +242,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - superpc
+    - survival
+    - stringr
 ...

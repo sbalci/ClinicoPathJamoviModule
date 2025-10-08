@@ -61,4 +61,10 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - janitor
+    - lm.beta
+    - ggstats
+    - broom
+    - survival
+    - lme4
 ...

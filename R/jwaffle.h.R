@@ -147,7 +147,9 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ggplot2",
                     "waffle",
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "digest",
+                    "glue"),
                 clearWith=list(
                     "counts",
                     "groups",

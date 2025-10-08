@@ -402,4 +402,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - Kendall
 ...

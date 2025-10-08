@@ -559,4 +559,8 @@ refs:
     - BlueSky
     - Swamidass2010
 
+    - pROC
+    - caret
+    - grDevices
+    - reshape2
 ...

@@ -229,4 +229,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - cluster
 ...

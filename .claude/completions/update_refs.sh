@@ -45,10 +45,36 @@ PKGS_RAW=$(
 )
 
 # Normalize: unique, keep order stable (awk trick)
-readarray -t PKGS < <(printf "%s\n" "$PKGS_RAW" | awk '!seen[$0]++' | sed '/^$/d')
+# Use while-read loop for macOS bash 3.x compatibility
+PKGS=()
+while IFS= read -r line; do
+  [[ -n "$line" ]] && PKGS+=("$line")
+done < <(printf "%s\n" "$PKGS_RAW" | awk '!seen[$0]++' | sed '/^$/d')
+
+# Exclude foundational base packages that should not be referenced in individual functions
+FOUNDATION_PKGS=("jmvcore" "ggplot2" "R6" "stats" "utils" "kableExtra" "rlang" "dplyr")
+FILTERED_PKGS=()
+for pkg in "${PKGS[@]}"; do
+  skip=0
+  for basepkg in "${FOUNDATION_PKGS[@]}"; do
+    if [[ "$pkg" == "$basepkg" ]]; then
+      skip=1
+      break
+    fi
+  done
+  if [[ $skip -eq 0 ]]; then
+    FILTERED_PKGS+=("$pkg")
+  fi
+done
+# Only update PKGS if FILTERED_PKGS is not empty
+if [[ ${#FILTERED_PKGS[@]} -gt 0 ]]; then
+  PKGS=("${FILTERED_PKGS[@]}")
+else
+  PKGS=()
+fi
 
 if [[ ${#PKGS[@]} -eq 0 ]]; then
-  echo "No packages detected in $B_R. Nothing to do."
+  echo "No packages detected in $B_R (after excluding foundational packages). Nothing to do."
   exit 0
 fi
 
@@ -57,25 +83,40 @@ for p in "${PKGS[@]}"; do echo "  - $p"; done
 
 # --- 2) Ensure 00refs.yaml contains each package key --------------------------
 # We assume 00refs.yaml has a top-level "refs:" mapping.
-# If a package key is missing, we append a minimal, CRAN-style placeholder entry.
+# If a package key is missing, insert it BEFORE the '...' line (YAML document terminator).
 ensure_refs_yaml_key() {
   local key="$1"
-  # Anchor on beginning of line (allow 4 spaces indent below 'refs:')
+  # Check if key already exists under 'refs:' (allow 4 spaces indent)
   if grep -Eq "^ {4}${key}:" "$REFS_YAML"; then
     return 0
   fi
 
   # If 'refs:' missing entirely, add it at file top
   if ! grep -Eq '^refs:\s*$' "$REFS_YAML"; then
-    # Prepend refs: and a newline
     tmp="$(mktemp)"
     printf "refs:\n" > "$tmp"
     cat "$REFS_YAML" >> "$tmp"
     mv "$tmp" "$REFS_YAML"
   fi
 
-  # Append a placeholder block for the missing package
-  cat >> "$REFS_YAML" <<EOF
+  # Insert before '...' line if it exists, otherwise append to end
+  if grep -Eq '^\.\.\.\s*$' "$REFS_YAML"; then
+    # Insert before the '...' line using sed
+    tmp="$(mktemp)"
+    sed "/^\.\.\.\$/i\\
+\\
+    ${key}:\\
+        type: 'software'\\
+        author:\\
+        year:\\
+        title: \"${key}: R package\"\\
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=${key}'\\
+        url: https://CRAN.R-project.org/package=${key}
+" "$REFS_YAML" > "$tmp"
+    mv "$tmp" "$REFS_YAML"
+  else
+    # No '...' found, append to end
+    cat >> "$REFS_YAML" <<EOF
 
     ${key}:
         type: 'software'
@@ -85,6 +126,8 @@ ensure_refs_yaml_key() {
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=${key}'
         url: https://CRAN.R-project.org/package=${key}
 EOF
+  fi
+
   echo " - Added placeholder ref for '${key}' to $REFS_YAML"
 }
 
@@ -96,16 +139,25 @@ done
 # --- 3) Add package keys to .r.yaml refs list ---------------------------------
 # Strategy:
 #  - Ensure the file has a 'refs:' list (YAML sequence) section.
-#  - Append '- pkg' entries that are not already present.
+#  - Insert '- pkg' entries BEFORE '...' if it exists, otherwise append.
 # We do not reorder or remove anything; we just add missing items.
 
 ensure_ryaml_refs_section() {
   if grep -Eq '^refs:\s*$' "$R_YAML"; then
     return 0
   fi
-  # If there is a refs: under items (like per-table), we still want the top-level refs block.
-  # Append at end a top-level 'refs:' if missing.
-  echo -e "\nrefs:" >> "$R_YAML"
+
+  # Insert 'refs:' before '...' if it exists, otherwise append
+  if grep -Eq '^\.\.\.\s*$' "$R_YAML"; then
+    tmp="$(mktemp)"
+    sed "/^\.\.\.\$/i\\
+\\
+refs:
+" "$R_YAML" > "$tmp"
+    mv "$tmp" "$R_YAML"
+  else
+    echo -e "\nrefs:" >> "$R_YAML"
+  fi
 }
 
 add_ref_to_ryaml_if_missing() {
@@ -114,9 +166,42 @@ add_ref_to_ryaml_if_missing() {
   if grep -Eq "^[[:space:]]*-[[:space:]]*['\"]?${key}['\"]?\s*$" "$R_YAML"; then
     return 0
   fi
-  # Append directly under the last/top-level 'refs:' block.
-  # We simply add at EOF after ensuring refs: exists; jamovi tolerates refs gathered anywhere at top-level.
-  echo "  - ${key}" >> "$R_YAML"
+
+  # Insert before '...' if it exists, otherwise append after refs:
+  if grep -Eq '^\.\.\.\s*$' "$R_YAML"; then
+    tmp="$(mktemp)"
+    # Insert before '...' with proper 4-space indentation, avoiding multiple blank lines
+    awk -v key="$key" '
+      /^\.\.\./ {
+        # Skip any consecutive blank lines before ...
+        while (nb > 0 && length(buffer[nb]) == 0) {
+          nb--
+        }
+        # Print buffer content
+        for (i = 1; i <= nb; i++) {
+          print buffer[i]
+        }
+        # Add the new entry (no extra blank line - one already exists in refs section)
+        print "    - " key
+        # Print the ... line itself
+        print $0
+        # Print anything after ... (if any)
+        while ((getline) > 0) {
+          print
+        }
+        exit
+      }
+      {
+        # Store in buffer
+        nb++
+        buffer[nb] = $0
+      }
+    ' "$R_YAML" > "$tmp"
+    mv "$tmp" "$R_YAML"
+  else
+    echo "    - ${key}" >> "$R_YAML"
+  fi
+
   echo " - Added '${key}' to refs list in $R_YAML"
 }
 

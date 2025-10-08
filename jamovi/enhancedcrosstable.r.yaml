@@ -74,8 +74,11 @@ items:
       - exclude_missing
 
 refs:
-  - ClinicoPathJamoviModule
-  - crosstable
-  - officer
+    - ClinicoPathJamoviModule
+    - crosstable
+    - officer
 
+    - janitor
+    - labelled
+    - stringr
 ...

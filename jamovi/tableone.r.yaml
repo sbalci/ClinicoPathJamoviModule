@@ -69,11 +69,11 @@ items:
     refs: janitor
 
 refs:
-  - ClinicoPathJamoviModule
-  - tableone
-  - gtsummary
-  - arsenal
-  - janitor
-  - whoisinthisstudy
+    - ClinicoPathJamoviModule
+    - tableone
+    - gtsummary
+    - arsenal
+    - janitor
+    - whoisinthisstudy
 
 ...

@@ -319,7 +319,8 @@ patientdashboardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Patient Monitoring Dashboard",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "reshape2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

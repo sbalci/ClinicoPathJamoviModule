@@ -282,4 +282,8 @@ items:
           title: Cluster Interpretation
           type: Html
 
+
+refs:
+    - tidyheatmaps
+    - grDevices
 ...

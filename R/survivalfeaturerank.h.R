@@ -251,7 +251,12 @@ survivalfeaturerankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Survival Feature Ranking",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "urvival",
+                    "urvminer",
+                    "survival",
+                    "glue",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

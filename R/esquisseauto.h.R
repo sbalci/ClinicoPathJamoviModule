@@ -249,7 +249,8 @@ esquisseautoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ggplot2",
                     "dplyr",
                     "jmvcore",
-                    "R6"))
+                    "R6",
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

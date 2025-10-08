@@ -262,7 +262,10 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Tumor Growth Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "nlme",
+                    "glue",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

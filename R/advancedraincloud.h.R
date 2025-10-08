@@ -472,7 +472,10 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 refs=list(
                     "ggplot2",
                     "ggrain",
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "grDevices",
+                    "viridis",
+                    "RColorBrewer"),
                 clearWith=list(
                     "y_var",
                     "x_var",

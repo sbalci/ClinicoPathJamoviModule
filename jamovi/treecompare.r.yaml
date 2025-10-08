@@ -158,4 +158,7 @@ refs:
     - pROC
     - ggplot2
 
+    - xgboost
+    - party
+    - parallel
 ...

@@ -279,7 +279,10 @@ principalcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Principal Component Cox Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "Hmisc",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

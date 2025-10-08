@@ -172,7 +172,8 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "ClinicoPathJamoviModule",
                     "performance",
                     "anomalydetection",
-                    "lofoutlier"))
+                    "lofoutlier",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

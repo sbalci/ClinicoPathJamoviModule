@@ -266,4 +266,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - lme4
+    - glmmTMB
 ...

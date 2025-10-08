@@ -279,7 +279,9 @@ coxphwResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Weighted Cox Regression",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "coxphw"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

@@ -290,7 +290,10 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggplot2",
                     "ggstatsplot",
                     "ggpubr",
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "digest",
+                    "purrr",
+                    "glue"),
                 clearWith=list(
                     "dep",
                     "group",

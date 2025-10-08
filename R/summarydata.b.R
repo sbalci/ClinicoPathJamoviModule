@@ -14,8 +14,6 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
     inherit = summarydataBase, private = list(
         
         .run = function() {
-
-
         # Check if variables have been selected. If not, display a welcoming message with instructions.
         if (length(self$options$vars) == 0) {
             intro_msg <- "
@@ -28,17 +26,14 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         } else {
             # Clear any introductory message if variables are selected.
             self$results$todo$setContent("")
-
             # Validate that the dataset contains complete rows.
             if (nrow(self$data) == 0) {
                 stop(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
             }
-
             # Retrieve the data and construct the list of variables.
             dataset <- self$data
             var_formula <- jmvcore::constructFormula(terms = self$options$vars)
             var_list <- unlist(jmvcore::decomposeFormula(formula = var_formula))
-
             # mysummary function with optimized calculations
             mysummary <- function(myvar) {
                 # Cache numeric conversion to avoid repeated calls
@@ -60,11 +55,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 median_x <- stats["median"]
                 min_x <- stats["min"]
                 max_x <- stats["max"]
-
-
-
                 dist_text <- ""
-
                 # If the distribution diagnostics option is enabled, add additional tests.
                 if (self$options$distr) {
                     # Shapiro-Wilk test (only valid if 3 <= sample size <= 5000)
@@ -76,37 +67,29 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     } else {
                         p_val <- NA
                     }
-
                     # Calculate skewness and kurtosis using the moments package.
                     skew_val <- round(moments::skewness(numeric_data, na.rm = TRUE), 2)
                     kurt_val <- round(moments::kurtosis(numeric_data, na.rm = TRUE), 2)
-
                     # Interpret normality based on the Shapiro-Wilk p-value.
                     norm_status <- if (!is.na(p_val)) {
                         if (p_val > 0.05) .("appears to be normally distributed") else .("does not appear to be normally distributed. Please use relevant visualisation and tests to verify the characteristics of distribution.")
                     } else {
                         .("Normality test not applicable due to sample size")
                     }
-
                     dist_text <- paste0(
                         "<br><em>", .("Distribution Diagnostics for"), " ", myvar ,":</em> ", .("Shapiro-Wilk p-value"), " = ", p_val,
                         "; ", .("Skewness"), " = ", skew_val, "; ", .("Kurtosis"), " = ", kurt_val,
                         " (", .("Data"), " ", norm_status, ")."
                     )
                 }
-
                     # Return the summary text with distribution diagnostics.
                     paste0(.("Mean of"), " <strong>", myvar, "</strong> ", .("is"), ": ", mean_x, " &plusmn; ", sd_x,
                            ". (", .("Median"), ": ", median_x, " [", .("Min"), ": ", min_x, " - ", .("Max"), ": ",
                            max_x, "]) <br>", dist_text, "<br><br>", collapse = " ")
-
             }
-
             results <- purrr::map(.x = var_list, .f = mysummary)
             results <- unlist(results)
             self$results$text$setContent(results)
-
-
             # CORRECT IMPLEMENTATION: Use gtExtras as intended by the package
             plot_dataset <- tryCatch({
                 # Filter to numeric variables for gtExtras
@@ -183,9 +166,12 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             glossary_content <- private$.generateGlossary()
             self$results$glossary$setContent(glossary_content)
 
+            # Generate R code if enabled
+            if (self$options$showRCode) {
+                private$.generateRCode(var_list, dataset)
+            }
         }
         },
-
         # Simple summary table without resource-intensive gtExtras
         .create_simple_summary_table = function(dataset, var_list) {
             # Filter to numeric variables only
@@ -223,7 +209,6 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             html <- paste0(html, "</table>")
             return(htmltools::HTML(html))
         },
-
         # Simplified gtExtras wrapper (compatibility verified)
         .create_summary_table = function(dataset, var_list) {
             # Filter to numeric variables only
@@ -254,7 +239,6 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 return(self$.gtExtras_style_fallback(dataset, var_list))
             })
         },
-
         # Fallback with gtExtras-style appearance
         .gtExtras_style_fallback = function(dataset, var_list) {
             # Get numeric variables only
@@ -609,5 +593,103 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             return(glossary_html)
         }
 
+#         .generateRCode = function(var_list, dataset) {
 
+#             # Build variable string
+#             var_str <- paste0("c(\"", paste(var_list, collapse = "\", \""), "\")")
+
+#             # Generate R code for descriptive statistics
+#             r_code <- sprintf(
+# '# ============================================
+# # Reproducible R Code for Summary Statistics
+# # ============================================
+# # This code uses base R stats package
+
+# # Load required packages
+# library(moments)  # for skewness and kurtosis
+
+# # Assuming your data is in a data frame called "mydata"
+# variables <- %s
+
+# # Function to calculate comprehensive summaries
+# summary_stats <- function(var_name, data) {
+#     x <- data[[var_name]]
+#     x_clean <- x[!is.na(x)]
+
+#     # Basic statistics
+#     n <- length(x_clean)
+#     mean_val <- mean(x_clean)
+#     sd_val <- sd(x_clean)
+#     median_val <- median(x_clean)
+#     min_val <- min(x_clean)
+#     max_val <- max(x_clean)
+
+#     # Distribution diagnostics
+#     if (n >= 3 && n <= 5000) {
+#         sw_test <- shapiro.test(x_clean)
+#         p_val <- sw_test$p.value
+#     } else {
+#         p_val <- NA
+#     }
+
+#     skew_val <- moments::skewness(x_clean)
+#     kurt_val <- moments::kurtosis(x_clean)
+
+#     # Create result
+#     result <- data.frame(
+#         Variable = var_name,
+#         N = n,
+#         Mean = round(mean_val, %d),
+#         SD = round(sd_val, %d),
+#         Median = round(median_val, %d),
+#         Min = round(min_val, %d),
+#         Max = round(max_val, %d),
+#         Shapiro_p = ifelse(is.na(p_val), NA, round(p_val, 3)),
+#         Skewness = round(skew_val, 2),
+#         Kurtosis = round(kurt_val, 2),
+#         stringsAsFactors = FALSE
+#     )
+
+#     return(result)
+# }
+
+# # Calculate summaries for all variables
+# results <- do.call(rbind, lapply(variables, summary_stats, data = mydata))
+
+# # Print results
+# print(results)
+
+# # Generate narrative summaries
+# for (var in variables) {
+#     stats <- results[results$Variable == var, ]
+#     cat(sprintf("%%s: Mean = %%.2f ± %%.2f (Median = %%.2f, Range: %%.2f - %%.2f)\\n",
+#                 var, stats$Mean, stats$SD, stats$Median, stats$Min, stats$Max))
+# }',
+#                 var_str,
+#                 self$options$decimal_places,
+#                 self$options$decimal_places,
+#                 self$options$decimal_places,
+#                 self$options$decimal_places,
+#                 self$options$decimal_places
+#             )
+
+#             # Wrap in HTML
+#             r_code_html <- paste0(
+#                 "<div style='background:#f5f5f5;padding:1em;border:1px solid #ddd;border-radius:4px;'>",
+#                 "<h4>Copy-Ready R Code</h4>",
+#                 "<p>This code replicates the descriptive statistics analysis using base R and the moments package.</p>",
+#                 "<ul>",
+#                 "<li>Replace <code>mydata</code> with your actual data frame name</li>",
+#                 "<li>Install moments package if needed: <code>install.packages('moments')</code></li>",
+#                 "<li><b>Copy:</b> Click and drag to select all text, then Ctrl+C (Cmd+C on Mac)</li>",
+#                 "</ul>",
+#                 "<pre style='background:white;padding:1em;overflow-x:auto;border:1px solid #ccc;'><code>",
+#                 htmltools::htmlEscape(r_code),
+#                 "</code></pre>",
+#                 "<p style='margin-top:1em;'><i>💡 Tip: This code is fully reproducible and can be shared with colleagues who don't use jamovi.</i></p>",
+#                 "</div>"
+#             )
+
+#             self$results$rCode$setContent(r_code_html)
+#         }
     ))

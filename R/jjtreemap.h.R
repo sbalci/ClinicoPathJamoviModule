@@ -271,7 +271,8 @@ jjtreemapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "labelAlignV",
                     "title",
                     "subtitle",
-                    "caption"))
+                    "caption",
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

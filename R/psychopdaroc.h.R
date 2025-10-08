@@ -815,7 +815,10 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "Vickers2006",
                     "Steyerberg2010",
                     "Higgins2003",
-                    "DerSimonian1986"))
+                    "DerSimonian1986",
+                    "tools",
+                    "tidyr",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

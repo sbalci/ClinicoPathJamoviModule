@@ -400,4 +400,9 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - timereg
+    - survival
+    - timeROC
+    - pROC
+    - riskRegression
 ...

@@ -310,4 +310,14 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - janitor
+    - labelled
+    - glue
+    - arsenal
+    - finalfit
+    - gtsummary
+    - tangram
+    - RVAideMemoire
+    - ca
+    - vcd
 ...

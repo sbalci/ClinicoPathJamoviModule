@@ -368,7 +368,9 @@ metaanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Meta-Analysis & Evidence Synthesis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "metafor",
+                    "mada"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

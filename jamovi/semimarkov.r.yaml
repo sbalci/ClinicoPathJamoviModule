@@ -400,4 +400,7 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - gridExtra
+    - tools
+    - scales
 ...

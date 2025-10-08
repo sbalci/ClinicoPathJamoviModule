@@ -319,7 +319,8 @@ jsjplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Social Science Statistical Visualization",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "sjPlot"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

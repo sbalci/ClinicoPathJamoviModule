@@ -62,7 +62,12 @@ items:
     visible: (sty:t5)
 
 refs:
-  - ClinicoPathJamoviModule
-  - whoisinthisstudy
+    - ClinicoPathJamoviModule
+    - whoisinthisstudy
+    - tableone
+    - gtsummary
+    - arsenal
+    - janitor
+    - moments
 
 ...

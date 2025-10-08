@@ -68,7 +68,8 @@ retractedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "retractcheck",
                     "rcrossref",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "httr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

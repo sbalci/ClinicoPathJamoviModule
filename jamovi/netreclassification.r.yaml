@@ -271,4 +271,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - boot
+    - pROC
 ...

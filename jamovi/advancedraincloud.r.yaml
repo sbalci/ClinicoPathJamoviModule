@@ -105,4 +105,7 @@ refs:
 
 
 
+    - grDevices
+    - viridis
+    - RColorBrewer
 ...

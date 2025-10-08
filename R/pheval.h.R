@@ -267,7 +267,9 @@ phevalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Proportional Hazards Testing",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "tools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

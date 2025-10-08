@@ -203,7 +203,11 @@ advancedanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Advanced ANOVA Suite",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "car",
+                    "pwr",
+                    "PMCMRplus",
+                    "multcomp"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

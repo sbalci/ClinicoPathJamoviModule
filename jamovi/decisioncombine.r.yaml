@@ -338,4 +338,7 @@ refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule
 
+    - forcats
+    - epiR
+    - scales
 ...

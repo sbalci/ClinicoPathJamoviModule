@@ -2,8 +2,7 @@
 name: causespecifichazards
 title: Cause-Specific Hazards Models
 jrs: '1.1'
-refs: survival
-    - ClinicoPathJamoviModule
+
 items:
     - name: overview
       title: Analysis Overview
@@ -294,4 +293,8 @@ items:
         - cause_variable
         - model_type
 
+
+refs:
+    - survival
+    - cmprsk
 ...

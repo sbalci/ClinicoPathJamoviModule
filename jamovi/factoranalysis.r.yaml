@@ -285,4 +285,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - psych
 ...

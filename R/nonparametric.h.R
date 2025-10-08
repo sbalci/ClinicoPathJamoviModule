@@ -595,7 +595,9 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dunn",
                     "effectsize",
                     "robustbase",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "nortest",
+                    "car"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

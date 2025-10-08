@@ -479,7 +479,9 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggstatsplot",
                     "viridis",
                     "RColorBrewer",
-                    "RGraphGallery"))
+                    "RGraphGallery",
+                    "moments",
+                    "WRS2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

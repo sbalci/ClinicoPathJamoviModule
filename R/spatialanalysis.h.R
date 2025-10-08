@@ -190,7 +190,9 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Spatial Statistics from Coordinates",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "spatstat.geom",
+                    "spatstat.explore"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",

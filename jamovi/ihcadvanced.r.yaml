@@ -212,4 +212,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - cluster
+    - parallel
+    - grDevices
 ...

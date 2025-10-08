@@ -262,6 +262,6 @@ refs:
     - glmnet
     - survival
     - survminer
-
-
+    - survcomp
+    - grid
 ...

@@ -42,11 +42,18 @@ items:
       type:  Html
       visible: true
 
+    # - name: rCode
+    #   title: Reproducible R Code
+    #   type: Html
+    #   visible: (showRCode)
+
 
 
 refs:
     - gtExtras
     - ClinicoPathJamoviModule
-
-
+    - moments
+    - purrr
+    - gt
+    - htmltools
 ...

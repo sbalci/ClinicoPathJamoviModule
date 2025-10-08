@@ -44,4 +44,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - broom
 ...

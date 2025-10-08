@@ -203,7 +203,11 @@ bayesdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Bayesian Decision Curve Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "RColorBrewer",
+                    "grDevices",
+                    "scales",
+                    "parallel"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

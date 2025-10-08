@@ -27,4 +27,10 @@ refs:
 
 
 
+    - tibble
+    - glue
+    - scales
+    - purrr
+    - gt
+    - htmltools
 ...

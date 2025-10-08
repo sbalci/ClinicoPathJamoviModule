@@ -222,7 +222,9 @@ groupedforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Grouped Hazard Forest Plot",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "broom"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

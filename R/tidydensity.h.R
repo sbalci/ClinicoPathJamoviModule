@@ -361,7 +361,9 @@ tidydensityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Statistical Distribution Generator",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "TidyDensity",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

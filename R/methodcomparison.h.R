@@ -300,7 +300,9 @@ methodcomparisonResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Method Comparison Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "DescTools",
+                    "mcr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

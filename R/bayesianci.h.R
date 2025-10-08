@@ -322,7 +322,8 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Bayesian Confidence Intervals (Credible Intervals)",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "tools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

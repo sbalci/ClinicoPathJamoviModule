@@ -197,7 +197,9 @@ causespecifichazardsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 options=options,
                 name="",
                 title="Cause-Specific Hazards Models",
-                refs="survival - ClinicoPathJamoviModule")
+                refs=list(
+                    "survival",
+                    "cmprsk"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overview",

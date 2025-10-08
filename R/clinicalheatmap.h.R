@@ -441,7 +441,10 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Clinical Heatmap")
+                title="Clinical Heatmap",
+                refs=list(
+                    "tidyheatmaps",
+                    "grDevices"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

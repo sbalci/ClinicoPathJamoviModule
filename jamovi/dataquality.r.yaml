@@ -52,4 +52,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - visdat
 ...

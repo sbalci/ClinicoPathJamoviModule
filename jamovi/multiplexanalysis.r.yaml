@@ -276,4 +276,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - vegan
 ...

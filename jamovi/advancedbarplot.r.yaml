@@ -95,10 +95,20 @@ items:
         - stat_type
 
 refs:
-  - ClinicoPathJamoviModule
-  - ggplot2
-  - plotly
-  - RColorBrewer
-  - viridis
+    - ClinicoPathJamoviModule
+    - ggplot2
+    - plotly
+    - RColorBrewer
+    - viridis
 
+    - ggprism
+    - ggpattern
+    - digest
+    - tools
+    - htmltools
+    - bbplot
+    - scales
+    - patchwork
+    - grid
+    - gridExtra
 ...

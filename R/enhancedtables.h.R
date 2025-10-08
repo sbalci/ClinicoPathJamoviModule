@@ -296,7 +296,9 @@ enhancedtablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Enhanced Tables Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "gt"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -118,4 +118,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - survminer
+    - RColorBrewer
 ...

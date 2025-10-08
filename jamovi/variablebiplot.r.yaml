@@ -128,4 +128,9 @@ refs:
     - factoextra
     - ggplot2
 
+    - mixOmics
+    - MASS
+    - cluster
+    - BiocManager
+    - htmltools
 ...

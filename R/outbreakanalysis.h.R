@@ -415,7 +415,8 @@ outbreakanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Outbreak Analysis & Epidemiological Investigation",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "scales"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outbreak_overview",

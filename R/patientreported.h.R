@@ -521,7 +521,9 @@ patientreportedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Patient-Reported Outcomes & Quality of Life Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "reshape2",
+                    "psych"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="scale_overview",

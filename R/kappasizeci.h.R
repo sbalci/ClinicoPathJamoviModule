@@ -108,7 +108,9 @@ kappaSizeCIResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Confidence Interval Approach for the Number of Subjects Required",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "kappaSize"))
+                    "kappaSize",
+                    "glue",
+                    "digest"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",

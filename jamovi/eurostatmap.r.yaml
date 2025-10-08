@@ -74,4 +74,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - tmap
+    - eurostat
 ...

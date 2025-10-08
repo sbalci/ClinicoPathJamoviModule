@@ -168,4 +168,7 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - janitor
+    - labelled
+    - glue
 ...

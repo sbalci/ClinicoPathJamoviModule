@@ -192,7 +192,9 @@ condsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Conditional Survival Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "flexsurv"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

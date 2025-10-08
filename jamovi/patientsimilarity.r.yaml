@@ -227,4 +227,11 @@ refs:
     - Rtsne
     - umap
 
+    - urvival
+    - urvminer
+    - dbscan
+    - cluster
+    - survival
+    - plotly
+    - survminer
 ...

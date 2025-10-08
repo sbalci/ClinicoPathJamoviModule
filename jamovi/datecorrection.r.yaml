@@ -65,4 +65,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - datefixR
+    - anytime
+    - lubridate
 ...

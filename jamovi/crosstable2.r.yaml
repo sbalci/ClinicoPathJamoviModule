@@ -71,4 +71,12 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - janitor
+    - labelled
+    - glue
+    - arsenal
+    - finalfit
+    - gtsummary
+    - purrr
+    - tangram
 ...

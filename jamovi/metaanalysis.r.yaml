@@ -417,4 +417,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - metafor
+    - mada
 ...

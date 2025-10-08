@@ -229,4 +229,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - mstate
+    - flexsurv
+    - stringr
 ...

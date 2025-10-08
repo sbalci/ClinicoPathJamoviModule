@@ -240,7 +240,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 refs=list(
                     "DiagnosticTests",
                     "sensspecwiki",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "tibble"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",

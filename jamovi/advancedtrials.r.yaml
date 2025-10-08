@@ -362,4 +362,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - gsDesign
 ...

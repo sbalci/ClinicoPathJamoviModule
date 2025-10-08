@@ -132,4 +132,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - ggmice
+    - mice
 ...

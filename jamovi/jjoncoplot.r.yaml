@@ -168,7 +168,10 @@ items:
       visible: true
 
 refs:
-  - ClinicoPathJamoviModule
+    - ClinicoPathJamoviModule
 
 
+    - scales
+    - patchwork
+    - tidyr
 ...

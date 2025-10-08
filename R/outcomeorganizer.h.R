@@ -253,7 +253,10 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "cmprsk",
                     "mstate",
                     "survivaltutorial",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "labelled",
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
