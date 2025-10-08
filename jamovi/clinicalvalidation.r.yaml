@@ -234,6 +234,21 @@ items:
         - predictors
         - confidence_level
 
+    - name: prccurve
+      title: Precision-Recall Curve Analysis
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .prc_curve_plot
+      visible: (show_prc_curve)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - confidence_level
+      refs:
+        - Saito2015
+
     - name: residualplots
       title: Model Residual Analysis
       type: Image

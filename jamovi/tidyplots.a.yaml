@@ -1,7 +1,7 @@
 ---
 name: tidyplots
 title: Comprehensive Tidy Plots
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlotT
 menuSubgroup: All-In-One
 version: '0.0.31'
 jas: '1.2'
@@ -539,4 +539,309 @@ options:
       title: Remove Y Axis Line
       type: Bool
       default: false
+
+    # === DATA LABELS ===
+    - name: showDataLabels
+      title: Show Data Labels
+      type: Bool
+      default: false
+
+    - name: dataLabelType
+      title: Data Label Type
+      type: List
+      options:
+        - name: direct
+          title: Direct Labels
+        - name: repel
+          title: Repelled Labels (avoid overlap)
+      default: direct
+
+    # === LEGEND POSITION ===
+    - name: legendPosition
+      title: Legend Position
+      type: List
+      options:
+        - name: default
+          title: Default (Right)
+        - name: top
+          title: Top
+        - name: bottom
+          title: Bottom
+        - name: left
+          title: Left
+        - name: right
+          title: Right
+        - name: none
+          title: None
+      default: default
+
+    # === PLOT ORIENTATION ===
+    - name: flipOrientation
+      title: Flip Plot Orientation
+      type: Bool
+      default: false
+
+    # === PADDING OPTIONS ===
+    - name: paddingTop
+      title: Top Padding (0-1)
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: paddingBottom
+      title: Bottom Padding (0-1)
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: paddingLeft
+      title: Left Padding (0-1)
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: paddingRight
+      title: Right Padding (0-1)
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    # === COLOR SATURATION ===
+    - name: colorSaturation
+      title: Color Saturation (0-1)
+      type: Number
+      default: 1.0
+      min: 0
+      max: 1
+
+    # === DODGING WIDTH ===
+    - name: dodgeWidth
+      title: Dodge Width
+      type: Number
+      default: 0.8
+      min: 0.1
+      max: 2.0
+
+    # === POINT OPTIONS ===
+    - name: pointSize
+      title: Point Size
+      type: Number
+      default: 2.5
+      min: 0.5
+      max: 10
+
+    - name: pointWhiteBorder
+      title: Add White Border to Points
+      type: Bool
+      default: false
+
+    # === LINE OPTIONS ===
+    - name: lineWidth
+      title: Line Width
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 5.0
+
+    # === RASTERIZATION ===
+    - name: useRasterization
+      title: Use Rasterization (reduce file size)
+      type: Bool
+      default: false
+
+    - name: rasterDPI
+      title: Raster DPI
+      type: Integer
+      default: 300
+      min: 72
+      max: 600
+
+    # === AXIS LIMITS ===
+    - name: setXLimits
+      title: Set X Axis Limits
+      type: Bool
+      default: false
+
+    - name: xMin
+      title: X Minimum
+      type: Number
+      default: 0
+
+    - name: xMax
+      title: X Maximum
+      type: Number
+      default: 100
+
+    - name: setYLimits
+      title: Set Y Axis Limits
+      type: Bool
+      default: false
+
+    - name: yMin
+      title: Y Minimum
+      type: Number
+      default: 0
+
+    - name: yMax
+      title: Y Maximum
+      type: Number
+      default: 100
+
+    # === AXIS TICK OPTIONS ===
+    - name: xAxisTickCount
+      title: X Axis Tick Count
+      type: Integer
+      default: 5
+      min: 2
+      max: 20
+
+    - name: yAxisTickCount
+      title: Y Axis Tick Count
+      type: Integer
+      default: 5
+      min: 2
+      max: 20
+
+    # === FONT FAMILY ===
+    - name: fontFamily
+      title: Font Family
+      type: List
+      options:
+        - name: default
+          title: Default
+        - name: sans
+          title: Sans Serif
+        - name: serif
+          title: Serif
+        - name: mono
+          title: Monospace
+      default: default
+
+    # === TITLE ALIGNMENT ===
+    - name: titleAlignment
+      title: Title Alignment
+      type: List
+      options:
+        - name: left
+          title: Left
+        - name: center
+          title: Center
+        - name: right
+          title: Right
+      default: left
+
+    # === CAPTION ALIGNMENT ===
+    - name: captionAlignment
+      title: Caption Alignment
+      type: List
+      options:
+        - name: left
+          title: Left
+        - name: center
+          title: Center
+        - name: right
+          title: Right
+      default: right
+
+    # === ADVANCED PLOT OPTIONS ===
+    - name: showMedianLine
+      title: Show Median Line (for time series)
+      type: Bool
+      default: false
+
+    - name: connectPairedData
+      title: Connect Paired Data Points
+      type: Bool
+      default: false
+
+    - name: highlightSubset
+      title: Highlight Data Subset
+      type: Bool
+      default: false
+
+    - name: maxDataPoints
+      title: Maximum Data Points to Display
+      type: Integer
+      default: 10000
+      min: 100
+      max: 100000
+
+    # === ERROR BAR OPTIONS ===
+    - name: errorBarWidth
+      title: Error Bar Width
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    # === VIOLIN PLOT OPTIONS ===
+    - name: violinScale
+      title: Violin Plot Scale
+      type: List
+      options:
+        - name: area
+          title: Area (same area)
+        - name: count
+          title: Count (proportional to n)
+        - name: width
+          title: Width (same width)
+      default: area
+
+    # === BOXPLOT OPTIONS ===
+    - name: boxplotOutliers
+      title: Show Boxplot Outliers
+      type: Bool
+      default: true
+
+    - name: boxplotNotch
+      title: Show Notch in Boxplot
+      type: Bool
+      default: false
+
+    # === SMOOTHING OPTIONS ===
+    - name: addSmoother
+      title: Add Smooth Trend Line
+      type: Bool
+      default: false
+
+    - name: smootherMethod
+      title: Smoother Method
+      type: List
+      options:
+        - name: loess
+          title: LOESS
+        - name: lm
+          title: Linear Model
+        - name: gam
+          title: GAM
+      default: loess
+
+    - name: smootherSE
+      title: Show Smoother Confidence Band
+      type: Bool
+      default: true
+
+    # === PLOT SIZE OPTIONS ===
+    - name: plotWidth
+      title: Plot Width (mm)
+      type: Integer
+      default: 150
+      min: 50
+      max: 500
+
+    - name: plotHeight
+      title: Plot Height (mm)
+      type: Integer
+      default: 100
+      min: 50
+      max: 500
+
+    - name: useAutoSize
+      title: Use Automatic Size
+      type: Bool
+      default: true
 ...

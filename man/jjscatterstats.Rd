@@ -9,6 +9,14 @@ jjscatterstats(
   dep,
   group,
   grvar = NULL,
+  colorvar = NULL,
+  sizevar = NULL,
+  shapevar = NULL,
+  alphavar = NULL,
+  labelvar = NULL,
+  showRugPlot = FALSE,
+  marginalType = "none",
+  smoothMethod = "lm",
   typestatistics = "parametric",
   mytitle = "",
   xtitle = "",
@@ -26,7 +34,12 @@ jjscatterstats(
   smoothlinesize = 1.5,
   smoothlinecolor = "blue",
   plotwidth = 600,
-  plotheight = 450
+  plotheight = 450,
+  addGGPubrPlot = FALSE,
+  ggpubrPalette = "jco",
+  ggpubrAddCorr = TRUE,
+  ggpubrCorrMethod = "pearson",
+  ggpubrAddSmooth = TRUE
 )
 }
 \arguments{
@@ -42,8 +55,32 @@ the vertical axis. Use numeric variables that you want to correlate with
 the x-axis variable.}
 
 \item{grvar}{Optional categorical variable to create separate correlation
-plots for each group  (e.g., by treatment group, tumor stage, or gender).
+plots for each group (e.g., by treatment group, tumor stage, or gender).
 Creates multiple panels for comparison.}
+
+\item{colorvar}{Optional variable to map point colors. When specified,
+switches to enhanced scatter plot with full ggplot2 aesthetic control
+instead of ggstatsplot correlation analysis.}
+
+\item{sizevar}{Optional continuous variable to map point sizes. When
+specified, switches to enhanced scatter plot with full ggplot2 aesthetic
+control instead of ggstatsplot correlation analysis.}
+
+\item{shapevar}{Optional categorical variable to map point shapes. When
+specified, switches to enhanced scatter plot. Works best with variables
+having 6 or fewer levels.}
+
+\item{alphavar}{Optional continuous variable to map point transparency
+(alpha). When specified, switches to enhanced scatter plot.}
+
+\item{labelvar}{Optional variable to label points. Uses ggrepel to avoid
+overlapping labels.}
+
+\item{showRugPlot}{Add rug plot along axes to show data distribution.}
+
+\item{marginalType}{Add marginal distribution plots using ggExtra package.}
+
+\item{smoothMethod}{Method for smooth trend line in enhanced scatter plot.}
 
 \item{typestatistics}{Choose based on your data distribution. Pearson
 assumes normality (common for lab values after transformation).  Spearman
@@ -88,6 +125,17 @@ using ggside.}
 \item{plotwidth}{Width of the plot in pixels. Default is 600.}
 
 \item{plotheight}{Height of the plot in pixels. Default is 450.}
+
+\item{addGGPubrPlot}{Add publication-ready scatter plot using ggpubr
+package.}
+
+\item{ggpubrPalette}{Color palette for ggpubr scatter plot.}
+
+\item{ggpubrAddCorr}{Add correlation statistics to ggpubr scatter plot.}
+
+\item{ggpubrCorrMethod}{Method for correlation in ggpubr plot.}
+
+\item{ggpubrAddSmooth}{Add smoothed trend line to ggpubr scatter plot.}
 }
 \value{
 A results object containing:
@@ -95,6 +143,9 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+\code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$ggpubrPlot2} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

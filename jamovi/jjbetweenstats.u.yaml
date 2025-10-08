@@ -76,7 +76,6 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
-
   - type: CollapseBox
     label: Plot Display
     collapsed: true
@@ -94,7 +93,6 @@ children:
                   - type: ComboBox
                     name: centralitytype
                     enable: (centralityplotting)
-
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -112,6 +110,8 @@ children:
                 name: originaltheme
               - type: CheckBox
                 name: colorblindSafe
+              - type: CheckBox
+                name: addGGPubrPlot
       - type: Label
         label: Plot Labels
         fitToGrid: true
@@ -131,7 +131,6 @@ children:
                 name: ytitle
                 format: string
                 width: large
-
   - type: CollapseBox
     label: Plot Configuration
     collapsed: true
@@ -149,4 +148,20 @@ children:
               - type: TextBox
                 name: plotheight
                 format: number
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ggpubrPlotType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ggpubrPalette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: ggpubrAddStats
+      - type: CheckBox
+        name: ggpubrAddPoints

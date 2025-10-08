@@ -1,0 +1,158 @@
+title: Publication-Ready Plots (ggpubr)
+name: jjpubr
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Label
+    label: Publication-Ready Plots using ggpubr
+    margin: large
+    style: list-inline
+  - type: ComboBox
+    name: plotType
+    label: Plot Type
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: X Variable
+        children:
+          - type: VariablesListBox
+            name: xvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Y Variable (continuous)
+        children:
+          - type: VariablesListBox
+            name: yvar
+            maxItemCount: 1
+            isTarget: true
+            height: small
+      - type: TargetLayoutBox
+        label: Color Grouping (optional)
+        children:
+          - type: VariablesListBox
+            name: groupvar
+            maxItemCount: 1
+            isTarget: true
+            height: small
+      - type: TargetLayoutBox
+        label: Facet Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: facetvar
+            maxItemCount: 1
+            isTarget: true
+            height: small
+  - type: CollapseBox
+    label: Statistical Annotations
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: addStats
+        label: Add statistical comparisons
+      - type: ComboBox
+        name: statMethod
+        label: Statistical test
+        enable: (addStats)
+      - type: CheckBox
+        name: pairwiseComparisons
+        label: Pairwise comparisons
+        enable: (addStats)
+      - type: Label
+        label: Scatter Plot Statistics
+        margin: large
+        enable: (plotType:scatter)
+      - type: CheckBox
+        name: addCorr
+        label: Add correlation
+        enable: (plotType:scatter)
+      - type: ComboBox
+        name: corrMethod
+        label: Correlation method
+        enable: (plotType:scatter && addCorr)
+      - type: CheckBox
+        name: addSmoothLine
+        label: Add smooth line
+        enable: (plotType:scatter)
+      - type: CheckBox
+        name: addMarginal
+        label: Add marginal plots
+        enable: (plotType:scatter)
+  - type: CollapseBox
+    label: Distribution Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: addDensity
+        label: Add density curve
+        enable: (plotType:histogram)
+      - type: TextBox
+        name: bins
+        label: Number of bins
+        format: number
+        enable: (plotType:histogram)
+      - type: CheckBox
+        name: addMean
+        label: Add mean line
+        enable: (plotType:histogram || plotType:density)
+      - type: CheckBox
+        name: addMedian
+        label: Add median line
+        enable: (plotType:histogram || plotType:density)
+  - type: CollapseBox
+    label: Box/Violin Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: addPoints
+        label: Add jittered points
+        enable: (plotType:boxplot || plotType:violin)
+      - type: TextBox
+        name: pointAlpha
+        label: Point transparency
+        format: number
+        enable: (addPoints)
+      - type: CheckBox
+        name: addMeanSD
+        label: Show mean ± SD
+        enable: (plotType:boxplot || plotType:violin)
+  - type: CollapseBox
+    label: Appearance
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: palette
+        label: Color palette
+      - type: TextBox
+        name: fillColor
+        label: Fill color (hex)
+        format: string
+      - type: TextBox
+        name: title
+        label: Title
+        format: string
+      - type: TextBox
+        name: xlab
+        label: X-axis label
+        format: string
+      - type: TextBox
+        name: ylab
+        label: Y-axis label
+        format: string
+      - type: ComboBox
+        name: legendPosition
+        label: Legend position
+      - type: ComboBox
+        name: theme
+        label: Theme
+      - type: TextBox
+        name: plotWidth
+        label: Width (px)
+        format: number
+      - type: TextBox
+        name: plotHeight
+        label: Height (px)
+        format: number

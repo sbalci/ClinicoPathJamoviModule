@@ -122,7 +122,54 @@ items:
       title: Interpretation & Guidance
       type: Html
       description: Explanatory text about the diagram and results
+      visible: (show_interpretation)
       clearWith:
         - show_interpretation
         - data_format
         - diagram_type
+
+    - name: warnings
+      title: Data Quality Warnings
+      type: Html
+      description: Alerts about potential data quality issues
+      clearWith:
+        - data_format
+        - participant_id
+        - step_excluded
+        - participant_count
+
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      description: Plain-language summary for clinical interpretation
+      visible: (show_interpretation)
+      clearWith:
+        - show_interpretation
+        - data_format
+
+    - name: reportSentence
+      title: Report Sentence
+      type: Html
+      description: Copy-ready sentence for manuscripts
+      visible: (show_interpretation)
+      clearWith:
+        - show_interpretation
+        - data_format
+
+    - name: aboutAnalysis
+      title: About This Analysis
+      type: Html
+      description: Explanation of analysis type and usage
+      visible: (show_interpretation)
+      clearWith:
+        - show_interpretation
+        - diagram_type
+
+    - name: caveatsAssumptions
+      title: Caveats & Assumptions
+      type: Html
+      description: Important considerations and limitations
+      visible: (show_interpretation)
+      clearWith:
+        - show_interpretation
+        - data_format

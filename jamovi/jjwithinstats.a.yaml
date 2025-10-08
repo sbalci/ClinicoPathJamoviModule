@@ -1,7 +1,7 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
 version: '0.0.31'
@@ -340,6 +340,77 @@ options:
       description:
           R: >
             Height of the plot in pixels. Default is 450.
+
+    - name: addGGPubrPlot
+      title: Add ggpubr Plot Variant
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add publication-ready plot using ggpubr package for within-subjects/paired data.
+
+    - name: ggpubrPlotType
+      title: ggpubr Plot Type
+      type: List
+      options:
+        - title: Box Plot
+          name: boxplot
+        - title: Violin Plot
+          name: violin
+        - title: Paired Plot (with lines)
+          name: paired
+        - title: Line Plot (mean trajectory)
+          name: line
+      default: boxplot
+      description:
+          R: >
+            Type of ggpubr plot for within-subjects data. Paired plot shows individual trajectories.
+
+    - name: ggpubrPalette
+      title: ggpubr Color Palette
+      type: List
+      options:
+        - title: Journal of Clinical Oncology (jco)
+          name: jco
+        - title: Nature Publishing Group (npg)
+          name: npg
+        - title: AAAS Science
+          name: aaas
+        - title: Lancet
+          name: lancet
+        - title: JAMA
+          name: jama
+        - title: New England Journal of Medicine (nejm)
+          name: nejm
+      default: jco
+      description:
+          R: >
+            Color palette for ggpubr plot.
+
+    - name: ggpubrAddStats
+      title: Add Statistical Comparisons (ggpubr)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add statistical comparison p-values to ggpubr plot.
+
+    - name: ggpubrShowLines
+      title: Show Connecting Lines (paired plot)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show individual subject trajectories for paired plot.
+
+    - name: ggpubrAddPoints
+      title: Add Individual Points
+      type: Bool
+      default: false
+      description:
+          R: >
+            Overlay individual data points on ggpubr plot.
+
 ...
 
 # ggwithinstats(

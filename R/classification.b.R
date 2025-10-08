@@ -142,6 +142,9 @@ private = list(
             # Calculate Number Needed to Treat (if applicable)
             nnt <- if (ppv > prevalence) 1 / (ppv - prevalence) else NA
 
+            # Create confusion matrix for MCC
+            conf_mat <- table(Predicted = pred_response, Actual = truth_factor)
+
             metrics <- list(
                 sensitivity = sens,
                 specificity = spec,
@@ -150,7 +153,8 @@ private = list(
                 positive_lr = pos_lr,
                 negative_lr = neg_lr,
                 prevalence = prevalence,
-                nnt = nnt
+                nnt = nnt,
+                confusion_matrix = conf_mat
             )
 
             # Add bootstrap confidence intervals if requested
@@ -237,6 +241,73 @@ private = list(
                 )
             }
         }
+
+        # Calculate and populate MCC if requested
+        if (self$options$reportMCC && !is.null(clinical_metrics$confusion_matrix)) {
+            private$.calculateMCC(clinical_metrics$confusion_matrix, clinical_metrics)
+        }
+    },
+
+    .calculateMCC = function(confusion_matrix, clinical_metrics = NULL) {
+        # Calculate Matthews Correlation Coefficient
+        # MCC = (TP*TN - FP*FN) / sqrt((TP+FP)(TP+FN)(TN+FP)(TN+FN))
+
+        if (nrow(confusion_matrix) != 2 || ncol(confusion_matrix) != 2) {
+            # MCC only defined for binary classification
+            return()
+        }
+
+        # Extract confusion matrix values (assuming 2x2 for binary)
+        tp <- confusion_matrix[1, 1]  # True Positive
+        fn <- confusion_matrix[1, 2]  # False Negative
+        fp <- confusion_matrix[2, 1]  # False Positive
+        tn <- confusion_matrix[2, 2]  # True Negative
+
+        # Calculate MCC
+        numerator <- (tp * tn) - (fp * fn)
+        denominator <- sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+
+        mcc <- ifelse(denominator == 0, 0, numerator / denominator)
+
+        # Interpret MCC
+        interpretation <- if (mcc >= 0.8) {
+            "Very strong positive correlation"
+        } else if (mcc >= 0.5) {
+            "Strong positive correlation"
+        } else if (mcc >= 0.3) {
+            "Moderate positive correlation"
+        } else if (mcc >= 0.1) {
+            "Weak positive correlation"
+        } else if (mcc > -0.1) {
+            "No correlation (random)"
+        } else if (mcc > -0.3) {
+            "Weak negative correlation"
+        } else if (mcc > -0.5) {
+            "Moderate negative correlation"
+        } else {
+            "Strong negative correlation"
+        }
+
+        # Bootstrap CI if confidence intervals requested
+        ci_lower <- NA
+        ci_upper <- NA
+
+        if (self$options$reportConfidenceIntervals && !is.null(clinical_metrics)) {
+            # Use bootstrap samples if available
+            mcc_key <- "mcc_ci_lower"
+            if (!is.null(clinical_metrics[[mcc_key]])) {
+                ci_lower <- clinical_metrics$mcc_ci_lower
+                ci_upper <- clinical_metrics$mcc_ci_upper
+            }
+        }
+
+        # Populate MCC table
+        self$results$classificationMetrics$mccTable$setRow(rowNo = 1, values = list(
+            mcc = mcc,
+            ci_lower = ci_lower,
+            ci_upper = ci_upper,
+            interpretation = interpretation
+        ))
     },
 
     .initLearner = function() {

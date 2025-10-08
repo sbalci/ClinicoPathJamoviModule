@@ -66,7 +66,47 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             reverseXAxisLabels = FALSE,
             plotTheme = "default",
             removeXAxisLine = FALSE,
-            removeYAxisLine = FALSE, ...) {
+            removeYAxisLine = FALSE,
+            showDataLabels = FALSE,
+            dataLabelType = "direct",
+            legendPosition = "default",
+            flipOrientation = FALSE,
+            paddingTop = 0.1,
+            paddingBottom = 0.1,
+            paddingLeft = 0.1,
+            paddingRight = 0.1,
+            colorSaturation = 1,
+            dodgeWidth = 0.8,
+            pointSize = 2.5,
+            pointWhiteBorder = FALSE,
+            lineWidth = 1,
+            useRasterization = FALSE,
+            rasterDPI = 300,
+            setXLimits = FALSE,
+            xMin = 0,
+            xMax = 100,
+            setYLimits = FALSE,
+            yMin = 0,
+            yMax = 100,
+            xAxisTickCount = 5,
+            yAxisTickCount = 5,
+            fontFamily = "default",
+            titleAlignment = "left",
+            captionAlignment = "right",
+            showMedianLine = FALSE,
+            connectPairedData = FALSE,
+            highlightSubset = FALSE,
+            maxDataPoints = 10000,
+            errorBarWidth = 0.1,
+            violinScale = "area",
+            boxplotOutliers = TRUE,
+            boxplotNotch = FALSE,
+            addSmoother = FALSE,
+            smootherMethod = "loess",
+            smootherSE = TRUE,
+            plotWidth = 150,
+            plotHeight = 100,
+            useAutoSize = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -439,6 +479,227 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "removeYAxisLine",
                 removeYAxisLine,
                 default=FALSE)
+            private$..showDataLabels <- jmvcore::OptionBool$new(
+                "showDataLabels",
+                showDataLabels,
+                default=FALSE)
+            private$..dataLabelType <- jmvcore::OptionList$new(
+                "dataLabelType",
+                dataLabelType,
+                options=list(
+                    "direct",
+                    "repel"),
+                default="direct")
+            private$..legendPosition <- jmvcore::OptionList$new(
+                "legendPosition",
+                legendPosition,
+                options=list(
+                    "default",
+                    "top",
+                    "bottom",
+                    "left",
+                    "right",
+                    "none"),
+                default="default")
+            private$..flipOrientation <- jmvcore::OptionBool$new(
+                "flipOrientation",
+                flipOrientation,
+                default=FALSE)
+            private$..paddingTop <- jmvcore::OptionNumber$new(
+                "paddingTop",
+                paddingTop,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..paddingBottom <- jmvcore::OptionNumber$new(
+                "paddingBottom",
+                paddingBottom,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..paddingLeft <- jmvcore::OptionNumber$new(
+                "paddingLeft",
+                paddingLeft,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..paddingRight <- jmvcore::OptionNumber$new(
+                "paddingRight",
+                paddingRight,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..colorSaturation <- jmvcore::OptionNumber$new(
+                "colorSaturation",
+                colorSaturation,
+                default=1,
+                min=0,
+                max=1)
+            private$..dodgeWidth <- jmvcore::OptionNumber$new(
+                "dodgeWidth",
+                dodgeWidth,
+                default=0.8,
+                min=0.1,
+                max=2)
+            private$..pointSize <- jmvcore::OptionNumber$new(
+                "pointSize",
+                pointSize,
+                default=2.5,
+                min=0.5,
+                max=10)
+            private$..pointWhiteBorder <- jmvcore::OptionBool$new(
+                "pointWhiteBorder",
+                pointWhiteBorder,
+                default=FALSE)
+            private$..lineWidth <- jmvcore::OptionNumber$new(
+                "lineWidth",
+                lineWidth,
+                default=1,
+                min=0.1,
+                max=5)
+            private$..useRasterization <- jmvcore::OptionBool$new(
+                "useRasterization",
+                useRasterization,
+                default=FALSE)
+            private$..rasterDPI <- jmvcore::OptionInteger$new(
+                "rasterDPI",
+                rasterDPI,
+                default=300,
+                min=72,
+                max=600)
+            private$..setXLimits <- jmvcore::OptionBool$new(
+                "setXLimits",
+                setXLimits,
+                default=FALSE)
+            private$..xMin <- jmvcore::OptionNumber$new(
+                "xMin",
+                xMin,
+                default=0)
+            private$..xMax <- jmvcore::OptionNumber$new(
+                "xMax",
+                xMax,
+                default=100)
+            private$..setYLimits <- jmvcore::OptionBool$new(
+                "setYLimits",
+                setYLimits,
+                default=FALSE)
+            private$..yMin <- jmvcore::OptionNumber$new(
+                "yMin",
+                yMin,
+                default=0)
+            private$..yMax <- jmvcore::OptionNumber$new(
+                "yMax",
+                yMax,
+                default=100)
+            private$..xAxisTickCount <- jmvcore::OptionInteger$new(
+                "xAxisTickCount",
+                xAxisTickCount,
+                default=5,
+                min=2,
+                max=20)
+            private$..yAxisTickCount <- jmvcore::OptionInteger$new(
+                "yAxisTickCount",
+                yAxisTickCount,
+                default=5,
+                min=2,
+                max=20)
+            private$..fontFamily <- jmvcore::OptionList$new(
+                "fontFamily",
+                fontFamily,
+                options=list(
+                    "default",
+                    "sans",
+                    "serif",
+                    "mono"),
+                default="default")
+            private$..titleAlignment <- jmvcore::OptionList$new(
+                "titleAlignment",
+                titleAlignment,
+                options=list(
+                    "left",
+                    "center",
+                    "right"),
+                default="left")
+            private$..captionAlignment <- jmvcore::OptionList$new(
+                "captionAlignment",
+                captionAlignment,
+                options=list(
+                    "left",
+                    "center",
+                    "right"),
+                default="right")
+            private$..showMedianLine <- jmvcore::OptionBool$new(
+                "showMedianLine",
+                showMedianLine,
+                default=FALSE)
+            private$..connectPairedData <- jmvcore::OptionBool$new(
+                "connectPairedData",
+                connectPairedData,
+                default=FALSE)
+            private$..highlightSubset <- jmvcore::OptionBool$new(
+                "highlightSubset",
+                highlightSubset,
+                default=FALSE)
+            private$..maxDataPoints <- jmvcore::OptionInteger$new(
+                "maxDataPoints",
+                maxDataPoints,
+                default=10000,
+                min=100,
+                max=100000)
+            private$..errorBarWidth <- jmvcore::OptionNumber$new(
+                "errorBarWidth",
+                errorBarWidth,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..violinScale <- jmvcore::OptionList$new(
+                "violinScale",
+                violinScale,
+                options=list(
+                    "area",
+                    "count",
+                    "width"),
+                default="area")
+            private$..boxplotOutliers <- jmvcore::OptionBool$new(
+                "boxplotOutliers",
+                boxplotOutliers,
+                default=TRUE)
+            private$..boxplotNotch <- jmvcore::OptionBool$new(
+                "boxplotNotch",
+                boxplotNotch,
+                default=FALSE)
+            private$..addSmoother <- jmvcore::OptionBool$new(
+                "addSmoother",
+                addSmoother,
+                default=FALSE)
+            private$..smootherMethod <- jmvcore::OptionList$new(
+                "smootherMethod",
+                smootherMethod,
+                options=list(
+                    "loess",
+                    "lm",
+                    "gam"),
+                default="loess")
+            private$..smootherSE <- jmvcore::OptionBool$new(
+                "smootherSE",
+                smootherSE,
+                default=TRUE)
+            private$..plotWidth <- jmvcore::OptionInteger$new(
+                "plotWidth",
+                plotWidth,
+                default=150,
+                min=50,
+                max=500)
+            private$..plotHeight <- jmvcore::OptionInteger$new(
+                "plotHeight",
+                plotHeight,
+                default=100,
+                min=50,
+                max=500)
+            private$..useAutoSize <- jmvcore::OptionBool$new(
+                "useAutoSize",
+                useAutoSize,
+                default=TRUE)
 
             self$.addOption(private$..xvar)
             self$.addOption(private$..yvar)
@@ -501,6 +762,46 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotTheme)
             self$.addOption(private$..removeXAxisLine)
             self$.addOption(private$..removeYAxisLine)
+            self$.addOption(private$..showDataLabels)
+            self$.addOption(private$..dataLabelType)
+            self$.addOption(private$..legendPosition)
+            self$.addOption(private$..flipOrientation)
+            self$.addOption(private$..paddingTop)
+            self$.addOption(private$..paddingBottom)
+            self$.addOption(private$..paddingLeft)
+            self$.addOption(private$..paddingRight)
+            self$.addOption(private$..colorSaturation)
+            self$.addOption(private$..dodgeWidth)
+            self$.addOption(private$..pointSize)
+            self$.addOption(private$..pointWhiteBorder)
+            self$.addOption(private$..lineWidth)
+            self$.addOption(private$..useRasterization)
+            self$.addOption(private$..rasterDPI)
+            self$.addOption(private$..setXLimits)
+            self$.addOption(private$..xMin)
+            self$.addOption(private$..xMax)
+            self$.addOption(private$..setYLimits)
+            self$.addOption(private$..yMin)
+            self$.addOption(private$..yMax)
+            self$.addOption(private$..xAxisTickCount)
+            self$.addOption(private$..yAxisTickCount)
+            self$.addOption(private$..fontFamily)
+            self$.addOption(private$..titleAlignment)
+            self$.addOption(private$..captionAlignment)
+            self$.addOption(private$..showMedianLine)
+            self$.addOption(private$..connectPairedData)
+            self$.addOption(private$..highlightSubset)
+            self$.addOption(private$..maxDataPoints)
+            self$.addOption(private$..errorBarWidth)
+            self$.addOption(private$..violinScale)
+            self$.addOption(private$..boxplotOutliers)
+            self$.addOption(private$..boxplotNotch)
+            self$.addOption(private$..addSmoother)
+            self$.addOption(private$..smootherMethod)
+            self$.addOption(private$..smootherSE)
+            self$.addOption(private$..plotWidth)
+            self$.addOption(private$..plotHeight)
+            self$.addOption(private$..useAutoSize)
         }),
     active = list(
         xvar = function() private$..xvar$value,
@@ -563,7 +864,47 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         reverseXAxisLabels = function() private$..reverseXAxisLabels$value,
         plotTheme = function() private$..plotTheme$value,
         removeXAxisLine = function() private$..removeXAxisLine$value,
-        removeYAxisLine = function() private$..removeYAxisLine$value),
+        removeYAxisLine = function() private$..removeYAxisLine$value,
+        showDataLabels = function() private$..showDataLabels$value,
+        dataLabelType = function() private$..dataLabelType$value,
+        legendPosition = function() private$..legendPosition$value,
+        flipOrientation = function() private$..flipOrientation$value,
+        paddingTop = function() private$..paddingTop$value,
+        paddingBottom = function() private$..paddingBottom$value,
+        paddingLeft = function() private$..paddingLeft$value,
+        paddingRight = function() private$..paddingRight$value,
+        colorSaturation = function() private$..colorSaturation$value,
+        dodgeWidth = function() private$..dodgeWidth$value,
+        pointSize = function() private$..pointSize$value,
+        pointWhiteBorder = function() private$..pointWhiteBorder$value,
+        lineWidth = function() private$..lineWidth$value,
+        useRasterization = function() private$..useRasterization$value,
+        rasterDPI = function() private$..rasterDPI$value,
+        setXLimits = function() private$..setXLimits$value,
+        xMin = function() private$..xMin$value,
+        xMax = function() private$..xMax$value,
+        setYLimits = function() private$..setYLimits$value,
+        yMin = function() private$..yMin$value,
+        yMax = function() private$..yMax$value,
+        xAxisTickCount = function() private$..xAxisTickCount$value,
+        yAxisTickCount = function() private$..yAxisTickCount$value,
+        fontFamily = function() private$..fontFamily$value,
+        titleAlignment = function() private$..titleAlignment$value,
+        captionAlignment = function() private$..captionAlignment$value,
+        showMedianLine = function() private$..showMedianLine$value,
+        connectPairedData = function() private$..connectPairedData$value,
+        highlightSubset = function() private$..highlightSubset$value,
+        maxDataPoints = function() private$..maxDataPoints$value,
+        errorBarWidth = function() private$..errorBarWidth$value,
+        violinScale = function() private$..violinScale$value,
+        boxplotOutliers = function() private$..boxplotOutliers$value,
+        boxplotNotch = function() private$..boxplotNotch$value,
+        addSmoother = function() private$..addSmoother$value,
+        smootherMethod = function() private$..smootherMethod$value,
+        smootherSE = function() private$..smootherSE$value,
+        plotWidth = function() private$..plotWidth$value,
+        plotHeight = function() private$..plotHeight$value,
+        useAutoSize = function() private$..useAutoSize$value),
     private = list(
         ..xvar = NA,
         ..yvar = NA,
@@ -625,7 +966,47 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..reverseXAxisLabels = NA,
         ..plotTheme = NA,
         ..removeXAxisLine = NA,
-        ..removeYAxisLine = NA)
+        ..removeYAxisLine = NA,
+        ..showDataLabels = NA,
+        ..dataLabelType = NA,
+        ..legendPosition = NA,
+        ..flipOrientation = NA,
+        ..paddingTop = NA,
+        ..paddingBottom = NA,
+        ..paddingLeft = NA,
+        ..paddingRight = NA,
+        ..colorSaturation = NA,
+        ..dodgeWidth = NA,
+        ..pointSize = NA,
+        ..pointWhiteBorder = NA,
+        ..lineWidth = NA,
+        ..useRasterization = NA,
+        ..rasterDPI = NA,
+        ..setXLimits = NA,
+        ..xMin = NA,
+        ..xMax = NA,
+        ..setYLimits = NA,
+        ..yMin = NA,
+        ..yMax = NA,
+        ..xAxisTickCount = NA,
+        ..yAxisTickCount = NA,
+        ..fontFamily = NA,
+        ..titleAlignment = NA,
+        ..captionAlignment = NA,
+        ..showMedianLine = NA,
+        ..connectPairedData = NA,
+        ..highlightSubset = NA,
+        ..maxDataPoints = NA,
+        ..errorBarWidth = NA,
+        ..violinScale = NA,
+        ..boxplotOutliers = NA,
+        ..boxplotNotch = NA,
+        ..addSmoother = NA,
+        ..smootherMethod = NA,
+        ..smootherSE = NA,
+        ..plotWidth = NA,
+        ..plotHeight = NA,
+        ..useAutoSize = NA)
 )
 
 tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -736,7 +1117,47 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "reverseXAxisLabels",
                     "plotTheme",
                     "removeXAxisLine",
-                    "removeYAxisLine")))}))
+                    "removeYAxisLine",
+                    "showDataLabels",
+                    "dataLabelType",
+                    "legendPosition",
+                    "flipOrientation",
+                    "paddingTop",
+                    "paddingBottom",
+                    "paddingLeft",
+                    "paddingRight",
+                    "colorSaturation",
+                    "dodgeWidth",
+                    "pointSize",
+                    "pointWhiteBorder",
+                    "lineWidth",
+                    "useRasterization",
+                    "rasterDPI",
+                    "setXLimits",
+                    "xMin",
+                    "xMax",
+                    "setYLimits",
+                    "yMin",
+                    "yMax",
+                    "xAxisTickCount",
+                    "yAxisTickCount",
+                    "fontFamily",
+                    "titleAlignment",
+                    "captionAlignment",
+                    "showMedianLine",
+                    "connectPairedData",
+                    "highlightSubset",
+                    "maxDataPoints",
+                    "errorBarWidth",
+                    "violinScale",
+                    "boxplotOutliers",
+                    "boxplotNotch",
+                    "addSmoother",
+                    "smootherMethod",
+                    "smootherSE",
+                    "plotWidth",
+                    "plotHeight",
+                    "useAutoSize")))}))
 
 tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "tidyplotsBase",
@@ -829,6 +1250,46 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotTheme .
 #' @param removeXAxisLine .
 #' @param removeYAxisLine .
+#' @param showDataLabels .
+#' @param dataLabelType .
+#' @param legendPosition .
+#' @param flipOrientation .
+#' @param paddingTop .
+#' @param paddingBottom .
+#' @param paddingLeft .
+#' @param paddingRight .
+#' @param colorSaturation .
+#' @param dodgeWidth .
+#' @param pointSize .
+#' @param pointWhiteBorder .
+#' @param lineWidth .
+#' @param useRasterization .
+#' @param rasterDPI .
+#' @param setXLimits .
+#' @param xMin .
+#' @param xMax .
+#' @param setYLimits .
+#' @param yMin .
+#' @param yMax .
+#' @param xAxisTickCount .
+#' @param yAxisTickCount .
+#' @param fontFamily .
+#' @param titleAlignment .
+#' @param captionAlignment .
+#' @param showMedianLine .
+#' @param connectPairedData .
+#' @param highlightSubset .
+#' @param maxDataPoints .
+#' @param errorBarWidth .
+#' @param violinScale .
+#' @param boxplotOutliers .
+#' @param boxplotNotch .
+#' @param addSmoother .
+#' @param smootherMethod .
+#' @param smootherSE .
+#' @param plotWidth .
+#' @param plotHeight .
+#' @param useAutoSize .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -901,7 +1362,47 @@ tidyplots <- function(
     reverseXAxisLabels = FALSE,
     plotTheme = "default",
     removeXAxisLine = FALSE,
-    removeYAxisLine = FALSE) {
+    removeYAxisLine = FALSE,
+    showDataLabels = FALSE,
+    dataLabelType = "direct",
+    legendPosition = "default",
+    flipOrientation = FALSE,
+    paddingTop = 0.1,
+    paddingBottom = 0.1,
+    paddingLeft = 0.1,
+    paddingRight = 0.1,
+    colorSaturation = 1,
+    dodgeWidth = 0.8,
+    pointSize = 2.5,
+    pointWhiteBorder = FALSE,
+    lineWidth = 1,
+    useRasterization = FALSE,
+    rasterDPI = 300,
+    setXLimits = FALSE,
+    xMin = 0,
+    xMax = 100,
+    setYLimits = FALSE,
+    yMin = 0,
+    yMax = 100,
+    xAxisTickCount = 5,
+    yAxisTickCount = 5,
+    fontFamily = "default",
+    titleAlignment = "left",
+    captionAlignment = "right",
+    showMedianLine = FALSE,
+    connectPairedData = FALSE,
+    highlightSubset = FALSE,
+    maxDataPoints = 10000,
+    errorBarWidth = 0.1,
+    violinScale = "area",
+    boxplotOutliers = TRUE,
+    boxplotNotch = FALSE,
+    addSmoother = FALSE,
+    smootherMethod = "loess",
+    smootherSE = TRUE,
+    plotWidth = 150,
+    plotHeight = 100,
+    useAutoSize = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tidyplots requires jmvcore to be installed (restart may be required)")
@@ -982,7 +1483,47 @@ tidyplots <- function(
         reverseXAxisLabels = reverseXAxisLabels,
         plotTheme = plotTheme,
         removeXAxisLine = removeXAxisLine,
-        removeYAxisLine = removeYAxisLine)
+        removeYAxisLine = removeYAxisLine,
+        showDataLabels = showDataLabels,
+        dataLabelType = dataLabelType,
+        legendPosition = legendPosition,
+        flipOrientation = flipOrientation,
+        paddingTop = paddingTop,
+        paddingBottom = paddingBottom,
+        paddingLeft = paddingLeft,
+        paddingRight = paddingRight,
+        colorSaturation = colorSaturation,
+        dodgeWidth = dodgeWidth,
+        pointSize = pointSize,
+        pointWhiteBorder = pointWhiteBorder,
+        lineWidth = lineWidth,
+        useRasterization = useRasterization,
+        rasterDPI = rasterDPI,
+        setXLimits = setXLimits,
+        xMin = xMin,
+        xMax = xMax,
+        setYLimits = setYLimits,
+        yMin = yMin,
+        yMax = yMax,
+        xAxisTickCount = xAxisTickCount,
+        yAxisTickCount = yAxisTickCount,
+        fontFamily = fontFamily,
+        titleAlignment = titleAlignment,
+        captionAlignment = captionAlignment,
+        showMedianLine = showMedianLine,
+        connectPairedData = connectPairedData,
+        highlightSubset = highlightSubset,
+        maxDataPoints = maxDataPoints,
+        errorBarWidth = errorBarWidth,
+        violinScale = violinScale,
+        boxplotOutliers = boxplotOutliers,
+        boxplotNotch = boxplotNotch,
+        addSmoother = addSmoother,
+        smootherMethod = smootherMethod,
+        smootherSE = smootherSE,
+        plotWidth = plotWidth,
+        plotHeight = plotHeight,
+        useAutoSize = useAutoSize)
 
     analysis <- tidyplotsClass$new(
         options = options,

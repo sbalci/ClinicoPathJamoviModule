@@ -401,9 +401,66 @@ items:
       type: Html
       visible: (showAboutAnalysis)
 
+    # Misclassified Cases Analysis ----
 
+    - name: misclassifiedHeading
+      title: 'Misclassified Cases Analysis'
+      type: Html
+      visible: (showMisclassified)
 
+    - name: confusionMatrixSummary
+      title: 'Confusion Matrix Summary'
+      type: Table
+      visible: (showMisclassified)
+      rows: 0
+      columns:
+        - name: classification
+          title: 'Classification'
+          type: text
+        - name: count
+          title: 'Count'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: pc
 
+    - name: falsePositiveTable
+      title: 'False Positive Cases (Test+ but Disease-)'
+      type: Table
+      visible: (showMisclassified)
+      rows: 0
+      columns:
+        - name: case_id
+          title: 'Row'
+          type: integer
+        - name: gold_value
+          title: 'True Status'
+          type: text
+        - name: test_value
+          title: 'Test Result'
+          type: text
+
+    - name: falseNegativeTable
+      title: 'False Negative Cases (Test- but Disease+)'
+      type: Table
+      visible: (showMisclassified)
+      rows: 0
+      columns:
+        - name: case_id
+          title: 'Row'
+          type: integer
+        - name: gold_value
+          title: 'True Status'
+          type: text
+        - name: test_value
+          title: 'Test Result'
+          type: text
+
+    - name: misclassificationInterpretation
+      title: 'Interpretation of Misclassified Cases'
+      type: Html
+      visible: (showMisclassified)
 
 
 refs:

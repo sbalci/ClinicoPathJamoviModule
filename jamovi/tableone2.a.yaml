@@ -1,7 +1,7 @@
 ---
 name: tableone2
 title: "Table One Draft 2"
-menuGroup: ExplorationD
+menuGroup: ExplorationT
 menuSubgroup: "ClinicoPath Descriptives"
 version: '0.0.3'
 jas: '1.2'
@@ -119,4 +119,14 @@ options:
         Enable group comparison features in pivot table.
       jamovi: >
         Enable group comparison analysis.
+
+  - name: view_tutorial
+    title: "View Tutorial"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Display the embedded Table One tutorial in the output.
+      jamovi: >
+        Show the Table One tutorial in the results panel.
 ...

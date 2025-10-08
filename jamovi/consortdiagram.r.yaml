@@ -1,0 +1,170 @@
+---
+name: consortdiagram
+title: CONSORT Flow Diagram
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Welcome
+      type: Html
+      visible: (!participant_id)
+
+    - name: flowSummary
+      title: Participant Flow Summary
+      type: Table
+      rows: 0
+      columns:
+        - name: stage
+          title: Stage
+          type: text
+        - name: n_remaining
+          title: Remaining (n)
+          type: integer
+        - name: n_excluded
+          title: Excluded (n)
+          type: integer
+        - name: pct_retained
+          title: Retained (%)
+          type: number
+          format: pc
+        - name: exclusion_details
+          title: Exclusion Reasons
+          type: text
+      clearWith:
+        - participant_id
+        - screening_exclusions
+        - enrollment_exclusions
+        - randomization_var
+        - allocation_exclusions
+        - followup_exclusions
+        - analysis_exclusions
+
+    - name: armSummary
+      title: Flow by Treatment Arm
+      type: Table
+      visible: (randomization_var)
+      rows: 0
+      columns:
+        - name: arm
+          title: Treatment Arm
+          type: text
+        - name: allocated
+          title: Allocated (n)
+          type: integer
+        - name: received
+          title: Received Intervention (n)
+          type: integer
+        - name: completed_followup
+          title: Completed Follow-up (n)
+          type: integer
+        - name: analyzed
+          title: Analyzed (n)
+          type: integer
+        - name: retention_rate
+          title: Retention Rate (%)
+          type: number
+          format: pc
+      clearWith:
+        - randomization_var
+        - allocation_exclusions
+        - followup_exclusions
+        - analysis_exclusions
+
+    - name: exclusionBreakdown
+      title: Detailed Exclusion Breakdown
+      type: Table
+      visible: (show_exclusion_details)
+      rows: 0
+      columns:
+        - name: stage
+          title: Stage
+          type: text
+        - name: reason
+          title: Exclusion Reason
+          type: text
+        - name: count
+          title: Count (n)
+          type: integer
+        - name: percentage
+          title: Percentage of Stage (%)
+          type: number
+          format: pc
+      clearWith:
+        - screening_exclusions
+        - enrollment_exclusions
+        - allocation_exclusions
+        - followup_exclusions
+        - analysis_exclusions
+
+    - name: diagram
+      title: CONSORT Flow Diagram
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+        - participant_id
+        - screening_exclusions
+        - enrollment_exclusions
+        - randomization_var
+        - allocation_exclusions
+        - followup_exclusions
+        - analysis_exclusions
+        - show_percentages
+        - show_exclusion_details
+        - diagram_width
+        - diagram_height
+        - text_width
+        - study_title
+        - screening_label
+        - enrollment_label
+        - allocation_label
+        - followup_label
+        - analysis_label
+      refs:
+        - consort
+        - CONSORT
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (include_interpretation)
+
+    - name: consortValidation
+      title: CONSORT 2010 Compliance Checklist
+      type: Html
+      visible: (consort_validation)
+
+    - name: exportInfo
+      title: Export Information
+      type: Html
+
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      visible: (include_interpretation)
+      clearWith:
+        - participant_id
+        - screening_exclusions
+        - enrollment_exclusions
+        - allocation_exclusions
+        - followup_exclusions
+        - analysis_exclusions
+
+    - name: aboutAnalysis
+      title: About CONSORT Diagrams
+      type: Html
+      visible: (include_interpretation)
+
+    - name: caveatsAssumptions
+      title: Caveats & Assumptions
+      type: Html
+      visible: (include_interpretation)
+
+refs:
+    - CONSORT
+    - consort
+    - ClinicoPathJamoviModule
+
+...

@@ -1,0 +1,145 @@
+---
+name: jjpubr
+title: Publication-Ready Plots (ggpubr)
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Welcome
+      type: Html
+      visible: (!xvar)
+
+    - name: plot
+      title: ggpubr Plot
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+        - plotType
+        - xvar
+        - yvar
+        - groupvar
+        - facetvar
+        - addStats
+        - statMethod
+        - pairwiseComparisons
+        - addCorr
+        - corrMethod
+        - addSmoothLine
+        - addMarginal
+        - addDensity
+        - bins
+        - addMean
+        - addMedian
+        - addPoints
+        - pointAlpha
+        - addMeanSD
+        - palette
+        - fillColor
+        - title
+        - xlab
+        - ylab
+        - legendPosition
+        - theme
+      refs:
+        - ggpubr
+        - ggplot2
+
+    - name: statistics
+      title: Statistical Summary
+      type: Table
+      visible: (addStats)
+      rows: 0
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: significance
+          title: Significance
+          type: text
+      clearWith:
+        - plotType
+        - xvar
+        - yvar
+        - groupvar
+        - statMethod
+        - pairwiseComparisons
+
+    - name: correlation
+      title: Correlation Statistics
+      type: Table
+      visible: (plotType:scatter && addCorr)
+      rows: 1
+      columns:
+        - name: method
+          title: Method
+          type: text
+        - name: coefficient
+          title: Correlation
+          type: number
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+      clearWith:
+        - xvar
+        - yvar
+        - corrMethod
+
+    - name: descriptives
+      title: Descriptive Statistics
+      type: Table
+      visible: (plotType:boxplot || plotType:violin || plotType:histogram || plotType:density)
+      rows: 0
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: mean
+          title: Mean
+          type: number
+        - name: sd
+          title: SD
+          type: number
+        - name: median
+          title: Median
+          type: number
+        - name: min
+          title: Min
+          type: number
+        - name: max
+          title: Max
+          type: number
+      clearWith:
+        - xvar
+        - yvar
+        - groupvar
+
+    - name: plotInfo
+      title: Plot Information
+      type: Html
+
+refs:
+    - ggpubr
+    - ggplot2
+    - ClinicoPathJamoviModule
+
+...

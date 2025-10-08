@@ -281,16 +281,6 @@ children:
             name: plotCaption
             format: string
             width: largest
-  - type: CollapseBox
-    label: Plot Size
-    collapsed: true
-    children:
-      - type: Label
-        label: Plot Width
-        children: []
-      - type: Label
-        label: Plot Height
-        children: []
   - type: LayoutBox
     margin: large
     children:
@@ -336,3 +326,250 @@ children:
             enable: (!removeYAxis)
           - type: CheckBox
             name: removeYAxisLine
+  - type: CollapseBox
+    label: Data Labels & Annotations
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showDataLabels
+      - type: Label
+        label: Label Type
+        children:
+          - type: ComboBox
+            name: dataLabelType
+            enable: (showDataLabels)
+  - type: CollapseBox
+    label: Legend & Orientation
+    collapsed: true
+    children:
+      - type: Label
+        label: Legend Position
+        children:
+          - type: ComboBox
+            name: legendPosition
+      - type: CheckBox
+        name: flipOrientation
+  - type: CollapseBox
+    label: Padding & Spacing
+    collapsed: true
+    children:
+      - type: Label
+        label: Top Padding
+        children:
+          - type: TextBox
+            name: paddingTop
+            format: number
+      - type: Label
+        label: Bottom Padding
+        children:
+          - type: TextBox
+            name: paddingBottom
+            format: number
+      - type: Label
+        label: Left Padding
+        children:
+          - type: TextBox
+            name: paddingLeft
+            format: number
+      - type: Label
+        label: Right Padding
+        children:
+          - type: TextBox
+            name: paddingRight
+            format: number
+      - type: Label
+        label: Dodge Width
+        children:
+          - type: TextBox
+            name: dodgeWidth
+            format: number
+  - type: CollapseBox
+    label: Point & Line Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Point Size
+        children:
+          - type: TextBox
+            name: pointSize
+            format: number
+      - type: CheckBox
+        name: pointWhiteBorder
+      - type: Label
+        label: Line Width
+        children:
+          - type: TextBox
+            name: lineWidth
+            format: number
+  - type: CollapseBox
+    label: Color Customization
+    collapsed: true
+    children:
+      - type: Label
+        label: Color Saturation
+        children:
+          - type: TextBox
+            name: colorSaturation
+            format: number
+  - type: CollapseBox
+    label: Advanced Performance
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: useRasterization
+      - type: Label
+        label: Raster DPI
+        children:
+          - type: TextBox
+            name: rasterDPI
+            format: number
+            enable: (useRasterization)
+      - type: Label
+        label: Max Data Points
+        children:
+          - type: TextBox
+            name: maxDataPoints
+            format: number
+  - type: CollapseBox
+    label: Axis Limits & Ticks
+    collapsed: true
+    children:
+      - type: Label
+        label: X Axis
+        children:
+          - type: CheckBox
+            name: setXLimits
+          - type: Label
+            label: X Minimum
+            children:
+              - type: TextBox
+                name: xMin
+                format: number
+                enable: (setXLimits)
+          - type: Label
+            label: X Maximum
+            children:
+              - type: TextBox
+                name: xMax
+                format: number
+                enable: (setXLimits)
+          - type: Label
+            label: X Tick Count
+            children:
+              - type: TextBox
+                name: xAxisTickCount
+                format: number
+      - type: Label
+        label: Y Axis
+        children:
+          - type: CheckBox
+            name: setYLimits
+          - type: Label
+            label: Y Minimum
+            children:
+              - type: TextBox
+                name: yMin
+                format: number
+                enable: (setYLimits)
+          - type: Label
+            label: Y Maximum
+            children:
+              - type: TextBox
+                name: yMax
+                format: number
+                enable: (setYLimits)
+          - type: Label
+            label: Y Tick Count
+            children:
+              - type: TextBox
+                name: yAxisTickCount
+                format: number
+  - type: CollapseBox
+    label: Typography
+    collapsed: true
+    children:
+      - type: Label
+        label: Font Family
+        children:
+          - type: ComboBox
+            name: fontFamily
+      - type: Label
+        label: Title Alignment
+        children:
+          - type: ComboBox
+            name: titleAlignment
+      - type: Label
+        label: Caption Alignment
+        children:
+          - type: ComboBox
+            name: captionAlignment
+  - type: CollapseBox
+    label: Error Bar Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Error Bar Width
+        children:
+          - type: TextBox
+            name: errorBarWidth
+            format: number
+  - type: CollapseBox
+    label: Violin & Boxplot Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Violin Scale
+        children:
+          - type: ComboBox
+            name: violinScale
+            enable: (plotType=="violin")
+      - type: CheckBox
+        name: boxplotOutliers
+        enable: (plotType=="boxplot")
+      - type: CheckBox
+        name: boxplotNotch
+        enable: (plotType=="boxplot")
+  - type: CollapseBox
+    label: Smoothing & Trends
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: addSmoother
+      - type: Label
+        label: Smoother Method
+        children:
+          - type: ComboBox
+            name: smootherMethod
+            enable: (addSmoother)
+      - type: CheckBox
+        name: smootherSE
+        enable: (addSmoother)
+      - type: CheckBox
+        name: showMedianLine
+      - type: CheckBox
+        name: connectPairedData
+  - type: CollapseBox
+    label: Plot Size
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: useAutoSize
+      - type: Label
+        label: Plot Width (mm)
+        children:
+          - type: TextBox
+            name: plotWidth
+            format: number
+            enable: (!useAutoSize)
+      - type: Label
+        label: Plot Height (mm)
+        children:
+          - type: TextBox
+            name: plotHeight
+            format: number
+            enable: (!useAutoSize)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: highlightSubset

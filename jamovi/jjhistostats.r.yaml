@@ -74,6 +74,69 @@ items:
       type: Html
       visible: (showInterpretation)
 
+    - name: ggpubrPlot
+      title: 'Publication-Ready Histogram (ggpubr)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotGGPubr
+      requiresData: true
+      visible: (addGGPubrPlot)
+      clearWith:
+        - dep
+        - ggpubrPalette
+        - ggpubrAddDensity
+        - ggpubrAddMean
+
+    - name: ggpubrPlot2
+      title: '`Publication-Ready Histogram by ${grvar} (ggpubr)`'
+      type: Image
+      width: 1200
+      height: 450
+      renderFun: .plotGGPubr2
+      requiresData: true
+      visible: (addGGPubrPlot && grvar)
+      clearWith:
+        - dep
+        - grvar
+        - ggpubrPalette
+        - ggpubrAddDensity
+        - ggpubrAddMean
+
+    - name: densityPlot
+      title: 'Density Plot (ggpubr)'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotDensity
+      requiresData: true
+      visible: (addDistributionDiagnostics)
+      clearWith:
+        - dep
+        - ggpubrDensityColor
+
+    - name: qqPlot
+      title: 'QQ Plot - Normality Assessment (ggpubr)'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotQQ
+      requiresData: true
+      visible: (addDistributionDiagnostics && ggpubrShowQQ)
+      clearWith:
+        - dep
+
+    - name: ecdfPlot
+      title: 'Empirical CDF (ggpubr)'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotECDF
+      requiresData: true
+      visible: (addDistributionDiagnostics && ggpubrShowECDF)
+      clearWith:
+        - dep
+
     # - name:  e_stats
     #   title: e_stats
     #   type:  Preformatted
@@ -89,6 +152,7 @@ items:
 refs:
     - ggplot2
     - ggstatsplot
+    - ggpubr
     - ClinicoPathJamoviModule
 
 

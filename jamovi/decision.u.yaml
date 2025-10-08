@@ -110,6 +110,34 @@ children:
         name: showAboutAnalysis
         label: "About This Analysis"
 
+  - type: CollapseBox
+    label: "Misclassified Cases Analysis"
+    collapsed: true
+    children:
+      - type: Label
+        label: "Identify and analyze false positive and false negative cases"
+      - type: CheckBox
+        name: showMisclassified
+        label: "Show Misclassified Cases Tables"
+      - type: LayoutBox
+        margin: small
+        children:
+          - type: Label
+            label: "Maximum Cases to Display:"
+            fitToGrid: true
+          - type: TextBox
+            name: maxCasesShow
+            format: number
+            enable: (showMisclassified)
+      - type: LayoutBox
+        margin: small
+        children:
+          - type: Label
+            label: "Save classification groups (TP/FP/FN/TN) to dataset:"
+            fitToGrid: true
+          - type: Output
+            name: saveClassifications
+
 
   # About This Analysis Panel
   # - type: CollapseBox

@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.85
+version: 0.0.31.86
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-10-04'
+date: '2025-10-06'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -622,7 +622,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -941,6 +941,22 @@ analyses:
       each subgroup.
     ribbon: analyses
     category: analyses
+  - title: Survival Feature Ranking
+    name: survivalfeaturerank
+    ns: ClinicoPath
+    menuGroup: SurvivalT
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Survival Feature Ranking
+    menuSubtitle: Univariate Cox Screening, Biomarker Discovery
+    description: >-
+      Performs univariate survival analysis for multiple features to identify
+      potential prognostic factors. This analysis runs a separate Cox
+      proportional hazards model for each selected feature and ranks them by
+      statistical significance, hazard ratio, or concordance index. Useful for
+      biomarker screening, exploratory analysis, and feature selection before
+      building multivariable models.
+    ribbon: analyses
+    category: analyses
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
@@ -1232,7 +1248,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1501,7 +1517,7 @@ analyses:
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Histogram
     description: |
@@ -1521,6 +1537,41 @@ analyses:
       Wrapper Function for ggstatsplot::ggscatterstats and
       ggstatsplot::grouped_ggscatterstats to generate scatter plots
       with correlation analysis and optional marginal distributions.
+  - title: Syndromic Plot (PCA Loadings)
+    name: jjsyndromicplot
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotT2
+    menuSubgroup: Multivariate Analysis
+    menuTitle: Syndromic Plot (PCA Loadings)
+    menuSubtitle: PCA Loading Visualization
+    ribbon: analyses
+    category: analyses
+    description: >-
+      Syndromic plots visualize Principal Component Analysis (PCA) loadings
+      using
+
+      a unique triangular design with directional arrows. This visualization
+      method
+
+      was developed by Ferguson et al. (2013) for interpreting complex disease
+      patterns.
+  - title: PCA Loading Heatmap & Barmap
+    name: pcaloadingheatmap
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotT2
+    menuSubgroup: Multivariate Analysis
+    menuTitle: PCA Loading Heatmap & Barmap
+    menuSubtitle: Heatmap and Barmap Visualizations
+    ribbon: analyses
+    category: analyses
+    description: >-
+      Creates heatmap and barmap visualizations of PCA loadings for easy
+      interpretation
+
+      of component structure. Heatmaps show all loadings as a color-coded
+      matrix, while
+
+      barmaps display loading patterns as bar charts across components.
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
@@ -1549,7 +1600,7 @@ analyses:
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples
@@ -1771,7 +1822,7 @@ analyses:
   - title: Comprehensive Tidy Plots
     name: tidyplots
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuTitle: Comprehensive Tidy Plots
     ribbon: analyses
     category: analyses
@@ -2087,7 +2138,7 @@ analyses:
     name: tableone2
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One Draft 2
     description: >
@@ -2145,6 +2196,48 @@ analyses:
       Optionally, you can enable distribution diagnostics to examine normality,
       skewness, and kurtosis.
     menuSubtitle: Advanced Continuous Variables
+  - title: Patient Similarity Clustering
+    name: patientsimilarity
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Patient Similarity Clustering
+    menuSubtitle: t-SNE, UMAP, PCA - Discover Patient Subgroups
+    description: >-
+      Visualizes patient similarity using dimensionality reduction techniques
+      (PCA, t-SNE, UMAP, MDS). Projects high-dimensional patient data into 2D or
+      3D space to reveal natural patient groupings and subpopulations. Inspired
+      by Orange Data Mining's interactive projection widgets, adapted for jamovi
+      with comprehensive cluster analysis and statistical validation.
+  - title: Multi-Model Performance Comparison
+    name: modelperformance
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Multi-Model Performance Comparison
+    menuSubtitle: Compare Multiple Models Side-by-Side
+    description: >-
+      Compare performance of multiple statistical models side-by-side. Supports
+      Cox proportional hazards, logistic regression, and linear regression
+      models. Provides unified comparison tables with AIC, BIC, R², C-index, and
+      other metrics. Inspired by Orange Data Mining's Test & Score widget,
+      adapted for clinical research with comprehensive model diagnostics.
+  - title: Variable Importance Biplot
+    name: variablebiplot
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Variable Selection
+    menuTitle: Variable Importance Biplot
+    menuSubtitle: Visualize Variable Contributions to Group Separation
+    description: >-
+      Create biplots showing variable contributions to group separation using
+      PCA, PLS-DA, or LDA. Displays patients as points and variables as vectors,
+      with vector length indicating contribution strength. Inspired by Orange
+      Data Mining's contribution analysis, adapted for clinical research with
+      comprehensive variable importance metrics.
   - title: Simon-Makuch Time-Dependent Survival Analysis
     name: simonmakuch
     ns: ClinicoPath
@@ -3566,6 +3659,21 @@ analyses:
     menuTitle: Likelihood Ratio Analysis
     menuSubtitle: Likelihood ratios and diagnostic test evaluation
     description: Comprehensive likelihood ratio analysis for diagnostic test evaluation.
+  - title: Precision-Recall Curve
+    name: precisionrecall
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Diagnostic Test Evaluation
+    menuTitle: Precision-Recall Curve
+    menuSubtitle: PRC curves for imbalanced datasets
+    description: >-
+      Precision-Recall (PRC) curve analysis for evaluating binary classifiers,
+
+      especially on imbalanced datasets. Unlike ROC curves, PRC curves show
+
+      how precision (positive predictive value) varies with recall
+      (sensitivity).
   - title: IHC Clustering Analysis
     name: ihccluster
     ns: ClinicoPath
@@ -4081,7 +4189,7 @@ analyses:
     name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Design and Power Analysis
     menuTitle: Power Analysis
     menuSubtitle: Power analysis
@@ -4457,11 +4565,45 @@ analyses:
       multiple rotation methods, and factor score extraction. Essential for
       dimensionality reduction, scale development, and multivariate analysis
       in clinical and pathological research.
+  - title: PCA Component Significance Test
+    name: pcacomponenttest
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationT2
+    menuSubgroup: Multivariate Analysis
+    menuTitle: PCA Component Significance Test
+    menuSubtitle: Permutation-based component selection
+    description: >-
+      Performs permutation-based significance testing to determine which
+      principal
+
+      components explain more variance than expected by random chance. This
+      provides
+
+      an objective, hypothesis-tested approach to component retention.
+  - title: PCA Loading Significance Test
+    name: pcaloadingtest
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationT2
+    menuSubgroup: Multivariate Analysis
+    menuTitle: PCA Loading Significance Test
+    menuSubtitle: Permutation-based loading thresholds
+    description: >-
+      Performs permutation-based significance testing for PCA loadings using the
+
+      permV method (Linting et al., 2011). This approach permutes one variable
+      at
+
+      a time, providing variable-specific and component-specific significance
+      thresholds
+
+      with higher statistical power and proper Type I error control.
   - title: Clinical ROC Analysis
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -4673,7 +4815,7 @@ analyses:
     name: studydiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathD
+    menuGroup: OncoPathT
     menuSubgroup: Study Design
     menuTitle: Study Diagram
     description: >-
@@ -4915,6 +5057,49 @@ analyses:
       combinations including histograms, scatter plots, box plots, violin plots,
       bar charts, line plots, and more. Perfect for quick data visualization
       with intelligent defaults.
+  - title: CONSORT Flow Diagram
+    name: consortdiagram
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Study Design
+    menuTitle: CONSORT Diagram
+    menuSubtitle: Clinical Trial Flow
+    description: >
+      Creates CONSORT 2010 compliant flow diagrams for clinical trials using the
+      consort R package.
+
+      Automatically calculates participant numbers from patient-level data with
+      exclusion columns.
+
+      Follows the approach described by Riinu Ots
+      (https://www.riinu.me/2024/02/consort/).
+  - title: Precision-Recall Curve
+    name: precisionrecall
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecide
+    menuSubgroup: Diagnostic Test Evaluation
+    menuTitle: Precision-Recall Curve
+    description: >-
+      Precision-Recall (PRC) curve analysis for evaluating binary classifiers,
+
+      especially on imbalanced datasets. Unlike ROC curves, PRC curves show
+
+      how precision (positive predictive value) varies with recall
+      (sensitivity).
+  - title: Publication-Ready Plots (ggpubr)
+    name: jjpubr
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: JJStatsPlotT
+    menuSubgroup: All-In-One
+    menuTitle: ggpubr Plots
+    menuSubtitle: Publication-ready visualizations
+    description: |-
+      Create publication-ready plots using the ggpubr package.
+      Provides easy-to-use functions for creating customized plots with
+      statistical annotations for scientific publications.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

@@ -1,0 +1,213 @@
+---
+name:  survivalfeaturerank
+title: Survival Feature Ranking
+jrs:   '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: (features)
+      refs:
+        - ClinicoPathJamoviModule
+
+    - name: summaryText
+      title: Summary
+      type: Preformatted
+      visible: (showSummary)
+
+    - name: rankingTable
+      title: Feature Ranking Results
+      type: Table
+      clearWith:
+        - survtime
+        - event
+        - eventLevel
+        - features
+        - rankBy
+        - adjustPValues
+        - adjustMethod
+      columns:
+        - name: rank
+          title: 'Rank'
+          type: integer
+          visible: true
+        - name: feature
+          title: 'Feature'
+          type: text
+        - name: type
+          title: 'Type'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: events
+          title: 'Events'
+          type: integer
+        - name: hr
+          title: 'HR'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+          visible: (showCI)
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+          visible: (showCI)
+        - name: ci_text
+          title: '95% CI'
+          type: text
+          visible: (showCI)
+        - name: pvalue
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: adj_pvalue
+          title: 'Adjusted p'
+          type: number
+          format: zto,pvalue
+          visible: (adjustPValues)
+        - name: cindex
+          title: 'C-index'
+          type: number
+          format: zto
+        - name: cindex_se
+          title: 'C-index SE'
+          type: number
+          format: zto
+          visible: false
+        - name: significant
+          title: 'Sig.'
+          type: text
+
+    - name: forestPlot
+      title: Forest Plot of All Features
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .forestPlot
+      visible: (showForestPlot)
+      requiresData: true
+      clearWith:
+        - features
+        - rankBy
+        - forestStyle
+
+    - name: topFeaturesHeading
+      title: Top Ranked Features - Kaplan-Meier Curves
+      type: Html
+      visible: (showTopKM)
+
+    - name: kmPlot1
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot1
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot2
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot2
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot3
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot3
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot4
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot4
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot5
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot5
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot6
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot6
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot7
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot7
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot8
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot8
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot9
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot9
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: kmPlot10
+      title: ''
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .kmPlot10
+      visible: (showTopKM)
+      requiresData: true
+
+    - name: exportRanking
+      title: Feature Rankings
+      type: Output
+      varTitle: '`Feature_Rank`'
+      varDescription: Exported feature ranking results
+      clearWith:
+        - features
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: true
+      refs:
+        - ClinicoPathJamoviModule
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

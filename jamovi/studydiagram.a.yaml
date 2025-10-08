@@ -1,7 +1,7 @@
 ---
 name: studydiagram
 title: Study Diagram
-menuGroup: OncoPathD
+menuGroup: OncoPathT
 menuSubgroup: Study Design
 version: '1.0.0'
 jas: '1.2'
@@ -118,15 +118,6 @@ options:
       description:
           R: Variable containing all exclusion reasons (for exclusion mapping format)
 
-    # Treatment/Group Variables (all formats)
-    - name: treatment_group
-      title: Treatment Group Variable
-      type: Variable
-      suggested: [ nominal ]
-      permitted: [ factor ]
-      description:
-          R: Variable indicating treatment arm or group assignment (optional)
-
     # Step Level Selectors for Format 3
     - name: step1_exclusions
       title: Step 1 Exclusions
@@ -203,14 +194,14 @@ options:
     - name: show_percentages
       title: Show Percentages
       type: Bool
-      default: true
+      default: false
       description:
           R: Show percentage of initial participants retained at each step
 
     - name: show_exclusion_boxes
       title: Show Exclusion Boxes
       type: Bool
-      default: true
+      default: false
       description:
           R: Show side boxes with exclusion counts and reasons
 
@@ -243,6 +234,6 @@ options:
     - name: show_interpretation
       title: Show Interpretation
       type: Bool
-      default: true
+      default: false
       description:
           R: Show explanatory text about the generated diagram

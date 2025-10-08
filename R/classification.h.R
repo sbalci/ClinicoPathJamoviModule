@@ -39,7 +39,8 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             validateMethod = "holdout",
             bootstrapSamples = 1000,
             reportClinicalMetrics = TRUE,
-            reportConfidenceIntervals = TRUE, ...) {
+            reportConfidenceIntervals = TRUE,
+            reportMCC = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -232,6 +233,10 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "reportConfidenceIntervals",
                 reportConfidenceIntervals,
                 default=TRUE)
+            private$..reportMCC <- jmvcore::OptionBool$new(
+                "reportMCC",
+                reportMCC,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..indep)
@@ -266,6 +271,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..bootstrapSamples)
             self$.addOption(private$..reportClinicalMetrics)
             self$.addOption(private$..reportConfidenceIntervals)
+            self$.addOption(private$..reportMCC)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -300,7 +306,8 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         validateMethod = function() private$..validateMethod$value,
         bootstrapSamples = function() private$..bootstrapSamples$value,
         reportClinicalMetrics = function() private$..reportClinicalMetrics$value,
-        reportConfidenceIntervals = function() private$..reportConfidenceIntervals$value),
+        reportConfidenceIntervals = function() private$..reportConfidenceIntervals$value,
+        reportMCC = function() private$..reportMCC$value),
     private = list(
         ..dep = NA,
         ..indep = NA,
@@ -334,7 +341,8 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..validateMethod = NA,
         ..bootstrapSamples = NA,
         ..reportClinicalMetrics = NA,
-        ..reportConfidenceIntervals = NA)
+        ..reportConfidenceIntervals = NA,
+        ..reportMCC = NA)
 )
 
 classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -389,6 +397,7 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 active = list(
                     general = function() private$.items[["general"]],
                     clinicalMetrics = function() private$.items[["clinicalMetrics"]],
+                    mccTable = function() private$.items[["mccTable"]],
                     class = function() private$.items[["class"]]),
                 private = list(),
                 public=list(
@@ -440,6 +449,37 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                     `type`="number", 
                                     `format`="zto", 
                                     `visible`="(reportConfidenceIntervals)"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="mccTable",
+                            title="Matthews Correlation Coefficient",
+                            visible="(reportMCC)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="mcc", 
+                                    `title`="MCC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(reportConfidenceIntervals)"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(reportConfidenceIntervals)"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            refs=list(
+                                "Matthews1975",
+                                "Saito2015")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="class",
@@ -589,12 +629,17 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   likelihood ratios.
 #' @param reportConfidenceIntervals Include 95\% confidence intervals for
 #'   clinical metrics.
+#' @param reportMCC Calculate Matthews Correlation Coefficient (MCC), a
+#'   balanced metric for imbalanced datasets. MCC ranges from -1 (perfect
+#'   disagreement) to +1 (perfect agreement), with 0 indicating random
+#'   prediction.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$modelSettings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$confusion$matrix} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$classificationMetrics$general} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$classificationMetrics$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$classificationMetrics$mccTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$classificationMetrics$class} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rocCurvePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$decisionTreeModel} \tab \tab \tab \tab \tab an image \cr
@@ -639,7 +684,8 @@ classification <- function(
     validateMethod = "holdout",
     bootstrapSamples = 1000,
     reportClinicalMetrics = TRUE,
-    reportConfidenceIntervals = TRUE) {
+    reportConfidenceIntervals = TRUE,
+    reportMCC = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("classification requires jmvcore to be installed (restart may be required)")
@@ -687,7 +733,8 @@ classification <- function(
         validateMethod = validateMethod,
         bootstrapSamples = bootstrapSamples,
         reportClinicalMetrics = reportClinicalMetrics,
-        reportConfidenceIntervals = reportConfidenceIntervals)
+        reportConfidenceIntervals = reportConfidenceIntervals,
+        reportMCC = reportMCC)
 
     analysis <- classificationClass$new(
         options = options,

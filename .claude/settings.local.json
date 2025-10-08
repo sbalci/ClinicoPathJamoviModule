@@ -104,7 +104,11 @@
       "WebFetch(domain:chstock.github.io)",
       "WebFetch(domain:stemangiola.github.io)",
       "WebFetch(domain:lubridate.tidyverse.org)",
-      "WebFetch(domain:dreamrs.github.io)"
+      "WebFetch(domain:dreamrs.github.io)",
+      "WebFetch(domain:orangedatamining.com)",
+      "WebFetch(domain:orange.biolab.si)",
+      "WebFetch(domain:rpkgs.datanovia.com)",
+      "Bash(paste - - -)"
     ],
     "deny": [],
     "ask": [],

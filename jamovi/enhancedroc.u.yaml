@@ -156,6 +156,26 @@ children:
                     name: comparisonMethod
                     enable: (pairwiseComparisons)
   - type: CollapseBox
+    label: Class Imbalance Detection
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: detectImbalance
+          - type: TextBox
+            name: imbalanceThreshold
+            format: number
+            enable: (detectImbalance)
+          - type: CheckBox
+            name: showImbalanceWarning
+            enable: (detectImbalance)
+          - type: CheckBox
+            name: recommendPRC
+            enable: (detectImbalance)
+  - type: CollapseBox
     label: Clinical Context
     collapsed: true
     stretchFactor: 1
@@ -192,6 +212,16 @@ children:
                     name: partialRange
                     format: string
                     enable: (partialAuc)
+                  - type: CheckBox
+                    name: crocAnalysis
+                  - type: TextBox
+                    name: crocAlpha
+                    format: number
+                    enable: (crocAnalysis)
+                  - type: CheckBox
+                    name: convexHull
+                  - type: ComboBox
+                    name: tiedScoreHandling
   - type: CollapseBox
     label: Advanced Output
     collapsed: true

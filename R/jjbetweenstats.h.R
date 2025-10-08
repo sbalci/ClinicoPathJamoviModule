@@ -27,7 +27,12 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             varequal = FALSE,
             plotwidth = 650,
             plotheight = 450,
-            colorblindSafe = FALSE, ...) {
+            colorblindSafe = FALSE,
+            addGGPubrPlot = FALSE,
+            ggpubrPlotType = "boxplot",
+            ggpubrPalette = "jco",
+            ggpubrAddStats = TRUE,
+            ggpubrAddPoints = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -171,6 +176,39 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "colorblindSafe",
                 colorblindSafe,
                 default=FALSE)
+            private$..addGGPubrPlot <- jmvcore::OptionBool$new(
+                "addGGPubrPlot",
+                addGGPubrPlot,
+                default=FALSE)
+            private$..ggpubrPlotType <- jmvcore::OptionList$new(
+                "ggpubrPlotType",
+                ggpubrPlotType,
+                options=list(
+                    "boxplot",
+                    "violin",
+                    "boxviolin"),
+                default="boxplot")
+            private$..ggpubrPalette <- jmvcore::OptionList$new(
+                "ggpubrPalette",
+                ggpubrPalette,
+                options=list(
+                    "jco",
+                    "npg",
+                    "aaas",
+                    "lancet",
+                    "jama",
+                    "nejm",
+                    "grey",
+                    "default"),
+                default="jco")
+            private$..ggpubrAddStats <- jmvcore::OptionBool$new(
+                "ggpubrAddStats",
+                ggpubrAddStats,
+                default=TRUE)
+            private$..ggpubrAddPoints <- jmvcore::OptionBool$new(
+                "ggpubrAddPoints",
+                ggpubrAddPoints,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -194,6 +232,11 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
             self$.addOption(private$..colorblindSafe)
+            self$.addOption(private$..addGGPubrPlot)
+            self$.addOption(private$..ggpubrPlotType)
+            self$.addOption(private$..ggpubrPalette)
+            self$.addOption(private$..ggpubrAddStats)
+            self$.addOption(private$..ggpubrAddPoints)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -217,7 +260,12 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         varequal = function() private$..varequal$value,
         plotwidth = function() private$..plotwidth$value,
         plotheight = function() private$..plotheight$value,
-        colorblindSafe = function() private$..colorblindSafe$value),
+        colorblindSafe = function() private$..colorblindSafe$value,
+        addGGPubrPlot = function() private$..addGGPubrPlot$value,
+        ggpubrPlotType = function() private$..ggpubrPlotType$value,
+        ggpubrPalette = function() private$..ggpubrPalette$value,
+        ggpubrAddStats = function() private$..ggpubrAddStats$value,
+        ggpubrAddPoints = function() private$..ggpubrAddPoints$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -240,7 +288,12 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..varequal = NA,
         ..plotwidth = NA,
         ..plotheight = NA,
-        ..colorblindSafe = NA)
+        ..colorblindSafe = NA,
+        ..addGGPubrPlot = NA,
+        ..ggpubrPlotType = NA,
+        ..ggpubrPalette = NA,
+        ..ggpubrAddStats = NA,
+        ..ggpubrAddPoints = NA)
 )
 
 jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -249,7 +302,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     active = list(
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        ggpubrPlot = function() private$.items[["ggpubrPlot"]],
+        ggpubrPlot2 = function() private$.items[["ggpubrPlot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -260,6 +315,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
+                    "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
@@ -300,7 +356,38 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="plot",
                 title="Violin Plot",
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="ggpubrPlot",
+                title="Publication-Ready Plot (ggpubr)",
+                width=650,
+                height=450,
+                renderFun=".plotGGPubr",
+                requiresData=TRUE,
+                visible="(addGGPubrPlot)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "ggpubrPlotType",
+                    "ggpubrPalette",
+                    "ggpubrAddStats",
+                    "ggpubrAddPoints")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="ggpubrPlot2",
+                title="`Publication-Ready Plot by ${grvar} (ggpubr)`",
+                renderFun=".plotGGPubr2",
+                requiresData=TRUE,
+                visible="(addGGPubrPlot && grvar)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "ggpubrPlotType",
+                    "ggpubrPalette",
+                    "ggpubrAddStats",
+                    "ggpubrAddPoints")))}))
 
 jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjbetweenstatsBase",
@@ -403,11 +490,20 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param plotheight Height of the plot in pixels. Default is 450.
 #' @param colorblindSafe Whether to use colorblind-safe color palette for plot
 #'   elements.
+#' @param addGGPubrPlot Add publication-ready plot using ggpubr package. This
+#'   provides an alternative visualization with publication-quality aesthetics.
+#' @param ggpubrPlotType Type of ggpubr plot to display when addGGPubrPlot is
+#'   enabled.
+#' @param ggpubrPalette Color palette for ggpubr plot.
+#' @param ggpubrAddStats Add statistical comparison p-values to ggpubr plot.
+#' @param ggpubrAddPoints Overlay individual data points on ggpubr plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$ggpubrPlot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -434,7 +530,12 @@ jjbetweenstats <- function(
     varequal = FALSE,
     plotwidth = 650,
     plotheight = 450,
-    colorblindSafe = FALSE) {
+    colorblindSafe = FALSE,
+    addGGPubrPlot = FALSE,
+    ggpubrPlotType = "boxplot",
+    ggpubrPalette = "jco",
+    ggpubrAddStats = TRUE,
+    ggpubrAddPoints = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbetweenstats requires jmvcore to be installed (restart may be required)")
@@ -474,7 +575,12 @@ jjbetweenstats <- function(
         varequal = varequal,
         plotwidth = plotwidth,
         plotheight = plotheight,
-        colorblindSafe = colorblindSafe)
+        colorblindSafe = colorblindSafe,
+        addGGPubrPlot = addGGPubrPlot,
+        ggpubrPlotType = ggpubrPlotType,
+        ggpubrPalette = ggpubrPalette,
+        ggpubrAddStats = ggpubrAddStats,
+        ggpubrAddPoints = ggpubrAddPoints)
 
     analysis <- jjbetweenstatsClass$new(
         options = options,

@@ -1,0 +1,601 @@
+"participant_id","site","age","sex","screening_failure","enrollment_issue","arm","not_received","followup_loss_reason","analysis_issue"
+"MC-00001","Site C",57,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00002","Site B",75,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00003","Site C",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00004","Site B",65,"Female",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00005","Site D",70,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00006","Site A",49,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00007","Site A",79,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00008","Site C",59,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00009","Site A",67,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00010","Site D",75,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00011","Site B",72,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00012","Site D",74,"Female",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00013","Site A",71,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00014","Site D",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00015","Site D",43,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00016","Site C",67,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00017","Site A",66,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00018","Site C",65,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00019","Site B",63,"Female",NA,NA,"Experimental",NA,"Lost to follow-up",NA
+"MC-00020","Site B",68,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00021","Site C",80,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00022","Site B",65,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00023","Site C",58,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00024","Site D",55,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00025","Site B",50,"Female",NA,NA,"Experimental","Intervention not available",NA,NA
+"MC-00026","Site D",50,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00027","Site A",65,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00028","Site B",64,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00029","Site D",48,"Male",NA,NA,"Experimental",NA,"Lost to follow-up",NA
+"MC-00030","Site C",77,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00031","Site C",68,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00032","Site A",65,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00033","Site A",58,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00034","Site C",76,"Female",NA,NA,"Experimental","Patient deteriorated",NA,NA
+"MC-00035","Site A",75,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00036","Site A",73,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00037","Site A",79,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00038","Site A",72,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00039","Site A",48,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00040","Site D",75,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00041","Site D",62,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00042","Site B",52,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00043","Site A",79,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00044","Site A",49,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00045","Site B",66,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00046","Site A",58,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00047","Site A",82,"Male",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00048","Site A",60,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00049","Site D",77,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00050","Site D",62,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00051","Site B",53,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00052","Site C",73,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00053","Site A",70,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00054","Site A",67,"Male",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00055","Site C",68,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00056","Site B",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00057","Site A",57,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00058","Site B",56,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00059","Site C",74,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00060","Site D",74,"Male",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00061","Site B",65,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00062","Site C",64,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00063","Site D",72,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00064","Site C",79,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00065","Site D",52,"Female",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00066","Site D",60,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00067","Site A",58,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00068","Site A",67,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00069","Site D",69,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00070","Site B",58,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00071","Site C",84,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00072","Site B",60,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00073","Site C",72,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00074","Site D",86,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00075","Site D",63,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00076","Site D",35,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00077","Site A",52,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00078","Site C",68,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00079","Site A",79,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00080","Site A",56,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00081","Site D",54,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00082","Site A",79,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00083","Site D",42,"Male",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00084","Site D",51,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00085","Site B",70,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00086","Site A",77,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00087","Site B",70,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00088","Site D",63,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00089","Site A",71,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00090","Site B",62,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00091","Site C",69,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00092","Site C",80,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00093","Site B",51,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00094","Site A",65,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00095","Site B",76,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00096","Site A",69,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00097","Site B",91,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00098","Site A",46,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00099","Site C",76,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00100","Site C",34,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00101","Site B",73,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00102","Site B",57,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00103","Site A",65,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00104","Site C",50,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00105","Site B",62,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00106","Site B",52,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00107","Site C",72,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00108","Site B",71,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00109","Site D",58,"Male",NA,"Refused consent",NA,NA,NA,NA
+"MC-00110","Site B",57,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00111","Site B",76,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00112","Site C",67,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00113","Site B",53,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00114","Site D",66,"Male",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00115","Site D",72,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00116","Site A",79,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00117","Site C",64,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00118","Site A",63,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00119","Site A",68,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00120","Site B",34,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00121","Site D",77,"Male",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00122","Site C",70,"Male",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00123","Site B",70,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00124","Site B",78,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00125","Site C",80,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00126","Site D",64,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00127","Site D",55,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00128","Site C",71,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00129","Site B",59,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00130","Site A",89,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00131","Site B",60,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00132","Site B",66,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00133","Site A",72,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00134","Site A",44,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00135","Site A",65,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00136","Site D",57,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00137","Site C",76,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00138","Site C",68,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00139","Site C",68,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00140","Site C",72,"Male",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00141","Site A",66,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00142","Site D",57,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00143","Site B",101,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00144","Site B",61,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00145","Site B",62,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00146","Site A",79,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00147","Site D",51,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00148","Site C",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00149","Site A",83,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00150","Site A",89,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00151","Site D",69,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00152","Site B",72,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00153","Site C",55,"Male",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00154","Site A",55,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00155","Site A",80,"Male",NA,NA,"Control",NA,NA,"Missing primary endpoint"
+"MC-00156","Site A",56,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00157","Site B",58,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00158","Site D",75,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00159","Site C",60,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00160","Site A",69,"Male",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00161","Site B",68,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00162","Site A",85,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00163","Site D",60,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00164","Site A",64,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00165","Site C",73,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00166","Site D",71,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00167","Site D",69,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00168","Site A",74,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00169","Site D",66,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00170","Site D",43,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00171","Site B",66,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00172","Site A",78,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00173","Site D",59,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00174","Site D",59,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00175","Site D",56,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00176","Site D",70,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00177","Site C",45,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00178","Site B",69,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00179","Site A",78,"Male",NA,NA,"Control",NA,"Site closure",NA
+"MC-00180","Site D",47,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00181","Site B",66,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00182","Site D",57,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00183","Site B",65,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00184","Site D",68,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00185","Site D",52,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00186","Site C",77,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00187","Site D",72,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00188","Site D",57,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00189","Site B",75,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00190","Site D",43,"Male",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00191","Site D",49,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00192","Site B",57,"Female",NA,NA,"Experimental","Patient deteriorated",NA,NA
+"MC-00193","Site B",78,"Male",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00194","Site A",62,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00195","Site A",64,"Male",NA,NA,"Control","Intervention not available",NA,NA
+"MC-00196","Site D",63,"Male",NA,"Refused consent",NA,NA,NA,NA
+"MC-00197","Site C",54,"Female",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00198","Site A",71,"Male",NA,NA,"Control",NA,NA,"Missing primary endpoint"
+"MC-00199","Site A",63,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00200","Site D",43,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00201","Site D",81,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00202","Site B",77,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00203","Site A",74,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00204","Site A",59,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00205","Site D",62,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00206","Site A",56,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00207","Site B",61,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00208","Site A",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00209","Site C",56,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00210","Site B",50,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00211","Site A",70,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00212","Site B",67,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00213","Site A",68,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00214","Site D",80,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00215","Site B",49,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00216","Site D",72,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00217","Site B",73,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00218","Site D",78,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00219","Site A",49,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00220","Site C",60,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00221","Site D",53,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00222","Site D",60,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00223","Site D",73,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00224","Site C",71,"Female",NA,NA,"Control",NA,NA,"Missing primary endpoint"
+"MC-00225","Site D",50,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00226","Site D",59,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00227","Site A",47,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00228","Site C",63,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00229","Site A",69,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00230","Site C",74,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00231","Site C",80,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00232","Site D",63,"Female",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00233","Site B",57,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00234","Site D",64,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00235","Site C",86,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00236","Site B",60,"Male",NA,NA,"Experimental",NA,NA,"Missing primary endpoint"
+"MC-00237","Site C",76,"Female",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00238","Site D",70,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00239","Site B",59,"Female",NA,NA,"Experimental",NA,"Lost to follow-up",NA
+"MC-00240","Site A",80,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00241","Site B",63,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00242","Site A",74,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00243","Site A",60,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00244","Site C",46,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00245","Site A",59,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00246","Site A",60,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00247","Site B",68,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00248","Site A",76,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00249","Site C",59,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00250","Site B",60,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00251","Site B",64,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00252","Site B",67,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00253","Site C",69,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00254","Site D",77,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00255","Site C",56,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00256","Site D",62,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00257","Site A",67,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00258","Site D",86,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00259","Site C",69,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00260","Site A",50,"Female",NA,NA,"Experimental","Intervention not available",NA,NA
+"MC-00261","Site B",61,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00262","Site A",66,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00263","Site A",60,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00264","Site D",70,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00265","Site B",55,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00266","Site D",73,"Male",NA,NA,"Experimental",NA,NA,"Missing primary endpoint"
+"MC-00267","Site B",64,"Female",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00268","Site D",59,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00269","Site B",58,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00270","Site A",65,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00271","Site B",75,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00272","Site B",73,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00273","Site D",64,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00274","Site A",74,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00275","Site A",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00276","Site C",49,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00277","Site B",82,"Male",NA,NA,"Control",NA,"Site closure",NA
+"MC-00278","Site D",77,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00279","Site C",80,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00280","Site D",61,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00281","Site C",41,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00282","Site C",60,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00283","Site A",89,"Female",NA,NA,"Experimental",NA,"Lost to follow-up",NA
+"MC-00284","Site B",57,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00285","Site C",65,"Female",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00286","Site C",70,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00287","Site B",49,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00288","Site C",83,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00289","Site A",66,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00290","Site B",53,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00291","Site A",75,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00292","Site D",70,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00293","Site A",74,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00294","Site D",52,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00295","Site D",47,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00296","Site A",52,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00297","Site A",78,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00298","Site A",77,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00299","Site C",56,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00300","Site C",37,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00301","Site A",81,"Male",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00302","Site B",52,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00303","Site C",63,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00304","Site C",70,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00305","Site A",65,"Female",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00306","Site A",58,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00307","Site A",57,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00308","Site C",58,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00309","Site A",53,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00310","Site A",72,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00311","Site B",72,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00312","Site C",59,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00313","Site B",61,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00314","Site C",66,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00315","Site B",70,"Female",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00316","Site A",61,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00317","Site C",57,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00318","Site A",69,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00319","Site C",66,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00320","Site A",67,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00321","Site A",65,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00322","Site B",54,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00323","Site D",60,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00324","Site A",81,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00325","Site C",47,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00326","Site D",63,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00327","Site C",68,"Female",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00328","Site D",41,"Male",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00329","Site D",79,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00330","Site C",60,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00331","Site A",59,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00332","Site D",83,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00333","Site C",70,"Male",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00334","Site B",67,"Female",NA,"Refused consent",NA,NA,NA,NA
+"MC-00335","Site A",72,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00336","Site D",64,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00337","Site C",57,"Female",NA,NA,"Control",NA,"Site closure",NA
+"MC-00338","Site D",48,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00339","Site B",49,"Female",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00340","Site A",70,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00341","Site B",65,"Male",NA,"Refused consent",NA,NA,NA,NA
+"MC-00342","Site A",74,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00343","Site D",80,"Female",NA,"Refused consent",NA,NA,NA,NA
+"MC-00344","Site D",65,"Female",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00345","Site D",67,"Male",NA,"Refused consent",NA,NA,NA,NA
+"MC-00346","Site B",49,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00347","Site B",50,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00348","Site A",55,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00349","Site D",65,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00350","Site B",64,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00351","Site C",54,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00352","Site D",70,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00353","Site A",69,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00354","Site C",73,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00355","Site B",55,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00356","Site D",70,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00357","Site A",71,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00358","Site B",70,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00359","Site A",65,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00360","Site D",64,"Female",NA,NA,"Control","Intervention not available",NA,NA
+"MC-00361","Site D",59,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00362","Site C",62,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00363","Site B",66,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00364","Site D",60,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00365","Site B",63,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00366","Site C",69,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00367","Site D",71,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00368","Site C",71,"Female",NA,NA,"Experimental","Patient deteriorated",NA,NA
+"MC-00369","Site C",61,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00370","Site A",67,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00371","Site B",65,"Female",NA,NA,"Experimental","Patient deteriorated",NA,NA
+"MC-00372","Site C",75,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00373","Site B",56,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00374","Site A",69,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00375","Site B",71,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00376","Site D",77,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00377","Site A",66,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00378","Site B",52,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00379","Site C",52,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00380","Site D",62,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00381","Site D",48,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00382","Site A",66,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00383","Site D",62,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00384","Site D",84,"Male",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00385","Site B",67,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00386","Site C",67,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00387","Site A",63,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00388","Site D",80,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00389","Site B",46,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00390","Site D",81,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00391","Site C",72,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00392","Site B",53,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00393","Site D",55,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00394","Site B",77,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00395","Site C",86,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00396","Site C",63,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00397","Site A",48,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00398","Site A",80,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00399","Site C",56,"Male",NA,NA,"Experimental",NA,"Lost to follow-up",NA
+"MC-00400","Site C",69,"Male",NA,NA,"Experimental",NA,"Lost to follow-up",NA
+"MC-00401","Site A",64,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00402","Site A",74,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00403","Site C",76,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00404","Site D",78,"Male",NA,NA,"Experimental","Intervention not available",NA,NA
+"MC-00405","Site D",55,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00406","Site B",42,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00407","Site A",58,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00408","Site B",54,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00409","Site D",60,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00410","Site D",82,"Female",NA,NA,"Control",NA,NA,"Missing primary endpoint"
+"MC-00411","Site A",51,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00412","Site B",66,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00413","Site A",62,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00414","Site A",56,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00415","Site A",68,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00416","Site B",54,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00417","Site D",67,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00418","Site D",67,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00419","Site B",69,"Male",NA,NA,"Control",NA,NA,"Missing primary endpoint"
+"MC-00420","Site D",83,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00421","Site D",63,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00422","Site A",70,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00423","Site B",88,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00424","Site A",73,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00425","Site D",66,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00426","Site B",47,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00427","Site B",52,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00428","Site D",51,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00429","Site A",76,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00430","Site A",77,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00431","Site C",61,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00432","Site B",64,"Female",NA,NA,"Control",NA,"Site closure",NA
+"MC-00433","Site B",69,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00434","Site D",59,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00435","Site C",70,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00436","Site C",67,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00437","Site D",63,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00438","Site C",52,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00439","Site D",63,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00440","Site B",65,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00441","Site A",65,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00442","Site B",60,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00443","Site C",47,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00444","Site C",53,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00445","Site A",65,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00446","Site C",62,"Male",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00447","Site A",77,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00448","Site A",58,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00449","Site B",67,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00450","Site C",62,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00451","Site C",69,"Female",NA,NA,"Control","Patient deteriorated",NA,NA
+"MC-00452","Site C",71,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00453","Site D",74,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00454","Site B",67,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00455","Site C",79,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00456","Site B",67,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00457","Site D",62,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00458","Site C",62,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00459","Site D",94,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00460","Site A",59,"Female",NA,NA,"Control",NA,"Site closure",NA
+"MC-00461","Site B",71,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00462","Site A",59,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00463","Site B",57,"Male",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00464","Site B",68,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00465","Site D",68,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00466","Site A",78,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00467","Site B",57,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00468","Site A",40,"Male",NA,NA,"Experimental","Intervention not available",NA,NA
+"MC-00469","Site C",55,"Female",NA,NA,"Control",NA,"Site closure",NA
+"MC-00470","Site A",67,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00471","Site A",55,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00472","Site B",59,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00473","Site D",66,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00474","Site A",70,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00475","Site A",79,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00476","Site A",79,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00477","Site B",64,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00478","Site C",61,"Female",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00479","Site D",73,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00480","Site A",59,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00481","Site C",69,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00482","Site C",73,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00483","Site A",58,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00484","Site B",78,"Female",NA,NA,"Experimental",NA,"Lost to follow-up",NA
+"MC-00485","Site B",73,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00486","Site D",76,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00487","Site A",50,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00488","Site A",67,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00489","Site A",73,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00490","Site D",80,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00491","Site D",49,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00492","Site D",69,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00493","Site A",67,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00494","Site C",48,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00495","Site C",62,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00496","Site C",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00497","Site A",56,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00498","Site C",68,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00499","Site A",59,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00500","Site B",58,"Male",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00501","Site A",55,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00502","Site B",80,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00503","Site A",67,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00504","Site C",71,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00505","Site B",68,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00506","Site A",82,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00507","Site A",71,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00508","Site C",56,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00509","Site C",48,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00510","Site D",57,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00511","Site B",67,"Male",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00512","Site B",69,"Male",NA,"Refused consent",NA,NA,NA,NA
+"MC-00513","Site B",70,"Female",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00514","Site C",75,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00515","Site B",63,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00516","Site C",64,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00517","Site A",61,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00518","Site B",59,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00519","Site B",72,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00520","Site D",82,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00521","Site D",51,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00522","Site C",68,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00523","Site D",80,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00524","Site C",53,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00525","Site C",63,"Female",NA,"Refused consent",NA,NA,NA,NA
+"MC-00526","Site A",77,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00527","Site C",61,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00528","Site A",72,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00529","Site D",83,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00530","Site D",78,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00531","Site A",78,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00532","Site B",58,"Female",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00533","Site A",69,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00534","Site C",71,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00535","Site C",70,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00536","Site D",64,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00537","Site C",77,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00538","Site B",61,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00539","Site B",63,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00540","Site C",57,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00541","Site A",76,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00542","Site C",77,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00543","Site C",68,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00544","Site C",75,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00545","Site A",43,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00546","Site C",50,"Female",NA,"Refused consent",NA,NA,NA,NA
+"MC-00547","Site A",69,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00548","Site D",60,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00549","Site C",79,"Male",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00550","Site C",57,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00551","Site C",62,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00552","Site A",73,"Male",NA,NA,"Control","Patient deteriorated",NA,NA
+"MC-00553","Site A",65,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00554","Site D",61,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00555","Site A",76,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00556","Site B",59,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00557","Site D",57,"Female","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00558","Site B",53,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00559","Site D",73,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00560","Site D",66,"Female",NA,NA,"Control",NA,"Site closure",NA
+"MC-00561","Site C",71,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00562","Site D",61,"Male",NA,NA,"Control",NA,"Withdrew consent",NA
+"MC-00563","Site B",77,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00564","Site D",60,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00565","Site C",42,"Male","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00566","Site A",57,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00567","Site C",58,"Male",NA,"Travel distance too far",NA,NA,NA,NA
+"MC-00568","Site C",72,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00569","Site C",61,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00570","Site B",56,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00571","Site B",60,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00572","Site A",65,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00573","Site B",57,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00574","Site A",63,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00575","Site C",63,"Male",NA,"Refused consent",NA,NA,NA,NA
+"MC-00576","Site D",45,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00577","Site A",73,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00578","Site D",62,"Male","Inclusion criteria not met",NA,NA,NA,NA,NA
+"MC-00579","Site C",63,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00580","Site C",63,"Male",NA,NA,"Experimental",NA,"Withdrew consent",NA
+"MC-00581","Site A",61,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00582","Site A",56,"Female",NA,NA,"Control",NA,"Site closure",NA
+"MC-00583","Site A",62,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00584","Site A",45,"Male","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00585","Site C",61,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00586","Site D",61,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00587","Site B",59,"Female",NA,NA,"Control",NA,"Lost to follow-up",NA
+"MC-00588","Site B",63,"Female",NA,NA,"Experimental",NA,"Site closure",NA
+"MC-00589","Site C",53,"Male",NA,NA,"Control",NA,NA,NA
+"MC-00590","Site C",63,"Female",NA,"Refused consent",NA,NA,NA,NA
+"MC-00591","Site C",66,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00592","Site B",48,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00593","Site A",56,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00594","Site B",51,"Female",NA,NA,"Experimental","Intervention not available",NA,NA
+"MC-00595","Site D",61,"Female",NA,NA,"Control",NA,NA,NA
+"MC-00596","Site A",76,"Female",NA,NA,"Experimental",NA,NA,NA
+"MC-00597","Site A",87,"Female","Lab values out of range",NA,NA,NA,NA,NA
+"MC-00598","Site B",62,"Male",NA,NA,"Experimental",NA,NA,NA
+"MC-00599","Site B",73,"Female","Exclusion criteria present",NA,NA,NA,NA,NA
+"MC-00600","Site D",62,"Male",NA,NA,"Experimental",NA,NA,NA

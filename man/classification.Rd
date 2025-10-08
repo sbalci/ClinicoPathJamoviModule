@@ -38,7 +38,8 @@ classification(
   validateMethod = "holdout",
   bootstrapSamples = 1000,
   reportClinicalMetrics = TRUE,
-  reportConfidenceIntervals = TRUE
+  reportConfidenceIntervals = TRUE,
+  reportMCC = TRUE
 )
 }
 \arguments{
@@ -114,6 +115,11 @@ likelihood ratios.}
 
 \item{reportConfidenceIntervals}{Include 95\\% confidence intervals for
 clinical metrics.}
+
+\item{reportMCC}{Calculate Matthews Correlation Coefficient (MCC), a
+balanced metric for imbalanced datasets. MCC ranges from -1 (perfect
+disagreement) to +1 (perfect agreement), with 0 indicating random
+prediction.}
 }
 \value{
 A results object containing:
@@ -122,6 +128,7 @@ A results object containing:
 \code{results$confusion$matrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$classificationMetrics$general} \tab \tab \tab \tab \tab a table \cr
 \code{results$classificationMetrics$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$classificationMetrics$mccTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$classificationMetrics$class} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocCurvePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$decisionTreeModel} \tab \tab \tab \tab \tab an image \cr

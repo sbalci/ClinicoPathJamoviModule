@@ -1,7 +1,7 @@
 ---
 name:  jjscatterstats
 title: Scatter Plot
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
 version: '0.0.31'
@@ -344,6 +344,64 @@ options:
       description:
           R: >
             Height of the plot in pixels. Default is 450.
+
+    - name: addGGPubrPlot
+      title: Add ggpubr Scatter Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add publication-ready scatter plot using ggpubr package.
+
+    - name: ggpubrPalette
+      title: ggpubr Color Palette
+      type: List
+      options:
+        - title: Journal of Clinical Oncology (jco)
+          name: jco
+        - title: Nature Publishing Group (npg)
+          name: npg
+        - title: AAAS Science
+          name: aaas
+        - title: Lancet
+          name: lancet
+        - title: JAMA
+          name: jama
+        - title: New England Journal of Medicine (nejm)
+          name: nejm
+      default: jco
+      description:
+          R: >
+            Color palette for ggpubr scatter plot.
+
+    - name: ggpubrAddCorr
+      title: Add Correlation (ggpubr)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add correlation statistics to ggpubr scatter plot.
+
+    - name: ggpubrCorrMethod
+      title: Correlation Method (ggpubr)
+      type: List
+      options:
+        - title: Pearson
+          name: pearson
+        - title: Spearman
+          name: spearman
+      default: pearson
+      description:
+          R: >
+            Method for correlation in ggpubr plot.
+
+    - name: ggpubrAddSmooth
+      title: Add Smooth Line (ggpubr)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add smoothed trend line to ggpubr scatter plot.
 
 ...
 

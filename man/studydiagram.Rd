@@ -16,7 +16,6 @@ studydiagram(
   exclusion_reason_summary,
   participant_id_mapping,
   exclusion_reason_mapping,
-  treatment_group,
   step1_exclusions,
   step2_exclusions,
   step3_exclusions,
@@ -27,11 +26,11 @@ studydiagram(
   step3_label = "Treatment",
   step4_label = "Follow-up",
   step5_label = "Analysis",
-  show_percentages = TRUE,
-  show_exclusion_boxes = TRUE,
+  show_percentages = FALSE,
+  show_exclusion_boxes = FALSE,
   direction = "TB",
   color_scheme = "gray",
-  show_interpretation = TRUE
+  show_interpretation = FALSE
 )
 }
 \arguments{
@@ -68,9 +67,6 @@ descriptions (for step summary format)}
 
 \item{exclusion_reason_mapping}{Variable containing all exclusion reasons
 (for exclusion mapping format)}
-
-\item{treatment_group}{Variable indicating treatment arm or group
-assignment (optional)}
 
 \item{step1_exclusions}{Select exclusion reason levels that occur at step 1}
 
@@ -113,6 +109,11 @@ A results object containing:
 \code{results$diagram} \tab \tab \tab \tab \tab Interactive study flow diagram \cr
 \code{results$plot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab Explanatory text about the diagram and results \cr
+\code{results$warnings} \tab \tab \tab \tab \tab Alerts about potential data quality issues \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab Plain-language summary for clinical interpretation \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab Copy-ready sentence for manuscripts \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab Explanation of analysis type and usage \cr
+\code{results$caveatsAssumptions} \tab \tab \tab \tab \tab Important considerations and limitations \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -414,5 +414,89 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(p)
             TRUE
         }
+
+        ,
+        .plotGGPubr = function(image, ...) {
+            # Validate inputs
+            if (is.null(self$options$dep) || is.null(self$options$group))
+                return()
+
+            # Skip if ggpubr plot not requested
+            if (!self$options$addGGPubrPlot)
+                return()
+
+            # Prepare data
+            mydata <- self$data
+            dep <- self$options$dep
+            group <- self$options$group
+
+            # Build scatter plot arguments
+            args <- list(
+                data = mydata,
+                x = dep,
+                y = group,
+                palette = self$options$ggpubrPalette
+            )
+
+            # Add correlation if requested
+            if (self$options$ggpubrAddCorr) {
+                args$add <- "reg.line"
+                args$conf.int <- TRUE
+                args$cor.coef <- TRUE
+                args$cor.method <- self$options$ggpubrCorrMethod
+            }
+
+            # Create scatter plot
+            plot <- do.call(ggpubr::ggscatter, args)
+
+            # Apply theme
+            plot <- plot + ggpubr::theme_pubr()
+
+            print(plot)
+            TRUE
+        }
+
+        ,
+        .plotGGPubr2 = function(image, ...) {
+            # Validate inputs
+            if (is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
+                return()
+
+            # Skip if ggpubr plot not requested
+            if (!self$options$addGGPubrPlot)
+                return()
+
+            # Prepare data
+            mydata <- self$data
+            dep <- self$options$dep
+            group <- self$options$group
+            grvar <- self$options$grvar
+
+            # Build scatter plot arguments with faceting
+            args <- list(
+                data = mydata,
+                x = dep,
+                y = group,
+                palette = self$options$ggpubrPalette,
+                facet.by = grvar
+            )
+
+            # Add correlation if requested
+            if (self$options$ggpubrAddCorr) {
+                args$add <- "reg.line"
+                args$conf.int <- TRUE
+                args$cor.coef <- TRUE
+                args$cor.method <- self$options$ggpubrCorrMethod
+            }
+
+            # Create scatter plot
+            plot <- do.call(ggpubr::ggscatter, args)
+
+            # Apply theme
+            plot <- plot + ggpubr::theme_pubr()
+
+            print(plot)
+            TRUE
+        }
     )
 )

@@ -1,0 +1,103 @@
+---
+name: precisionrecall
+title: Precision-Recall Curve
+jrs: '1.1'
+
+items:
+    - name: instructions
+      type: Html
+      visible: false
+      content: >
+        <p>Please select an outcome variable and at least one classifier score variable to begin analysis.</p>
+
+    - name: aucTable
+      title: Area Under PRC Curve
+      type: Table
+      rows: (scores)
+      clearWith:
+        - outcome
+        - scores
+        - positiveClass
+        - aucMethod
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: auc
+          title: AUC(PRC)
+          type: number
+          format: zto,pvalue
+        - name: baseline
+          title: Baseline
+          type: number
+          format: zto,pvalue
+        - name: improvement
+          title: Improvement
+          type: number
+          format: zto,pvalue
+        - name: lower
+          title: Lower CI
+          type: number
+          format: zto,pvalue
+          visible: (ci)
+        - name: upper
+          title: Upper CI
+          type: number
+          format: zto,pvalue
+          visible: (ci)
+
+    - name: comparisonTable
+      title: Model Comparison
+      type: Table
+      visible: (comparison)
+      clearWith:
+        - outcome
+        - scores
+        - positiveClass
+        - comparisonMethod
+      columns:
+        - name: model1
+          title: Model 1
+          type: text
+        - name: model2
+          title: Model 2
+          type: text
+        - name: aucDiff
+          title: AUC Difference
+          type: number
+        - name: pValue
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: prcPlot
+      title: Precision-Recall Curve
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plotPRC
+      clearWith:
+        - outcome
+        - scores
+        - positiveClass
+        - interpolation
+        - showBaseline
+        - showFScore
+
+    - name: rocPlot
+      title: Companion ROC Curve
+      type: Image
+      width: 500
+      height: 400
+      visible: (showROC)
+      renderFun: .plotROC
+      clearWith:
+        - outcome
+        - scores
+        - positiveClass
+
+refs:
+    - Saito2015
+    - Davis2006
+
+...

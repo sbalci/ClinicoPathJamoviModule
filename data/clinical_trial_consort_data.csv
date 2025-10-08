@@ -1,0 +1,501 @@
+"participant_id","age","sex","age_exclusion","performance_exclusion","comorbidity_exclusion","consent_exclusion","eligibility_exclusion","treatment_arm","allocation_exclusion","followup_loss","followup_death","analysis_exclusion","outcome_response"
+"PT-0001",74,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0002",53,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0003",64,"Female",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0004",62,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0005",71,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0006",66,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0007",59,"Male",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0008",63,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0009",46,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0010",66,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0011",38,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0012",67,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0013",72,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0014",69,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0015",65,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0016",62,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0017",56,"Male",NA,NA,NA,NA,NA,"Treatment A","Intervention not received - protocol deviation",NA,NA,NA,NA
+"PT-0018",84,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0019",75,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0020",53,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0021",42,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0022",70,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0023",58,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0024",63,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0025",72,"Male",NA,NA,NA,"Consent withdrawn",NA,NA,NA,NA,NA,NA,NA
+"PT-0026",34,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0027",78,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0028",64,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0029",54,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0030",55,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,"Moved to different institution",NA,NA,NA
+"PT-0031",56,"Male",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0032",63,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0033",69,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0034",66,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0035",78,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,"Lost to follow-up",NA,NA,NA
+"PT-0036",76,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0037",63,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0038",82,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0039",67,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0040",40,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0041",81,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0042",61,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0043",83,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0044",70,"Female",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0045",56,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0046",62,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,"Lost to follow-up",NA,NA,NA
+"PT-0047",47,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0048",41,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,"Moved to different institution",NA,NA,NA
+"PT-0049",61,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0050",74,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0051",60,"Male",NA,NA,NA,NA,NA,"Treatment A","Ineligible after randomization",NA,NA,NA,NA
+"PT-0052",60,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0053",68,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0054",47,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0055",49,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0056",71,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0057",62,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0058",63,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0059",76,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0060",77,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0061",66,"Male",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0062",48,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0063",65,"Male",NA,NA,NA,NA,NA,"Treatment B","Intervention not received - patient refusal",NA,NA,NA,NA
+"PT-0064",58,"Male",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0065",55,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0066",70,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0067",63,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0068",78,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0069",61,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0070",86,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0071",66,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0072",55,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0073",77,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0074",64,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0075",63,"Male",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0076",97,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,"Unable to contact",NA,NA,NA
+"PT-0077",57,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0078",35,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0079",93,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0080",61,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0081",48,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0082",66,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0083",56,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0084",76,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,"Missing outcome data",NA
+"PT-0085",46,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0086",66,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0087",72,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,"Protocol violation",NA
+"PT-0088",86,"Male",NA,NA,NA,NA,NA,"Treatment B","Intervention not received - patient refusal",NA,NA,NA,NA
+"PT-0089",52,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0090",56,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0091",72,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0092",66,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0093",74,"Female",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0094",48,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0095",96,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0096",79,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0097",73,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0098",41,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0099",62,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0100",65,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0101",58,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0102",62,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0103",55,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0104",50,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0105",56,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0106",53,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0107",74,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0108",47,"Male","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0109",56,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0110",55,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0111",69,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0112",52,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0113",76,"Male",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0114",48,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0115",56,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0116",59,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0117",55,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0118",50,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0119",48,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0120",56,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0121",71,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0122",65,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0123",72,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0124",46,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0125",63,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0126",83,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0127",79,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,"Unable to contact",NA,NA,NA
+"PT-0128",61,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0129",61,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0130",57,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0131",47,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,"Major protocol deviation",NA
+"PT-0132",26,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0133",85,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,"Moved to different institution",NA,NA,NA
+"PT-0134",62,"Male",NA,NA,NA,"Consent withdrawn",NA,NA,NA,NA,NA,NA,NA
+"PT-0135",71,"Male",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0136",59,"Male",NA,NA,NA,"Consent refused",NA,NA,NA,NA,NA,NA,NA
+"PT-0137",69,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0138",62,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Moved to different institution",NA,NA,NA
+"PT-0139",76,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0140",61,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0141",74,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0142",56,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0143",43,"Female",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0144",72,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0145",67,"Male","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0146",63,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0147",46,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,"Protocol violation",NA
+"PT-0148",58,"Male",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0149",66,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0150",63,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0151",64,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0152",56,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0153",67,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0154",36,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0155",61,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0156",59,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0157",54,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0158",67,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0159",63,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Withdrew consent during follow-up",NA,NA
+"PT-0160",78,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0161",58,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0162",57,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0163",48,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0164",72,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0165",59,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0166",65,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0167",59,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0168",52,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0169",37,"Female",NA,NA,NA,NA,NA,"Treatment B","Intervention not received - clinical deterioration",NA,NA,NA,NA
+"PT-0170",70,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0171",84,"Female","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0172",55,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0173",45,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0174",59,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0175",57,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0176",53,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0177",60,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0178",81,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0179",70,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0180",60,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0181",36,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0182",70,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0183",76,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0184",59,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0185",36,"Male",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0186",70,"Female",NA,NA,NA,"Consent refused",NA,NA,NA,NA,NA,NA,NA
+"PT-0187",52,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0188",57,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0189",56,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,"Withdrew consent during follow-up",NA,NA
+"PT-0190",73,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0191",56,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0192",73,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0193",33,"Male","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0194",56,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0195",69,"Male",NA,NA,NA,NA,NA,"Treatment A","Ineligible after randomization",NA,NA,NA,NA
+"PT-0196",82,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0197",62,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0198",55,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0199",51,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0200",55,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0201",73,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0202",76,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0203",76,"Male","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0204",59,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0205",61,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0206",37,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,"Unable to contact",NA,NA,NA
+"PT-0207",59,"Female",NA,NA,NA,"Consent withdrawn",NA,NA,NA,NA,NA,NA,NA
+"PT-0208",76,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0209",86,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0210",41,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0211",79,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0212",66,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0213",66,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0214",74,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0215",44,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0216",63,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0217",84,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0218",48,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0219",43,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0220",52,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,"Moved to different institution",NA,NA,NA
+"PT-0221",78,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0222",46,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0223",44,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0224",59,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0225",54,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0226",58,"Male",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0227",72,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0228",77,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0229",54,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0230",76,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0231",68,"Female",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0232",73,"Male",NA,NA,NA,NA,NA,"Treatment A","Withdrew before treatment",NA,NA,NA,NA
+"PT-0233",61,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0234",54,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0235",65,"Female",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0236",61,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0237",49,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0238",82,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0239",79,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0240",53,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0241",67,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0242",52,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0243",45,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0244",62,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0245",66,"Female",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0246",54,"Female",NA,NA,NA,NA,NA,"Treatment B","Intervention not received - clinical deterioration",NA,NA,NA,NA
+"PT-0247",67,"Female",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0248",73,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0249",64,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0250",56,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0251",65,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0252",73,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0253",34,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0254",58,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0255",77,"Male",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0256",58,"Male",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0257",65,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0258",68,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0259",68,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0260",61,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0261",79,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0262",62,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0263",65,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0264",62,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0265",77,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0266",64,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0267",65,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0268",38,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0269",49,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0270",70,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0271",70,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0272",89,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0273",76,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0274",78,"Female",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0275",51,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0276",49,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0277",50,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0278",54,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0279",61,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0280",86,"Male","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0281",53,"Male",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0282",60,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0283",56,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0284",40,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0285",57,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0286",55,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0287",59,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0288",73,"Female",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0289",57,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0290",47,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0291",80,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0292",68,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0293",45,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0294",77,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0295",58,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,"Moved to different institution",NA,NA,NA
+"PT-0296",57,"Female",NA,NA,NA,NA,NA,"Treatment A","Intervention not received - patient refusal",NA,NA,NA,NA
+"PT-0297",68,"Male","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0298",55,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0299",60,"Male",NA,NA,NA,NA,NA,"Treatment B","Ineligible after randomization",NA,NA,NA,NA
+"PT-0300",52,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0301",49,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0302",73,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0303",63,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0304",66,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0305",89,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0306",75,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0307",92,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0308",58,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0309",53,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0310",60,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0311",45,"Male",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0312",65,"Male",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0313",65,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0314",45,"Male",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0315",65,"Male",NA,NA,NA,NA,NA,"Treatment A","Withdrew before treatment",NA,NA,NA,NA
+"PT-0316",61,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0317",61,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Withdrew consent during follow-up",NA,NA
+"PT-0318",63,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,"Incomplete data",NA
+"PT-0319",62,"Male",NA,NA,NA,NA,NA,"Treatment A","Intervention not received - patient refusal",NA,NA,NA,NA
+"PT-0320",86,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0321",82,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0322",61,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0323",47,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0324",56,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0325",49,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0326",56,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0327",67,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0328",63,"Male",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0329",52,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0330",34,"Male",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0331",92,"Male",NA,NA,NA,"Consent refused",NA,NA,NA,NA,NA,NA,NA
+"PT-0332",59,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0333",72,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0334",60,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,"Moved to different institution",NA,NA,NA
+"PT-0335",60,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0336",48,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,"Lost to follow-up",NA,NA,NA
+"PT-0337",62,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0338",61,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0339",39,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0340",56,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Unable to contact",NA,NA,NA
+"PT-0341",77,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0342",48,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0343",55,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0344",50,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0345",75,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0346",40,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0347",68,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0348",57,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0349",76,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0350",69,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0351",51,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0352",61,"Female",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0353",53,"Female","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0354",76,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0355",74,"Male",NA,NA,NA,"Consent withdrawn",NA,NA,NA,NA,NA,NA,NA
+"PT-0356",61,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0357",68,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0358",61,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0359",57,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0360",59,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0361",69,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0362",77,"Male",NA,NA,NA,"Consent withdrawn",NA,NA,NA,NA,NA,NA,NA
+"PT-0363",86,"Female",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0364",53,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0365",63,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0366",53,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0367",36,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,"Moved to different institution",NA,NA,NA
+"PT-0368",56,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0369",66,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0370",57,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0371",64,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0372",49,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0373",65,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0374",50,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0375",75,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0376",50,"Female",NA,NA,NA,"Consent refused",NA,NA,NA,NA,NA,NA,NA
+"PT-0377",53,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0378",67,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0379",73,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0380",87,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0381",52,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,"Major protocol deviation",NA
+"PT-0382",65,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0383",85,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0384",59,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0385",67,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0386",49,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0387",62,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0388",72,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0389",91,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0390",65,"Female","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0391",61,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0392",59,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Withdrew consent during follow-up",NA,NA
+"PT-0393",68,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0394",55,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0395",55,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0396",24,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0397",77,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0398",49,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0399",69,"Male",NA,NA,NA,NA,NA,"Treatment A","Ineligible after randomization",NA,NA,NA,NA
+"PT-0400",62,"Male",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0401",58,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0402",74,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0403",68,"Female",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0404",54,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0405",57,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0406",73,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0407",84,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0408",63,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0409",45,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0410",65,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Complete Response"
+"PT-0411",55,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0412",76,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0413",57,"Male",NA,NA,NA,NA,NA,"Treatment B","Withdrew before treatment",NA,NA,NA,NA
+"PT-0414",66,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Lost to follow-up",NA,NA,NA
+"PT-0415",73,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0416",69,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0417",76,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0418",85,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0419",79,"Female",NA,NA,NA,NA,NA,"Treatment B","Intervention not received - clinical deterioration",NA,NA,NA,NA
+"PT-0420",51,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0421",42,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0422",62,"Female",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0423",49,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0424",82,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0425",68,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0426",67,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0427",53,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0428",50,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,"Missing outcome data",NA
+"PT-0429",45,"Male",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0430",59,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,"Major protocol deviation",NA
+"PT-0431",75,"Male",NA,NA,NA,"Consent refused",NA,NA,NA,NA,NA,NA,NA
+"PT-0432",70,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0433",59,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0434",70,"Female","Age < 18 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0435",75,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0436",62,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0437",60,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0438",84,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0439",50,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0440",63,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0441",47,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0442",64,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0443",62,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0444",63,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0445",50,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0446",68,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0447",62,"Male",NA,NA,NA,"Patient decision",NA,NA,NA,NA,NA,NA,NA
+"PT-0448",44,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0449",67,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0450",54,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0451",69,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0452",68,"Male",NA,NA,NA,NA,NA,"Treatment A","Ineligible after randomization",NA,NA,NA,NA
+"PT-0453",66,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0454",66,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0455",75,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0456",50,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0457",66,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0458",63,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0459",71,"Female",NA,NA,NA,NA,NA,"Treatment B","Withdrew before treatment",NA,NA,NA,NA
+"PT-0460",63,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0461",58,"Female",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0462",61,"Male",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0463",60,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0464",51,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,"Death unrelated to disease",NA,NA
+"PT-0465",66,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0466",60,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0467",52,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0468",49,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0469",57,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0470",65,"Male","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0471",52,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0472",72,"Female","Age > 80 years",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0473",53,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0474",64,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,"Moved to different institution",NA,NA,NA
+"PT-0475",77,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0476",44,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0477",68,"Male",NA,NA,NA,NA,"Eligibility criteria not met",NA,NA,NA,NA,NA,NA
+"PT-0478",93,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0479",33,"Male",NA,NA,NA,"Consent withdrawn",NA,NA,NA,NA,NA,NA,NA
+"PT-0480",66,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Stable Disease"
+"PT-0481",56,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Complete Response"
+"PT-0482",54,"Male",NA,"Inadequate organ function",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0483",76,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Stable Disease"
+"PT-0484",57,"Male",NA,NA,NA,NA,"Lost before enrollment",NA,NA,NA,NA,NA,NA
+"PT-0485",59,"Female",NA,NA,NA,NA,NA,"Treatment A","Ineligible after randomization",NA,NA,NA,NA
+"PT-0486",48,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0487",67,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0488",60,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Progressive Disease"
+"PT-0489",44,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"
+"PT-0490",54,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0491",52,"Male",NA,NA,"Severe comorbidity",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0492",86,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0493",68,"Female",NA,NA,"Prior malignancy",NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0494",62,"Female",NA,NA,NA,"Consent refused",NA,NA,NA,NA,NA,NA,NA
+"PT-0495",68,"Male",NA,NA,NA,NA,NA,"Treatment A",NA,NA,NA,NA,"Partial Response"
+"PT-0496",66,"Male",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Progressive Disease"
+"PT-0497",69,"Female",NA,NA,NA,NA,NA,"Treatment A",NA,"Unable to contact",NA,NA,NA
+"PT-0498",56,"Female",NA,"ECOG PS > 2",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"PT-0499",68,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,"Missing outcome data",NA
+"PT-0500",78,"Female",NA,NA,NA,NA,NA,"Treatment B",NA,NA,NA,NA,"Partial Response"

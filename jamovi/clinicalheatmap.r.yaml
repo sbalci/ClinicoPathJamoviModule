@@ -67,7 +67,28 @@ items:
       height: 600
       renderFun: .plotHeatmap
       visible: true
-      clearWith: []
+      clearWith:
+        - rowVar
+        - colVar
+        - valueVar
+        - annotationCols
+        - annotationRows
+        - scaleMethod
+        - clusterRows
+        - clusterCols
+        - clusterDistanceRows
+        - clusterMethodRows
+        - clusterDistanceCols
+        - clusterMethodCols
+        - colorPalette
+        - showRownames
+        - showColnames
+        - annotationType
+        - addLayer
+        - layerType
+        - layerFilter
+        - splitRows
+        - splitCols
 
     - name: annotations
       title: Annotation Summary
@@ -109,5 +130,156 @@ items:
       type: Html
       visible: true
       clearWith: []
+
+    # === ENHANCED CLUSTERING RESULTS ===
+    - name: optimalKAnalysis
+      title: Optimal K Determination
+      type: Group
+      visible: (findOptimalK)
+      items:
+        - name: elbowPlot
+          title: Elbow Plot (WSS)
+          type: Image
+          width: 600
+          height: 400
+          renderFun: .elbowPlot
+
+        - name: silhouettePlot
+          title: Silhouette Analysis
+          type: Image
+          width: 600
+          height: 400
+          renderFun: .silhouettePlot
+
+        - name: optimalKTable
+          title: Optimal K Summary
+          type: Table
+          rows: 0
+          columns:
+            - name: method
+              title: Method
+              type: text
+            - name: optimal_k
+              title: Optimal K
+              type: integer
+            - name: metric_value
+              title: Metric Value
+              type: number
+              format: zto
+
+    - name: clusterAssignments
+      title: Cluster Assignments
+      type: Group
+      visible: (exportRowClusters || exportColClusters)
+      items:
+        - name: rowClusterTable
+          title: Row Cluster Assignments
+          type: Table
+          visible: (exportRowClusters)
+          rows: 0
+          columns:
+            - name: row_id
+              title: Row ID
+              type: text
+            - name: cluster
+              title: Cluster
+              type: integer
+
+        - name: colClusterTable
+          title: Column Cluster Assignments
+          type: Table
+          visible: (exportColClusters)
+          rows: 0
+          columns:
+            - name: col_id
+              title: Column ID
+              type: text
+            - name: cluster
+              title: Cluster
+              type: integer
+
+    - name: clusterSurvival
+      title: Survival Analysis by Clusters
+      type: Group
+      visible: (survivalAnalysis)
+      items:
+        - name: kmPlot
+          title: Kaplan-Meier by Cluster
+          type: Image
+          width: 700
+          height: 500
+          renderFun: .kmPlotClusters
+
+        - name: survivalTable
+          title: Survival Comparison
+          type: Table
+          rows: 0
+          columns:
+            - name: cluster
+              title: Cluster
+              type: text
+            - name: n
+              title: N
+              type: integer
+            - name: events
+              title: Events
+              type: integer
+            - name: median_surv
+              title: Median Survival
+              type: number
+              format: zto
+            - name: ci_lower
+              title: 95% CI Lower
+              type: number
+              format: zto
+            - name: ci_upper
+              title: 95% CI Upper
+              type: number
+              format: zto
+
+        - name: logRankTest
+          title: Log-Rank Test
+          type: Table
+          rows: 1
+          columns:
+            - name: chisq
+              title: Chi-Square
+              type: number
+              format: zto
+            - name: df
+              title: df
+              type: integer
+            - name: p
+              title: p
+              type: number
+              format: zto,pvalue
+
+    - name: clusterCharacteristics
+      title: Cluster Characteristics Comparison
+      type: Group
+      visible: (clusterComparison)
+      items:
+        - name: characteristicTable
+          title: Characteristics by Cluster
+          type: Table
+          rows: 0
+          columns:
+            - name: variable
+              title: Variable
+              type: text
+            - name: cluster
+              title: Cluster
+              type: text
+            - name: summary
+              title: Summary
+              type: text
+            - name: p_value
+              title: p
+              type: number
+              format: zto,pvalue
+
+        - name: clusterInterpretation
+          title: Cluster Interpretation
+          type: Html
 
 ...

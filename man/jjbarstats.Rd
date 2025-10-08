@@ -27,7 +27,9 @@ jjbarstats(
   conflevel = 0.95,
   ratio = "",
   clinicalpreset = "custom",
-  showexplanations = FALSE
+  showexplanations = FALSE,
+  addGGPubrBalloon = FALSE,
+  ggpubrBalloonPalette = "jco"
 )
 }
 \arguments{
@@ -89,8 +91,13 @@ scenarios.  Automatically sets appropriate statistical methods and
 parameters.}
 
 \item{showexplanations}{Display detailed explanations of statistical
-methods, assumptions,  and clinical interpretations to guide analysis and
+methods, assumptions, and clinical interpretations to guide analysis and
 result interpretation.}
+
+\item{addGGPubrBalloon}{Add balloon plot for contingency table
+visualization using ggpubr.}
+
+\item{ggpubrBalloonPalette}{Color palette for balloon plot.}
 }
 \value{
 A results object containing:
@@ -103,6 +110,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$balloonPlot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

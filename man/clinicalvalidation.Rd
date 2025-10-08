@@ -33,6 +33,7 @@ clinicalvalidation(
   show_performance_table = TRUE,
   show_calibration_plot = TRUE,
   show_roc_curve = TRUE,
+  show_prc_curve = FALSE,
   show_validation_curves = FALSE,
   show_residual_plots = FALSE,
   show_clinical_interpretation = TRUE,
@@ -103,6 +104,10 @@ clinicalvalidation(
 
 \item{show_roc_curve}{.}
 
+\item{show_prc_curve}{Display Precision-Recall curve analysis. Recommended
+for imbalanced datasets where ROC curves may be misleading (Saito &
+Rehmsmeier, 2015).}
+
 \item{show_validation_curves}{.}
 
 \item{show_residual_plots}{.}
@@ -139,6 +144,7 @@ A results object containing:
 \code{results$validationcurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$calibrationplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$roccurve} \tab \tab \tab \tab \tab an image \cr
+\code{results$prccurve} \tab \tab \tab \tab \tab an image \cr
 \code{results$residualplots} \tab \tab \tab \tab \tab an image \cr
 \code{results$clinicalinterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$validationreport} \tab \tab \tab \tab \tab a html \cr

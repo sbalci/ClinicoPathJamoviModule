@@ -21,7 +21,29 @@ clinicalheatmap(
   showDataSummary = TRUE,
   showInterpretation = TRUE,
   exportWidth = 8,
-  exportHeight = 6
+  exportHeight = 6,
+  clusterDistanceRows = "euclidean",
+  clusterMethodRows = "complete",
+  clusterDistanceCols = "euclidean",
+  clusterMethodCols = "complete",
+  annotationType = "tile",
+  addLayer = FALSE,
+  layerType = "point",
+  layerFilter = "",
+  splitRows = 1,
+  splitCols = 1,
+  findOptimalK = FALSE,
+  kRange = "2:8",
+  exportRowClusters = FALSE,
+  exportColClusters = FALSE,
+  rowClusterPrefix = "RowCluster",
+  colClusterPrefix = "ColCluster",
+  survivalAnalysis = FALSE,
+  survivalTime,
+  survivalEvent,
+  survivalEventLevel,
+  clusterComparison = FALSE,
+  comparisonVars
 )
 }
 \arguments{
@@ -65,6 +87,60 @@ context.}
 \item{exportWidth}{Width of exported heatmap in inches.}
 
 \item{exportHeight}{Height of exported heatmap in inches.}
+
+\item{clusterDistanceRows}{Distance metric for row clustering.}
+
+\item{clusterMethodRows}{Agglomeration method for row clustering.}
+
+\item{clusterDistanceCols}{Distance metric for column clustering.}
+
+\item{clusterMethodCols}{Agglomeration method for column clustering.}
+
+\item{annotationType}{Type of annotation visualization for tidyHeatmap.}
+
+\item{addLayer}{Add a symbol layer on top of the heatmap.}
+
+\item{layerType}{Type of symbol to add as a layer.}
+
+\item{layerFilter}{Logical expression to filter which cells show symbols
+(e.g., "> 0.5").}
+
+\item{splitRows}{Number of row groups to split based on dendrogram
+branches.}
+
+\item{splitCols}{Number of column groups to split based on dendrogram
+branches.}
+
+\item{findOptimalK}{Automatically determine optimal number of clusters
+using elbow method and silhouette analysis.}
+
+\item{kRange}{Range of K values to test (format: "min:max", e.g., "2:10").}
+
+\item{exportRowClusters}{Add row cluster assignments as a new column in the
+dataset.}
+
+\item{exportColClusters}{Add column cluster assignments as a new column in
+the dataset.}
+
+\item{rowClusterPrefix}{Name for the exported row cluster assignment
+column.}
+
+\item{colClusterPrefix}{Name for the exported column cluster assignment
+column.}
+
+\item{survivalAnalysis}{Perform survival analysis comparing row clusters
+(requires survival data).}
+
+\item{survivalTime}{.}
+
+\item{survivalEvent}{.}
+
+\item{survivalEventLevel}{.}
+
+\item{clusterComparison}{Compare clinical/molecular characteristics across
+discovered clusters.}
+
+\item{comparisonVars}{.}
 }
 \value{
 A results object containing:
@@ -81,6 +157,16 @@ A results object containing:
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$optimalKAnalysis$elbowPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$optimalKAnalysis$silhouettePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$optimalKAnalysis$optimalKTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterAssignments$rowClusterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterAssignments$colClusterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterSurvival$kmPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$clusterSurvival$survivalTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterSurvival$logRankTest} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterCharacteristics$characteristicTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterCharacteristics$clusterInterpretation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

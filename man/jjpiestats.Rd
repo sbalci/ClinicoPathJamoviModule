@@ -22,7 +22,9 @@ jjpiestats(
   messages = FALSE,
   clinicalpreset = "custom",
   showexplanations = TRUE,
-  resultssubtitle = FALSE
+  resultssubtitle = FALSE,
+  addGGPubrDonut = FALSE,
+  ggpubrDonutPalette = "jco"
 )
 }
 \arguments{
@@ -90,6 +92,10 @@ result interpretation.}
 subtitle in the pie chart. Shows test statistics, p-values, effect sizes,
 and confidence intervals for categorical association tests. Provides
 detailed statistical summary.}
+
+\item{addGGPubrDonut}{Add modern donut chart variant using ggpubr.}
+
+\item{ggpubrDonutPalette}{Color palette for donut chart.}
 }
 \value{
 A results object containing:

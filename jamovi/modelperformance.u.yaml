@@ -1,0 +1,155 @@
+title: Multi-Model Performance Comparison
+name: modelperformance
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Type
+        children:
+          - type: ComboBox
+            name: modelType
+
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+          - type: ComboBox
+            name: outcomeLevel
+            enable: (modelType:logistic || modelType:cox)
+      - type: TargetLayoutBox
+        label: Time Variable (Cox only)
+        children:
+          - type: VariablesListBox
+            name: timeVar
+            maxItemCount: 1
+            isTarget: true
+            enable: (modelType:cox)
+
+  - type: CollapseBox
+    label: Model 1
+    collapsed: false
+    children:
+      - type: TextBox
+        name: model1name
+        label: Model Name
+        format: string
+      - type: VariablesListBox
+        name: model1vars
+        isTarget: true
+        height: normal
+
+  - type: CollapseBox
+    label: Model 2
+    collapsed: false
+    children:
+      - type: TextBox
+        name: model2name
+        label: Model Name
+        format: string
+      - type: VariablesListBox
+        name: model2vars
+        isTarget: true
+        height: normal
+
+  - type: CollapseBox
+    label: Model 3
+    collapsed: true
+    children:
+      - type: TextBox
+        name: model3name
+        label: Model Name
+        format: string
+      - type: VariablesListBox
+        name: model3vars
+        isTarget: true
+        height: normal
+
+  - type: CollapseBox
+    label: Model 4
+    collapsed: true
+    children:
+      - type: TextBox
+        name: model4name
+        label: Model Name
+        format: string
+      - type: VariablesListBox
+        name: model4vars
+        isTarget: true
+        height: normal
+
+  - type: CollapseBox
+    label: Model 5
+    collapsed: true
+    children:
+      - type: TextBox
+        name: model5name
+        label: Model Name
+        format: string
+      - type: VariablesListBox
+        name: model5vars
+        isTarget: true
+        height: normal
+
+  - type: CollapseBox
+    label: Comparison Metrics
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showAIC
+      - type: CheckBox
+        name: showRSquared
+      - type: CheckBox
+        name: showCIndex
+      - type: CheckBox
+        name: showLogLik
+      - type: CheckBox
+        name: showMCC
+
+  - type: CollapseBox
+    label: Validation
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: crossValidation
+      - type: Label
+        label: 'Number of Folds:'
+        fitToGrid: true
+        enable: (crossValidation)
+      - type: TextBox
+        name: cvFolds
+        format: number
+        enable: (crossValidation)
+
+  - type: CollapseBox
+    label: Visualization
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showForestPlot
+      - type: CheckBox
+        name: showROC
+        enable: (modelType:logistic)
+      - type: CheckBox
+        name: showCalibration
+        enable: (modelType:logistic || modelType:cox)
+
+  - type: CollapseBox
+    label: Model Recommendation
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: autoRecommend
+      - type: ComboBox
+        name: recommendBy
+        enable: (autoRecommend)

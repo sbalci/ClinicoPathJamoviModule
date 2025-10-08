@@ -50,7 +50,6 @@ children:
               - type: TextBox
                 name: k
                 format: number
-
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -85,7 +84,6 @@ children:
                 name: resultssubtitle
               - type: CheckBox
                 name: originaltheme
-
   - type: CollapseBox
     label: Point Aesthetics
     collapsed: true
@@ -103,7 +101,6 @@ children:
               - type: TextBox
                 name: pointalpha
                 format: number
-
   - type: CollapseBox
     label: Regression Line
     collapsed: true
@@ -122,7 +119,6 @@ children:
                 name: smoothlinecolor
                 format: string
                 width: large
-
   - type: CollapseBox
     label: Marginal Histograms
     collapsed: true
@@ -153,7 +149,6 @@ children:
                 format: string
                 width: large
                 enable: (marginal)
-
   - type: CollapseBox
     label: Plot Configuration
     collapsed: true
@@ -171,7 +166,6 @@ children:
               - type: TextBox
                 name: plotheight
                 format: number
-
   - type: CollapseBox
     label: Plot with Aesthetics
     collapsed: true
@@ -228,3 +222,28 @@ children:
                 name: marginalType
               - type: ComboBox
                 name: smoothMethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: addGGPubrPlot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ggpubrPalette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: ggpubrAddCorr
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ggpubrCorrMethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: ggpubrAddSmooth

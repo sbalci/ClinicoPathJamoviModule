@@ -62,6 +62,32 @@ items:
             type: number
             format: zto
             visible: (reportConfidenceIntervals)
+      - name: mccTable
+        title: Matthews Correlation Coefficient
+        visible: (reportMCC)
+        type: Table
+        rows: 1
+        columns:
+          - name: mcc
+            title: 'MCC'
+            type: number
+            format: zto
+          - name: ci_lower
+            title: '95% CI Lower'
+            type: number
+            format: zto
+            visible: (reportConfidenceIntervals)
+          - name: ci_upper
+            title: '95% CI Upper'
+            type: number
+            format: zto
+            visible: (reportConfidenceIntervals)
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+        refs:
+          - Matthews1975
+          - Saito2015
       - name: class
         title: 'Per class'
         type: Table

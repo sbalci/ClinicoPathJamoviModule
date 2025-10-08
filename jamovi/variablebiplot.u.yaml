@@ -1,0 +1,137 @@
+title: Variable Importance Biplot
+name: variablebiplot
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: groupVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Features for Analysis
+        children:
+          - type: VariablesListBox
+            name: features
+            isTarget: true
+            height: large
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Method
+        children:
+          - type: ComboBox
+            name: method
+  - type: CollapseBox
+    label: Component Selection
+    collapsed: false
+    children:
+      - type: Label
+        label: 'First Component (X-axis):'
+        children:
+          - type: TextBox
+            name: pc1
+            format: number
+      - type: Label
+        label: 'Second Component (Y-axis):'
+        children:
+          - type: TextBox
+            name: pc2
+            format: number
+  - type: CollapseBox
+    label: Biplot Options
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showLoadings
+      - type: Label
+        label: 'Loading Vector Scale:'
+        enable: (showLoadings)
+        children:
+          - type: TextBox
+            name: loadingScale
+            format: number
+            enable: (showLoadings)
+      - type: Label
+        label: 'Top Contributors to Label:'
+        children:
+          - type: TextBox
+            name: topContributors
+            format: number
+      - type: CheckBox
+        name: showConfidenceEllipse
+      - type: Label
+        label: Point Labeling
+        children:
+          - type: ComboBox
+            name: labelPoints
+      - type: Label
+        label: 'Point Size:'
+        children:
+          - type: TextBox
+            name: pointSize
+            format: number
+  - type: CollapseBox
+    label: Contribution Analysis
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showContribTable
+      - type: Label
+        label: Contribution Metric
+        enable: (showContribTable)
+        children:
+          - type: ComboBox
+            name: contributionMetric
+            enable: (showContribTable)
+      - type: CheckBox
+        name: showVarianceExplained
+  - type: CollapseBox
+    label: Group Separation
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showSeparation
+      - type: Label
+        label: Separation Metric
+        enable: (showSeparation)
+        children:
+          - type: ComboBox
+            name: separationMetric
+            enable: (showSeparation)
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: centerScale
+      - type: Label
+        label: 'Minimum Cumulative Variance (%):'
+        children:
+          - type: TextBox
+            name: minVariance
+            format: number
+      - type: Label
+        label: Biplot Type
+        children:
+          - type: ComboBox
+            name: biplotType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showReport
+      - type: CheckBox
+        name: showInterpretation
+      - type: CheckBox
+        name: showRCode

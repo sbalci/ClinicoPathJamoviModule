@@ -77,13 +77,6 @@ children:
             name: exclusion_reason_mapping
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: Treatment Group Variable
-        children:
-          - type: VariablesListBox
-            name: treatment_group
-            maxItemCount: 1
-            isTarget: true
   - type: LayoutBox
     margin: large
     children:

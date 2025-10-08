@@ -1,7 +1,7 @@
 ---
 name:  jjpiestats
 title: Pie Charts
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Pie Charts'
 version: '0.0.31'
@@ -251,6 +251,29 @@ options:
             Whether to display statistical test results as subtitle in the pie chart.
             Shows test statistics, p-values, effect sizes, and confidence intervals
             for categorical association tests. Provides detailed statistical summary.
+
+    - name: addGGPubrDonut
+      title: Add Donut Chart (ggpubr)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add modern donut chart variant using ggpubr.
+
+    - name: ggpubrDonutPalette
+      title: Donut Chart Palette
+      type: List
+      options:
+        - title: Journal of Clinical Oncology (jco)
+          name: jco
+        - title: Nature Publishing Group (npg)
+          name: npg
+        - title: Lancet
+          name: lancet
+      default: jco
+      description:
+          R: >
+            Color palette for donut chart.
 
 
 ...

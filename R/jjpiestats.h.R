@@ -22,7 +22,9 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             messages = FALSE,
             clinicalpreset = "custom",
             showexplanations = TRUE,
-            resultssubtitle = FALSE, ...) {
+            resultssubtitle = FALSE,
+            addGGPubrDonut = FALSE,
+            ggpubrDonutPalette = "jco", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -134,6 +136,18 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "resultssubtitle",
                 resultssubtitle,
                 default=FALSE)
+            private$..addGGPubrDonut <- jmvcore::OptionBool$new(
+                "addGGPubrDonut",
+                addGGPubrDonut,
+                default=FALSE)
+            private$..ggpubrDonutPalette <- jmvcore::OptionList$new(
+                "ggpubrDonutPalette",
+                ggpubrDonutPalette,
+                options=list(
+                    "jco",
+                    "npg",
+                    "lancet"),
+                default="jco")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -152,6 +166,8 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..clinicalpreset)
             self$.addOption(private$..showexplanations)
             self$.addOption(private$..resultssubtitle)
+            self$.addOption(private$..addGGPubrDonut)
+            self$.addOption(private$..ggpubrDonutPalette)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -170,7 +186,9 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         messages = function() private$..messages$value,
         clinicalpreset = function() private$..clinicalpreset$value,
         showexplanations = function() private$..showexplanations$value,
-        resultssubtitle = function() private$..resultssubtitle$value),
+        resultssubtitle = function() private$..resultssubtitle$value,
+        addGGPubrDonut = function() private$..addGGPubrDonut$value,
+        ggpubrDonutPalette = function() private$..ggpubrDonutPalette$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -188,7 +206,9 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..messages = NA,
         ..clinicalpreset = NA,
         ..showexplanations = NA,
-        ..resultssubtitle = NA)
+        ..resultssubtitle = NA,
+        ..addGGPubrDonut = NA,
+        ..ggpubrDonutPalette = NA)
 )
 
 jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -393,6 +413,8 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   subtitle in the pie chart. Shows test statistics, p-values, effect sizes,
 #'   and confidence intervals for categorical association tests. Provides
 #'   detailed statistical summary.
+#' @param addGGPubrDonut Add modern donut chart variant using ggpubr.
+#' @param ggpubrDonutPalette Color palette for donut chart.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -425,7 +447,9 @@ jjpiestats <- function(
     messages = FALSE,
     clinicalpreset = "custom",
     showexplanations = TRUE,
-    resultssubtitle = FALSE) {
+    resultssubtitle = FALSE,
+    addGGPubrDonut = FALSE,
+    ggpubrDonutPalette = "jco") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjpiestats requires jmvcore to be installed (restart may be required)")
@@ -463,7 +487,9 @@ jjpiestats <- function(
         messages = messages,
         clinicalpreset = clinicalpreset,
         showexplanations = showexplanations,
-        resultssubtitle = resultssubtitle)
+        resultssubtitle = resultssubtitle,
+        addGGPubrDonut = addGGPubrDonut,
+        ggpubrDonutPalette = ggpubrDonutPalette)
 
     analysis <- jjpiestatsClass$new(
         options = options,

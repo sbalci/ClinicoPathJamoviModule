@@ -32,7 +32,13 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             conflevel = 0.95,
             k = 2,
             plotwidth = 650,
-            plotheight = 450, ...) {
+            plotheight = 450,
+            addGGPubrPlot = FALSE,
+            ggpubrPlotType = "boxplot",
+            ggpubrPalette = "jco",
+            ggpubrAddStats = TRUE,
+            ggpubrShowLines = TRUE,
+            ggpubrAddPoints = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -203,6 +209,42 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=450,
                 min=300,
                 max=800)
+            private$..addGGPubrPlot <- jmvcore::OptionBool$new(
+                "addGGPubrPlot",
+                addGGPubrPlot,
+                default=FALSE)
+            private$..ggpubrPlotType <- jmvcore::OptionList$new(
+                "ggpubrPlotType",
+                ggpubrPlotType,
+                options=list(
+                    "boxplot",
+                    "violin",
+                    "paired",
+                    "line"),
+                default="boxplot")
+            private$..ggpubrPalette <- jmvcore::OptionList$new(
+                "ggpubrPalette",
+                ggpubrPalette,
+                options=list(
+                    "jco",
+                    "npg",
+                    "aaas",
+                    "lancet",
+                    "jama",
+                    "nejm"),
+                default="jco")
+            private$..ggpubrAddStats <- jmvcore::OptionBool$new(
+                "ggpubrAddStats",
+                ggpubrAddStats,
+                default=TRUE)
+            private$..ggpubrShowLines <- jmvcore::OptionBool$new(
+                "ggpubrShowLines",
+                ggpubrShowLines,
+                default=TRUE)
+            private$..ggpubrAddPoints <- jmvcore::OptionBool$new(
+                "ggpubrAddPoints",
+                ggpubrAddPoints,
+                default=FALSE)
 
             self$.addOption(private$..dep1)
             self$.addOption(private$..dep2)
@@ -231,6 +273,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..k)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
+            self$.addOption(private$..addGGPubrPlot)
+            self$.addOption(private$..ggpubrPlotType)
+            self$.addOption(private$..ggpubrPalette)
+            self$.addOption(private$..ggpubrAddStats)
+            self$.addOption(private$..ggpubrShowLines)
+            self$.addOption(private$..ggpubrAddPoints)
         }),
     active = list(
         dep1 = function() private$..dep1$value,
@@ -259,7 +307,13 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         conflevel = function() private$..conflevel$value,
         k = function() private$..k$value,
         plotwidth = function() private$..plotwidth$value,
-        plotheight = function() private$..plotheight$value),
+        plotheight = function() private$..plotheight$value,
+        addGGPubrPlot = function() private$..addGGPubrPlot$value,
+        ggpubrPlotType = function() private$..ggpubrPlotType$value,
+        ggpubrPalette = function() private$..ggpubrPalette$value,
+        ggpubrAddStats = function() private$..ggpubrAddStats$value,
+        ggpubrShowLines = function() private$..ggpubrShowLines$value,
+        ggpubrAddPoints = function() private$..ggpubrAddPoints$value),
     private = list(
         ..dep1 = NA,
         ..dep2 = NA,
@@ -287,7 +341,13 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..conflevel = NA,
         ..k = NA,
         ..plotwidth = NA,
-        ..plotheight = NA)
+        ..plotheight = NA,
+        ..addGGPubrPlot = NA,
+        ..ggpubrPlotType = NA,
+        ..ggpubrPalette = NA,
+        ..ggpubrAddStats = NA,
+        ..ggpubrShowLines = NA,
+        ..ggpubrAddPoints = NA)
 )
 
 jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -297,7 +357,8 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         todo = function() private$.items[["todo"]],
         interpretation = function() private$.items[["interpretation"]],
         plot = function() private$.items[["plot"]],
-        summary = function() private$.items[["summary"]]),
+        summary = function() private$.items[["summary"]],
+        ggpubrPlot = function() private$.items[["ggpubrPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -308,6 +369,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
+                    "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep1",
@@ -354,7 +416,26 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
-                title="Analysis Summary"))}))
+                title="Analysis Summary"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="ggpubrPlot",
+                title="Publication-Ready Within-Subjects Plot (ggpubr)",
+                width=650,
+                height=450,
+                renderFun=".plotGGPubr",
+                requiresData=TRUE,
+                visible="(addGGPubrPlot)",
+                clearWith=list(
+                    "dep1",
+                    "dep2",
+                    "dep3",
+                    "dep4",
+                    "ggpubrPlotType",
+                    "ggpubrPalette",
+                    "ggpubrAddStats",
+                    "ggpubrShowLines",
+                    "ggpubrAddPoints")))}))
 
 jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjwithinstatsBase",
@@ -498,12 +579,22 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   subtitle.
 #' @param plotwidth Width of the plot in pixels. Default is 650.
 #' @param plotheight Height of the plot in pixels. Default is 450.
+#' @param addGGPubrPlot Add publication-ready plot using ggpubr package for
+#'   within-subjects/paired data.
+#' @param ggpubrPlotType Type of ggpubr plot for within-subjects data. Paired
+#'   plot shows individual trajectories.
+#' @param ggpubrPalette Color palette for ggpubr plot.
+#' @param ggpubrAddStats Add statistical comparison p-values to ggpubr plot.
+#' @param ggpubrShowLines Show individual subject trajectories for paired
+#'   plot.
+#' @param ggpubrAddPoints Overlay individual data points on ggpubr plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -535,7 +626,13 @@ jjwithinstats <- function(
     conflevel = 0.95,
     k = 2,
     plotwidth = 650,
-    plotheight = 450) {
+    plotheight = 450,
+    addGGPubrPlot = FALSE,
+    ggpubrPlotType = "boxplot",
+    ggpubrPalette = "jco",
+    ggpubrAddStats = TRUE,
+    ggpubrShowLines = TRUE,
+    ggpubrAddPoints = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjwithinstats requires jmvcore to be installed (restart may be required)")
@@ -580,7 +677,13 @@ jjwithinstats <- function(
         conflevel = conflevel,
         k = k,
         plotwidth = plotwidth,
-        plotheight = plotheight)
+        plotheight = plotheight,
+        addGGPubrPlot = addGGPubrPlot,
+        ggpubrPlotType = ggpubrPlotType,
+        ggpubrPalette = ggpubrPalette,
+        ggpubrAddStats = ggpubrAddStats,
+        ggpubrShowLines = ggpubrShowLines,
+        ggpubrAddPoints = ggpubrAddPoints)
 
     analysis <- jjwithinstatsClass$new(
         options = options,

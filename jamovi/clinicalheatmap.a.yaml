@@ -219,4 +219,241 @@ options:
           jamovi: >
             Height for exported plots.
 
+    # === CLUSTERING OPTIONS ===
+    - name: clusterDistanceRows
+      title: 'Row Clustering Distance'
+      type: List
+      options:
+        - name: euclidean
+          title: 'Euclidean'
+        - name: pearson
+          title: 'Pearson Correlation'
+        - name: spearman
+          title: 'Spearman Correlation'
+        - name: manhattan
+          title: 'Manhattan'
+      default: euclidean
+      description:
+          R: >
+            Distance metric for row clustering.
+
+    - name: clusterMethodRows
+      title: 'Row Clustering Method'
+      type: List
+      options:
+        - name: complete
+          title: 'Complete Linkage'
+        - name: average
+          title: 'Average Linkage'
+        - name: single
+          title: 'Single Linkage'
+        - name: ward.D2
+          title: 'Ward.D2'
+      default: complete
+      description:
+          R: >
+            Agglomeration method for row clustering.
+
+    - name: clusterDistanceCols
+      title: 'Column Clustering Distance'
+      type: List
+      options:
+        - name: euclidean
+          title: 'Euclidean'
+        - name: pearson
+          title: 'Pearson Correlation'
+        - name: spearman
+          title: 'Spearman Correlation'
+        - name: manhattan
+          title: 'Manhattan'
+      default: euclidean
+      description:
+          R: >
+            Distance metric for column clustering.
+
+    - name: clusterMethodCols
+      title: 'Column Clustering Method'
+      type: List
+      options:
+        - name: complete
+          title: 'Complete Linkage'
+        - name: average
+          title: 'Average Linkage'
+        - name: single
+          title: 'Single Linkage'
+        - name: ward.D2
+          title: 'Ward.D2'
+      default: complete
+      description:
+          R: >
+            Agglomeration method for column clustering.
+
+    # === ANNOTATION TYPE OPTIONS ===
+    - name: annotationType
+      title: 'Annotation Type'
+      type: List
+      options:
+        - name: tile
+          title: 'Tile (Discrete Categories)'
+        - name: bar
+          title: 'Bar (Numeric Values)'
+        - name: point
+          title: 'Point (Scatter)'
+        - name: line
+          title: 'Line (Trends)'
+      default: tile
+      description:
+          R: >
+            Type of annotation visualization for tidyHeatmap.
+
+    # === LAYER/SYMBOL OPTIONS ===
+    - name: addLayer
+      title: 'Add Symbol Layer'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add a symbol layer on top of the heatmap.
+
+    - name: layerType
+      title: 'Layer Symbol Type'
+      type: List
+      options:
+        - name: point
+          title: 'Points'
+        - name: text
+          title: 'Text'
+        - name: star
+          title: 'Stars'
+        - name: square
+          title: 'Squares'
+        - name: diamond
+          title: 'Diamonds'
+        - name: arrow_up
+          title: 'Arrow Up'
+        - name: arrow_down
+          title: 'Arrow Down'
+      default: point
+      description:
+          R: >
+            Type of symbol to add as a layer.
+
+    - name: layerFilter
+      title: 'Layer Filter Expression'
+      type: String
+      default: ''
+      description:
+          R: >
+            Logical expression to filter which cells show symbols (e.g., "> 0.5").
+
+    # === SPLIT OPTIONS ===
+    - name: splitRows
+      title: 'Split Rows by Dendrogram'
+      type: Integer
+      min: 1
+      max: 10
+      default: 1
+      description:
+          R: >
+            Number of row groups to split based on dendrogram branches.
+
+    - name: splitCols
+      title: 'Split Columns by Dendrogram'
+      type: Integer
+      min: 1
+      max: 10
+      default: 1
+      description:
+          R: >
+            Number of column groups to split based on dendrogram branches.
+
+    # === CLUSTER ANALYSIS OPTIONS (Enhanced) ===
+    - name: findOptimalK
+      title: 'Find Optimal Number of Clusters'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Automatically determine optimal number of clusters using elbow method and silhouette analysis.
+
+    - name: kRange
+      title: 'Range for K Search'
+      type: String
+      default: '2:8'
+      description:
+          R: >
+            Range of K values to test (format: "min:max", e.g., "2:10").
+
+    - name: exportRowClusters
+      title: 'Export Row Cluster Assignments'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add row cluster assignments as a new column in the dataset.
+
+    - name: exportColClusters
+      title: 'Export Column Cluster Assignments'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add column cluster assignments as a new column in the dataset.
+
+    - name: rowClusterPrefix
+      title: 'Row Cluster Column Name'
+      type: String
+      default: 'RowCluster'
+      description:
+          R: >
+            Name for the exported row cluster assignment column.
+
+    - name: colClusterPrefix
+      title: 'Column Cluster Column Name'
+      type: String
+      default: 'ColCluster'
+      description:
+          R: >
+            Name for the exported column cluster assignment column.
+
+    # === SURVIVAL INTEGRATION ===
+    - name: survivalAnalysis
+      title: 'Survival Analysis by Clusters'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform survival analysis comparing row clusters (requires survival data).
+
+    - name: survivalTime
+      title: 'Survival Time Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    - name: survivalEvent
+      title: 'Event Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor, numeric ]
+
+    - name: survivalEventLevel
+      title: 'Event Level'
+      type: Level
+      variable: (survivalEvent)
+
+    - name: clusterComparison
+      title: 'Cluster Characteristic Comparison'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare clinical/molecular characteristics across discovered clusters.
+
+    - name: comparisonVars
+      title: 'Variables for Cluster Comparison'
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+
 ...

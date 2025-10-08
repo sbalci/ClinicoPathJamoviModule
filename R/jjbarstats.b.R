@@ -843,5 +843,47 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 TRUE
             }
 
+            ,
+            .plotBalloon = function(image, ...) {
+                if (!self$options$addGGPubrBalloon)
+                    return()
+
+                if (is.null(self$options$dep) || is.null(self$options$group))
+                    return()
+
+                mydata <- self$data
+                dep <- self$options$dep
+                group <- self$options$group
+
+                # Create contingency table
+                cont_table <- table(mydata[[dep]], mydata[[group]])
+
+                # Convert to data frame for ggballoonplot
+                cont_df <- as.data.frame(cont_table)
+                names(cont_df) <- c("Row", "Column", "Freq")
+
+                # Create balloon plot
+                plot <- ggpubr::ggballoonplot(
+                    cont_df,
+                    x = "Column",
+                    y = "Row",
+                    size = "Freq",
+                    fill = "Freq",
+                    ggtheme = ggpubr::theme_pubr()
+                )
+
+                # Add gradient color based on palette
+                if (self$options$ggpubrBalloonPalette == "jco") {
+                    plot <- plot + ggplot2::scale_fill_gradient(low = "#FFFFFF", high = "#0073C2FF")
+                } else if (self$options$ggpubrBalloonPalette == "lancet") {
+                    plot <- plot + ggplot2::scale_fill_gradient(low = "#FFFFFF", high = "#00468BFF")
+                } else {
+                    plot <- plot + ggplot2::scale_fill_gradient(low = "#FFFFFF", high = "#999999")
+                }
+
+                print(plot)
+                TRUE
+            }
+
         )
     )

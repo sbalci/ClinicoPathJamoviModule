@@ -88,6 +88,46 @@ items:
           - plotTheme
           - removeXAxisLine
           - removeYAxisLine
+          - showDataLabels
+          - dataLabelType
+          - legendPosition
+          - flipOrientation
+          - paddingTop
+          - paddingBottom
+          - paddingLeft
+          - paddingRight
+          - colorSaturation
+          - dodgeWidth
+          - pointSize
+          - pointWhiteBorder
+          - lineWidth
+          - useRasterization
+          - rasterDPI
+          - setXLimits
+          - xMin
+          - xMax
+          - setYLimits
+          - yMin
+          - yMax
+          - xAxisTickCount
+          - yAxisTickCount
+          - fontFamily
+          - titleAlignment
+          - captionAlignment
+          - showMedianLine
+          - connectPairedData
+          - highlightSubset
+          - maxDataPoints
+          - errorBarWidth
+          - violinScale
+          - boxplotOutliers
+          - boxplotNotch
+          - addSmoother
+          - smootherMethod
+          - smootherSE
+          - plotWidth
+          - plotHeight
+          - useAutoSize
 
 refs:
     - ClinicoPathJamoviModule

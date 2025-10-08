@@ -34,7 +34,12 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             smoothlinesize = 1.5,
             smoothlinecolor = "blue",
             plotwidth = 600,
-            plotheight = 450, ...) {
+            plotheight = 450,
+            addGGPubrPlot = FALSE,
+            ggpubrPalette = "jco",
+            ggpubrAddCorr = TRUE,
+            ggpubrCorrMethod = "pearson",
+            ggpubrAddSmooth = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -222,6 +227,36 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 default=450,
                 min=300,
                 max=800)
+            private$..addGGPubrPlot <- jmvcore::OptionBool$new(
+                "addGGPubrPlot",
+                addGGPubrPlot,
+                default=FALSE)
+            private$..ggpubrPalette <- jmvcore::OptionList$new(
+                "ggpubrPalette",
+                ggpubrPalette,
+                options=list(
+                    "jco",
+                    "npg",
+                    "aaas",
+                    "lancet",
+                    "jama",
+                    "nejm"),
+                default="jco")
+            private$..ggpubrAddCorr <- jmvcore::OptionBool$new(
+                "ggpubrAddCorr",
+                ggpubrAddCorr,
+                default=TRUE)
+            private$..ggpubrCorrMethod <- jmvcore::OptionList$new(
+                "ggpubrCorrMethod",
+                ggpubrCorrMethod,
+                options=list(
+                    "pearson",
+                    "spearman"),
+                default="pearson")
+            private$..ggpubrAddSmooth <- jmvcore::OptionBool$new(
+                "ggpubrAddSmooth",
+                ggpubrAddSmooth,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -252,6 +287,11 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..smoothlinecolor)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
+            self$.addOption(private$..addGGPubrPlot)
+            self$.addOption(private$..ggpubrPalette)
+            self$.addOption(private$..ggpubrAddCorr)
+            self$.addOption(private$..ggpubrCorrMethod)
+            self$.addOption(private$..ggpubrAddSmooth)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -282,7 +322,12 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         smoothlinesize = function() private$..smoothlinesize$value,
         smoothlinecolor = function() private$..smoothlinecolor$value,
         plotwidth = function() private$..plotwidth$value,
-        plotheight = function() private$..plotheight$value),
+        plotheight = function() private$..plotheight$value,
+        addGGPubrPlot = function() private$..addGGPubrPlot$value,
+        ggpubrPalette = function() private$..ggpubrPalette$value,
+        ggpubrAddCorr = function() private$..ggpubrAddCorr$value,
+        ggpubrCorrMethod = function() private$..ggpubrCorrMethod$value,
+        ggpubrAddSmooth = function() private$..ggpubrAddSmooth$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -312,7 +357,12 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..smoothlinesize = NA,
         ..smoothlinecolor = NA,
         ..plotwidth = NA,
-        ..plotheight = NA)
+        ..plotheight = NA,
+        ..addGGPubrPlot = NA,
+        ..ggpubrPalette = NA,
+        ..ggpubrAddCorr = NA,
+        ..ggpubrCorrMethod = NA,
+        ..ggpubrAddSmooth = NA)
 )
 
 jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -322,7 +372,9 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]],
-        plot3 = function() private$.items[["plot3"]]),
+        plot3 = function() private$.items[["plot3"]],
+        ggpubrPlot = function() private$.items[["ggpubrPlot"]],
+        ggpubrPlot2 = function() private$.items[["ggpubrPlot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -333,6 +385,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
+                    "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
@@ -388,12 +441,45 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
-                title="Plot with Aesthetics - `${dep} vs {group}`",
+                title="`Plot with Aesthetics - ${dep} vs {group}`",
                 width=600,
                 height=450,
                 renderFun=".plot3",
                 requiresData=TRUE,
-                visible="(!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))"))}))
+                visible="(!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="ggpubrPlot",
+                title="Publication-Ready Scatter Plot (ggpubr)",
+                width=600,
+                height=450,
+                renderFun=".plotGGPubr",
+                requiresData=TRUE,
+                visible="(addGGPubrPlot)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "ggpubrPalette",
+                    "ggpubrAddCorr",
+                    "ggpubrCorrMethod",
+                    "ggpubrAddSmooth")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="ggpubrPlot2",
+                title="`Publication-Ready Scatter Plot by ${grvar} (ggpubr)`",
+                width=1200,
+                height=450,
+                renderFun=".plotGGPubr2",
+                requiresData=TRUE,
+                visible="(addGGPubrPlot && grvar)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "ggpubrPalette",
+                    "ggpubrAddCorr",
+                    "ggpubrCorrMethod",
+                    "ggpubrAddSmooth")))}))
 
 jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjscatterstatsBase",
@@ -516,12 +602,20 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param smoothlinecolor Color of the regression/smooth line.
 #' @param plotwidth Width of the plot in pixels. Default is 600.
 #' @param plotheight Height of the plot in pixels. Default is 450.
+#' @param addGGPubrPlot Add publication-ready scatter plot using ggpubr
+#'   package.
+#' @param ggpubrPalette Color palette for ggpubr scatter plot.
+#' @param ggpubrAddCorr Add correlation statistics to ggpubr scatter plot.
+#' @param ggpubrCorrMethod Method for correlation in ggpubr plot.
+#' @param ggpubrAddSmooth Add smoothed trend line to ggpubr scatter plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$ggpubrPlot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -555,7 +649,12 @@ jjscatterstats <- function(
     smoothlinesize = 1.5,
     smoothlinecolor = "blue",
     plotwidth = 600,
-    plotheight = 450) {
+    plotheight = 450,
+    addGGPubrPlot = FALSE,
+    ggpubrPalette = "jco",
+    ggpubrAddCorr = TRUE,
+    ggpubrCorrMethod = "pearson",
+    ggpubrAddSmooth = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjscatterstats requires jmvcore to be installed (restart may be required)")
@@ -612,7 +711,12 @@ jjscatterstats <- function(
         smoothlinesize = smoothlinesize,
         smoothlinecolor = smoothlinecolor,
         plotwidth = plotwidth,
-        plotheight = plotheight)
+        plotheight = plotheight,
+        addGGPubrPlot = addGGPubrPlot,
+        ggpubrPalette = ggpubrPalette,
+        ggpubrAddCorr = ggpubrAddCorr,
+        ggpubrCorrMethod = ggpubrCorrMethod,
+        ggpubrAddSmooth = ggpubrAddSmooth)
 
     analysis <- jjscatterstatsClass$new(
         options = options,

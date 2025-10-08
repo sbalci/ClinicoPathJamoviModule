@@ -1,0 +1,230 @@
+---
+name:  patientsimilarity
+title: Patient Similarity Clustering
+jrs:   '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: (vars)
+      refs:
+        - ClinicoPathJamoviModule
+
+    - name: summaryText
+      title: Analysis Summary
+      type: Preformatted
+      visible: true
+
+    - name: projectionPlot
+      title: ''
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .projectionPlot
+      visible: true
+      requiresData: true
+      clearWith:
+        - vars
+        - method
+        - dimensions
+        - colorBy
+
+    - name: projection3D
+      title: Interactive 3D Projection
+      type: Image
+      width: 800
+      height: 700
+      renderFun: .projection3D
+      visible: (show3DPlot)
+      requiresData: true
+      clearWith:
+        - vars
+        - method
+        - dimensions
+
+    - name: varianceTable
+      title: Variance Explained
+      type: Table
+      visible: (method:pca)
+      rows: 0
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+          type: number
+          format: zto
+        - name: cumulative
+          title: Cumulative
+          type: number
+          format: pc
+
+    - name: loadingsTable
+      title: Variable Loadings
+      type: Table
+      visible: (showLoadings)
+      rows: 0
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: dim1
+          title: 'Dim 1'
+          type: number
+          format: zto
+        - name: dim2
+          title: 'Dim 2'
+          type: number
+          format: zto
+        - name: dim3
+          title: 'Dim 3'
+          type: number
+          format: zto
+          visible: (dimensions:3)
+
+    - name: clusterHeading
+      title: Cluster Analysis Results
+      type: Html
+      visible: (performClustering)
+
+    - name: clusterSummary
+      title: Cluster Summary
+      type: Table
+      visible: (performClustering)
+      rows: 0
+      columns:
+        - name: cluster
+          title: Cluster
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: percentage
+          title: '%'
+          type: number
+          format: pc
+
+    - name: clusterCharacteristics
+      title: Cluster Characteristics (Mean Values)
+      type: Table
+      visible: (performClustering && showClusterStats)
+      rows: 0
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+
+    - name: clusterOutcomes
+      title: Outcome Distribution by Cluster
+      type: Table
+      visible: (performClustering && colorBy)
+      rows: 0
+      columns:
+        - name: cluster
+          title: Cluster
+          type: text
+        - name: outcome_summary
+          title: ''
+          type: text
+
+    - name: clusterQuality
+      title: Cluster Quality Metrics
+      type: Table
+      visible: (performClustering)
+      rows: 1
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+
+    - name: survivalHeading
+      title: Survival Analysis by Cluster
+      type: Html
+      visible: (survivalAnalysis)
+
+    - name: survivalTable
+      title: Survival Summary by Cluster
+      type: Table
+      visible: (survivalAnalysis)
+      rows: 0
+      columns:
+        - name: cluster
+          title: Cluster
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: median_survival
+          title: Median Survival
+          type: number
+          format: zto
+
+    - name: survivalPlot
+      title: Kaplan-Meier Curves by Cluster
+      type: Image
+      width: 650
+      height: 500
+      renderFun: .survivalPlot
+      visible: (survivalAnalysis)
+      requiresData: true
+
+    - name: survivalComparison
+      title: Log-Rank Test
+      type: Table
+      visible: (survivalAnalysis)
+      rows: 1
+      columns:
+        - name: chisq
+          title: Chi-square
+          type: number
+          format: zto
+        - name: df
+          title: df
+          type: integer
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: exportClusters
+      title: Cluster Assignments
+      type: Output
+      varTitle: '`Cluster`'
+      varDescription: Patient cluster assignments from similarity analysis
+      clearWith:
+        - vars
+        - method
+        - performClustering
+
+    - name: exportCoordinates
+      title: Projection Coordinates
+      type: Output
+      varTitle: '`Coord`'
+      varDescription: Projection coordinates (2D or 3D)
+      clearWith:
+        - vars
+        - method
+        - dimensions
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: true
+      refs:
+        - ClinicoPathJamoviModule
+
+refs:
+    - ClinicoPathJamoviModule
+    - Rtsne
+    - umap
+
+...

@@ -1,0 +1,122 @@
+---
+name:  modelperformance
+title: Multi-Model Performance Comparison
+jrs:   '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: comparisonTable
+      title: Model Performance Comparison
+      type: Table
+      rows: 0
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: nvars
+          title: N Vars
+          type: integer
+        - name: n
+          title: N
+          type: integer
+        - name: aic
+          title: AIC
+          type: number
+          format: zto
+          visible: (showAIC)
+        - name: bic
+          title: BIC
+          type: number
+          format: zto
+          visible: (showAIC)
+        - name: rsquared
+          title: R²
+          type: number
+          format: zto
+          visible: (showRSquared)
+        - name: cindex
+          title: C-index
+          type: number
+          format: zto
+          visible: (showCIndex)
+        - name: loglik
+          title: Log-Lik
+          type: number
+          format: zto
+          visible: (showLogLik)
+        - name: mcc
+          title: MCC
+          type: number
+          format: zto
+          visible: (showMCC)
+        - name: recommended
+          title: Best
+          type: text
+      refs:
+        - Matthews1975
+        - Saito2015
+
+    - name: cvTable
+      title: Cross-Validation Performance
+      type: Table
+      visible: (crossValidation)
+      rows: 0
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: cv_metric
+          title: CV Score
+          type: number
+          format: zto
+        - name: cv_se
+          title: SE
+          type: number
+          format: zto
+
+    - name: forestPlot
+      title: Forest Plot - Model Comparison
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .forestPlot
+      visible: (showForestPlot)
+      requiresData: true
+
+    - name: rocPlot
+      title: ROC Curves - Model Comparison
+      type: Image
+      width: 650
+      height: 550
+      renderFun: .rocPlot
+      visible: (showROC)
+      requiresData: true
+
+    - name: calibrationPlot
+      title: Calibration Plot
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .calibrationPlot
+      visible: (showCalibration)
+      requiresData: true
+
+    - name: recommendation
+      title: Model Recommendation
+      type: Html
+      visible: (autoRecommend)
+
+    - name: modelDetails
+      title: Detailed Model Summaries
+      type: Html
+      visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+    - survival
+
+...
