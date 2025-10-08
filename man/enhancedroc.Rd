@@ -29,6 +29,14 @@ enhancedROC(
   smoothMethod = "none",
   partialAuc = FALSE,
   partialRange = "0.8,1.0",
+  crocAnalysis = FALSE,
+  crocAlpha = 7,
+  convexHull = FALSE,
+  tiedScoreHandling = "average",
+  detectImbalance = TRUE,
+  imbalanceThreshold = 3,
+  showImbalanceWarning = TRUE,
+  recommendPRC = TRUE,
   prevalence = 0.1,
   clinicalContext = "general",
   clinicalPresets = "custom",
@@ -100,6 +108,30 @@ sensitivity/specificity ranges}
 
 \item{partialRange}{Range for partial AUC (specificity_min,specificity_max)}
 
+\item{crocAnalysis}{Calculate Concentrated ROC curves for early retrieval
+analysis}
+
+\item{crocAlpha}{Concentration parameter for CROC exponential magnifier
+function}
+
+\item{convexHull}{Calculate ROC convex hull (optimal achievable
+performance)}
+
+\item{tiedScoreHandling}{Method for handling tied predictor scores in ROC
+calculation}
+
+\item{detectImbalance}{Automatically detect class imbalance and recommend
+PRC when appropriate}
+
+\item{imbalanceThreshold}{Ratio threshold for imbalance detection (e.g.,
+3.0 means 3:1 or 1:3 ratio)}
+
+\item{showImbalanceWarning}{Display warning message when class imbalance is
+detected}
+
+\item{recommendPRC}{Recommend using Precision-Recall curves when imbalance
+is detected}
+
 \item{prevalence}{Disease prevalence for calculating predictive values}
 
 \item{clinicalContext}{Clinical application context for interpretation}
@@ -131,6 +163,8 @@ between models}
 A results object containing:
 \tabular{llllll}{
 \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$results$imbalanceWarning} \tab \tab \tab \tab \tab Warning and recommendations for imbalanced datasets \cr
+\code{results$results$imbalanceMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$results$analysisSummary} \tab \tab \tab \tab \tab Plain language summary of key findings \cr
 \code{results$results$clinicalReport} \tab \tab \tab \tab \tab Copy-ready clinical report sentences for publications and reports \cr
 \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
@@ -142,6 +176,8 @@ A results object containing:
 \code{results$results$diagnosticPerformance} \tab \tab \tab \tab \tab Comprehensive diagnostic performance measures at optimal cutoff \cr
 \code{results$results$clinicalApplicationMetrics} \tab \tab \tab \tab \tab Clinical metrics including predictive values and likelihood ratios \cr
 \code{results$results$partialAucAnalysis} \tab \tab \tab \tab \tab Partial AUC analysis for specific sensitivity/specificity ranges \cr
+\code{results$results$crocAnalysisTable} \tab \tab \tab \tab \tab Concentrated ROC analysis with early retrieval focus \cr
+\code{results$results$convexHullTable} \tab \tab \tab \tab \tab ROC convex hull showing optimal achievable performance \cr
 \code{results$results$comprehensiveAnalysisSummary} \tab \tab \tab \tab \tab Enhanced statistical summary for comprehensive output \cr
 \code{results$results$clinicalInterpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -150,6 +186,8 @@ A results object containing:
 \code{results$results$cutoffAnalysisPlot} \tab \tab \tab \tab \tab Sensitivity and specificity across cutoff values \cr
 \code{results$results$youdenIndexPlot} \tab \tab \tab \tab \tab Youden Index values across cutoff range \cr
 \code{results$results$clinicalDecisionPlot} \tab \tab \tab \tab \tab Clinical decision curves and threshold analysis \cr
+\code{results$results$crocCurvePlot} \tab \tab \tab \tab \tab Concentrated ROC curve with exponential magnifier transformation \cr
+\code{results$results$convexHullPlot} \tab \tab \tab \tab \tab ROC curve with convex hull overlay \cr
 }
 }
 \description{

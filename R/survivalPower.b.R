@@ -130,6 +130,14 @@ survivalPowerClass <- R6::R6Class(
                 }
             }
 
+            distribution <- self$options$survival_distribution
+            if (!is.null(distribution) && distribution != "exponential") {
+                result$valid <- FALSE
+                result$message <- paste0(result$message,
+                    "Current version supports exponential survival only. ",
+                    "Please set the survival distribution to 'exponential' for validated calculations. ")
+            }
+
             # Validate allocation ratio
             ratio <- self$options$allocation_ratio
             if (!is.null(ratio)) {
@@ -155,6 +163,28 @@ survivalPowerClass <- R6::R6Class(
 
             # Validate parameter combinations
             private$.validate_parameter_combinations(result)
+
+            # Multiplicity handling constraints
+            if (!isTRUE(self$options$multiple_comparisons %in% c("none", "bonferroni"))) {
+                result$valid <- FALSE
+                result$message <- paste0(result$message,
+                    "Multiplicity adjustment '", self$options$multiple_comparisons,
+                    "' is not yet supported. Please select 'none' or 'bonferroni'. ")
+            }
+
+            if (!is.null(self$options$stratification_factors) && self$options$stratification_factors > 0) {
+                result$warnings <- append(result$warnings,
+                    "Stratification factors are not currently used to adjust variance; ensure stratified analyses are planned separately.")
+            }
+
+            unsupported_tests <- c("competing_risks", "rmst_test", "snp_survival", "weighted_log_rank")
+            if (isTRUE(self$options$test_type %in% unsupported_tests)) {
+                result$valid <- FALSE
+                result$message <- paste0(result$message,
+                    "Selected statistical test '", self$options$test_type,
+                    "' is temporarily unavailable pending validated implementation. ",
+                    "Please choose log-rank, Cox regression, or non-inferiority.")
+            }
 
             return(result)
         },
@@ -264,16 +294,16 @@ survivalPowerClass <- R6::R6Class(
                 "<p><strong>Current Configuration:</strong><br>",
                 "• Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
                 "• Statistical Test: ", private$.format_test_type(test_type), "</p>",
-                "<p><strong>Key Features:</strong><br>",
-                "• Log-rank test and Cox regression power calculations<br>",
-                "• Competing risks and RMST-based analyses<br>",
-                "• Non-inferiority trial designs<br>",
-                "• SNP-based survival studies<br>",
-                "• Multi-arm and cluster randomized trials<br>",
-                "• Interim analysis planning with alpha spending functions<br>",
-                "• Sensitivity analysis across parameter ranges<br>",
-                "• Regulatory compliance assessment</p>",
-                "<p><strong>Note:</strong> All calculations are based on established statistical methods and validated formulas. ",
+                "<p><strong>Currently validated calculations:</strong><br>",
+                "• Log-rank test (sample size, power, detectable effect, duration)<br>",
+                "• Cox regression under proportional hazards<br>",
+                "• Non-inferiority designs using hazard-ratio margins<br>",
+                "• Cluster design effects for randomized trials</p>",
+                "<p><strong>Temporarily unavailable pending validation:</strong><br>",
+                "• Competing risks (Fine-Gray)<br>",
+                "• Restricted mean survival time comparisons<br>",
+                "• SNP-based survival analyses and other specialised endpoints</p>",
+                "<p><strong>Note:</strong> Calculations assume exponential survival distributions and uniform accrual. ",
                 "Results should be interpreted by qualified biostatisticians in the context of specific study requirements.</p>"
             )
 
@@ -771,257 +801,11 @@ survivalPowerClass <- R6::R6Class(
         },
         
         .calculate_competing_risks = function() {
-            # Competing risks power calculation using Fine-Gray method
-            analysis_type <- self$options$analysis_type
-            alpha <- self$options$alpha_level
-            power <- self$options$power_level
-            hr <- self$options$effect_size
-            accrual_period <- self$options$accrual_period
-            follow_up <- self$options$follow_up_period
-            median_control <- self$options$control_median_survival
-            allocation_ratio <- self$options$allocation_ratio
-            cr_rate <- self$options$competing_risk_rate
-            cr_hr <- self$options$competing_risk_hr
-
-            # Convert median to rate parameter for exponential distribution
-            lambda_control <- log(2) / median_control
-            lambda_cr <- cr_rate  # Competing risk rate
-
-            tryCatch({
-                if (analysis_type == "sample_size") {
-                    # Calculate sample size for competing risks using Fine-Gray approach
-
-                    # Effective hazard ratio accounting for competing risks
-                    # Using simplified approximation based on cumulative incidence functions
-                    total_time <- accrual_period + follow_up
-
-                    # Primary event cumulative incidence in control group
-                    cif_primary_control <- 1 - exp(-lambda_control * total_time * private$AVERAGE_FOLLOWUP_FACTOR) * exp(-lambda_cr * total_time * private$AVERAGE_FOLLOWUP_FACTOR)
-
-                    # Competing risk cumulative incidence
-                    cif_competing <- 1 - exp(-lambda_cr * total_time * private$AVERAGE_FOLLOWUP_FACTOR)
-
-                    # Effective events proportion (reduced due to competing risks)
-                    effective_event_prop <- cif_primary_control * (1 - cif_competing * 0.5)
-
-                    # Variance inflation factor for competing risks
-                    variance_inflation <- 1 / (1 - cif_competing)
-
-                    # Standard log-rank calculation with competing risks adjustment
-                    events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
-                    events_needed_cr <- ceiling(events_needed * variance_inflation)
-
-                    # Total sample size accounting for event probability and dropout
-                    dropout_adj <- 1 / (1 - self$options$dropout_rate * (total_time / 12))
-                    n_total <- ceiling((events_needed_cr / effective_event_prop) * dropout_adj)
-
-                    return(paste("Total Sample Size:", n_total, "subjects (", events_needed_cr, "primary events needed, competing risk rate:", round(cr_rate * 100, 1), "%)"))
-
-                } else if (analysis_type == "power") {
-                    # Calculate power for competing risks analysis
-                    n_total <- self$options$sample_size_input
-
-                    total_time <- accrual_period + follow_up
-
-                    # Expected primary events accounting for competing risks
-                    cif_primary_control <- 1 - exp(-lambda_control * total_time * private$AVERAGE_FOLLOWUP_FACTOR) * exp(-lambda_cr * total_time * private$AVERAGE_FOLLOWUP_FACTOR)
-                    cif_competing <- 1 - exp(-lambda_cr * total_time * private$AVERAGE_FOLLOWUP_FACTOR)
-
-                    effective_events <- n_total * cif_primary_control * (1 - cif_competing * 0.5)
-                    effective_events <- effective_events * (1 - self$options$dropout_rate * (total_time / 12))
-
-                    # Power calculation with competing risks adjustment
-                    variance_inflation <- 1 / (1 - cif_competing)
-                    adjusted_events <- effective_events / variance_inflation
-
-                    power_calc <- private$.power_from_events(
-                        events = adjusted_events,
-                        hr = hr,
-                        alpha = alpha,
-                        allocation_ratio = allocation_ratio
-                    )
-
-                    return(paste("Statistical Power:", round(power_calc * 100, 1), "% (", round(effective_events), "primary events expected,", round(cif_competing * 100, 1), "% competing risk)"))
-
-                } else if (analysis_type == "effect_size") {
-                    # Calculate minimum detectable HR for competing risks
-                    n_total <- self$options$sample_size_input
-
-                    total_time <- accrual_period + follow_up
-                    cif_primary_control <- 1 - exp(-lambda_control * total_time * private$AVERAGE_FOLLOWUP_FACTOR) * exp(-lambda_cr * total_time * private$AVERAGE_FOLLOWUP_FACTOR)
-                    cif_competing <- 1 - exp(-lambda_cr * total_time * private$AVERAGE_FOLLOWUP_FACTOR)
-
-                    effective_events <- n_total * cif_primary_control * (1 - cif_competing * 0.5)
-                    effective_events <- effective_events * (1 - self$options$dropout_rate * (total_time / 12))
-
-                    variance_inflation <- 1 / (1 - cif_competing)
-                    adjusted_events <- effective_events / variance_inflation
-
-                    # Find minimum detectable HR
-                    hr_candidates <- seq(0.5, 0.95, by = 0.02)
-                    for (hr_test in hr_candidates) {
-                        power_test <- private$.power_from_events(
-                            events = adjusted_events,
-                            hr = hr_test,
-                            alpha = alpha,
-                            allocation_ratio = allocation_ratio
-                        )
-                        if (power_test >= power) {
-                            return(paste("Minimum Detectable HR:", round(hr_test, 3), "(accounting for", round(cif_competing * 100, 1), "% competing risk)"))
-                        }
-                    }
-
-                    return("HR < 0.5 required for specified power with competing risks")
-
-                } else if (analysis_type == "duration") {
-                    # Calculate required study duration for competing risks
-                    n_total <- self$options$sample_size_input
-
-                    # Events needed with competing risks adjustment
-                    events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
-
-                    # Approximate competing risk impact on event accumulation
-                    primary_event_rate <- lambda_control * (1 - self$options$dropout_rate / 12)
-                    competing_event_rate <- lambda_cr
-
-                    # Reduced effective event rate due to competing risks
-                    effective_event_rate <- primary_event_rate * (1 - competing_event_rate / (primary_event_rate + competing_event_rate))
-
-                    # Duration calculation
-                    variance_inflation <- 1 + competing_event_rate / primary_event_rate
-                    adjusted_events_needed <- events_needed * variance_inflation
-
-                    avg_follow_up_needed <- adjusted_events_needed / (n_total * effective_event_rate)
-                    total_duration <- accrual_period + avg_follow_up_needed
-
-                    return(paste("Required Study Duration:", round(total_duration, 1), "months (accounting for competing risks)"))
-                }
-
-            }, error = function(e) {
-                return(paste("Competing risks calculation error:", e$message))
-            })
-
-            return("Competing risks calculation completed")
+            return("Competing risks calculations are temporarily unavailable pending validated Fine-Gray implementation")
         },
         
         .calculate_rmst = function() {
-            # RMST (Restricted Mean Survival Time) power calculation
-            analysis_type <- self$options$analysis_type
-            alpha <- self$options$alpha_level
-            power <- self$options$power_level
-            hr <- self$options$effect_size
-            accrual_period <- self$options$accrual_period
-            follow_up <- self$options$follow_up_period
-            median_control <- self$options$control_median_survival
-            allocation_ratio <- self$options$allocation_ratio
-            rmst_tau <- self$options$rmst_tau
-            rmst_difference <- self$options$rmst_difference
-
-            # Convert median to rate parameter for exponential distribution
-            lambda_control <- log(2) / median_control
-            lambda_treatment <- lambda_control * hr
-
-            tryCatch({
-                # Calculate RMST for both groups under exponential assumption
-                rmst_control <- (1 - exp(-lambda_control * rmst_tau)) / lambda_control
-                rmst_treatment <- (1 - exp(-lambda_treatment * rmst_tau)) / lambda_treatment
-
-                # Expected RMST difference
-                expected_rmst_diff <- rmst_treatment - rmst_control
-
-                if (analysis_type == "sample_size") {
-                    # Sample size calculation for RMST difference test
-
-                    # Variance estimation for RMST under exponential distribution
-                    # Using asymptotic variance formula for RMST estimator
-                    var_rmst_control <- private$.calculate_rmst_variance(lambda_control, rmst_tau)
-                    var_rmst_treatment <- private$.calculate_rmst_variance(lambda_treatment, rmst_tau)
-
-                    # Combined variance for difference in RMST
-                    var_combined <- var_rmst_control + var_rmst_treatment * allocation_ratio
-
-                    # Standard error for RMST difference
-                    se_rmst_diff <- sqrt(var_combined)
-
-                    # Sample size calculation using normal approximation
-                    z_alpha <- qnorm(1 - alpha/2)
-                    z_beta <- qnorm(power)
-
-                    # Use specified RMST difference or calculate from HR
-                    target_diff <- if (self$options$effect_size_type == "rmst_difference") rmst_difference else expected_rmst_diff
-
-                    n_per_group <- ceiling(((z_alpha + z_beta) * se_rmst_diff / target_diff)^2)
-                    n_total <- n_per_group * (1 + allocation_ratio)
-
-                    # Adjust for dropout
-                    total_time <- accrual_period + follow_up
-                    dropout_adj <- 1 / (1 - self$options$dropout_rate * (total_time / 12))
-                    n_total_adj <- ceiling(n_total * dropout_adj)
-
-                    return(paste("Total Sample Size:", n_total_adj, "subjects (", n_per_group, "per group, RMST difference:", round(target_diff, 1), "months)"))
-
-                } else if (analysis_type == "power") {
-                    # Power calculation for RMST test
-                    n_total <- self$options$sample_size_input
-                    n_per_group <- round(n_total / (1 + allocation_ratio))
-
-                    # Variance calculation
-                    var_rmst_control <- private$.calculate_rmst_variance(lambda_control, rmst_tau)
-                    var_rmst_treatment <- private$.calculate_rmst_variance(lambda_treatment, rmst_tau)
-
-                    # Standard error accounting for sample size
-                    se_control <- sqrt(var_rmst_control / n_per_group)
-                    se_treatment <- sqrt(var_rmst_treatment / (n_per_group * allocation_ratio))
-                    se_diff <- sqrt(se_control^2 + se_treatment^2)
-
-                    # Power calculation
-                    z_alpha <- qnorm(1 - alpha/2)
-                    z_statistic <- abs(expected_rmst_diff) / se_diff
-                    power_calc <- pnorm(z_statistic - z_alpha) + pnorm(-z_statistic - z_alpha)
-
-                    return(paste("Statistical Power:", round(power_calc * 100, 1), "% (RMST difference:", round(expected_rmst_diff, 1), "months at τ =", rmst_tau, "months)"))
-
-                } else if (analysis_type == "effect_size") {
-                    # Calculate minimum detectable RMST difference
-                    n_total <- self$options$sample_size_input
-                    n_per_group <- round(n_total / (1 + allocation_ratio))
-
-                    # Conservative variance estimate (using control group parameters)
-                    var_rmst_control <- private$.calculate_rmst_variance(lambda_control, rmst_tau)
-                    se_per_group <- sqrt(var_rmst_control / n_per_group)
-                    se_diff <- sqrt(2) * se_per_group  # Assuming equal variance
-
-                    # Minimum detectable difference
-                    z_alpha <- qnorm(1 - alpha/2)
-                    z_beta <- qnorm(power)
-                    min_detectable_diff <- (z_alpha + z_beta) * se_diff
-
-                    return(paste("Minimum Detectable RMST Difference:", round(min_detectable_diff, 1), "months (at τ =", rmst_tau, "months)"))
-
-                } else if (analysis_type == "duration") {
-                    # Calculate required study duration for RMST analysis
-                    n_total <- self$options$sample_size_input
-
-                    # For RMST, the restriction time tau is critical
-                    # Duration should be at least tau plus some buffer for complete follow-up
-                    min_duration_for_rmst <- rmst_tau + 6  # 6 months buffer
-
-                    # Check if current timeline is sufficient
-                    current_duration <- accrual_period + follow_up
-
-                    if (current_duration >= min_duration_for_rmst) {
-                        return(paste("Current Study Duration Adequate:", current_duration, "months (>", min_duration_for_rmst, "months needed for τ =", rmst_tau, ")"))
-                    } else {
-                        additional_time <- min_duration_for_rmst - current_duration
-                        return(paste("Required Study Duration:", min_duration_for_rmst, "months (additional", round(additional_time, 1), "months needed)"))
-                    }
-                }
-
-            }, error = function(e) {
-                return(paste("RMST calculation error:", e$message))
-            })
-
-            return("RMST calculation completed")
+            return("RMST-based calculations are temporarily unavailable pending validated RMST variance implementation")
         },
 
         .calculate_rmst_variance = function(lambda, tau) {
@@ -1038,11 +822,10 @@ survivalPowerClass <- R6::R6Class(
         },
         
         .calculate_non_inferiority = function() {
-            # Non-inferiority power calculation
             analysis_type <- self$options$analysis_type
             alpha <- self$options$alpha_level
             power <- self$options$power_level
-            hr <- self$options$effect_size
+            hr_true <- private$.get_effect_hr()
             accrual_period <- self$options$accrual_period
             follow_up <- self$options$follow_up_period
             median_control <- self$options$control_median_survival
@@ -1050,301 +833,154 @@ survivalPowerClass <- R6::R6Class(
             ni_margin <- self$options$ni_margin
             ni_type <- self$options$ni_type
 
-            # Convert median to rate parameter for exponential distribution
-            lambda_control <- log(2) / median_control
+            if (is.null(hr_true) || hr_true <= 0) {
+                return("Hazard ratio must be specified and positive for non-inferiority calculations")
+            }
 
-            tryCatch({
-                # Non-inferiority testing uses one-sided hypothesis
-                # H0: HR >= ni_margin vs H1: HR < ni_margin
+            if (!isTRUE(ni_type %in% c("relative_margin", "retention_fraction"))) {
+                return("Only relative hazard-ratio margins are supported in the validated implementation")
+            }
 
-                if (analysis_type == "sample_size") {
-                    # Sample size for non-inferiority trial
+            hr_margin <- ni_margin
+            if (hr_margin <= 0) {
+                return("Non-inferiority margin must be specified on the hazard-ratio scale")
+            }
 
-                    # For non-inferiority, we test against the margin, not 1.0
-                    # The effect size is the difference between true HR and margin
-                    if (ni_type == "relative_margin") {
-                        # True HR should be less than the margin for non-inferiority
-                        effect_against_margin <- log(hr) - log(ni_margin)
-                    } else if (ni_type == "absolute_margin") {
-                        # Absolute difference from margin
-                        effect_against_margin <- hr - ni_margin
-                    } else {  # retention_fraction
-                        # Retention of effect relative to historical control
-                        effect_against_margin <- log(hr) - log(ni_margin)
+            if (hr_true >= hr_margin) {
+                warning("Specified treatment effect does not demonstrate non-inferiority against the chosen margin")
+            }
+
+            props <- private$.allocation_props(allocation_ratio)
+            info_fraction <- props$control * props$treatment
+            if (info_fraction <= 0) {
+                return("Allocation ratio must produce positive information fraction")
+            }
+
+            z_alpha <- qnorm(1 - alpha)  # one-sided
+            z_beta <- qnorm(power)
+            log_effect <- log(hr_true) - log(hr_margin)
+
+            if (log_effect >= 0) {
+                log_effect <- -abs(log_effect)
+            }
+
+            events_needed <- ceiling(((z_alpha + z_beta)^2) / ((log_effect)^2 * info_fraction))
+
+            dist_params <- private$.get_distribution_parameters(median_control, hr_true)
+
+            dropout_rate <- self$options$dropout_rate
+
+            if (analysis_type == "sample_size") {
+                n_total <- private$.sample_size_from_events(
+                    events_needed = events_needed,
+                    lambda_control = dist_params$lambda_control,
+                    hr = hr_true,
+                    allocation_ratio = allocation_ratio,
+                    accrual_period = accrual_period,
+                    follow_up_period = follow_up,
+                    dropout_rate = dropout_rate
+                )
+
+                return(paste(
+                    "Total Sample Size:", n_total,
+                    "subjects (", events_needed, "events needed; NI margin HR =", hr_margin, ")"
+                ))
+
+            } else if (analysis_type == "power") {
+                n_total <- self$options$sample_size_input
+
+                expected_events <- private$.expected_events_from_sample(
+                    n_total = n_total,
+                    lambda_control = dist_params$lambda_control,
+                    hr = hr_true,
+                    allocation_ratio = allocation_ratio,
+                    accrual_period = accrual_period,
+                    follow_up_period = follow_up,
+                    dropout_rate = dropout_rate
+                )$total
+
+                info <- private$.information_from_events(expected_events, allocation_ratio)
+                mean_z <- sqrt(info) * (log(hr_true) - log(hr_margin))
+                power_calc <- pnorm(-z_alpha - mean_z)
+
+                return(paste(
+                    "Non-inferiority Power:", round(power_calc * 100, 1),
+                    "% (HR =", round(hr_true, 3), "vs margin =", hr_margin, ")"
+                ))
+
+            } else if (analysis_type == "effect_size") {
+                n_total <- self$options$sample_size_input
+
+                power_for_hr <- function(hr_candidate) {
+                    if (hr_candidate <= 0 || hr_candidate >= hr_margin) {
+                        return(-1)
                     }
 
-                    # One-sided test for non-inferiority
-                    z_alpha_one_sided <- qnorm(1 - alpha)  # One-sided alpha
-                    z_beta <- qnorm(power)
+                    events <- private$.expected_events_from_sample(
+                        n_total = n_total,
+                        lambda_control = dist_params$lambda_control,
+                        hr = hr_candidate,
+                        allocation_ratio = allocation_ratio,
+                        accrual_period = accrual_period,
+                        follow_up_period = follow_up,
+                        dropout_rate = dropout_rate
+                    )$total
 
-                    # Events needed for non-inferiority test
-                    if (ni_type == "absolute_margin") {
-                        # For absolute margin, use different calculation
-                        # Approximate using log-HR methods
-                        events_needed <- ((z_alpha_one_sided + z_beta)^2 * (1 + allocation_ratio)^2) /
-                                       (allocation_ratio * (log(hr/ni_margin))^2)
-                    } else {
-                        # Standard calculation for relative margins
-                        events_needed <- ((z_alpha_one_sided + z_beta)^2 * (1 + allocation_ratio)^2) /
-                                       (allocation_ratio * (effect_against_margin)^2)
-                    }
-
-                    events_needed <- ceiling(max(events_needed, 1))
-
-                    # Total sample size accounting for event probability
-                    total_time <- accrual_period + follow_up
-                    prob_event <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
-
-                    # Adjust for dropout
-                    dropout_adj <- 1 / (1 - self$options$dropout_rate * (total_time / 12))
-                    n_total <- ceiling((events_needed / prob_event) * dropout_adj)
-
-                    return(paste("Total Sample Size:", n_total, "subjects (", events_needed, "events needed, NI margin HR =", ni_margin, ")"))
-
-                } else if (analysis_type == "power") {
-                    # Power calculation for non-inferiority
-                    n_total <- self$options$sample_size_input
-
-                    # Expected events
-                    total_time <- accrual_period + follow_up
-                    prob_event <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
-                    expected_events <- n_total * prob_event * (1 - self$options$dropout_rate * (total_time / 12))
-
-                    # Non-inferiority power calculation
-                    if (ni_type == "relative_margin") {
-                        effect_against_margin <- log(hr) - log(ni_margin)
-                    } else if (ni_type == "absolute_margin") {
-                        effect_against_margin <- hr - ni_margin
-                    } else {  # retention_fraction
-                        effect_against_margin <- log(hr) - log(ni_margin)
-                    }
-
-                    # Standard error for log-HR
-                    se_log_hr <- sqrt((1 + allocation_ratio) / (allocation_ratio * expected_events))
-
-                    # Test statistic for non-inferiority
-                    z_test <- abs(effect_against_margin) / se_log_hr
-
-                    # One-sided power
-                    z_alpha_one_sided <- qnorm(1 - alpha)
-                    power_calc <- pnorm(z_test - z_alpha_one_sided)
-
-                    return(paste("Non-inferiority Power:", round(power_calc * 100, 1), "% (HR =", hr, "vs margin =", ni_margin, ")"))
-
-                } else if (analysis_type == "effect_size") {
-                    # Calculate maximum HR that can be detected as non-inferior
-                    n_total <- self$options$sample_size_input
-
-                    # Expected events
-                    total_time <- accrual_period + follow_up
-                    prob_event <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
-                    expected_events <- n_total * prob_event * (1 - self$options$dropout_rate * (total_time / 12))
-
-                    # Standard error
-                    se_log_hr <- sqrt((1 + allocation_ratio) / (allocation_ratio * expected_events))
-
-                    # Critical value for non-inferiority
-                    z_alpha_one_sided <- qnorm(1 - alpha)
-                    z_beta <- qnorm(power)
-
-                    # Maximum detectable HR for non-inferiority
-                    max_effect_against_margin <- (z_alpha_one_sided + z_beta) * se_log_hr
-
-                    if (ni_type == "relative_margin") {
-                        max_detectable_hr <- exp(log(ni_margin) - max_effect_against_margin)
-                    } else if (ni_type == "absolute_margin") {
-                        max_detectable_hr <- ni_margin - max_effect_against_margin
-                    } else {  # retention_fraction
-                        max_detectable_hr <- exp(log(ni_margin) - max_effect_against_margin)
-                    }
-
-                    return(paste("Maximum HR for Non-inferiority:", round(max_detectable_hr, 3), "(margin =", ni_margin, ")"))
-
-                } else if (analysis_type == "duration") {
-                    # Calculate required duration for non-inferiority trial
-                    n_total <- self$options$sample_size_input
-
-                    # Events needed for non-inferiority
-                    if (ni_type == "relative_margin") {
-                        effect_against_margin <- log(hr) - log(ni_margin)
-                    } else if (ni_type == "absolute_margin") {
-                        effect_against_margin <- hr - ni_margin
-                    } else {  # retention_fraction
-                        effect_against_margin <- log(hr) - log(ni_margin)
-                    }
-
-                    z_alpha_one_sided <- qnorm(1 - alpha)
-                    z_beta <- qnorm(power)
-
-                    events_needed <- ((z_alpha_one_sided + z_beta)^2 * (1 + allocation_ratio)^2) /
-                                   (allocation_ratio * (effect_against_margin)^2)
-                    events_needed <- ceiling(max(events_needed, 1))
-
-                    # Calculate duration needed
-                    event_rate_monthly <- (log(2) / median_control) * (1 - self$options$dropout_rate / 12)
-                    avg_follow_up_needed <- events_needed / (n_total * event_rate_monthly)
-                    total_duration <- accrual_period + avg_follow_up_needed
-
-                    return(paste("Required Study Duration:", round(total_duration, 1), "months (non-inferiority trial)"))
+                    info <- private$.information_from_events(events, allocation_ratio)
+                    mean_z <- sqrt(info) * (log(hr_candidate) - log(hr_margin))
+                    pnorm(-z_alpha - mean_z)
                 }
 
-            }, error = function(e) {
-                return(paste("Non-inferiority calculation error:", e$message))
-            })
+                objective <- function(hr_candidate) {
+                    power_for_hr(hr_candidate) - power
+                }
+
+                upper_bound <- min(hr_margin * 0.999, 5)
+                lower_bound <- max(1e-3, min(hr_true, 0.1))
+                if (lower_bound >= upper_bound) {
+                    lower_bound <- max(1e-3, upper_bound * 0.2)
+                }
+
+                detectable_hr <- tryCatch({
+                    uniroot(objective, interval = c(lower_bound, upper_bound))$root
+                }, error = function(e) {
+                    NA_real_
+                })
+
+                if (is.na(detectable_hr)) {
+                    return("Unable to determine maximum HR satisfying non-inferiority criteria with current settings")
+                }
+
+                return(paste(
+                    "Maximum HR for Non-inferiority:", round(detectable_hr, 3),
+                    "(margin =", hr_margin, ")"
+                ))
+
+            } else if (analysis_type == "duration") {
+                n_total <- self$options$sample_size_input
+                duration <- private$.solve_follow_up_duration(
+                    n_total = n_total,
+                    target_events = events_needed,
+                    lambda_control = dist_params$lambda_control,
+                    hr = hr_true,
+                    allocation_ratio = allocation_ratio,
+                    accrual_period = accrual_period,
+                    dropout_rate = dropout_rate,
+                    initial_follow_up = follow_up
+                )
+
+                if (is.na(duration)) {
+                    return("Unable to determine study duration with current settings")
+                }
+
+                return(paste("Required Study Duration:", round(duration, 1), "months (non-inferiority trial)"))
+            }
 
             return("Non-inferiority calculation completed")
         },
         
         .calculate_snp_survival = function() {
-            # SNP-based survival power calculation for genetic association studies
-            analysis_type <- self$options$analysis_type
-            alpha <- self$options$alpha_level
-            power <- self$options$power_level
-            hr <- self$options$effect_size
-            accrual_period <- self$options$accrual_period
-            follow_up <- self$options$follow_up_period
-            median_control <- self$options$control_median_survival
-            allocation_ratio <- self$options$allocation_ratio
-            maf <- self$options$snp_maf
-            genetic_model <- self$options$genetic_model
-
-            # Convert median to rate parameter for exponential distribution
-            lambda_control <- log(2) / median_control
-
-            tryCatch({
-                # Calculate genotype frequencies based on Hardy-Weinberg equilibrium
-                freq_AA <- (1 - maf)^2
-                freq_Aa <- 2 * maf * (1 - maf)
-                freq_aa <- maf^2
-
-                # Calculate effective sample size based on genetic model
-                if (genetic_model == "additive") {
-                    # Additive model: each copy of minor allele contributes equally
-                    # Effective sample size is proportional to variance in number of minor alleles
-                    var_genetic <- 2 * maf * (1 - maf)
-                    effective_sample_prop <- var_genetic / max(var_genetic, 0.01)  # Normalize
-                } else if (genetic_model == "dominant") {
-                    # Dominant model: Aa and aa vs AA
-                    freq_carriers <- freq_Aa + freq_aa
-                    freq_non_carriers <- freq_AA
-                    effective_sample_prop <- freq_carriers * freq_non_carriers
-                } else {  # recessive
-                    # Recessive model: aa vs (AA + Aa)
-                    freq_homozygous <- freq_aa
-                    freq_other <- freq_AA + freq_Aa
-                    effective_sample_prop <- freq_homozygous * freq_other
-                }
-
-                # Adjust for reduced effective sample size in genetic studies
-                genetic_efficiency <- max(effective_sample_prop, 0.05)  # Minimum 5% efficiency
-
-                if (analysis_type == "sample_size") {
-                    events_needed <- private$.events_needed_log_rank(hr, alpha, power, 1.0)
-                    events_needed_genetic <- ceiling(events_needed / genetic_efficiency)
-
-                    n_total <- private$.sample_size_from_events(
-                        events_needed = events_needed_genetic,
-                        lambda_control = lambda_control,
-                        hr = hr,
-                        allocation_ratio = 1,
-                        accrual_period = accrual_period,
-                        follow_up_period = follow_up,
-                        dropout_rate = self$options$dropout_rate
-                    )
-
-                    genotype_info <- paste0("AA:", round(freq_AA * 100, 1), "%, Aa:", round(freq_Aa * 100, 1), "%, aa:", round(freq_aa * 100, 1), "%")
-
-                    return(paste("Total Sample Size:", n_total, "subjects (", events_needed_genetic, "effective events, MAF =", round(maf, 3), ",", genetic_model, "model,", genotype_info, ")"))
-
-                } else if (analysis_type == "power") {
-                    n_total <- self$options$sample_size_input
-
-                    expected_events <- private$.expected_events_from_sample(
-                        n_total = n_total,
-                        lambda_control = lambda_control,
-                        hr = hr,
-                        allocation_ratio = 1,
-                        accrual_period = accrual_period,
-                        follow_up_period = follow_up,
-                        dropout_rate = self$options$dropout_rate
-                    )$total
-
-                    effective_events <- expected_events * genetic_efficiency
-
-                    power_calc <- private$.power_from_events(
-                        events = effective_events,
-                        hr = hr,
-                        alpha = alpha,
-                        allocation_ratio = 1
-                    )
-
-                    return(paste("Statistical Power:", round(power_calc * 100, 1), "% (", round(effective_events), "effective events, MAF =", round(maf, 3), ",", genetic_model, "model)"))
-
-                } else if (analysis_type == "effect_size") {
-                    n_total <- self$options$sample_size_input
-
-                    target_power <- power
-
-                    hr_solution <- tryCatch({
-                        objective <- function(hr_candidate) {
-                            expected_events <- private$.expected_events_from_sample(
-                                n_total = n_total,
-                                lambda_control = lambda_control,
-                                hr = hr_candidate,
-                                allocation_ratio = 1,
-                                accrual_period = accrual_period,
-                                follow_up_period = follow_up,
-                                dropout_rate = self$options$dropout_rate
-                            )$total * genetic_efficiency
-
-                            private$.power_from_events(
-                                events = expected_events,
-                                hr = hr_candidate,
-                                alpha = alpha,
-                                allocation_ratio = 1
-                            ) - target_power
-                        }
-
-                        uniroot(objective, interval = c(0.1, 1.5))$root
-                    }, error = function(e) {
-                        NA_real_
-                    })
-
-                    if (is.na(hr_solution)) {
-                        return("Unable to determine detectable HR under current settings")
-                    }
-
-                    return(paste("Minimum Detectable HR:", round(hr_solution, 3), "(MAF =", round(maf, 3), ",", genetic_model, "model)"))
-
-                } else if (analysis_type == "duration") {
-                    n_total <- self$options$sample_size_input
-
-                    events_needed <- private$.events_needed_log_rank(hr, alpha, power, 1.0)
-                    events_needed_genetic <- ceiling(events_needed / genetic_efficiency)
-
-                    total_duration <- private$.solve_follow_up_duration(
-                        n_total = n_total,
-                        target_events = events_needed_genetic,
-                        lambda_control = lambda_control,
-                        hr = hr,
-                        allocation_ratio = 1,
-                        accrual_period = accrual_period,
-                        dropout_rate = self$options$dropout_rate,
-                        initial_follow_up = follow_up
-                    )
-
-                    if (is.na(total_duration)) {
-                        return("Unable to determine study duration with current settings")
-                    }
-
-                    return(paste("Required Study Duration:", round(total_duration, 1), "months (genetic study, MAF =", round(maf, 3), ")"))
-                }
-
-            }, error = function(e) {
-                return(paste("SNP survival calculation error:", e$message))
-            })
-
-            return("SNP-based survival calculation completed")
+            return("SNP-based survival power calculations are temporarily unavailable pending validated genetic-model implementation")
         },
         
         .perform_power_analysis = function() {
@@ -1591,16 +1227,10 @@ survivalPowerClass <- R6::R6Class(
         .populate_specialized_tables = function() {
             test_type <- self$options$test_type
             
-            if (test_type == "competing_risks") {
-                private$.populate_competing_risks_table()
-            } else if (test_type == "non_inferiority") {
+            if (test_type == "non_inferiority") {
                 private$.populate_non_inferiority_table()
-            } else if (test_type == "rmst_test") {
-                private$.populate_rmst_analysis_table()
-            } else if (test_type == "snp_survival") {
-                private$.populate_snp_analysis_table()
             }
-            
+
             if (self$options$study_design == "multi_arm") {
                 private$.populate_multi_arm_table()
             }
@@ -3269,26 +2899,12 @@ survivalPowerClass <- R6::R6Class(
             distribution <- self$options$survival_distribution
             weibull_shape <- self$options$weibull_shape
 
-            if (distribution == "exponential" || distribution == "weibull" && weibull_shape == 1) {
-                # Exponential distribution
-                lambda_control <- log(2) / median_control
-                lambda_treatment <- lambda_control * hr
-            } else if (distribution == "weibull") {
-                # Weibull distribution with shape parameter
-                scale_control <- median_control / (log(2)^(1/weibull_shape))
-                scale_treatment <- scale_control / (hr^(1/weibull_shape))
-                # Convert to hazard rates for calculations (approximate)
-                lambda_control <- weibull_shape / scale_control
-                lambda_treatment <- weibull_shape / scale_treatment
-            } else if (distribution == "log_normal") {
-                # Log-normal distribution (approximate with exponential for calculations)
-                lambda_control <- log(2) / median_control
-                lambda_treatment <- lambda_control * hr
-            } else {
-                # Default to exponential
-                lambda_control <- log(2) / median_control
-                lambda_treatment <- lambda_control * hr
+            if (distribution != "exponential") {
+                stop("Only exponential survival distribution supported in validated release")
             }
+
+            lambda_control <- log(2) / median_control
+            lambda_treatment <- lambda_control * hr
 
             return(list(lambda_control = lambda_control, lambda_treatment = lambda_treatment))
         },
@@ -3300,16 +2916,11 @@ survivalPowerClass <- R6::R6Class(
 
             if (study_design == "multi_arm" && number_of_arms > 2) {
                 if (multiple_comparisons == "bonferroni") {
-                    # Bonferroni correction
                     alpha_adjusted <- alpha / (number_of_arms - 1)
-                } else if (multiple_comparisons == "dunnett") {
-                    # Dunnett's correction (approximate)
-                    alpha_adjusted <- alpha * 0.8  # Conservative approximation
-                } else if (multiple_comparisons == "holm") {
-                    # Holm correction (approximate for most conservative)
-                    alpha_adjusted <- alpha / (number_of_arms - 1)
-                } else {
+                } else if (multiple_comparisons == "none" || is.null(multiple_comparisons)) {
                     alpha_adjusted <- alpha
+                } else {
+                    stop("Unsupported multiplicity adjustment requested")
                 }
             } else {
                 alpha_adjusted <- alpha
@@ -3331,35 +2942,20 @@ survivalPowerClass <- R6::R6Class(
                 design_effect <- 1
             }
 
-            # Efficiency adjustment for stratification
-            if (stratification_factors > 0) {
-                # Stratification typically improves efficiency by 5-15%
-                stratification_efficiency <- private$STRATIFICATION_EFFICIENCY^stratification_factors
-            } else {
-                stratification_efficiency <- 1
-            }
-
             return(list(
                 design_effect = design_effect,
-                stratification_efficiency = stratification_efficiency
+                stratification_efficiency = 1
             ))
         },
 
         .adjust_sample_for_accrual = function(base_sample_size) {
             accrual_pattern <- self$options$accrual_pattern
 
-            if (accrual_pattern == "linear_increasing") {
-                # Linear increasing accrual may require 10-20% more participants
-                accrual_adjustment <- 1.15
-            } else if (accrual_pattern == "exponential") {
-                # Exponential accrual often requires adjustments for slow start
-                accrual_adjustment <- 1.10
-            } else {
-                # Uniform accrual (default)
-                accrual_adjustment <- 1.0
+            if (!isTRUE(accrual_pattern %in% c("uniform", NA))) {
+                warning("Non-uniform accrual patterns are not yet modelled; proceeding as uniform accrual")
             }
 
-            return(base_sample_size * accrual_adjustment)
+            return(base_sample_size)
         },
 
         .allocation_props = function(allocation_ratio) {

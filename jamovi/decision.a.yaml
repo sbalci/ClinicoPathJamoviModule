@@ -1,7 +1,7 @@
 ---
 name:  decision
 title: Medical Decision
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV
 version: '0.0.31'
@@ -192,6 +192,50 @@ options:
           R: >
             Boolean selection whether to show the about analysis section.
 
+    - name: showMisclassified
+      title: 'Show Misclassified Cases Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display detailed tables of false positive and false negative cases.
+            Helps identify patterns in diagnostic errors and understand which cases
+            are being misclassified by the test. Inspired by Orange Data Mining's
+            interactive confusion matrix feature, adapted for static jamovi output.
+          R: >
+            Boolean selection whether to show detailed misclassified cases tables.
+
+    - name: maxCasesShow
+      title: 'Maximum Cases to Display'
+      type: Integer
+      default: 50
+      min: 10
+      max: 500
+      description:
+          ui: >
+            Maximum number of misclassified cases to display in each table.
+            Large datasets may have many misclassifications; this limits the output.
+          R: >
+            Maximum number of misclassified cases to display in tables.
+
+    - name: saveClassifications
+      title: 'Save Classifications to Data'
+      type: Output
+      varTitle: "Classification Group"
+      varDescription: "Classification of each case: True Positive, False Positive, False Negative, or True Negative"
+      measureType: nominal
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+      description:
+          ui: >
+            Save the classification results (True Positive, False Positive, False Negative, True Negative)
+            as a new column in your dataset. This allows you to use the classification groups
+            in other analyses.
+          R: >
+            Output variable to save classification results to the dataset.
 
 
 

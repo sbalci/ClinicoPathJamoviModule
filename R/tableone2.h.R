@@ -12,7 +12,8 @@ tableone2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pivot_format = "clinical",
             include_statistics = TRUE,
             group_var = NULL,
-            group_comparisons = FALSE, ...) {
+            group_comparisons = FALSE,
+            view_tutorial = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -59,6 +60,10 @@ tableone2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "group_comparisons",
                 group_comparisons,
                 default=FALSE)
+            private$..view_tutorial <- jmvcore::OptionBool$new(
+                "view_tutorial",
+                view_tutorial,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sty)
@@ -67,6 +72,7 @@ tableone2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..include_statistics)
             self$.addOption(private$..group_var)
             self$.addOption(private$..group_comparisons)
+            self$.addOption(private$..view_tutorial)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -75,7 +81,8 @@ tableone2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pivot_format = function() private$..pivot_format$value,
         include_statistics = function() private$..include_statistics$value,
         group_var = function() private$..group_var$value,
-        group_comparisons = function() private$..group_comparisons$value),
+        group_comparisons = function() private$..group_comparisons$value,
+        view_tutorial = function() private$..view_tutorial$value),
     private = list(
         ..vars = NA,
         ..sty = NA,
@@ -83,7 +90,8 @@ tableone2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pivot_format = NA,
         ..include_statistics = NA,
         ..group_var = NA,
-        ..group_comparisons = NA)
+        ..group_comparisons = NA,
+        ..view_tutorial = NA)
 )
 
 tableone2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -91,6 +99,7 @@ tableone2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        tutorial = function() private$.items[["tutorial"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
@@ -110,6 +119,11 @@ tableone2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Instructions"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tutorial",
+                title="Table One Tutorial",
+                visible="(view_tutorial)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="tablestyle1",
@@ -209,9 +223,11 @@ tableone2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   format.
 #' @param group_var Variable to use for group comparisons in the analysis.
 #' @param group_comparisons Enable group comparison features in pivot table.
+#' @param view_tutorial Display the embedded Table One tutorial in the output.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$tutorial} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
@@ -228,7 +244,8 @@ tableone2 <- function(
     pivot_format = "clinical",
     include_statistics = TRUE,
     group_var,
-    group_comparisons = FALSE) {
+    group_comparisons = FALSE,
+    view_tutorial = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tableone2 requires jmvcore to be installed (restart may be required)")
@@ -249,7 +266,8 @@ tableone2 <- function(
         pivot_format = pivot_format,
         include_statistics = include_statistics,
         group_var = group_var,
-        group_comparisons = group_comparisons)
+        group_comparisons = group_comparisons,
+        view_tutorial = view_tutorial)
 
     analysis <- tableone2Class$new(
         options = options,

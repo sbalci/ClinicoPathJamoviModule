@@ -229,6 +229,9 @@ children:
             name: reportClinicalMetrics
           - type: CheckBox
             name: reportConfidenceIntervals
+          - type: CheckBox
+            name: reportMCC
+            label: Matthews Correlation Coefficient
   - type: CollapseBox
     label: K-Nearest Neighbors (KNN)
     collapsed: true

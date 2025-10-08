@@ -712,5 +712,115 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         }
 
+        ,
+        .plotGGPubr = function(image, ...) {
+            # Validate inputs
+            if (is.null(self$options$dep1) || is.null(self$options$dep2))
+                return()
+
+            # Skip if ggpubr plot not requested
+            if (!self$options$addGGPubrPlot)
+                return()
+
+            tryCatch({
+                # Prepare data - convert wide to long format
+                mydata <- self$data
+
+                # Collect dependent variables
+                deps <- c(self$options$dep1, self$options$dep2)
+                if (!is.null(self$options$dep3)) deps <- c(deps, self$options$dep3)
+                if (!is.null(self$options$dep4)) deps <- c(deps, self$options$dep4)
+
+                # Create subject ID if not exists
+                mydata$Subject_ID <- seq_len(nrow(mydata))
+
+                # Convert to long format
+                long_data <- data.frame()
+                for (i in seq_along(deps)) {
+                    temp <- data.frame(
+                        Subject_ID = mydata$Subject_ID,
+                        Measurement = deps[i],
+                        Value = mydata[[deps[i]]]
+                    )
+                    long_data <- rbind(long_data, temp)
+                }
+
+                # Remove NA values
+                long_data <- long_data[complete.cases(long_data), ]
+
+                # Get palette
+                palette <- self$options$ggpubrPalette
+
+                # Create plot based on type
+                if (self$options$ggpubrPlotType == "paired") {
+                    # Paired plot with connecting lines
+                    args <- list(
+                        data = long_data,
+                        x = "Measurement",
+                        y = "Value",
+                        id = "Subject_ID",
+                        palette = palette,
+                        line.color = "gray",
+                        line.size = 0.4
+                    )
+
+                    if (!self$options$ggpubrShowLines) {
+                        args$line.color <- NA
+                    }
+
+                    plot <- do.call(ggpubr::ggpaired, args)
+
+                } else if (self$options$ggpubrPlotType == "boxplot") {
+                    args <- list(
+                        data = long_data,
+                        x = "Measurement",
+                        y = "Value",
+                        palette = palette,
+                        add = if (self$options$ggpubrAddPoints) "jitter" else NULL
+                    )
+                    plot <- do.call(ggpubr::ggboxplot, args)
+
+                } else if (self$options$ggpubrPlotType == "violin") {
+                    args <- list(
+                        data = long_data,
+                        x = "Measurement",
+                        y = "Value",
+                        palette = palette,
+                        add = if (self$options$ggpubrAddPoints) "jitter" else NULL
+                    )
+                    plot <- do.call(ggpubr::ggviolin, args)
+
+                } else if (self$options$ggpubrPlotType == "line") {
+                    args <- list(
+                        data = long_data,
+                        x = "Measurement",
+                        y = "Value",
+                        palette = palette,
+                        add = "mean_se"
+                    )
+                    plot <- do.call(ggpubr::ggline, args)
+                }
+
+                # Add statistical comparisons if requested
+                if (self$options$ggpubrAddStats && self$options$ggpubrPlotType != "line") {
+                    plot <- plot + ggpubr::stat_compare_means()
+                }
+
+                # Apply theme
+                plot <- plot + ggpubr::theme_pubr()
+
+                print(plot)
+                TRUE
+
+            }, error = function(e) {
+                error_msg <- paste0(
+                    .("<br>Error creating ggpubr within-subjects plot: "), e$message,
+                    .("<br><br>Please check that measurement variables contain numeric values."),
+                    .("<br><hr>")
+                )
+                self$results$todo$setContent(error_msg)
+            })
+        }
+
     )
 )

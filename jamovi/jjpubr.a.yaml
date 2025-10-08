@@ -1,0 +1,458 @@
+---
+name: jjpubr
+title: Publication-Ready Plots (ggpubr)
+menuGroup: JJStatsPlotT
+menuSubgroup: All-In-One
+menuTitle: ggpubr Plots
+menuSubtitle: Publication-ready visualizations
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Create publication-ready plots using the ggpubr package.
+        Provides easy-to-use functions for creating customized plots with
+        statistical annotations for scientific publications.
+
+        Available plot types:
+        - Box plots with statistical comparisons
+        - Violin plots with distribution visualization
+        - Scatter plots with correlation analysis
+        - Histograms with density overlays
+        - Density plots for distribution analysis
+        - Bar plots for categorical data
+
+        Each plot type supports:
+        - Automatic statistical testing and p-value annotations
+        - Publication-ready themes
+        - Customizable color palettes
+        - Grouping and faceting options
+    R:
+        dontrun: false
+        usage: |
+            # Box plot with statistical comparison
+            jjpubr(
+                data = mtcars,
+                plotType = "boxplot",
+                xvar = "cyl",
+                yvar = "mpg",
+                addStats = TRUE,
+                palette = "jco"
+            )
+
+            # Scatter plot with correlation
+            jjpubr(
+                data = mtcars,
+                plotType = "scatter",
+                xvar = "wt",
+                yvar = "mpg",
+                addCorr = TRUE,
+                addMarginal = TRUE
+            )
+
+            # Histogram with density overlay
+            jjpubr(
+                data = mtcars,
+                plotType = "histogram",
+                xvar = "mpg",
+                addDensity = TRUE,
+                fillColor = "#0073C2FF"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # === PLOT TYPE SELECTION ===
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - title: Box Plot
+          name: boxplot
+        - title: Violin Plot
+          name: violin
+        - title: Scatter Plot
+          name: scatter
+        - title: Histogram
+          name: histogram
+        - title: Density Plot
+          name: density
+        - title: Bar Plot
+          name: barplot
+        - title: Dot Plot
+          name: dotplot
+        - title: Line Plot
+          name: line
+        - title: Error Plot
+          name: errorplot
+      default: boxplot
+      description:
+          ui: >
+            Select the type of plot to create
+          R: >
+            Type of plot: boxplot, violin, scatter, histogram, density, barplot, dotplot, line, errorplot
+
+    # === VARIABLE SELECTION ===
+    - name: xvar
+      title: X Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          ui: >
+            X-axis variable (categorical for boxplot/violin/barplot, continuous for scatter)
+          R: >
+            X-axis variable
+
+    - name: yvar
+      title: Y Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          ui: >
+            Y-axis variable (continuous, required for boxplot/violin/scatter/line/errorplot)
+          R: >
+            Y-axis variable (continuous)
+
+    - name: groupvar
+      title: Color Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          ui: >
+            Variable for color grouping (optional)
+          R: >
+            Grouping variable for coloring points/boxes
+      default: NULL
+
+    - name: facetvar
+      title: Facet Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          ui: >
+            Variable to create separate panels (facets)
+          R: >
+            Variable for faceting plots into panels
+      default: NULL
+
+    # === STATISTICAL ANNOTATIONS ===
+    - name: addStats
+      title: Add Statistical Comparisons
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add p-values from statistical tests comparing groups
+          R: >
+            Whether to add statistical comparison p-values
+
+    - name: statMethod
+      title: Statistical Test Method
+      type: List
+      options:
+        - title: Automatic (based on data)
+          name: auto
+        - title: t-test
+          name: t.test
+        - title: Wilcoxon test
+          name: wilcox.test
+        - title: ANOVA
+          name: anova
+        - title: Kruskal-Wallis
+          name: kruskal.test
+      default: auto
+      description:
+          ui: >
+            Statistical test to use for comparisons
+          R: >
+            Method for statistical comparison
+
+    - name: pairwiseComparisons
+      title: Show Pairwise Comparisons
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Show all pairwise comparisons between groups
+          R: >
+            Whether to show all pairwise comparisons
+
+    # === SCATTER PLOT SPECIFIC ===
+    - name: addCorr
+      title: Add Correlation Statistics
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add correlation coefficient and p-value (for scatter plots)
+          R: >
+            Whether to add correlation statistics
+
+    - name: corrMethod
+      title: Correlation Method
+      type: List
+      options:
+        - title: Pearson
+          name: pearson
+        - title: Spearman
+          name: spearman
+        - title: Kendall
+          name: kendall
+      default: pearson
+      description:
+          ui: >
+            Method for correlation calculation
+          R: >
+            Correlation method
+
+    - name: addSmoothLine
+      title: Add Smooth Line
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Add smoothed trend line (for scatter plots)
+          R: >
+            Whether to add smooth trend line
+
+    - name: addMarginal
+      title: Add Marginal Histograms
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add marginal density plots on axes (for scatter plots)
+          R: >
+            Whether to add marginal histograms
+
+    # === HISTOGRAM/DENSITY SPECIFIC ===
+    - name: addDensity
+      title: Add Density Curve
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Overlay density curve (for histograms)
+          R: >
+            Whether to add density curve overlay
+
+    - name: bins
+      title: Number of Bins
+      type: Integer
+      min: 5
+      max: 100
+      default: 30
+      description:
+          ui: >
+            Number of bins for histogram
+          R: >
+            Number of histogram bins
+
+    - name: addMean
+      title: Add Mean Line
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add vertical line at mean
+          R: >
+            Whether to add mean line
+
+    - name: addMedian
+      title: Add Median Line
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add vertical line at median
+          R: >
+            Whether to add median line
+
+    # === BOX/VIOLIN PLOT SPECIFIC ===
+    - name: addPoints
+      title: Add Individual Points
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Overlay individual data points (jitter)
+          R: >
+            Whether to add jittered points
+
+    - name: pointAlpha
+      title: Point Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.6
+      description:
+          ui: >
+            Transparency of points (0=transparent, 1=opaque)
+          R: >
+            Alpha transparency for points
+
+    - name: addMeanSD
+      title: Show Mean and SD
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add mean and standard deviation markers
+          R: >
+            Whether to show mean ± SD
+
+    # === APPEARANCE CUSTOMIZATION ===
+    - name: palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Journal of Clinical Oncology (jco)
+          name: jco
+        - title: Nature Publishing Group (npg)
+          name: npg
+        - title: AAAS Science
+          name: aaas
+        - title: Lancet
+          name: lancet
+        - title: JAMA
+          name: jama
+        - title: New England Journal of Medicine (nejm)
+          name: nejm
+        - title: Grey scale
+          name: grey
+        - title: Default ggplot2
+          name: default
+      default: jco
+      description:
+          ui: >
+            Color palette for the plot
+          R: >
+            Color palette name
+
+    - name: fillColor
+      title: Fill Color (single variable)
+      type: String
+      default: "#0073C2FF"
+      description:
+          ui: >
+            Fill color when no grouping variable (hex code)
+          R: >
+            Fill color for single-variable plots
+
+    - name: title
+      title: Plot Title
+      type: String
+      default: ""
+      description:
+          ui: >
+            Main title for the plot
+          R: >
+            Plot title
+
+    - name: xlab
+      title: X-axis Label
+      type: String
+      default: ""
+      description:
+          ui: >
+            Label for X-axis (leave empty for variable name)
+          R: >
+            X-axis label
+
+    - name: ylab
+      title: Y-axis Label
+      type: String
+      default: ""
+      description:
+          ui: >
+            Label for Y-axis (leave empty for variable name)
+          R: >
+            Y-axis label
+
+    - name: legendPosition
+      title: Legend Position
+      type: List
+      options:
+        - title: Right
+          name: right
+        - title: Left
+          name: left
+        - title: Top
+          name: top
+        - title: Bottom
+          name: bottom
+        - title: None
+          name: none
+      default: right
+      description:
+          ui: >
+            Position of the legend
+          R: >
+            Legend position
+
+    - name: theme
+      title: Theme
+      type: List
+      options:
+        - title: Publication (pubr)
+          name: pubr
+        - title: Classic
+          name: classic
+        - title: Minimal
+          name: minimal
+        - title: Light
+          name: light
+        - title: Dark
+          name: dark
+      default: pubr
+      description:
+          ui: >
+            ggplot2 theme for the plot
+          R: >
+            Theme name
+
+    - name: plotWidth
+      title: Plot Width
+      type: Integer
+      min: 300
+      max: 2000
+      default: 600
+      description:
+          ui: >
+            Width of the plot in pixels
+          R: >
+            Plot width in pixels
+
+    - name: plotHeight
+      title: Plot Height
+      type: Integer
+      min: 300
+      max: 2000
+      default: 500
+      description:
+          ui: >
+            Height of the plot in pixels
+          R: >
+            Plot height in pixels
+
+...

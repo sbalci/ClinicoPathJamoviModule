@@ -1,0 +1,124 @@
+name: jjsyndromicplot
+title: Syndromic Plot
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables for PCA
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            maxItemCount: 100
+  - type: LayoutBox
+    margin: large
+    style: inline
+    children:
+      - type: Label
+        label: PCA Settings
+        children:
+          - type: LayoutBox
+            margin: large
+            style: list
+            children:
+              - type: TextBox
+                name: cutoff
+                label: Loading Cutoff
+                suffix: (0-1)
+                format: number
+                enable: (vars)
+              - type: CheckBox
+                name: center
+                enable: (vars)
+              - type: CheckBox
+                name: scale
+                enable: (vars)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: component
+        format: number
+  - type: CollapseBox
+    label: Plot Customization
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: Label
+            label: Arrow & Text Settings
+            children:
+              - type: TextBox
+                name: arrowsize
+                label: Arrow Size Multiplier
+                format: number
+                enable: (vars)
+              - type: TextBox
+                name: textsize
+                label: Text Size
+                format: number
+                enable: (vars)
+              - type: CheckBox
+                name: repel
+                enable: (vars)
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: plotlegend
+                enable: (vars)
+              - type: CheckBox
+                name: plotcutoff
+                enable: (vars)
+              - type: ComboBox
+                name: varorder
+                label: Variable Ordering
+                enable: (vars)
+  - type: CollapseBox
+    label: Color Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: TextBox
+            name: colorlow
+            label: Negative Loading Color
+            format: string
+            enable: (vars)
+          - type: TextBox
+            name: colormid
+            label: Zero Loading Color
+            format: string
+            enable: (vars)
+          - type: TextBox
+            name: colorhigh
+            label: Positive Loading Color
+            format: string
+            enable: (vars)
+  - type: CollapseBox
+    label: Plot Size
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        style: list
+        children:
+          - type: TextBox
+            name: plotwidth
+            label: Width (pixels)
+            format: number
+            enable: (vars)
+          - type: TextBox
+            name: plotheight
+            label: Height (pixels)
+            format: number
+            enable: (vars)

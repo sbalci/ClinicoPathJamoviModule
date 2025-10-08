@@ -1,0 +1,316 @@
+---
+name:  patientsimilarity
+title: Patient Similarity Clustering
+menuGroup: OncoPathT
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: 't-SNE, UMAP, PCA - Discover Patient Subgroups'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >-
+        Visualizes patient similarity using dimensionality reduction techniques (PCA, t-SNE, UMAP, MDS).
+        Projects high-dimensional patient data into 2D or 3D space to reveal natural patient groupings
+        and subpopulations. Inspired by Orange Data Mining's interactive projection widgets, adapted for
+        jamovi with comprehensive cluster analysis and statistical validation.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Basic t-SNE visualization
+            library(Rtsne)
+            data(iris)
+
+            patientsimilarity(
+                data = iris,
+                vars = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
+                method = "tsne",
+                colorBy = "Species"
+            )
+
+            # Example 2: UMAP with cluster analysis
+            patientsimilarity(
+                data = clinical_data,
+                vars = c("age", "tumor_size", "grade", "ki67"),
+                method = "umap",
+                colorBy = "survival_status",
+                performClustering = TRUE,
+                nClusters = 3,
+                showClusterStats = TRUE
+            )
+
+            # Example 3: PCA with survival comparison
+            patientsimilarity(
+                data = pathology_data,
+                vars = c("age", "stage", "nodes", "size"),
+                method = "pca",
+                colorBy = "death",
+                dimensions = 3,
+                survivalTime = "months",
+                survivalEvent = "death"
+            )
+
+options:
+
+# Data ----
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The dataset to be analyzed, provided as a data frame.
+
+# Variables ----
+
+    - name: vars
+      title: Variables for Similarity Analysis
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+          R: >
+            Continuous variables to use for calculating patient similarity.
+            These will be used to compute distances between patients.
+            Categorical variables should be converted to numeric or one-hot encoded.
+
+# Method ----
+
+    - name: method
+      title: Dimensionality Reduction Method
+      type: List
+      options:
+        - title: PCA (Principal Component Analysis)
+          name: pca
+        - title: t-SNE (t-Distributed Stochastic Neighbor Embedding)
+          name: tsne
+        - title: UMAP (Uniform Manifold Approximation and Projection)
+          name: umap
+        - title: MDS (Multidimensional Scaling)
+          name: mds
+      default: tsne
+      description:
+          R: >
+            Method for dimensionality reduction:
+            - PCA: Linear method, preserves global structure
+            - t-SNE: Non-linear, excellent for visualization, preserves local structure
+            - UMAP: Non-linear, preserves both local and global structure, faster than t-SNE
+            - MDS: Classical method, preserves pairwise distances
+
+# Dimensions ----
+
+    - name: dimensions
+      title: Number of Dimensions
+      type: List
+      options:
+        - title: 2D
+          name: '2'
+        - title: 3D
+          name: '3'
+      default: '2'
+      description:
+          R: >
+            Number of dimensions for projection. 2D is easier to interpret,
+            3D can reveal additional structure.
+
+# Color ----
+
+    - name: colorBy
+      title: Color Points By
+      type: Variable
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+          R: >
+            Variable to use for coloring points. Typically an outcome variable
+            (e.g., disease status, survival, response) to see if it corresponds
+            to natural patient groupings.
+
+# t-SNE Parameters ----
+
+    - name: perplexity
+      title: Perplexity (t-SNE)
+      type: Number
+      default: 30
+      min: 5
+      max: 100
+      description:
+          R: >
+            Perplexity parameter for t-SNE. Roughly corresponds to the number of
+            nearest neighbors considered. Typical values: 5-50. Higher values
+            preserve more global structure.
+
+    - name: iterations
+      title: Iterations (t-SNE)
+      type: Integer
+      default: 1000
+      min: 250
+      max: 5000
+      description:
+          R: >
+            Number of iterations for t-SNE optimization. More iterations improve
+            convergence but take longer.
+
+# UMAP Parameters ----
+
+    - name: umapNeighbors
+      title: Number of Neighbors (UMAP)
+      type: Integer
+      default: 15
+      min: 2
+      max: 100
+      description:
+          R: >
+            Number of nearest neighbors for UMAP. Controls local vs global structure.
+            Smaller values preserve local structure, larger values preserve global.
+
+    - name: umapMinDist
+      title: Minimum Distance (UMAP)
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 0.99
+      description:
+          R: >
+            Minimum distance between points in UMAP. Controls how tightly points
+            are packed. Smaller values create tighter clusters.
+
+# Clustering ----
+
+    - name: performClustering
+      title: Perform Cluster Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Automatically identify patient clusters using k-means or hierarchical clustering
+            on the reduced-dimension space.
+
+    - name: clusterMethod
+      title: Clustering Method
+      type: List
+      options:
+        - title: K-means
+          name: kmeans
+        - title: Hierarchical
+          name: hclust
+        - title: DBSCAN
+          name: dbscan
+      default: kmeans
+      description:
+          R: >
+            Method for clustering patients in the reduced space.
+
+    - name: nClusters
+      title: Number of Clusters
+      type: Integer
+      default: 3
+      min: 2
+      max: 10
+      description:
+          R: >
+            Number of clusters for k-means or hierarchical clustering.
+            For DBSCAN, this is ignored.
+
+    - name: showClusterStats
+      title: Show Cluster Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display summary statistics for each cluster including size,
+            characteristics, and outcome distribution.
+
+# Survival Analysis ----
+
+    - name: survivalAnalysis
+      title: Compare Survival Across Clusters
+      type: Bool
+      default: false
+      description:
+          R: >
+            If survival data is available, compare survival across discovered clusters.
+            Useful for identifying prognostic patient subtypes.
+
+    - name: survivalTime
+      title: Survival Time
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+          R: >
+            Time to event or censoring for survival analysis.
+
+    - name: survivalEvent
+      title: Survival Event
+      type: Variable
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+          R: >
+            Event indicator (1=event, 0=censored).
+
+    - name: survivalEventLevel
+      title: Event Level
+      type: Level
+      variable: (survivalEvent)
+      description:
+          R: >
+            Level indicating the event occurred.
+
+# Data Preprocessing ----
+
+    - name: scaleVars
+      title: Standardize Variables
+      type: Bool
+      default: true
+      description:
+          R: >
+            Standardize variables to mean=0, sd=1 before analysis.
+            Recommended when variables have different scales.
+
+    - name: removeOutliers
+      title: Remove Outliers
+      type: Bool
+      default: false
+      description:
+          R: >
+            Remove outliers before analysis using IQR method.
+            May improve visualization quality.
+
+# Output Options ----
+
+    - name: showLoadings
+      title: Show Variable Loadings (PCA/MDS)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show how original variables contribute to each dimension.
+            Only available for PCA and MDS.
+
+    - name: show3DPlot
+      title: Interactive 3D Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate interactive 3D plot using plotly (if dimensions=3).
+
+    - name: exportClusters
+      title: Export Cluster Assignments
+      type: Output
+      description:
+          R: >
+            Export cluster assignments to dataset for further analysis.
+
+    - name: exportCoordinates
+      title: Export Projection Coordinates
+      type: Output
+      description:
+          R: >
+            Export 2D/3D coordinates to dataset.
+
+...

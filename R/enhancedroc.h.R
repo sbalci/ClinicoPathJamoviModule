@@ -29,6 +29,14 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             smoothMethod = "none",
             partialAuc = FALSE,
             partialRange = "0.8,1.0",
+            crocAnalysis = FALSE,
+            crocAlpha = 7,
+            convexHull = FALSE,
+            tiedScoreHandling = "average",
+            detectImbalance = TRUE,
+            imbalanceThreshold = 3,
+            showImbalanceWarning = TRUE,
+            recommendPRC = TRUE,
             prevalence = 0.1,
             clinicalContext = "general",
             clinicalPresets = "custom",
@@ -171,6 +179,46 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "partialRange",
                 partialRange,
                 default="0.8,1.0")
+            private$..crocAnalysis <- jmvcore::OptionBool$new(
+                "crocAnalysis",
+                crocAnalysis,
+                default=FALSE)
+            private$..crocAlpha <- jmvcore::OptionNumber$new(
+                "crocAlpha",
+                crocAlpha,
+                default=7,
+                min=1,
+                max=20)
+            private$..convexHull <- jmvcore::OptionBool$new(
+                "convexHull",
+                convexHull,
+                default=FALSE)
+            private$..tiedScoreHandling <- jmvcore::OptionList$new(
+                "tiedScoreHandling",
+                tiedScoreHandling,
+                options=list(
+                    "average",
+                    "upper",
+                    "lower"),
+                default="average")
+            private$..detectImbalance <- jmvcore::OptionBool$new(
+                "detectImbalance",
+                detectImbalance,
+                default=TRUE)
+            private$..imbalanceThreshold <- jmvcore::OptionNumber$new(
+                "imbalanceThreshold",
+                imbalanceThreshold,
+                default=3,
+                min=1.5,
+                max=10)
+            private$..showImbalanceWarning <- jmvcore::OptionBool$new(
+                "showImbalanceWarning",
+                showImbalanceWarning,
+                default=TRUE)
+            private$..recommendPRC <- jmvcore::OptionBool$new(
+                "recommendPRC",
+                recommendPRC,
+                default=TRUE)
             private$..prevalence <- jmvcore::OptionNumber$new(
                 "prevalence",
                 prevalence,
@@ -265,6 +313,14 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..smoothMethod)
             self$.addOption(private$..partialAuc)
             self$.addOption(private$..partialRange)
+            self$.addOption(private$..crocAnalysis)
+            self$.addOption(private$..crocAlpha)
+            self$.addOption(private$..convexHull)
+            self$.addOption(private$..tiedScoreHandling)
+            self$.addOption(private$..detectImbalance)
+            self$.addOption(private$..imbalanceThreshold)
+            self$.addOption(private$..showImbalanceWarning)
+            self$.addOption(private$..recommendPRC)
             self$.addOption(private$..prevalence)
             self$.addOption(private$..clinicalContext)
             self$.addOption(private$..clinicalPresets)
@@ -302,6 +358,14 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         smoothMethod = function() private$..smoothMethod$value,
         partialAuc = function() private$..partialAuc$value,
         partialRange = function() private$..partialRange$value,
+        crocAnalysis = function() private$..crocAnalysis$value,
+        crocAlpha = function() private$..crocAlpha$value,
+        convexHull = function() private$..convexHull$value,
+        tiedScoreHandling = function() private$..tiedScoreHandling$value,
+        detectImbalance = function() private$..detectImbalance$value,
+        imbalanceThreshold = function() private$..imbalanceThreshold$value,
+        showImbalanceWarning = function() private$..showImbalanceWarning$value,
+        recommendPRC = function() private$..recommendPRC$value,
         prevalence = function() private$..prevalence$value,
         clinicalContext = function() private$..clinicalContext$value,
         clinicalPresets = function() private$..clinicalPresets$value,
@@ -338,6 +402,14 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..smoothMethod = NA,
         ..partialAuc = NA,
         ..partialRange = NA,
+        ..crocAnalysis = NA,
+        ..crocAlpha = NA,
+        ..convexHull = NA,
+        ..tiedScoreHandling = NA,
+        ..detectImbalance = NA,
+        ..imbalanceThreshold = NA,
+        ..showImbalanceWarning = NA,
+        ..recommendPRC = NA,
         ..prevalence = NA,
         ..clinicalContext = NA,
         ..clinicalPresets = NA,
@@ -366,11 +438,14 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Clinical ROC Analysis Results",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "BlueSky"))
+                    "BlueSky",
+                    "Swamidass2010"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
                     instructions = function() private$.items[["instructions"]],
+                    imbalanceWarning = function() private$.items[["imbalanceWarning"]],
+                    imbalanceMetrics = function() private$.items[["imbalanceMetrics"]],
                     analysisSummary = function() private$.items[["analysisSummary"]],
                     clinicalReport = function() private$.items[["clinicalReport"]],
                     aucSummary = function() private$.items[["aucSummary"]],
@@ -382,6 +457,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     diagnosticPerformance = function() private$.items[["diagnosticPerformance"]],
                     clinicalApplicationMetrics = function() private$.items[["clinicalApplicationMetrics"]],
                     partialAucAnalysis = function() private$.items[["partialAucAnalysis"]],
+                    crocAnalysisTable = function() private$.items[["crocAnalysisTable"]],
+                    convexHullTable = function() private$.items[["convexHullTable"]],
                     comprehensiveAnalysisSummary = function() private$.items[["comprehensiveAnalysisSummary"]],
                     clinicalInterpretationGuide = function() private$.items[["clinicalInterpretationGuide"]],
                     methodsExplanation = function() private$.items[["methodsExplanation"]],
@@ -389,7 +466,9 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     comparativeROCPlot = function() private$.items[["comparativeROCPlot"]],
                     cutoffAnalysisPlot = function() private$.items[["cutoffAnalysisPlot"]],
                     youdenIndexPlot = function() private$.items[["youdenIndexPlot"]],
-                    clinicalDecisionPlot = function() private$.items[["clinicalDecisionPlot"]]),
+                    clinicalDecisionPlot = function() private$.items[["clinicalDecisionPlot"]],
+                    crocCurvePlot = function() private$.items[["crocCurvePlot"]],
+                    convexHullPlot = function() private$.items[["convexHullPlot"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -402,6 +481,48 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             name="instructions",
                             title="Instructions",
                             visible=TRUE))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="imbalanceWarning",
+                            title="Class Imbalance Detection",
+                            visible="(detectImbalance && showImbalanceWarning)"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="imbalanceMetrics",
+                            title="Class Imbalance Metrics",
+                            visible="(detectImbalance)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="n_positive", 
+                                    `title`="N Positive", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_negative", 
+                                    `title`="N Negative", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="ratio", 
+                                    `title`="Ratio (Pos:Neg)", 
+                                    `type`="text"),
+                                list(
+                                    `name`="prevalence", 
+                                    `title`="Prevalence", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="prc_baseline", 
+                                    `title`="PRC Baseline", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="imbalance_severity", 
+                                    `title`="Imbalance Severity", 
+                                    `type`="text"),
+                                list(
+                                    `name`="recommendation", 
+                                    `title`="Recommendation", 
+                                    `type`="text"))))
                         self$add(jmvcore::Html$new(
                             options=options,
                             name="analysisSummary",
@@ -780,6 +901,73 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,
+                            name="crocAnalysisTable",
+                            title="CROC (Concentrated ROC) Analysis",
+                            visible="(crocAnalysis)",
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="croc_auc", 
+                                    `title`="CROC AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="roc_auc", 
+                                    `title`="ROC AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="alpha", 
+                                    `title`="Alpha", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="early_retrieval_gain", 
+                                    `title`="Early Retrieval Gain", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="convexHullTable",
+                            title="ROC Convex Hull Analysis",
+                            visible="(convexHull)",
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="hull_auc", 
+                                    `title`="Convex Hull AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="empirical_auc", 
+                                    `title`="Empirical AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="performance_gap", 
+                                    `title`="Performance Gap", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="n_hull_points", 
+                                    `title`="Hull Points", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
                             name="comprehensiveAnalysisSummary",
                             title="Comprehensive ROC Analysis Summary",
                             visible="(comprehensive_output)",
@@ -849,6 +1037,22 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(clinicalMetrics)",
                             renderFun=".plotClinicalDecision",
                             width=600,
+                            height=600))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="crocCurvePlot",
+                            title="CROC (Concentrated ROC) Curve",
+                            visible="(crocAnalysis)",
+                            renderFun=".plotCROC",
+                            width=600,
+                            height=600))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="convexHullPlot",
+                            title="ROC Convex Hull Plot",
+                            visible="(convexHull)",
+                            renderFun=".plotConvexHull",
+                            width=600,
                             height=600))}))$new(options=options))}))
 
 enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -912,6 +1116,22 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param partialAuc Calculate partial AUC for specific
 #'   sensitivity/specificity ranges
 #' @param partialRange Range for partial AUC (specificity_min,specificity_max)
+#' @param crocAnalysis Calculate Concentrated ROC curves for early retrieval
+#'   analysis
+#' @param crocAlpha Concentration parameter for CROC exponential magnifier
+#'   function
+#' @param convexHull Calculate ROC convex hull (optimal achievable
+#'   performance)
+#' @param tiedScoreHandling Method for handling tied predictor scores in ROC
+#'   calculation
+#' @param detectImbalance Automatically detect class imbalance and recommend
+#'   PRC when appropriate
+#' @param imbalanceThreshold Ratio threshold for imbalance detection (e.g.,
+#'   3.0 means 3:1 or 1:3 ratio)
+#' @param showImbalanceWarning Display warning message when class imbalance is
+#'   detected
+#' @param recommendPRC Recommend using Precision-Recall curves when imbalance
+#'   is detected
 #' @param prevalence Disease prevalence for calculating predictive values
 #' @param clinicalContext Clinical application context for interpretation
 #' @param clinicalPresets Pre-configured settings for common clinical
@@ -930,6 +1150,8 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$results$imbalanceWarning} \tab \tab \tab \tab \tab Warning and recommendations for imbalanced datasets \cr
+#'   \code{results$results$imbalanceMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$results$analysisSummary} \tab \tab \tab \tab \tab Plain language summary of key findings \cr
 #'   \code{results$results$clinicalReport} \tab \tab \tab \tab \tab Copy-ready clinical report sentences for publications and reports \cr
 #'   \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
@@ -941,6 +1163,8 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$diagnosticPerformance} \tab \tab \tab \tab \tab Comprehensive diagnostic performance measures at optimal cutoff \cr
 #'   \code{results$results$clinicalApplicationMetrics} \tab \tab \tab \tab \tab Clinical metrics including predictive values and likelihood ratios \cr
 #'   \code{results$results$partialAucAnalysis} \tab \tab \tab \tab \tab Partial AUC analysis for specific sensitivity/specificity ranges \cr
+#'   \code{results$results$crocAnalysisTable} \tab \tab \tab \tab \tab Concentrated ROC analysis with early retrieval focus \cr
+#'   \code{results$results$convexHullTable} \tab \tab \tab \tab \tab ROC convex hull showing optimal achievable performance \cr
 #'   \code{results$results$comprehensiveAnalysisSummary} \tab \tab \tab \tab \tab Enhanced statistical summary for comprehensive output \cr
 #'   \code{results$results$clinicalInterpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -949,6 +1173,8 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$cutoffAnalysisPlot} \tab \tab \tab \tab \tab Sensitivity and specificity across cutoff values \cr
 #'   \code{results$results$youdenIndexPlot} \tab \tab \tab \tab \tab Youden Index values across cutoff range \cr
 #'   \code{results$results$clinicalDecisionPlot} \tab \tab \tab \tab \tab Clinical decision curves and threshold analysis \cr
+#'   \code{results$results$crocCurvePlot} \tab \tab \tab \tab \tab Concentrated ROC curve with exponential magnifier transformation \cr
+#'   \code{results$results$convexHullPlot} \tab \tab \tab \tab \tab ROC curve with convex hull overlay \cr
 #' }
 #'
 #' @export
@@ -977,6 +1203,14 @@ enhancedROC <- function(
     smoothMethod = "none",
     partialAuc = FALSE,
     partialRange = "0.8,1.0",
+    crocAnalysis = FALSE,
+    crocAlpha = 7,
+    convexHull = FALSE,
+    tiedScoreHandling = "average",
+    detectImbalance = TRUE,
+    imbalanceThreshold = 3,
+    showImbalanceWarning = TRUE,
+    recommendPRC = TRUE,
     prevalence = 0.1,
     clinicalContext = "general",
     clinicalPresets = "custom",
@@ -1026,6 +1260,14 @@ enhancedROC <- function(
         smoothMethod = smoothMethod,
         partialAuc = partialAuc,
         partialRange = partialRange,
+        crocAnalysis = crocAnalysis,
+        crocAlpha = crocAlpha,
+        convexHull = convexHull,
+        tiedScoreHandling = tiedScoreHandling,
+        detectImbalance = detectImbalance,
+        imbalanceThreshold = imbalanceThreshold,
+        showImbalanceWarning = showImbalanceWarning,
+        recommendPRC = recommendPRC,
         prevalence = prevalence,
         clinicalContext = clinicalContext,
         clinicalPresets = clinicalPresets,

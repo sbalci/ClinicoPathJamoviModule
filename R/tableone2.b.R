@@ -47,6 +47,14 @@ tableone2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 stop("Error: The input data contains no (complete) rows. Please provide a valid dataset.")
             }
 
+            # Handle tutorial display when requested.
+            tutorial_item <- self$results$tutorial
+            if (isTRUE(self$options$view_tutorial)) {
+                tutorial_item$setContent(tableone2_tutorial_html())
+            } else {
+                tutorial_item$setContent('')
+            }
+
             # If no variables are selected, show a welcome/instructions message.
             if (is.null(self$options$vars)) {
                 todo_message <- "

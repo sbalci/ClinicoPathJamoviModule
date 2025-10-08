@@ -27,7 +27,12 @@ jjbetweenstats(
   varequal = FALSE,
   plotwidth = 650,
   plotheight = 450,
-  colorblindSafe = FALSE
+  colorblindSafe = FALSE,
+  addGGPubrPlot = FALSE,
+  ggpubrPlotType = "boxplot",
+  ggpubrPalette = "jco",
+  ggpubrAddStats = TRUE,
+  ggpubrAddPoints = FALSE
 )
 }
 \arguments{
@@ -80,6 +85,18 @@ parametric tests.}
 
 \item{colorblindSafe}{Whether to use colorblind-safe color palette for plot
 elements.}
+
+\item{addGGPubrPlot}{Add publication-ready plot using ggpubr package. This
+provides an alternative visualization with publication-quality aesthetics.}
+
+\item{ggpubrPlotType}{Type of ggpubr plot to display when addGGPubrPlot is
+enabled.}
+
+\item{ggpubrPalette}{Color palette for ggpubr plot.}
+
+\item{ggpubrAddStats}{Add statistical comparison p-values to ggpubr plot.}
+
+\item{ggpubrAddPoints}{Overlay individual data points on ggpubr plot.}
 }
 \value{
 A results object containing:
@@ -87,6 +104,8 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$ggpubrPlot2} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

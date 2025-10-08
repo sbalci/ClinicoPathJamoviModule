@@ -177,3 +177,27 @@ children:
                 name: plotheight
                 format: number
                 width: small
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: addGGPubrPlot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ggpubrPlotType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ggpubrPalette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: ggpubrAddStats
+      - type: CheckBox
+        name: ggpubrShowLines
+      - type: CheckBox
+        name: ggpubrAddPoints

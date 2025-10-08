@@ -26,6 +26,12 @@ children:
       - type: CheckBox
         name: excl
         label: Exclude Missing Values (NA)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: view_tutorial
+        label: Show Table One Tutorial
   - type: CollapseBox
     label: Enhanced Pivot Options
     stretchFactor: 1

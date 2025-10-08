@@ -16,7 +16,6 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             exclusion_reason_summary = NULL,
             participant_id_mapping = NULL,
             exclusion_reason_mapping = NULL,
-            treatment_group = NULL,
             step1_exclusions = NULL,
             step2_exclusions = NULL,
             step3_exclusions = NULL,
@@ -27,11 +26,11 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             step3_label = "Treatment",
             step4_label = "Follow-up",
             step5_label = "Analysis",
-            show_percentages = TRUE,
-            show_exclusion_boxes = TRUE,
+            show_percentages = FALSE,
+            show_exclusion_boxes = FALSE,
             direction = "TB",
             color_scheme = "gray",
-            show_interpretation = TRUE, ...) {
+            show_interpretation = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -115,13 +114,6 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..treatment_group <- jmvcore::OptionVariable$new(
-                "treatment_group",
-                treatment_group,
-                suggested=list(
-                    "nominal"),
-                permitted=list(
-                    "factor"))
             private$..step1_exclusions <- jmvcore::OptionLevel$new(
                 "step1_exclusions",
                 step1_exclusions,
@@ -165,11 +157,11 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..show_percentages <- jmvcore::OptionBool$new(
                 "show_percentages",
                 show_percentages,
-                default=TRUE)
+                default=FALSE)
             private$..show_exclusion_boxes <- jmvcore::OptionBool$new(
                 "show_exclusion_boxes",
                 show_exclusion_boxes,
-                default=TRUE)
+                default=FALSE)
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
@@ -188,7 +180,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..show_interpretation <- jmvcore::OptionBool$new(
                 "show_interpretation",
                 show_interpretation,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..data_format)
             self$.addOption(private$..diagram_type)
@@ -200,7 +192,6 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..exclusion_reason_summary)
             self$.addOption(private$..participant_id_mapping)
             self$.addOption(private$..exclusion_reason_mapping)
-            self$.addOption(private$..treatment_group)
             self$.addOption(private$..step1_exclusions)
             self$.addOption(private$..step2_exclusions)
             self$.addOption(private$..step3_exclusions)
@@ -228,7 +219,6 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         exclusion_reason_summary = function() private$..exclusion_reason_summary$value,
         participant_id_mapping = function() private$..participant_id_mapping$value,
         exclusion_reason_mapping = function() private$..exclusion_reason_mapping$value,
-        treatment_group = function() private$..treatment_group$value,
         step1_exclusions = function() private$..step1_exclusions$value,
         step2_exclusions = function() private$..step2_exclusions$value,
         step3_exclusions = function() private$..step3_exclusions$value,
@@ -255,7 +245,6 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..exclusion_reason_summary = NA,
         ..participant_id_mapping = NA,
         ..exclusion_reason_mapping = NA,
-        ..treatment_group = NA,
         ..step1_exclusions = NA,
         ..step2_exclusions = NA,
         ..step3_exclusions = NA,
@@ -281,7 +270,12 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         summary = function() private$.items[["summary"]],
         diagram = function() private$.items[["diagram"]],
         plot = function() private$.items[["plot"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        warnings = function() private$.items[["warnings"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        reportSentence = function() private$.items[["reportSentence"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        caveatsAssumptions = function() private$.items[["caveatsAssumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -409,10 +403,52 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="interpretation",
                 title="Interpretation & Guidance",
+                visible="(show_interpretation)",
                 clearWith=list(
                     "show_interpretation",
                     "data_format",
-                    "diagram_type")))}))
+                    "diagram_type")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Data Quality Warnings",
+                clearWith=list(
+                    "data_format",
+                    "participant_id",
+                    "step_excluded",
+                    "participant_count")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible="(show_interpretation)",
+                clearWith=list(
+                    "show_interpretation",
+                    "data_format")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentence",
+                title="Report Sentence",
+                visible="(show_interpretation)",
+                clearWith=list(
+                    "show_interpretation",
+                    "data_format")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(show_interpretation)",
+                clearWith=list(
+                    "show_interpretation",
+                    "diagram_type")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="caveatsAssumptions",
+                title="Caveats & Assumptions",
+                visible="(show_interpretation)",
+                clearWith=list(
+                    "show_interpretation",
+                    "data_format")))}))
 
 studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "studydiagramBase",
@@ -462,8 +498,6 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (for exclusion mapping format)
 #' @param exclusion_reason_mapping Variable containing all exclusion reasons
 #'   (for exclusion mapping format)
-#' @param treatment_group Variable indicating treatment arm or group
-#'   assignment (optional)
 #' @param step1_exclusions Select exclusion reason levels that occur at step 1
 #' @param step2_exclusions Select exclusion reason levels that occur at step 2
 #' @param step3_exclusions Select exclusion reason levels that occur at step 3
@@ -489,6 +523,11 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$diagram} \tab \tab \tab \tab \tab Interactive study flow diagram \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab Explanatory text about the diagram and results \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab Alerts about potential data quality issues \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab Plain-language summary for clinical interpretation \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab Copy-ready sentence for manuscripts \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab Explanation of analysis type and usage \cr
+#'   \code{results$caveatsAssumptions} \tab \tab \tab \tab \tab Important considerations and limitations \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -510,7 +549,6 @@ studydiagram <- function(
     exclusion_reason_summary,
     participant_id_mapping,
     exclusion_reason_mapping,
-    treatment_group,
     step1_exclusions,
     step2_exclusions,
     step3_exclusions,
@@ -521,11 +559,11 @@ studydiagram <- function(
     step3_label = "Treatment",
     step4_label = "Follow-up",
     step5_label = "Analysis",
-    show_percentages = TRUE,
-    show_exclusion_boxes = TRUE,
+    show_percentages = FALSE,
+    show_exclusion_boxes = FALSE,
     direction = "TB",
     color_scheme = "gray",
-    show_interpretation = TRUE) {
+    show_interpretation = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("studydiagram requires jmvcore to be installed (restart may be required)")
@@ -538,7 +576,6 @@ studydiagram <- function(
     if ( ! missing(exclusion_reason_summary)) exclusion_reason_summary <- jmvcore::resolveQuo(jmvcore::enquo(exclusion_reason_summary))
     if ( ! missing(participant_id_mapping)) participant_id_mapping <- jmvcore::resolveQuo(jmvcore::enquo(participant_id_mapping))
     if ( ! missing(exclusion_reason_mapping)) exclusion_reason_mapping <- jmvcore::resolveQuo(jmvcore::enquo(exclusion_reason_mapping))
-    if ( ! missing(treatment_group)) treatment_group <- jmvcore::resolveQuo(jmvcore::enquo(treatment_group))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -549,14 +586,12 @@ studydiagram <- function(
             `if`( ! missing(participant_count), participant_count, NULL),
             `if`( ! missing(exclusion_reason_summary), exclusion_reason_summary, NULL),
             `if`( ! missing(participant_id_mapping), participant_id_mapping, NULL),
-            `if`( ! missing(exclusion_reason_mapping), exclusion_reason_mapping, NULL),
-            `if`( ! missing(treatment_group), treatment_group, NULL))
+            `if`( ! missing(exclusion_reason_mapping), exclusion_reason_mapping, NULL))
 
     for (v in exclusion_reason_participant) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in step_name) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in exclusion_reason_summary) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in exclusion_reason_mapping) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in treatment_group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- studydiagramOptions$new(
         data_format = data_format,
@@ -569,7 +604,6 @@ studydiagram <- function(
         exclusion_reason_summary = exclusion_reason_summary,
         participant_id_mapping = participant_id_mapping,
         exclusion_reason_mapping = exclusion_reason_mapping,
-        treatment_group = treatment_group,
         step1_exclusions = step1_exclusions,
         step2_exclusions = step2_exclusions,
         step3_exclusions = step3_exclusions,

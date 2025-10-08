@@ -1,7 +1,7 @@
 ---
 name: clinicalvalidation
 title: Clinical Model Validation Suite
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Comprehensive validation for clinical prediction models
 version: '0.0.31'
@@ -267,6 +267,14 @@ options:
       title: Show ROC Curve
       type: Bool
       default: true
+
+    - name: show_prc_curve
+      title: Show Precision-Recall Curve
+      type: Bool
+      default: false
+      description: >
+        Display Precision-Recall curve analysis. Recommended for imbalanced datasets
+        where ROC curves may be misleading (Saito & Rehmsmeier, 2015).
 
     - name: show_validation_curves
       title: Show Validation Learning Curves

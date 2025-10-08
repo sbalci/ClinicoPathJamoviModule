@@ -64,7 +64,6 @@ children:
                 format: number
                 events:
                   change: ./jjhistostats.events::onChange_digits
-
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -83,7 +82,7 @@ children:
               - type: TextBox
                 name: subtitle
                 format: string
-                width: large  
+                width: large
               - type: TextBox
                 name: caption
                 format: string
@@ -103,7 +102,6 @@ children:
                 name: resultssubtitle
               - type: CheckBox
                 name: showInterpretation
-
   - type: CollapseBox
     label: Histogram Settings
     collapsed: true
@@ -146,7 +144,6 @@ children:
                 format: number
                 events:
                   change: ./jjhistostats.events::onChange_binalpha
-
   - type: CollapseBox
     label: Centrality Line
     collapsed: true
@@ -183,7 +180,6 @@ children:
               - type: ComboBox
                 name: centralitylinetype
                 enable: (centralityline)
-
   - type: CollapseBox
     label: Plot Configuration
     collapsed: true
@@ -205,3 +201,36 @@ children:
                 format: number
                 events:
                   change: ./jjhistostats.events::onChange_plotheight
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: addGGPubrPlot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ggpubrPalette
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: ggpubrAddDensity
+      - type: CheckBox
+        name: ggpubrAddMean
+      - type: CheckBox
+        name: addDistributionDiagnostics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ggpubrDensityColor
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: ggpubrShowQQ
+      - type: CheckBox
+        name: ggpubrShowECDF

@@ -48,13 +48,42 @@ items:
       renderFun: .plot
       requiresData: true
 
+    - name: ggpubrPlot
+      title: 'Publication-Ready Plot (ggpubr)'
+      type: Image
+      width: 650
+      height: 450
+      renderFun: .plotGGPubr
+      requiresData: true
+      visible: (addGGPubrPlot)
+      clearWith:
+        - dep
+        - group
+        - ggpubrPlotType
+        - ggpubrPalette
+        - ggpubrAddStats
+        - ggpubrAddPoints
 
-
+    - name: ggpubrPlot2
+      title: '`Publication-Ready Plot by ${grvar} (ggpubr)`'
+      type: Image
+      renderFun: .plotGGPubr2
+      requiresData: true
+      visible: (addGGPubrPlot && grvar)
+      clearWith:
+        - dep
+        - group
+        - grvar
+        - ggpubrPlotType
+        - ggpubrPalette
+        - ggpubrAddStats
+        - ggpubrAddPoints
 
 
 refs:
     - ggplot2
     - ggstatsplot
+    - ggpubr
     - ClinicoPathJamoviModule
 
 

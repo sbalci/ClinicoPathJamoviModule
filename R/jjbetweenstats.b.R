@@ -655,6 +655,195 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             TRUE
         }
 
+        ,
+        .plotGGPubr = function(image, ggtheme, theme, ...) {
+            # Validate inputs
+            if (!private$.validateInputs())
+                return()
+
+            # Skip if ggpubr plot not requested
+            if (!self$options$addGGPubrPlot)
+                return()
+
+            private$.checkpoint()
+
+            # Prepare data
+            mydata <- private$.prepareData()
+            dep <- self$options$dep
+            group <- self$options$group
+
+            # Get palette
+            palette <- if (self$options$ggpubrPalette == "default") NULL else self$options$ggpubrPalette
+
+            # Single dependent variable
+            if (length(dep) == 1) {
+                # Build arguments conditionally
+                args <- list(
+                    data = mydata,
+                    x = group,
+                    y = dep,
+                    title = if (nchar(self$options$mytitle) > 0) self$options$mytitle else NULL,
+                    xlab = if (nchar(self$options$xtitle) > 0) self$options$xtitle else group,
+                    ylab = if (nchar(self$options$ytitle) > 0) self$options$ytitle else dep,
+                    add = if (self$options$ggpubrAddPoints) "jitter" else NULL,
+                    palette = palette
+                )
+
+                # Create plot based on type
+                if (self$options$ggpubrPlotType == "boxplot") {
+                    plot <- do.call(ggpubr::ggboxplot, args)
+                } else if (self$options$ggpubrPlotType == "violin") {
+                    plot <- do.call(ggpubr::ggviolin, args)
+                } else if (self$options$ggpubrPlotType == "boxviolin") {
+                    # Create violin plot and add boxplot
+                    plot <- do.call(ggpubr::ggviolin, args)
+                    plot <- plot + ggplot2::geom_boxplot(width = 0.1)
+                }
+
+                # Add statistical comparisons
+                if (self$options$ggpubrAddStats) {
+                    plot <- plot + ggpubr::stat_compare_means()
+                }
+
+                # Apply theme
+                plot <- plot + ggpubr::theme_pubr()
+
+                print(plot)
+            }
+
+            # Multiple dependent variables
+            if (length(dep) > 1) {
+                dep_list <- as.list(dep)
+
+                plotlist <- lapply(dep_list, function(depvar) {
+                    args <- list(
+                        data = mydata,
+                        x = group,
+                        y = depvar,
+                        title = depvar,
+                        xlab = group,
+                        ylab = depvar,
+                        add = if (self$options$ggpubrAddPoints) "jitter" else NULL,
+                        palette = palette
+                    )
+
+                    if (self$options$ggpubrPlotType == "boxplot") {
+                        p <- do.call(ggpubr::ggboxplot, args)
+                    } else if (self$options$ggpubrPlotType == "violin") {
+                        p <- do.call(ggpubr::ggviolin, args)
+                    } else if (self$options$ggpubrPlotType == "boxviolin") {
+                        p <- do.call(ggpubr::ggviolin, args)
+                        p <- p + ggplot2::geom_boxplot(width = 0.1)
+                    }
+
+                    if (self$options$ggpubrAddStats) {
+                        p <- p + ggpubr::stat_compare_means()
+                    }
+
+                    p <- p + ggpubr::theme_pubr()
+                    return(p)
+                })
+
+                plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
+                print(plot)
+            }
+
+            TRUE
+        }
+
+        ,
+        .plotGGPubr2 = function(image, ggtheme, theme, ...) {
+            # Validate inputs
+            if (!private$.validateInputs())
+                return()
+
+            # Skip if ggpubr plot not requested or no grouping variable
+            if (!self$options$addGGPubrPlot || is.null(self$options$grvar))
+                return()
+
+            private$.checkpoint()
+
+            # Prepare data
+            mydata <- private$.prepareData()
+            dep <- self$options$dep
+            group <- self$options$group
+            grvar <- self$options$grvar
+
+            # Get palette
+            palette <- if (self$options$ggpubrPalette == "default") NULL else self$options$ggpubrPalette
+
+            # Single dependent variable with faceting
+            if (length(dep) == 1) {
+                args <- list(
+                    data = mydata,
+                    x = group,
+                    y = dep,
+                    title = if (nchar(self$options$mytitle) > 0) self$options$mytitle else NULL,
+                    xlab = if (nchar(self$options$xtitle) > 0) self$options$xtitle else group,
+                    ylab = if (nchar(self$options$ytitle) > 0) self$options$ytitle else dep,
+                    add = if (self$options$ggpubrAddPoints) "jitter" else NULL,
+                    palette = palette,
+                    facet.by = grvar
+                )
+
+                if (self$options$ggpubrPlotType == "boxplot") {
+                    plot <- do.call(ggpubr::ggboxplot, args)
+                } else if (self$options$ggpubrPlotType == "violin") {
+                    plot <- do.call(ggpubr::ggviolin, args)
+                } else if (self$options$ggpubrPlotType == "boxviolin") {
+                    plot <- do.call(ggpubr::ggviolin, args)
+                    plot <- plot + ggplot2::geom_boxplot(width = 0.1)
+                }
+
+                if (self$options$ggpubrAddStats) {
+                    plot <- plot + ggpubr::stat_compare_means()
+                }
+
+                plot <- plot + ggpubr::theme_pubr()
+                print(plot)
+            }
+
+            # Multiple dependent variables with faceting
+            if (length(dep) > 1) {
+                dep_list <- as.list(dep)
+
+                plotlist <- lapply(dep_list, function(depvar) {
+                    args <- list(
+                        data = mydata,
+                        x = group,
+                        y = depvar,
+                        title = depvar,
+                        xlab = group,
+                        ylab = depvar,
+                        add = if (self$options$ggpubrAddPoints) "jitter" else NULL,
+                        palette = palette,
+                        facet.by = grvar
+                    )
+
+                    if (self$options$ggpubrPlotType == "boxplot") {
+                        p <- do.call(ggpubr::ggboxplot, args)
+                    } else if (self$options$ggpubrPlotType == "violin") {
+                        p <- do.call(ggpubr::ggviolin, args)
+                    } else if (self$options$ggpubrPlotType == "boxviolin") {
+                        p <- do.call(ggpubr::ggviolin, args)
+                        p <- p + ggplot2::geom_boxplot(width = 0.1)
+                    }
+
+                    if (self$options$ggpubrAddStats) {
+                        p <- p + ggpubr::stat_compare_means()
+                    }
+
+                    p <- p + ggpubr::theme_pubr()
+                    return(p)
+                })
+
+                plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
+                print(plot)
+            }
+
+            TRUE
+        }
+
     )
 
 )

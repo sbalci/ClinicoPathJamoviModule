@@ -12,6 +12,58 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .processedData = NULL,
         .flowSummary = NULL,
 
+        # Plot Style Constants ----
+        .CONSORT_STYLE = list(
+            border_width = 1.2,
+            text_size = 3.8,
+            arrow_size = 1.0,
+            box_height = 0.35,
+            box_width = 0.4
+        ),
+
+        .FLOWCHART_STYLE = list(
+            border_width = 0.8,
+            text_size = 3.2,
+            arrow_size = 0.6,
+            box_height = 0.30,
+            box_width = 0.35
+        ),
+
+        .COLOR_SCHEMES = list(
+            gray = list(
+                main = "#f0f0f0",
+                border = "#333333",
+                exclusion = "#ffe6e6",
+                excl_border = "#cc0000"
+            ),
+            blue = list(
+                main = "#e7f3ff",
+                border = "#0066cc",
+                exclusion = "#ffe6e6",
+                excl_border = "#cc0000"
+            ),
+            minimal = list(
+                main = "#ffffff",
+                border = "#000000",
+                exclusion = "#f5f5f5",
+                excl_border = "#666666"
+            )
+        ),
+
+        # Variable name escaping utility ----
+        .escapeVar = function(x) {
+            if (is.null(x) || length(x) == 0) return(character(0))
+            vapply(x, function(var) {
+                gsub("[^A-Za-z0-9_]+", "_", make.names(var))
+            }, character(1), USE.NAMES = FALSE)
+        },
+
+        # Get style parameters based on diagram type ----
+        .getStyleParams = function(diagram_type) {
+            is_consort <- grepl("consort", diagram_type)
+            if (is_consort) private$.CONSORT_STYLE else private$.FLOWCHART_STYLE
+        },
+
         .init = function() {
             if (is.null(self$data) || nrow(self$data) == 0) {
                 self$results$todo$setContent(private$.generateWelcomeMessage())
@@ -26,10 +78,16 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
+            # Checkpoint before validation
+            private$.checkpoint()
+
             # Check for required variables based on format
             if (!private$.validateVariables()) {
                 return()
             }
+
+            # Checkpoint before data processing
+            private$.checkpoint()
 
             # Process data based on selected format
             data_format <- self$options$data_format
@@ -42,14 +100,24 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.processExclusionMapping()
             }
 
+            # Checkpoint before output generation
+            private$.checkpoint()
+
             # Generate outputs if data processing succeeded
             if (!is.null(private$.processedData)) {
                 private$.populateSummaryTable()
                 private$.generateDiagram()
+
+                # Always check data quality
+                private$.checkDataQuality()
+
+                # Checkpoint before plot rendering
+                private$.checkpoint()
+
                 private$.generatePlot()
 
                 if (self$options$show_interpretation) {
-                    private$.generateInterpretation()
+                    private$.generateClinicalOutputs()
                 }
             }
         },
@@ -103,14 +171,59 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
+            # Warn if variables from other formats are selected
+            warnings <- character(0)
+
+            if (data_format == "participant_step") {
+                # Check if user selected step_summary or exclusion_mapping variables
+                if (!is.null(self$options$step_name) || !is.null(self$options$participant_count)) {
+                    warnings <- c(warnings, "Note: 'Step Name' and 'Participant Count' are for 'Step summary' format, not 'Participant tracking' format.")
+                }
+                if (!is.null(self$options$participant_id_mapping) || !is.null(self$options$exclusion_reason_mapping)) {
+                    warnings <- c(warnings, "Note: Mapping variables are for 'Exclusion mapping' format, not 'Participant tracking' format.")
+                }
+            } else if (data_format == "step_summary") {
+                # Check if user selected participant_step or exclusion_mapping variables
+                if (!is.null(self$options$participant_id) || !is.null(self$options$step_excluded)) {
+                    warnings <- c(warnings, "Note: 'Participant ID' and 'Step Excluded' are for 'Participant tracking' format, not 'Step summary' format.")
+                }
+                if (!is.null(self$options$participant_id_mapping) || !is.null(self$options$exclusion_reason_mapping)) {
+                    warnings <- c(warnings, "Note: Mapping variables are for 'Exclusion mapping' format, not 'Step summary' format.")
+                }
+            } else if (data_format == "exclusion_mapping") {
+                # Check if user selected other format variables
+                if (!is.null(self$options$participant_id) || !is.null(self$options$step_excluded)) {
+                    warnings <- c(warnings, "Note: 'Participant ID' and 'Step Excluded' are for 'Participant tracking' format, not 'Exclusion mapping' format.")
+                }
+                if (!is.null(self$options$step_name) || !is.null(self$options$participant_count)) {
+                    warnings <- c(warnings, "Note: 'Step Name' and 'Participant Count' are for 'Step summary' format, not 'Exclusion mapping' format.")
+                }
+            }
+
+            if (length(warnings) > 0) {
+                warning_msg <- paste0(
+                    "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
+                    "<h4>⚠️ Variable Selection Warning</h4>",
+                    paste0("<p>", warnings, "</p>", collapse = ""),
+                    "<p>Please verify you have selected the correct data format.</p>",
+                    "</div>"
+                )
+                # Show warning but continue processing
+                self$results$todo$setContent(warning_msg)
+            }
+
             return(TRUE)
         },
 
         .processParticipantStep = function() {
             data <- self$data
-            id_var <- self$options$participant_id
-            step_var <- self$options$step_excluded
-            reason_var <- self$options$exclusion_reason_participant
+            id_var <- private$.escapeVar(self$options$participant_id)
+            step_var <- private$.escapeVar(self$options$step_excluded)
+            reason_var <- if (!is.null(self$options$exclusion_reason_participant)) {
+                private$.escapeVar(self$options$exclusion_reason_participant)
+            } else {
+                NULL
+            }
 
             # Count total participants
             total_participants <- nrow(data)
@@ -168,9 +281,13 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .processStepSummary = function() {
             data <- self$data
-            step_var <- self$options$step_name
-            count_var <- self$options$participant_count
-            reason_var <- self$options$exclusion_reason_summary
+            step_var <- private$.escapeVar(self$options$step_name)
+            count_var <- private$.escapeVar(self$options$participant_count)
+            reason_var <- if (!is.null(self$options$exclusion_reason_summary)) {
+                private$.escapeVar(self$options$exclusion_reason_summary)
+            } else {
+                NULL
+            }
 
             # Sort data by participant count (descending)
             data <- data[order(data[[count_var]], decreasing = TRUE), ]
@@ -218,8 +335,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .processExclusionMapping = function() {
             data <- self$data
-            id_var <- self$options$participant_id_mapping
-            reason_var <- self$options$exclusion_reason_mapping
+            id_var <- private$.escapeVar(self$options$participant_id_mapping)
+            reason_var <- private$.escapeVar(self$options$exclusion_reason_mapping)
 
             total_participants <- nrow(data)
 
@@ -338,356 +455,54 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .generateConsortStandardHtml = function() {
-            # Generate CONSORT diagram using DiagrammeR
-            flow_data <- private$.processedData
-
-            # Create DOT notation for CONSORT diagram
-            dot_lines <- c("digraph CONSORT {")
-            dot_lines <- c(dot_lines,
-                "graph [rankdir=TB, bgcolor=white, nodesep=0.5, ranksep=1.2];",
-                "node [shape=rectangle, style=\"filled\", fillcolor=\"#f0f0f0\", color=\"#333333\", fontname=\"Arial\", fontsize=10];"
-            )
-
-            # Add main flow nodes
-            for (i in seq_along(flow_data)) {
-                step_data <- flow_data[[i]]
-                label <- paste0(step_data$step, "\\n(n = ", step_data$participants, ")")
-
-                if (self$options$show_percentages && i > 1) {
-                    label <- paste0(label, "\\n[", step_data$percent_retained, "% retained]")
-                }
-
-                dot_lines <- c(dot_lines,
-                    sprintf("node%d [label=\"%s\"];", i, label)
-                )
-            }
-
-            # Add exclusion boxes if requested
-            if (self$options$show_exclusion_boxes) {
-                for (i in 2:length(flow_data)) {
-                    step_data <- flow_data[[i]]
-                    if (step_data$excluded > 0) {
-                        exc_label <- paste0("Excluded\\n(n = ", step_data$excluded, ")")
-                        if (step_data$exclusion_reasons != "") {
-                            exc_label <- paste0(exc_label, "\\n", gsub(";", "\\n", step_data$exclusion_reasons))
-                        }
-
-                        dot_lines <- c(dot_lines,
-                            sprintf("exc%d [label=\"%s\", fillcolor=\"#ffe6e6\", color=\"#cc0000\"];", i-1, exc_label)
-                        )
-                    }
-                }
-            }
-
-            # Add main flow edges
-            for (i in 1:(length(flow_data)-1)) {
-                dot_lines <- c(dot_lines,
-                    sprintf("node%d -> node%d;", i, i+1)
-                )
-            }
-
-            # Add exclusion edges
-            if (self$options$show_exclusion_boxes) {
-                for (i in 2:length(flow_data)) {
-                    step_data <- flow_data[[i]]
-                    if (step_data$excluded > 0) {
-                        dot_lines <- c(dot_lines,
-                            sprintf("node%d -> exc%d [style=dashed, color=\"#cc0000\"];", i-1, i-1)
-                        )
-                    }
-                }
-            }
-
-            dot_lines <- c(dot_lines, "}")
-            dot_code <- paste(dot_lines, collapse = "\n")
-
-            # Generate HTML with embedded SVG
-            html_content <- paste0(
-                "<div style='text-align: center; padding: 20px;'>",
-                "<div id='diagram'></div>",
-                "<script>",
-                "var dot = `", dot_code, "`;",
-                "var svg = Viz(dot, {format: 'svg'});",
-                "document.getElementById('diagram').innerHTML = svg;",
-                "</script>",
+            # DiagrammeR/Viz.js doesn't work in jamovi HTML output
+            # Provide informative message to use the plot output instead
+            return(paste0(
+                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<h4>📊 CONSORT Diagram Available in Plot Output</h4>",
+                "<p>The interactive diagram is displayed in the <strong>Plot</strong> section above.</p>",
+                "<p>You can customize the appearance using the options panel:</p>",
+                "<ul style='text-align: left; display: inline-block;'>",
+                "<li>Direction: Top-to-Bottom or Left-to-Right</li>",
+                "<li>Color Scheme: Gray, Blue, or Minimal</li>",
+                "<li>Show/Hide exclusion boxes and percentages</li>",
+                "</ul>",
+                "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
                 "</div>"
-            )
-
-            return(html_content)
+            ))
         },
 
         .generateConsortGgplotHtml = function() {
-            # Generate CONSORT diagram using ggconsort package
-            flow_data <- private$.processedData
-
-            # Check if ggconsort is available
-            if (!requireNamespace("ggconsort", quietly = TRUE)) {
-                return("<p>Error: ggconsort package not available. Install with: remotes::install_github('tgerke/ggconsort')</p>")
-            }
-
-            tryCatch({
-                # Convert flow data to ggconsort format
-                library(ggconsort)
-                library(dplyr)
-                library(ggplot2)
-
-                # Create a simple cohort structure for ggconsort
-                # Note: This is a simplified implementation - real use would require more complex data preparation
-                consort_data <- data.frame(
-                    step = sapply(flow_data, function(x) x$step),
-                    n = sapply(flow_data, function(x) x$participants),
-                    excluded = sapply(flow_data, function(x) x$excluded),
-                    stringsAsFactors = FALSE
-                )
-
-                # Create a basic ggplot CONSORT-style visualization
-                # This is a simplified version - full ggconsort integration would be more sophisticated
-                p <- ggplot(consort_data, aes(x = 1, y = rev(seq_along(step)))) +
-                    geom_rect(aes(xmin = 0.8, xmax = 1.2, ymin = rev(seq_along(step)) - 0.3, ymax = rev(seq_along(step)) + 0.3),
-                              fill = "#f0f0f0", color = "#333333") +
-                    geom_text(aes(label = paste0(step, "\n(n = ", n, ")")), size = 3) +
-                    theme_void() +
-                    labs(title = "Study Flow Diagram") +
-                    coord_cartesian(xlim = c(0.5, 1.5), ylim = c(0.5, length(consort_data$step) + 0.5))
-
-                # Convert ggplot to HTML
-                temp_file <- tempfile(fileext = ".png")
-                ggsave(temp_file, p, width = 8, height = 6, dpi = 150)
-
-                # Read image and convert to base64
-                img_base64 <- base64enc::base64encode(temp_file)
-                unlink(temp_file)
-
-                html_content <- paste0(
-                    "<div style='text-align: center; padding: 20px;'>",
-                    "<img src='data:image/png;base64,", img_base64, "' style='max-width: 100%; height: auto;'/>",
-                    "<p><em>Generated using ggconsort-style visualization</em></p>",
-                    "</div>"
-                )
-
-                return(html_content)
-
-            }, error = function(e) {
-                return(paste0("<p>Error generating ggconsort diagram: ", e$message, "</p>"))
-            })
+            # ggconsort rendering handled in plot output
+            return(paste0(
+                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<h4>📊 CONSORT Diagram Available in Plot Output</h4>",
+                "<p>The diagram is displayed in the <strong>Plot</strong> section above using ggplot2.</p>",
+                "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
+                "</div>"
+            ))
         },
 
         .generateFlowchartStandardHtml = function() {
-            # Generate flowchart using consort package
-            flow_data <- private$.processedData
-
-            # Check if consort is available
-            if (!requireNamespace("consort", quietly = TRUE)) {
-                return("<p>Error: consort package not available. Install with: install.packages('consort')</p>")
-            }
-
-            tryCatch({
-                library(consort)
-
-                # Convert flow data to consort format
-                consort_data <- data.frame(
-                    step = sapply(flow_data, function(x) x$step),
-                    n = sapply(flow_data, function(x) x$participants),
-                    excluded = sapply(flow_data, function(x) x$excluded),
-                    exclusion_reason = sapply(flow_data, function(x) x$exclusion_reasons),
-                    stringsAsFactors = FALSE
-                )
-
-                # Create consort diagram
-                # Note: This is a basic implementation - real consort integration would use patient-level data
-                g <- consort_plot(
-                    data = consort_data,
-                    orders = consort_data$step,
-                    side_box = if (self$options$show_exclusion_boxes) consort_data$exclusion_reason else NULL,
-                    allocation = NULL,
-                    labels = consort_data$step,
-                    text_width = 50
-                )
-
-                # Convert to HTML
-                temp_file <- tempfile(fileext = ".svg")
-                svg(temp_file, width = 8, height = 6)
-                plot(g)
-                dev.off()
-
-                # Read SVG content
-                svg_content <- readLines(temp_file, warn = FALSE)
-                svg_content <- paste(svg_content, collapse = "\n")
-                unlink(temp_file)
-
-                html_content <- paste0(
-                    "<div style='text-align: center; padding: 20px;'>",
-                    svg_content,
-                    "<p><em>Generated using consort package</em></p>",
-                    "</div>"
-                )
-
-                return(html_content)
-
-            }, error = function(e) {
-                # Fallback to a simple HTML table representation
-                html_content <- "<div style='text-align: center; padding: 20px;'>"
-                html_content <- paste0(html_content, "<h3>Study Flow Summary</h3>")
-                html_content <- paste0(html_content, "<table style='margin: 0 auto; border-collapse: collapse;'>")
-
-                for (i in seq_along(flow_data)) {
-                    step_data <- flow_data[[i]]
-                    html_content <- paste0(html_content,
-                        "<tr><td style='border: 1px solid #ccc; padding: 10px; text-align: center; background: #f9f9f9;'>",
-                        "<strong>", step_data$step, "</strong><br/>",
-                        "n = ", step_data$participants,
-                        if (self$options$show_percentages && i > 1) paste0("<br/>(", step_data$percent_retained, "% retained)") else "",
-                        "</td></tr>"
-                    )
-
-                    if (self$options$show_exclusion_boxes && step_data$excluded > 0) {
-                        html_content <- paste0(html_content,
-                            "<tr><td style='border: 1px solid #ccc; padding: 5px; text-align: center; background: #ffe6e6; font-size: 0.9em;'>",
-                            "Excluded: n = ", step_data$excluded,
-                            if (step_data$exclusion_reasons != "") paste0("<br/>", step_data$exclusion_reasons) else "",
-                            "</td></tr>"
-                        )
-                    }
-                }
-
-                html_content <- paste0(html_content, "</table>")
-                html_content <- paste0(html_content, "<p><em>Fallback visualization (consort package error: ", e$message, ")</em></p>")
-                html_content <- paste0(html_content, "</div>")
-
-                return(html_content)
-            })
+            # consort package rendering handled in plot output
+            return(paste0(
+                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<h4>📊 Flow Diagram Available in Plot Output</h4>",
+                "<p>The diagram is displayed in the <strong>Plot</strong> section above.</p>",
+                "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
+                "</div>"
+            ))
         },
 
         .generateFlowchartGgplotHtml = function() {
-            # Generate flowchart using ggflowchart or flowchart packages
-            flow_data <- private$.processedData
-
-            # Try ggflowchart first, then fallback to flowchart package
-            if (requireNamespace("ggflowchart", quietly = TRUE)) {
-                return(private$.generateGgflowchartHtml())
-            } else if (requireNamespace("flowchart", quietly = TRUE)) {
-                return(private$.generateFlowchartPackageHtml())
-            } else {
-                return("<p>Error: Neither ggflowchart nor flowchart packages available.<br/>Install with: install.packages('ggflowchart') or install.packages('flowchart')</p>")
-            }
-        },
-
-        .generateGgflowchartHtml = function() {
-            tryCatch({
-                library(ggflowchart)
-                library(ggplot2)
-
-                flow_data <- private$.processedData
-
-                # Create edge data for ggflowchart
-                edges <- data.frame(
-                    from = character(0),
-                    to = character(0),
-                    stringsAsFactors = FALSE
-                )
-
-                # Create nodes data
-                nodes <- data.frame(
-                    name = character(0),
-                    label = character(0),
-                    stringsAsFactors = FALSE
-                )
-
-                # Populate nodes and edges
-                for (i in seq_along(flow_data)) {
-                    step_data <- flow_data[[i]]
-                    node_name <- paste0("step", i)
-                    label <- paste0(step_data$step, "\n(n = ", step_data$participants, ")")
-
-                    if (self$options$show_percentages && i > 1) {
-                        label <- paste0(label, "\n[", step_data$percent_retained, "% retained]")
-                    }
-
-                    nodes <- rbind(nodes, data.frame(
-                        name = node_name,
-                        label = label,
-                        stringsAsFactors = FALSE
-                    ))
-
-                    # Add edges (from previous step to current)
-                    if (i > 1) {
-                        edges <- rbind(edges, data.frame(
-                            from = paste0("step", i-1),
-                            to = node_name,
-                            stringsAsFactors = FALSE
-                        ))
-                    }
-                }
-
-                # Create ggflowchart
-                p <- ggflowchart(edges, node_data = nodes) +
-                    theme_void() +
-                    labs(title = "Study Flow Diagram")
-
-                # Convert ggplot to HTML
-                temp_file <- tempfile(fileext = ".png")
-                ggsave(temp_file, p, width = 10, height = 8, dpi = 150)
-
-                # Read image and convert to base64
-                img_base64 <- base64enc::base64encode(temp_file)
-                unlink(temp_file)
-
-                html_content <- paste0(
-                    "<div style='text-align: center; padding: 20px;'>",
-                    "<img src='data:image/png;base64,", img_base64, "' style='max-width: 100%; height: auto;'/>",
-                    "<p><em>Generated using ggflowchart package</em></p>",
-                    "</div>"
-                )
-
-                return(html_content)
-
-            }, error = function(e) {
-                return(paste0("<p>Error generating ggflowchart diagram: ", e$message, "</p>"))
-            })
-        },
-
-        .generateFlowchartPackageHtml = function() {
-            tryCatch({
-                library(flowchart)
-
-                flow_data <- private$.processedData
-
-                # Create data frame for flowchart package
-                fc_data <- data.frame(
-                    id = seq_along(flow_data),
-                    step = sapply(flow_data, function(x) x$step),
-                    n = sapply(flow_data, function(x) x$participants),
-                    excluded = sapply(flow_data, function(x) x$excluded),
-                    stringsAsFactors = FALSE
-                )
-
-                # Use flowchart package to create diagram
-                fc_obj <- fc_data %>%
-                    as_fc(label = "step") %>%
-                    fc_draw()
-
-                # Save to temporary file
-                temp_file <- tempfile(fileext = ".png")
-                png(temp_file, width = 800, height = 600, res = 150)
-                print(fc_obj)
-                dev.off()
-
-                # Read image and convert to base64
-                img_base64 <- base64enc::base64encode(temp_file)
-                unlink(temp_file)
-
-                html_content <- paste0(
-                    "<div style='text-align: center; padding: 20px;'>",
-                    "<img src='data:image/png;base64,", img_base64, "' style='max-width: 100%; height: auto;'/>",
-                    "<p><em>Generated using flowchart package</em></p>",
-                    "</div>"
-                )
-
-                return(html_content)
-
-            }, error = function(e) {
-                return(paste0("<p>Error generating flowchart diagram: ", e$message, "</p>"))
-            })
+            # ggplot rendering handled in plot output
+            return(paste0(
+                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<h4>📊 Flow Diagram Available in Plot Output</h4>",
+                "<p>The diagram is displayed in the <strong>Plot</strong> section above using ggplot2.</p>",
+                "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
+                "</div>"
+            ))
         },
 
         .generatePlot = function() {
@@ -708,9 +523,131 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot = function(image, ggtheme, theme, ...) {
             if (is.null(image$state)) return(FALSE)
 
-            # For now, return a simple placeholder
-            # Full plotting implementation will be added in Phase 2
-            return(FALSE)
+            flow_data <- image$state$flow_data
+            diagram_type <- image$state$diagram_type
+            show_percentages <- image$state$show_percentages
+            show_exclusion_boxes <- image$state$show_exclusion_boxes
+            direction <- image$state$direction
+            color_scheme <- image$state$color_scheme
+
+            if (is.null(flow_data) || length(flow_data) == 0) return(FALSE)
+
+            library(ggplot2)
+
+            # Get style parameters and color schemes
+            style <- private$.getStyleParams(diagram_type)
+            colors <- private$.COLOR_SCHEMES[[color_scheme]]
+            if (is.null(colors)) colors <- private$.COLOR_SCHEMES$gray
+
+            # Extract style parameters
+            box_border_width <- style$border_width
+            text_size <- style$text_size
+            arrow_size <- style$arrow_size
+            box_height <- style$box_height
+            box_width <- style$box_width
+
+            # Determine plot orientation
+            if (direction == "LR") {
+                # Left to right
+                n_stages <- length(flow_data)
+                plot_data <- data.frame(
+                    x = seq(1, n_stages),
+                    y = rep(1, n_stages),
+                    label = vapply(flow_data, function(s) {
+                        lbl <- paste0(s$step, "\nn = ", s$participants)
+                        if (show_percentages && s$percent_retained < 100) {
+                            lbl <- paste0(lbl, "\n(", s$percent_retained, "% retained)")
+                        }
+                        lbl
+                    }, character(1)),
+                    stringsAsFactors = FALSE
+                )
+
+                p <- ggplot(plot_data, aes(x = x, y = y)) +
+                    geom_rect(aes(xmin = x - box_width, xmax = x + box_width,
+                                 ymin = y - box_height, ymax = y + box_height),
+                             fill = colors$main, color = colors$border, size = box_border_width) +
+                    geom_text(aes(label = label), size = text_size, lineheight = 0.9) +
+                    theme_void() +
+                    coord_cartesian(xlim = c(0.4, n_stages + 0.6), ylim = c(0.5, 1.5))
+
+            } else {
+                # Top to bottom (default)
+                n_stages <- length(flow_data)
+                plot_data <- data.frame(
+                    x = rep(1, n_stages),
+                    y = seq(n_stages, 1, by = -1),
+                    label = vapply(flow_data, function(s) {
+                        lbl <- paste0(s$step, "\nn = ", s$participants)
+                        if (show_percentages && s$percent_retained < 100) {
+                            lbl <- paste0(lbl, "\n(", s$percent_retained, "% retained)")
+                        }
+                        lbl
+                    }, character(1)),
+                    excluded = vapply(flow_data, function(s) s$excluded, numeric(1)),
+                    exclusion_text = vapply(flow_data, function(s) {
+                        if (s$excluded > 0 && s$exclusion_reasons != "") {
+                            paste0("Excluded: n=", s$excluded, "\n",
+                                   substr(s$exclusion_reasons, 1, 40),
+                                   if(nchar(s$exclusion_reasons) > 40) "..." else "")
+                        } else if (s$excluded > 0) {
+                            paste0("Excluded: n=", s$excluded)
+                        } else {
+                            ""
+                        }
+                    }, character(1)),
+                    stringsAsFactors = FALSE
+                )
+
+                # Main flow boxes with diagram-specific styling
+                p <- ggplot(plot_data, aes(x = x, y = y)) +
+                    geom_rect(aes(xmin = x - box_width, xmax = x + box_width,
+                                 ymin = y - box_height, ymax = y + box_height),
+                             fill = colors$main, color = colors$border, size = box_border_width) +
+                    geom_text(aes(label = label), size = text_size, lineheight = 0.9)
+
+                # Add exclusion boxes if requested
+                if (show_exclusion_boxes) {
+                    excl_data <- plot_data[plot_data$excluded > 0, ]
+                    if (nrow(excl_data) > 0) {
+                        p <- p +
+                            geom_rect(data = excl_data,
+                                     aes(xmin = x + 0.6, xmax = x + 1.4,
+                                         ymin = y - 0.25, ymax = y + 0.25),
+                                     fill = colors$exclusion, color = colors$excl_border,
+                                     size = 0.8) +
+                            geom_text(data = excl_data,
+                                     aes(x = x + 1.0, label = exclusion_text),
+                                     size = 2.8, lineheight = 0.8)
+                    }
+                }
+
+                # Add flow arrows
+                if (n_stages > 1) {
+                    arrow_data <- data.frame(
+                        x = rep(1, n_stages - 1),
+                        y = seq(n_stages, 2, by = -1),
+                        xend = rep(1, n_stages - 1),
+                        yend = seq(n_stages - 1, 1, by = -1) + box_height,
+                        stringsAsFactors = FALSE
+                    )
+
+                    p <- p +
+                        geom_segment(data = arrow_data,
+                                    aes(x = x, y = y - box_height, xend = xend, yend = yend),
+                                    arrow = arrow(length = unit(0.15, "inches"), type = "closed"),
+                                    color = colors$border, size = arrow_size)
+                }
+
+                p <- p +
+                    theme_void() +
+                    coord_cartesian(xlim = c(0.4, if(show_exclusion_boxes) 2.0 else 1.6),
+                                   ylim = c(0.5, n_stages + 0.5)) +
+                    theme(plot.margin = margin(20, 20, 20, 20))
+            }
+
+            print(p)
+            return(TRUE)
         },
 
         .generateInterpretation = function() {
@@ -767,6 +704,241 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<p>The tool will automatically generate publication-ready diagrams with participant counts, exclusion reasons, and retention percentages.</p>",
                 "</div>"
             ))
+        },
+
+        # Clinician-Friendly Output Generation ----
+
+        .checkDataQuality = function() {
+            if (is.null(private$.flowSummary)) return()
+
+            summary <- private$.flowSummary
+            warnings <- character()
+
+            # Check for high attrition
+            if (!is.null(summary$retention_rate)) {
+                retention_pct <- summary$retention_rate
+
+                if (retention_pct < 50) {
+                    warnings <- c(warnings, sprintf(
+                        "⚠️ <b>High Attrition:</b> Only %.1f%% of participants reached final analysis (%d/%d). ",
+                        "Consider discussing attrition bias in your manuscript and performing sensitivity analyses.",
+                        retention_pct, summary$total_final, summary$total_initial
+                    ))
+                }
+            }
+
+            # Check for missing exclusion reasons
+            if (!is.null(private$.processedData)) {
+                flow_data <- private$.processedData
+                missing_reasons <- vapply(flow_data, function(s) {
+                    s$excluded > 0 && (is.null(s$exclusion_reasons) || s$exclusion_reasons == "")
+                }, logical(1))
+
+                if (any(missing_reasons)) {
+                    n_missing <- sum(missing_reasons)
+                    warnings <- c(warnings, sprintf(
+                        "⚠️ <b>Missing Exclusion Reasons:</b> %d stage(s) have exclusions without documented reasons. ",
+                        "CONSORT 2010 requires reporting all exclusion criteria and reasons.",
+                        n_missing
+                    ))
+                }
+
+                # Check for single-stage studies
+                if (length(flow_data) == 1) {
+                    warnings <- c(warnings,
+                        "ℹ️ <b>Single Stage:</b> Only one stage detected. Flow diagrams are most useful for multi-stage studies."
+                    )
+                }
+            }
+
+            # Generate warnings or success message
+            if (length(warnings) > 0) {
+                html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 10px 0;'>",
+                    paste(warnings, collapse = "<br/><br/>"),
+                    "</div>"
+                )
+                self$results$warnings$setContent(html)
+            } else {
+                self$results$warnings$setContent(
+                    paste0(
+                    "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin: 10px 0;'>" ,
+                    "✅ <b>No data quality issues detected.</b> All stages have documented exclusions and retention is adequate." ,
+                    "</div>"
+                    )
+                )
+            }
+        },
+
+        .generateClinicalOutputs = function() {
+            if (is.null(private$.flowSummary)) return()
+
+            private$.generateClinicalSummary()
+            private$.generateReportSentence()
+            private$.generateAboutAnalysis()
+            private$.generateCaveatsAssumptions()
+        },
+
+        .generateClinicalSummary = function() {
+            summary <- private$.flowSummary
+
+            initial_n <- summary$total_initial
+            final_n <- summary$total_final
+            total_excluded <- summary$total_excluded
+            retention_pct <- summary$retention_rate
+
+            # Count exclusion stages
+            n_stages <- if (!is.null(private$.processedData)) length(private$.processedData) - 1 else 0
+
+            summary_html <- sprintf(
+                "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;'>" ,
+                "<h4 style='margin-top: 0;'>📊 Study Flow Summary</h4>" ,
+                "<p><b>Initial participants:</b> %d</p>" ,
+                "<p><b>Exclusion stages:</b> %d</p>" ,
+                "<p><b>Total excluded:</b> %d (%.1f%%)</p>" ,
+                "<p><b>Final analysis cohort:</b> %d (<span style='color: %s; font-weight: bold;'>%.1f%% retained</span>)</p>" ,
+                "<p style='margin-bottom: 0; font-style: italic; color: #6c757d;'>" ,
+                "A retention rate of %.1f%% indicates %s attrition for this study design." ,
+                "</p></div>",
+                initial_n,
+                n_stages,
+                total_excluded, (total_excluded / initial_n) * 100,
+                final_n,
+                if (retention_pct >= 70) "#28a745" else if (retention_pct >= 50) "#ffc107" else "#dc3545",
+                retention_pct,
+                retention_pct,
+                if (retention_pct >= 70) "acceptable" else if (retention_pct >= 50) "moderate" else "high"
+            )
+
+            self$results$clinicalSummary$setContent(summary_html)
+        },
+
+        .generateReportSentence = function() {
+            summary <- private$.flowSummary
+
+            initial_n <- summary$total_initial
+            final_n <- summary$total_final
+            retention_pct <- round(summary$retention_rate, 1)
+
+            # Generate exclusion summary from flow data
+            exclusion_details <- character()
+            if (!is.null(private$.processedData)) {
+                flow_data <- private$.processedData
+                for (stage in flow_data[-1]) {  # Skip first stage (initial)
+                    if (stage$excluded > 0) {
+                        exclusion_details <- c(exclusion_details,
+                            sprintf("%s (n=%d)", stage$step, stage$excluded))
+                    }
+                }
+            }
+
+            report_html <- sprintf(
+                "<div style='background-color: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 10px 0;'>" ,
+                "<h4 style='margin-top: 0;'>📝 Copy-Ready Report Sentence</h4>" ,
+                "<p style='font-family: \"Times New Roman\", serif; font-size: 14px; line-height: 1.6;' id='reportText'>" ,
+                "Figure X shows the participant flow through the study. Of %d individuals assessed, " ,
+                "%d (%s%%) completed all study stages and were included in the final analysis.%s" ,
+                "</p>" ,
+                "<button onclick='navigator.clipboard.writeText(document.getElementById(\"reportText\").innerText)' " ,
+                "style='background-color: #0066cc; color: white; border: none; padding: 8px 16px; " ,
+                "border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;'>" ,
+                "📋 Copy to Clipboard</button>" ,
+                "</div>",
+                initial_n,
+                final_n, retention_pct,
+                if (length(exclusion_details) > 0)
+                    sprintf(" Exclusions occurred at the following stages: %s.", paste(exclusion_details, collapse = ", "))
+                else
+                    ""
+            )
+
+            self$results$reportSentence$setContent(report_html)
+        },
+
+        .generateAboutAnalysis = function() {
+            diagram_type <- self$options$diagram_type
+            is_consort <- grepl("consort", diagram_type)
+
+            about_html <- sprintf(
+                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>" ,
+                "<h4 style='margin-top: 0;'>ℹ️ About This Analysis</h4>" ,
+                "<p><b>Analysis Type:</b> %s</p>" ,
+                "<p><b>Purpose:</b> %s</p>" ,
+                "<p><b>When to Use:</b> %s</p>" ,
+                "<p><b>Key Outputs:</b></p>" ,
+                "<ul style='margin-bottom: 0;'>" ,
+                "<li>Flow diagram showing participant progression through study stages</li>" ,
+                "<li>Exclusion counts and reasons at each stage</li>" ,
+                "<li>Retention percentages from baseline to final analysis</li>" ,
+                "<li>Data quality warnings for high attrition or missing documentation</li>" ,
+                "</ul>" ,
+                "<p style='margin-top: 10px; font-size: 12px; color: #6c757d;'>" ,
+                "📚 <a href='https://www.consort-statement.org/' target='_blank' style='color: #0066cc;'>CONSORT 2010 Guidelines</a> | " ,
+                "<a href='https://www.riinu.me/2024/02/consort/' target='_blank' style='color: #0066cc;'>Implementation Guide</a>" ,
+                "</p></div>",
+                if (is_consort) "CONSORT Flow Diagram" else "Study Flowchart",
+                if (is_consort)
+                    "Create publication-ready flow diagrams compliant with CONSORT 2010 reporting standards for clinical trials."
+                else
+                    "Visualize participant flow through observational studies, cohort analyses, or diagnostic accuracy studies.",
+                if (is_consort)
+                    "Required for randomized controlled trials (RCTs) submitted to major medical journals. Documents screening, enrollment, allocation, follow-up, and analysis stages."
+                else
+                    "Recommended for any study with sequential inclusion/exclusion criteria. Helps readers understand selection bias and generalizability."
+            )
+
+            self$results$aboutAnalysis$setContent(about_html)
+        },
+
+        .generateCaveatsAssumptions = function() {
+            summary <- private$.flowSummary
+
+            caveats <- c(
+                "<b>Data Requirements:</b>",
+                "<ul>",
+                "<li>Each participant should be counted only once</li>",
+                "<li>Exclusion categories should be mutually exclusive</li>",
+                "<li>All exclusion reasons should be documented</li>",
+                "<li>Participants flow sequentially through stages (no re-entry)</li>",
+                "</ul>",
+                "<b>Assumptions:</b>",
+                "<ul>",
+                "<li>Numbers reported are final counts, not interim assessments</li>",
+                "<li>Exclusions occur at discrete, identifiable stages</li>",
+                "<li>Exclusion criteria are applied consistently</li>",
+                "</ul>",
+                "<b>Common Pitfalls:</b>",
+                "<ul>",
+                "<li>⚠️ Overlapping exclusion criteria (participants excluded for multiple reasons)</li>",
+                "<li>⚠️ Missing data on exclusion timing (unclear which stage exclusion occurred)</li>",
+                "<li>⚠️ Inconsistent definitions across study sites in multi-center trials</li>",
+                "<li>⚠️ Confusing 'screened' with 'eligible' in initial counts</li>",
+                "</ul>"
+            )
+
+            # Add context-specific warnings
+            if (!is.null(summary$retention_rate) && summary$retention_rate < 50) {
+                caveats <- c(caveats,
+                    "<div style='background-color: #fff3cd; padding: 10px; margin-top: 10px; border-radius: 4px;'>",
+                    "<b>⚠️ High Attrition Alert:</b> Less than 50% of initial participants reached final analysis. ",
+                    "Consider:",
+                    "<ul style='margin-bottom: 0;'>",
+                    "<li>Comparing baseline characteristics of included vs. excluded participants</li>",
+                    "<li>Performing sensitivity analyses (e.g., multiple imputation, inverse probability weighting)</li>",
+                    "<li>Discussing potential selection bias in limitations section</li>",
+                    "<li>Calculating E-value to assess robustness to unmeasured confounding</li>",
+                    "</ul></div>"
+                )
+            }
+
+            caveats_html <- paste0(
+                "<div style='background-color: #fff8e1; border-left: 4px solid #ff9800; padding: 15px;'>",
+                "<h4 style='margin-top: 0;'>⚠️ Caveats & Assumptions</h4>",
+                paste(caveats, collapse = "\n"),
+                "</div>"
+            )
+
+            self$results$caveatsAssumptions$setContent(caveats_html)
         }
     )
 )

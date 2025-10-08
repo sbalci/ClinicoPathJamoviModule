@@ -153,6 +153,8 @@ children:
       - type: CheckBox
         name: show_roc_curve
       - type: CheckBox
+        name: show_prc_curve
+      - type: CheckBox
         name: show_validation_curves
       - type: CheckBox
         name: show_residual_plots

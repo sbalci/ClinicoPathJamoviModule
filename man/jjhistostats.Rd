@@ -31,7 +31,15 @@ jjhistostats(
   centralitylinewidth = 1,
   centralitylinetype = "dashed",
   plotwidth = 600,
-  plotheight = 450
+  plotheight = 450,
+  addGGPubrPlot = FALSE,
+  ggpubrPalette = "#0073C2FF",
+  ggpubrAddDensity = TRUE,
+  ggpubrAddMean = FALSE,
+  addDistributionDiagnostics = FALSE,
+  ggpubrDensityColor = "#0073C2FF",
+  ggpubrShowQQ = TRUE,
+  ggpubrShowECDF = TRUE
 )
 }
 \arguments{
@@ -113,6 +121,23 @@ transparent, 1 = opaque).}
 \item{plotwidth}{Width of each plot in pixels. Default is 600.}
 
 \item{plotheight}{Height of each plot in pixels. Default is 450.}
+
+\item{addGGPubrPlot}{Add publication-ready histogram using ggpubr package.}
+
+\item{ggpubrPalette}{Fill color for ggpubr histogram (hex code).}
+
+\item{ggpubrAddDensity}{Add density curve overlay to ggpubr histogram.}
+
+\item{ggpubrAddMean}{Add vertical line at mean for ggpubr histogram.}
+
+\item{addDistributionDiagnostics}{Add density plot, ECDF, and QQ plot for
+distribution assessment using ggpubr.}
+
+\item{ggpubrDensityColor}{Fill color for density plot (hex code).}
+
+\item{ggpubrShowQQ}{Show QQ plot for normality assessment.}
+
+\item{ggpubrShowECDF}{Show empirical cumulative distribution function plot.}
 }
 \value{
 A results object containing:
@@ -121,6 +146,11 @@ A results object containing:
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$ggpubrPlot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$densityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$qqPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$ecdfPlot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

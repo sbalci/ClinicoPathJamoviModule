@@ -1190,7 +1190,17 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 }, error = function(e) {
                     # Silently handle misuse detection errors
                 })
-                
+
+                # Misclassified Cases Analysis and Output
+                tryCatch({
+                    # Always create classifications if output is requested or analysis is shown
+                    if (self$options$showMisclassified || !is.null(self$options$saveClassifications)) {
+                        private$.analyzeMisclassifiedCases(mydata, goldVariable, testVariable)
+                    }
+                }, error = function(e) {
+                    message(paste("Error in misclassified cases analysis:", e$message))
+                })
+
                 # Add footnotes using centralized method
                 private$.addFootnotes()
 
@@ -1449,17 +1459,210 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 print(plot1)
                 TRUE
 
+            },
+
+            # Misclassified Cases Analysis ----
+            # Inspired by Orange Data Mining's interactive confusion matrix
+            # Adapted for static jamovi output
+
+            .analyzeMisclassifiedCases = function(mydata2, gold_var, test_var) {
+
+                tryCatch({
+
+                    # Get levels
+                    gold_pos <- self$options$goldPositive
+                    test_pos <- self$options$testPositive
+
+                    # Create classification groups for all data rows (not just complete cases)
+                    # Initialize with NA for all rows in original dataset
+                    classification_vector <- rep(NA_character_, nrow(self$data))
+
+                    # Map complete case indices back to original data indices
+                    # Get row names from mydata2 to match with original data
+                    complete_indices <- as.numeric(rownames(mydata2))
+
+                    # Create classification groups for complete cases
+                    mydata2$classification_group <- NA_character_
+
+                    # True Positive: Test+ and Disease+
+                    tp_idx <- mydata2[[test_var]] == test_pos & mydata2[[gold_var]] == gold_pos
+                    mydata2$classification_group[tp_idx] <- "True Positive"
+
+                    # False Positive: Test+ but Disease-
+                    fp_idx <- mydata2[[test_var]] == test_pos & mydata2[[gold_var]] != gold_pos
+                    mydata2$classification_group[fp_idx] <- "False Positive"
+
+                    # False Negative: Test- but Disease+
+                    fn_idx <- mydata2[[test_var]] != test_pos & mydata2[[gold_var]] == gold_pos
+                    mydata2$classification_group[fn_idx] <- "False Negative"
+
+                    # True Negative: Test- and Disease-
+                    tn_idx <- mydata2[[test_var]] != test_pos & mydata2[[gold_var]] != gold_pos
+                    mydata2$classification_group[tn_idx] <- "True Negative"
+
+                    # Map complete case classifications back to original data positions
+                    if (length(complete_indices) > 0) {
+                        classification_vector[complete_indices] <- mydata2$classification_group
+                    }
+
+                    # Save classifications to dataset if output variable is specified
+                    if (!is.null(self$options$saveClassifications)) {
+                        self$results$saveClassifications$setValue(classification_vector)
+                    }
+
+                    # Only populate tables if user requested to see misclassified cases
+                    if (!self$options$showMisclassified) {
+                        return()
+                    }
+
+                    # Summary counts
+                    n_total <- nrow(mydata2)
+                    n_tp <- sum(tp_idx, na.rm = TRUE)
+                    n_fp <- sum(fp_idx, na.rm = TRUE)
+                    n_fn <- sum(fn_idx, na.rm = TRUE)
+                    n_tn <- sum(tn_idx, na.rm = TRUE)
+
+                    # Populate confusion matrix summary
+                    summary_table <- self$results$confusionMatrixSummary
+                    summary_table$addRow(rowKey = 1, values = list(
+                        classification = "True Positive",
+                        count = n_tp,
+                        percentage = n_tp / n_total
+                    ))
+                    summary_table$addRow(rowKey = 2, values = list(
+                        classification = "False Positive",
+                        count = n_fp,
+                        percentage = n_fp / n_total
+                    ))
+                    summary_table$addRow(rowKey = 3, values = list(
+                        classification = "False Negative",
+                        count = n_fn,
+                        percentage = n_fn / n_total
+                    ))
+                    summary_table$addRow(rowKey = 4, values = list(
+                        classification = "True Negative",
+                        count = n_tn,
+                        percentage = n_tn / n_total
+                    ))
+
+                    # False Positive cases table
+                    if (n_fp > 0) {
+                        fp_cases <- mydata2[fp_idx, ]
+                        fp_cases$row_id <- which(fp_idx)
+
+                        max_show <- min(self$options$maxCasesShow, nrow(fp_cases))
+                        fp_table <- self$results$falsePositiveTable
+
+                        for (i in seq_len(max_show)) {
+                            fp_table$addRow(rowKey = i, values = list(
+                                case_id = fp_cases$row_id[i],
+                                gold_value = as.character(fp_cases[[gold_var]][i]),
+                                test_value = as.character(fp_cases[[test_var]][i])
+                            ))
+                        }
+
+                        if (nrow(fp_cases) > max_show) {
+                            note_text <- sprintf("Showing first %d of %d false positive cases",
+                                               max_show, nrow(fp_cases))
+                            fp_table$setNote("truncated", note_text)
+                        }
+                    }
+
+                    # False Negative cases table
+                    if (n_fn > 0) {
+                        fn_cases <- mydata2[fn_idx, ]
+                        fn_cases$row_id <- which(fn_idx)
+
+                        max_show <- min(self$options$maxCasesShow, nrow(fn_cases))
+                        fn_table <- self$results$falseNegativeTable
+
+                        for (i in seq_len(max_show)) {
+                            fn_table$addRow(rowKey = i, values = list(
+                                case_id = fn_cases$row_id[i],
+                                gold_value = as.character(fn_cases[[gold_var]][i]),
+                                test_value = as.character(fn_cases[[test_var]][i])
+                            ))
+                        }
+
+                        if (nrow(fn_cases) > max_show) {
+                            note_text <- sprintf("Showing first %d of %d false negative cases",
+                                               max_show, nrow(fn_cases))
+                            fn_table$setNote("truncated", note_text)
+                        }
+                    }
+
+                    # Interpretation
+                    private$.generateMisclassificationInterpretation(n_tp, n_fp, n_fn, n_tn)
+
+                }, error = function(e) {
+                    # Silently fail if misclassification analysis has errors
+                    message(paste("Error in misclassified cases analysis:", e$message))
+                })
+            },
+
+            .generateMisclassificationInterpretation = function(n_tp, n_fp, n_fn, n_tn) {
+
+                total_errors <- n_fp + n_fn
+                error_rate <- (total_errors / (n_tp + n_fp + n_fn + n_tn)) * 100
+
+                fp_proportion <- if (total_errors > 0) (n_fp / total_errors) * 100 else 0
+                fn_proportion <- if (total_errors > 0) (n_fn / total_errors) * 100 else 0
+
+                html <- "<h3>Understanding Misclassifications</h3>"
+
+                html <- paste0(html, sprintf(
+                    "<p><b>Error Summary:</b> %d total misclassifications (%.1f%% error rate)</p>",
+                    total_errors, error_rate
+                ))
+
+                html <- paste0(html, "<ul>")
+                html <- paste0(html, sprintf(
+                    "<li><b>False Positives:</b> %d cases (%.1f%% of errors) - Test incorrectly predicts disease</li>",
+                    n_fp, fp_proportion
+                ))
+                html <- paste0(html, sprintf(
+                    "<li><b>False Negatives:</b> %d cases (%.1f%% of errors) - Test misses actual disease</li>",
+                    n_fn, fn_proportion
+                ))
+                html <- paste0(html, "</ul>")
+
+                # Clinical interpretation
+                if (n_fp > n_fn) {
+                    html <- paste0(html,
+                        "<p><b>Clinical Implication:</b> The test tends to over-diagnose (more false positives). ",
+                        "This may lead to unnecessary treatments but rarely misses disease.</p>")
+                } else if (n_fn > n_fp) {
+                    html <- paste0(html,
+                        "<p><b>Clinical Implication:</b> The test tends to under-diagnose (more false negatives). ",
+                        "This may miss cases that need treatment but reduces unnecessary interventions.</p>")
+                } else {
+                    html <- paste0(html,
+                        "<p><b>Clinical Implication:</b> The test has balanced error types.</p>")
+                }
+
+                # Recommendations
+                html <- paste0(html, "<p><b>Recommendations:</b></p><ul>")
+
+                if (n_fp > 0) {
+                    html <- paste0(html,
+                        "<li>Review false positive cases to identify common characteristics</li>",
+                        "<li>Consider if test cutpoint needs adjustment to reduce false positives</li>")
+                }
+
+                if (n_fn > 0) {
+                    html <- paste0(html,
+                        "<li>Review false negative cases to understand what the test misses</li>",
+                        "<li>Consider supplementary tests for cases with high clinical suspicion</li>")
+                }
+
+                html <- paste0(html, "</ul>")
+
+                html <- paste0(html,
+                    "<p><i>This analysis was inspired by Orange Data Mining's interactive confusion matrix feature, ",
+                    "adapted for static jamovi output with comprehensive statistical tables.</i></p>")
+
+                self$results$misclassificationInterpretation$setContent(html)
             }
-
-
-
-
-
-
-
-
-
-
 
 
         )

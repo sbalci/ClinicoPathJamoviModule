@@ -27,7 +27,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             conflevel = 0.95,
             ratio = "",
             clinicalpreset = "custom",
-            showexplanations = FALSE, ...) {
+            showexplanations = FALSE,
+            addGGPubrBalloon = FALSE,
+            ggpubrBalloonPalette = "jco", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -174,6 +176,18 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showexplanations",
                 showexplanations,
                 default=FALSE)
+            private$..addGGPubrBalloon <- jmvcore::OptionBool$new(
+                "addGGPubrBalloon",
+                addGGPubrBalloon,
+                default=FALSE)
+            private$..ggpubrBalloonPalette <- jmvcore::OptionList$new(
+                "ggpubrBalloonPalette",
+                ggpubrBalloonPalette,
+                options=list(
+                    "jco",
+                    "lancet",
+                    "grey"),
+                default="jco")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -197,6 +211,8 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ratio)
             self$.addOption(private$..clinicalpreset)
             self$.addOption(private$..showexplanations)
+            self$.addOption(private$..addGGPubrBalloon)
+            self$.addOption(private$..ggpubrBalloonPalette)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -220,7 +236,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         conflevel = function() private$..conflevel$value,
         ratio = function() private$..ratio$value,
         clinicalpreset = function() private$..clinicalpreset$value,
-        showexplanations = function() private$..showexplanations$value),
+        showexplanations = function() private$..showexplanations$value,
+        addGGPubrBalloon = function() private$..addGGPubrBalloon$value,
+        ggpubrBalloonPalette = function() private$..ggpubrBalloonPalette$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -243,7 +261,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..conflevel = NA,
         ..ratio = NA,
         ..clinicalpreset = NA,
-        ..showexplanations = NA)
+        ..showexplanations = NA,
+        ..addGGPubrBalloon = NA,
+        ..ggpubrBalloonPalette = NA)
 )
 
 jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -257,7 +277,8 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         report = function() private$.items[["report"]],
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        balloonPlot = function() private$.items[["balloonPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -268,6 +289,7 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
+                    "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
@@ -329,7 +351,20 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="plot",
                 title="Bar Chart",
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="balloonPlot",
+                title="Balloon Plot (ggpubr)",
+                width=600,
+                height=500,
+                renderFun=".plotBalloon",
+                requiresData=TRUE,
+                visible="(addGGPubrBalloon)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "ggpubrBalloonPalette")))}))
 
 jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjbarstatsBase",
@@ -398,8 +433,11 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   scenarios.  Automatically sets appropriate statistical methods and
 #'   parameters.
 #' @param showexplanations Display detailed explanations of statistical
-#'   methods, assumptions,  and clinical interpretations to guide analysis and
+#'   methods, assumptions, and clinical interpretations to guide analysis and
 #'   result interpretation.
+#' @param addGGPubrBalloon Add balloon plot for contingency table
+#'   visualization using ggpubr.
+#' @param ggpubrBalloonPalette Color palette for balloon plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -410,6 +448,7 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$balloonPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -436,7 +475,9 @@ jjbarstats <- function(
     conflevel = 0.95,
     ratio = "",
     clinicalpreset = "custom",
-    showexplanations = FALSE) {
+    showexplanations = FALSE,
+    addGGPubrBalloon = FALSE,
+    ggpubrBalloonPalette = "jco") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbarstats requires jmvcore to be installed (restart may be required)")
@@ -479,7 +520,9 @@ jjbarstats <- function(
         conflevel = conflevel,
         ratio = ratio,
         clinicalpreset = clinicalpreset,
-        showexplanations = showexplanations)
+        showexplanations = showexplanations,
+        addGGPubrBalloon = addGGPubrBalloon,
+        ggpubrBalloonPalette = ggpubrBalloonPalette)
 
     analysis <- jjbarstatsClass$new(
         options = options,

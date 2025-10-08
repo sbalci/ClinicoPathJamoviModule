@@ -21,7 +21,29 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             showDataSummary = TRUE,
             showInterpretation = TRUE,
             exportWidth = 8,
-            exportHeight = 6, ...) {
+            exportHeight = 6,
+            clusterDistanceRows = "euclidean",
+            clusterMethodRows = "complete",
+            clusterDistanceCols = "euclidean",
+            clusterMethodCols = "complete",
+            annotationType = "tile",
+            addLayer = FALSE,
+            layerType = "point",
+            layerFilter = "",
+            splitRows = 1,
+            splitCols = 1,
+            findOptimalK = FALSE,
+            kRange = "2:8",
+            exportRowClusters = FALSE,
+            exportColClusters = FALSE,
+            rowClusterPrefix = "RowCluster",
+            colClusterPrefix = "ColCluster",
+            survivalAnalysis = FALSE,
+            survivalTime = NULL,
+            survivalEvent = NULL,
+            survivalEventLevel = NULL,
+            clusterComparison = FALSE,
+            comparisonVars = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -138,6 +160,144 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 min=3,
                 max=20,
                 default=6)
+            private$..clusterDistanceRows <- jmvcore::OptionList$new(
+                "clusterDistanceRows",
+                clusterDistanceRows,
+                options=list(
+                    "euclidean",
+                    "pearson",
+                    "spearman",
+                    "manhattan"),
+                default="euclidean")
+            private$..clusterMethodRows <- jmvcore::OptionList$new(
+                "clusterMethodRows",
+                clusterMethodRows,
+                options=list(
+                    "complete",
+                    "average",
+                    "single",
+                    "ward.D2"),
+                default="complete")
+            private$..clusterDistanceCols <- jmvcore::OptionList$new(
+                "clusterDistanceCols",
+                clusterDistanceCols,
+                options=list(
+                    "euclidean",
+                    "pearson",
+                    "spearman",
+                    "manhattan"),
+                default="euclidean")
+            private$..clusterMethodCols <- jmvcore::OptionList$new(
+                "clusterMethodCols",
+                clusterMethodCols,
+                options=list(
+                    "complete",
+                    "average",
+                    "single",
+                    "ward.D2"),
+                default="complete")
+            private$..annotationType <- jmvcore::OptionList$new(
+                "annotationType",
+                annotationType,
+                options=list(
+                    "tile",
+                    "bar",
+                    "point",
+                    "line"),
+                default="tile")
+            private$..addLayer <- jmvcore::OptionBool$new(
+                "addLayer",
+                addLayer,
+                default=FALSE)
+            private$..layerType <- jmvcore::OptionList$new(
+                "layerType",
+                layerType,
+                options=list(
+                    "point",
+                    "text",
+                    "star",
+                    "square",
+                    "diamond",
+                    "arrow_up",
+                    "arrow_down"),
+                default="point")
+            private$..layerFilter <- jmvcore::OptionString$new(
+                "layerFilter",
+                layerFilter,
+                default="")
+            private$..splitRows <- jmvcore::OptionInteger$new(
+                "splitRows",
+                splitRows,
+                min=1,
+                max=10,
+                default=1)
+            private$..splitCols <- jmvcore::OptionInteger$new(
+                "splitCols",
+                splitCols,
+                min=1,
+                max=10,
+                default=1)
+            private$..findOptimalK <- jmvcore::OptionBool$new(
+                "findOptimalK",
+                findOptimalK,
+                default=FALSE)
+            private$..kRange <- jmvcore::OptionString$new(
+                "kRange",
+                kRange,
+                default="2:8")
+            private$..exportRowClusters <- jmvcore::OptionBool$new(
+                "exportRowClusters",
+                exportRowClusters,
+                default=FALSE)
+            private$..exportColClusters <- jmvcore::OptionBool$new(
+                "exportColClusters",
+                exportColClusters,
+                default=FALSE)
+            private$..rowClusterPrefix <- jmvcore::OptionString$new(
+                "rowClusterPrefix",
+                rowClusterPrefix,
+                default="RowCluster")
+            private$..colClusterPrefix <- jmvcore::OptionString$new(
+                "colClusterPrefix",
+                colClusterPrefix,
+                default="ColCluster")
+            private$..survivalAnalysis <- jmvcore::OptionBool$new(
+                "survivalAnalysis",
+                survivalAnalysis,
+                default=FALSE)
+            private$..survivalTime <- jmvcore::OptionVariable$new(
+                "survivalTime",
+                survivalTime,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..survivalEvent <- jmvcore::OptionVariable$new(
+                "survivalEvent",
+                survivalEvent,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..survivalEventLevel <- jmvcore::OptionLevel$new(
+                "survivalEventLevel",
+                survivalEventLevel,
+                variable="(survivalEvent)")
+            private$..clusterComparison <- jmvcore::OptionBool$new(
+                "clusterComparison",
+                clusterComparison,
+                default=FALSE)
+            private$..comparisonVars <- jmvcore::OptionVariables$new(
+                "comparisonVars",
+                comparisonVars,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
 
             self$.addOption(private$..rowVar)
             self$.addOption(private$..colVar)
@@ -155,6 +315,28 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..showInterpretation)
             self$.addOption(private$..exportWidth)
             self$.addOption(private$..exportHeight)
+            self$.addOption(private$..clusterDistanceRows)
+            self$.addOption(private$..clusterMethodRows)
+            self$.addOption(private$..clusterDistanceCols)
+            self$.addOption(private$..clusterMethodCols)
+            self$.addOption(private$..annotationType)
+            self$.addOption(private$..addLayer)
+            self$.addOption(private$..layerType)
+            self$.addOption(private$..layerFilter)
+            self$.addOption(private$..splitRows)
+            self$.addOption(private$..splitCols)
+            self$.addOption(private$..findOptimalK)
+            self$.addOption(private$..kRange)
+            self$.addOption(private$..exportRowClusters)
+            self$.addOption(private$..exportColClusters)
+            self$.addOption(private$..rowClusterPrefix)
+            self$.addOption(private$..colClusterPrefix)
+            self$.addOption(private$..survivalAnalysis)
+            self$.addOption(private$..survivalTime)
+            self$.addOption(private$..survivalEvent)
+            self$.addOption(private$..survivalEventLevel)
+            self$.addOption(private$..clusterComparison)
+            self$.addOption(private$..comparisonVars)
         }),
     active = list(
         rowVar = function() private$..rowVar$value,
@@ -172,7 +354,29 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         showDataSummary = function() private$..showDataSummary$value,
         showInterpretation = function() private$..showInterpretation$value,
         exportWidth = function() private$..exportWidth$value,
-        exportHeight = function() private$..exportHeight$value),
+        exportHeight = function() private$..exportHeight$value,
+        clusterDistanceRows = function() private$..clusterDistanceRows$value,
+        clusterMethodRows = function() private$..clusterMethodRows$value,
+        clusterDistanceCols = function() private$..clusterDistanceCols$value,
+        clusterMethodCols = function() private$..clusterMethodCols$value,
+        annotationType = function() private$..annotationType$value,
+        addLayer = function() private$..addLayer$value,
+        layerType = function() private$..layerType$value,
+        layerFilter = function() private$..layerFilter$value,
+        splitRows = function() private$..splitRows$value,
+        splitCols = function() private$..splitCols$value,
+        findOptimalK = function() private$..findOptimalK$value,
+        kRange = function() private$..kRange$value,
+        exportRowClusters = function() private$..exportRowClusters$value,
+        exportColClusters = function() private$..exportColClusters$value,
+        rowClusterPrefix = function() private$..rowClusterPrefix$value,
+        colClusterPrefix = function() private$..colClusterPrefix$value,
+        survivalAnalysis = function() private$..survivalAnalysis$value,
+        survivalTime = function() private$..survivalTime$value,
+        survivalEvent = function() private$..survivalEvent$value,
+        survivalEventLevel = function() private$..survivalEventLevel$value,
+        clusterComparison = function() private$..clusterComparison$value,
+        comparisonVars = function() private$..comparisonVars$value),
     private = list(
         ..rowVar = NA,
         ..colVar = NA,
@@ -189,7 +393,29 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..showDataSummary = NA,
         ..showInterpretation = NA,
         ..exportWidth = NA,
-        ..exportHeight = NA)
+        ..exportHeight = NA,
+        ..clusterDistanceRows = NA,
+        ..clusterMethodRows = NA,
+        ..clusterDistanceCols = NA,
+        ..clusterMethodCols = NA,
+        ..annotationType = NA,
+        ..addLayer = NA,
+        ..layerType = NA,
+        ..layerFilter = NA,
+        ..splitRows = NA,
+        ..splitCols = NA,
+        ..findOptimalK = NA,
+        ..kRange = NA,
+        ..exportRowClusters = NA,
+        ..exportColClusters = NA,
+        ..rowClusterPrefix = NA,
+        ..colClusterPrefix = NA,
+        ..survivalAnalysis = NA,
+        ..survivalTime = NA,
+        ..survivalEvent = NA,
+        ..survivalEventLevel = NA,
+        ..clusterComparison = NA,
+        ..comparisonVars = NA)
 )
 
 clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -204,7 +430,11 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         interpretation = function() private$.items[["interpretation"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
         reportSentences = function() private$.items[["reportSentences"]],
-        assumptions = function() private$.items[["assumptions"]]),
+        assumptions = function() private$.items[["assumptions"]],
+        optimalKAnalysis = function() private$.items[["optimalKAnalysis"]],
+        clusterAssignments = function() private$.items[["clusterAssignments"]],
+        clusterSurvival = function() private$.items[["clusterSurvival"]],
+        clusterCharacteristics = function() private$.items[["clusterCharacteristics"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -291,7 +521,28 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 height=600,
                 renderFun=".plotHeatmap",
                 visible=TRUE,
-                clearWith=list()))
+                clearWith=list(
+                    "rowVar",
+                    "colVar",
+                    "valueVar",
+                    "annotationCols",
+                    "annotationRows",
+                    "scaleMethod",
+                    "clusterRows",
+                    "clusterCols",
+                    "clusterDistanceRows",
+                    "clusterMethodRows",
+                    "clusterDistanceCols",
+                    "clusterMethodCols",
+                    "colorPalette",
+                    "showRownames",
+                    "showColnames",
+                    "annotationType",
+                    "addLayer",
+                    "layerType",
+                    "layerFilter",
+                    "splitRows",
+                    "splitCols")))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -339,7 +590,207 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="assumptions",
                 title="Assumptions & Notes",
                 visible=TRUE,
-                clearWith=list()))}))
+                clearWith=list()))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    elbowPlot = function() private$.items[["elbowPlot"]],
+                    silhouettePlot = function() private$.items[["silhouettePlot"]],
+                    optimalKTable = function() private$.items[["optimalKTable"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="optimalKAnalysis",
+                            title="Optimal K Determination")
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="elbowPlot",
+                            title="Elbow Plot (WSS)",
+                            width=600,
+                            height=400,
+                            renderFun=".elbowPlot"))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="silhouettePlot",
+                            title="Silhouette Analysis",
+                            width=600,
+                            height=400,
+                            renderFun=".silhouettePlot"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="optimalKTable",
+                            title="Optimal K Summary",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="optimal_k", 
+                                    `title`="Optimal K", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="metric_value", 
+                                    `title`="Metric Value", 
+                                    `type`="number", 
+                                    `format`="zto"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    rowClusterTable = function() private$.items[["rowClusterTable"]],
+                    colClusterTable = function() private$.items[["colClusterTable"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="clusterAssignments",
+                            title="Cluster Assignments")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="rowClusterTable",
+                            title="Row Cluster Assignments",
+                            visible="(exportRowClusters)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="row_id", 
+                                    `title`="Row ID", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cluster", 
+                                    `title`="Cluster", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="colClusterTable",
+                            title="Column Cluster Assignments",
+                            visible="(exportColClusters)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="col_id", 
+                                    `title`="Column ID", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cluster", 
+                                    `title`="Cluster", 
+                                    `type`="integer"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    kmPlot = function() private$.items[["kmPlot"]],
+                    survivalTable = function() private$.items[["survivalTable"]],
+                    logRankTest = function() private$.items[["logRankTest"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="clusterSurvival",
+                            title="Survival Analysis by Clusters")
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="kmPlot",
+                            title="Kaplan-Meier by Cluster",
+                            width=700,
+                            height=500,
+                            renderFun=".kmPlotClusters"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="survivalTable",
+                            title="Survival Comparison",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="cluster", 
+                                    `title`="Cluster", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n", 
+                                    `title`="N", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="events", 
+                                    `title`="Events", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="median_surv", 
+                                    `title`="Median Survival", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="logRankTest",
+                            title="Log-Rank Test",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="chisq", 
+                                    `title`="Chi-Square", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    characteristicTable = function() private$.items[["characteristicTable"]],
+                    clusterInterpretation = function() private$.items[["clusterInterpretation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="clusterCharacteristics",
+                            title="Cluster Characteristics Comparison")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="characteristicTable",
+                            title="Characteristics by Cluster",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="variable", 
+                                    `title`="Variable", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cluster", 
+                                    `title`="Cluster", 
+                                    `type`="text"),
+                                list(
+                                    `name`="summary", 
+                                    `title`="Summary", 
+                                    `type`="text"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="clusterInterpretation",
+                            title="Cluster Interpretation"))}))$new(options=options))}))
 
 clinicalheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "clinicalheatmapBase",
@@ -389,6 +840,38 @@ clinicalheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   context.
 #' @param exportWidth Width of exported heatmap in inches.
 #' @param exportHeight Height of exported heatmap in inches.
+#' @param clusterDistanceRows Distance metric for row clustering.
+#' @param clusterMethodRows Agglomeration method for row clustering.
+#' @param clusterDistanceCols Distance metric for column clustering.
+#' @param clusterMethodCols Agglomeration method for column clustering.
+#' @param annotationType Type of annotation visualization for tidyHeatmap.
+#' @param addLayer Add a symbol layer on top of the heatmap.
+#' @param layerType Type of symbol to add as a layer.
+#' @param layerFilter Logical expression to filter which cells show symbols
+#'   (e.g., "> 0.5").
+#' @param splitRows Number of row groups to split based on dendrogram
+#'   branches.
+#' @param splitCols Number of column groups to split based on dendrogram
+#'   branches.
+#' @param findOptimalK Automatically determine optimal number of clusters
+#'   using elbow method and silhouette analysis.
+#' @param kRange Range of K values to test (format: "min:max", e.g., "2:10").
+#' @param exportRowClusters Add row cluster assignments as a new column in the
+#'   dataset.
+#' @param exportColClusters Add column cluster assignments as a new column in
+#'   the dataset.
+#' @param rowClusterPrefix Name for the exported row cluster assignment
+#'   column.
+#' @param colClusterPrefix Name for the exported column cluster assignment
+#'   column.
+#' @param survivalAnalysis Perform survival analysis comparing row clusters
+#'   (requires survival data).
+#' @param survivalTime .
+#' @param survivalEvent .
+#' @param survivalEventLevel .
+#' @param clusterComparison Compare clinical/molecular characteristics across
+#'   discovered clusters.
+#' @param comparisonVars .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -403,6 +886,16 @@ clinicalheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$optimalKAnalysis$elbowPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$optimalKAnalysis$silhouettePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$optimalKAnalysis$optimalKTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterAssignments$rowClusterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterAssignments$colClusterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterSurvival$kmPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clusterSurvival$survivalTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterSurvival$logRankTest} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterCharacteristics$characteristicTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterCharacteristics$clusterInterpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -423,7 +916,29 @@ clinicalheatmap <- function(
     showDataSummary = TRUE,
     showInterpretation = TRUE,
     exportWidth = 8,
-    exportHeight = 6) {
+    exportHeight = 6,
+    clusterDistanceRows = "euclidean",
+    clusterMethodRows = "complete",
+    clusterDistanceCols = "euclidean",
+    clusterMethodCols = "complete",
+    annotationType = "tile",
+    addLayer = FALSE,
+    layerType = "point",
+    layerFilter = "",
+    splitRows = 1,
+    splitCols = 1,
+    findOptimalK = FALSE,
+    kRange = "2:8",
+    exportRowClusters = FALSE,
+    exportColClusters = FALSE,
+    rowClusterPrefix = "RowCluster",
+    colClusterPrefix = "ColCluster",
+    survivalAnalysis = FALSE,
+    survivalTime,
+    survivalEvent,
+    survivalEventLevel,
+    clusterComparison = FALSE,
+    comparisonVars) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("clinicalheatmap requires jmvcore to be installed (restart may be required)")
@@ -433,6 +948,9 @@ clinicalheatmap <- function(
     if ( ! missing(valueVar)) valueVar <- jmvcore::resolveQuo(jmvcore::enquo(valueVar))
     if ( ! missing(annotationCols)) annotationCols <- jmvcore::resolveQuo(jmvcore::enquo(annotationCols))
     if ( ! missing(annotationRows)) annotationRows <- jmvcore::resolveQuo(jmvcore::enquo(annotationRows))
+    if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
+    if ( ! missing(survivalEvent)) survivalEvent <- jmvcore::resolveQuo(jmvcore::enquo(survivalEvent))
+    if ( ! missing(comparisonVars)) comparisonVars <- jmvcore::resolveQuo(jmvcore::enquo(comparisonVars))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -440,7 +958,10 @@ clinicalheatmap <- function(
             `if`( ! missing(colVar), colVar, NULL),
             `if`( ! missing(valueVar), valueVar, NULL),
             `if`( ! missing(annotationCols), annotationCols, NULL),
-            `if`( ! missing(annotationRows), annotationRows, NULL))
+            `if`( ! missing(annotationRows), annotationRows, NULL),
+            `if`( ! missing(survivalTime), survivalTime, NULL),
+            `if`( ! missing(survivalEvent), survivalEvent, NULL),
+            `if`( ! missing(comparisonVars), comparisonVars, NULL))
 
     for (v in annotationCols) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in annotationRows) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -461,7 +982,29 @@ clinicalheatmap <- function(
         showDataSummary = showDataSummary,
         showInterpretation = showInterpretation,
         exportWidth = exportWidth,
-        exportHeight = exportHeight)
+        exportHeight = exportHeight,
+        clusterDistanceRows = clusterDistanceRows,
+        clusterMethodRows = clusterMethodRows,
+        clusterDistanceCols = clusterDistanceCols,
+        clusterMethodCols = clusterMethodCols,
+        annotationType = annotationType,
+        addLayer = addLayer,
+        layerType = layerType,
+        layerFilter = layerFilter,
+        splitRows = splitRows,
+        splitCols = splitCols,
+        findOptimalK = findOptimalK,
+        kRange = kRange,
+        exportRowClusters = exportRowClusters,
+        exportColClusters = exportColClusters,
+        rowClusterPrefix = rowClusterPrefix,
+        colClusterPrefix = colClusterPrefix,
+        survivalAnalysis = survivalAnalysis,
+        survivalTime = survivalTime,
+        survivalEvent = survivalEvent,
+        survivalEventLevel = survivalEventLevel,
+        clusterComparison = clusterComparison,
+        comparisonVars = comparisonVars)
 
     analysis <- clinicalheatmapClass$new(
         options = options,

@@ -94,11 +94,15 @@ and \code{fudate} will be used to calculate this time.}
 and \code{fudate}. If false, \code{elapsedtime} should be provided as a
 pre-calculated numeric variable.}
 
-\item{dxdate}{Date of diagnosis. Required if \code{tint} = true. Must match
-the format specified in \code{timetypedata}.}
+\item{dxdate}{Date of diagnosis. Required if \code{tint} = true. Accepts:
+(1) Date/datetime text, (2) Numeric Unix epoch seconds (from DateTime
+Converter's corrected_datetime_numeric output), (3) Numeric datetime values
+from R. Time intervals calculated as difference from follow-up date.}
 
 \item{fudate}{Follow-up date or date of last observation. Required if
-\code{tint} = true. Must match the format specified in \code{timetypedata}.}
+\code{tint} = true. Accepts: (1) Date/datetime text, (2) Numeric Unix epoch
+seconds (from DateTime Converter's corrected_datetime_numeric output), (3)
+Numeric datetime values from R. Must be in same format as diagnosis date.}
 
 \item{timetypedata}{Specifies the format of the date variables in the input
 data. This is critical if \code{tint = true}, as \code{dxdate} and

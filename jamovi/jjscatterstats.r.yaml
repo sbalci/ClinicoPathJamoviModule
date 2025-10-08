@@ -69,13 +69,45 @@ items:
       requiresData: true
       visible: (!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))
 
+    - name: ggpubrPlot
+      title: 'Publication-Ready Scatter Plot (ggpubr)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotGGPubr
+      requiresData: true
+      visible: (addGGPubrPlot)
+      clearWith:
+        - dep
+        - group
+        - ggpubrPalette
+        - ggpubrAddCorr
+        - ggpubrCorrMethod
+        - ggpubrAddSmooth
 
+    - name: ggpubrPlot2
+      title: '`Publication-Ready Scatter Plot by ${grvar} (ggpubr)`'
+      type: Image
+      width: 1200
+      height: 450
+      renderFun: .plotGGPubr2
+      requiresData: true
+      visible: (addGGPubrPlot && grvar)
+      clearWith:
+        - dep
+        - group
+        - grvar
+        - ggpubrPalette
+        - ggpubrAddCorr
+        - ggpubrCorrMethod
+        - ggpubrAddSmooth
 
 
 
 refs:
     - ggplot2
     - ggstatsplot
+    - ggpubr
     - ClinicoPathJamoviModule
 
 

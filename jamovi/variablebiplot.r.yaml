@@ -1,0 +1,131 @@
+---
+name:  variablebiplot
+title: Variable Importance Biplot
+jrs:   '1.1'
+
+items:
+    - name: about
+      title: About This Analysis
+      type: Html
+      visible: true
+
+    - name: todo
+      title: Analysis Setup
+      type: Html
+      visible: true
+
+    - name: assumptions
+      title: Assumptions & Warnings
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: interpretation
+      title: How to Read This Biplot
+      type: Html
+      visible: (showInterpretation)
+
+    - name: report
+      title: Copy-Ready Report
+      type: Html
+      visible: (showReport)
+
+    - name: componentVariance
+      title: Component Variance Explained
+      type: Table
+      visible: (showVarianceExplained)
+      rows: 0
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: eigenvalue
+          title: Eigenvalue
+          type: number
+          format: zto
+        - name: variance
+          title: '% Variance'
+          type: number
+          format: zto
+        - name: cumulative
+          title: '% Cumulative'
+          type: number
+          format: zto
+
+    - name: contributionTable
+      title: Variable Contributions
+      type: Table
+      visible: (showContribTable)
+      rows: 0
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: pc1_contrib
+          title: 'PC1 Contrib'
+          type: number
+          format: zto
+        - name: pc2_contrib
+          title: 'PC2 Contrib'
+          type: number
+          format: zto
+        - name: total_contrib
+          title: 'Total Contrib'
+          type: number
+          format: zto
+        - name: quality
+          title: 'Quality (Cos²)'
+          type: number
+          format: zto
+
+    - name: separationAnalysis
+      title: Group Separation Analysis
+      type: Table
+      visible: (showSeparation)
+      rows: 0
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: biplot
+      title: Variable Importance Biplot
+      type: Image
+      width: 800
+      height: 700
+      renderFun: .biplot
+      requiresData: true
+
+    - name: contributionInterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (showContribTable)
+
+
+
+    - name: rCode
+      title: Reproducible R Code
+      type: Html
+      visible: (showRCode)
+
+
+
+
+refs:
+    - ClinicoPathJamoviModule
+    - FactoMineR
+    - factoextra
+    - ggplot2
+
+...

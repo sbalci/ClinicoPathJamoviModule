@@ -1,7 +1,7 @@
 ---
 name:  classification
 title: Clinical Classification
-menuGroup: ExplorationD
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Predictions
 menuSubtitle: Classification Analysis
 version: '0.0.3'
@@ -284,5 +284,15 @@ options:
       description:
           R: >
             Include 95% confidence intervals for clinical metrics.
+
+    - name: reportMCC
+      title: Matthews Correlation Coefficient
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Matthews Correlation Coefficient (MCC), a balanced metric
+            for imbalanced datasets. MCC ranges from -1 (perfect disagreement) to
+            +1 (perfect agreement), with 0 indicating random prediction.
 
 ...

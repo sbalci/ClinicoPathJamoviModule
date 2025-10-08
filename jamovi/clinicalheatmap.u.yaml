@@ -2,7 +2,7 @@ title: Clinical Heatmap
 name: clinicalheatmap
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -41,51 +41,215 @@ children:
           - type: VariablesListBox
             name: annotationRows
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Heatmap Appearance
+    collapsed: false
     children:
-      - type: ComboBox
-        name: scaleMethod
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: scaleMethod
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: colorPalette
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showRownames
+          - type: CheckBox
+            name: showColnames
+  - type: CollapseBox
+    label: Clustering Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: clusterRows
+          - type: CheckBox
+            name: clusterCols
+      - type: Label
+        label: Row Clustering
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clusterDistanceRows
+                enable: (clusterRows)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clusterMethodRows
+                enable: (clusterRows)
+      - type: Label
+        label: Column Clustering
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clusterDistanceCols
+                enable: (clusterCols)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clusterMethodCols
+                enable: (clusterCols)
+  - type: CollapseBox
+    label: Annotation & Layer Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: annotationType
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: addLayer
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: layerType
+            enable: (addLayer)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: layerFilter
+            format: string
+            enable: (addLayer)
+  - type: CollapseBox
+    label: Split Heatmap by Dendrogram
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: splitRows
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: splitCols
+            format: number
+  - type: CollapseBox
+    label: Data Handling & Display
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: naHandling
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showDataSummary
+          - type: CheckBox
+            name: showInterpretation
+  - type: CollapseBox
+    label: Export Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: exportWidth
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: exportHeight
+            format: number
+
+  - type: CollapseBox
+    label: Advanced Cluster Analysis
+    collapsed: true
     children:
       - type: CheckBox
-        name: clusterRows
+        name: findOptimalK
+      - type: Label
+        label: 'K Range (format: min:max):'
+        enable: (findOptimalK)
+        children:
+          - type: TextBox
+            name: kRange
+            format: string
+            enable: (findOptimalK)
       - type: CheckBox
-        name: clusterCols
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: colorPalette
-  - type: LayoutBox
-    margin: large
+        name: exportRowClusters
+      - type: Label
+        label: 'Row Cluster Column Name:'
+        enable: (exportRowClusters)
+        children:
+          - type: TextBox
+            name: rowClusterPrefix
+            format: string
+            enable: (exportRowClusters)
+      - type: CheckBox
+        name: exportColClusters
+      - type: Label
+        label: 'Column Cluster Column Name:'
+        enable: (exportColClusters)
+        children:
+          - type: TextBox
+            name: colClusterPrefix
+            format: string
+            enable: (exportColClusters)
+
+  - type: CollapseBox
+    label: Survival Integration
+    collapsed: true
     children:
       - type: CheckBox
-        name: showRownames
+        name: survivalAnalysis
+      - type: TargetLayoutBox
+        label: Survival Time Variable
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+            enable: (survivalAnalysis)
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: survivalEvent
+            maxItemCount: 1
+            isTarget: true
+            enable: (survivalAnalysis)
+          - type: ComboBox
+            name: survivalEventLevel
+            enable: (survivalAnalysis)
+
+  - type: CollapseBox
+    label: Cluster Comparison
+    collapsed: true
+    children:
       - type: CheckBox
-        name: showColnames
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: naHandling
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showDataSummary
-      - type: CheckBox
-        name: showInterpretation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: exportWidth
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: exportHeight
-        format: number
+        name: clusterComparison
+      - type: TargetLayoutBox
+        label: Variables for Comparison
+        children:
+          - type: VariablesListBox
+            name: comparisonVars
+            isTarget: true
+            enable: (clusterComparison)

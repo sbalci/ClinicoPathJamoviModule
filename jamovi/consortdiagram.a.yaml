@@ -1,0 +1,271 @@
+---
+name: consortdiagram
+title: CONSORT Flow Diagram
+menuGroup: OncoPathT
+menuSubgroup: Study Design
+menuTitle: CONSORT Diagram
+menuSubtitle: Clinical Trial Flow
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Creates CONSORT 2010 compliant flow diagrams for clinical trials using the consort R package.
+        Automatically calculates participant numbers from patient-level data with exclusion columns.
+        Follows the approach described by Riinu Ots (https://www.riinu.me/2024/02/consort/).
+    R:
+        dontrun: false
+        usage: |
+            # Prepare data with exclusion columns
+            # Each row = one participant
+            # Non-NA values in exclusion columns indicate exclusion at that stage
+            # Example:
+            # data with columns: id, age_exclusion, consent_exclusion, randomization_arm
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: |
+            Patient-level data frame where each row represents one participant.
+            Exclusion columns should have non-NA values for excluded participants.
+
+    # === PATIENT IDENTIFICATION ===
+    - name: participant_id
+      title: Participant ID
+      type: Variable
+      suggested: [ id ]
+      permitted: [ factor, numeric, id ]
+      description:
+          ui: >
+            Variable that uniquely identifies each participant.
+          R: >
+            Unique participant identifier variable.
+
+    # === SCREENING & ENROLLMENT ===
+    - name: screening_exclusions
+      title: Screening Exclusion Reasons
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Variables indicating exclusion during screening phase.
+            Non-NA values indicate participant was excluded at screening.
+            Examples: age_exclusion, eligibility_exclusion
+          R: >
+            List of variables representing screening-stage exclusion reasons.
+
+    - name: enrollment_exclusions
+      title: Enrollment Exclusion Reasons
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Variables indicating exclusion during enrollment phase.
+            Non-NA values indicate participant was excluded at enrollment.
+            Examples: consent_refusal, dropout_before_randomization
+          R: >
+            List of variables representing enrollment-stage exclusion reasons.
+
+    # === RANDOMIZATION & ALLOCATION ===
+    - name: randomization_var
+      title: Randomization/Group Assignment
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Variable indicating treatment arm or group assignment.
+            Leave empty for non-randomized studies.
+          R: >
+            Treatment arm or group assignment variable for randomized trials.
+
+    - name: allocation_exclusions
+      title: Post-Randomization Exclusions
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Variables indicating exclusion after randomization but before intervention.
+            Examples: intervention_not_received, withdrew_before_treatment
+          R: >
+            List of variables representing post-randomization exclusion reasons.
+
+    # === FOLLOW-UP ===
+    - name: followup_exclusions
+      title: Follow-up Exclusions
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Variables indicating exclusion during follow-up phase.
+            Examples: lost_to_followup, death, withdrawal
+          R: >
+            List of variables representing follow-up-stage exclusion reasons.
+
+    # === ANALYSIS ===
+    - name: analysis_exclusions
+      title: Analysis Exclusions
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Variables indicating exclusion from final analysis.
+            Examples: protocol_violation, missing_outcome_data
+          R: >
+            List of variables representing analysis-stage exclusion reasons.
+
+    # === DISPLAY OPTIONS ===
+    - name: show_exclusion_details
+      title: Show Detailed Exclusion Reasons
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Show detailed breakdown of exclusion reasons in side boxes.
+          R: >
+            Whether to display detailed exclusion reasons with counts.
+
+    - name: diagram_width
+      title: Diagram Width
+      type: Number
+      min: 600
+      max: 1200
+      default: 800
+      description:
+          ui: >
+            Width of the generated diagram in pixels.
+          R: >
+            Diagram width in pixels.
+
+    - name: diagram_height
+      title: Diagram Height
+      type: Number
+      min: 400
+      max: 1000
+      default: 600
+      description:
+          ui: >
+            Height of the generated diagram in pixels.
+          R: >
+            Diagram height in pixels.
+
+    - name: text_width
+      title: Text Wrap Width
+      type: Integer
+      min: 20
+      max: 100
+      default: 50
+      description:
+          ui: >
+            Character width for text wrapping in boxes.
+          R: >
+            Maximum characters before text wraps in diagram boxes.
+
+    # === CUSTOMIZATION ===
+    - name: study_title
+      title: Study Title
+      type: String
+      default: "Study Flow Diagram"
+      description:
+          ui: >
+            Title to display at the top of the diagram.
+          R: >
+            Title for the CONSORT diagram.
+
+    - name: screening_label
+      title: Screening Stage Label
+      type: String
+      default: "Assessed for eligibility"
+      description:
+          ui: >
+            Label for the screening/assessment stage.
+          R: >
+            Custom label for screening stage.
+
+    - name: enrollment_label
+      title: Enrollment Stage Label
+      type: String
+      default: "Enrolled"
+      description:
+          ui: >
+            Label for the enrollment stage.
+          R: >
+            Custom label for enrollment stage.
+
+    - name: allocation_label
+      title: Allocation Stage Label
+      type: String
+      default: "Allocated to intervention"
+      description:
+          ui: >
+            Label for the allocation stage (for randomized trials).
+          R: >
+            Custom label for allocation stage.
+
+    - name: followup_label
+      title: Follow-up Stage Label
+      type: String
+      default: "Completed follow-up"
+      description:
+          ui: >
+            Label for the follow-up stage.
+          R: >
+            Custom label for follow-up stage.
+
+    - name: analysis_label
+      title: Analysis Stage Label
+      type: String
+      default: "Analyzed"
+      description:
+          ui: >
+            Label for the analysis stage.
+          R: >
+            Custom label for analysis stage.
+
+    # === OUTPUT OPTIONS ===
+    - name: export_format
+      title: Export Format
+      type: List
+      options:
+        - title: PNG (High Resolution)
+          name: png
+        - title: SVG (Vector)
+          name: svg
+        - title: PDF (Publication)
+          name: pdf
+      default: png
+      description:
+          ui: >
+            Format for exporting the diagram.
+            PNG: High-resolution raster, SVG: Scalable vector, PDF: Publication-ready
+          R: >
+            Export format for the diagram.
+
+    - name: include_interpretation
+      title: Include Clinical Interpretation
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Include interpretation guidance and retention statistics.
+          R: >
+            Whether to include interpretation section.
+
+    - name: consort_validation
+      title: CONSORT 2010 Compliance Check
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Check diagram against CONSORT 2010 statement requirements.
+            Provides checklist of required and recommended elements.
+          R: >
+            Whether to perform CONSORT 2010 compliance validation.
+
+...

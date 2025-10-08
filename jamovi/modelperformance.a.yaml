@@ -1,0 +1,209 @@
+---
+name:  modelperformance
+title: Multi-Model Performance Comparison
+menuGroup: OncoPathT
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: 'Compare Multiple Models Side-by-Side'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >-
+        Compare performance of multiple statistical models side-by-side. Supports Cox proportional
+        hazards, logistic regression, and linear regression models. Provides unified comparison
+        tables with AIC, BIC, R², C-index, and other metrics. Inspired by Orange Data Mining's
+        Test & Score widget, adapted for clinical research with comprehensive model diagnostics.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Compare Cox models
+            modelperformance(
+                data = cancer_data,
+                modelType = "cox",
+                outcome = "death",
+                timeVar = "months",
+                model1vars = c("age", "stage"),
+                model2vars = c("age", "stage", "grade"),
+                model3vars = c("age", "stage", "grade", "ki67")
+            )
+
+options:
+
+# Data ----
+    - name: data
+      type: Data
+
+# Model Type ----
+    - name: modelType
+      title: Model Type
+      type: List
+      options:
+        - title: Cox Proportional Hazards (Survival)
+          name: cox
+        - title: Logistic Regression (Binary)
+          name: logistic
+        - title: Linear Regression (Continuous)
+          name: linear
+      default: cox
+
+# Outcome Variables ----
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+
+    - name: outcomeLevel
+      title: Event Level (for binary/Cox)
+      type: Level
+      variable: (outcome)
+
+    - name: timeVar
+      title: Time Variable (for Cox)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+
+# Model Specifications ----
+    - name: model1vars
+      title: Model 1 Variables
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      default: NULL
+
+    - name: model1name
+      title: Model 1 Name (optional)
+      type: String
+      default: 'Model 1'
+
+    - name: model2vars
+      title: Model 2 Variables
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      default: NULL
+
+    - name: model2name
+      title: Model 2 Name (optional)
+      type: String
+      default: 'Model 2'
+
+    - name: model3vars
+      title: Model 3 Variables
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      default: NULL
+
+    - name: model3name
+      title: Model 3 Name (optional)
+      type: String
+      default: 'Model 3'
+
+    - name: model4vars
+      title: Model 4 Variables
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      default: NULL
+
+    - name: model4name
+      title: Model 4 Name (optional)
+      type: String
+      default: 'Model 4'
+
+    - name: model5vars
+      title: Model 5 Variables
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      default: NULL
+
+    - name: model5name
+      title: Model 5 Name (optional)
+      type: String
+      default: 'Model 5'
+
+# Comparison Metrics ----
+    - name: showAIC
+      title: Show AIC/BIC
+      type: Bool
+      default: true
+
+    - name: showRSquared
+      title: Show R² / Pseudo-R²
+      type: Bool
+      default: true
+
+    - name: showCIndex
+      title: Show C-index (Concordance)
+      type: Bool
+      default: true
+
+    - name: showLogLik
+      title: Show Log-Likelihood
+      type: Bool
+      default: false
+
+    - name: showMCC
+      title: Show Matthews Correlation Coefficient
+      type: Bool
+      default: true
+      description: >
+        Matthews Correlation Coefficient (MCC) - a balanced metric for binary
+        classification, especially useful for imbalanced datasets. Ranges from
+        -1 (total disagreement) to +1 (perfect prediction).
+
+# Validation ----
+    - name: crossValidation
+      title: Perform Cross-Validation
+      type: Bool
+      default: false
+
+    - name: cvFolds
+      title: Number of Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+
+# Visualization ----
+    - name: showForestPlot
+      title: Forest Plot Comparison
+      type: Bool
+      default: true
+
+    - name: showROC
+      title: ROC Curve Comparison
+      type: Bool
+      default: false
+
+    - name: showCalibration
+      title: Calibration Plot
+      type: Bool
+      default: false
+
+# Recommendations ----
+    - name: autoRecommend
+      title: Automatic Model Recommendation
+      type: Bool
+      default: true
+
+    - name: recommendBy
+      title: Recommendation Criterion
+      type: List
+      options:
+        - title: AIC (Lower is better)
+          name: aic
+        - title: BIC (Lower is better)
+          name: bic
+        - title: C-index (Higher is better)
+          name: cindex
+        - title: Cross-Validation Performance
+          name: cv
+      default: aic
+
+...

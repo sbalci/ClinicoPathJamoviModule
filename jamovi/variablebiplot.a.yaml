@@ -1,0 +1,227 @@
+---
+name:  variablebiplot
+title: Variable Importance Biplot
+menuGroup: OncoPathT
+menuSubgroup: Variable Selection
+menuSubtitle: 'Visualize Variable Contributions to Group Separation'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >-
+        Create biplots showing variable contributions to group separation using PCA, PLS-DA, or
+        LDA. Displays patients as points and variables as vectors, with vector length indicating
+        contribution strength. Inspired by Orange Data Mining's contribution analysis, adapted
+        for clinical research with comprehensive variable importance metrics.
+    R:
+        dontrun: false
+        usage: |
+            # Example: PCA biplot for tumor staging
+            variablebiplot(
+                data = clinical_data,
+                groupVar = "stage",
+                features = c("age", "ki67", "grade", "size"),
+                method = "pca",
+                showLoadings = TRUE,
+                topContributors = 10
+            )
+
+options:
+
+# Data ----
+    - name: data
+      type: Data
+
+# Group Variable ----
+    - name: groupVar
+      title: Grouping Variable
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      default: NULL
+
+# Features ----
+    - name: features
+      title: Features for Analysis
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      default: NULL
+
+# Method ----
+    - name: method
+      title: Analysis Method
+      type: List
+      options:
+        - title: Principal Component Analysis (PCA)
+          name: pca
+        - title: Partial Least Squares Discriminant Analysis (PLS-DA)
+          name: plsda
+        - title: Linear Discriminant Analysis (LDA)
+          name: lda
+      default: pca
+
+# Biplot Options ----
+    - name: showLoadings
+      title: Show Variable Loadings
+      type: Bool
+      default: false
+
+    - name: loadingScale
+      title: Loading Vector Scale
+      type: Number
+      default: 1.5
+      min: 0.5
+      max: 5.0
+
+    - name: topContributors
+      title: Top Contributors to Label
+      type: Integer
+      default: 10
+      min: 0
+      max: 50
+
+# Component Selection ----
+    - name: pc1
+      title: First Component
+      type: Integer
+      default: 1
+      min: 1
+      max: 20
+
+    - name: pc2
+      title: Second Component
+      type: Integer
+      default: 2
+      min: 1
+      max: 20
+
+# Contribution Metrics ----
+    - name: showContribTable
+      title: Variable Contribution Table
+      type: Bool
+      default: false
+
+    - name: showVarianceExplained
+      title: Variance Explained
+      type: Bool
+      default: false
+
+    - name: contributionMetric
+      title: Contribution Metric
+      type: List
+      options:
+        - title: Absolute Loading
+          name: loading
+        - title: Squared Loading (% Contribution)
+          name: squared
+        - title: Correlation with Component
+          name: correlation
+      default: squared
+
+# Group Separation Analysis ----
+    - name: showSeparation
+      title: Analyze Group Separation
+      type: Bool
+      default: false
+
+    - name: separationMetric
+      title: Separation Metric
+      type: List
+      options:
+        - title: Silhouette Score
+          name: silhouette
+        - title: Between/Within Variance Ratio
+          name: bw_ratio
+        - title: Mahalanobis Distance
+          name: mahalanobis
+      default: silhouette
+
+# Visualization Options ----
+    - name: showConfidenceEllipse
+      title: Confidence Ellipses
+      type: Bool
+      default: false
+
+    - name: pointSize
+      title: Point Size
+      type: Number
+      default: 3
+      min: 1
+      max: 10
+
+    - name: labelPoints
+      title: Label Points
+      type: List
+      options:
+        - title: No Labels
+          name: none
+        - title: Row Numbers
+          name: rownum
+        - title: Row Names (if available)
+          name: rowname
+      default: none
+
+# Advanced Options ----
+    - name: centerScale
+      title: Center and Scale Variables
+      type: Bool
+      default: false
+
+    - name: minVariance
+      title: Minimum Cumulative Variance (%)
+      type: Number
+      default: 70
+      min: 50
+      max: 99
+
+    - name: biplotType
+      title: Biplot Type
+      type: List
+      options:
+        - title: Covariance Biplot
+          name: covariance
+        - title: Correlation Biplot
+          name: correlation
+      default: covariance
+
+# Output Options ----
+    - name: showSummary
+      title: Show Natural-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a plain-language summary paragraph with key findings and
+            clinical interpretation. Useful for understanding results and
+            creating reports.
+
+    - name: showReport
+      title: Show Copy-Ready Report
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate a copy-ready paragraph with all statistics filled in,
+            suitable for pasting into manuscripts or clinical reports.
+
+    - name: showInterpretation
+      title: Show Interpretation Guide
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display guidance on how to read and interpret the biplot,
+            including what arrows, points, and distances represent.
+
+    - name: showRCode
+      title: Show R Code (Reproducible)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate copy-ready R code using upstream packages (stats, mixOmics, MASS)
+            instead of jamovi wrappers. Useful for reproducing analysis in R scripts,
+            learning the underlying implementation, and sharing code with non-jamovi users.
+
+...

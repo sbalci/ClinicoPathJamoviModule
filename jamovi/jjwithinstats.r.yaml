@@ -53,12 +53,31 @@ items:
       title: Analysis Summary
       type: Html
 
+    - name: ggpubrPlot
+      title: 'Publication-Ready Within-Subjects Plot (ggpubr)'
+      type: Image
+      width: 650
+      height: 450
+      renderFun: .plotGGPubr
+      requiresData: true
+      visible: (addGGPubrPlot)
+      clearWith:
+        - dep1
+        - dep2
+        - dep3
+        - dep4
+        - ggpubrPlotType
+        - ggpubrPalette
+        - ggpubrAddStats
+        - ggpubrShowLines
+        - ggpubrAddPoints
 
 
 
 refs:
     - ggplot2
     - ggstatsplot
+    - ggpubr
     - ClinicoPathJamoviModule
 
 

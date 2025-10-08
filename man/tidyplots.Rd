@@ -52,8 +52,6 @@ tidyplots(
   showHowTo = FALSE,
   showGlossary = FALSE,
   showSummary = FALSE,
-  plotWidth = 20,
-  plotHeight = 20,
   pointShape = 16,
   removeLegend = FALSE,
   removeLegendTitle = FALSE,
@@ -68,7 +66,47 @@ tidyplots(
   reverseXAxisLabels = FALSE,
   plotTheme = "default",
   removeXAxisLine = FALSE,
-  removeYAxisLine = FALSE
+  removeYAxisLine = FALSE,
+  showDataLabels = FALSE,
+  dataLabelType = "direct",
+  legendPosition = "default",
+  flipOrientation = FALSE,
+  paddingTop = 0.1,
+  paddingBottom = 0.1,
+  paddingLeft = 0.1,
+  paddingRight = 0.1,
+  colorSaturation = 1,
+  dodgeWidth = 0.8,
+  pointSize = 2.5,
+  pointWhiteBorder = FALSE,
+  lineWidth = 1,
+  useRasterization = FALSE,
+  rasterDPI = 300,
+  setXLimits = FALSE,
+  xMin = 0,
+  xMax = 100,
+  setYLimits = FALSE,
+  yMin = 0,
+  yMax = 100,
+  xAxisTickCount = 5,
+  yAxisTickCount = 5,
+  fontFamily = "default",
+  titleAlignment = "left",
+  captionAlignment = "right",
+  showMedianLine = FALSE,
+  connectPairedData = FALSE,
+  highlightSubset = FALSE,
+  maxDataPoints = 10000,
+  errorBarWidth = 0.1,
+  violinScale = "area",
+  boxplotOutliers = TRUE,
+  boxplotNotch = FALSE,
+  addSmoother = FALSE,
+  smootherMethod = "loess",
+  smootherSE = TRUE,
+  plotWidth = 150,
+  plotHeight = 100,
+  useAutoSize = TRUE
 )
 }
 \arguments{
@@ -166,10 +204,6 @@ tidyplots(
 
 \item{showSummary}{.}
 
-\item{plotWidth}{.}
-
-\item{plotHeight}{.}
-
 \item{pointShape}{.}
 
 \item{removeLegend}{.}
@@ -199,6 +233,86 @@ tidyplots(
 \item{removeXAxisLine}{.}
 
 \item{removeYAxisLine}{.}
+
+\item{showDataLabels}{.}
+
+\item{dataLabelType}{.}
+
+\item{legendPosition}{.}
+
+\item{flipOrientation}{.}
+
+\item{paddingTop}{.}
+
+\item{paddingBottom}{.}
+
+\item{paddingLeft}{.}
+
+\item{paddingRight}{.}
+
+\item{colorSaturation}{.}
+
+\item{dodgeWidth}{.}
+
+\item{pointSize}{.}
+
+\item{pointWhiteBorder}{.}
+
+\item{lineWidth}{.}
+
+\item{useRasterization}{.}
+
+\item{rasterDPI}{.}
+
+\item{setXLimits}{.}
+
+\item{xMin}{.}
+
+\item{xMax}{.}
+
+\item{setYLimits}{.}
+
+\item{yMin}{.}
+
+\item{yMax}{.}
+
+\item{xAxisTickCount}{.}
+
+\item{yAxisTickCount}{.}
+
+\item{fontFamily}{.}
+
+\item{titleAlignment}{.}
+
+\item{captionAlignment}{.}
+
+\item{showMedianLine}{.}
+
+\item{connectPairedData}{.}
+
+\item{highlightSubset}{.}
+
+\item{maxDataPoints}{.}
+
+\item{errorBarWidth}{.}
+
+\item{violinScale}{.}
+
+\item{boxplotOutliers}{.}
+
+\item{boxplotNotch}{.}
+
+\item{addSmoother}{.}
+
+\item{smootherMethod}{.}
+
+\item{smootherSE}{.}
+
+\item{plotWidth}{.}
+
+\item{plotHeight}{.}
+
+\item{useAutoSize}{.}
 }
 \value{
 A results object containing:

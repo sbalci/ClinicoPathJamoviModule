@@ -60,6 +60,11 @@ enhancedROCClass <- R6::R6Class(
             # Run ROC analysis for each predictor
             private$.runROCAnalysis(analysisData)
 
+            # Check for class imbalance
+            if (self$options$detectImbalance) {
+                private$.checkClassImbalance(analysisData)
+            }
+
             # Checkpoint after ROC analysis, before populating tables
             private$.checkpoint()
 
@@ -106,6 +111,16 @@ enhancedROCClass <- R6::R6Class(
             if (self$options$partialAuc) {
                 private$.checkpoint()
                 private$.populatePartialAUC()
+            }
+
+            if (self$options$crocAnalysis) {
+                private$.checkpoint()
+                private$.populateCROCAnalysis()
+            }
+
+            if (self$options$convexHull) {
+                private$.checkpoint()
+                private$.populateConvexHull()
             }
 
             if (self$options$comprehensive_output) {
@@ -1097,6 +1112,295 @@ enhancedROCClass <- R6::R6Class(
                     warning(paste("Partial AUC calculation failed for", predictor, ":", e$message))
                 })
             }
+        },
+
+        .populateCROCAnalysis = function() {
+            crocTable <- self$results$results$crocAnalysisTable
+            alpha <- self$options$crocAlpha
+
+            for (predictor in names(private$.rocResults)) {
+                tryCatch({
+                    roc_obj <- private$.rocObjects[[predictor]]
+
+                    # Calculate CROC curve using exponential magnifier
+                    croc_result <- private$.calculateCROC(roc_obj, alpha)
+
+                    # Get original ROC AUC
+                    roc_auc <- as.numeric(roc_obj$auc)
+
+                    # Calculate early retrieval gain
+                    early_retrieval_gain <- croc_result$croc_auc - roc_auc
+
+                    # Interpretation
+                    interpretation <- private$.interpretCROC(croc_result$croc_auc, early_retrieval_gain)
+
+                    row <- list(
+                        predictor = predictor,
+                        croc_auc = croc_result$croc_auc,
+                        roc_auc = roc_auc,
+                        alpha = alpha,
+                        early_retrieval_gain = early_retrieval_gain,
+                        interpretation = interpretation
+                    )
+
+                    crocTable$addRow(rowKey = predictor, values = row)
+
+                }, error = function(e) {
+                    warning(paste("CROC calculation failed for", predictor, ":", e$message))
+                })
+            }
+        },
+
+        .populateConvexHull = function() {
+            hullTable <- self$results$results$convexHullTable
+
+            for (predictor in names(private$.rocResults)) {
+                tryCatch({
+                    roc_obj <- private$.rocObjects[[predictor]]
+
+                    # Calculate convex hull
+                    hull_result <- private$.calculateConvexHull(roc_obj)
+
+                    # Get empirical AUC
+                    empirical_auc <- as.numeric(roc_obj$auc)
+
+                    # Calculate performance gap
+                    performance_gap <- hull_result$hull_auc - empirical_auc
+
+                    # Interpretation
+                    interpretation <- private$.interpretConvexHull(performance_gap, hull_result$n_hull_points)
+
+                    row <- list(
+                        predictor = predictor,
+                        hull_auc = hull_result$hull_auc,
+                        empirical_auc = empirical_auc,
+                        performance_gap = performance_gap,
+                        n_hull_points = hull_result$n_hull_points,
+                        interpretation = interpretation
+                    )
+
+                    hullTable$addRow(rowKey = predictor, values = row)
+
+                }, error = function(e) {
+                    warning(paste("Convex hull calculation failed for", predictor, ":", e$message))
+                })
+            }
+        },
+
+        .calculateCROC = function(roc_obj, alpha = 7.0) {
+            # Extract ROC coordinates
+            fpr <- 1 - roc_obj$specificities  # False Positive Rate
+            tpr <- roc_obj$sensitivities      # True Positive Rate
+
+            # Apply exponential magnifier function: f(x) = (1 - exp(-alpha*x))/(1 - exp(-alpha))
+            exp_alpha <- exp(-alpha)
+            croc_fpr <- (1 - exp(-alpha * fpr)) / (1 - exp_alpha)
+
+            # Calculate CROC AUC using trapezoidal rule
+            # Sort by croc_fpr for proper integration
+            ord <- order(croc_fpr)
+            croc_fpr_sorted <- croc_fpr[ord]
+            croc_tpr_sorted <- tpr[ord]
+
+            # Trapezoidal integration
+            croc_auc <- sum(diff(croc_fpr_sorted) *
+                           (croc_tpr_sorted[-1] + croc_tpr_sorted[-length(croc_tpr_sorted)]) / 2)
+
+            return(list(
+                croc_auc = abs(croc_auc),
+                croc_fpr = croc_fpr,
+                croc_tpr = tpr,
+                alpha = alpha
+            ))
+        },
+
+        .calculateConvexHull = function(roc_obj) {
+            # Extract ROC coordinates
+            fpr <- 1 - roc_obj$specificities
+            tpr <- roc_obj$sensitivities
+
+            # Add corner points
+            fpr <- c(0, fpr, 1)
+            tpr <- c(0, tpr, 1)
+
+            # Calculate convex hull using Graham scan
+            points <- cbind(fpr, tpr)
+            hull_indices <- grDevices::chull(points)
+
+            # Extract hull points
+            hull_fpr <- fpr[hull_indices]
+            hull_tpr <- tpr[hull_indices]
+
+            # Sort by FPR for AUC calculation
+            ord <- order(hull_fpr)
+            hull_fpr_sorted <- hull_fpr[ord]
+            hull_tpr_sorted <- hull_tpr[ord]
+
+            # Calculate hull AUC using trapezoidal rule
+            hull_auc <- sum(diff(hull_fpr_sorted) *
+                           (hull_tpr_sorted[-1] + hull_tpr_sorted[-length(hull_tpr_sorted)]) / 2)
+
+            return(list(
+                hull_auc = abs(hull_auc),
+                hull_fpr = hull_fpr_sorted,
+                hull_tpr = hull_tpr_sorted,
+                n_hull_points = length(hull_indices)
+            ))
+        },
+
+        .interpretCROC = function(croc_auc, early_retrieval_gain) {
+            if (early_retrieval_gain > 0.1) {
+                return(.("Excellent early retrieval performance; classifier performs well at low FPR"))
+            } else if (early_retrieval_gain > 0.05) {
+                return(.("Good early retrieval performance"))
+            } else if (early_retrieval_gain > 0) {
+                return(.("Moderate early retrieval performance"))
+            } else {
+                return(.("Limited early retrieval advantage"))
+            }
+        },
+
+        .interpretConvexHull = function(performance_gap, n_hull_points) {
+            if (performance_gap < 0.01) {
+                return(.("Classifier is near-optimal; convex hull shows minimal improvement potential"))
+            } else if (performance_gap < 0.05) {
+                return(.("Classifier performance is good; small optimization potential remains"))
+            } else if (performance_gap < 0.1) {
+                return(.("Moderate optimization potential; consider threshold tuning"))
+            } else {
+                return(.("Significant optimization potential; classifier may benefit from recalibration"))
+            }
+        },
+
+        .checkClassImbalance = function(analysisData) {
+            # Get outcome variable
+            outcome <- analysisData[[private$.outcome]]
+
+            # Convert to factor if needed
+            if (!is.factor(outcome)) {
+                outcome <- as.factor(outcome)
+            }
+
+            # Count classes
+            class_counts <- table(outcome)
+            if (length(class_counts) != 2) {
+                return()  # Only check binary classification
+            }
+
+            n_positive <- as.integer(class_counts[self$options$positiveClass])
+            n_negative <- sum(class_counts) - n_positive
+
+            # Calculate ratio (always express as larger:smaller)
+            if (n_positive > n_negative) {
+                ratio_value <- n_positive / n_negative
+                ratio_text <- sprintf("%.2f:1", ratio_value)
+            } else {
+                ratio_value <- n_negative / n_positive
+                ratio_text <- sprintf("1:%.2f", ratio_value)
+            }
+
+            # Calculate prevalence and PRC baseline
+            prevalence <- n_positive / (n_positive + n_negative)
+            prc_baseline <- prevalence
+
+            # Determine if imbalanced
+            threshold <- self$options$imbalanceThreshold
+            is_imbalanced <- ratio_value >= threshold
+
+            # Determine severity
+            if (ratio_value >= 10) {
+                severity <- .("Severe imbalance")
+            } else if (ratio_value >= 5) {
+                severity <- .("High imbalance")
+            } else if (ratio_value >= threshold) {
+                severity <- .("Moderate imbalance")
+            } else {
+                severity <- .("Balanced")
+            }
+
+            # Generate recommendation
+            if (is_imbalanced && self$options$recommendPRC) {
+                recommendation <- .("Use Precision-Recall Curve (PRC) analysis instead of ROC")
+            } else if (is_imbalanced) {
+                recommendation <- .("Consider class imbalance in interpretation")
+            } else {
+                recommendation <- .("ROC analysis is appropriate")
+            }
+
+            # Populate metrics table
+            metricsTable <- self$results$results$imbalanceMetrics
+            metricsTable$setRow(rowNo = 1, values = list(
+                n_positive = n_positive,
+                n_negative = n_negative,
+                ratio = ratio_text,
+                prevalence = prevalence,
+                prc_baseline = prc_baseline,
+                imbalance_severity = severity,
+                recommendation = recommendation
+            ))
+
+            # Generate warning HTML if imbalanced
+            if (is_imbalanced && self$options$showImbalanceWarning) {
+                private$.generateImbalanceWarning(
+                    n_positive, n_negative, ratio_text, prevalence,
+                    prc_baseline, severity
+                )
+            }
+        },
+
+        .generateImbalanceWarning = function(n_pos, n_neg, ratio, prevalence, baseline, severity) {
+            warningHtml <- self$results$results$imbalanceWarning
+
+            # Create styled warning message
+            html <- paste0(
+                '<div style="background-color: #fff3cd; border: 2px solid #ffc107; ',
+                'border-radius: 5px; padding: 15px; margin: 10px 0;">',
+                '<h3 style="color: #856404; margin-top: 0;">',
+                '<span style="font-size: 1.2em;">⚠️</span> Class Imbalance Detected</h3>',
+                '<p style="color: #856404; margin: 10px 0;"><strong>',
+                severity, '</strong> - Your dataset has a ', ratio, ' class ratio.</p>',
+
+                '<div style="background-color: #fff; padding: 10px; border-radius: 3px; margin: 10px 0;">',
+                '<p style="margin: 5px 0;"><strong>Dataset composition:</strong></p>',
+                '<ul style="margin: 5px 0;">',
+                '<li>Positive class: ', n_pos, ' samples (',
+                sprintf("%.1f%%", prevalence * 100), ')</li>',
+                '<li>Negative class: ', n_neg, ' samples (',
+                sprintf("%.1f%%", (1 - prevalence) * 100), ')</li>',
+                '<li>PRC baseline: ', sprintf("%.3f", baseline), '</li>',
+                '</ul></div>',
+
+                '<div style="background-color: #d1ecf1; border-left: 4px solid #0c5460; ',
+                'padding: 10px; margin: 10px 0;">',
+                '<p style="color: #0c5460; margin: 5px 0;"><strong>Why this matters:</strong></p>',
+                '<p style="color: #0c5460; margin: 5px 0;">',
+                'ROC curves can be misleading with imbalanced data because specificity ',
+                '(True Negative Rate) is dominated by the majority class. A high AUC ',
+                'may mask poor performance on the minority (positive) class.</p></div>'
+            )
+
+            if (self$options$recommendPRC) {
+                html <- paste0(html,
+                    '<div style="background-color: #d4edda; border-left: 4px solid #28a745; ',
+                    'padding: 10px; margin: 10px 0;">',
+                    '<p style="color: #155724; margin: 5px 0;"><strong>📊 Recommendation:</strong></p>',
+                    '<p style="color: #155724; margin: 5px 0;">',
+                    'Use the <strong>Precision-Recall Curve (PRC)</strong> function instead of ROC. ',
+                    'PRC shows Precision (PPV) vs Recall (Sensitivity), which are more informative ',
+                    'for imbalanced datasets.</p>',
+                    '<p style="color: #155724; margin: 5px 0;">',
+                    '<strong>Location:</strong> meddecide → Diagnostic Test Evaluation → ',
+                    'Precision-Recall Curve</p>',
+                    '<p style="color: #155724; margin: 5px 0; font-size: 0.9em;">',
+                    '<em>Reference: Saito & Rehmsmeier (2015). The Precision-Recall Plot Is More ',
+                    'Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced ',
+                    'Datasets. PLoS ONE 10(3): e0118432.</em></p>',
+                    '</div>'
+                )
+            }
+
+            html <- paste0(html, '</div>')
+            warningHtml$setContent(html)
         },
 
         .populateComprehensiveAnalysis = function() {
@@ -2275,6 +2579,158 @@ enhancedROCClass <- R6::R6Class(
 
             }, error = function(e) {
                 warning(paste("Failed to create clinical decision plot:", e$message))
+                FALSE
+            })
+        },
+
+        .plotCROC = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
+                return(FALSE)
+            }
+
+            # Set custom plot dimensions if specified
+            width <- self$options$plotWidth %||% 600
+            height <- self$options$plotHeight %||% 600
+            image$setState(list(width = width, height = height))
+
+            tryCatch({
+                library(ggplot2)
+
+                # Prepare CROC data for plotting
+                plot_data <- data.frame()
+                alpha <- self$options$crocAlpha
+
+                for (predictor in names(private$.rocResults)) {
+                    roc_obj <- private$.rocObjects[[predictor]]
+
+                    # Calculate CROC curve
+                    croc_result <- private$.calculateCROC(roc_obj, alpha)
+
+                    # Create data frame for this predictor
+                    croc_df <- data.frame(
+                        CROC_FPR = croc_result$croc_fpr,
+                        TPR = croc_result$croc_tpr,
+                        Predictor = predictor,
+                        Type = "CROC"
+                    )
+
+                    # Also add original ROC for comparison
+                    roc_df <- data.frame(
+                        CROC_FPR = (1 - roc_obj$specificities),
+                        TPR = roc_obj$sensitivities,
+                        Predictor = predictor,
+                        Type = "ROC"
+                    )
+
+                    plot_data <- rbind(plot_data, croc_df, roc_df)
+                }
+
+                # Create the plot
+                p <- ggplot(plot_data, aes(x = CROC_FPR, y = TPR, color = Predictor, linetype = Type)) +
+                    geom_line(size = 1) +
+                    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+                    labs(
+                        x = paste0("Transformed FPR (CROC, α=", alpha, ")"),
+                        y = "True Positive Rate (Sensitivity)",
+                        title = "CROC (Concentrated ROC) Curve Analysis",
+                        subtitle = "Exponential magnifier emphasizes early retrieval performance",
+                        color = "Predictor",
+                        linetype = "Curve Type"
+                    ) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    coord_fixed() +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        plot.subtitle = element_text(hjust = 0.5, size = 10),
+                        legend.position = "bottom",
+                        panel.grid.minor = element_line(color = "gray95")
+                    )
+
+                print(p)
+                TRUE
+
+            }, error = function(e) {
+                warning(paste("Failed to create CROC plot:", e$message))
+                FALSE
+            })
+        },
+
+        .plotConvexHull = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
+                return(FALSE)
+            }
+
+            # Set custom plot dimensions if specified
+            width <- self$options$plotWidth %||% 600
+            height <- self$options$plotHeight %||% 600
+            image$setState(list(width = width, height = height))
+
+            tryCatch({
+                library(ggplot2)
+
+                # Prepare convex hull data for plotting
+                plot_data <- data.frame()
+                hull_data <- data.frame()
+
+                for (predictor in names(private$.rocResults)) {
+                    roc_obj <- private$.rocObjects[[predictor]]
+
+                    # Calculate convex hull
+                    hull_result <- private$.calculateConvexHull(roc_obj)
+
+                    # Original ROC curve
+                    roc_df <- data.frame(
+                        FPR = 1 - roc_obj$specificities,
+                        TPR = roc_obj$sensitivities,
+                        Predictor = predictor,
+                        Type = "Empirical ROC"
+                    )
+
+                    # Convex hull
+                    hull_df <- data.frame(
+                        FPR = hull_result$hull_fpr,
+                        TPR = hull_result$hull_tpr,
+                        Predictor = predictor,
+                        Type = "Convex Hull"
+                    )
+
+                    plot_data <- rbind(plot_data, roc_df)
+                    hull_data <- rbind(hull_data, hull_df)
+                }
+
+                # Create the plot
+                p <- ggplot() +
+                    geom_line(data = plot_data, aes(x = FPR, y = TPR, color = Predictor),
+                             size = 1, alpha = 0.7) +
+                    geom_polygon(data = hull_data, aes(x = FPR, y = TPR, fill = Predictor),
+                                alpha = 0.2) +
+                    geom_line(data = hull_data, aes(x = FPR, y = TPR, color = Predictor),
+                             size = 1.2, linetype = "dashed") +
+                    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+                    labs(
+                        x = "False Positive Rate (1 - Specificity)",
+                        y = "True Positive Rate (Sensitivity)",
+                        title = "ROC Curve with Convex Hull",
+                        subtitle = "Convex hull represents optimal achievable performance",
+                        color = "Predictor",
+                        fill = "Predictor"
+                    ) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    coord_fixed() +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        plot.subtitle = element_text(hjust = 0.5, size = 10),
+                        legend.position = "bottom",
+                        panel.grid.minor = element_line(color = "gray95")
+                    )
+
+                print(p)
+                TRUE
+
+            }, error = function(e) {
+                warning(paste("Failed to create convex hull plot:", e$message))
                 FALSE
             })
         }

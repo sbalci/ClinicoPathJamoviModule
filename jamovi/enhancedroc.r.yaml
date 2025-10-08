@@ -13,6 +13,44 @@ items:
             type: Html
             visible: true
 
+          # Class Imbalance Warning
+          - name: imbalanceWarning
+            title: Class Imbalance Detection
+            type: Html
+            visible: (detectImbalance && showImbalanceWarning)
+            description: Warning and recommendations for imbalanced datasets
+
+          # Imbalance Metrics Table
+          - name: imbalanceMetrics
+            title: Class Imbalance Metrics
+            type: Table
+            visible: (detectImbalance)
+            rows: 1
+            columns:
+                - name: n_positive
+                  title: 'N Positive'
+                  type: integer
+                - name: n_negative
+                  title: 'N Negative'
+                  type: integer
+                - name: ratio
+                  title: 'Ratio (Pos:Neg)'
+                  type: text
+                - name: prevalence
+                  title: 'Prevalence'
+                  type: number
+                  format: zto
+                - name: prc_baseline
+                  title: 'PRC Baseline'
+                  type: number
+                  format: zto
+                - name: imbalance_severity
+                  title: 'Imbalance Severity'
+                  type: text
+                - name: recommendation
+                  title: 'Recommendation'
+                  type: text
+
           # Natural Language Summary
           - name: analysisSummary
             title: Analysis Summary
@@ -324,7 +362,7 @@ items:
             type: Table
             description: Partial AUC analysis for specific sensitivity/specificity ranges
             visible: (partialAuc)
-            
+
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -350,6 +388,67 @@ items:
                   format: zto
                 - name: clinical_relevance
                   title: 'Clinical Relevance'
+                  type: text
+
+          # CROC Analysis
+          - name: crocAnalysisTable
+            title: CROC (Concentrated ROC) Analysis
+            type: Table
+            description: Concentrated ROC analysis with early retrieval focus
+            visible: (crocAnalysis)
+
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: croc_auc
+                  title: 'CROC AUC'
+                  type: number
+                  format: zto
+                - name: roc_auc
+                  title: 'ROC AUC'
+                  type: number
+                  format: zto
+                - name: alpha
+                  title: 'Alpha'
+                  type: number
+                  format: zto
+                - name: early_retrieval_gain
+                  title: 'Early Retrieval Gain'
+                  type: number
+                  format: zto
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          # ROC Convex Hull
+          - name: convexHullTable
+            title: ROC Convex Hull Analysis
+            type: Table
+            description: ROC convex hull showing optimal achievable performance
+            visible: (convexHull)
+
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: hull_auc
+                  title: 'Convex Hull AUC'
+                  type: number
+                  format: zto
+                - name: empirical_auc
+                  title: 'Empirical AUC'
+                  type: number
+                  format: zto
+                - name: performance_gap
+                  title: 'Performance Gap'
+                  type: number
+                  format: zto
+                - name: n_hull_points
+                  title: 'Hull Points'
+                  type: integer
+                - name: interpretation
+                  title: 'Interpretation'
                   type: text
 
           # Comprehensive Analysis Summary
@@ -435,8 +534,29 @@ items:
             width: 600
             height: 600
 
+          # CROC Curve Plot
+          - name: crocCurvePlot
+            title: CROC (Concentrated ROC) Curve
+            type: Image
+            description: Concentrated ROC curve with exponential magnifier transformation
+            visible: (crocAnalysis)
+            renderFun: .plotCROC
+            width: 600
+            height: 600
+
+          # ROC Convex Hull Plot
+          - name: convexHullPlot
+            title: ROC Convex Hull Plot
+            type: Image
+            description: ROC curve with convex hull overlay
+            visible: (convexHull)
+            renderFun: .plotConvexHull
+            width: 600
+            height: 600
+
 refs:
     - ClinicoPathJamoviModule
     - BlueSky
+    - Swamidass2010
 
 ...

@@ -1,0 +1,154 @@
+title: CONSORT Flow Diagram
+name: consortdiagram
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Participant Identification
+        children:
+          - type: VariablesListBox
+            name: participant_id
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Exclusion Variables (by Stage)
+    collapsed: false
+    children:
+      - type: Label
+        label: >-
+          Select variables indicating exclusions at each stage. Non-NA values =
+          excluded.
+        margin: small
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Screening Exclusions
+            children:
+              - type: VariablesListBox
+                name: screening_exclusions
+                isTarget: true
+                height: small
+          - type: TargetLayoutBox
+            label: Enrollment Exclusions
+            children:
+              - type: VariablesListBox
+                name: enrollment_exclusions
+                isTarget: true
+                height: small
+          - type: TargetLayoutBox
+            label: Post-Randomization Exclusions
+            children:
+              - type: VariablesListBox
+                name: allocation_exclusions
+                isTarget: true
+                height: small
+          - type: TargetLayoutBox
+            label: Follow-up Exclusions
+            children:
+              - type: VariablesListBox
+                name: followup_exclusions
+                isTarget: true
+                height: small
+          - type: TargetLayoutBox
+            label: Analysis Exclusions
+            children:
+              - type: VariablesListBox
+                name: analysis_exclusions
+                isTarget: true
+                height: small
+  - type: CollapseBox
+    label: Randomization (Clinical Trials)
+    collapsed: true
+    children:
+      - type: Label
+        label: >-
+          For randomized controlled trials - leave empty for observational
+          studies
+        margin: small
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Treatment Arm / Group
+            children:
+              - type: VariablesListBox
+                name: randomization_var
+                maxItemCount: 1
+                isTarget: true
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: show_exclusion_details
+        label: Show detailed exclusion reasons
+      - type: LayoutBox
+        margin: small
+        children:
+          - type: Label
+            label: 'Diagram Dimensions:'
+            fitToGrid: true
+          - type: TextBox
+            name: diagram_width
+            label: Width (px)
+            format: number
+          - type: TextBox
+            name: diagram_height
+            label: Height (px)
+            format: number
+      - type: TextBox
+        name: text_width
+        label: Text wrap width (characters)
+        format: number
+  - type: CollapseBox
+    label: Stage Labels (Customization)
+    collapsed: true
+    children:
+      - type: TextBox
+        name: study_title
+        label: Study Title
+        format: string
+      - type: TextBox
+        name: screening_label
+        label: Screening Stage
+        format: string
+      - type: TextBox
+        name: enrollment_label
+        label: Enrollment Stage
+        format: string
+      - type: TextBox
+        name: allocation_label
+        label: Allocation Stage
+        format: string
+        enable: (randomization_var)
+      - type: TextBox
+        name: followup_label
+        label: Follow-up Stage
+        format: string
+      - type: TextBox
+        name: analysis_label
+        label: Analysis Stage
+        format: string
+  - type: CollapseBox
+    label: Output & Export
+    collapsed: true
+    children:
+      - type: Label
+        label: 'Export Format:'
+        fitToGrid: true
+      - type: ComboBox
+        name: export_format
+      - type: CheckBox
+        name: include_interpretation
+        label: Include clinical interpretation
+      - type: CheckBox
+        name: consort_validation
+        label: CONSORT 2010 compliance check

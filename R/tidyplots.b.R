@@ -261,6 +261,9 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .addTidyPlotElements = function(p) {
             plot_type <- self$options$plotType
             alpha <- self$options$alpha
+            size <- self$options$pointSize
+            white_border <- self$options$pointWhiteBorder
+            line_width <- self$options$lineWidth
             message(paste("DEBUG: Adding plot elements for type:", plot_type, "with alpha:", alpha))
 
             switch(plot_type,
@@ -268,26 +271,39 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     message(paste("DEBUG: Adding points with pointType:", self$options$pointType))
                     if (self$options$pointType == "jitter") {
                         message("DEBUG: Adding jittered points")
-                        p <- p |> tidyplots::add_data_points_jitter(alpha = alpha)
+                        p <- p |> tidyplots::add_data_points_jitter(
+                            alpha = alpha,
+                            size = size,
+                            white_border = white_border
+                        )
                     } else if (self$options$pointType == "beeswarm") {
                         # Use shape parameter from options if available
                         shape_param <- if (!is.null(self$options$pointShape)) self$options$pointShape else 16
                         message(paste("DEBUG: Adding beeswarm points with shape:", shape_param))
-                        p <- p |> tidyplots::add_data_points_beeswarm(alpha = alpha, shape = shape_param)
+                        p <- p |> tidyplots::add_data_points_beeswarm(
+                            alpha = alpha,
+                            shape = shape_param,
+                            size = size,
+                            white_border = white_border
+                        )
                     } else {
                         message("DEBUG: Adding basic data points")
-                        p <- p |> tidyplots::add_data_points(alpha = alpha)
+                        p <- p |> tidyplots::add_data_points(
+                            alpha = alpha,
+                            size = size,
+                            white_border = white_border
+                        )
                     }
                 },
                 "line" = {
                     if (self$options$lineType == "curve") {
-                        p <- p |> tidyplots::add_curve_fit(alpha = alpha)
+                        p <- p |> tidyplots::add_curve_fit(alpha = alpha, linewidth = line_width)
                     } else if (self$options$lineType == "mean") {
-                        p <- p |> tidyplots::add_mean_line(alpha = alpha)
+                        p <- p |> tidyplots::add_mean_line(alpha = alpha, linewidth = line_width)
                     } else if (self$options$lineType == "median") {
-                        p <- p |> tidyplots::add_median_line(alpha = alpha)
+                        p <- p |> tidyplots::add_median_line(alpha = alpha, linewidth = line_width)
                     } else {
-                        p <- p |> tidyplots::add_line(alpha = alpha)
+                        p <- p |> tidyplots::add_line(alpha = alpha, linewidth = line_width)
                     }
                 },
                 "bar" = {
@@ -309,12 +325,24 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 },
                 "boxplot" = {
-                    p <- p |> tidyplots::add_boxplot(alpha = alpha)
+                    # Add boxplot with custom options
+                    p <- p |> tidyplots::add_boxplot(
+                        alpha = alpha,
+                        outliers = self$options$boxplotOutliers,
+                        notch = self$options$boxplotNotch
+                    )
                 },
                 "violin" = {
-                    p <- p |> tidyplots::add_violin(alpha = alpha)
+                    # Add violin plot with custom scale
+                    p <- p |> tidyplots::add_violin(
+                        alpha = alpha,
+                        scale = self$options$violinScale
+                    )
                     if (self$options$violinPoints) {
-                        p <- p |> tidyplots::add_data_points_jitter(alpha = alpha * 0.6)
+                        p <- p |> tidyplots::add_data_points_jitter(
+                            alpha = alpha * 0.6,
+                            size = size * 0.7
+                        )
                     }
                 },
                 "histogram" = {
@@ -392,10 +420,12 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Add error bars if requested
+            # Add error bars if requested (with custom width)
+            errorbar_width <- self$options$errorBarWidth
+
             if (self$options$showSEM) {
                 if (self$options$semType == "errorbar") {
-                    p <- p |> tidyplots::add_sem_errorbar()
+                    p <- p |> tidyplots::add_sem_errorbar(width = errorbar_width)
                 } else {
                     p <- p |> tidyplots::add_sem_ribbon()
                 }
@@ -403,7 +433,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (self$options$showSD) {
                 if (self$options$sdType == "errorbar") {
-                    p <- p |> tidyplots::add_sd_errorbar()
+                    p <- p |> tidyplots::add_sd_errorbar(width = errorbar_width)
                 } else {
                     p <- p |> tidyplots::add_sd_ribbon()
                 }
@@ -411,7 +441,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (self$options$showCI) {
                 if (self$options$ciType == "errorbar") {
-                    p <- p |> tidyplots::add_ci95_errorbar()
+                    p <- p |> tidyplots::add_ci95_errorbar(width = errorbar_width)
                 } else {
                     p <- p |> tidyplots::add_ci95_ribbon()
                 }
@@ -420,7 +450,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add range if requested
             if (self$options$showRange) {
                 if (self$options$rangeType == "errorbar") {
-                    p <- p |> tidyplots::add_range_errorbar()
+                    p <- p |> tidyplots::add_range_errorbar(width = errorbar_width)
                 } else {
                     p <- p |> tidyplots::add_range_ribbon()
                 }
@@ -551,14 +581,130 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p <- p |> tidyplots::adjust_font(size = self$options$fontSize)
             }
 
-            # Force tidyplots to fill available canvas space instead of using fixed 50mm default
-            # Using NA tells tidyplots to use ggplot2's default behavior (fill available space)
-            p <- p |> tidyplots::adjust_size(width = NA, height = NA)
+            # Apply plot size
+            if (self$options$useAutoSize) {
+                # Force tidyplots to fill available canvas space instead of using fixed 50mm default
+                # Using NA tells tidyplots to use ggplot2's default behavior (fill available space)
+                p <- p |> tidyplots::adjust_size(width = NA, height = NA)
+            } else {
+                # Use user-specified size in mm
+                p <- p |> tidyplots::adjust_size(
+                    width = self$options$plotWidth,
+                    height = self$options$plotHeight
+                )
+            }
+
+            # Apply padding adjustments if not using default
+            if (!self$options$removePadding) {
+                p <- p |> tidyplots::adjust_padding(
+                    top = self$options$paddingTop,
+                    bottom = self$options$paddingBottom,
+                    left = self$options$paddingLeft,
+                    right = self$options$paddingRight
+                )
+            }
+
+            # Apply color saturation
+            if (self$options$colorSaturation != 1.0) {
+                p <- p |> tidyplots::adjust_colors(saturation = self$options$colorSaturation)
+            }
+
+            # Apply font family if specified
+            if (self$options$fontFamily != "default") {
+                font_name <- switch(self$options$fontFamily,
+                    "sans" = "sans",
+                    "serif" = "serif",
+                    "mono" = "mono",
+                    "sans"
+                )
+                p <- p |> tidyplots::adjust_font(family = font_name)
+            }
+
+            # Apply title alignment
+            if (!is.null(self$options$plotTitle) && self$options$plotTitle != "") {
+                p <- p |> tidyplots::adjust_title_alignment(self$options$titleAlignment)
+            }
+
+            # Apply caption alignment
+            if (!is.null(self$options$plotCaption) && self$options$plotCaption != "") {
+                p <- p |> tidyplots::adjust_caption_alignment(self$options$captionAlignment)
+            }
+
+            # Apply legend position
+            if (self$options$legendPosition != "default") {
+                p <- p |> tidyplots::adjust_legend_position(self$options$legendPosition)
+            }
+
+            # Apply dodge width
+            if (self$options$dodgeWidth != 0.8) {
+                p <- p |> tidyplots::adjust_dodge_width(self$options$dodgeWidth)
+            }
 
             return(p)
         },
 
         .applyTidyFinalAdjustments = function(p) {
+            # Apply data labels if requested
+            if (self$options$showDataLabels) {
+                if (self$options$dataLabelType == "repel") {
+                    p <- p |> tidyplots::add_data_labels_repel()
+                } else {
+                    p <- p |> tidyplots::add_data_labels()
+                }
+            }
+
+            # Apply plot orientation flip if requested
+            if (self$options$flipOrientation) {
+                p <- p |> tidyplots::flip_plot_orientation()
+            }
+
+            # Apply axis limits if specified
+            if (self$options$setXLimits) {
+                p <- p |> tidyplots::adjust_x_axis_limits(
+                    min = self$options$xMin,
+                    max = self$options$xMax
+                )
+            }
+
+            if (self$options$setYLimits) {
+                p <- p |> tidyplots::adjust_y_axis_limits(
+                    min = self$options$yMin,
+                    max = self$options$yMax
+                )
+            }
+
+            # Apply axis tick counts
+            if (self$options$xAxisTickCount != 5) {
+                p <- p |> tidyplots::adjust_x_axis_n_breaks(self$options$xAxisTickCount)
+            }
+
+            if (self$options$yAxisTickCount != 5) {
+                p <- p |> tidyplots::adjust_y_axis_n_breaks(self$options$yAxisTickCount)
+            }
+
+            # Apply median line for time series if requested
+            if (self$options$showMedianLine) {
+                p <- p |> tidyplots::add_median_line()
+            }
+
+            # Apply smoother if requested
+            if (self$options$addSmoother) {
+                p <- p |> tidyplots::add_curve_fit(
+                    method = self$options$smootherMethod,
+                    se = self$options$smootherSE
+                )
+            }
+
+            # Apply rasterization if requested
+            if (self$options$useRasterization) {
+                p <- p |> tidyplots::rasterize(dpi = self$options$rasterDPI)
+            }
+
+            # Apply data point limit if specified
+            if (self$options$maxDataPoints < 10000) {
+                p <- p |> tidyplots::max_rows(self$options$maxDataPoints)
+            }
+
             # Apply axis label manipulations
             if (self$options$sortXAxisLabels) {
                 p <- p |> tidyplots::sort_x_axis_labels()

@@ -1,7 +1,7 @@
 ---
 name:  jjhistostats
 title: Histogram
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Distribution
 # menuSubtitle: Histogram
 version: '0.0.31'
@@ -371,6 +371,70 @@ options:
       description:
           R: >
             Height of each plot in pixels. Default is 450.
+
+    - name: addGGPubrPlot
+      title: Add ggpubr Histogram
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add publication-ready histogram using ggpubr package.
+
+    - name: ggpubrPalette
+      title: ggpubr Fill Color
+      type: String
+      default: '#0073C2FF'
+      description:
+          R: >
+            Fill color for ggpubr histogram (hex code).
+
+    - name: ggpubrAddDensity
+      title: Add Density Curve (ggpubr)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add density curve overlay to ggpubr histogram.
+
+    - name: ggpubrAddMean
+      title: Add Mean Line (ggpubr)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add vertical line at mean for ggpubr histogram.
+
+    - name: addDistributionDiagnostics
+      title: Add Distribution Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add density plot, ECDF, and QQ plot for distribution assessment using ggpubr.
+
+    - name: ggpubrDensityColor
+      title: Density Plot Fill Color
+      type: String
+      default: '#0073C2FF'
+      description:
+          R: >
+            Fill color for density plot (hex code).
+
+    - name: ggpubrShowQQ
+      title: Show QQ Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show QQ plot for normality assessment.
+
+    - name: ggpubrShowECDF
+      title: Show ECDF Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show empirical cumulative distribution function plot.
 
 
 ...

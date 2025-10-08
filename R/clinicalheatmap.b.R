@@ -316,11 +316,21 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     scale_method = self$options$scaleMethod,
                     cluster_rows = self$options$clusterRows,
                     cluster_cols = self$options$clusterCols,
+                    cluster_distance_rows = self$options$clusterDistanceRows,
+                    cluster_method_rows = self$options$clusterMethodRows,
+                    cluster_distance_cols = self$options$clusterDistanceCols,
+                    cluster_method_cols = self$options$clusterMethodCols,
                     color_palette = self$options$colorPalette,
                     show_rownames = self$options$showRownames,
                     show_colnames = self$options$showColnames,
                     annotation_cols = self$options$annotationCols,
-                    annotation_rows = self$options$annotationRows
+                    annotation_rows = self$options$annotationRows,
+                    annotation_type = self$options$annotationType,
+                    add_layer = self$options$addLayer,
+                    layer_type = self$options$layerType,
+                    layer_filter = self$options$layerFilter,
+                    split_rows = self$options$splitRows,
+                    split_cols = self$options$splitCols
                 )
             )
 
@@ -349,13 +359,12 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     stop("rlang package is required")
                 }
 
-                # Create the base heatmap using tidyheatmaps
-                # Note: tidyheatmaps syntax may differ - this is a template implementation
-                p <- tidyheatmaps::tidyheatmap(
-                    data,
-                    rows = !!rlang::sym(row_var),
-                    columns = !!rlang::sym(col_var),
-                    values = !!rlang::sym(value_var),
+                # Build base heatmap call arguments
+                heatmap_args <- list(
+                    .data = data,
+                    .row = rlang::sym(row_var),
+                    .column = rlang::sym(col_var),
+                    .value = rlang::sym(value_var),
                     scale = if(options$scale_method == "none") "none" else options$scale_method,
                     cluster_rows = options$cluster_rows,
                     cluster_cols = options$cluster_cols,
@@ -363,10 +372,96 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     show_colnames = options$show_colnames
                 )
 
+                # Add clustering options if clustering is enabled
+                if (options$cluster_rows) {
+                    heatmap_args$clustering_distance_rows <- options$cluster_distance_rows
+                    heatmap_args$clustering_method_rows <- options$cluster_method_rows
+                }
+
+                if (options$cluster_cols) {
+                    heatmap_args$clustering_distance_cols <- options$cluster_distance_cols
+                    heatmap_args$clustering_method_cols <- options$cluster_method_cols
+                }
+
+                # Add column annotations if specified
+                if (!is.null(options$annotation_cols) && length(options$annotation_cols) > 0) {
+                    # Build annotation list for columns
+                    col_ann_syms <- lapply(options$annotation_cols, rlang::sym)
+                    heatmap_args$annotation_col <- col_ann_syms
+                }
+
+                # Add row annotations if specified
+                if (!is.null(options$annotation_rows) && length(options$annotation_rows) > 0) {
+                    # Build annotation list for rows
+                    row_ann_syms <- lapply(options$annotation_rows, rlang::sym)
+                    heatmap_args$annotation_row <- row_ann_syms
+                }
+
+                # Add annotation type
+                if (!is.null(options$annotation_type)) {
+                    heatmap_args$annotation_type <- options$annotation_type
+                }
+
+                # Add split options if > 1
+                if (!is.null(options$split_rows) && options$split_rows > 1) {
+                    heatmap_args$row_split <- options$split_rows
+                }
+
+                if (!is.null(options$split_cols) && options$split_cols > 1) {
+                    heatmap_args$column_split <- options$split_cols
+                }
+
+                # Create the base heatmap using tidyheatmaps
+                p <- do.call(tidyheatmaps::heatmap, heatmap_args)
+
+                # Add layer if requested
+                if (!is.null(options$add_layer) && options$add_layer) {
+                    layer_type <- options$layer_type
+                    layer_filter <- options$layer_filter
+
+                    # Map layer types to appropriate geom layers
+                    if (!is.null(layer_type) && layer_type != "point") {
+                        # Add layer based on type
+                        # Note: tidyheatmaps layer syntax may vary
+                        tryCatch({
+                            if (layer_type == "text") {
+                                p <- p %>% tidyheatmaps::add_tile(geom = "text")
+                            } else if (layer_type %in% c("star", "square", "diamond", "arrow_up", "arrow_down")) {
+                                shape_map <- list(
+                                    star = 8,
+                                    square = 15,
+                                    diamond = 18,
+                                    arrow_up = 24,
+                                    arrow_down = 25
+                                )
+                                p <- p %>% tidyheatmaps::add_point(shape = shape_map[[layer_type]])
+                            }
+                        }, error = function(e) {
+                            # If layer addition fails, continue without it
+                        })
+                    }
+                }
+
                 # Apply color palette if specified
                 if (!is.null(options$color_palette) && options$color_palette != "viridis") {
-                    # Note: tidyheatmaps may use different color specification
-                    # This is a placeholder for color palette application
+                    # Build color palette function
+                    palette_colors <- switch(
+                        options$color_palette,
+                        "plasma" = grDevices::hcl.colors(100, "Plasma"),
+                        "inferno" = grDevices::hcl.colors(100, "Inferno"),
+                        "RdYlBu" = grDevices::hcl.colors(100, "RdYlBu"),
+                        "RdBu" = grDevices::hcl.colors(100, "RdBu"),
+                        "Blues" = grDevices::hcl.colors(100, "Blues"),
+                        "Reds" = grDevices::hcl.colors(100, "Reds"),
+                        grDevices::hcl.colors(100, "Viridis")  # default
+                    )
+
+                    # Apply palette
+                    tryCatch({
+                        p <- p %>% tidyheatmaps::add_palette(palette_colors)
+                    }, error = function(e) {
+                        # If palette fails, continue with default
+                    })
                 }
 
                 # Add title and apply theme

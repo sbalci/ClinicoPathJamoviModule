@@ -68,10 +68,24 @@ items:
       renderFun: .plot
       requiresData: true
 
+    - name: balloonPlot
+      title: 'Balloon Plot (ggpubr)'
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotBalloon
+      requiresData: true
+      visible: (addGGPubrBalloon)
+      clearWith:
+        - dep
+        - group
+        - ggpubrBalloonPalette
+
 
 refs:
     - ggplot2
     - ggstatsplot
+    - ggpubr
     - ClinicoPathJamoviModule
 
 

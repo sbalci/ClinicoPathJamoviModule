@@ -1,0 +1,60 @@
+---
+name:  jjsyndromicplot
+title: Syndromic Plot (PCA Loadings)
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: 'Instructions'
+      type: Html
+      visible: true
+
+    - name: loadings
+      title: Component Loadings
+      type: Table
+      description: Standardized loadings for the selected principal component
+      clearWith:
+        - vars
+        - component
+        - center
+        - scale
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+
+        - name: loading
+          title: Loading
+          type: number
+          format: zto,pvalue
+
+        - name: absloading
+          title: 'Absolute Loading'
+          type: number
+          format: zto,pvalue
+
+    - name: plot
+      title: Syndromic Plot
+      type: Image
+      description: Syndromic visualization of PCA loadings
+      width:  600
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+        - vars
+        - component
+        - cutoff
+        - center
+        - scale
+        - arrowsize
+        - textsize
+        - repel
+        - plotlegend
+        - plotcutoff
+        - varorder
+        - colorlow
+        - colormid
+        - colorhigh
+        - plotwidth
+        - plotheight

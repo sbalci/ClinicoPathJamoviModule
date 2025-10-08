@@ -1,7 +1,7 @@
 ---
 name:  jjbetweenstats
 title: Box-Violin Plots to Compare Between Groups
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
 version: '0.0.31'
@@ -268,5 +268,69 @@ options:
       description:
           R: >
             Whether to use colorblind-safe color palette for plot elements.
+
+    - name: addGGPubrPlot
+      title: Add ggpubr Plot Variant
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add publication-ready plot using ggpubr package. This provides an alternative visualization with publication-quality aesthetics.
+
+    - name: ggpubrPlotType
+      title: ggpubr Plot Type
+      type: List
+      options:
+        - title: Box Plot
+          name: boxplot
+        - title: Violin Plot
+          name: violin
+        - title: Box-Violin Combined
+          name: boxviolin
+      default: boxplot
+      description:
+          R: >
+            Type of ggpubr plot to display when addGGPubrPlot is enabled.
+
+    - name: ggpubrPalette
+      title: ggpubr Color Palette
+      type: List
+      options:
+        - title: Journal of Clinical Oncology (jco)
+          name: jco
+        - title: Nature Publishing Group (npg)
+          name: npg
+        - title: AAAS Science
+          name: aaas
+        - title: Lancet
+          name: lancet
+        - title: JAMA
+          name: jama
+        - title: New England Journal of Medicine (nejm)
+          name: nejm
+        - title: Grey scale
+          name: grey
+        - title: Default ggplot2
+          name: default
+      default: jco
+      description:
+          R: >
+            Color palette for ggpubr plot.
+
+    - name: ggpubrAddStats
+      title: Add Statistical Comparisons (ggpubr)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add statistical comparison p-values to ggpubr plot.
+
+    - name: ggpubrAddPoints
+      title: Add Individual Points (ggpubr)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Overlay individual data points on ggpubr plot.
 
 ...

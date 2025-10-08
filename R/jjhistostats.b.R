@@ -742,5 +742,220 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 print(plot2)
                 TRUE
             }
+
+            ,
+            .plotGGPubr = function(image, ...) {
+                # Validate inputs
+                if (is.null(self$options$dep))
+                    return()
+
+                # Skip if ggpubr plot not requested
+                if (!self$options$addGGPubrPlot)
+                    return()
+
+                # Prepare data
+                mydata <- self$data
+                dep <- self$options$dep
+
+                # Single variable
+                if (length(dep) == 1) {
+                    # Build histogram arguments
+                    args <- list(
+                        data = mydata,
+                        x = dep,
+                        fill = self$options$ggpubrPalette,
+                        add_density = self$options$ggpubrAddDensity
+                    )
+
+                    # Create histogram
+                    plot <- do.call(ggpubr::gghistogram, args)
+
+                    # Add mean line if requested
+                    if (self$options$ggpubrAddMean) {
+                        mean_val <- mean(mydata[[dep]], na.rm = TRUE)
+                        plot <- plot + ggplot2::geom_vline(xintercept = mean_val,
+                                                          color = "red",
+                                                          linetype = "dashed",
+                                                          linewidth = 1)
+                    }
+
+                    # Apply theme
+                    plot <- plot + ggpubr::theme_pubr()
+
+                    print(plot)
+                }
+
+                # Multiple variables
+                if (length(dep) > 1) {
+                    dep_list <- as.list(dep)
+
+                    plotlist <- lapply(dep_list, function(depvar) {
+                        args <- list(
+                            data = mydata,
+                            x = depvar,
+                            fill = self$options$ggpubrPalette,
+                            add_density = self$options$ggpubrAddDensity,
+                            title = depvar
+                        )
+
+                        p <- do.call(ggpubr::gghistogram, args)
+
+                        if (self$options$ggpubrAddMean) {
+                            mean_val <- mean(mydata[[depvar]], na.rm = TRUE)
+                            p <- p + ggplot2::geom_vline(xintercept = mean_val,
+                                                        color = "red",
+                                                        linetype = "dashed",
+                                                        linewidth = 1)
+                        }
+
+                        p <- p + ggpubr::theme_pubr()
+                        return(p)
+                    })
+
+                    plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
+                    print(plot)
+                }
+
+                TRUE
+            }
+
+            ,
+            .plotGGPubr2 = function(image, ...) {
+                # Validate inputs
+                if (is.null(self$options$dep) || is.null(self$options$grvar))
+                    return()
+
+                # Skip if ggpubr plot not requested
+                if (!self$options$addGGPubrPlot)
+                    return()
+
+                # Prepare data
+                mydata <- self$data
+                dep <- self$options$dep
+                grvar <- self$options$grvar
+
+                # Single variable with faceting
+                if (length(dep) == 1) {
+                    args <- list(
+                        data = mydata,
+                        x = dep,
+                        fill = self$options$ggpubrPalette,
+                        add_density = self$options$ggpubrAddDensity,
+                        facet.by = grvar
+                    )
+
+                    plot <- do.call(ggpubr::gghistogram, args)
+
+                    if (self$options$ggpubrAddMean) {
+                        mean_val <- mean(mydata[[dep]], na.rm = TRUE)
+                        plot <- plot + ggplot2::geom_vline(xintercept = mean_val,
+                                                          color = "red",
+                                                          linetype = "dashed",
+                                                          linewidth = 1)
+                    }
+
+                    plot <- plot + ggpubr::theme_pubr()
+                    print(plot)
+                }
+
+                # Multiple variables with faceting
+                if (length(dep) > 1) {
+                    dep_list <- as.list(dep)
+
+                    plotlist <- lapply(dep_list, function(depvar) {
+                        args <- list(
+                            data = mydata,
+                            x = depvar,
+                            fill = self$options$ggpubrPalette,
+                            add_density = self$options$ggpubrAddDensity,
+                            facet.by = grvar,
+                            title = depvar
+                        )
+
+                        p <- do.call(ggpubr::gghistogram, args)
+
+                        if (self$options$ggpubrAddMean) {
+                            mean_val <- mean(mydata[[depvar]], na.rm = TRUE)
+                            p <- p + ggplot2::geom_vline(xintercept = mean_val,
+                                                        color = "red",
+                                                        linetype = "dashed",
+                                                        linewidth = 1)
+                        }
+
+                        p <- p + ggpubr::theme_pubr()
+                        return(p)
+                    })
+
+                    plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
+                    print(plot)
+                }
+
+                TRUE
+            }
+
+            ,
+            .plotDensity = function(image, ...) {
+                if (is.null(self$options$dep) || !self$options$addDistributionDiagnostics)
+                    return()
+
+                mydata <- self$data
+                dep <- self$options$dep
+
+                if (length(dep) == 1) {
+                    plot <- ggpubr::ggdensity(
+                        mydata,
+                        x = dep,
+                        fill = self$options$ggpubrDensityColor,
+                        add = "mean",
+                        rug = TRUE
+                    )
+                    plot <- plot + ggpubr::theme_pubr()
+                    print(plot)
+                }
+
+                TRUE
+            }
+
+            ,
+            .plotQQ = function(image, ...) {
+                if (is.null(self$options$dep) || !self$options$addDistributionDiagnostics || !self$options$ggpubrShowQQ)
+                    return()
+
+                mydata <- self$data
+                dep <- self$options$dep
+
+                if (length(dep) == 1) {
+                    plot <- ggpubr::ggqqplot(
+                        mydata,
+                        x = dep,
+                        color = self$options$ggpubrDensityColor
+                    )
+                    plot <- plot + ggpubr::theme_pubr()
+                    print(plot)
+                }
+
+                TRUE
+            }
+
+            ,
+            .plotECDF = function(image, ...) {
+                if (is.null(self$options$dep) || !self$options$addDistributionDiagnostics || !self$options$ggpubrShowECDF)
+                    return()
+
+                mydata <- self$data
+                dep <- self$options$dep
+
+                if (length(dep) == 1) {
+                    plot <- ggpubr::ggecdf(
+                        mydata,
+                        x = dep,
+                        color = self$options$ggpubrDensityColor
+                    )
+                    plot <- plot + ggpubr::theme_pubr()
+                    print(plot)
+                }
+
+                TRUE
+            }
         )
     )

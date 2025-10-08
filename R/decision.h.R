@@ -19,7 +19,9 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showNaturalLanguage = TRUE,
             showClinicalInterpretation = TRUE,
             showReportTemplate = FALSE,
-            showAboutAnalysis = FALSE, ...) {
+            showAboutAnalysis = FALSE,
+            showMisclassified = FALSE,
+            maxCasesShow = 50, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -91,6 +93,18 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showAboutAnalysis",
                 showAboutAnalysis,
                 default=FALSE)
+            private$..showMisclassified <- jmvcore::OptionBool$new(
+                "showMisclassified",
+                showMisclassified,
+                default=FALSE)
+            private$..maxCasesShow <- jmvcore::OptionInteger$new(
+                "maxCasesShow",
+                maxCasesShow,
+                default=50,
+                min=10,
+                max=500)
+            private$..saveClassifications <- jmvcore::OptionOutput$new(
+                "saveClassifications")
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
@@ -106,6 +120,9 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showClinicalInterpretation)
             self$.addOption(private$..showReportTemplate)
             self$.addOption(private$..showAboutAnalysis)
+            self$.addOption(private$..showMisclassified)
+            self$.addOption(private$..maxCasesShow)
+            self$.addOption(private$..saveClassifications)
         }),
     active = list(
         gold = function() private$..gold$value,
@@ -121,7 +138,10 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showNaturalLanguage = function() private$..showNaturalLanguage$value,
         showClinicalInterpretation = function() private$..showClinicalInterpretation$value,
         showReportTemplate = function() private$..showReportTemplate$value,
-        showAboutAnalysis = function() private$..showAboutAnalysis$value),
+        showAboutAnalysis = function() private$..showAboutAnalysis$value,
+        showMisclassified = function() private$..showMisclassified$value,
+        maxCasesShow = function() private$..maxCasesShow$value,
+        saveClassifications = function() private$..saveClassifications$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
@@ -136,7 +156,10 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showNaturalLanguage = NA,
         ..showClinicalInterpretation = NA,
         ..showReportTemplate = NA,
-        ..showAboutAnalysis = NA)
+        ..showAboutAnalysis = NA,
+        ..showMisclassified = NA,
+        ..maxCasesShow = NA,
+        ..saveClassifications = NA)
 )
 
 decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -155,7 +178,12 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
         clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
         reportTemplate = function() private$.items[["reportTemplate"]],
-        aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        misclassifiedHeading = function() private$.items[["misclassifiedHeading"]],
+        confusionMatrixSummary = function() private$.items[["confusionMatrixSummary"]],
+        falsePositiveTable = function() private$.items[["falsePositiveTable"]],
+        falseNegativeTable = function() private$.items[["falseNegativeTable"]],
+        misclassificationInterpretation = function() private$.items[["misclassificationInterpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -444,7 +472,75 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showAboutAnalysis)"))}))
+                visible="(showAboutAnalysis)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="misclassifiedHeading",
+                title="Misclassified Cases Analysis",
+                visible="(showMisclassified)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="confusionMatrixSummary",
+                title="Confusion Matrix Summary",
+                visible="(showMisclassified)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="classification", 
+                        `title`="Classification", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="falsePositiveTable",
+                title="False Positive Cases (Test+ but Disease-)",
+                visible="(showMisclassified)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Row", 
+                        `type`="integer"),
+                    list(
+                        `name`="gold_value", 
+                        `title`="True Status", 
+                        `type`="text"),
+                    list(
+                        `name`="test_value", 
+                        `title`="Test Result", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="falseNegativeTable",
+                title="False Negative Cases (Test- but Disease+)",
+                visible="(showMisclassified)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Row", 
+                        `type`="integer"),
+                    list(
+                        `name`="gold_value", 
+                        `title`="True Status", 
+                        `type`="text"),
+                    list(
+                        `name`="test_value", 
+                        `title`="Test Result", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="misclassificationInterpretation",
+                title="Interpretation of Misclassified Cases",
+                visible="(showMisclassified)"))}))
 
 decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionBase",
@@ -464,7 +560,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Medical Decision
@@ -505,6 +601,10 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   report template.
 #' @param showAboutAnalysis Boolean selection whether to show the about
 #'   analysis section.
+#' @param showMisclassified Boolean selection whether to show detailed
+#'   misclassified cases tables.
+#' @param maxCasesShow Maximum number of misclassified cases to display in
+#'   tables.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$rawContingency} \tab \tab \tab \tab \tab a table \cr
@@ -520,6 +620,11 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportTemplate} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$misclassifiedHeading} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$confusionMatrixSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$falsePositiveTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$falseNegativeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$misclassificationInterpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -544,7 +649,9 @@ decision <- function(
     showNaturalLanguage = TRUE,
     showClinicalInterpretation = TRUE,
     showReportTemplate = FALSE,
-    showAboutAnalysis = FALSE) {
+    showAboutAnalysis = FALSE,
+    showMisclassified = FALSE,
+    maxCasesShow = 50) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decision requires jmvcore to be installed (restart may be required)")
@@ -574,7 +681,9 @@ decision <- function(
         showNaturalLanguage = showNaturalLanguage,
         showClinicalInterpretation = showClinicalInterpretation,
         showReportTemplate = showReportTemplate,
-        showAboutAnalysis = showAboutAnalysis)
+        showAboutAnalysis = showAboutAnalysis,
+        showMisclassified = showMisclassified,
+        maxCasesShow = maxCasesShow)
 
     analysis <- decisionClass$new(
         options = options,

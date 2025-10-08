@@ -12,7 +12,8 @@ tableone2(
   pivot_format = "clinical",
   include_statistics = TRUE,
   group_var,
-  group_comparisons = FALSE
+  group_comparisons = FALSE,
+  view_tutorial = FALSE
 )
 }
 \arguments{
@@ -35,11 +36,14 @@ format.}
 \item{group_var}{Variable to use for group comparisons in the analysis.}
 
 \item{group_comparisons}{Enable group comparison features in pivot table.}
+
+\item{view_tutorial}{Display the embedded Table One tutorial in the output.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$tutorial} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr

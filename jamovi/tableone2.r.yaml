@@ -9,6 +9,11 @@ items:
     type: Html
     # Displays welcome and instruction text when no variables are selected.
 
+  - name: tutorial
+    title: "Table One Tutorial"
+    type: Html
+    visible: (view_tutorial)
+
   - name: tablestyle1
     title: "Table One Output (tableone)"
     type: Preformatted

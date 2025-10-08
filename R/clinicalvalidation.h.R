@@ -33,6 +33,7 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             show_performance_table = TRUE,
             show_calibration_plot = TRUE,
             show_roc_curve = TRUE,
+            show_prc_curve = FALSE,
             show_validation_curves = FALSE,
             show_residual_plots = FALSE,
             show_clinical_interpretation = TRUE,
@@ -228,6 +229,10 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 "show_roc_curve",
                 show_roc_curve,
                 default=TRUE)
+            private$..show_prc_curve <- jmvcore::OptionBool$new(
+                "show_prc_curve",
+                show_prc_curve,
+                default=FALSE)
             private$..show_validation_curves <- jmvcore::OptionBool$new(
                 "show_validation_curves",
                 show_validation_curves,
@@ -310,6 +315,7 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..show_performance_table)
             self$.addOption(private$..show_calibration_plot)
             self$.addOption(private$..show_roc_curve)
+            self$.addOption(private$..show_prc_curve)
             self$.addOption(private$..show_validation_curves)
             self$.addOption(private$..show_residual_plots)
             self$.addOption(private$..show_clinical_interpretation)
@@ -350,6 +356,7 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         show_performance_table = function() private$..show_performance_table$value,
         show_calibration_plot = function() private$..show_calibration_plot$value,
         show_roc_curve = function() private$..show_roc_curve$value,
+        show_prc_curve = function() private$..show_prc_curve$value,
         show_validation_curves = function() private$..show_validation_curves$value,
         show_residual_plots = function() private$..show_residual_plots$value,
         show_clinical_interpretation = function() private$..show_clinical_interpretation$value,
@@ -389,6 +396,7 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..show_performance_table = NA,
         ..show_calibration_plot = NA,
         ..show_roc_curve = NA,
+        ..show_prc_curve = NA,
         ..show_validation_curves = NA,
         ..show_residual_plots = NA,
         ..show_clinical_interpretation = NA,
@@ -417,6 +425,7 @@ clinicalvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         validationcurves = function() private$.items[["validationcurves"]],
         calibrationplot = function() private$.items[["calibrationplot"]],
         roccurve = function() private$.items[["roccurve"]],
+        prccurve = function() private$.items[["prccurve"]],
         residualplots = function() private$.items[["residualplots"]],
         clinicalinterpretation = function() private$.items[["clinicalinterpretation"]],
         validationreport = function() private$.items[["validationreport"]]),
@@ -699,6 +708,21 @@ clinicalvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "confidence_level")))
             self$add(jmvcore::Image$new(
                 options=options,
+                name="prccurve",
+                title="Precision-Recall Curve Analysis",
+                width=700,
+                height=500,
+                renderFun=".prc_curve_plot",
+                visible="(show_prc_curve)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "predictors",
+                    "confidence_level"),
+                refs=list(
+                    "Saito2015")))
+            self$add(jmvcore::Image$new(
+                options=options,
                 name="residualplots",
                 title="Model Residual Analysis",
                 width=900,
@@ -800,6 +824,9 @@ clinicalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param show_performance_table .
 #' @param show_calibration_plot .
 #' @param show_roc_curve .
+#' @param show_prc_curve Display Precision-Recall curve analysis. Recommended
+#'   for imbalanced datasets where ROC curves may be misleading (Saito &
+#'   Rehmsmeier, 2015).
 #' @param show_validation_curves .
 #' @param show_residual_plots .
 #' @param show_clinical_interpretation .
@@ -824,6 +851,7 @@ clinicalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   \code{results$validationcurves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calibrationplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$roccurve} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$prccurve} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$residualplots} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$clinicalinterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$validationreport} \tab \tab \tab \tab \tab a html \cr
@@ -865,6 +893,7 @@ clinicalvalidation <- function(
     show_performance_table = TRUE,
     show_calibration_plot = TRUE,
     show_roc_curve = TRUE,
+    show_prc_curve = FALSE,
     show_validation_curves = FALSE,
     show_residual_plots = FALSE,
     show_clinical_interpretation = TRUE,
@@ -920,6 +949,7 @@ clinicalvalidation <- function(
         show_performance_table = show_performance_table,
         show_calibration_plot = show_calibration_plot,
         show_roc_curve = show_roc_curve,
+        show_prc_curve = show_prc_curve,
         show_validation_curves = show_validation_curves,
         show_residual_plots = show_residual_plots,
         show_clinical_interpretation = show_clinical_interpretation,
