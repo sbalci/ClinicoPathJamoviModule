@@ -563,7 +563,9 @@ decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Decision Tree Graph",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "parallel",
+                    "scales"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="treeplot",

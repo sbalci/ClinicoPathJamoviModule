@@ -206,7 +206,8 @@ weightedlogrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Weighted Log-Rank Tests",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -147,7 +147,9 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Pathology Agreement Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "psych",
+                    "epiR"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",

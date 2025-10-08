@@ -273,7 +273,8 @@ distributionfitResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Distribution Selection and Goodness-of-Fit",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "flexsurv"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

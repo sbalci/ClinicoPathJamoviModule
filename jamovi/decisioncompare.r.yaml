@@ -304,4 +304,9 @@ refs:
     - ClinicoPathJamoviModule
     - stats
 
+    - forcats
+    - knitr
+    - epiR
+    - tibble
+    - scales
 ...

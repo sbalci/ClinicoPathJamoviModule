@@ -28,4 +28,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - knitr
+    - survival
+    - visR
+    - survminer
 ...

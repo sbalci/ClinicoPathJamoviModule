@@ -251,4 +251,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - pwr
 ...

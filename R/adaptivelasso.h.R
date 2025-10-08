@@ -429,7 +429,9 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Analysis Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "glmnet"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

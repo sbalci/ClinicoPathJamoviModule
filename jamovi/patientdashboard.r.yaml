@@ -340,4 +340,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - reshape2
 ...

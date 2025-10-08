@@ -181,4 +181,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - nlme
+    - glue
+    - stringr
 ...

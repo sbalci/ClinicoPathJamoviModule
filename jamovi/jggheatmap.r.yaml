@@ -50,4 +50,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - janitor
+    - tidyr
+    - tibble
+    - scales
 ...

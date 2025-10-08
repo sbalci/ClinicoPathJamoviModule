@@ -93,9 +93,12 @@ items:
         - economist_theme
 
 refs:
-  - ClinicoPathJamoviModule
-  - ggeconodist
-  - ggplot2
-  - dplyr
+    - ClinicoPathJamoviModule
+    - ggeconodist
+    - ggplot2
+    - dplyr
 
+    - remotes
+    - moments
+    - systemfonts
 ...

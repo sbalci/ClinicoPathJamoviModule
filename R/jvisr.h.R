@@ -252,7 +252,11 @@ jvisrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Clinical Research Visualization with visR",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "knitr",
+                    "survival",
+                    "visR",
+                    "survminer"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

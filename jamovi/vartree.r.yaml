@@ -29,4 +29,8 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - janitor
+    - labelled
+    - DiagrammeRsvg
+    - base
 ...

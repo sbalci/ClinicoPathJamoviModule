@@ -426,4 +426,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - scales
 ...

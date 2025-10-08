@@ -332,7 +332,15 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="AI Model Validation with Cross-Validation",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "caret",
+                    "pROC",
+                    "MASS",
+                    "glmnet",
+                    "boot",
+                    "ResourceSelection",
+                    "scales",
+                    "reshape2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

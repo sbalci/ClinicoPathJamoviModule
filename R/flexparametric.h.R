@@ -289,7 +289,9 @@ flexparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Flexible Parametric Survival Models (Enhanced)",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "flexsurv",
+                    "rstpm2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

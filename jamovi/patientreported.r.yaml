@@ -619,4 +619,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - reshape2
+    - psych
 ...

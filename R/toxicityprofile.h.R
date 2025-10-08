@@ -210,7 +210,10 @@ toxicityprofileResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "dplyr",
                     "survival",
                     "RColorBrewer",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "viridis",
+                    "scales",
+                    "binom"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

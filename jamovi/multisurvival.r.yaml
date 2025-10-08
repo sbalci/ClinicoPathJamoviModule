@@ -1360,4 +1360,22 @@ refs:
 
 
 
+    - survival
+    - janitor
+    - labelled
+    - glue
+    - lubridate
+    - rms
+    - finalfit
+    - survminer
+    - grid
+    - knitr
+    - scales
+    - MASS
+    - rpart
+    - rpart.plot
+    - randomForestSRC
+    - glmnet
+    - xgboost
+    - survivalsvm
 ...

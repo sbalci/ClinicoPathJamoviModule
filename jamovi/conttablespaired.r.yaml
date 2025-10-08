@@ -107,4 +107,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - base
+    - exact2x2
 ...

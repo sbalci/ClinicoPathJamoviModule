@@ -218,7 +218,9 @@ ihcsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="IHC Survival Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "cluster"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -264,7 +264,10 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Flexible Multi-State Survival Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "mstate",
+                    "flexsurv",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

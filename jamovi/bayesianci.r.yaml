@@ -388,4 +388,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - tools
 ...

@@ -370,7 +370,10 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ggplot2",
                     "ggstatsplot",
                     "ggpubr",
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "digest",
+                    "tidyr"),
                 clearWith=list(
                     "dep1",
                     "dep2",

@@ -270,7 +270,10 @@ rmstregressionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Restricted Mean Survival Time Regression",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "survRM2",
+                    "gridExtra"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

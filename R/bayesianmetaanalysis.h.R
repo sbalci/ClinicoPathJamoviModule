@@ -198,7 +198,10 @@ bayesianmetaanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="",
                 title="Bayesian Meta-Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "brms",
+                    "parallel",
+                    "metafor"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

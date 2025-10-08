@@ -85,4 +85,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - ggalluvial
+    - survival
+    - survminer
 ...

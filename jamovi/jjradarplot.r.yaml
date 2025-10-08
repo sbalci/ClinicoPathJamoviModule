@@ -20,4 +20,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - glue
+    - tidyr
 ...

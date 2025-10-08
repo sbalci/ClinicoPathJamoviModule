@@ -53,7 +53,12 @@ reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "report",
                     "gtExtras",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "scales",
+                    "purrr",
+                    "gt",
+                    "htmltools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

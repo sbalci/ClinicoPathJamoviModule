@@ -109,7 +109,9 @@ contTablesPairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Paired Samples Contingency Tables",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "base",
+                    "exact2x2"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="freqs",

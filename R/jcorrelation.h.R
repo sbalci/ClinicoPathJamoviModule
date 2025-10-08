@@ -158,7 +158,8 @@ jcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "qgraph",
                     "igraph",
                     "ggraph",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "stringr"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="matrix",

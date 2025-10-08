@@ -34,4 +34,5 @@ refs:
     - retractcheck
     - rcrossref
     - ClinicoPathJamoviModule
+    - httr
 ...

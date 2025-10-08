@@ -344,7 +344,8 @@ emfrailtyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="EM-Algorithm Frailty Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

@@ -140,4 +140,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - .step
+    - ppsr
 ...

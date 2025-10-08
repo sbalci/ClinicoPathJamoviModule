@@ -148,4 +148,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - timereg
 ...

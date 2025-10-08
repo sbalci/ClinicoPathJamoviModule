@@ -59,4 +59,7 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - remotes
+    - DataExplorer
+    - stringr
 ...

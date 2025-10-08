@@ -350,4 +350,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
 ...

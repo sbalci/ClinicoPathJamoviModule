@@ -878,4 +878,14 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - ggdendro
+    - gridExtra
+    - grid
+    - stringr
+    - reshape2
+    - scales
+    - cluster
+    - viridisLite
+    - grDevices
+    - pheatmap
 ...

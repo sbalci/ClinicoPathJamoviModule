@@ -223,7 +223,10 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "crosstable",
-                    "officer"))
+                    "officer",
+                    "janitor",
+                    "labelled",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

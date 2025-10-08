@@ -62,4 +62,17 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - BiocManager
+    - tibble
+    - tidyr
+    - tidyHeatmap
+    - grid
+    - ComplexHeatmap
+    - igraph
+    - ggraph
+    - dendextend
+    - viridisLite
+    - viridis
+    - RColorBrewer
+    - grDevices
 ...

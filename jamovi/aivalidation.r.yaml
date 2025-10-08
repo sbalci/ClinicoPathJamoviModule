@@ -365,4 +365,12 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - caret
+    - pROC
+    - MASS
+    - glmnet
+    - boot
+    - ResourceSelection
+    - scales
+    - reshape2
 ...

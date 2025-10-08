@@ -232,4 +232,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - stringr
+    - psych
 ...

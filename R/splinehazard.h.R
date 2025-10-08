@@ -193,7 +193,8 @@ splinehazardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Spline-based Hazard Functions",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "flexsurv"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

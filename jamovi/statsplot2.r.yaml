@@ -57,4 +57,9 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - glue
+    - jjstatsplot
+    - jmv
+    - patchwork
+    - cowplot
 ...

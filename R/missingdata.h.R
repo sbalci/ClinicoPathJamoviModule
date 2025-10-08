@@ -191,7 +191,9 @@ missingdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Missing Data Analysis and Imputation",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ggmice",
+                    "mice"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

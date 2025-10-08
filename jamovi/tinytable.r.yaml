@@ -22,4 +22,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - tinytable
+    - stringr
 ...

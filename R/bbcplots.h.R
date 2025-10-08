@@ -323,7 +323,8 @@ bbcplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "bbplot",
                     "ggplot2",
-                    "ggpubr"))
+                    "ggpubr",
+                    "devtools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

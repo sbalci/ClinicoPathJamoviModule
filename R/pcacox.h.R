@@ -270,7 +270,10 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Principal Component Cox Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "superpc",
+                    "survival",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

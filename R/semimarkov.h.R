@@ -332,7 +332,10 @@ semimarkovResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survival",
                     "ReliabilityTheory",
                     "flexsurv",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "gridExtra",
+                    "tools",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -228,7 +228,9 @@ smoothtimevaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Smoothly Time-Varying Effects",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "timereg"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -176,7 +176,10 @@ multiclassdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                 name="",
                 title="Multi-class Diagnostic Performance Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "pROC",
+                    "psych",
+                    "tidyr"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="confusionMatrix",

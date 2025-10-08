@@ -283,7 +283,8 @@ classicalSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
                     "ClinicoPathJamoviModule",
                     "gsDesign",
                     "survival",
-                    "ggplot2"))
+                    "ggplot2",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -110,7 +110,8 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Data Quality Assessment",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "visdat"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

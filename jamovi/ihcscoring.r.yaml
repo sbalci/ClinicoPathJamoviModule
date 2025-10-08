@@ -843,4 +843,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - psych
+    - reticulate
 ...

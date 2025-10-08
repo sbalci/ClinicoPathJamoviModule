@@ -323,4 +323,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - stringr
+    - survival
+    - boot
+    - timeROC
 ...

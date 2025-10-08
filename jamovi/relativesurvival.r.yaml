@@ -265,4 +265,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - relsurv
+    - glue
+    - rstpm2
 ...

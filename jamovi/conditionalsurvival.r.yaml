@@ -71,4 +71,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - condSURV
+    - scales
 ...

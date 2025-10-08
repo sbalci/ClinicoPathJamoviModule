@@ -46,4 +46,8 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - viridis
+    - RColorBrewer
+    - grDevices
+    - scales
 ...

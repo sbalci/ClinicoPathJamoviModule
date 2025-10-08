@@ -306,7 +306,8 @@ hiddenmarkovResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Hidden Markov Models for Survival",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "msm"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

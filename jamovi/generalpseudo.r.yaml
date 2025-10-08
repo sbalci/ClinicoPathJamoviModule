@@ -251,4 +251,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - betareg
 ...

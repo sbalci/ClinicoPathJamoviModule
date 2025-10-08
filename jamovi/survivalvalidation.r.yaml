@@ -304,4 +304,9 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - survcomp
+    - glue
+    - timeROC
+    - pec
 ...

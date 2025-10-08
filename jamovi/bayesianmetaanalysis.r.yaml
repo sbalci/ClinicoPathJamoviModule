@@ -135,4 +135,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - brms
+    - parallel
+    - metafor
 ...

@@ -312,4 +312,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - parallel
+    - scales
 ...

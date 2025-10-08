@@ -555,7 +555,9 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="IHC Scoring Standardization",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "psych",
+                    "reticulate"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",

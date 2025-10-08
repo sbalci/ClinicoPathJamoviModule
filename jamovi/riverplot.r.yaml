@@ -2,8 +2,7 @@
 name: riverplot
 title: River Plots & Alluvial Diagrams
 jrs: '1.1'
-refs: ClinicoPath
-    - ClinicoPathJamoviModule
+
 items:
     - name: todo
       title: Welcome & Instructions
@@ -149,4 +148,15 @@ items:
       type: Html
       visible: (enhanced_validation)
 
+
+refs:
+    - riverplot
+    - digest
+    - stringr
+    - ggalluvial
+    - ggstream
+    - grid
+    - viridis
+    - RColorBrewer
+    - scales
 ...

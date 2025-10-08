@@ -272,7 +272,12 @@ variablebiplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ClinicoPathJamoviModule",
                     "FactoMineR",
                     "factoextra",
-                    "ggplot2"))
+                    "ggplot2",
+                    "mixOmics",
+                    "MASS",
+                    "cluster",
+                    "BiocManager",
+                    "htmltools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",

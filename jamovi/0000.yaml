@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.86
+version: 0.0.31.87
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-10-06'
+date: '2025-10-08'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1540,7 +1540,7 @@ analyses:
   - title: Syndromic Plot (PCA Loadings)
     name: jjsyndromicplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Multivariate Analysis
     menuTitle: Syndromic Plot (PCA Loadings)
     menuSubtitle: PCA Loading Visualization
@@ -1614,7 +1614,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -1628,7 +1628,7 @@ analyses:
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: |
@@ -1640,7 +1640,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -4319,7 +4319,7 @@ analyses:
     name: clinicalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Clinical Model Validation Suite
     menuSubtitle: Comprehensive validation for clinical prediction models

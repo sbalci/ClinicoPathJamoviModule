@@ -227,7 +227,8 @@ jextractggstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Statistical Data Extraction Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ggstatsplot"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

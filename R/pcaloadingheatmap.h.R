@@ -173,7 +173,9 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="PCA Loading Heatmap & Barmap")
+                title="PCA Loading Heatmap & Barmap",
+                refs=list(
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -243,7 +243,9 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ClinicoPathJamoviModule",
                     "survival",
                     "survminer",
-                    "car"))
+                    "car",
+                    "janitor",
+                    "labelled"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

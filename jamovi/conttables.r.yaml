@@ -311,4 +311,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - base
+    - vcd
+    - vcdExtra
+    - DescTools
 ...

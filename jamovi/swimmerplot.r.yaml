@@ -265,4 +265,7 @@ refs:
     - RColorBrewer
     - gridExtra
 
+    - tibble
+    - tidyr
+    - grDevices
 ...

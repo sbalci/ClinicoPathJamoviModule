@@ -507,7 +507,16 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="River Plots & Alluvial Diagrams",
-                refs="ClinicoPath - ClinicoPathJamoviModule")
+                refs=list(
+                    "riverplot",
+                    "digest",
+                    "stringr",
+                    "ggalluvial",
+                    "ggstream",
+                    "grid",
+                    "viridis",
+                    "RColorBrewer",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

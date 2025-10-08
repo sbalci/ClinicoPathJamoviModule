@@ -409,7 +409,14 @@ jointmodelingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Joint Longitudinal-Survival Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "splines",
+                    "nlme",
+                    "JMbayes2",
+                    "survival",
+                    "joineR",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

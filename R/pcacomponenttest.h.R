@@ -149,7 +149,9 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="PCA Component Significance Test")
+                title="PCA Component Significance Test",
+                refs=list(
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

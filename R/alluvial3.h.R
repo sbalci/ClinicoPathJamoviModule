@@ -524,7 +524,10 @@ alluvial3Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Alluvial & Sankey Diagrams",
-                refs="ClinicoPath")
+                refs=list(
+                    "ggalluvial",
+                    "easyalluvial",
+                    "tidyr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

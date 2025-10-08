@@ -509,7 +509,9 @@ comprehensiveSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRU
                     "NPHMC",
                     "survSNP",
                     "survivalpwr",
-                    "rpact"))
+                    "rpact",
+                    "tools",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

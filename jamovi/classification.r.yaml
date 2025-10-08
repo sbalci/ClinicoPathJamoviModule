@@ -164,4 +164,9 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - mlr3
+    - pROC
+    - rpart.plot
+    - caret
+    - boot
 ...

@@ -208,7 +208,8 @@ clinicalalertsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Clinical Alert & Threshold Monitoring",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

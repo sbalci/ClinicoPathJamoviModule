@@ -205,7 +205,9 @@ aalenhazardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Aalen's Additive Hazard Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "timereg"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

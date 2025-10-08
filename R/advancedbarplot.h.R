@@ -442,7 +442,17 @@ advancedbarplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "ggplot2",
                     "plotly",
                     "RColorBrewer",
-                    "viridis"))
+                    "viridis",
+                    "ggprism",
+                    "ggpattern",
+                    "digest",
+                    "tools",
+                    "htmltools",
+                    "bbplot",
+                    "scales",
+                    "patchwork",
+                    "grid",
+                    "gridExtra"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

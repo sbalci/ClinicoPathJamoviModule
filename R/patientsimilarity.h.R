@@ -265,7 +265,14 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "Rtsne",
-                    "umap"))
+                    "umap",
+                    "urvival",
+                    "urvminer",
+                    "dbscan",
+                    "cluster",
+                    "survival",
+                    "plotly",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -300,7 +300,9 @@ modelperformanceResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Multi-Model Performance Comparison",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "survival"))
+                    "survival",
+                    "pROC",
+                    "DescTools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -81,4 +81,6 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - glue
+    - digest
 ...

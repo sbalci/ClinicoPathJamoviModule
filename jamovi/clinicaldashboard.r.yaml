@@ -101,4 +101,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - tools
 ...

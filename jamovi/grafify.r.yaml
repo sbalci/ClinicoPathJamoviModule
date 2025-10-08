@@ -120,4 +120,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - janitor
+    - grafify
 ...

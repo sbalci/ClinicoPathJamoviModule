@@ -180,7 +180,10 @@ jjsyndromicplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Syndromic Plot (PCA Loadings)")
+                title="Syndromic Plot (PCA Loadings)",
+                refs=list(
+                    "glue",
+                    "ggrepel"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -203,7 +203,8 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Analysis Without Gold Standard",
                 refs=list(
                     "NoGoldDiagnostic",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "poLCA"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

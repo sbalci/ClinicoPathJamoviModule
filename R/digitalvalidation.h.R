@@ -185,7 +185,10 @@ digitalvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Digital Pathology Validation",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "gridExtra",
+                    "psych",
+                    "epiR"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",

@@ -150,7 +150,12 @@ summarydata2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 title="Summary of Continuous Variables",
                 refs=list(
                     "gtExtras",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "lubridate",
+                    "moments",
+                    "purrr",
+                    "htmltools",
+                    "summarytools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

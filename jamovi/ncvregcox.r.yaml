@@ -178,4 +178,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - ncvreg
 ...

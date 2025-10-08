@@ -43,4 +43,12 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - ggdist
+    - scales
+    - viridis
+    - grDevices
+    - RColorBrewer
+    - ggprism
+    - moments
+    - stringr
 ...

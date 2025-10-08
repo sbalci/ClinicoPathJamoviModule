@@ -259,7 +259,9 @@ pseudosurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Pseudo-Observations Survival Methods",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "stringr",
+                    "geepack"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

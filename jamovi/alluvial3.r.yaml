@@ -2,7 +2,6 @@
 name:  alluvial3
 title: Alluvial & Sankey Diagrams
 jrs:   '1.1'
-refs: ClinicoPath
 
 items:
 
@@ -215,4 +214,9 @@ items:
 
 
 
+
+refs:
+    - ggalluvial
+    - easyalluvial
+    - tidyr
 ...

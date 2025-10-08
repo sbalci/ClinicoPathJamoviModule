@@ -109,7 +109,9 @@ enhancedcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Enhanced Correlation Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "psych",
+                    "GGally"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

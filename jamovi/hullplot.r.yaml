@@ -44,4 +44,10 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - ggforce
+    - grDevices
+    - grid
+    - viridis
+    - RColorBrewer
+    - scales
 ...

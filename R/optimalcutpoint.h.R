@@ -217,7 +217,10 @@ optimalcutpointResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Optimal Cutpoint Determination",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "cutpointr",
+                    "maxstat",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

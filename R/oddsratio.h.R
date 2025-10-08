@@ -112,7 +112,12 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Hmisc",
                     "survival",
                     "survivaltutorial",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "glue",
+                    "labelled",
+                    "knitr",
+                    "stringr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

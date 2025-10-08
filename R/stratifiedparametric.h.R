@@ -245,7 +245,9 @@ stratifiedparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="",
                 title="Stratified Parametric Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "flexsurv"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

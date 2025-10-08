@@ -441,7 +441,8 @@ survivalbartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Analysis Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "BART"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

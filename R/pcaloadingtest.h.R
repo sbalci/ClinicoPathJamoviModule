@@ -156,7 +156,10 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="PCA Loading Significance Test")
+                title="PCA Loading Significance Test",
+                refs=list(
+                    "glue",
+                    "pracma"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

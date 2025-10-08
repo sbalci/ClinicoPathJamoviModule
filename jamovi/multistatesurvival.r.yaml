@@ -217,4 +217,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - mstate
+    - survival
+    - glue
 ...

@@ -382,7 +382,12 @@ timedependentResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Time-Dependent Covariates & ROC Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "timereg",
+                    "survival",
+                    "timeROC",
+                    "pROC",
+                    "riskRegression"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

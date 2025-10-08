@@ -206,7 +206,10 @@ permutationsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Permutation Tests for Survival",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "survival",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

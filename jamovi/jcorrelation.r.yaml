@@ -91,4 +91,5 @@ refs:
     - ggraph
     - ClinicoPathJamoviModule
 
+    - stringr
 ...

@@ -317,4 +317,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - grplasso
 ...

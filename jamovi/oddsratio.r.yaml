@@ -148,4 +148,9 @@ refs:
 
 
 
+    - janitor
+    - glue
+    - labelled
+    - knitr
+    - stringr
 ...

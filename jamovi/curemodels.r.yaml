@@ -160,4 +160,10 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - urvival
+    - parallel
+    - smcure
+    - flexsurvcure
+    - glue
+    - stringr
 ...

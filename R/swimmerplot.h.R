@@ -460,7 +460,10 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "dplyr",
                     "lubridate",
                     "RColorBrewer",
-                    "gridExtra"))
+                    "gridExtra",
+                    "tibble",
+                    "tidyr",
+                    "grDevices"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

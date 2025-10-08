@@ -255,7 +255,9 @@ flexcompriskResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "survival",
                     "splines",
                     "randomForestSRC",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "tools",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

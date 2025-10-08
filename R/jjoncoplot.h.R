@@ -269,7 +269,10 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Genomic Landscape Visualization",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "scales",
+                    "patchwork",
+                    "tidyr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

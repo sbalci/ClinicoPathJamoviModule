@@ -328,7 +328,8 @@ robustaftResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Robust AFT Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

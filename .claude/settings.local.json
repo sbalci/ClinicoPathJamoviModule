@@ -108,7 +108,8 @@
       "WebFetch(domain:orangedatamining.com)",
       "WebFetch(domain:orange.biolab.si)",
       "WebFetch(domain:rpkgs.datanovia.com)",
-      "Bash(paste - - -)"
+      "Bash(paste - - -)",
+      "Bash(bash:*)"
     ],
     "deny": [],
     "ask": [],

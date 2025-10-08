@@ -272,4 +272,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - msm
+    - stringr
 ...

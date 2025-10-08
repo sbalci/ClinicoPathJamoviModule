@@ -78,4 +78,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - boot
+    - base
 ...

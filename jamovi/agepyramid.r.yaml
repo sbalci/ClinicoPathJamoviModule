@@ -66,4 +66,6 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - tidyr
+    - ggcharts
 ...

@@ -294,7 +294,11 @@ explainableaiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Explainable AI Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "reticulate",
+                    "randomForest",
+                    "jsonlite",
+                    "viridis"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="overview",

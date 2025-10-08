@@ -350,7 +350,8 @@ mixedeffectscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Mixed-Effects Cox Models",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

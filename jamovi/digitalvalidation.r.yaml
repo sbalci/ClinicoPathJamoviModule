@@ -114,4 +114,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - gridExtra
+    - psych
+    - epiR
 ...

@@ -114,4 +114,5 @@ refs:
     - randomForestSRC
     - ClinicoPathJamoviModule
 
+    - urvival
 ...

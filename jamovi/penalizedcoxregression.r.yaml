@@ -98,4 +98,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - survival
+    - glmnet
+    - penalized
+    - tools
 ...

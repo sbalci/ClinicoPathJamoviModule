@@ -162,7 +162,14 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Overall, Cause Specific, and Competing Survival",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "labelled",
+                    "glue",
+                    "finalfit",
+                    "survival",
+                    "cmprsk",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

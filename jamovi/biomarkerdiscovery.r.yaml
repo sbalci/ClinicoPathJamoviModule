@@ -623,4 +623,10 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - BiocManager
+    - sva
+    - glmnet
+    - randomForest
+    - caret
+    - pROC
 ...

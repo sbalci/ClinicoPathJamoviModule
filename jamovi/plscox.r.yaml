@@ -221,4 +221,9 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - glue
+    - plsRcox
+    - survival
+    - ggrepel
+    - survminer
 ...

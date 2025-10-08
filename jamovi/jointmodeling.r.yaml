@@ -132,4 +132,11 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - glue
+    - splines
+    - nlme
+    - JMbayes2
+    - survival
+    - joineR
+    - stringr
 ...

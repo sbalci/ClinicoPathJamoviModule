@@ -454,7 +454,9 @@ grafifyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Scientific Visualization with Grafify",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "janitor",
+                    "grafify"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

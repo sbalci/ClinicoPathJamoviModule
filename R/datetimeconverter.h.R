@@ -296,7 +296,8 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="DateTime Converter",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "lubridate"))
+                    "lubridate",
+                    "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",

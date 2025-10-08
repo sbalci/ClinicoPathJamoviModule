@@ -93,7 +93,11 @@ parallelplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Parallel Coordinates Plot",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "viridis",
+                    "RColorBrewer",
+                    "grDevices",
+                    "scales"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

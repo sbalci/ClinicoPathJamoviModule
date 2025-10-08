@@ -163,7 +163,9 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="SCAD Cox Regression Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "ncvreg"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

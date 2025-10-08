@@ -499,7 +499,15 @@ clinicalpredictionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Clinical Prediction Models & ML Interpretability",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "mice",
+                    "glmnet",
+                    "caret",
+                    "randomForest",
+                    "xgboost",
+                    "e1071",
+                    "pROC",
+                    "fastshap"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overview",

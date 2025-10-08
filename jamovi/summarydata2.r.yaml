@@ -39,4 +39,9 @@ refs:
     - ClinicoPathJamoviModule
 
 
+    - lubridate
+    - moments
+    - purrr
+    - htmltools
+    - summarytools
 ...

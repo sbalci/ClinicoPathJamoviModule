@@ -146,9 +146,11 @@ items:
       visible: true
 
 refs:
-  - ClinicoPathJamoviModule
-  - ggprism
-  - ggplot2
-  - dplyr
+    - ClinicoPathJamoviModule
+    - ggprism
+    - ggplot2
+    - dplyr
 
+    - viridis
+    - stringr
 ...

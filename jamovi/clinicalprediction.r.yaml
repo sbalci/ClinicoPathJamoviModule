@@ -564,4 +564,12 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
+    - mice
+    - glmnet
+    - caret
+    - randomForest
+    - xgboost
+    - e1071
+    - pROC
+    - fastshap
 ...
