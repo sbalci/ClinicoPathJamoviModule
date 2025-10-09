@@ -4890,7 +4890,7 @@ refs:
     - timeROC
     - dcurves
 
-    - urvival
+    - survival
     - viridis
     - gridExtra
     - coxme

@@ -177,7 +177,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Cure Models for Long-term Survivors",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "urvival",
+                    "survival",
                     "parallel",
                     "smcure",
                     "flexsurvcure",

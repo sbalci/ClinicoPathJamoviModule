@@ -80,7 +80,4 @@ refs:
     - ggstatsplot
     - ClinicoPathJamoviModule
 
-
-    - glue
-    - digest
 ...

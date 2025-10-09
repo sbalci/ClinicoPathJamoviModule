@@ -1033,15 +1033,4 @@ refs:
     - ClinicoPathJamoviModule
     - flexsurv
 
-
-    - urvival
-    - janitor
-    - labelled
-    - glue
-    - lubridate
-    - tibble
-    - purrr
-    - scales
-    - tidyr
-    - tools
 ...

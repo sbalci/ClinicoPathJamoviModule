@@ -1278,13 +1278,6 @@ refs:
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=geepack'
         url: https://CRAN.R-project.org/package=geepack
 
-    urvival:
-        type: 'software'
-        author:
-        year:
-        title: "urvival: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=urvival'
-        url: https://CRAN.R-project.org/package=urvival
 
     party:
         type: 'software'

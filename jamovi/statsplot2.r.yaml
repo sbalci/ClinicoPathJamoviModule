@@ -55,11 +55,6 @@ refs:
     - ggalluvial
     - easyalluvial
     - ClinicoPathJamoviModule
-
-
-    - glue
-    - jjstatsplot
-    - jmv
     - patchwork
     - cowplot
 ...

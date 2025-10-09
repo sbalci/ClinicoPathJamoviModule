@@ -636,7 +636,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "appliedsurvivalanalysisR",
                     "ClinicoPathJamoviModule",
                     "flexsurv",
-                    "urvival",
+                    "survival",
                     "janitor",
                     "labelled",
                     "glue",

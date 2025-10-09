@@ -762,6 +762,34 @@ copy_jamovi_assets <- function(module_names, source_base_dir, dest_base_dir, mod
   return(list(copied = copied_count, failed = failed_count))
 }
 
+# Copy 00refs.yaml to module jamovi folder
+copy_refs_yaml <- function(dest_base_dir, module_type = "unknown") {
+  cat("\n📚 Copying references file (00refs.yaml) to", module_type, "module...\n")
+
+  source_file <- file.path(main_repo_dir, "jamovi", "00refs.yaml")
+  dest_dir <- file.path(dest_base_dir, "jamovi")
+  dest_file <- file.path(dest_dir, "00refs.yaml")
+
+  if (!file.exists(source_file)) {
+    warning("⚠️ Source 00refs.yaml not found: ", source_file)
+    return(list(copied = 0, failed = 1))
+  }
+
+  if (!dir.exists(dest_dir)) {
+    cat("  📁 Creating destination jamovi directory: ", dest_dir, "\n")
+    dir.create(dest_dir, recursive = TRUE)
+  }
+
+  tryCatch({
+    file.copy(source_file, dest_file, overwrite = TRUE)
+    cat("  ✅ Copied 00refs.yaml to", module_type, "module\n")
+    return(list(copied = 1, failed = 0))
+  }, error = function(e) {
+    warning("⚠️ Failed to copy 00refs.yaml: ", e$message)
+    return(list(copied = 0, failed = 1))
+  })
+}
+
 # Enhanced Git commit function with comprehensive validation
 commit_repo_enhanced <- function(repo_dir, commit_message, validate_repo = TRUE, dry_run = FALSE) {
   if (!dir.exists(repo_dir)) {
@@ -1395,6 +1423,12 @@ if (!TEST) {
     dest_base_dir = jjstatsplot_dir,
     module_type = "jjstatsplot"
   )
+
+  # Copy 00refs.yaml
+  copy_refs_yaml(
+    dest_base_dir = jjstatsplot_dir,
+    module_type = "jjstatsplot"
+  )
 } else {
   cat("\n⏭️ Skipping jjstatsplot modules (disabled or no modules found)\n")
 }
@@ -1430,6 +1464,12 @@ if (meddecide_module && length(meddecide_modules) > 0) {
   copy_jamovi_assets(
     meddecide_modules,
     source_base_dir = main_repo_dir,
+    dest_base_dir = meddecide_dir,
+    module_type = "meddecide"
+  )
+
+  # Copy 00refs.yaml
+  copy_refs_yaml(
     dest_base_dir = meddecide_dir,
     module_type = "meddecide"
   )
@@ -1472,6 +1512,12 @@ if (jsurvival_module && length(jsurvival_modules) > 0) {
     dest_base_dir = jsurvival_dir,
     module_type = "jsurvival"
   )
+
+  # Copy 00refs.yaml
+  copy_refs_yaml(
+    dest_base_dir = jsurvival_dir,
+    module_type = "jsurvival"
+  )
 } else {
   cat("\n⏭️ Skipping jsurvival modules (disabled or no modules found)\n")
 }
@@ -1511,6 +1557,12 @@ if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 
     dest_base_dir = ClinicoPathDescriptives_dir,
     module_type = "ClinicoPathDescriptives"
   )
+
+  # Copy 00refs.yaml
+  copy_refs_yaml(
+    dest_base_dir = ClinicoPathDescriptives_dir,
+    module_type = "ClinicoPathDescriptives"
+  )
 } else {
   cat("\n⏭️ Skipping ClinicoPathDescriptives modules (disabled or no modules found)\n")
 }
@@ -1547,6 +1599,12 @@ if (OncoPath_module && length(OncoPath_modules) > 0) {
   copy_jamovi_assets(
     OncoPath_modules,
     source_base_dir = main_repo_dir,
+    dest_base_dir = OncoPath_dir,
+    module_type = "OncoPath"
+  )
+
+  # Copy 00refs.yaml
+  copy_refs_yaml(
     dest_base_dir = OncoPath_dir,
     module_type = "OncoPath"
   )
@@ -1595,7 +1653,13 @@ if (TEST && modules_config$JamoviTest$enabled && length(JamoviTest_modules) > 0)
     dest_base_dir = test_dir,
     module_type = "JamoviTest"
   )
-  
+
+  # Copy 00refs.yaml
+  copy_refs_yaml(
+    dest_base_dir = test_dir,
+    module_type = "JamoviTest"
+  )
+
   # Copy utils.R and other R helper files if specified in config
   if (copy_r_files && length(modules_config$JamoviTest$r_files) > 0) {
     cat("  📁 Copying helper R files...\n")

@@ -468,9 +468,4 @@ refs:
     - ClinicoPathJamoviModule
     - epiR
 
-
-
-
-    - forcats
-    - htmlTable
 ...

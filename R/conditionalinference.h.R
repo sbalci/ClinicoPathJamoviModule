@@ -248,7 +248,7 @@ conditionalinferenceResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                     "Strobl2007",
                     "Survival",
                     "ClinicoPathJamoviModule",
-                    "urvival",
+                    "survival",
                     "party"))
             self$add(jmvcore::Html$new(
                 options=options,

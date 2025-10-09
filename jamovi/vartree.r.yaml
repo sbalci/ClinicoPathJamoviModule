@@ -28,9 +28,4 @@ refs:
     - vtree
     - ClinicoPathJamoviModule
 
-
-    - janitor
-    - labelled
-    - DiagrammeRsvg
-    - base
 ...

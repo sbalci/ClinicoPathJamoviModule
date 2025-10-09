@@ -302,11 +302,6 @@ items:
 refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule
-    - stats
-
-    - forcats
-    - knitr
     - epiR
-    - tibble
-    - scales
+
 ...

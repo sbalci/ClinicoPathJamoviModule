@@ -323,7 +323,4 @@ refs:
     - ClinicoPathJamoviModule
 
 
-    - grDevices
-    - RColorBrewer
-    - grid
 ...

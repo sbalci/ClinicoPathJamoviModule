@@ -45,6 +45,4 @@ refs:
     - waffle
     - ClinicoPathJamoviModule
 
-    - digest
-    - glue
 ...

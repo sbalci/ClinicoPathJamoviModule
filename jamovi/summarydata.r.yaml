@@ -52,8 +52,5 @@ items:
 refs:
     - gtExtras
     - ClinicoPathJamoviModule
-    - moments
-    - purrr
-    - gt
-    - htmltools
+
 ...

@@ -6,7 +6,7 @@ jrs:   '1.1'
 items:
 
     - name:  explanation
-      title: About Benford's Law in Clinical Data
+      title: "About Benford's Law in Clinical Data"
       type:  Html
 
     - name:  summary
@@ -53,6 +53,4 @@ refs:
     - benford.analysis
     - ClinicoPathJamoviModule
 
-
-    - glue
 ...

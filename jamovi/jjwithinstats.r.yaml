@@ -75,13 +75,8 @@ items:
 
 
 refs:
-    - ggplot2
     - ggstatsplot
     - ggpubr
     - ClinicoPathJamoviModule
 
-
-    - glue
-    - digest
-    - tidyr
 ...

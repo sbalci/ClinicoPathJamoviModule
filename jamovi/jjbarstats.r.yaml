@@ -83,13 +83,8 @@ items:
 
 
 refs:
-    - ggplot2
     - ggstatsplot
     - ggpubr
     - ClinicoPathJamoviModule
 
-
-    - digest
-    - purrr
-    - glue
 ...

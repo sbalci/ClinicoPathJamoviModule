@@ -50,11 +50,4 @@ refs:
     - gtExtras
     - ClinicoPathJamoviModule
 
-
-
-    - glue
-    - scales
-    - purrr
-    - gt
-    - htmltools
 ...

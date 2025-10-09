@@ -2396,7 +2396,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ggplot2",
                     "timeROC",
                     "dcurves",
-                    "urvival",
+                    "survival",
                     "viridis",
                     "gridExtra",
                     "coxme",

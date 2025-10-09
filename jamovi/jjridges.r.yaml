@@ -163,14 +163,8 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-    - ggplot2
     - ggridges
     - ggstatsplot
-    - viridis
-    - RColorBrewer
     - RGraphGallery
 
-
-    - moments
-    - WRS2
 ...

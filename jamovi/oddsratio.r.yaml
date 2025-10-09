@@ -145,12 +145,4 @@ refs:
     - survivaltutorial
     - ClinicoPathJamoviModule
 
-
-
-
-    - janitor
-    - glue
-    - labelled
-    - knitr
-    - stringr
 ...
