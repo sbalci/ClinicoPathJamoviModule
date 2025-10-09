@@ -97,6 +97,9 @@ Key Styling Elements (matching decisionpanel):
 
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"
+! Rscript -e "devtools::load_all()"
+! Rscript -e "pkgdown::build_site()"
+! Rscript -e "pkgdown::build_site(examples = FALSE, lazy = TRUE, preview = FALSE)"
 
 run jmvtools::prepare() to see if there are any errors
 run devtools::document() to see if there are any errors
@@ -105,5 +108,3 @@ prepare a realistic data to test the features in detail
 move csv files under data folder.
 move data generation files under data-raw folder.
 move documentation files under module specific vignettes folder.
-
-

@@ -1,6 +1,6 @@
 #' \code{jsurvival}
 #'
-#' @title jsurvival: Analysis for jsurvivalological Research
+#' @title jsurvival: Analysis for survival in ClinicoPathological Research
 #'
 #' @description `jsurvival` jsurvival help researchers to generate natural
 #' language summaries of their dataset, generate cross tables with statistical

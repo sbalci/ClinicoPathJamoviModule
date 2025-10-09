@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jamovi Tutorial Builder</title>
+  <style>
+    :root {
+      --bg: #141c2b;
+      --fg: #e8edf5;
+      --muted: #a3adba;
+      --card: #1a2335;
+      --border: #2f3a4f;
+      --accent: #7aa2ff;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --err: #ef4444;
+      --shadow: 0 12px 32px rgba(4, 6, 12, .35)
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Helvetica Neue, Arial, Noto Sans, Apple Color Emoji, Segoe UI Emoji
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      height: 100vh;
+      padding: 16px
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden
+    }
+
+    .left {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px
+    }
+
+    .section {
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .list {
+      padding: 8px;
+      overflow: auto
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid transparent;
+      border-radius: 10px
+    }
+
+    .row.active {
+      border-color: #3a4a60;
+      background: #0f1523
+    }
+
+    .row button {
+      margin-left: auto
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid var(--border)
+    }
+
+    button {
+      background: #152036;
+      color: var(--fg);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: .2s
+    }
+
+    button:hover {
+      background: #1c2a45;
+      border-color: #3a4b65
+    }
+
+    button.active {
+      background: var(--accent);
+      color: #05070f;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(122, 162, 255, .25);
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: #0e1320;
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px
+    }
+
+    textarea {
+      min-height: 64px
+    }
+
+    .stage {
+      position: relative;
+      display: grid;
+      place-items: center
+    }
+
+    .canvasWrap {
+      position: relative;
+      max-width: 100%;
+      height: calc(100vh - 32px);
+      display: grid;
+      place-items: center
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at 20% 20%, rgba(122, 162, 255, .08), transparent 55%), #101828
+    }
+
+    .hotspot {
+      position: absolute;
+      border: 3px solid rgba(122, 162, 255, .95);
+      border-radius: 10px;
+      cursor: crosshair;
+      outline: 9999px solid rgba(11, 16, 28, .45);
+      box-shadow: 0 0 0 2px rgba(11, 16, 28, .4), 0 0 12px rgba(122, 162, 255, .55);
+      background: rgba(122, 162, 255, .08)
+    }
+
+    .hotspot.selected {
+      border-color: rgba(34, 197, 94, .95);
+      outline-color: rgba(34, 197, 94, .3);
+      box-shadow: 0 0 0 2px rgba(13, 27, 18, .4), 0 0 14px rgba(34, 197, 94, .55);
+      background: rgba(34, 197, 94, .08)
+    }
+
+    .hotspot.preview {
+      opacity: .6;
+      pointer-events: none;
+      border-style: dashed;
+      background: rgba(122, 162, 255, .05);
+      box-shadow: none;
+    }
+
+    .hotspot .handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(122, 162, 255, .95);
+      border: 1px solid #060b1a;
+      box-shadow: 0 0 4px rgba(12, 17, 32, .6);
+      transform: translate(-50%, -50%);
+    }
+
+    .hotspot .handle.nw {
+      top: 0;
+      left: 0;
+      cursor: nwse-resize;
+    }
+
+    .hotspot .handle.ne {
+      top: 0;
+      left: 100%;
+      cursor: nesw-resize;
+    }
+
+    .hotspot .handle.sw {
+      top: 100%;
+      left: 0;
+      cursor: nesw-resize;
+    }
+
+    .hotspot .handle.se {
+      top: 100%;
+      left: 100%;
+      cursor: nwse-resize;
+    }
+
+    .hotspot .handle.n {
+      top: 0;
+      left: 50%;
+      cursor: ns-resize;
+    }
+
+    .hotspot .handle.s {
+      top: 100%;
+      left: 50%;
+      cursor: ns-resize;
+    }
+
+    .hotspot .handle.w {
+      top: 50%;
+      left: 0;
+      cursor: ew-resize;
+    }
+
+    .hotspot .handle.e {
+      top: 50%;
+      left: 100%;
+      cursor: ew-resize;
+    }
+
+    .badge {
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 8px
+    }
+
+    .grid {
+      display: grid;
+      gap: 10px
+    }
+
+    .grid.cols2 {
+      grid-template-columns: 1fr 1fr
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: .2s
+    }
+
+    .toast.show {
+      opacity: 1
+    }
+
+    .tiny {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .visually-hidden {
+      position: absolute;
+      left: -9999px;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="left card">
+      <div class="section">
+        <strong>Steps</strong>
+        <div class="hint">Upload screenshots, crop if needed, then draw hotspots and set actions.</div>
+      </div>
+      <div class="list" id="stepList"></div>
+      <div class="controls">
+        <label class="badge" for="fileInput">Add images</label>
+        <input id="fileInput" class="visually-hidden" type="file" accept="image/*" multiple tabindex="-1" />
+        <button id="addBtn">Upload</button>
+        <button id="dupStep">Duplicate</button>
+        <button id="delStep">Delete</button>
+        <button id="upBtn">↑</button>
+        <button id="downBtn">↓</button>
+      </div>
+      <div class="section">
+        <strong>Step properties</strong>
+      </div>
+      <div class="list" style="padding:12px">
+        <div class="grid">
+          <label>Title<input id="titleInput" type="text" placeholder="e.g., Enable ClinicoPath" /></label>
+          <label>Hint<textarea id="hintInput" placeholder="Tip shown as toast"></textarea></label>
+          <label>Guidance<textarea id="guidanceInput" placeholder="Longer directions shown with the image"></textarea></label>
+          <div class="grid cols2">
+            <label>Action
+              <select id="actionSelect">
+                <option value="next">Go to next step</option>
+                <option value="info">Show info popover</option>
+                <option value="goto">Go to step…</option>
+              </select>
+            </label>
+            <label>Go‑to index<input id="gotoInput" type="number" min="1" value="1" /></label>
+          </div>
+          <label id="infoLabel" style="display:none">Info text (HTML allowed)
+            <textarea id="infoInput"
+              placeholder="What should appear when user clicks?&#10;You can use <b>bold</b>, lists, etc."></textarea>
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <strong>Tips</strong>
+        <div class="hint">Crop an image by clicking <b>Start crop</b>, dragging over the area, then pressing <b>Apply Crop</b>.</div>
+        <div class="hint">Click <b>New hotspot</b>, hold <b>Shift</b>, and drag to draw a clickable region on the screenshot.</div>
+      </div>
+      <div class="controls">
+        <button id="newHotspot">New hotspot</button>
+        <button id="clearHotspots">Clear hotspots</button>
+        <span class="badge" id="dimToggle">Dim: On</span>
+      </div>
+      <div class="controls">
+        <button id="exportHtml">Export tutorial.html</button>
+        <button id="exportJson">Export project.json</button>
+        <button id="exportMarkdown">Export timeline.md</button>
+        <label class="badge">Import
+          <input id="importJson" type="file" accept="application/json" style="display:none" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Canvas / editor -->
+    <div class="card stage">
+      <div class="canvasWrap" id="canvasWrap">
+        <canvas id="canvas" width="1280" height="720" aria-label="Editor canvas"></canvas>
+        <!-- hotspot overlays rendered as absolutely positioned divs -->
+      </div>
+      <div class="section" style="width:100%">
+        <div class="grid cols2" style="padding:10px">
+          <div>
+            <strong>Crop</strong>
+            <div class="hint">Drag to select a region. Click <em>Apply Crop</em>.</div>
+            <div class="controls">
+              <button id="startCrop">Start crop</button>
+              <button id="applyCrop" disabled>Apply crop</button>
+              <button id="cancelCrop" disabled>Cancel</button>
+            </div>
+          </div>
+          <div>
+            <strong>Keyboard</strong>
+            <div class="tiny">Draw hotspot: hold <b>Shift</b> and drag • Delete hotspot: select + press <b>Backspace</b>
+              • Move step: <b>Alt</b>+↑/↓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ============================
+       Data model
+    ============================ */
+    let project = {
+      meta: { title: 'Jamovi Tutorial', author: '', created: new Date().toISOString() },
+      steps: [] // each: { title, hint, imgData, hotspots:[{x,y,w,h, action, info, gotoIndex}], crop: {x,y,w,h} }
+    };
+    let activeIndex = -1;
+    let hotspotsEls = []; // DOM overlays for hotspots
+    let drawingHotspot = false; let drawStart = null; let selectedHot = null; let dimOn = true;
+    let draggingHotspot = null; let resizingHotspot = null;
+    const MIN_HOTSPOT_SIZE = 1;
+
+    function clamp(value, min, max) { return Math.min(Math.max(value, min), max); }
+
+    function setDrawingMode(on) {
+      drawingHotspot = on;
+      if (on) {
+        els.newHotspot.classList.add('active');
+      } else {
+        els.newHotspot.classList.remove('active');
+      }
+    }
+
+    const els = {
+      list: document.getElementById('stepList'),
+      fileInput: document.getElementById('fileInput'), addBtn: document.getElementById('addBtn'),
+      titleInput: document.getElementById('titleInput'), hintInput: document.getElementById('hintInput'), guidanceInput: document.getElementById('guidanceInput'),
+      actionSelect: document.getElementById('actionSelect'), infoInput: document.getElementById('infoInput'), infoLabel: document.getElementById('infoLabel'),
+      gotoInput: document.getElementById('gotoInput'),
+      newHotspot: document.getElementById('newHotspot'), clearHotspots: document.getElementById('clearHotspots'), dimToggle: document.getElementById('dimToggle'),
+      dupStep: document.getElementById('dupStep'), delStep: document.getElementById('delStep'), upBtn: document.getElementById('upBtn'), downBtn: document.getElementById('downBtn'),
+      exportHtml: document.getElementById('exportHtml'), exportJson: document.getElementById('exportJson'), exportMarkdown: document.getElementById('exportMarkdown'), importJson: document.getElementById('importJson'),
+      canvas: document.getElementById('canvas'), wrap: document.getElementById('canvasWrap'),
+      startCrop: document.getElementById('startCrop'), applyCrop: document.getElementById('applyCrop'), cancelCrop: document.getElementById('cancelCrop'),
+      toast: document.getElementById('toast')
+    };
+    const ctx = els.canvas.getContext('2d');
+    let baseImg = new Image();
+    let cropMode = false; let cropRect = null; let cropStart = null;
+
+    function toast(msg) { els.toast.innerHTML = msg; els.toast.classList.add('show'); setTimeout(() => els.toast.classList.remove('show'), 1600) }
+    function pxToPct(x, y, w, h) { const r = els.canvas.getBoundingClientRect(); return { x: x / r.width * 100, y: y / r.height * 100, w: w / r.width * 100, h: h / r.height * 100 } }
+    function pctToPx(rect) { return { x: rect.x / 100 * els.canvas.width, y: rect.y / 100 * els.canvas.height, w: rect.w / 100 * els.canvas.width, h: rect.h / 100 * els.canvas.height } }
+    function getCanvasOffset() {
+      const wrapRect = els.wrap.getBoundingClientRect();
+      const canvasRect = els.canvas.getBoundingClientRect();
+      return { left: canvasRect.left - wrapRect.left, top: canvasRect.top - wrapRect.top };
+    }
+    function placeHotspotElement(el, rect, offset) {
+      const px = pctToPx(rect);
+      const off = offset || getCanvasOffset();
+      el.style.left = off.left + px.x + 'px';
+      el.style.top = off.top + px.y + 'px';
+      el.style.width = px.w + 'px';
+      el.style.height = px.h + 'px';
+    }
+
+    /* ============================
+       File handling
+    ============================ */
+    els.addBtn.onclick = () => {
+      try {
+        // Prefer the native picker if available
+        if (typeof els.fileInput.showPicker === 'function') {
+          els.fileInput.showPicker();
+        } else {
+          els.fileInput.click();
+        }
+      } catch (e) {
+        // Fallbacks for stricter browsers
+        els.fileInput.focus();
+        setTimeout(() => els.fileInput.click(), 0);
+      }
+    };
+    els.fileInput.onchange = async (e) => {
+      console.log('fileInput change', e.target.files && e.target.files.length);
+      await handleFiles(e.target.files);
+      // reset so selecting same files again will trigger change
+      e.target.value = '';
+    };
+
+    function readAsDataURL(file) {
+      return new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.onerror = () => rej(fr.error || 'Read error');
+        fr.readAsDataURL(file);
+      });
+    }
+
+    async function handleFiles(files) {
+      try {
+        const all = Array.from(files || []);
+        const imgs = all.filter(f => /^image\//.test(f.type) || /\.(png|jpe?g|gif|webp)$/i.test(f.name));
+        if (!imgs.length) { toast('No images found'); return; }
+        let added = 0;
+        for (const f of imgs) {
+          try {
+            const dataUrl = await readAsDataURL(f);
+            project.steps.push({ title: f.name.replace(/\.[^.]+$/, ''), hint: '', guidance: '', imgData: dataUrl, hotspots: [] });
+            added++;
+          } catch (err) {
+            console.error('Failed to read file:', f.name, err);
+          }
+        }
+        if (!added) { toast('Could not load selected files'); return; }
+        if (activeIndex === -1) activeIndex = 0;
+        renderList();
+        loadActive();
+        toast(`Added ${added} image${added>1?'s':''}`);
+      } catch (e) {
+        console.error('handleFiles error', e);
+        toast('Import failed (see console)');
+      }
+    }
+
+    ;[els.list, els.wrap].forEach(zone => {
+      zone.addEventListener('dragover', (ev) => { ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; });
+      zone.addEventListener('drop', async (ev) => {
+        ev.preventDefault();
+        if (ev.dataTransfer && ev.dataTransfer.files) {
+          await handleFiles(ev.dataTransfer.files);
+        }
+      });
+    });
+
+    /* ============================
+       Rendering
+    ============================ */
+    function renderList() {
+      els.list.innerHTML = '';
+      if (!project.steps.length) {
+        const empty = document.createElement('div');
+        empty.className = 'hint';
+        empty.style.padding = '8px 10px';
+        empty.textContent = 'No images yet. Click Upload or drag & drop here.';
+        els.list.appendChild(empty);
+        return;
+      }
+      project.steps.forEach((s, i) => {
+        const row = document.createElement('div'); row.className = 'row' + (i === activeIndex ? ' active' : '');
+        row.innerHTML = `<span class="badge">${i + 1}</span> <span>${s.title || 'Untitled'}</span>`;
+        row.onclick = () => { activeIndex = i; renderList(); loadActive(); };
+        els.list.appendChild(row);
+      });
+    }
+
+    function loadActive() {
+      if (activeIndex < 0 || !project.steps[activeIndex]) return;
+      const step = project.steps[activeIndex];
+      baseImg = new Image();
+      baseImg.onload = () => { fitCanvasToImage(baseImg); draw(); renderHotspots(); syncForm(); };
+      baseImg.src = step.imgData;
+    }
+
+    function fitCanvasToImage(img) {
+      const maxW = els.wrap.clientWidth - 20, maxH = els.wrap.clientHeight - 20;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const s = Math.min(maxW / w, maxH / h, 1);
+      els.canvas.width = Math.round(w * s); els.canvas.height = Math.round(h * s);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
+      ctx.drawImage(baseImg, 0, 0, els.canvas.width, els.canvas.height);
+      if (dimOn) { ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(0, 0, els.canvas.width, els.canvas.height); }
+      if (cropMode && cropRect) {
+        ctx.save(); ctx.strokeStyle = '#7aa2ff'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+        const { x, y, w, h } = cropRect; ctx.strokeRect(x, y, w, h); ctx.restore();
+      }
+    }
+
+    function renderHotspots() {
+      hotspotsEls.forEach(el => el.remove()); hotspotsEls = [];
+      const step = project.steps[activeIndex]; if (!step) return;
+      const offset = getCanvasOffset();
+      step.hotspots.forEach((hs, j) => {
+        const d = document.createElement('div');
+        d.className = 'hotspot' + (j === selectedHot ? ' selected' : '');
+        d.title = `${hs.action}${hs.action === 'goto' ? ' → ' + (hs.gotoIndex || 1) : ''}`;
+        placeHotspotElement(d, hs, offset);
+        d.style.cursor = j === selectedHot ? 'move' : 'crosshair';
+        d.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          selectHotspot(j);
+          if (e.target !== d || drawingHotspot || cropMode) return;
+          draggingHotspot = { index: j, startX: e.clientX, startY: e.clientY, rect: { ...project.steps[activeIndex].hotspots[j] } };
+        });
+        if (j === selectedHot) { addHandles(d, j); }
+        els.wrap.appendChild(d);
+        hotspotsEls.push(d);
+      });
+    }
+
+    function addHandles(container, idx) {
+      const dirs = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+      dirs.forEach((dir) => {
+        const h = document.createElement('span');
+        h.className = 'handle ' + dir;
+        h.dataset.dir = dir;
+        h.onmousedown = (ev) => startResize(ev, idx, dir);
+        container.appendChild(h);
+      });
+    }
+
+    function startResize(ev, idx, dir) {
+      ev.stopPropagation();
+      ev.preventDefault();
+      const step = project.steps[activeIndex]; if (!step || !step.hotspots[idx]) return;
+      resizingHotspot = {
+        index: idx,
+        dir,
+        startX: ev.clientX,
+        startY: ev.clientY,
+        rect: { ...step.hotspots[idx] }
+      };
+    }
+
+    function handleResizeMove(ev) {
+      const step = project.steps[activeIndex]; if (!step) return;
+      const info = resizingHotspot; if (!info) return;
+      if (!step.hotspots[info.index]) return;
+      const canvasRect = els.canvas.getBoundingClientRect();
+      if (!canvasRect.width || !canvasRect.height) return;
+      const deltaX = (ev.clientX - info.startX) / canvasRect.width * 100;
+      const deltaY = (ev.clientY - info.startY) / canvasRect.height * 100;
+      const origin = info.rect;
+      let left = origin.x;
+      let right = origin.x + origin.w;
+      let top = origin.y;
+      let bottom = origin.y + origin.h;
+      if (info.dir.includes('w')) {
+        left = clamp(left + deltaX, 0, right - MIN_HOTSPOT_SIZE);
+      }
+      if (info.dir.includes('e')) {
+        right = clamp(right + deltaX, left + MIN_HOTSPOT_SIZE, 100);
+      }
+      if (info.dir.includes('n')) {
+        top = clamp(top + deltaY, 0, bottom - MIN_HOTSPOT_SIZE);
+      }
+      if (info.dir.includes('s')) {
+        bottom = clamp(bottom + deltaY, top + MIN_HOTSPOT_SIZE, 100);
+      }
+      const nextRect = {
+        x: clamp(left, 0, 100 - MIN_HOTSPOT_SIZE),
+        y: clamp(top, 0, 100 - MIN_HOTSPOT_SIZE),
+        w: clamp(right - left, MIN_HOTSPOT_SIZE, 100),
+        h: clamp(bottom - top, MIN_HOTSPOT_SIZE, 100)
+      };
+      const maxW = 100 - nextRect.x;
+      const maxH = 100 - nextRect.y;
+      nextRect.w = clamp(nextRect.w, MIN_HOTSPOT_SIZE, maxW);
+      nextRect.h = clamp(nextRect.h, MIN_HOTSPOT_SIZE, maxH);
+      step.hotspots[info.index] = nextRect;
+      renderHotspots();
+    }
+
+    function handleDragMove(ev) {
+      const step = project.steps[activeIndex]; if (!step) return;
+      const info = draggingHotspot; if (!info) return;
+      if (!step.hotspots[info.index]) return;
+      const canvasRect = els.canvas.getBoundingClientRect();
+      if (!canvasRect.width || !canvasRect.height) return;
+      const deltaX = (ev.clientX - info.startX) / canvasRect.width * 100;
+      const deltaY = (ev.clientY - info.startY) / canvasRect.height * 100;
+      const nextRect = {
+        x: clamp(info.rect.x + deltaX, 0, 100 - info.rect.w),
+        y: clamp(info.rect.y + deltaY, 0, 100 - info.rect.h),
+        w: info.rect.w,
+        h: info.rect.h
+      };
+      step.hotspots[info.index] = nextRect;
+      renderHotspots();
+    }
+
+    function selectHotspot(idxHot) {
+      selectedHot = idxHot;
+      draggingHotspot = null;
+      resizingHotspot = null;
+      setDrawingMode(false);
+      renderHotspots();
+      syncHotspotForm();
+    }
+
+    /* ============================
+       Hotspot drawing & editing
+    ============================ */
+    function startDrawHotspot() {
+      drawStart = null;
+      setDrawingMode(true);
+      draggingHotspot = null;
+      resizingHotspot = null;
+      toast('Shift+drag to draw hotspot');
+    }
+
+    els.newHotspot.onclick = startDrawHotspot;
+    els.clearHotspots.onclick = () => {
+      const s = project.steps[activeIndex]; if (!s) return;
+      s.hotspots = [];
+      selectedHot = null;
+      draggingHotspot = null;
+      resizingHotspot = null;
+      setDrawingMode(false);
+      renderHotspots();
+      syncHotspotForm();
+      draw();
+    };
+    els.dimToggle.onclick = () => { dimOn = !dimOn; els.dimToggle.textContent = 'Dim: ' + (dimOn ? 'On' : 'Off'); draw(); };
+
+    els.wrap.addEventListener('mousedown', (e) => {
+      if (!e.shiftKey || !drawingHotspot) return;
+      const r = els.canvas.getBoundingClientRect();
+      drawStart = { x: e.clientX - r.left, y: e.clientY - r.top };
+    });
+    els.canvas.addEventListener('mousedown', (e) => {
+      if (cropMode || (drawingHotspot && e.shiftKey)) return;
+      if (resizingHotspot || draggingHotspot) return;
+      if (selectedHot != null) {
+        selectedHot = null;
+        renderHotspots();
+        syncHotspotForm();
+      }
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (resizingHotspot) { handleResizeMove(e); return; }
+      if (draggingHotspot) { handleDragMove(e); return; }
+      if (!drawStart || !drawingHotspot) return;
+      const r = els.canvas.getBoundingClientRect();
+      const currentX = clamp(e.clientX - r.left, 0, r.width);
+      const currentY = clamp(e.clientY - r.top, 0, r.height);
+      const x = Math.min(drawStart.x, currentX);
+      const y = Math.min(drawStart.y, currentY);
+      const w = Math.abs(currentX - drawStart.x);
+      const h = Math.abs(currentY - drawStart.y);
+      const pct = pxToPct(x, y, w, h);
+      renderHotspots();
+      const preview = document.createElement('div');
+      preview.className = 'hotspot preview';
+      preview.style.pointerEvents = 'none';
+      placeHotspotElement(preview, pct);
+      els.wrap.appendChild(preview);
+      hotspotsEls.push(preview);
+    });
+    window.addEventListener('mouseup', (e) => {
+      if (resizingHotspot) { resizingHotspot = null; return; }
+      if (draggingHotspot) { draggingHotspot = null; return; }
+      if (!drawStart || !drawingHotspot) return;
+      const r = els.canvas.getBoundingClientRect();
+      const currentX = clamp(e.clientX - r.left, 0, r.width);
+      const currentY = clamp(e.clientY - r.top, 0, r.height);
+      const x = Math.min(drawStart.x, currentX);
+      const y = Math.min(drawStart.y, currentY);
+      const w = Math.abs(currentX - drawStart.x);
+      const h = Math.abs(currentY - drawStart.y);
+      drawStart = null;
+      setDrawingMode(false);
+      if (w < 2 && h < 2) { renderHotspots(); return; }
+      const pct = pxToPct(x, y, w, h);
+      const s = project.steps[activeIndex]; if (!s) return;
+      s.hotspots.push({ ...pct, action: els.actionSelect.value, info: els.infoInput.value || '', gotoIndex: +els.gotoInput.value || 1 });
+      selectedHot = s.hotspots.length - 1;
+      renderHotspots();
+      syncHotspotForm();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && selectedHot != null) {
+        const s = project.steps[activeIndex];
+        s.hotspots.splice(selectedHot, 1);
+        selectedHot = null;
+        draggingHotspot = null;
+        resizingHotspot = null;
+        renderHotspots();
+        syncHotspotForm();
+        draw();
+      }
+      if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); moveStep(e.key === 'ArrowUp' ? -1 : 1); }
+    });
+
+    /* ============================
+       Forms syncing
+    ============================ */
+    function syncForm() {
+      const s = project.steps[activeIndex]; if (!s) return;
+      els.titleInput.value = s.title || '';
+      els.hintInput.value = s.hint || '';
+      els.guidanceInput.value = s.guidance || '';
+      selectedHot = null; syncHotspotForm();
+    }
+    function syncHotspotForm() {
+      const s = project.steps[activeIndex]; if (!s) return;
+      const hs = selectedHot != null ? s.hotspots[selectedHot] : null;
+      els.actionSelect.value = hs ? hs.action : 'next';
+      els.infoInput.value = hs ? (hs.info || '') : '';
+      els.gotoInput.value = hs ? (hs.gotoIndex || 1) : 1;
+      els.infoLabel.style.display = (hs && hs.action === 'info') ? 'block' : 'none';
+    }
+    els.titleInput.oninput = () => { const s = project.steps[activeIndex]; if (s) { s.title = els.titleInput.value; renderList(); } };
+    els.hintInput.oninput = () => { const s = project.steps[activeIndex]; if (s) { s.hint = els.hintInput.value; } };
+    els.guidanceInput.oninput = () => { const s = project.steps[activeIndex]; if (s) { s.guidance = els.guidanceInput.value; } };
+    els.actionSelect.onchange = () => { const s = project.steps[activeIndex]; if (s && selectedHot != null) { s.hotspots[selectedHot].action = els.actionSelect.value; syncHotspotForm(); } };
+    els.infoInput.oninput = () => { const s = project.steps[activeIndex]; if (s && selectedHot != null) { s.hotspots[selectedHot].info = els.infoInput.value; } };
+    els.gotoInput.oninput = () => { const s = project.steps[activeIndex]; if (s && selectedHot != null) { s.hotspots[selectedHot].gotoIndex = +els.gotoInput.value || 1; } };
+
+    /* ============================
+       Crop tool
+    ============================ */
+    els.startCrop.onclick = () => { cropMode = true; cropRect = null; els.applyCrop.disabled = true; els.cancelCrop.disabled = false; toast('Drag on image to select crop'); };
+    els.cancelCrop.onclick = () => { cropMode = false; cropRect = null; els.applyCrop.disabled = true; els.cancelCrop.disabled = true; draw(); };
+    els.applyCrop.onclick = () => {
+      if (!cropRect) return; const s = project.steps[activeIndex]; if (!s) return;
+      // Render crop to new dataURL
+      const c = document.createElement('canvas'); c.width = cropRect.w; c.height = cropRect.h;
+      const srcX = cropRect.x / els.canvas.width * baseImg.naturalWidth;
+      const srcY = cropRect.y / els.canvas.height * baseImg.naturalHeight;
+      const srcW = cropRect.w / els.canvas.width * baseImg.naturalWidth;
+      const srcH = cropRect.h / els.canvas.height * baseImg.naturalHeight;
+      const ictx = c.getContext('2d');
+      ictx.drawImage(baseImg, srcX, srcY, srcW, srcH, 0, 0, c.width, c.height);
+      s.imgData = c.toDataURL('image/png'); s.crop = { x: srcX, y: srcY, w: srcW, h: srcH };
+      cropMode = false; cropRect = null; els.applyCrop.disabled = true; els.cancelCrop.disabled = true; loadActive(); toast('Cropped');
+    };
+    els.canvas.addEventListener('mousedown', (e) => {
+      if (!cropMode) return; const r = els.canvas.getBoundingClientRect(); cropStart = { x: e.clientX - r.left, y: e.clientY - r.top };
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!cropMode || !cropStart) return; const r = els.canvas.getBoundingClientRect(); const x = Math.min(cropStart.x, e.clientX - r.left); const y = Math.min(cropStart.y, e.clientY - r.top); const w = Math.abs(e.clientX - r.left - cropStart.x); const h = Math.abs(e.clientY - r.top - cropStart.y); cropRect = { x, y, w, h }; draw();
+    });
+    window.addEventListener('mouseup', () => { if (cropMode && cropStart) { els.applyCrop.disabled = false; } cropStart = null; });
+
+    /* ============================
+       Step ops & project I/O
+    ============================ */
+    function moveStep(delta) { if (activeIndex < 0) return; const i = activeIndex, j = i + delta; if (j < 0 || j >= project.steps.length) return; const [s] = project.steps.splice(i, 1); project.steps.splice(j, 0, s); activeIndex = j; renderList(); loadActive(); }
+    els.upBtn.onclick = () => moveStep(-1); els.downBtn.onclick = () => moveStep(1);
+    els.dupStep.onclick = () => { const s = project.steps[activeIndex]; if (!s) return; project.steps.splice(activeIndex + 1, 0, JSON.parse(JSON.stringify(s))); activeIndex++; renderList(); loadActive(); }
+    els.delStep.onclick = () => { if (activeIndex < 0) return; project.steps.splice(activeIndex, 1); activeIndex = Math.min(activeIndex, project.steps.length - 1); renderList(); loadActive(); }
+
+    els.exportJson.onclick = () => { const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' }); download(blob, 'project.json'); };
+    els.importJson.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const obj = JSON.parse(text);
+      if (!obj.steps) return toast('Invalid project');
+      project = obj;
+      project.steps = (project.steps || []).map((s) => ({ guidance: '', hotspots: [], ...s, guidance: s.guidance || '' }));
+      activeIndex = project.steps.length ? 0 : -1;
+      renderList();
+      loadActive();
+    };
+
+    function download(blob, filename) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0); }
+
+    /* ============================
+       Export tutorial.html (single file)
+    ============================ */
+    els.exportHtml.onclick = () => {
+      const stepsData = project.steps.map((s) => ({
+        title: s.title || '', hint: s.hint || '', guidance: s.guidance || '', img: s.imgData, hotspots: s.hotspots || []
+      }));
+      const html = generatePlayerHTML(project.meta.title || 'Jamovi Tutorial', stepsData);
+      const blob = new Blob([html], { type: 'text/html' });
+      download(blob, 'tutorial.html');
+    };
+
+    els.exportMarkdown.onclick = () => {
+      const md = generateTimelineMarkdown(project.meta.title || 'Jamovi Tutorial', project.steps || []);
+      const blob = new Blob([md], { type: 'text/markdown' });
+      download(blob, 'tutorial_timeline.md');
+    };
+
+    function generatePlayerHTML(title, steps) {
+      // Minimal player (derived from our earlier template) with info/next/goto actions and embedded images
+      return `<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>${escapeHtml(title)}</title>
+  <style>body{margin:0;background:#141c2b;color:#e9eef5;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto} .wrap{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh;gap:12px;padding:16px} header,footer,.panel,.guidance{background:#1a2335;border:1px solid #2f3a4f;border-radius:14px;box-shadow:0 10px 28px rgba(6,10,20,.35)} header{padding:10px 14px;display:flex;justify-content:space-between;align-items:center} .figure{position:relative;display:grid;place-items:center;border:1px solid #2f3a4f;border-radius:14px;overflow:hidden;background:radial-gradient(circle at 20% 20%,rgba(122,162,255,.08),transparent 55%),#101828} .figure img{width:100%;height:100%;object-fit:contain;background:#101828} .figure .hs{position:absolute;border:3px solid rgba(122,162,255,.95);border-radius:10px;cursor:pointer;outline:9999px solid rgba(11,16,28,.45);box-shadow:0 0 0 2px rgba(11,16,28,.4),0 0 12px rgba(122,162,255,.55);background:rgba(122,162,255,.08)} .panel{padding:8px 12px;display:flex;gap:10px;align-items:center} .guidance{padding:12px;white-space:pre-line} .progress{flex:1;height:10px;background:#101828;border:1px solid #2f3a4f;border-radius:999px;overflow:hidden} .progress>div{height:100%;background:linear-gradient(90deg,#7aa2ff,#60a5fa,#22d3ee);width:0%;transition:.25s} .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#1a2335;border:1px solid #2f3a4f;border-radius:10px;padding:8px 12px;opacity:0;transition:.2s} .toast.show{opacity:1} .popover{position:absolute;background:#1a2335;border:1px solid #2f3a4f;border-radius:10px;padding:10px;max-width:min(360px,80%);z-index:5;box-shadow:0 10px 24px rgba(6,10,20,.35)} button{background:#152036;color:#e9eef5;border:1px solid #2f3a4f;padding:8px 12px;border-radius:999px;cursor:pointer;transition:.2s} button:hover{background:#1c2a45;border-color:#3a4b65} .muted{color:#a3adba}</style></head>
+  <body><div class="wrap"><header><div><strong>${escapeHtml(title)}</strong><div id="label" class="muted"></div></div><div><button id="prev">⟨ Prev</button> <button id="toggle">Highlight</button> <button id="next">Next ⟩</button></div></header>
+  <main class="figure" id="fig"><img id="img" alt="step"/></main>
+  <div class="panel"><div class="progress"><div id="bar"></div></div><div id="hint" class="muted"></div></div>
+  <div class="guidance" id="guide"></div>
+  <footer><div class="muted">Single‑file tutorial</div><div class="muted">Use ←/→ keys</div></footer></div>
+  <div id="toast" class="toast"></div>
+  <script>const STEPS=${JSON.stringify(steps)};let i=0, hs=null, show=true;const img=document.getElementById('img'),fig=document.getElementById('fig'),bar=document.getElementById('bar'),label=document.getElementById('label'),hint=document.getElementById('hint'),guide=document.getElementById('guide'),toast=document.getElementById('toast');function ui(){label.textContent='Step '+(i+1)+' of '+STEPS.length;bar.style.width=((i+1)/STEPS.length*100)+'%';hint.textContent=STEPS[i].hint||'';guide.textContent=STEPS[i].guidance||'';}function load(k){i=Math.max(0,Math.min(k,STEPS.length-1));img.src=STEPS[i].img;img.onload=()=>{renderHS();ui()}}function renderHS(){[...fig.querySelectorAll('.hs,.popover')].forEach(n=>n.remove());const s=STEPS[i];(s.hotspots||[]).forEach((r,idx)=>{const d=document.createElement('div');d.className='hs';d.style.display=show?'block':'none';d.style.left=r.x+'%';d.style.top=r.y+'%';d.style.width=r.w+'%';d.style.height=r.h+'%';d.onclick=(ev)=>handle(r,ev,d);fig.appendChild(d);});}function handle(r,ev,el){if(r.action==='info'){const p=document.createElement('div');p.className='popover';p.style.left=(r.x+r.w+1)+'%';p.style.top=r.y+'%';p.innerHTML=r.info||'Info';fig.appendChild(p);setTimeout(()=>{document.addEventListener('click',()=>p.remove(),{once:true});},0);} else if(r.action==='goto'){const to=(r.gotoIndex||1)-1;load(to);} else { // next
+if(i<STEPS.length-1) load(i+1); else msg('Tutorial complete ✔');}}function msg(m){toast.innerHTML=m;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1300);}document.getElementById('prev').onclick=()=>load(i-1);document.getElementById('next').onclick=()=>load(i+1);document.getElementById('toggle').onclick=()=>{show=!show;renderHS();};window.addEventListener('keydown',e=>{if(e.key==='ArrowRight')load(i+1);if(e.key==='ArrowLeft')load(i-1)});load(0);<\/script>
+</body>
+
+</html>`;
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+function escapeMd(s = '') { return s.replace(/[\\`*_{}\[\]()#+\-!|>]/g, '\\$&'); }
+function stripHtml(s = '') { return s.replace(/<[^>]*>/g, ''); }
+function generateTimelineMarkdown(title, steps) {
+  const lines = [];
+  const meta = project.meta || {};
+  lines.push(`# ${escapeMd(title || 'Tutorial Timeline')}`);
+  if (meta.author || meta.created) {
+    const metaParts = [];
+    if (meta.author) metaParts.push(`Author: ${escapeMd(meta.author)}`);
+    if (meta.created) {
+      const dt = new Date(meta.created);
+      const createdLabel = dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt.toISOString() : String(meta.created);
+      metaParts.push(`Created: ${escapeMd(createdLabel)}`);
+    }
+    lines.push(metaParts.join(' · '));
+  }
+  if (!steps.length) {
+    lines.push('\n_No steps added yet._');
+    return lines.join('\n');
+  }
+  steps.forEach((step, idx) => {
+    const titleLabel = step.title && step.title.trim() ? escapeMd(step.title.trim()) : 'Untitled';
+    lines.push('', `## Step ${idx + 1}: ${titleLabel}`);
+    if (step.hint) {
+      lines.push(`- Hint: ${escapeMd(step.hint.trim())}`);
+    }
+    if (step.guidance) {
+      lines.push('', '### Guidance', '', step.guidance.trim());
+    }
+    const hotspots = Array.isArray(step.hotspots) ? step.hotspots : [];
+    if (hotspots.length) {
+      lines.push('', '### Hotspots');
+      hotspots.forEach((hs, hidx) => {
+        const coords = hs && typeof hs === 'object'
+          ? `(${['x','y','w','h'].map(k => hs[k] != null ? Number(hs[k]).toFixed(1) + '%' : '–').join(', ')})`
+          : '';
+        let actionDesc = 'Advances to next step';
+        if (hs.action === 'info') {
+          const infoText = stripHtml(hs.info || '').trim();
+          actionDesc = infoText ? `Shows info: "${escapeMd(infoText)}"` : 'Shows info popover';
+        } else if (hs.action === 'goto') {
+          actionDesc = `Jumps to step ${hs.gotoIndex || 1}`;
+        }
+        lines.push(`- Hotspot ${hidx + 1} ${coords}: ${actionDesc}`);
+      });
+    } else {
+      lines.push('', '_No hotspots on this step._');
+    }
+  });
+  return lines.join('\n');
+}
+
+    // Init
+    console.log('Tutorial Builder loaded');
+    renderList();
+    </script>
+    </body>
+
+    </html>
