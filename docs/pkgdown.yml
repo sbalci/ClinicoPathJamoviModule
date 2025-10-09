@@ -2,12 +2,53 @@ pandoc: 3.7.0.2
 pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
-  clinical-workflow: clinical-workflow.html
+  dev.jamovi.org-master/api_analysis-definition: dev.jamovi.org-master/api_analysis-definition.html
+  dev.jamovi.org-master/api_module-definition: dev.jamovi.org-master/api_module-definition.html
+  dev.jamovi.org-master/api_results-definition: dev.jamovi.org-master/api_results-definition.html
+  dev.jamovi.org-master/api_results-elements: dev.jamovi.org-master/api_results-elements.html
+  dev.jamovi.org-master/api_table: dev.jamovi.org-master/api_table.html
+  dev.jamovi.org-master/api_ui-definition: dev.jamovi.org-master/api_ui-definition.html
+  developer_guide: developer_guide.html
+  dev.jamovi.org-master/index: dev.jamovi.org-master/index.html
+  dev.jamovi.org-master/info_project-structure: dev.jamovi.org-master/info_project-structure.html
   module-development-jamovi: module-development-jamovi.html
   pathology-jamovi: pathology-jamovi.html
-  pkgnet-report: pkgnet-report.html
+  dev.jamovi.org-master/tuts0101-getting-started: dev.jamovi.org-master/tuts0101-getting-started.html
+  dev.jamovi.org-master/tuts0102-creating-a-module: dev.jamovi.org-master/tuts0102-creating-a-module.html
+  dev.jamovi.org-master/tuts0103-creating-an-analysis: dev.jamovi.org-master/tuts0103-creating-an-analysis.html
+  dev.jamovi.org-master/tuts0104-implementing-an-analysis: dev.jamovi.org-master/tuts0104-implementing-an-analysis.html
+  dev.jamovi.org-master/tuts0105-creating-rich-results: dev.jamovi.org-master/tuts0105-creating-rich-results.html
+  dev.jamovi.org-master/tuts0105-debugging-an-analysis: dev.jamovi.org-master/tuts0105-debugging-an-analysis.html
+  dev.jamovi.org-master/tuts0106-adding-plots: dev.jamovi.org-master/tuts0106-adding-plots.html
+  dev.jamovi.org-master/tuts0107-distributing-modules: dev.jamovi.org-master/tuts0107-distributing-modules.html
+  dev.jamovi.org-master/tuts0108-additional-notes: dev.jamovi.org-master/tuts0108-additional-notes.html
+  dev.jamovi.org-master/tuts0201-data-binding: dev.jamovi.org-master/tuts0201-data-binding.html
+  dev.jamovi.org-master/tuts0201-dynamic-tables: dev.jamovi.org-master/tuts0201-dynamic-tables.html
+  dev.jamovi.org-master/tuts0202-handling-data: dev.jamovi.org-master/tuts0202-handling-data.html
+  dev.jamovi.org-master/tuts0203-state: dev.jamovi.org-master/tuts0203-state.html
+  dev.jamovi.org-master/ui-advanced-customisation: dev.jamovi.org-master/ui-advanced-customisation.html
+  dev.jamovi.org-master/ui-advanced-design: dev.jamovi.org-master/ui-advanced-design.html
+  dev.jamovi.org-master/ui-basecontrol: dev.jamovi.org-master/ui-basecontrol.html
+  dev.jamovi.org-master/ui-basic-design: dev.jamovi.org-master/ui-basic-design.html
+  dev.jamovi.org-master/ui-checkbox: dev.jamovi.org-master/ui-checkbox.html
+  dev.jamovi.org-master/ui-collapsebox: dev.jamovi.org-master/ui-collapsebox.html
+  dev.jamovi.org-master/ui-combobox: dev.jamovi.org-master/ui-combobox.html
+  dev.jamovi.org-master/ui-custom-format: dev.jamovi.org-master/ui-custom-format.html
+  dev.jamovi.org-master/ui-label: dev.jamovi.org-master/ui-label.html
+  dev.jamovi.org-master/ui-layoutbox: dev.jamovi.org-master/ui-layoutbox.html
+  dev.jamovi.org-master/ui-listbox: dev.jamovi.org-master/ui-listbox.html
+  dev.jamovi.org-master/ui-optioncontrol: dev.jamovi.org-master/ui-optioncontrol.html
+  dev.jamovi.org-master/ui-parentcontrol: dev.jamovi.org-master/ui-parentcontrol.html
+  dev.jamovi.org-master/ui-radiobutton: dev.jamovi.org-master/ui-radiobutton.html
+  dev.jamovi.org-master/ui-standard-formats: dev.jamovi.org-master/ui-standard-formats.html
+  dev.jamovi.org-master/ui-supplier: dev.jamovi.org-master/ui-supplier.html
+  dev.jamovi.org-master/ui-targetlayoutbox: dev.jamovi.org-master/ui-targetlayoutbox.html
+  dev.jamovi.org-master/ui-termlabel: dev.jamovi.org-master/ui-termlabel.html
+  dev.jamovi.org-master/ui-textbox: dev.jamovi.org-master/ui-textbox.html
+  dev.jamovi.org-master/ui-variablelabel: dev.jamovi.org-master/ui-variablelabel.html
+  dev.jamovi.org-master/ui-variablesupplier: dev.jamovi.org-master/ui-variablesupplier.html
   users-of-ClinicoPath: users-of-ClinicoPath.html
-last_built: 2025-08-01T15:17Z
+last_built: 2025-10-09T15:56Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

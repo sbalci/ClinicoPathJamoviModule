@@ -109,7 +109,12 @@
       "WebFetch(domain:orange.biolab.si)",
       "WebFetch(domain:rpkgs.datanovia.com)",
       "Bash(paste - - -)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(rsync:*)",
+      "Bash(do echo \"=== $dir vignettes count ===\")",
+      "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives/vignettes/)",
+      "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/jjstatsplot/vignettes/)",
+      "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/meddecide/vignettes/)"
     ],
     "deny": [],
     "ask": [],

@@ -44,6 +44,7 @@ options:
       description: >
                   Frequency/weight variable for contingency table data.
                   When specified, the data is treated as already summarized with counts per combination.
+      default: NULL
 
     - name: posthoc
       title: Post-Hoc Method
