@@ -43,10 +43,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - arcdiagram
-    - igraph
-    - RColorBrewer
-    - scales
 
-
-    - glue
 ...

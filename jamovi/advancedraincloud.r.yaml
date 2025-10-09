@@ -103,9 +103,4 @@ refs:
     - ggrain
     - ClinicoPathJamoviModule
 
-
-
-    - grDevices
-    - viridis
-    - RColorBrewer
 ...

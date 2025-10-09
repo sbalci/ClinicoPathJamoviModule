@@ -227,7 +227,7 @@ refs:
     - Rtsne
     - umap
 
-    - urvival
+    - survival
     - urvminer
     - dbscan
     - cluster

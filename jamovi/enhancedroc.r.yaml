@@ -556,11 +556,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-    - BlueSky
     - Swamidass2010
-
     - pROC
-    - caret
-    - grDevices
-    - reshape2
+
 ...

@@ -599,13 +599,4 @@ refs:
     - survivaltutorial
     - survivalrwnahhas
 
-
-
-    - digest
-    - janitor
-    - labelled
-    - glue
-    - lubridate
-    - scales
-    - purrr
 ...

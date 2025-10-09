@@ -210,7 +210,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
-    - urvival
+    - survival
     - urvminer
     - survival
     - glue

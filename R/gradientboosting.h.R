@@ -310,7 +310,7 @@ gradientboostingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "gbm",
                     "xgboost",
                     "ClinicoPathJamoviModule",
-                    "urvival",
+                    "survival",
                     "Matrix"))
             self$add(jmvcore::Html$new(
                 options=options,

@@ -41,7 +41,7 @@ jamovi/00refs.yaml
 1. **Detect packages in `.b.R`**
    - Scan for `library()`, `require()`, and `pkg::` usage.
    - Extract unique package names.
-   - **Filter out foundational packages**: Excludes `jmvcore`, `ggplot2`, `R6`, `stats`, `utils`, `kableExtra`, `rlang`, `dplyr`, `tidyr` from individual function refs.
+   - **Filter out foundational packages**: Excludes `jmvcore`, `ggplot2`, `R6`, `stats`, `utils`, `kableExtra`, `rlang`, `dplyr`, `tidyr`, `glue`, `stringr`, `htmltools`, `labelled`, `scales`, `purrr`, `gt`, `DiagrammeRsvg`, `base`, `RColorBrewer`, `gridExtra`, `tibble`, `tidyr`, `grDevices`, `grid` from individual function refs.
 
 2. **Ensure package refs exist in `jamovi/00refs.yaml`**
    - Check whether each package is already listed under `refs:`.

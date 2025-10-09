@@ -129,7 +129,5 @@ items:
 refs: 
     - NoGoldDiagnostic
     - ClinicoPathJamoviModule
-
-
     - poLCA
 ...

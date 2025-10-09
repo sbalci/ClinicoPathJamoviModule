@@ -259,13 +259,4 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - ggswim
-    - ggplot2
-    - dplyr
-    - lubridate
-    - RColorBrewer
-    - gridExtra
-
-    - tibble
-    - tidyr
-    - grDevices
 ...

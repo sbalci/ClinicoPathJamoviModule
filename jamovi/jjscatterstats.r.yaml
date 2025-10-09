@@ -110,8 +110,4 @@ refs:
     - ggpubr
     - ClinicoPathJamoviModule
 
-
-    - glue
-    - ggrepel
-    - ggExtra
 ...

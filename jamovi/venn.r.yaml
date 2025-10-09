@@ -161,11 +161,4 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
-    - palmerpenguins
-    - UpSetR
-    - grid
-    - ComplexUpset
-    - viridis
-    - grDevices
-    - RColorBrewer
 ...

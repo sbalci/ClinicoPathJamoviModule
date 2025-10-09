@@ -269,7 +269,7 @@ treatmentswitchingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 title="Treatment Switching Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "urvival",
+                    "survival",
                     "urvminer",
                     "glue",
                     "parallel"))

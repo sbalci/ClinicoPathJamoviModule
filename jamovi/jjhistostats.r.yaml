@@ -155,8 +155,4 @@ refs:
     - ggpubr
     - ClinicoPathJamoviModule
 
-
-    - digest
-    - glue
-    - purrr
 ...

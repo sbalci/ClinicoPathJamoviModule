@@ -266,7 +266,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "ClinicoPathJamoviModule",
                     "Rtsne",
                     "umap",
-                    "urvival",
+                    "survival",
                     "urvminer",
                     "dbscan",
                     "cluster",

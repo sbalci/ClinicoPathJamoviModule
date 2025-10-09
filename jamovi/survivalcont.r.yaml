@@ -1097,12 +1097,4 @@ refs:
     - survivalrwnahhas
     - ClinicoPathJamoviModule
 
-
-    - glue
-    - janitor
-    - labelled
-    - lubridate
-    - tibble
-    - scales
-    - rpart
 ...
