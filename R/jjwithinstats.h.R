@@ -367,13 +367,9 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Violin Plots to Compare Within Groups",
                 refs=list(
-                    "ggplot2",
                     "ggstatsplot",
                     "ggpubr",
-                    "ClinicoPathJamoviModule",
-                    "glue",
-                    "digest",
-                    "tidyr"),
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep1",
                     "dep2",

@@ -78,8 +78,7 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Single Variable Quality Check",
                 refs=list(
-                    "ClinicoPathJamoviModule",
-                    "stringr"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

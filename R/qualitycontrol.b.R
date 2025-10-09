@@ -34,7 +34,7 @@ qualitycontrolClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     <li>Westgard multi-rule quality control</li>
                     <li>Statistical trend analysis</li>
                     <li>Process capability assessment (Cp, Cpk)</li>
-                    <li>ISO 15189 compliant uncertainty estimation</li>
+                    <li>Uncertainty estimation</li>
                     </ul>
                     
                     <p><b>Clinical Laboratory Applications:</b></p>
@@ -943,7 +943,7 @@ qualitycontrolClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             <p><b>References:</b></p>
             <p>• CLSI EP5-A3: Evaluation of Precision of Quantitative Measurement Procedures</p>
             <p>• CLSI C28-A3: Defining, Establishing, and Verifying Reference Intervals</p>
-            <p>• ISO 15189: Medical Laboratories Requirements for Quality and Competence</p>
+            <p>• Medical Laboratories Requirements for Quality and Competence</p>
             <p>• Westgard QC: Statistical Quality Control for Quantitative Measurements</p>
             </body>
             </html>"

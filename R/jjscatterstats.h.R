@@ -386,10 +386,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ggplot2",
                     "ggstatsplot",
                     "ggpubr",
-                    "ClinicoPathJamoviModule",
-                    "glue",
-                    "ggrepel",
-                    "ggExtra"),
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
                     "group",

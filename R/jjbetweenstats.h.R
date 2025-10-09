@@ -313,13 +313,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Box-Violin Plots to Compare Between Groups",
                 refs=list(
-                    "ggplot2",
                     "ggstatsplot",
                     "ggpubr",
-                    "ClinicoPathJamoviModule",
-                    "glue",
-                    "digest",
-                    "purrr"),
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
                     "group",

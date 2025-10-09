@@ -32,3 +32,5 @@ children:
         name: outliers
       - type: CheckBox
         name: report_sentences
+      - type: CheckBox
+        name: showRCode

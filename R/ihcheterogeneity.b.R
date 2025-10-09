@@ -1375,7 +1375,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<li><strong>Primary Methodology:</strong> Zilenaite-Petrulaitiene et al. (Am J Clin Pathol 2025)</li>",
                 "<li><strong>ICC Guidelines:</strong> Koo & Li (J Chiropr Med 2016) - ICC interpretation standards</li>",
                 "<li><strong>Biomarker Assessment:</strong> ASCO/CAP guidelines for immunohistochemical analysis</li>",
-                "<li><strong>Quality Standards:</strong> ISO 15189 requirements for laboratory quality management</li>",
+                "<li><strong>Quality Standards:</strong> Laboratory quality management requirements</li>",
                 "</ul>",
                 "</div>",
                 "</div>"

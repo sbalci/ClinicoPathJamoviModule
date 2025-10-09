@@ -10,7 +10,8 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             distr = FALSE,
             decimal_places = 1,
             outliers = FALSE,
-            report_sentences = FALSE, ...) {
+            report_sentences = FALSE,
+            showRCode = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -43,25 +44,32 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "report_sentences",
                 report_sentences,
                 default=FALSE)
+            private$..showRCode <- jmvcore::OptionBool$new(
+                "showRCode",
+                showRCode,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..distr)
             self$.addOption(private$..decimal_places)
             self$.addOption(private$..outliers)
             self$.addOption(private$..report_sentences)
+            self$.addOption(private$..showRCode)
         }),
     active = list(
         vars = function() private$..vars$value,
         distr = function() private$..distr$value,
         decimal_places = function() private$..decimal_places$value,
         outliers = function() private$..outliers$value,
-        report_sentences = function() private$..report_sentences$value),
+        report_sentences = function() private$..report_sentences$value,
+        showRCode = function() private$..showRCode$value),
     private = list(
         ..vars = NA,
         ..distr = NA,
         ..decimal_places = NA,
         ..outliers = NA,
-        ..report_sentences = NA)
+        ..report_sentences = NA,
+        ..showRCode = NA)
 )
 
 summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -85,11 +93,7 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Summary of Continuous Variables",
                 refs=list(
                     "gtExtras",
-                    "ClinicoPathJamoviModule",
-                    "moments",
-                    "purrr",
-                    "gt",
-                    "htmltools"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -176,6 +180,10 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   method. Helpful for quality control and identifying data entry errors.
 #' @param report_sentences If TRUE, generate copy-ready clinical report
 #'   sentences for direct use in medical documentation.
+#' @param showRCode Generate copy-ready R code using upstream packages (stats,
+#'   mixOmics, MASS) instead of jamovi wrappers. Useful for reproducing analysis
+#'   in R scripts, learning the underlying implementation, and sharing code with
+#'   non-jamovi users.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -195,7 +203,8 @@ summarydata <- function(
     distr = FALSE,
     decimal_places = 1,
     outliers = FALSE,
-    report_sentences = FALSE) {
+    report_sentences = FALSE,
+    showRCode = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("summarydata requires jmvcore to be installed (restart may be required)")
@@ -212,7 +221,8 @@ summarydata <- function(
         distr = distr,
         decimal_places = decimal_places,
         outliers = outliers,
-        report_sentences = report_sentences)
+        report_sentences = report_sentences,
+        showRCode = showRCode)
 
     analysis <- summarydataClass$new(
         options = options,

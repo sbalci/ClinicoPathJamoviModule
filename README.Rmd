@@ -47,7 +47,7 @@ knitr::opts_chunk$set(
     *   **Clinical Monitoring:** Alert systems and patient monitoring dashboards.
     *   **Treatment Planning:** Optimization frameworks and differential diagnosis assistance.
     *   **Results Interpretation:** Laboratory and imaging findings correlation.
-*   **Laboratory Quality Control:** ISO 15189 compliant statistical process control, including Shewhart/CUSUM charts, Six Sigma metrics, and measurement uncertainty.
+*   **Laboratory Quality Control:** Statistical process control, including Shewhart/CUSUM charts, Six Sigma metrics, and measurement uncertainty.
 *   **Spatial Statistics & Digital Pathology:** 
     *   **Spatial Analysis:** Spatial point pattern analysis (Ripley's K-function), spatial autocorrelation (Moran's I)
     *   **Texture Analysis:** Haralick texture features for quantitative pathology

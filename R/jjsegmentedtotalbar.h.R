@@ -359,9 +359,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Segmented Total Bar Charts",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "ggplot2",
-                    "ggsegmentedtotalbar",
-                    "stringr"))
+                    "ggsegmentedtotalbar"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

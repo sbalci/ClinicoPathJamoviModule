@@ -41,7 +41,7 @@ labcontrolchartsClass <- R6::R6Class(
                             </div>
                         </div>
                         <div class='important'>
-                            <b>ISO 15189 Compliance:</b> This analysis supports laboratory accreditation requirements for internal quality control and statistical process monitoring.
+                            <b>Laboratory Accreditation:</b> This analysis supports laboratory accreditation requirements for internal quality control and statistical process monitoring.
                         </div>
                         <div class='section'>
                             <b>Key Features:</b>
@@ -603,7 +603,7 @@ labcontrolchartsClass <- R6::R6Class(
                     
                     <div class='clinical'>
                         <h4>Clinical Laboratory Applications</h4>
-                        <b>ISO 15189 Requirements:</b><br>
+                        <b>Laboratory Accreditation Requirements:</b><br>
                         • Regular internal quality control<br>
                         • Statistical evaluation of QC data<br>
                         • Defined acceptance criteria<br>

@@ -35,7 +35,7 @@ within jamovi for a wide range of functions. Key features include:
 - **Agreement and Reliability:** Assessment of inter-rater reliability
   using statistics such as Cohen’s Kappa and the Intraclass Correlation
   Coefficient (ICC).
-- **Laboratory Quality Control:** ISO 15189 compliant statistical
+- **Laboratory Quality Control:** Statistical
   process control with Shewhart, CUSUM, and EWMA control charts, Six
   Sigma metrics, method validation protocols, reference interval
   establishment, and measurement uncertainty estimation.

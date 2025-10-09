@@ -358,10 +358,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ggplot2",
                     "ggstatsplot",
                     "ggpubr",
-                    "ClinicoPathJamoviModule",
-                    "digest",
-                    "glue",
-                    "purrr"),
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
                     "grvar",

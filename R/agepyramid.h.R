@@ -134,7 +134,6 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Age Pyramid",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "tidyr",
                     "ggcharts"))
             self$add(jmvcore::Table$new(
                 options=options,

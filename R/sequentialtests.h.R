@@ -164,8 +164,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "Fagan",
                     "Fagan2",
                     "sensspecwiki",
-                    "ClinicoPathJamoviModule",
-                    "grid"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary_table",

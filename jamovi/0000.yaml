@@ -3987,18 +3987,18 @@ analyses:
       approaches, robust methods for outlier handling, and partitioning analysis
       for demographic factors. Essential for laboratory standardization and
       clinical interpretation of test results.
-  - title: Measurement Uncertainty Estimation (ISO 15189)
+  - title: Measurement Uncertainty Estimation
     name: measurementuncertainty
     ns: ClinicoPath
     category: analyses
     menuGroup: ClinicoPathD
-    menuTitle: Measurement Uncertainty Estimation (ISO 15189)
+    menuTitle: Measurement Uncertainty Estimation
     description: >
-      Comprehensive measurement uncertainty evaluation following ISO 15189,
-      ISO/IEC Guide 98-3 (GUM), and JCGM 100:2008 guidelines. Calculates Type A
-      and Type B uncertainties, combined and expanded uncertainty, and
-      uncertainty budgets for clinical laboratory measurements. Essential for
-      laboratory accreditation and quality assurance.
+      Comprehensive measurement uncertainty evaluation following ISO/IEC Guide
+      98-3 (GUM), and JCGM 100:2008 guidelines. Calculates Type A and Type B
+      uncertainties, combined and expanded uncertainty, and uncertainty budgets
+      for clinical laboratory measurements. Essential for laboratory
+      accreditation and quality assurance.
   - title: Spatial Autocorrelation Analysis (Moran's I, Geary's C)
     name: spatialautocorrelation
     ns: ClinicoPath

@@ -311,15 +311,7 @@ raincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Raincloud Plot",
                 refs=list(
-                    "ClinicoPathJamoviModule",
-                    "ggdist",
-                    "scales",
-                    "viridis",
-                    "grDevices",
-                    "RColorBrewer",
-                    "ggprism",
-                    "moments",
-                    "stringr"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

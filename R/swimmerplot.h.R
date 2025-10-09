@@ -455,15 +455,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Swimmer Plot",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "ggswim",
-                    "ggplot2",
-                    "dplyr",
-                    "lubridate",
-                    "RColorBrewer",
-                    "gridExtra",
-                    "tibble",
-                    "tidyr",
-                    "grDevices"))
+                    "ggswim"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
