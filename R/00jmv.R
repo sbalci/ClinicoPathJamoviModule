@@ -1081,13 +1081,6 @@
         `title`="geepack: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=geepack", 
         `url`="https://CRAN.R-project.org/package=geepack"), 
-    `survival`=list(
-        `type`="software", 
-        `author`=NULL, 
-        `year`=NULL, 
-        `title`="survival: R package", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survival", 
-        `url`="https://CRAN.R-project.org/package=survival"), 
     `party`=list(
         `type`="software", 
         `author`=NULL, 

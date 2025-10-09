@@ -134,8 +134,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "irr",
                     "PathologyKappa",
-                    "ClinicoPathJamoviModule",
-                    "janitor"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",

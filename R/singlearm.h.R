@@ -445,14 +445,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survminer",
                     "ClinicoPathJamoviModule",
                     "survivaltutorial",
-                    "survivalrwnahhas",
-                    "digest",
-                    "janitor",
-                    "labelled",
-                    "glue",
-                    "lubridate",
-                    "scales",
-                    "purrr"))
+                    "survivalrwnahhas"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

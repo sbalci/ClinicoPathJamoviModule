@@ -270,9 +270,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
-                    "ClinicoPathJamoviModule",
-                    "glue",
-                    "digest"),
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
                     "group",

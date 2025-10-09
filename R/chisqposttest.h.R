@@ -56,7 +56,8 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..posthoc <- jmvcore::OptionList$new(
                 "posthoc",
                 posthoc,
@@ -246,8 +247,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs=list(
                     "chisq.posthoc.test",
                     "vcd",
-                    "ClinicoPathJamoviModule",
-                    "htmltools"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -559,7 +559,7 @@ chisqposttest <- function(
     data,
     rows,
     cols,
-    counts,
+    counts = NULL,
     posthoc = "bonferroni",
     sig = 0.05,
     excl = FALSE,

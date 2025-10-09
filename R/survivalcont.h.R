@@ -529,14 +529,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dichotomizing",
                     "survivaltutorial",
                     "survivalrwnahhas",
-                    "ClinicoPathJamoviModule",
-                    "glue",
-                    "janitor",
-                    "labelled",
-                    "lubridate",
-                    "tibble",
-                    "scales",
-                    "rpart"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

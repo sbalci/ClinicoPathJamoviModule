@@ -635,17 +635,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survivalrviews",
                     "appliedsurvivalanalysisR",
                     "ClinicoPathJamoviModule",
-                    "flexsurv",
-                    "survival",
-                    "janitor",
-                    "labelled",
-                    "glue",
-                    "lubridate",
-                    "tibble",
-                    "purrr",
-                    "scales",
-                    "tidyr",
-                    "tools"))
+                    "flexsurv"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",

@@ -320,7 +320,7 @@ measurementuncertaintyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Measurement Uncertainty Estimation (ISO 15189)")}))
+                title="Measurement Uncertainty Estimation")}))
 
 measurementuncertaintyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "measurementuncertaintyBase",
@@ -343,13 +343,13 @@ measurementuncertaintyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 weightsSupport = 'auto')
         }))
 
-#' Measurement Uncertainty Estimation (ISO 15189)
+#' Measurement Uncertainty Estimation
 #'
-#' Comprehensive measurement uncertainty evaluation following ISO 15189, 
-#' ISO/IEC Guide 98-3 (GUM), and JCGM 100:2008 guidelines. Calculates Type A 
-#' and Type B uncertainties, combined and expanded uncertainty, and 
-#' uncertainty budgets for clinical laboratory measurements. Essential for 
-#' laboratory accreditation and quality assurance.
+#' Comprehensive measurement uncertainty evaluation following ISO/IEC Guide 
+#' 98-3 (GUM), and JCGM 100:2008 guidelines. Calculates Type A and Type B 
+#' uncertainties, combined and expanded uncertainty, and uncertainty budgets 
+#' for clinical laboratory measurements. Essential for laboratory 
+#' accreditation and quality assurance.
 #' 
 #'
 #' @examples
@@ -396,7 +396,8 @@ measurementuncertaintyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' @param interlaboratory_comparison Compare uncertainty with other
 #'   laboratories
 #' @param clinical_significance Evaluate clinical significance of uncertainty
-#' @param iso15189_compliance Verify compliance with ISO 15189 requirements
+#' @param iso15189_compliance Verify compliance with laboratory accreditation
+#'   requirements
 #' @param uncertainty_plots Generate uncertainty analysis plots
 #' @param budget_plots Create uncertainty budget visualizations
 #' @param monte_carlo_plots Generate Monte Carlo simulation plots

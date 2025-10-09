@@ -240,7 +240,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="IHC Heterogeneity Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "stringr",
                     "psych"))
             self$add(jmvcore::Html$new(
                 options=options,

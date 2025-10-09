@@ -1000,7 +1000,7 @@
 * **Multi-Protocol Validation Support:** Complete implementation of CLSI EP15-A3 (precision), EP09-A3 (method comparison), EP06-A (linearity), and EP05-A3 (accuracy) protocols
 * **Advanced Precision Analysis:** Within-run, between-run, and total precision calculations with confidence intervals, measurement uncertainty contribution, and statistical significance testing
 * **Comprehensive Accuracy Assessment:** Bias evaluation, recovery studies, and trueness assessment with statistical testing and clinical significance evaluation
-* **Regulatory Compliance Tools:** ISO 15189 and FDA guidance compliance checking with documentation templates and validation report generation
+* **Regulatory Compliance Tools:** FDA guidance compliance checking with documentation templates and validation report generation
 
 ##### **Reference Intervals (referenceintervals) - Population-Based Reference Standards**
 
@@ -1009,12 +1009,12 @@
 * **Advanced Statistical Methods:** Outlier detection using Horn's method, Box-Cox transformation, and robust statistics for non-normal distributions
 * **Clinical Decision Support:** Reference interval transferability testing, verification protocols, and population-specific adjustments with uncertainty quantification
 
-##### **Measurement Uncertainty (measurementuncertainty) - ISO 15189 Compliance**
+##### **Measurement Uncertainty (measurementuncertainty) - Medical Laboratory Compliance**
 
 * **GUM Approach Implementation:** Complete Guide to Uncertainty in Measurement (GUM) methodology with Type A and Type B uncertainty evaluation and combined uncertainty calculation
 * **Monte Carlo Simulation Engine:** Advanced uncertainty propagation using Monte Carlo methods with configurable simulation parameters and distribution modeling
 * **Comprehensive Uncertainty Budget:** Bottom-up and top-down uncertainty assessment with component contribution analysis and optimization recommendations
-* **ISO 15189 Compliance Framework:** Complete medical laboratory uncertainty evaluation with clinical significance assessment and expanded uncertainty reporting
+* **Medical Laboratory Compliance Framework:** Complete medical laboratory uncertainty evaluation with clinical significance assessment and expanded uncertainty reporting
 
 #### 🗺️ **Phase D: Spatial Statistics & Digital Pathology - Enhanced Implementation**
 
