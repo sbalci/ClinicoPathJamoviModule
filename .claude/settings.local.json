@@ -114,7 +114,8 @@
       "Bash(do echo \"=== $dir vignettes count ===\")",
       "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives/vignettes/)",
       "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/jjstatsplot/vignettes/)",
-      "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/meddecide/vignettes/)"
+      "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/meddecide/vignettes/)",
+      "Read(//Users/serdarbalci/Desktop/omentum/**)"
     ],
     "deny": [],
     "ask": [],

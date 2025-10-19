@@ -20,47 +20,6 @@
 #' @importFrom rlang sym
 #'
 #' @return The function produces a Venn diagram and an Upset diagram.
-#' @export vennClass
-
-# Helper function to escape variable names with special characters for formulas
-.escapeVariableNames <- function(var_names) {
-    # Check if variable names contain special characters that need escaping
-    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
-    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
-    return(var_names)
-}
-
-# Helper function to validate and clean variable names for jamovi interface
-.validateVariableNames <- function(var_names) {
-    if (is.null(var_names) || length(var_names) == 0) {
-        return(list(valid = TRUE, message = ""))
-    }
-
-    problematic <- c()
-
-    # Check for names that might cause parsing issues
-    for (name in var_names) {
-        if (grepl("^[0-9]", name)) {
-            problematic <- c(problematic, paste0("'", name, "' starts with a number"))
-        }
-        if (grepl("\\s+[0-9]", name)) {
-            problematic <- c(problematic, paste0("'", name, "' contains space followed by number"))
-        }
-        if (grepl("[^a-zA-Z0-9._\\s]", name)) {
-            problematic <- c(problematic, paste0("'", name, "' contains special characters"))
-        }
-    }
-
-    if (length(problematic) > 0) {
-        message <- paste0(
-            "⚠️ Variable name format note: ", paste(problematic, collapse = "; "),
-            ". If you encounter parsing errors, consider renaming these variables or using the jamovi GUI for variable selection."
-        )
-        return(list(valid = FALSE, message = message))
-    }
-
-    return(list(valid = TRUE, message = ""))
-}
 #'
 #' @examples
 #' \dontrun{
@@ -158,7 +117,47 @@
 #'      regionLabels = "percent",
 #'      colorPalette = "viridis")
 #' }
-#'
+#' @export vennClass
+
+# Helper function to escape variable names with special characters for formulas
+.escapeVariableNames <- function(var_names) {
+    # Check if variable names contain special characters that need escaping
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    return(var_names)
+}
+
+# Helper function to validate and clean variable names for jamovi interface
+.validateVennVariableNames <- function(var_names) {
+    if (is.null(var_names) || length(var_names) == 0) {
+        return(list(valid = TRUE, message = ""))
+    }
+
+    problematic <- c()
+
+    # Check for names that might cause parsing issues
+    for (name in var_names) {
+        if (grepl("^[0-9]", name)) {
+            problematic <- c(problematic, paste0("'", name, "' starts with a number"))
+        }
+        if (grepl("\\s+[0-9]", name)) {
+            problematic <- c(problematic, paste0("'", name, "' contains space followed by number"))
+        }
+        if (grepl("[^a-zA-Z0-9._\\s]", name)) {
+            problematic <- c(problematic, paste0("'", name, "' contains special characters"))
+        }
+    }
+
+    if (length(problematic) > 0) {
+        message <- paste0(
+            "⚠️ Variable name format note: ", paste(problematic, collapse = "; "),
+            ". If you encounter parsing errors, consider renaming these variables or using the jamovi GUI for variable selection."
+        )
+        return(list(valid = FALSE, message = message))
+    }
+
+    return(list(valid = TRUE, message = ""))
+}
 
 vennClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
@@ -371,7 +370,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # Validate variable names for potential parsing issues
                     all_vars <- c(var1, var2, var3, var4, var5, var6, var7)
                     selected_vars <- all_vars[!sapply(all_vars, is.null)]
-                    validation_result <- .validateVariableNames(selected_vars)
+                    validation_result <- .validateVennVariableNames(selected_vars)
 
                     if (!validation_result$valid) {
                         # Display warning but continue with analysis

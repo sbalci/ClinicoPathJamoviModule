@@ -1,0 +1,16 @@
+"case_id","patient_age","tumor_type","tumor_characteristic","disease_stage","total_samples","first_detection"
+"PERFECT_01",70,"Serous","Yes","IIIB",5,1
+"PERFECT_02",66,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_03",55,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_04",75,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_05",63,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_06",77,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_07",60,"Serous","Yes","IIIB",5,1
+"PERFECT_08",59,"Serous","Yes","IIIB",5,1
+"PERFECT_09",50,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_10",72,"Serous","Yes","IIIB",5,1
+"PERFECT_11",53,"Serous","Yes","IIIB",5,1
+"PERFECT_12",67,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_13",72,"Endometrioid","Yes","IIIB",5,1
+"PERFECT_14",68,"Serous","Yes","IIIB",5,1
+"PERFECT_15",75,"Serous","Yes","IIIB",5,1

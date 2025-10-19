@@ -1,0 +1,6 @@
+"case_id","patient_age","tumor_type","tumor_characteristic","disease_stage","total_samples","first_detection"
+"SMALL_01",45,"Serous","Yes","IIIA",5,1
+"SMALL_02",55,"Serous","Yes","IIIA",5,1
+"SMALL_03",60,"Serous","Yes","IIIA",5,2
+"SMALL_04",65,"Serous","Yes","IIIA",5,3
+"SMALL_05",70,"Serous","Yes","IIIA",5,4

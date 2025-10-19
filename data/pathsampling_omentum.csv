@@ -1,0 +1,61 @@
+"case_id","patient_age","tumor_type","tumor_characteristic","disease_stage","total_samples","first_detection"
+"OMENTUM_0001",65,"Endometrioid","Yes","IA",6,3
+"OMENTUM_0002",85,"Mucinous","Yes","IIA",5,3
+"OMENTUM_0003",63,"Clear cell","Yes","IA",5,1
+"OMENTUM_0004",77,"Serous","Yes","IA",7,4
+"OMENTUM_0005",53,"Clear cell","Yes","IA",7,2
+"OMENTUM_0006",54,"Serous","Yes","IB",5,1
+"OMENTUM_0007",45,"Endometrioid","Yes","IIIC",5,2
+"OMENTUM_0008",82,"Endometrioid","Yes","IC",5,1
+"OMENTUM_0009",45,"Serous","No","IIB",7,2
+"OMENTUM_0010",71,"Serous","Yes","IA",6,2
+"OMENTUM_0011",59,"Serous","No","IC",5,1
+"OMENTUM_0012",53,"Endometrioid","Yes","IIB",7,2
+"OMENTUM_0013",71,"Endometrioid","Yes","IIIC",5,3
+"OMENTUM_0014",82,"Clear cell","Yes","IIIA",5,1
+"OMENTUM_0015",44,"Serous","No","IIIB",6,1
+"OMENTUM_0016",61,"Mucinous","Yes","IIIB",4,3
+"OMENTUM_0017",51,"Serous","Yes","IV",5,5
+"OMENTUM_0018",60,"Serous","Yes","IV",5,1
+"OMENTUM_0019",76,"Endometrioid","Yes","IV",6,1
+"OMENTUM_0020",43,"Serous","Yes","IC",5,2
+"OMENTUM_0021",60,"Endometrioid","Yes","IB",4,3
+"OMENTUM_0022",58,"Serous","Yes","IIB",6,1
+"OMENTUM_0023",45,"Endometrioid","Yes","IV",5,5
+"OMENTUM_0024",52,"Endometrioid","No","IIA",5,3
+"OMENTUM_0025",57,"Serous","Yes","IV",4,1
+"OMENTUM_0026",62,"Serous","Yes","IIIA",5,1
+"OMENTUM_0027",67,"Serous","Yes","IIIC",5,1
+"OMENTUM_0028",48,"Endometrioid","No","IA",6,3
+"OMENTUM_0029",69,"Mucinous","Yes","IIIA",6,1
+"OMENTUM_0030",41,"Serous","Yes","IV",5,4
+"OMENTUM_0031",59,"Endometrioid","Yes","IIIA",7,2
+"OMENTUM_0032",71,"Serous","No","IIIA",6,4
+"OMENTUM_0033",42,"Serous","Yes","IIIA",5,1
+"OMENTUM_0034",55,"Serous","No","IIA",7,2
+"OMENTUM_0035",60,"Serous","Yes","IIIB",5,1
+"OMENTUM_0036",61,"Serous","Yes","IIIA",5,4
+"OMENTUM_0037",43,"Serous","Yes","IIB",4,1
+"OMENTUM_0038",34,"Serous","Yes","IIB",5,1
+"OMENTUM_0039",51,"Endometrioid","Yes","IB",6,3
+"OMENTUM_0040",59,"Serous","Yes","IV",7,2
+"OMENTUM_0041",77,"Serous","Yes","IIIA",6,1
+"OMENTUM_0042",73,"Serous","Yes","IA",5,1
+"OMENTUM_0043",59,"Serous","No","IA",4,1
+"OMENTUM_0044",70,"Serous","No","IB",5,5
+"OMENTUM_0045",42,"Clear cell","Yes","IIIB",5,1
+"OMENTUM_0046",57,"Serous","No","IB",5,5
+"OMENTUM_0047",65,"Endometrioid","Yes","IIA",5,3
+"OMENTUM_0048",54,"Endometrioid","Yes","IIA",6,2
+"OMENTUM_0049",65,"Mucinous","Yes","IIIB",6,5
+"OMENTUM_0050",72,"Clear cell","Yes","IA",7,2
+"OMENTUM_0051",43,"Serous","Yes","IIB",5,1
+"OMENTUM_0052",43,"Serous","Yes","IIIA",7,1
+"OMENTUM_0053",64,"Endometrioid","Yes","IIA",5,1
+"OMENTUM_0054",49,"Endometrioid","Yes","IB",6,4
+"OMENTUM_0055",73,"Mucinous","Yes","IV",4,1
+"OMENTUM_0056",30,"Endometrioid","Yes","IIIA",5,2
+"OMENTUM_0057",80,"Serous","Yes","IV",4,2
+"OMENTUM_0058",59,"Serous","No","IIIB",4,1
+"OMENTUM_0059",76,"Serous","Yes","IC",6,1
+"OMENTUM_0060",70,"Endometrioid","Yes","IV",7,1

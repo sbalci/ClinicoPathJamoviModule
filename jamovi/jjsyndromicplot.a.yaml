@@ -1,9 +1,9 @@
 ---
 name:  jjsyndromicplot
 title: Syndromic Plot (PCA Loadings)
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: Multivariate Analysis
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

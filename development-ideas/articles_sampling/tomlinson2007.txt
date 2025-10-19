@@ -1,0 +1,980 @@
+PAPER
+
+Accuracy of Staging Node-Negative Pancreas Cancer
+A Potential Quality Measure
+James S. Tomlinson, MD; Sushma Jain, MBBS, MPH; David J. Bentrem, MD; Evangelos G. Sekeris, PhD;
+Melinda A. Maggard, MD; O. Joe Hines, MD; Howard A. Reber, MD; Clifford Y. Ko, MD, MS, MSHS
+
+Objective: To determine the optimal number of
+lymph nodes to examine for accurate staging of nodenegative pancreatic adenocarcinoma after pancreaticoduodenectomy.
+Design, Setting, and Patients: Data from the National Cancer Institute’s Surveillance, Epidemiology, and
+End Results program (1988-2002) were used to identify
+3505 patients who underwent pancreaticoduodenectomy for adenocarcinoma of the pancreas, including 1150
+patients who were pathologically node negative (pN0)
+and 584 patients with a single positive node (pN1a). Perioperative deaths were excluded. Univariate and multivariate survival analyses were performed.
+Main Outcome Measure: Examination of 15 lymph
+nodes appears to be optimal for accurate staging of nodenegative adenocarcinoma of the pancreas after pancreaticoduodenectomy.
+Results: The number of nodes examined ranged from
+1 to 54 (median, 7 examined nodes). Univariate survival analysis demonstrated that dichotomizing the pN0
+cohort on 15 or more examined lymph nodes resulted
+
+Author Affiliations: Center for
+Surgical Outcomes and Quality
+(Drs Tomlinson, Jain, Sekeris,
+Maggard, and Ko), Department
+of Surgery (Drs Tomlinson,
+Maggard, Hines, Reber, and
+Ko), David Geffen School of
+Medicine, University of
+California, Los Angeles;
+Department of Surgery, Veterans
+Affairs Greater Los Angeles
+Healthcare System, Los Angeles
+(Drs Tomlinson and Ko); and
+Division of Surgical Oncology,
+Department of Surgery,
+Northwestern University,
+Chicago, Illinois (Dr Bentrem).
+
+P
+
+in the most statistically significant survival difference (logrank ␹2 =14.49). Kaplan-Meier survival curves demonstrated a median survival difference of 8 months (P⬍.001)
+in favor of the patients who had 15 or more examined
+nodes compared with patients with fewer than 15 examined nodes. Multivariate analysis validated that having
+15 or more examined nodes was a statistically significant predictor of survival (hazard ratio, 0.63; 95% confidence interval, 0.49-0.80; P⬍ .0001). Furthermore, a
+multivariate model based on the survival benefit of each
+additional node evaluated in the pN0 cohort demonstrated only a marginal survival benefit for analysis of more
+than 15 nodes. Approximately 90% of the pN1a cohort
+was identified with examination of 15 nodes.
+Conclusions: Examination of 15 lymph nodes appears
+
+to be optimal to accurately stage node-negative adenocarcinoma of the pancreas after pancreaticoduodenectomy. Furthermore, evaluation of at least 15 lymph nodes
+of a pancreaticoduodenectomy specimen may serve as a
+quality measure in the treatment of pancreatic adenocarcinoma.
+Arch Surg. 2007;142(8):767-774
+
+ANCREAS CANCER CONTINUES
+
+to be one of the most lethal
+cancers as reflected by an
+incidence rate that approximates mortality. Chemotherapy and irradiation remain largely
+ineffective.1 Surgical resection is the only
+chance of cure, offering actuarial 5-year
+survival rates below 25%.2-4 Given that
+current adjuvant therapy offers minimal
+benefit, we have an opportunity through
+accurate staging to delineate the natural
+history of this disease after resection.
+Improved knowledge regarding natural
+history will provide the essential background for the design of trials and ultimately a more precise assessment of
+future therapies.
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+767
+
+Currently, American Joint Committee
+on Cancer (AJCC) and International Union
+Against Cancer (UICC) staging of exocrine cancer of the pancreas is based on
+the TNM system. 5,6 Because most patients who undergo resection harbor T3
+tumors, ie, tumors that extend beyond the
+pancreas without involvement of major arteries, the additional information gained
+
+CME available online at
+www.archsurg.com
+after attempted curative resection is primarily nodal staging.7,8 Many studies4,7-12
+have noted a significant survival benefit for
+patients who are node negative com-
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+pared with patients found to have metastatic disease to
+regional lymph nodes. In other gastrointestinal epithelial malignancies, specifically gastric and colon cancers,
+much work has investigated the minimum number of
+nodes necessary for evaluation to accurately stage nodenegative cancers.13-16 With respect to pancreas cancer,
+Brennan et al7 introduced evidence that the number of
+negative nodes examined impacted prognosis in the recently validated nomogram for resected pancreatic adenocarcinoma.17 To our knowledge, no study has sought
+to develop this concept with respect to accurate staging
+of node-negative adenocarcinoma of the pancreas.
+In this study, population-based data from the National Cancer Institute’s Surveillance, Epidemiology, and
+End Results (SEER) program from 1988 to 2002 were
+used to identify a large cohort of patients who underwent pancreaticoduodenectomy for adenocarcinoma of
+the pancreas.18 Using overall survival as our end point,
+we sought to determine the optimal number of nodes necessary to accurately stage node-negative disease.
+METHODS
+
+DATA
+Data obtained from the SEER national cancer registry from 1988
+to 2002 were evaluated through structured queries. The SEER
+program collects patient records from multiple sites across the
+United States and is considered the standard for quality among
+cancer registries around the world. This national program includes 13 regional registries that cover approximately 26% of
+the US population. The database was designed to reflect the overall characteristics of the United States, including the spectrum
+of racial/ethnic groups, geographic locations, and types of cities and states.
+
+PATIENTS
+The SEER database extraction was performed by first identifying cases of pancreatic cancer as defined by the primary site variable (25.0, 25.1, 25.3-25.9). Adenocarcinoma cases were selected using histopathology codes as defined by the International
+Classification of Diseases for Oncology third edition19 codes for
+adenocarcinomas (8000, 8001, 8003, 8010, 8012, 8020, 8021,
+8022, 8030, 8031, 8033, 8035, 8041, 8045, 8046, 8050, 8070,
+8140, 8141, 8144, 8154, 8201, 8210, 8230, 8260, 8290, 8310,
+8440, 8441, 8450, 8452, 8453, 8460, 8470, 8471, 8472, 8473,
+8480, 8481, 8482, 8490, 8500, 8501, 8503, 8550, 8560). Data
+from patients who underwent pancreaticoduodenectomy were
+then extracted using primary site treatment variables. Cases pathologically staged as node negative (pN0) and single-node positive (pN1a) were identified using the extent-of-disease variables.6 Patients with more than 1 positive node as well as patients
+who experienced 30-day postoperative mortality were excluded
+from further analysis. Tumor T stage was also assigned using SEER
+extent-of-disease variables in accordance with AJCC staging sixth
+edition.20 Demographic information recorded for each patient included age, sex, race, and/or ethnicity (white, black, Asian or Pacific Islander, American Indian or Alaska native, and other).
+
+LYMPH NODE CUT POINT
+AND SURVIVAL ANALYSIS
+We determined the number of lymph nodes examined for both
+the pN0 and pN1a cohorts, including range and frequency. Four
+
+separate analyses were performed to determine the optimal number of nodes to examine after pancreaticoduodenectomy for exocrine cancer of the pancreas. First, an unadjusted univariate
+survival analysis was performed based on lymph node cut points
+(LNCPs) ranging from 2 to 25. Lymph node cut point was defined as whether a threshold number of lymph nodes had been
+examined. This allowed the introduction of the number of lymph
+nodes examined into analysis as a dichotomous variable. For
+example, an LNCP of 15 divides the pN0 cohort into a group
+of patients with fewer than 15 lymph nodes examined and a
+group with 15 or more lymph nodes examined. Overall survival was measured from the date of surgery to the date of death
+or last follow-up. The pN0 cohort was dichotomized with respect to each LNCP, and a pair of Kaplan-Meier survival curves
+was generated. Log-rank comparison was then performed on
+each pair of survival curves to determine the most statistically
+significant survival difference based on maximization of the logrank ␹² statistic.13,21
+To validate the significant results from our univariate survival analysis, the second analysis performed was a multivariate
+Cox proportional hazard regression with overall survival as the
+dependent variable.22 Independent variables included in the model
+were age, sex, T stage, and the number of lymph nodes examined as a dichotomous variable defined as the LNCP. The third
+analysis was a similar Cox proportional hazard regression; however, the number of lymph nodes examined was entered as a continuous independent variable in an attempt to define the survival benefit associated with each additional node examined. Given
+the skewed frequency of the number of nodes examined, a logarithmic transformation of this continuous variable was required.
+To obtain a clinically meaningful interpretation of this regression, we predicted the survival benefit associated with each additional node examined. In predicting the likelihood of survival
+between 2 patients with a differing number of nodes examined,
+the individual predicted hazard ratios (HRs) were subtracted.
+Finally, the fourth analysis recorded the actual number of nodes
+examined in the pN1a cohort to discover a single positive node.
+The pN1a cohort was chosen for analysis because it represents
+the cohort with the smallest burden of nodal metastases. We limited our analysis of this cohort to strictly determining the number of nodes examined to identify the single positive node. By
+plotting the number of nodes examined against the cumulative
+frequency of patients within this cohort, the number of examined nodes necessary to identify 90% of these patients with a single
+positive node was obtained. Of note, we specifically did not analyze survival within this cohort or any other node-positive cohort to avoid the confounding and putative arguments regarding any therapeutic effect of the extent of lymphadenectomy. Our
+study only analyzed survival within the node-negative cohort,
+which should negate any proposed therapeutic effect due to differences in the extent of lymphadenectomy. In other words, removal of more negative nodes should not have a therapeutic effect.
+Data were analyzed using Stata statistical software version
+9 (Stata Corp, College Station, Texas). Statistical significance
+was set at Pⱕ.05.
+RESULTS
+
+Using SEER data from 1988 to 2002, more than 3500 patients who underwent pancreaticoduodenectomy for adenocarcinoma of the pancreas were identified. The descriptive characteristics are listed in Table 1. Median
+age was 64.4 years and 49.3% of the patients were female.
+Using AJCC/UICC sixth edition staging guidelines, approximately 70% of the resected tumors were T3. Thirtythree percent of the cohort were pathologically staged as
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+768
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+node negative (pN0), and 60% of all node-positive patients had only a single node positive for metastatic disease, classified as pN1a disease according to the UICC staging guidelines.
+
+Figure 1). The median number of lymph nodes examined was 7, with a range of 1 to 54 examined nodes.
+In our first analysis, log-rank comparison of univariate Kaplan-Meier survival curves was performed for each
+LNCP (2-25 LNCPs) and demonstrated superior survival always in favor of the group with more nodes examined. Table 2 shows these results for representative
+LNCPs of 5, 10, 15, 20, and 25 examined nodes. An LNCP
+of 15 resulted in the most significant survival difference
+with the largest ␹2 statistic (14.49) and associated P value
+(P =.0001). The resulting Kaplan-Meier survival curves
+based on an LNCP of 15 are shown in Figure 2. The
+median survival for the group of patients with pN0 disease who had 15 or more nodes examined was 27 months,
+whereas the median survival for the group who had fewer
+than 15 nodes examined was 19 months. The difference
+in median survival between these two groups was 8
+months (P =.001).
+The second analysis, a Cox hazard regression, was performed to validate our univariate findings in a multivariate model. An LNCP of 15 was entered into a multivariate model along with T stage, age, and sex. The results
+demonstrate that the LNCP of 15 is a strong independent
+predictor of survival as evidenced by an HR of 0.63 (95%
+confidence interval, 0.49-0.80; P⬍.0001) (Table 3).
+In the third analysis, the Cox regression used the same
+variables as the prior regression but the number of nodes
+examined was entered as a continuous variable. The HR
+for the lymph node variable was 0.88 (95% confidence
+interval, 0.81-0.95; P=.002). Using this HR of 0.88 as the
+proportional survival benefit of each additional node examined, a predictive model was constructed. Figure 3
+depicts the predicted HR plotted against the number of
+nodes examined relative to a patient with pN0 disease
+with 1 node examined. Using this model, the propor-
+
+ANALYSIS OF pN0 COHORT
+In considering the pN0 cohort (n = 1150), a wide range
+and frequency of the number of nodes examined per patient were observed (as depicted in the histogram in
+Table 1. Demographics for Patients Undergoing
+Pancreaticoduodenectomy for Adenocarcinoma
+of Pancreas Cancer
+
+Demographic
+Age, median, y
+Race, No. (%)
+White
+Black
+Asian
+American Indian or
+Alaska native
+Other
+Sex, No. (%)
+Male
+Female
+T stage, No. (%) a
+T1
+T2
+T3
+T4
+
+All Patients
+(N = 3505)
+
+Patients
+With pN0
+Staging
+(n = 1150)
+
+Patients
+With pN1a
+Staging
+(n = 584)
+
+64.4
+
+64.6
+
+63.4
+
+2824 (80.6)
+384 (11.0)
+277 (7.9)
+12 (0.3)
+
+913 (79.4)
+126 (11.0)
+102 (8.9)
+4 (0.3)
+
+468 (80.1)
+73 (12.5)
+40 (6.4)
+2 (0.3)
+
+8 (0.2)
+
+5 (0.4)
+
+1 (0.2)
+
+1778 (50.7)
+1727 (49.3)
+
+562 (48.9)
+588 (51.1)
+
+288 (49.3)
+296 (50.7)
+
+212 (6.0)
+609 (17.4)
+2064 (58.9)
+89 (2.5)
+
+124 (10.8)
+276 (24.0)
+617 (53.7)
+19 (1.7)
+
+21 (3.6)
+90 (15.4)
+386 (66.1)
+12 (2.1)
+
+a
+Accurate T-stage information was available in only 90% of the cohort;
+thus, percentages will not sum to 100%.
+
+150
+
+Patients, No.
+
+100
+
+50
+
+0
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+13
+
+14
+
+15
+
+16
+
+17
+
+18
+
+19
+
+20
+
+21
+
+22
+
+23
+
+24
+
+25
+
+26
+
+27
+
+28
+
+29
+
+30
+
+Lymph Nodes Resected, No.
+
+Figure 1. Number of lymph nodes examined in the pathologically node-negative (pN0) cohort. The median number of lymph nodes examined in the pN0 cohort
+was 7.
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+769
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+Table 2. Univariate Survival Analysis Comparing Lymph Node Cut Points a
+⬍ LNCP
+
+ⱖ LNCP
+
+LNCP
+
+Sample Size,
+No. (%)
+
+Survival,
+Median, mo
+
+Sample Size,
+No. (%)
+
+Survival,
+Median, mo
+
+Survival
+Difference,
+Median, mo
+
+␹² Statistic
+
+P Value
+
+5
+10
+15
+20
+25
+
+403 (35)
+771 (67)
+995 (87)
+1083 (94)
+1123 (98)
+
+19
+19
+19
+20
+20
+
+747 (65)
+379 (33)
+155 (13)
+67 (6)
+27 (2)
+
+20
+22
+27
+30
+22
+
+1
+3
+8
+10
+2
+
+3.17
+7.64
+14.49
+6.46
+3.56
+
+.08
+.006
+.0001
+.01
+.06
+
+Abbreviation: LNCP, lymph node cut point.
+a The LNCP is defined as a threshold number of lymph nodes that dichotomizes the pathologically node-negative (pN0) cohort as to whether this number of
+lymph nodes had been evaluated. This table shows representative LNCPs from 5 to 25 and compares survival between groups of patients based on the LNCP. The
+statistically strongest difference in survival occurred with an LNCP of 15 based on maximization of the log-rank ␹² statistic and P value.
+
+1.00
+
+1.05
+≥15 LNs (n = 155) P < .001
+<15 LNs (n = 995)
+
+1.00
+0.95
+
+Predicted Hazard Ratio
+
+Proportion Surviving
+
+0.75
+
+0.50
+
+0.25
+
+0.90
+0.85
+0.80
+0.75
+0.70
+0.65
+
+0.00
+
+0.60
+0
+
+10
+
+20
+
+30
+
+40
+
+50
+
+60
+
+1
+
+Time, mo
+
+3
+
+5
+
+7
+
+9
+
+11 13 15 17 19 21 23 25 27 29
+
+Lymph Nodes Examined, No.
+
+Figure 2. Kaplan-Meier survival curves of the pathologically node-negative
+(pN0) cohort stratified by a lymph node (LN) cut point of 15.
+
+Table 3. Multivariate Cox Regression of the Pathologically
+Node-Negative Cohort
+Variable
+
+HR (95% CI)
+
+P Value
+
+Age, y
+Sex
+Male
+Female
+T stage
+T1
+T2
+T3
+T4
+LNCP a
+⬍15
+ⱖ15
+
+1.014 (1.007-1.021)
+
+⬍ .0001
+
+1 [Reference]
+1.217 (1.047-1.415)
+
+.01
+
+1 [Reference]
+1.525 (1.144-2.031)
+1.859 (1.426-2.423)
+2.081 (1.162-3.728)
+
+.004
+⬍ .0001
+.01
+
+1 [Reference]
+0.630 (0.494-0.802)
+
+⬍ .0001
+
+Abbreviations: CI, confidence interval; HR, hazard ratio; LNCP, lymph node
+cut point.
+a The LNCP is defined as a threshold number of lymph nodes that
+dichotomizes the pathologically node-negative (pN0) cohort as to whether
+this number of lymph nodes had been evaluated.
+
+tional survival benefit between 2 node-negative patients
+based on the number of nodes examined may be predicted. For example, comparing a patient with pN0 disease who had 1 node examined with a patient who had
+
+Figure 3. Predicted hazard ratio by the number of lymph nodes examined.
+
+15 nodes examined, the relative HR of 0.71 would indicate that the patient who had 15 nodes examined would
+have roughly a 30% increased likelihood of surviving. Furthermore, as shown in Figure 3, the predicted survival
+benefit becomes progressively smaller with an increasing number of nodes examined. If we compare a patient
+who had 15 nodes examined with a patient who had 20
+nodes examined, the model predicts only a 3% increased likelihood of survival based on the difference between predicted HRs.
+ANALYSIS OF THE pN1a COHORT
+The fourth analysis evaluated a cohort of patients who
+had only a single lymph node reported as positive, which
+corresponds to pN1a disease as defined by UICC sixth
+edition staging guidelines. Figure 4 plots the number
+of nodes examined against the cumulative percentage of
+patients in the pN1a cohort and shows that approximately 90% of all single-positive-node disease was found
+after evaluation of 15 or fewer nodes.
+COMMENT
+
+The presence or absence of nodal disease has a major impact on survival following resection of pancreatic can-
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+770
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+100
+90
+80
+70
+
+pN1a Cohort, %
+
+cer. Analogous to studies in gastric and colon cancer, our
+findings indicate that there is an improved survival associated with an increasing number of examined nodes
+within a cohort of pathologically staged node-negative
+patients. While some may argue that the survival benefit resulted from a more extensive surgical resection, this
+line of reasoning does not apply in a patient with truly
+node-negative disease. In other words, removing more
+negative nodes from a patient with truly node-negative
+disease should not provide any therapeutic benefit. Thus,
+the superior survival experienced after examination of
+more nodes is due to the understaging of patients with a
+suboptimal number of lymph nodes examined.
+The number of lymph nodes examined after resection
+of pancreatic cancer depends on many factors, including
+type of specimen, extent of surgery, regional nodes present in a given individual, and technique of the pathologist
+who examines the specimen. We have limited our analysis to include only pancreaticoduodenectomy specimens
+to control for some of these factors, specifically the type
+of specimen and, to some degree, the extent of surgery.
+In our attempt to determine an optimal number of nodes
+to examine to accurately stage node-negative pancreatic cancer after a pancreaticoduodenectomy, we used 4 separate
+but related analyses: (1) survival analysis based on LNCPs;
+(2) validation of univariate survival results with multivariate Cox regression; (3) multivariate predictive modeling;
+and (4) determination of the number of nodes examined
+to identify 90% of the cohort with a single positive node.
+Univariate analysis demonstrated that the most statistically significant improvement in survival occurred
+using an LNCP of 15. Similarly, multivariate analysis demonstrated that the LNCP of 15 was a strong and independent predictor of improved survival, also in favor of
+15 or more nodes evaluated. Furthermore, multivariate
+analysis using the number of nodes examined as a continuous variable allowed for the construction of a model
+predicting the incremental survival benefit associated with
+each additional node examined. Applying this model, we
+have shown that examination of more than 15 nodes provides only a marginal increase in the likelihood of survival. Finally, this point is strengthened on consideration that the vast majority of pN1a disease is found after
+examination of 15 lymph nodes.
+The statistical data described earlier appear to converge on 15 as the optimal number of lymph nodes to
+examine to accurately stage pN0 disease. However, a practical issue is raised as to whether the examination of 15
+lymph nodes is achievable in the majority of pancreaticoduodenectomy specimens. In a publication by the Royal
+College of Pathologists23 outlining standards in the histopathologic analysis of exocrine tumors of the pancreas, it is stated that 10 to 20 nodes should be available
+for examination within a pancreaticoduodenectomy specimen. A large series of resected pancreatic cancers from
+Memorial Sloan-Kettering Cancer Center showed that the
+median number of nodes examined was 15.7 Data from
+a randomized controlled trial from Johns Hopkins Medical Institutions by Yeo et al3 revealed a mean of 16 lymph
+nodes examined from the pancreaticoduodenectomy
+specimens. Of note, 86% of pancreaticoduodenectomies in this series were pylorus preserving. Similarly, in
+
+60
+50
+40
+30
+20
+10
+0
+1
+
+3
+
+5
+
+7
+
+9 11 13 15 17 19 21 23 25 27 29 31 33 35
+
+Lymph Nodes Examined, No.
+
+Figure 4. Number of lymph nodes examined in the cohort with a single
+positive node (pN1a). This curve demonstrates that approximately 90%
+of patients with a single positive node were discovered with examination
+of 15 nodes.
+
+a recent report by Berger et al24 from Fox Chase Cancer
+Center, the median number of nodes examined was 17.
+Given that these numbers were achieved in the absence
+of any benchmark or specific pathologic guidelines, it
+seems reasonable that retrieving 15 lymph nodes from a
+pancreaticoduodenectomy specimen is not only important but also achievable.
+At present, improving the quality of cancer care is a
+focal point of many national organizations. Quality measures and guidelines are being developed and public reporting is already being performed. While further rigorous work is probably needed in this regard, it is essential
+that meaningful measures that will allow for evaluation
+of cancer care and outcome are identified and developed. To this end, our work has identified that evaluating 15 lymph nodes in a node-negative pancreatic carcinoma resection may be considered a quality indicator
+because it is associated with improved survival as a result of more accurate staging. With respect to potential
+as a quality measure, there would be much room for clinical improvement, as the median number of nodes retrieved in this SEER sample was 7 and the percentage of
+cases that did retrieve 15 or more nodes was only 19%.
+This is probably an important quality issue in that there
+is a suboptimal number of nodes examined in more than
+80% of patients staged as pN0. Having a criterion for the
+number of nodes reported is not new, as numerous guidelines have purported that 12 nodes be examined in a nodenegative colon cancer specimen to truly deem the patient node negative.25,26 Moreover, the National Quality
+Forum is currently discussing the adoption of this measure for accountability—which could potentially transform into a pay-for-performance measure. The current
+work may contribute to the body of literature for developing quality measures in pancreatic cancer.
+Our study has several potential limitations. First, as
+with any large database there could be miscoding and inaccurate data, although the SEER program upholds several measures to ensure accuracy and maintains the highest level of certification of data quality and completeness.
+A second limitation is that the SEER program lacks in-
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+771
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+formation about potentially important clinicopathologic factors. Specifically, the SEER program does not provide data on patient comorbidities, margin status, and
+details regarding adjuvant therapy. Finally, we have limited our analysis to only include cancers of the pancreatic head to standardize the type of specimen for pathologic examination. There are 2 primary types of
+pancreaticoduodenectomies performed, pylorus preserving and standard, which involves removal of a portion
+of the distal stomach. The lymph nodes along the lesser
+and greater curve of the stomach would add to the total
+number of nodes for evaluation but would have little clinical relevance. The SEER database does not distinguish
+between these two operations.
+Although it is easy to accept a nihilistic attitude toward staging information faced with such an aggressive
+biology inherent to adenocarcinoma of the pancreas, it
+is important to seek the most accurate staging information against which future therapies can be judged appropriately. One can imagine a trial in which maldistribution of inaccurately staged node-negative patients could
+potentially compromise the results, especially given the
+large differences in median survival demonstrated from
+the LNCP analysis. For example, the Gastrointestinal Tumor Study Group trial27,28 randomized 49 patients, compared adjuvant chemotherapy and radiation therapy with
+observation, and reported an approximate 9-month increase in median survival for patients who received
+adjuvant chemotherapy and radiation therapy. Seventytwo percent of the randomized patients were pathologically staged as node negative. Given the small numbers
+in the Gastrointestinal Tumor Study Group trial, inaccurate staging leading to maldistribution of true nodenegative disease with its associated median survival of
+27 months could have a profound and confounding effect
+on these reported results. Furthermore, in a recently published meta-analysis of randomized adjuvant therapy trials
+for pancreatic cancer, it was noted that roughly 50% of
+all patients enrolled in these trials were considered node
+negative.29 Without standardization and quality measures to ensure accuracy of staging, we will always question whether maldistribution based on inaccurate staging contributed to the trial result.
+In summary, our results demonstrate a significant survival advantage associated with an increasing number of
+nodes examined within a large cohort of patients pathologically staged as pN0 after pancreaticoduodenectomy
+for pancreatic adenocarcinoma. We have attributed this
+difference in survival to understaging. Examination of 15
+or more lymph nodes appears to be a realistic goal in the
+routine staging of pancreas cancer given the average number of nodes examined in large published series of resected pancreatic adenocarcinoma. Taken together, these
+results suggest that the examination of 15 lymph nodes
+may serve as a guideline for the accurate staging of pN0
+pancreas cancer after pancreaticoduodenectomy. The increased accuracy of staging will undoubtedly allow for
+the more precise evaluation of future therapies.
+Accepted for Publication: April 6, 2007.
+Correspondence: James S. Tomlinson, MD, Department of Surgery, Veterans Affairs Greater Los Angeles
+
+Healthcare System, 11301 Wilshire Blvd, Los Angeles, CA
+90073 (james.tomlinson@va.gov).
+Author Contributions: Study concept and design: Tomlinson, Jain, Bentrem, Sekeris, and Ko. Acquisition of data:
+Tomlinson, Jain, Sekeris, and Ko. Analysis and interpretation of data: Tomlinson, Jain, Bentrem, Sekeris, Maggard, Hines, Reber, and Ko. Drafting of the manuscript:
+Tomlinson, Jain, Maggard, and Ko. Critical revision of the
+manuscript for important intellectual content: Tomlinson,
+Bentrem, Sekeris, Hines, Reber, and Ko. Statistical analysis: Tomlinson, Jain, Bentrem, Sekeris, Maggard, and Ko.
+Administrative, technical, and material support: Tomlinson, Jain, and Ko. Study supervision: Tomlinson, Hines,
+Reber, and Ko.
+Financial Disclosure: None reported.
+Previous Presentation: This paper was presented at the
+78th Annual Meeting of the Pacific Coast Surgical Association; February 18, 2007; Kohala Coast, Hawaii; and
+is published after peer review and revision. The discussions that follow this article are based on the originally
+submitted manuscript and not the revised manuscript.
+REFERENCES
+1. Brennan MF. Adjuvant therapy following resection for pancreatic adenocarcinoma.
+Surg Oncol Clin N Am. 2004;13(4):555-566, vii.
+2. Pedrazzoli S, DiCarlo V, Dionigi R, et al; Lymphadenectomy Study Group. Standard vs extended lymphadenectomy associated with pancreatoduodenectomy
+in the surgical treatment of adenocarcinoma of the head of the pancreas: a multicenter, prospective, randomized study. Ann Surg. 1998;228(4):508-517.
+3. Yeo CJ, Cameron JL, Lillemoe KD, et al. Pancreaticoduodenectomy with or without distal gastrectomy and extended retroperitoneal lymphadenectomy for periampullary adenocarcinoma, part 2: randomized controlled trial evaluating survival, morbidity, and mortality. Ann Surg. 2002;236(3):355-368.
+4. Sohn TA, Yeo CJ, Cameron JL, et al. Resected adenocarcinoma of the pancreas,
+616 patients: results, outcomes, and prognostic indicators. J Gastrointest Surg.
+2000;4(6):567-579.
+5. Greene FL, Page DL, Fleming ID, et al, eds. AJCC Cancer Staging Manual. 6th
+ed. New York, NY: Springer; 2002.
+6. Sobin LH, Wittekind C, eds. UICC TNM Classification of Malignant Tumours. 6th
+ed. New York, NY: Wiley-Liss; 2002.
+7. Brennan MF, Kattan MW, Klimstra D, Conlon K. Prognostic nomogram for patients undergoing resection for adenocarcinoma of the pancreas. Ann Surg. 2004;
+240(2):293-298.
+8. Lim JE, Chien MW, Earle CC. Prognostic factors following curative resection for
+pancreatic adenocarcinoma: a population-based, linked database analysis of 396
+patients. Ann Surg. 2003;237(1):74-85.
+9. Geer RJ, Brennan MF. Prognostic indicators for survival after resection of pancreatic adenocarcinoma. Am J Surg. 1993;165(1):68-73.
+10. Allema JH, Reinders ME, van Gulik TM, et al. Prognostic factors for survival after pancreaticoduodenectomy for patients with carcinoma of the pancreatic head
+region. Cancer. 1995;75(8):2069-2076.
+11. Benassai G, Mastrorilli M, Mosella F, Mosella G. Significance of lymph node metastases in the surgical management of pancreatic head carcinoma. J Exp Clin
+Cancer Res. 1999;18(1):23-28.
+12. Schmidt CM, Powell ES, Yiannoutsos CT, et al. Pancreaticoduodenectomy: a 20year experience in 516 patients. Arch Surg. 2004;139(7):718-727.
+13. Smith DD, Schwarz RR, Schwarz RE. Impact of total lymph node count on staging and survival after gastrectomy for gastric cancer: data from a large US population database. J Clin Oncol. 2005;23(28):7114-7124.
+14. Cserni G, Vinh-Hung V, Burzykowski T. Is there a minimum number of lymph
+nodes that should be histologically assessed for a reliable nodal staging of T3N0M0
+colorectal carcinomas? J Surg Oncol. 2002;81(2):63-69.
+15. Wong JH, Johnson DS, Hemmings D, Hsu A, Imai T, Tominaga GT. Assessing
+the quality of colorectal cancer staging: documenting the process in improving
+the staging of node-negative colorectal cancer. Arch Surg. 2005;140(9):881887.
+16. Swanson RS, Compton CC, Stewart AK, Bland KI. The prognosis of T3N0 colon
+cancer is dependent on the number of lymph nodes examined. Ann Surg Oncol.
+2003;10(1):65-71.
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+772
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+17. Ferrone CR, Kattan MW, Tomlinson JS, Thayer SP, Brennan MF, Warshaw AL.
+Validation of a postresection pancreatic adenocarcinoma nomogram for diseasespecific survival. J Clin Oncol. 2005;23(30):7529-7535.
+18. National Cancer Institute. SEER: surveillance, epidemiology, and end results. http:
+//seer.cancer.gov. Accessed January 10, 2006.
+19. Fritz AG, Percy C, Jack A, Sobin LH, Parkin MD, eds. International Classification
+of Diseases for Oncology. 3rd ed. Geneva, Switzerland: World Health Organization; 2000.
+20. Greene FL, Page DL, Fleming ID, et al, eds. AJCC Cancer Staging Handbook. 6th
+ed. Chicago, IL: Springer-Verlag; 2002.
+21. Kaplan EL, Meier P. Nonparametric estimation from incomplete observations.
+J Am Stat Assoc. 1958;53(282):457-481.
+22. Cox D. Regression models and life-tables. J R Stat Soc Ser B. 1972;34(2):187220.
+23. Royal College of Pathologists. Minimum Dataset for the Histopathological Reporting of Pancreatic, Ampulla of Vater and Bile Duct Carcinoma. London, England: Royal College of Pathologists; 2002.
+24. Berger AC, Watson JC, Ross EA, Hoffman JP. The metastatic/examined lymph
+node ratio is an important prognostic factor after pancreaticoduodenectomy for
+pancreatic adenocarcinoma. Am Surg. 2004;70(3):235-240.
+25. Sobin LH, Greene FL. TNM classification: clarification of number of regional lymph
+nodes for pNo. Cancer. 2001;92(2):452.
+26. Nelson H, Petrelli N, Carlin A, et al. Guidelines 2000 for colon and rectal cancer
+surgery. J Natl Cancer Inst. 2001;93(8):583-596.
+27. Kalser MH, Ellenberg SS. Pancreatic cancer: adjuvant combined radiation and
+chemotherapy following curative resection. Arch Surg. 1985;120(8):899-903.
+28. Gastrointestinal Tumor Study Group. Further evidence of effective adjuvant combined radiation and chemotherapy following curative resection of pancreatic cancer.
+Cancer. 1987;59(12):2006-2010.
+29. Stocken DD, Buchler MW, Dervenis C, et al. Meta-analysis of randomised
+adjuvant therapy trials for pancreatic cancer. Br J Cancer. 2005;92(8):13721381.
+
+DISCUSSION
+Anton Bilchik, MD, Santa Monica, California: Dr Ko and his
+colleagues from UCLA [University of California, Los Angeles]
+have presented very provocative data on improving staging accuracy in node-negative pancreas cancer.
+Considering the improvements in survival seen in many cancers including colon, breast, and prostate cancer, it is most disappointing that with over 30 000 new cases of pancreas cancer
+reported a year in the USA [United States of America], there
+are a similar number of deaths. There are several possible
+explanations for this: most patients present with advanced
+disease because of the paucity of symptoms, early screening
+techniques have not been adequately developed nor are they
+cost-effective, few patients are candidates for surgical resection, and systemic therapy is limited.
+In fact, 2 years ago at the national ASCO [American Society of Clinical Oncology] meeting, a prospective randomized
+trial demonstrated that a novel angiogenesis drug was effective for unresectable pancreas cancer. A packed audience applauded, the news hit all the major TV stations. Wall Street was
+very happy. The reality, however, was only a 2-week improvement in survival, but the study was large enough to demonstrate a significant P value. This result was far from impressive
+to the surgeon sitting in the audience. I think we would all be
+criticized heavily if we performed a surgical procedure that improved survival by only 2 weeks.
+Dr Ko and colleagues with the assistance of the RAND group
+are working closely with the ACS [American College of Surgeons] to provide surgical benchmarks that may ultimately impact reimbursement and referrals to centers of excellence. Not
+only is this timely, but we owe it to our patients to apply oncologic principles to every cancer operation we perform. Dr Tomlinson analyzed the SEER database over a 14-year period and
+demonstrated that there was a 25% survival benefit in nodenegative pancreas cancer patients if more than 15 LNs [lymph
+nodes] were removed. Unfortunately, however, this occurred
+
+in only 19% of patients, with the majority of patients having
+fewer than 3 LNs evaluated. I have several questions for the
+authors.
+1. You mentioned that the population studied reflected the
+overall characteristics of the USA. Can you comment on whether
+the majority of Whipples performed were in cities with highvolume medical centers, and if so, was there a difference in the
+number of lymph nodes retrieved?
+2. Your group has previously demonstrated that some of
+the characteristics of the primary tumor are prognostic such
+as degree of differentiation or margin status. Does this still apply when 15 negative lymph nodes are removed?
+3. On the same note, could the number of nodes removed
+merely reflect a difference in the amount of small-bowel mesentery resected rather than the number of peripancreatic nodes,
+which are more likely to be involved?
+4. A recent randomized trial by Yeo et al failed to demonstrate a survival benefit with extended lymphadenectomy in pancreas cancer. This is supported by your study when patients
+with more than 25 lymph nodes had a similar survival to patients with less than 5 nodes examined. Would you define 15
+lymph nodes as an adequate lymphadenectomy or as an extended lymphadenectomy?
+5. You mention that the median number of lymph nodes
+reported at 3 major medical centers was at least 15. Do you think
+this is a consequence of meticulous surgery or more careful
+pathologic evaluation?
+6. Contrary to popular belief, the majority of positive LNs
+are less than 5 mm in size and it is widely recognized that performing 1 section of an LN (standard practice in the USA) is
+likely to miss a metastasis. Do you have designated pancreatic
+pathologists at UCLA and does Dr Reber or Dr Hines ask the
+pathologist to reexamine the specimen if they receive a pathology report with very few lymph nodes?
+7. Finally, do you think stage migration alone explains the
+improvement in survival or do you think other factors may be
+involved such as the resection of undetected micrometastases
+that may be a nidus for recurrence?
+I would like to congratulate Dr Tomlinson for an excellent
+presentation. These findings will add to a number of recent important studies (in both colon and gastric cancer) where the
+resection of lymph nodes was not only important for staging
+but impacted survival as well. The application of oncologic principles to all cancer operations and close collaboration with the
+pathologist will likely improve the selection of patients for chemotherapy and clinical trials.
+Dr Ko: Everyone in the room knows that pay for performance is here and that in the field of surgery, many different
+groups are trying to develop quality performance measures. In
+surgery, however, the surgeons probably should identify what
+are the metrics that will distinguish what is a good surgery from
+a not-so-good surgery. In cancer, the National Quality Forum
+has addressed breast cancer and colorectal cancer and has endorsed a number of measures in each. And, the payers are following suit by using these measures to evaluate us. So, if we are
+going to be evaluated by these measures rather than having somebody else develop them, I think surgeons should figure out what
+we think is important and develop quality measures in these areas.
+Right now, in terms of pancreatic cancer, the main thing
+that is available and is being used regarding quality is the leapfrog measure of hospital volume. However, as I’m sure many
+of you will agree, there should probably be something a little
+more granular for measuring the quality of pancreas cancer care,
+and in that regard, identifying such a measure is what Dr Tomlinson was trying to do.
+As with probably all cancers, staging is a foundation for cancer care. It prognosticates, it helps us determine treatments, and
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+773
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+it categorizes patients when we have trials. Most will agree that
+having an appropriate sample size of lymph nodes is important.
+At this point, I would like to address the issues discussed
+by Dr Bilchik. First, he asked if we are able to tell if the procedures were performed at high-volume centers. The database that
+we used does not have identifiable information about the centers. So, we don’t know if they were performed in a highvolume or low-volume center. There are clearly other databases that one may use to tell volume, but unfortunately, this
+version of SEER does not. I would like to mention that our group
+has examined node retrieval rates in colon cancer by high- and
+low-volume centers. Much to the surprise of many, there was
+little difference in terms of achieving the appropriate number
+of nodes—regardless of volume.
+Dr Bikchik then asked about the importance of degree of
+differentiation and margin status. When we looked at predictors of outcome, once you take node status out of the equation, differentiation is significant. Notwithstanding the difficulty of consistently defining well vs moderate vs poor
+differentiation across the board, when we dichotomized grade
+into 2 groups, there was a statistical association with survival.
+So, it is important but not as important as the nodes. Unfortunately, no large registry has margin status that I know of—so
+we were not able to study that variable.
+The next question was whether the number of nodes reflect the amount of tissue taken with the small-bowel mesentery or whether a pylorus sparing or a standard Whipple would
+affect the node number. Although there is probably not very
+much, if any, small-bowel mesentery taken during a standard
+resection, there is likely a difference in node number for a pylorus sparing vs a standard Whipple. But again, as I was trying
+to say earlier, we are at a point where we are still trying to get
+to the “floor” of quality. We are still trying to get to 12 in colon. Once we get to 12 consistently, we can start identifying
+where these nodes are and whether there is micrometastasis
+or things like that beyond that. I think the same thing holds
+for pancreatic cancer. Let’s start by achieving 15, and then we
+can address the subsequent issues next.
+The next question was whether 15 nodes could be achieved
+in a standard lymphadenectomy or would an extended operation be required. As was discussed, what Dr Tomlinson showed,
+the numbers at Memorial and the numbers at Hopkins meet
+the criteria and they are not performing extended Whipples.
+
+The next question addressed the issue of whether surgery
+or pathology is the key. It’s probably both. Like other cancers,
+the surgeons have to take out the nodes and the pathologist
+has to find them—it’s a 2-part thing.
+The next question was, do you have a designated pancreatic pathologist at UCLA? Yes, we have such a pathologist. There
+is a weekly conference that Dr Hines and Dr Reber run where
+they review the cases and the pathology in a multidisciplinary
+conference. This is helpful for a number of reasons, but for this
+issue, there is constant feedback being provided.
+Finally, Dr Bilchik’s last question was, do you think this is
+stage migration or could it be that we are resecting micrometastases? It could be both, but I’m not certain. For now, I definitely think stage migration is playing a role. Resection of micrometastasis could also be important, but I think it probably
+requires further study to know.
+David R. Byrd, MD, Seattle, Washington: My comment is
+to expand on those by Drs Bilchik and Ko about the importance of the collaboration with the pathologist. I would submit that the highest yield we could have on this whole issue,
+not just with nodal evaluation in patients with pancreatic cancer but with colon, breast, melanoma sentinel nodes, and others, is to formally sit down with the pathologist and our specimens. Using the diagrams similar to those that you saw in this
+presentation, we can show the pathologist where the nodes are
+that we think we have removed, what we are looking for, and
+have a dialogue in person. If everybody in this room did this
+for these diseases and reported back next year what the change
+was in the number of nodes that were found, I think that we
+would see how big an issue it is. If we remain proactive, we
+will keep our credibility with our medical oncology colleagues about our ability both to find nodes and to perform an
+adequate and accurate node dissection. I think it starts with our
+face-to-face dialogue with the pathologist.
+James E. Goodnight Jr, MD, PhD, Sacramento, California: Well said, Dr Byrd. Obviously this concept was pioneered
+by Dr Wong and it has carried forward about adequate staging, but as I listened to this paper, nicely done, I can’t help but
+recall the movie The Deer Hunter. You have spun the barrel 14
+times and it came up negative each time. Do you want to spin
+it the 15th time? My goodness, it’s pretty dramatic.
+Financial Disclosure: None reported.
+
+(REPRINTED) ARCH SURG/ VOL 142 (NO. 8), AUG 2007
+774
+
+WWW.ARCHSURG.COM
+
+©2007 American Medical Association. All rights reserved.
+Downloaded From: http://archsurg.jamanetwork.com/ by a La Trobe University User on 07/05/2016
+
+

@@ -1,10 +1,10 @@
 ---
 name:  jjscatterstats
 title: Scatter Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 

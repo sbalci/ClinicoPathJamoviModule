@@ -1,7 +1,7 @@
 ---
 name:  variablebiplot
 title: Variable Importance Biplot
-menuGroup: OncoPathT
+menuGroup: OncoPathT2
 menuSubgroup: Variable Selection
 menuSubtitle: 'Visualize Variable Contributions to Group Separation'
 version: '0.0.31'

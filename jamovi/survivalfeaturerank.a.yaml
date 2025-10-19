@@ -1,7 +1,7 @@
 ---
 name:  survivalfeaturerank
 title: Survival Feature Ranking
-menuGroup: SurvivalT
+menuGroup: SurvivalT2
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Cox Screening, Biomarker Discovery'
 version: '0.0.31'

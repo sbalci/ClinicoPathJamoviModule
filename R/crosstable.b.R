@@ -52,7 +52,7 @@
 }
 
 # Helper function to validate variable names and detect issues
-.validateVariableNames <- function(original_names, cleaned_names) {
+.validateCrosstableVariableNames <- function(original_names, cleaned_names) {
     issues <- list()
     warnings <- list()
 
@@ -230,19 +230,18 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 mydata <- self$data
                 original_names <- names(mydata)
 
+                # Clean variable names using janitor
+                mydata <- mydata %>% janitor::clean_names()
+                cleaned_names <- names(mydata)
+
                 # Validate variable names and report issues
-                cleaned_names_preview <- janitor::make_clean_names(original_names)
-                validation_results <- .validateVariableNames(original_names, cleaned_names_preview)
+                validation_results <- .validateCrosstableVariableNames(original_names, cleaned_names)
 
                 # Report any critical issues
                 if (length(validation_results$issues) > 0) {
                     stop(paste("Variable name issues detected:",
                               paste(validation_results$issues, collapse = "; ")))
                 }
-
-                # Clean variable names using janitor
-                mydata <- mydata %>% janitor::clean_names()
-                cleaned_names <- names(mydata)
 
                 # Create bidirectional mappings for robust variable handling
                 # original_names_mapping: cleaned_name -> original_name
