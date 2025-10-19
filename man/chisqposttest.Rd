@@ -8,7 +8,7 @@ chisqposttest(
   data,
   rows,
   cols,
-  counts,
+  counts = NULL,
   posthoc = "bonferroni",
   sig = 0.05,
   excl = FALSE,

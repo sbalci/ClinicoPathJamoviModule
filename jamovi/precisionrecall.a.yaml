@@ -1,10 +1,10 @@
 ---
 name: precisionrecall
 title: Precision-Recall Curve
-menuGroup: meddecideT
+menuGroup: meddecideT2
 menuSubgroup: Diagnostic Test Evaluation
 menuTitle: Precision-Recall Curve
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 description:
     main: |

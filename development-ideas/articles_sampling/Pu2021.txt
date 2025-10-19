@@ -1,0 +1,1420 @@
+HPB
+
+https://doi.org/10.1016/j.hpb.2020.08.016
+
+ORIGINAL ARTICLE
+
+Deﬁning a minimum number of examined lymph nodes
+improves the prognostic value of lymphadenectomy in
+pancreas ductal adenocarcinoma
+Ning Pu1,2, Shanshan Gao1,3, Ross Beckman1, Ding Ding1, Michael Wright1, Zhiyao Chen1, Yayun Zhu1,
+Haijie Hu1, Lingdi Yin1, Michael Beckman1, Elizabeth Thompson4, Ralph H. Hruban4, John L. Cameron1,5,
+Michele M. Gage1,5, Kelly J. Lafaro1,5, William R. Burns1,5, Christopher L. Wolfgang1,4,5, Jin He1,5,
+Jun Yu1,5 & Richard A. Burkhart1,5
+1
+
+Division of Hepatobiliary and Pancreatic Surgery, Johns Hopkins University School of Medicine, Baltimore, MD, USA, 2Department of
+General Surgery, 3Department of Interventional Radiology, Zhongshan Hospital, Fudan University, Shanghai, China, 4Department of
+Pathology, The Sol Goldman Pancreatic Cancer Research Center and The Pancreatic Cancer Precision Medicine Program of
+Excellence, and 5Department of Oncology, The Sidney Kimmel Comprehensive Cancer Center, Johns Hopkins University School of
+Medicine, Baltimore, MD, USA
+
+Abstract
+Background: Lymph node (LN) metastasis is associated with decreased survival following resection for
+pancreatic ductal adenocarcinoma (PDAC). In N0 disease, increasing total evaluated LN (ELN) correlates
+with improved outcomes suggesting patients may be understaged when LNs are undersampled. We aim
+to assess the optimal number of examined lymph nodes (ELN) following pancreatectomy.
+Methods: Data from 1837 patients undergoing surgery were prospectively collected. The binomial
+probability law was utilized to analyze the minimum number of examined LNs (minELN) and accurately
+characterize each histopathologic stage. LN ratio (LNR) was compared to American Joint Committee on
+Cancer (AJCC) guidelines.
+Results: As ELN total increased, the likelihood of ﬁnding node positive disease increased. An evaluation
+based upon the binomial probability law suggested an optimal minELN of 12 for accurate AJCC N
+staging. As the number of ELNs increased, the discriminatory capacity of alternative strategies to
+characterize LN disease exceeded that offered by AJCC N stage.
+Conclusion: This is the ﬁrst study dedicated to optimizing histopathologic staging in PDAC using
+models of minELN informed by the binomial probability law. This study highlights two separate cutoffs for
+ELNs depending upon prognostic goal and validates that 12 LNs are adequate to determine AJCC N
+stage for the majority of patients.
+Received 2 April 2020; accepted 21 August 2020
+
+Correspondence
+Richard A. Burkhart, Department of Surgery, The Sidney Kimmel Comprehensive Cancer Center at Johns
+Hopkins Hospital, Halsted 612, 600 N. Wolfe Street, Baltimore, MD 21287, USA. Tel: +1 410 502 5309.
+E-mail: burkhart@jhmi.edu (R.A. Burkhart)
+
+Correspondence
+Jun Yu, Department of Surgery, The Sidney Kimmel Comprehensive Cancer Center at Johns Hopkins
+Hospital, Blalock 656, 600 N. Wolfe Street, Baltimore, MD 21287, USA. Tel: +1 443 287 1902. E-mail:
+jyu41@jhmi.edu (J. Yu)
+
+Introduction
+Pancreatic ductal adenocarcinoma (PDAC) is the third leading
+cause of cancer-related death in the United States, with a cumulative 5-year overall survival (OS) rate that remains less than
+
+HPB 2021, 23, 575–586
+
+9%.1,2 This is largely attributed to tumor biology, as well as
+limitations in all phases of care, including early diagnosis and a
+lack of effective systemic therapies.3 In 2018, the 8th edition of
+the American Joint Committee on Cancer (AJCC) TNM Staging
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+576
+
+Manual was released with revised N staging guidelines that
+convey greater prognostic accuracy for patients with resected
+PDAC.4,5 Patients with disease in lymph nodes (LNs) are newly
+divided into two groups. In N1 disease, 1–3 LNs contain metastatic foci of disease and in N2 disease there are more than 3
+involved LNs identiﬁed.4 This updated staging system has been
+validated, relative to the 7th edition staging guidelines in PDAC,
+in an analysis across several high-volume PDAC centers.6
+An accurate prognostic assessment that relies upon the number
+of positive lymph nodes is inherently dependent on the total
+number of examined lymph nodes (ELN) in a given specimen. The
+techniques of surgical lymphadenectomy and histopathologic
+specimen dissection both clearly play a role. Nevertheless, the use of
+a minimum number of lymph nodes examined has been suggested
+as a surrogate marker of quality control to accurately stage patients.7,8 The College of American Pathologists recommends that a
+minimum of 12 LNs be examined at the time of pancreaticoduodenectomy (PD). These guidelines are based upon literature that
+retrospectively suggests a minimum number of ELNs (minELN)
+that ranges between 12 and 17 for a pancreatic head tumor and at
+least 20 for a body and tail carcinoma.9–11 The biologic rationale for
+a disparate number of ELNs for head tumors, as opposed to body or
+tail tumors, and accounts for such a broad range of minELN remains obscured. Taken in aggregate, undersampling of LNs remains
+a potential error that may impact prognosis.
+One alternative prognostic strategy proposed by Berger and
+colleagues is using the positive lymph node ratio (LNR) as an
+adjunct to AJCC N stage.12 Support has grown for an expanded
+utilization of LNR to accurately characterize post-surgical
+prognosis.11,13,14 LNR has proven to be a valuable indicator for
+risk stratiﬁcation and survival prediction in a variety of malignancies, including gastric cancer, rectal cancer, esophageal
+cancer, breast cancer, and melanoma.15–19 The role of the total
+number of ELNs required to accurately characterize LNR needs
+to be further investigated.
+The purpose of this study is to critically evaluate the impact of
+the number of ELNs on the prognostic capacity of AJCC N
+staging and LNR, and to identify the optimal value of minELN
+using a novel modeling technique based upon the binomial
+probability law. This approach is particularly well suited for use
+in evaluating lymphatic metastases in cancer patients for three
+core reasons. First, the pathologic evaluation of lymph nodes for
+disease involvement can be viewed as a series of repeated investigations or tests (i.e. each node is evaluated separately).
+Second, these repeated tests can have just two discrete outcomes
+(i.e. metastases identiﬁed versus no metastases identiﬁed). Lastly,
+the evaluation of each lymph node is done independently such
+that the ﬁndings of one test (lymph node #1 for example) does
+not impact the outcome for the next test (lymph node #2 is
+evaluated independently). In this work, prospectively collected
+histopathologic data are utilized alongside this modeling technique to derive a proposed minELN required for optimal histopathologic staging in PDAC. These techniques are applied in
+
+HPB 2021, 23, 575–586
+
+the context of optimizing minELN for accurate determination of
+N stage and, separately, LNR.
+
+Methods
+Patient population and data source
+Clinicopathologic data were prospectively collected for all patients undergoing pancreatectomy at Johns Hopkins Hospital
+(JHH) between January 2000 and November 2018. Patients with
+a ﬁnal diagnosis of PDAC were enrolled. Patients who received
+neoadjuvant therapies before surgery were excluded as the
+impact of neoadjuvant therapy on the prognostic value of LN
+evaluation remains unclear and requires dedicated study.20
+Demographic and clinical data including age, gender, medical
+history (hypertension, diabetes, and hyperlipidemia), and adjuvant chemotherapy were collected. Pathologic details included
+tumor grade, presence of perineural or lymphovascular invasion,
+margin status, examined positive lymph nodes, total ELN, and
+tumor size.
+Lymph node assessment and standard protocol
+Surgical resection included en bloc extirpation of the locoregional draining lymph node basins. Pathologists dissected all
+peripancreatic soft tissues and grossly identify lymph node
+candidates to be submitted for histologic examination. As an
+institutional standard, a second pathologist or pathology assistant was required to repeat the dissection of all available tissues if
+fewer than 12 nodes were grossly identiﬁed by the ﬁrst. There
+was no institutional standard deﬁning a maximal number of LN
+candidates identiﬁed during the course of tissue dissection. Each
+candidate node was ﬁxed, sectioned and stained with hematoxylin and eosin for microscopic evaluation. Each node was
+assessed for tumor spread and deﬁned as a positive node in the
+event of ﬁnding adenocarcinoma cells, of any size or number,
+within the identiﬁed nodal tissue.
+Treatment strategy and follow-up
+Patients enrolled in this study underwent a surgery-ﬁrst approach
+to PDAC with perioperative outcome measures captured prospectively.21–23 Adjuvant chemotherapy regimens were broadly
+deﬁned as FOLFIRINOX or modiﬁed-FOLFIRINOX (5ﬂuorouracil, leucovorin, oxaliplatin, and irinotecan), singleagent therapies (capecitabine or gemcitabine alone), or
+gemcitabine-based regimens (predominately gemcitabine and
+nab-paclitaxel). Oncologic outcomes were followed through July
+2019. OS was calculated from the date of surgical operation. For
+actuarial survival assessment, patients were censored at the last
+follow-up date. The date of death was obtained from medical
+records, local obituary search or the Social Security Death Index.
+Statistical analysis
+LNR was derived by dividing the total number of positive lymph
+nodes by the number of ELNs. This ratio was expressed as the
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+577
+
+probability of metastasis for each node (a value between zero and
+one) and quartile classiﬁcation of LNR was performed to identify
+unique points of inﬂection with X-tile (Yale University, New
+Haven, CT, USA).24 The probability to detect at least one metastatic LN in a node-positive patient was modeled according to
+the binomial probability law, formulated as11,25:
+P = 1 − (1 − p)n
+
+In this formula, p is the LNR value, n is the number of ELN
+and P represents the probability of detecting at least 1 positive
+lymph node in a node-positive patient. The minELN was then
+deﬁned as the cutoff of LN yield consistent with a 95%
+probability to detect at least 1 positive lymph node (P = 95%).
+Kaplan –Meier survival curves were constructed using R
+version 3.5.2 (Bell Laboratories, Murray Hill, NJ). Actuarial
+differences were evaluated with log-rank testing. A Cox
+proportional-hazards regression model was used for univariate
+and multivariate analyses. Continuous variables were expressed
+as medians and compared using the Mann–Whitney U test or
+Kruskal –Wallis test, as appropriate. Categorical variables were
+presented as frequencies and percentages, and analyzed by
+Pearson Chi-square test, or Fisher’s exact test, as appropriate.
+Receiver operating curves are created in R and interpreted
+using an area under the curve (AUC) analysis. Statistical signiﬁcance was accepted in a 2-tailed analysis with a p value
+<0.05.
+
+Results
+Patient characteristics and nodal status according to
+updated AJCC guidelines
+Over nearly two decades, 1837 patients met inclusion criteria.
+The median age was 68 years (IQR 60–75) and 51.9% were male.
+Hypertension and diabetes mellitus were common comorbid
+medical conditions. Nodal stage (both AJCC and LNR) was
+associated with the surgical procedure performed, tumor grade,
+surgical margin, perineural invasion, lymphovascular invasion
+and tumor size (Table 1, Supplementary Tables 1 and 2). Patients
+who underwent PD were more likely to have positive nodes,
+higher N stage and a higher LNR stage than those who had distal
+pancreatectomy (DP). The median number of ELN for the entire
+cohort was 19 (IQR 14–26). In this surgery-ﬁrst cohort, lymph
+node metastasis was common (76.3%). The median number of
+ELNs in patients with positive lymph nodes was 20 and the
+median number of positive nodes found per patient was 3. The
+median number of ELNs in node-negative patients was 18
+(p < 0.001).
+An evaluation of N stage (AJCC 8th edition) demonstrates that
+23.7% patients were classiﬁed as N0, 40.0% patients as N1 (1–3
+nodal metastasis) and 36.3% patients as N2 (>3 nodal metastasis). Clinicopathologic features stratiﬁed by N staging are
+presented in Supplementary Table 1. The number of ELNs was
+
+HPB 2021, 23, 575–586
+
+found to be higher for patients with N2 disease (21) versus N0
+and N1 disease (18, p < 0.001). In this cohort, the median
+number of positive nodes was 6 (IQR 5–9). These data support
+the notion that patients with N2 disease typically have had a
+greater number of ELNs.
+Evaluating LNR as a method to reduce errors from
+inadequate LN sampling
+To mitigate the dependence of accurate LN staging on adequate
+total ELN, some studies have suggested the use of LNR. In our
+cohort, the median LNR was 0.118 (IQR 0.028–0.261). In the
+node-positive patients, the median LNR in this study was 0.227.
+Using X-tile, LNR was stratiﬁed into four subgroups with the
+proposed nomenclature LNR0 (LNR = 0), LNR1
+(0 < LNR  0.1), LNR2 (0.1 < LNR  0.3) and LNR3
+(0.3 < LNR  1). The median number of ELNs across prognostic
+subgroups varied signiﬁcantly from LNR0, 1, 2, to 3, with 18.0
+(IQR 13.0–23.0), 23.0 (IQR 16.0–31.0), 20.0 (IQR 15.5–26.0)
+and 17.0 (IQR 13.0–22.0), respectively. These data suggest that
+undersampling of peripancreatic nodes, a proposed factor of N
+stage migration in the AJCC system may similarly contribute to
+LNR quartile groupings as well. The clinicopathologic characteristics according to LNR staging are displayed in
+Supplementary Table 2.
+Deﬁning a minimum number of ELN for appropriate
+nodal staging
+Applying the binomial probability function to discriminate between N0 and N1/N2 with 95% conﬁdence, the minELN needed
+in PDAC specimens was 12 (binomial law calculation of 11.6).
+When this theory was applied to a hypothetical patient with only
+one metastatic node expected (and a LNR cutoff value of 0.1, i.e.
+low burden metastases), the model suggests that the minimum
+number of lymph nodes examined to reach a 95% probability of
+detection was 29 (binomial law calculation 28.4). The discrepancy between the minELN to detect any positive node for the
+average patient (12) and the minELN for a patient with only one
+node expected to be positive (29) was driven by the signiﬁcant
+number of patients found to have greater than one positive node.
+In keeping with this model, as the predicted LNR increased to
+0.3, reﬂecting poorer disease biology and more frequent detection of lymphatic spread, the number of ELNs to reach 95%
+probability of accurate characterization decreased to 9 (binomial
+law calculation 8.4).
+Oncologic outcomes and cohorting based on ELN
+thresholding
+The median OS of the entire cohort was 21.0 months and the 1-,
+3- and 5-year OS rates were 73.3%, 29.3%, and 16.3%, respectively. In patients with node negative disease, the median OS was
+no different with fewer than 12 ELNs when compared to 12 or
+more ELNs (35 v. 38 months). With node-positive disease, the
+median OS of patients with less than 12 ELNs was signiﬁcantly
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+578
+
+Table 1 Clinicopathologic data stratiﬁed by nodal status
+
+Parameters
+
+Total (N [ 1837, %)
+
+Node-negative (n [ 436, %)
+
+Node-positive (n [ 1401, %)
+
+Age (years)
+
+0.027
+
+65
+
+749 (40.8)
+
+158 (36.2)
+
+591 (42.2)
+
+>65
+
+1088 (59.2)
+
+278 (63.8)
+
+810 (57.8)
+
+Female
+
+884 (48.1)
+
+225 (51.6)
+
+659 (47.0)
+
+Male
+
+953 (51.9)
+
+211 (48.4)
+
+742 (53.0)
+
+No
+
+1081 (58.8)
+
+256 (58.7)
+
+825 (58.9)
+
+Yes
+
+756 (41.2)
+
+180 (41.3)
+
+576 (41.1)
+
+No
+
+1418 (77.2)
+
+333 (76.4)
+
+1085 (77.4)
+
+Yes
+
+419 (22.8)
+
+103 (23.6)
+
+316 (22.6)
+
+No
+
+1782 (97.0)
+
+421 (96.6)
+
+1361 (97.1)
+
+Yes
+
+55 (3.0)
+
+15 (3.4)
+
+40 (2.9)
+
+PD
+
+1472 (80.1)
+
+292 (67.0)
+
+1180 (84.2)
+
+DP
+
+264 (14.4)
+
+109 (25.0)
+
+155 (11.1)
+
+TP
+
+101 (5.5)
+
+35 (8.0)
+
+66 (4.7)
+
+81 (4.4)
+
+35 (8.0)
+
+46 (3.3)
+
+Gender
+
+0.096
+
+Hypertension
+
+0.950
+
+Diabetes
+
+0.642
+
+Hyperlipidemia
+
+0.531
+
+Surgery type
+
+<0.001
+
+Tumor grading
+Well
+
+<0.001
+
+Moderate
+
+998 (54.3)
+
+258 (59.2)
+
+740 (52.8)
+
+Poor and undifferentiated
+
+758 (41.3)
+
+143 (32.8)
+
+615 (43.9)
+
+563 (30.6)
+
+132 (30.3)
+
+431 (30.8)
+
+Chemotherapy
+No
+
+P value
+
+0.160
+
+Yes
+
+1005 (54.7)
+
+228 (52.3)
+
+777 (55.5)
+
+Unknown
+
+269 (14.6)
+
+76 (17.4)
+
+193 (13.8)
+
+Margin
+
+<0.001
+
+R0
+
+1329 (72.3)
+
+376 (86.2)
+
+953 (68.0)
+
+R1
+
+508 (27.7)
+
+60 (13.8)
+
+448 (32.0)
+
+Perineural invasion
+
+<0.001
+
+No
+
+180 (9,8)
+
+85 (19.5)
+
+95 (6.8)
+
+Yes
+
+1634 (88.9)
+
+342 (78.4)
+
+1292 (92.2)
+
+Unknown
+
+23 (1.3)
+
+9 (2.1)
+
+14 (1.0%)
+
+Lymphovascular invasion
+
+<0.001
+
+No
+
+681 (37.1)
+
+309 (70.9)
+
+Yes
+
+1010 (55.0)
+
+100 (22.9)
+
+372 (26.6)
+910 (65.0)
+
+Unknown
+
+146 (7.9)
+
+27 (6.2)
+
+119 (8.5)
+
+2 cm
+
+356 (19.4)
+
+136 (31.2)
+
+220 (15.7)
+
+>2, 4 cm
+
+1156 (62.9)
+
+261 (59.9)
+
+895 (63.9)
+
+>4 cm
+
+325 (17.7)
+
+39 (8.9)
+
+286 (20.4)
+
+Tumor size
+
+<0.001
+
+Bold = P value meets deﬁnition for statistical signiﬁcance.
+
+HPB 2021, 23, 575–586
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+579
+
+Figure 1 Kaplan–Meier curves showing overall survival for patients with (a and b) fewer than 12 and (c and d) 12 or more examined lymph nodes.
+
+The better predictive value for prognosis of (e) LNR staging showed by receiver operating characteristic curves. LNR, lymph node ratio
+
+HPB 2021, 23, 575–586
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+580
+
+different to those with 12 or more ELNs (16 v. 19 months,
+P = 0.015). N stage determination (N1 v. N2) was accurate in
+stratifying oncologic outcomes even when ﬁnding fewer than 12
+ELNs (19 v. 13 months, P = 0.036; Fig. 1a). The use of LNR in
+this subgroup did not add prognostic value (Fig. 1b). As the
+number of ELNs increase to 12 or more, the prognostic value of
+N stage was maintained (Fig. 1c) and an additional prognostic
+
+value emerges that supports LNR cohorting (Fig. 1d). When
+prognostic value was assessed using an AUC analysis, the LNR
+appears marginally superior to N stage (0.637 versus 0.621,
+P < 0.001, Fig. 1e; Supplementary Fig. 1A and B). Notably here,
+however, the AUC value failed to approach values typically seen
+when optimal modeling thresholds are reached (typically 0.8 and
+higher).
+
+Table 2 The univariate and multivariate analysis for overall survival in the entire cohort
+
+Parameters
+
+No. of patients (n, %) OS
+Univariate
+P value
+
+Age (years)
+
+Multivariate
+Hazard ratio
+P value (N stage) (95% CI)
+
+Multivariate
+Hazard ratio
+2 P value (LNR) (95% CI)
+
+0.002
+
+65
+
+749 (40.8)
+
+>65
+
+1088 (59.2)
+
+Tumor grading
+
+–
+
+Ref.
+
+Ref.
+
+0.001
+
+1.202 (1.080–1.338) 0.001
+
+1.204 (1.082–1.340)
+
+–
+
+Ref
+
+<0.001
+–
+
+Well
+
+81 (4.4)
+
+Moderate
+
+998 (54.3)
+
+0.014
+
+1.427 (1.073–1.897) 0.008
+
+1.468 (1.104–1.952)
+
+Poor and undifferentiated 758 (41.3)
+
+<0.001
+
+1.888 (1.415–2.519) <0.001
+
+1.940 (1.453–2.591)
+
+Chemotherapy
+
+<0.001
+
+No
+
+563 (30.6)
+
+–
+
+Ref.
+
+Yes
+
+1005 (54.7)
+
+<0.001
+
+0.496 (0.441–0.557) <0.001
+
+0.501 (0.446–0.563)
+
+Unknown
+
+269 (14.6)
+
+0.189
+
+0.897 (0.763–1.055) 0.135
+
+0.884 (0.751–1.039)
+
+Margin
+
+–
+
+Ref.
+
+<0.001
+
+R0
+
+1329 (72.3)
+
+–
+
+Ref
+
+R1
+
+508 (27.7)
+
+<0.001
+
+1.325 (1.180–1.486) <0.001
+
+Perineural invasion
+
+–
+1.302 (1.159–1.462)
+
+<0.001
+
+No
+
+180 (9,8)
+
+–
+
+Ref
+
+Yes
+
+1634 (88.9)
+
+<0.001
+
+1.603 (1.304–1.970) <0.001
+
+1.550 (1.261–1.905)
+
+Unknown
+
+23 (1.3)
+
+0.348
+
+1.290 (0.758–2.193) 0.321
+
+1.308 (0.769–2.224)
+
+LVI
+
+–
+
+<0.001
+
+No
+
+681 (37.1)
+
+–
+
+Ref
+
+Yes
+
+1010 (55.0)
+
+0.045
+
+1.135 (1.003–1.284) 0.021
+
+1.155 (1.022–1.306)
+
+Unknown
+
+146 (7.9)
+
+0.241
+
+1.139 (0.916–1.416) 0.223
+
+1.144 (0.921–1.422)
+
+Tumor size
+
+–
+
+<0.001
+
+2 cm
+
+356 (19.4)
+
+–
+
+Ref.
+
+>2, 4 cm
+
+1156 (62.9)
+
+0.001
+
+1.269 (1.102–1.462) 0.001
+
+1.266 (1.099–1.459)
+
+>4 cm
+
+325 (17.7)
+
+<0.001
+
+1.650 (1.384–1.966) <0.001
+
+1.632 (1.369–1.946)
+
+N stage
+
+<0.001
+
+0
+
+436 (23.7)
+
+–
+
+Ref
+
+1
+
+734 (40.0)
+
+<0.001
+
+1.308 (1.128–1.516)
+
+2
+
+667 (36.3)
+
+<0.001
+
+1.992 (1.698–2.337)
+
+LNR stage
+0
+
+–
+
+<0.001
+–
+
+436 (23.7)
+
+Ref
+
+1
+
+414 (22.5)
+
+0.034
+
+1.195 (1.013–1.409)
+
+2
+
+613 (33.4)
+
+<0.001
+
+1.633 (1.398–1.908)
+
+3
+
+374 (20.4)
+
+<0.001
+
+2.091 (1.753–2.494)
+
+Bold = P value meets deﬁnition for statistical signiﬁcance.
+
+HPB 2021, 23, 575–586
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+581
+
+Prognostic value of nodal assessment and impact of
+ELN
+Both univariate and multivariate analysis showed that the AJCC
+N stage and the proposed LNR staging guidelines were useful as
+independent prognostic biomarkers for OS (Table 2,
+Supplementary Fig. 2A–C). As guided by our analysis above, we
+focused next on an evaluation of nodal staging systems as the
+number of ELN reaches a threshold of 29. Similar to other
+patient cohorts, the median OS of patients with nodal metastasis
+was signiﬁcantly shorter than those without nodal metastasis (23
+vs. 41 months, P < 0.001; Fig. 2a). The N stage subgrouping
+maintained prognostic signiﬁcance in these high ELN patients
+(Fig. 2b). The LNR proved to be similarly valuable in these high
+ELN patients with median OS varying between 13 months for
+
+LNR3 to 41 months in LNR0 (Fig. 2c). When evaluating prognostic capacity using the AUC model, the AJCC N slightly
+outperformed LNR staging (Fig. 2d). Again here the AUC value
+did not approach 0.8 or above.
+When the number of ELNs was in the range of 9–29, the value
+of LNR appeared marginally superior to AJCC N staging by AUC
+analysis (Fig. 3a, values below 0.8). The superiority of the LNR
+strategy was, however, driven by patients with relatively high
+LNR burden. AJCC N stage cutoffs, for example, demonstrated a
+median OS between 16, 23 and 35 months, for N2, N1 and N0
+disease respectively (P < 0.001; Fig. 3b). When the LNR was
+examined, the median OS between each LNR stage maintained
+statistical signiﬁcance and provided additional prognostic data
+for high LN positive patients (Fig. 3c).
+
+Figure 2 Kaplan–Meier curves showing worse overall survival for patients with (a) positive lymph node metastasis or (b) higher AJCC N stage, (c)
+
+but no difference in higher LNR staging, when the examined lymph nodes reach a threshold of 29. Marginally better predictive value for
+prognosis of (d) AJCC N stage showed by receiver operating characteristic curves. AJCC, American Joint Committee on Cancer; LNR, lymph
+node ratio
+
+HPB 2021, 23, 575–586
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+582
+
+Figure 3 Improved predictive value for prognosis of (a) LNR staging showed by receiver operating characteristic curves. Kaplan–Meier curves
+
+showing worse overall survival for patients with (b) higher AJCC N stage or (c) higher LNR staging when the number of examined lymph nodes in
+the range of 9–29. AJCC, American Joint Committee on Cancer; LNR, lymph node ratio
+
+When the number of ELN was 9 or fewer, the value of utilizing
+LNR as an alternative to AJCC N stage was no longer maintained.
+In this cohort, neither AJCC N stage (speciﬁcally with N1 and
+N2, P = 0.139; Fig. 4a) nor LNR staging demonstrated statistical
+signiﬁcance (Fig. 4b). Only lymph node status (positive or
+negative) showed a signiﬁcant prognostic value (P = 0.003;
+Fig. 4c).
+
+Discussion
+The prognostic value of lymph node metastases in resected
+PDAC remains a cornerstone of histopathologic staging of each
+patient’s disease.8,26,27 Nevertheless, the minELN required during
+
+HPB 2021, 23, 575–586
+
+pathologic evaluation to accurately characterize N stage of disease remains an area of debate. Most prior work, for example, has
+focused on comparing AJCC N stage with LNR while noting
+sampling bias as a limitation in the work. Herein, we utilize a
+foundational concept of probability theory, the binomial probability law, to underpin a novel analysis of LN staging in PDAC
+and address the limitations of prior work directly. Our data
+conﬁrm that a larger number of ELNs is associated with an
+increased N stage and support the notion that understaging may
+be a source of stage migration in PDAC.
+As work continues in efforts to ﬁnd consensus on minELN, the
+effects of administering neoadjuvant therapies remains similarly
+controversial. Arrington and colleagues reviewed their
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+583
+
+Figure 4 Kaplan–Meier curves showing no signiﬁcant difference in overall survival for patients with (a) higher AJCC N stage, (b) higher LNR
+
+staging when ELNs are 9 or fewer. LN positive disease (versus LN negative) when ELN are 9 or fewer retains prognostic value (c)
+
+experience in a mixed population, with some receiving neoadjuvant therapy, and concluded that 18 LNs were required to
+capture 90% of cases with any nodal metastasis.28 This ﬁnding
+exceeds the current recommendations and may be difﬁcult to
+generalize to centers in which dedicated pancreatic pathologists
+are not available. We have found that, in the absence of neoadjuvant therapy, 12 nodes are required according to binomial
+probability modeling to accurately characterize AJCC N0 versus
+N1/N2 in 95% of patients. This ﬁnding supports the College of
+American Pathologists’ recommendation that a minimum of 12
+lymph nodes should be sampled.29 Our data do suggest, however,
+that understaging when 12 lymph nodes are examined may occur
+in as many as one in twenty patients and identifying the patient
+cohort with just one node positive may require more ELNs.
+Similarly, our data suggest that the minELN may vary based
+HPB 2021, 23, 575–586
+
+upon the type of surgical resection performed. While as few as 12
+ELN may be adequate for patients undergoing pancreaticoduodenectomy, as many as 18 are modeled to be required in patients
+undergoing distal pancreatectomy and splenectomy. The work
+done here using this novel method conﬁrms prior retrospective
+analysis suggesting the minELN is 12–15 in resected pancreatic
+head carcinoma and as many as 20 in pancreatic body/tail
+carcinoma.9,11
+The use of LNR, as opposed to AJCC N stage, has been proposed as a tractable strategy to mitigate the inﬂuence of variable
+ELN sampling on ﬁnal N stage assessment.30,31 Berger (12) and
+Pawlik (32) each reported on the relative value of LNR as
+prognostic biomarkers.12,32,33 Subsequent studies showed excellent discrimination of LNR in OS.8,34–36 Previously, we also reported that LNR could be pivotal prognostic predictor for
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+584
+
+resected patients with an analysis of patients from the Surveillance, Epidemiology, and End Results (SEER) database and
+proposed a nomogram containing LNR as a superior prognostic
+model with excellent performance in discrimination and risk
+stratiﬁcation.7 The effect of total number of ELN on LNR,
+however, is a concept that has not previously been investigated.
+Herein we demonstrate that the minELN required when using a
+LNR ratio approach is, in fact, greater than the number needed
+to conﬁdently determine patients as AJCC Stage N1 (as opposed
+to N0). When contemplating a change from the AJCC N stage
+classiﬁcation to one based upon LNR, it is important to note that
+the relative value of the proposed change is impacted by other
+markers of prognosis such as surgical margin status, tumor size
+(T-stage), tumor grade, and perineural or lymphovascular invasion. Thus, as the incidence of other poor prognostic features
+increases the relative value of LNR over simple N stage determination may be diminished.37–39
+Most prior work focused on the role of either AJCC N stage or
+LNR in predicting survival with an eye towards generalization in
+the absence of consensus regarding the minELN. We have utilized principles of binomial distribution to derive an optimal
+minELN in both AJCC N staging and LNR determination. As
+expected, the minELN value is dependent, in part, on the staging
+system selected (AJCC N stage versus LNR) and the expected
+LNR in a given population. The proposed LNR system is internally validated using our clinical cohort in an actuarial survival
+analysis. Our ﬁndings suggest that LNR is superior to AJCC N
+stage in discriminating survival after resection for PDAC in most
+patients. This includes patients who have a large range of ELNs
+(>9 but <29) on ﬁnal pathologic analysis. When the number of
+ELN 29, the power of LNR staging was diminished when
+compared to AJCC N stage, and when fewer than 9 LNs were
+available for analysis, simple nodal status (N0 v. N1) may be the
+better choice.
+There are several notable limitations that are inherent to this
+work. These data were analyzed retrospectively from a single
+center’s prospectively collected database and are likely not generalizable to all cohorts. The time period over which these data were
+collected, nearly two decades, also exposes the dataset to limitations with regards to the routine use and type of adjuvant chemotherapies administered. A multicenter, controlled, prospective
+study may be required to ultimately conﬁrm these ﬁndings and
+establish a prospectively derived value for minELN across the
+population. The LNR values derived from our X-tile analysis may
+not be applicable following neoadjuvant therapy. Owing to the
+controversy in neoadjuvant therapy for resectable PDAC and
+challenges in identifying a large number of lymph nodes in the
+specimen after neoadjuvant therapy, another speciﬁc assessment
+for PDAC patients with neoadjuvant therapy is ongoing. Importantly, the bias of both surgeons and pathologists in harvesting
+LNs for assessment cannot be overcome in this retrospective work.
+As an example, it may be appropriate to alter the LN harvest
+performed during pathologic grossing based upon factors such as
+
+HPB 2021, 23, 575–586
+
+obvious and bulky lymphadenopathy versus those with microscopic nodal tissues. The generalizability of this approach is also
+limited by the practical difﬁculty of reaching a cutoff of 12 ELNs in
+many pancreatic specimens. This limitation appears to be greater
+in patients who proceed to the operating room following neoadjuvant therapies and should be the focus of future work.
+Finally, an additional assumption in this work was inherent to
+the mathematical model utilized, namely, the assumption that
+any lymph node has an equal probability of being positive as any
+other for each speciﬁc patient. This assumption is contrary to the
+principles established in several other disease sites (such as breast
+cancer or melanoma) where the concept of a sentinel lymph
+node carrying the greatest prognostic value has been validated.
+Here we look to the current discussion in the literature, and in
+practice, regarding the optimal surgical lymph node dissection
+during pancreatectomy and the technical capacity to identify a
+sentinel node in PDAC. First, in contrast to breast cancer, it does
+not appear that sentinel node techniques would be a tractable
+method to address the remaining questions that our computational model poses.40 As the modern high-volume surgical
+setting matured, the performance of an extended lymphadenectomy in the retropancreatic soft tissues was found to be safe
+but added no oncologic beneﬁt and is not currently recommended.41,9 Nevertheless, outcomes were not cohorted according to LN status in this retroperitoneal space. With modern
+chemotherapeutics, nodal spread to the retroperitoneal tissues,
+particularly station 16 nodes, appears to confer a particularly
+poor prognosis.42 It remains to be seen if the indexed inclusion of
+these nodes speciﬁcally, or others clearly outside the regional
+nodes recommended by expert consensus, would alter our
+analysis here.
+
+Conclusion
+Accurate characterization of nodal disease, whether AJCC N
+stage designation or determination of a LNR, remains a
+cornerstone of modern oncologic care and informs postsurgical
+prognosis-based decision making. We present a novel approach
+to modeling lymph node metastasis based upon the binomial
+probability law in order to evaluate the frequency with which
+patients may be understaged according to current guidelines in
+patient care. In modeling the burden of disease in patients undergoing a surgery-ﬁrst approach, we have derived the minELN
+required for accurate characterization of AJCC N stage in
+resected PDAC. Twelve LNs are required, at a minimum, to
+capture 95% of patients with N1 disease. As the number of ELNs
+increased, the discriminatory capacity of alternative strategies to
+characterize LN disease burden exceeded that offered by AJCC N
+stage. Speciﬁcally, the LNR was a powerful prognostic staging
+system when ELN value was between 9 and 29. When the ELN
+count exceeded 29, the accuracy and performance of AJCC N
+stage was marginally superior to LNR. When fewer than 9 LNs
+were available for analysis, simple positive or negative LN status
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+585
+
+was the better choice. Ultimately, these data support the current
+recommendations from the College of American Pathologists
+that 12 LNs are required for adequate nodal staging in PDAC.
+Finally, this work lays out a method for derivation of minELN
+that relies upon a probability-based algorithm. This model may
+be utilized in future to derive the minELN value as the shift
+towards neoadjuvant therapy continues and paradigms of clinical
+care change.
+
+9. Tol JA, Gouma DJ, Bassi C, Dervenis C, Montorsi M, Adham M et al.
+(2014 Sep) Deﬁnition of a standard lymphadenectomy in surgery for
+pancreatic ductal adenocarcinoma: a consensus statement by the International Study Group on Pancreatic Surgery (ISGPS). Surgery 156:
+591–600.
+10. Slidell MB, Chang DC, Cameron JL, Wolfgang CL, Herman JM,
+Schulick RD et al. (2008 Jan) Impact of total lymph node count and
+lymph node ratio on staging and survival after pancreatectomy for
+pancreatic adenocarcinoma: a large, population-based analysis. Ann
+Surg Oncol 15:165–174.
+
+Acknowledgements
+RAB is supported by the National Institutes of Health/National Cancer Institute (K08CA248710) and a Stand Up To Cancer–Lustgarten Foundation
+Pancreatic Cancer Interception Translational Cancer Research Grant (grant
+number SU2C-AACR-DT26-17). Stand Up To Cancer (SU2C) is a division of
+the Entertainment Industry Foundation and funding is administered by the
+American Association for Cancer Research, the scientiﬁc partner of SU2C.
+
+11. Malleo G, Maggino L, Ferrone CR, Marchegiani G, Mino-Kenudson M,
+Capelli P et al. (2018 Apr 18, 270:1138-1146) Number of examined
+lymph nodes and nodal status assessment in distal pancreatectomy for
+body/tail ductal adenocarcinoma. Ann Surg.
+12. Berger AC, Watson JC, Ross EA, Hoffman JP. (2004 Mar) The metastatic/examined lymph node ratio is an important prognostic factor after
+pancreaticoduodenectomy for pancreatic adenocarcinoma. Am Surg
+
+Author contributions
+Study conception and design: Pu, Gao, Yu, Burkhart.
+
+70:235–240. discussion 40.
+13. Swords DS, Francis SR, Lloyd S, Garrido-Laguna I, Mulvihill SJ,
+
+Acquisition of data: Pu, Gao, Chen, Thompson, Hruban, Burns, Wolfgang, He,
+
+Druhl JD et al. (2018 Sep 5, 23:1401-1413) Lymph node ratio in
+
+Yu, Burkhart.
+
+pancreatic adenocarcinoma after preoperative chemotherapy vs. pre-
+
+Analysis and interpretation of data: Pu, Gao, Yu, Burkhart.
+
+operative chemoradiation and its utility in decisions about postoperative
+
+Drafting of manuscript: Pu, Gao, Thompson, Yu, Burkhart.
+Critical revision: Pu, Gao, Chen, Thompson, Hruban, Burns, Wolfgang, He,
+Yu, Burkhart.
+
+chemotherapy. J Gastrointest Surg.
+14. La Torre M, Nigri G, Petrucciani N, Cavallini M, Aurello P, Cosenza G
+et al. (2014 Jul-Aug) Prognostic assessment of different lymph node
+staging methods for pancreatic cancer with R0 resection: pN staging,
+
+Conﬂict of interest
+None declared.
+
+lymph node ratio, log odds of positive lymph nodes. Pancreatology 14:
+289–294.
+15. Zhu J, Xue Z, Zhang S, Guo X, Zhai L, Shang S et al. (2018 Sep) Inte-
+
+References
+
+grated analysis of the prognostic role of the lymph node ratio in node-
+
+1. Siegel RL, Miller KD, Jemal A. (2019 Jan) Cancer statistics, 2019. CA
+Cancer J Clin 69:7–34.
+
+positive gastric cancer: a meta-analysis. Int J Surg 57:76–83.
+16. Lykke J, Jess P Roikjaer O, &, Danish Colorectal Cancer G. (2016 Apr)
+
+2. Pu N, Zhao G, Yin H, Li J, Nuerxiati A, Wang D et al. (2018 Oct 25) CD25
+and TGF-beta blockade based on predictive integrated immune ratio
+inhibits tumor growth in pancreatic cancer. J Transl Med 16:294.
+3. Hruban RH, Gaida MM, Thompson E, Hong S, Noe M, Aa Brosens L
+et al. (2019 Jun) Why is pancreatic cancer so deadly? The pathologist’s
+view. J Pathol 248:131–141.
+
+The prognostic value of lymph node ratio in a national cohort of rectal
+cancer patients. Eur J Surg Oncol 42:504–512.
+17. Fu X, Liu Q, Luo K, Wen J, Yang H, Hu Y et al. (2017 Dec) Lymph node
+station ratio: revised nodal category for resected esophageal squamous
+cell carcinoma patients. J Surg Oncol 116:939–946.
+18. Hung M, Xu J, Nielson D, Bounsanga J, Gu Y, Hansen AR et al. (2018
+
+4. Chun YS, Pawlik TM, Vauthey JN. (2018 Apr) 8th edition of the AJCC
+cancer staging manual: pancreas and hepatobiliary cancers. Ann Surg
+Oncol 25:845–847.
+
+Sep) Evaluating the prediction of breast cancer survival using lymph
+node ratio. J Breast Cancer 21:315–320.
+19. Tas F, Erturk K. (2019 Feb 20, 24:721-726) Lymph node ratio has impact
+
+5. van Roessel S, Kasumova GG, Verheij J, Najarian RM, Maggino L, de
+Pastena M et al. (2018 Dec 1) International validation of the eighth
+
+on relapse and outcome in patients with stage III melanoma. Int J Clin
+Oncol.
+
+edition of the American Joint Committee on Cancer (AJCC) TNM
+
+20. Roland CL, Yang AD, Katz MH, Chatterjee D, Wang H, Lin H et al. (2015
+
+staging system in patients with resected pancreatic cancer. JAMA Surg
+
+Apr) Neoadjuvant therapy is associated with a reduced lymph node ratio
+
+153e183617.
+
+in patients with potentially resectable pancreatic cancer. Ann Surg
+
+6. Allen PJ, Kuk D, Castillo CF, Basturk O, Wolfgang CL, Cameron JL et al.
+
+Oncol 22:1168–1175.
+
+(2017 Jan) Multi-institutional validation study of the American Joint
+
+21. Poruk KE, Lin JA, Cooper MA, He J, Makary MA, Hirose K et al. (2016
+
+Commission on Cancer (8th edition) changes for T and N staging in
+
+Nov) A novel, validated risk score to predict surgical site infection after
+
+patients with pancreatic adenocarcinoma. Ann Surg 265:185–191.
+
+pancreaticoduodenectomy. HPB 18:893–899.
+
+7. Pu N, Li J, Xu Y, Lee W, Fang Y, Han X et al. (2018) Comparison of
+
+22. Groot VP, Gemenetzis G, Blair AB, Rivero-Soto RJ, Yu J, Javed AA
+
+prognostic prediction between nomogram based on lymph node ratio
+
+et al. (2019 Jun) Deﬁning and predicting early recurrence in 957 pa-
+
+and AJCC 8th staging system for patients with resected pancreatic
+
+tients with resected pancreatic ductal adenocarcinoma. Ann Surg 269:
+
+head carcinoma: a SEER analysis. Cancer Manag Res 10:227–238.
+
+1154–1162.
+
+8. Ashfaq A, Pockaj BA, Gray RJ, Halfdanarson TR, Wasif N. (2014 Nov)
+
+23. Javed AA, Teinor J, Wright M, Ding D, Burkhart RA, Hundt J et al. (2019
+
+Nodal counts and lymph node ratio impact survival after distal
+
+Jun) Negative pressure wound therapy for surgical-site infections: a
+
+pancreatectomy for pancreatic adenocarcinoma. J Gastrointest Surg
+
+randomized trial. Ann Surg 269:1034–1040.
+
+18:1929–1935.
+
+HPB 2021, 23, 575–586
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+HPB
+
+586
+
+24. Camp RL, Dolled-Filhart M, Rimm DL. (2004 Nov 1) X-tile: a new bio-
+
+35. Tol JA, Brosens LA, van Dieren S, Van Gulik TM, Busch OR,
+
+informatics tool for biomarker assessment and outcome-based cut-
+
+Besselink MG et al. (2015 Feb) Impact of lymph node ratio on survival in
+
+point optimization. Clin Cancer Res 10:7252–7259.
+
+patients with pancreatic and periampullary cancer. Br J Surg 102:
+
+25. Vuarnesson H, Lupinacci RM, Semoun O, Svrcek M, Julie C, Balladur P
+
+237–245.
+
+et al. (2013 Oct) Number of examined lymph nodes and nodal status
+
+36. Smith BJ, Mezhir JJ. (2014 Oct) An interactive Bayesian model for
+
+assessment in pancreaticoduodenectomy for pancreatic adenocarci-
+
+prediction of lymph node ratio and survival in pancreatic cancer patients. J Am Med Inf Assoc 21:e203–e211.
+
+noma. Eur J Surg Oncol 39:1116–1121.
+26. Morales-Oyarvide V, Rubinson DA, Dunne RF, Kozak MM, Bui JL,
+
+37. John BJ, Naik P, Ironside A, Davidson BR, Fusai G, Gillmore R et al.
+
+Yuan C et al. (2017 Dec 5) Lymph node metastases in resected
+
+(2013 Sep) Redeﬁning the R1 resection for pancreatic ductal adeno-
+
+pancreatic ductal adenocarcinoma: predictors of disease recurrence
+
+carcinoma: tumour lymph nodal burden and lymph node ratio are the
+only prognostic factors associated with survival. HPB 15:674–680.
+
+and survival. Br J Cancer 117:1874–1882.
+27. Lowder CY, Metkus J, Epstein J, Kozark GM, Lavu H, Yeo CJ et al.
+
+38. Takahashi H, Ohigashi H, Ishikawa O, Gotoh K, Yamada T, Nagata S
+
+(2018 Dec) Clinical implications of extensive lymph node metastases for
+
+et al. (2012 Jan) Perineural invasion and lymph node involvement as
+
+resected pancreatic cancer. Ann Surg Oncol 25:4004–4011.
+
+indicators of surgical outcome and pattern of recurrence in the setting
+
+28. Arrington AK, Price ET, Golisch K, Riall TS. (2019 Apr) Pancreatic cancer
+lymph node resection revisited: a novel calculation of number of lymph
+nodes required. J Am Coll Surg 228:662–669.
+
+of preoperative gemcitabine-based chemoradiation therapy for resectable pancreatic cancer. Ann Surg 255:95–102.
+39. Piscuoglio S, Zlobec I, Pallante P, Esposito F, Zimmermann A,
+
+29. Kakar S, Shi C, Adsay VN, Fitzgibbons P, Frankel WL, Klimstra DS et al.
+
+Diamantis I et al. (2012 Feb) HMGA1 and HMGA2 protein expression
+
+Protocol for the examination of specimens from patients with carcinoma
+
+correlates with advanced tumour grade and lymph node metastasis in
+pancreatic adenocarcinoma. Histopathology 60:397–404.
+
+of the pancreas.
+30. Derwinger K, Carlsson G, Gustavsson B. (2008 Jul) A study of lymph
+
+40. Kocher HM, Sohail M, Benjamin S, Patel AG. (2007 Sep) Technical
+
+node ratio as a prognostic marker in colon cancer. Eur J Surg Oncol 34:
+
+limitations of lymph node mapping in pancreatic cancer. Eur J Surg
+Oncol 33:887–891.
+
+771–775.
+31. Liu C, Lu P, Lu Y, Xu H, Wang S, Chen J. (2007 Oct 24) Clinical impli-
+
+41. Yeo CJ, Cameron JC, Sohn TA, Coleman J, Sauter PK, Hruban RH et al.
+
+cations of metastatic lymph node ratio in gastric cancer. BMC Cancer 7:
+
+(1999 May) Pancreaticoduodenectomy with or without extended retro-
+
+200.
+
+peritoneal lymphadenectomy for periampullary adenocarcinoma: com-
+
+32. Pawlik TM, Gleisner AL, Cameron JL, Winter JM, Assumpcao L,
+Lillemoe KD et al. (2007 May) Prognostic relevance of lymph node ratio
+following pancreaticoduodenectomy for pancreatic cancer. Surgery
+
+parison of morbidity and mortality and short-term outcome. Ann Surg
+229:613–622.
+42. Paiella S, Sandini M, Gianotti L, Butturini G, Salvia R, Bassi C. (2016
+May) The prognostic impact of para-aortic lymph node metastasis in
+
+141:610–618.
+33. Jang JY, Kang MJ, Heo JS, Choi SH, CHoi DW, Park SJ et al. (2014 Apr)
+A prospective randomized controlled study comparing outcomes of
+
+pancreatic cancer: a systematic review and meta-analysis. Eur J Surg
+Oncol 42:616–624.
+
+standard resection and extended resection, including dissection of the
+nerve plexus and various lymph nodes, in patients with pancreatic head
+
+Appendix A. Supplementary data
+
+cancer. Ann Surg 259:656–664.
+
+Supplementary data to this article can be found online at https://doi.org/10.
+
+34. Zhan HX, Xu JW, Wang L, Zhang GY, Hu SY. (2015 Mar 13) Lymph node
+
+1016/j.hpb.2020.08.016.
+
+ratio is an independent prognostic factor for patients after resection of
+pancreatic cancer. World J Surg Oncol 13:105.
+
+HPB 2021, 23, 575–586
+
+© 2020 International Hepato-Pancreato-Biliary Association Inc. Published by Elsevier Ltd. All rights reserved.
+
+

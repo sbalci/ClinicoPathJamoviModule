@@ -1,7 +1,7 @@
 ---
 name:  dendrogram
 title: Dendrogram
-menuGroup: OncoPathT
+menuGroup: OncoPathT2
 menuSubgroup: Drafts
 version: '0.0.31'
 jas: '1.2'

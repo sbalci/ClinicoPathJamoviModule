@@ -1,0 +1,1471 @@
+| Original Article
+
+A retrospective analysis of 1055 cases
+Neil Allen Maglalang, MD; Oluwole Fadare, MD*
+Department of Pathology, University of California San Diego, San Diego, CA, United States
+
+Abstract
+Objective: We sought to assess the number of blocks that should routinely be submitted
+for microscopic examination of omentectomy specimens associated with neoplasms that
+involve the female genital tract.
+Methods: Clinicopathologic data were retrospectively reviewed in 1055 cases wherein
+the omentum was resected for possible gynecologic cancer staging. We investigated any
+associations between the microscopic positivity rate (MPR) and the number of blocks
+submitted, block groups (categorized as 1-2 blocks, 3-4 blocks, 5-6 blocks, and >6 blocks),
+and block to size ratio (the number of blocks submitted to the widest specimen dimension,
+classified as approximate deciles).
+Results: Of the 1055 cases we studied, 536 (50.8%) were grossly normal, and 519 (49.2%)
+were abnormal. Within the grossly normal group, there were no statistically significant
+differences in MPR between the block groups and between cases with 1, 2, 3, 4, 5, or 6 blocks
+submitted (P > .50 for all pairwise comparisons). Cochran-Armitage tests for trend did not
+show any linear trend between increasing block groups (P = .88) or increasing block to size
+ratios (P = .39) and MPR; a binomial logistic regression analysis confirmed that neither
+block groups (odds ratio, 1.144 [95% CI, 0.794-1.648]; P = .47) nor block to size ratio (odds
+ratio, 1.022 [95% CI, 0.770-1.358]; P = .88) showed a statistically significant linear relation
+to MPR. For diffusely or multifocally abnormal cases, the highest MPR (95.5%) was reached
+at the 1 to 2 blocks group level, and MPR did not statistically significantly increase with
+higher levels of sampling.
+
+K E Y P O INT S
+• This retrospective study analyzed
+the MPR of various levels of
+sampling of omentectomy
+specimens associated with
+neoplasms that involve the female
+genital tract.
+• For a grossly normal omentum
+and for multifocally/diffusely
+abnormal omentum, our findings
+suggest that 1-2 blocks does not
+result in a significant decrease in
+the MPR compared with higher
+levels of sampling.
+• Additional studies are required
+to address omentum sampling
+in specific clinical scenarios,
+including following neoadjuvant
+therapy.
+
+Key words
+grossing; omentum sampling;
+ovarian cancer; endometrial cancer
+
+Am J Clin Pathol XXXX 2025;XX:1-0
+HTTPS://DOI.ORG/10.1093/AJCP/AQAF082
+Received: February 23, 2025
+Accepted: July 15, 2025
+*Corresponding author: Oluwole O.
+
+Fadare (oluwole.fadare@gmail.com)
+
+Conclusions: Submitting 1 to 2 block sections of the omentum in the studied setting
+results in an MPR that is not statistically significantly lower than the MPR associated with
+higher levels of sampling.
+
+INTR O D U CTI O N
+Omentum involvement in endometrial and tubo-ovarian malignancies denotes advancedstage disease.1-3 Given that treatment and prognosis are highly dependent on staging, the
+accurate determination of omentum involvement by a gynecologic tract neoplasm is paramount. Omentectomy (or partial omental sampling) has long been a mainstay of staging
+procedures for patients with ovarian cancer.4 Omentectomy not only facilitates achieving
+© The Author(s) 2025. Published by Oxford University Press on behalf of American Society for Clinical Pathology.
+All rights reserved. For commercial re-use, please contact reprints@oup.com for reprints and translation rights
+for reprints. All other permissions can be obtained through our RightsLink service via the Permissions link on the
+article page on our site—for further information please contact journals.permissions@oup.com.
+
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+1
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+Pathologic sampling of the
+omentum for neoplasms that
+involve the female genital tract
+
+     | American Journal of Clinical Pathology, 2025, Vol. XX, No. XX
+status, number of blocks submitted, and largest omental dimension.
+Cases for which key study parameters were incomplete were excluded. For most of the study period, the gross manual at our institution called for omentum specimens to be sectioned at 5-mm intervals,
+with 1 to 3 sections to be submitted for grossly abnormal omentum
+and 6 sections to be submitted grossly normal omentum. Given the
+wide spectrum of descriptions for the omentum across the pathology
+reports we reviewed, the gross appearances were classified into 4
+categories for analytic purposes using preset guidelines:
+•
+
+•
+
+•
+
+•
+
+M ET H O D S
+The authors searched the pathology database at an academic medical
+center for consecutive cases in which the omentum had been excised
+as part of possible gynecologic cancer staging (ie, as a component of
+formal surgical staging for a previously diagnosed gynecologic neoplasm or as part of intraabdominal exploration for a gynecologic tract
+mass or lesion) between January 2002 and August 2024. Only cases
+in which a borderline or malignant neoplasm involved the ovary,
+fallopian tube, or uterus were included. The neoplasms included epithelial neoplasms (borderline and malignant), sarcomas, sex cord
+stromal tumors, and non-gynecologic primaries with mass-forming
+involvement of the gynecologic tract. Cases were excluded if they
+failed to meet these inclusion criteria. Surgical pathology reports
+were reviewed in detail, and the following items were collected: primary tumor site, histologic subtype, gross appearance, microscopic
+
+2
+
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+Normal. These cases were specifically described as normal;
+grossly unremarkable; or showing no distinct or discernable
+lesions, nodules, or masses. They were frequently described as
+displaying yellow, tan, or reddish lobulated cut surfaces.
+Focally abnormal. These omental specimens had a distinct
+lesion, encompassing fibrosis, thickening, induration, nodules,
+or masses limited to a single discrete abnormality in an otherwise unremarkable specimen. Other descriptors for focal
+abnormality included cystic change, “mucinous” change, or
+chalky change. Based on specified measurements, a singular
+lesion that was described as equal to or less than 10% of the
+specimen’s greatest dimension was classified in this category.
+The category also includes cases where a separate specimen
+was labeled as an omental nodule or implant, even if the separately submitted larger specimen was described as being
+grossly unremarkable.
+Multifocally abnormal. These omental specimens had the
+same identifiable gross discrete lesions described in the focal
+category but showed more than 1 focus of abnormality in a
+single specimen or had at least 1 abnormality in multiple specimens if separately submitted. Abnormalities for the specimens in this category were frequently described as multiple,
+multifocal, several, numerous, or a definite number when the
+lesions were countable. Specimens with more than focal areas
+described by nonspecific terminologies (eg, fibrous, thickened,
+studded, intermixed, interspersed with indistinct lesions) were
+also included in this category.
+Diffusely abnormal. For these specimens, there was a predominance of the lesional component over the fatty or fibrofatty
+areas. They were frequently described as diffuse, replaced,
+entirely involved, confluent, grossly positive, or caked. Cut
+surfaces were typically described as solid and the omentum as
+firm or rubbery.
+
+Microscopic positivity (microscopic abnormality) for tumor was the
+primary outcome measure or end point used in this study. A case was
+classified as microscopically positive when viable tumor cells were
+reported as being definitively present in a section from the omentum.
+Samples that showed only acellular mucin, psammoma bodies,
+“atypical cells,” and reactive changes were classified as negative if
+tumor cells were not concurrently present. The number of blocks
+submitted was correlated with the microscopic positivity rate (MPR).
+In some analyses, the number of blocks submitted was categorized
+arbitrarily into 4 subgroups to facilitate subset analyses: 1 to 2 blocks,
+© American Society for Clinical Pathology
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+the “optimal cytoreduction” standard that is thought to have tremendous prognostic value in patients with advanced-stage ovarian
+cancer5 but is also invaluable in recognizing the 2.3% to 3% of patients with apparently early-stage ovarian cancer whose disease is
+upstaged solely due to microscopic disease.6,7 For patients with endometrial cancers, only 0.4% to 1.9% of clinically early-stage disease
+are found to have microscopic involvement of the omentum.8,9 Up
+to one-third of patients with nonendometrioid or “aggressive”
+histotypes show omentum involvement, however; accordingly,
+omentectomy is commonly performed in this setting.10,11
+The omentum specimen submitted to the pathology laboratory
+is often large, and it is neither practical nor cost-effective to microscopically evaluate a large portion of the specimen, especially given
+the widespread limitations in resources that the discipline faces.12,13
+In contrast, inadequate sampling of the omentum by the pathologist
+may lead to a failure to recognize microscopic disease, understaging,
+and (potentially) adverse patient outcomes. Only a few prior studies
+have attempted to determine the optimal number of blocks that
+should be submitted in this setting. Doig and Monaghan14 reviewed
+332 cases that were limited to malignant and borderline ovarian
+tumors. They concluded that submitting 1 block from a grossly involved omentum is sufficient. Usubutun et al15 evaluated 258 endometrial and ovarian malignancies, inclusive of retrospective and
+prospective cohorts, and concluded that 1 block is sufficient when
+the omentum is grossly involved. In another analysis, 44 ovarian and
+endometrial cases with grossly normal omentum and microscopic
+disease were assessed; using a simulated model, the authors found
+that 5, 10, and 14 blocks of omentum in such cases will yield a sensitivity of 82%, 95%, and 99%, respectively.16 There are some shared
+conclusions between these studies, but overall, the optimal number
+of blocks that should routinely be submitted for microscopic examination of staging omentectomy specimens, especially when grossly
+unremarkable, is not entirely clear. In the current study, the authors
+sought to provide a comprehensive reexamination of the issue, with
+an emphasis on grossly normal omentum, using the largest cohort
+reported to date and encompassing tumors of various types at different sites in the female genital tract.
+
+American Journal of Clinical Pathology, 2025, Vol. XX, No. XX   |
+
+Table 1 MPRs for Each Number of Submitted Blocks and Block Groups
+
+Grossly normal cases
+
+Grossly abnormal cases
+
+Total, No.
+
+Microscopically positive, No.
+
+MPR, %
+
+Total, No.
+
+Microscopically positive, No.
+
+MPR, %
+
+1
+
+149
+
+10
+
+6.7
+
+97
+
+97
+
+79.4
+93.5
+
+2
+
+72
+
+5
+
+6.9
+
+154
+
+154
+
+3
+
+52
+
+5
+
+9.6
+
+100
+
+100
+
+85.0
+
+4
+
+15
+
+1
+
+6.7
+
+55
+
+55
+
+90.9
+
+5
+
+34
+
+4
+
+11.8
+
+31
+
+31
+
+83.9
+78.9
+
+6
+
+190
+
+15
+
+7.9
+
+38
+
+38
+
+7
+
+9
+
+1
+
+11.1
+
+12
+
+12
+
+58.3
+
+8
+
+4
+
+1
+
+25.0
+
+14
+
+14
+
+78.6
+75.0
+
+9
+
+2
+
+0
+
+0.0
+
+4
+
+4
+
+10
+
+3
+
+1
+
+33.3
+
+7
+
+7
+
+57.1
+
+>10
+
+6
+
+0
+
+0.0
+
+7
+
+7
+
+71.4
+
+ 1-2
+
+221
+
+15
+
+6.8
+
+251
+
+221
+
+88.0
+
+ 3-4
+
+67
+
+6
+
+9.0
+
+155
+
+135
+
+87.1
+
+ 5-6
+
+224
+
+19
+
+8.5
+
+69
+
+56
+
+81.2
+
+ > 6
+
+24
+
+3
+
+12.5
+
+44
+
+30
+
+68.2
+
+Overall
+
+536
+
+43
+
+8.0
+
+519
+
+442
+
+85.2
+
+Block groups
+
+Abbreviation: MPR, microscopic positivity rate.
+
+3 to 4 blocks, 5 to 6 blocks, and more than 6 blocks. The ratio of the
+number of blocks submitted to the longest dimension of the specimen was designated the block to size ratio and was used as an alternative surrogate indicator for the percentage of the omentum sampled.
+Subset analyses were performed for cases in which 1% to less than
+10%, 10% to less than 20%, 20% to less than 30%, 30% to less than
+40%, and 40% or more of the sample had been sampled. Fisher exact
+and χ2 tests were used to assess MPR as a function of the number
+of blocks submitted, block groups, and the percentage of omentum
+sampled, with statistical significance set at ɑ = .05. For further analysis within the grossly normal group, 2 statistical methods were also
+performed: a Cochran-Armitage test of trend and binomial logistic
+regression. The Cochran-Armitage test of trend was performed to
+assess the effects of blocks submitted, block groups, and block to size
+ratio on MPR as well as whether statistically significant trends in MPR
+as a function of sampling could be identified. Given the dichotomous
+nature of our outcome variable (positive or negative for microscopic
+disease), binomial logistic regression was also employed using the
+same variables. These tests were used adjunctively to substantiate
+whether a trend exists, complementing the pairwise comparisons
+using Fisher exact tests. These sets of analyses provided a more comprehensive assessment of any potential trends. Statistical analyses
+were performed using Microsoft Excel (part of Microsoft 365, version
+2410) and IBM SPSS Statistics, version 29, software.
+
+RE S U LT S
+General microscopic positivity rates
+A total of 1629 possible cases were initially found, 1055 of which
+remained in the final study set after exclusion criteria were
+© American Society for Clinical Pathology
+
+applied; 536 (50.8%) of the 1055 cases had been classified as
+having grossly normal omenta, and 519 (49.2%) of the 1055 cases
+had been classified as having grossly abnormal omenta. The focally abnormal, multifocally abnormal, and diffusely abnormal
+groups comprised 13.2%, 30.0%, and 6.0% of the entire cohort,
+respectively. As expected, the MPR for the grossly normal group
+(43/536 [8.0%]) was much lower than the MPR for the grossly
+abnormal group (442/519 [85.2%]), P < .0001. Similarly, within
+the grossly abnormal group, the MPR for the focally abnormal
+subgroup (66.4%) was substantially lower than the rates for the
+multifocally abnormal (91.1%), diffuse abnormal (96.8%), and the
+multifocally + diffusely abnormal (92.1%) subgroups (P < .001
+for all).
+
+MPRs and number of blocks submitted
+in the grossly normal group
+Table 1 shows the MPRs associated with each level of sampling in
+
+cases classified as grossly normal. Of these 536 cases, 512 (95.5%)
+had 6 blocks or fewer submitted, with variable representation for
+each level of sampling. The overall MPR was 8.0%, and subgroup
+analysis of cases with 6 or fewer blocks submitted showed MPRs
+that ranged from 6.7% to 11.8%. Notably, there were no statistically
+significant differences in the MPR for cases with 1, 2, 3, 4, 5, or 6
+blocks submitted (P > .50 for all pairwise comparisons). A separate analysis classified the cases into subgroups of 1 to 2 blocks, 3
+to 4 blocks, 5 to 6 blocks, and more than 6 blocks to account for
+the variability in number of cases ( Table 1 ). The MPRs for these 4
+subgroups were 6.8%, 9.0%, 8.5%, and 12.5%, respectively; again,
+pairwise comparisons showed no statistically significant differences in MPRs between any 2 subgroups. The MPRs for cases with
+1 block submitted (10/149 [6.7%]) were not statistically significantly
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+3
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+Submitted blocks, No.
+
+     | American Journal of Clinical Pathology, 2025, Vol. XX, No. XX
+
+MPRs and number of blocks submitted
+in the grossly abnormal groups
+For grossly abnormal cases, Table 1 shows the MPRs associated
+with each level of sampling in cases classified as grossly abnormal.
+The MPRs for the focally abnormal, multifocally abnormal, diffusely abnormal, and multifocally + diffusely abnormal subgroups
+were 66.4% (93/140), 91.1% (288/316), 96.8% (61/63), and 92.1%
+(349/379), respectively ( Table 3 ). For the grossly abnormal group
+as a whole, the MPRs for the 1 to 2 block group (88%), 3 to 4 block
+group (87.1%), 5 to 6 block group (81.2%) showed no statistically
+
+significant differences (P > .05 for all pairwise comparisons). The
+MPRs for the more than 6 blocks group (68.2%) was statistically
+significantly lower than the other block groups (see “Discussion”).
+For the grossly abnormal subgroup as a whole, the MPR for 1 block
+sampled (79.4%) was statistically significantly lower than the MPR
+for 2 blocks sampled (93.5%) (P = .001).
+Among the subgroups of grossly abnormal cases, for the focally
+abnormal subgroup (n = 140), there was no statistically significant
+difference between the MPRs for the 1 to 2 blocks group (70.1%) and
+those for the 3 to 4 blocks (73.0%) or 5 to 6 block (64.3%) groups
+( Table 3 ). The MPR for the more than 6 blocks group (28.6%) was
+statistically significantly lower than the MPRs for each of the other
+block groups. For the multifocally abnormal, diffusely abnormal,
+and diffusely + multifocally abnormal subgroups, there were no
+statistically significant differences in the MPRs between the block
+groups. Overall, sampling above the 1 to 2 blocks level was not
+clearly associable with a statistically significantly higher MPR.
+
+MPRs, primary sites, tumor types, and other variables
+Table 4 outlines the distribution of tumoral histotypes in the study
+cohort and their sites of origin. Overall, 759 (71.9%) cases were tuboovarian/peritoneal, 189 (18%) were uterine, and 107 (10.1%) were
+uterine/adnexal synchronous primaries or metastases involving the
+gynecologic tract. Gross omental involvement was present in 54.0%
+of the tubo-ovarian/peritoneal cases in contrast to only 24.3% of
+the endometrial cases. Similarly, the MPR for the grossly abnormal
+tubo-ovarian/peritoneal cases (86.8%) was statistically significantly higher than the MPR for the grossly abnormal uterine cases
+(71.7%, P = .009). Accordingly, we separately assessed MPRs for the
+uterine and tubo-ovarian/peritoneal cases for the various categories
+of sampling (1-2 blocks, 3-4 blocks, 5-6 blocks, and >6 blocks), with
+the goal of determining whether different sampling-related conclusions could be reached for each anatomic site. Our results for each
+of these sites (data not shown) were broadly consistent with the
+aforementioned findings for the entire cohort (ie, the MPR for 1-2
+blocks is not statistically significantly lower than the MPR for 3-4
+blocks, 5-6 blocks, or >6 blocks for the uterine and tubo-ovarian/
+peritoneal subgroups).
+In addition, we assessed the effect of 3 variables in cases for
+which 1 to 2 blocks had been sampled within the grossly normal
+
+Table 2 MPRs Stratified by Block to Size Ratio
+
+MPR
+Gross Category, n/No. (%)
+Block to size ratioa
+
+Normal
+
+Focal
+
+Multifocal
+
+Diffuse
+
+Multifocal + diffuse
+
+Any abnormality
+
+1% to <10%
+
+15/182 (8.2)
+
+45/67 (67.2)
+
+128/142 (90.1)
+
+25/27 (92.6)
+
+153/169 (90.5)
+
+198/236 (83.8)
+
+10% to <20%
+
+12/190 (6.3)
+
+19/33 (57.6)
+
+88/96 (91.7)
+
+21/21 (100)
+
+109/117 (93.2)
+
+128/150 (85.3)
+
+20% to <30%
+
+8/78 (10.3)
+
+17/23 (73.9)
+
+35/37 (94.6)
+
+5/5 (100)
+
+40/42 (95.2)
+
+57/65 (87.7)
+
+30% to <40%
+
+2/29 (6.9)
+
+4/5 (80.0)
+
+12/13 (92.3)
+
+5/5 (100)
+
+17/18 (94.4)
+
+21/23 (91.3)
+
+≥40%
+
+6/57 (10.5)
+
+8/12 (66.7)
+
+25/28 (89.3)
+
+5/5 (100)
+
+30/33 (90.9)
+
+38/45 (84.4)
+
+Total
+
+43/536 (8.0)
+
+93/140 (66.4)
+
+288/316 (91.1)
+
+61/63 (96.8)
+
+349/379 (92.1)
+
+442/519 (85.16)
+
+Abbreviation: MPR, microscopic positivity rate.
+aPercentages are computed based on the total number of blocks divided by the single widest dimension of the omental size.
+
+4
+
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+© American Society for Clinical Pathology
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+different from the MPRs for cases with 2 to 6 blocks submitted
+(30/363 [8.3%]; P = .59).
+At the other end of the spectrum, MPRs for cases with 6 blocks
+submitted (15/190 [7.9%]) were not statistically significantly different from the MPRs for cases with 5 or fewer blocks submitted
+(25/322 [7.8%]; P > .99). Various other iterations, including fewer
+than 5 blocks vs 5 to 6 blocks vs more than 6 blocks, similarly
+showed no statistically significant difference in MPR. These findings were confirmed by a Cochran-Armitage test of trend, which
+did not show any linear trend between increasing block groups
+and MPR (P = .88), as well as Fisher exact tests for the group as a
+whole, showing no statistically significant association between
+block groups and MPR (P = .66). The block to size ratio was analyzed as approximate deciles (1% to <10%, 10% to <20%, 20% to
+<30%, 30% to <40%, and ≥40%) ( Table 2 ). The MPR was comparable at all levels of sampling for each category (P = .72), and there
+was no statistically significant linear trend in MPR as a function
+of block groups (P = .882) or block to size ratio. (Cases with 0% to
+<10% [n = 15], 10% to <20% [n = 12], 20% to <30% [n = 8], 30% to
+<40% [n = 2], and ≥40% [n = 6] sampling showed MPRs of 8.2%,
+6.3%, 10.3%, 6.9%, and 10.5%, respectively; P = .39).
+Finally, a binomial logistic regression analysis confirmed that
+neither block groups (odds ratio, 1.144 [95% CI, 0.794-1.648];
+P = .47) nor block to size ratio (odds ratio, 1.022 [95% CI, 0.7701.358]; P = .88) showed a statistically significant linear relation to
+MPR, (χ22 = 0.905, P = .64 for model). Overall, within the grossly
+normal group, increased sampling (number of blocks submitted,
+block to size ratio, block groups) were not statistically significantly
+associated with increasing rates of microscopic positivity.
+
+American Journal of Clinical Pathology, 2025, Vol. XX, No. XX   |
+
+Table 3 Grossly Abnormal Subgroups: MPR
+
+Focal
+
+MPR, %
+
+3-4 blocks
+(n = 37)
+
+5-6 blocks
+(n = 14)
+
+>6 blocks
+(n = 14)
+
+Total
+n = 140
+
+70.1
+
+73.0
+
+64.3
+
+28.6
+
+66.4
+
+1-2 blocks
+(n = 142)
+
+3-4 blocks
+(n = 99)
+
+5-6 blocks
+(n = 48)
+
+>6 blocks
+(n = 27)
+
+Total
+(n = 316)
+
+95.8
+
+89.9
+
+83.3
+
+85.2
+
+91.1
+
+1-2 blocks
+(n = 34)
+
+3-4 blocks
+(n = 19)
+
+5-6 blocks
+(n = 7)
+
+>6 blocks
+(n = 3)
+
+Total
+(n = 63)
+96.8
+
+Multifocal
+
+MPR, %
+Diffuse
+
+MPR, %
+
+94.1
+
+100
+
+100
+
+100
+
+MPR, %
+
+1 block: 85
+
+2 blocks: 96
+
+3 blocks: 100
+
+4 blocks: 100
+
+1-2 blocks
+(n = 176)
+
+3-4 blocks
+(n = 118)
+
+5-6 blocks
+(n = 55)
+
+>6 blocks
+(n = 30)
+
+Total
+(n = 379)
+
+95.5
+
+91.5
+
+85.45
+
+86.7
+
+92.1
+
+Multifocal + diffuse
+
+MPR, %
+
+Abbreviation: MPR, microscopic positivity rate.
+
+group and found no statistically significant differences in MPR
+between uterine and tubo-ovarian/peritoneal primaries (P = .34),
+cases in which the omentum’s widest dimension was less than
+the cohort median size vs equal to or greater than the cohort median size (P = .63), and cases associated and not associated with
+neoadjuvant chemotherapy (P = .41). Subset analyses restricted to
+grossly normal cases of tubo-ovarian/peritoneal origin (n = 349)
+showed that the MPR for cases with 1 to 2 blocks submitted
+within the neoadjuvant chemotherapy–positive group was 19.0%
+(4/21) compared with 3.8% (4/104) in the neoadjuvant chemotherapy–negative group (P = .03). Further analysis of the same
+subset (grossly normal, tubo-ovarian/peritoneal origin) showed
+that within the neoadjuvant chemotherapy–positive group, the
+MPR for 1 to 2 blocks (4/21 [19.0%]) was not statistically significantly
+different than the MPR for 3 to 4 blocks (3/42 [7.1%]; P = .21), 5 to 6
+blocks (7/94 [7.4%]; P = .20), and more than 6 blocks (2/18 [11.1%];
+P = .67).
+
+DISCUSSION
+In the current analysis, the authors report findings from the largest
+study to date exploring the appropriate level of omentum sampling
+in neoplasms that involve the female genital tract, inclusive of
+grossly normal and abnormal omenta. Relatively few current guidelines are based on primary published data regarding the optimal
+sampling of grossly normal cases. The 2017 Royal College of Pathologists (RCP) dataset for histologic reporting of endometrial cancer
+recommends submitting 2 to 4 blocks “based on accepted current
+practice.”17 The RCP’s 2025 “best practice recommendations,” citing
+Doig and Monaghan,14 note that if the omentum is grossly normal
+and “the ovary is malignant or borderline on gross inspection or
+histological examination,” “thorough sampling is needed” of the
+omentum.18 The 2019 endometrial cancer recommendations from
+
+© American Society for Clinical Pathology
+
+the International Society of Gynecologic Pathologists (ISGyP) call
+for the submission of “1 representative section per 2 or 3 cm of maximal omental dimension or at least a total of 4 blocks of tissue”19
+when the omentum is grossly normal, citing the aforementioned
+RCP guidelines17 and Usubutun et al.15 The 2022 recommendations from the International Collaboration on Cancer Reporting on
+endometrial cancer endorsed the ISGyP statement, calling for “at
+least 4 blocks” to be submitted when the omentum is grossly negative.20,21 Widely used textbooks on grossing give similarly variable
+recommendations.22,23 Westra et al,22 for example, note that “5 representative sections are usually sufficient, although some authorities recommend up to 10 sections.” This absence of standardized
+recommendations has in turn resulted in variability at the institutional level, as evidenced by our review of a sampling of publicly
+available gross manuals, with some institutions making a distinction between the sampling necessary for grossly normal omentum
+when the primary is tubo-ovarian (10 sections) vs endometrial (4
+sections), and a general variability in the number of sections that
+these manuals state should be submitted in this setting.24,25
+In the current analysis of a large cohort, we could not identify a
+clear evidentiary basis for submitting more than 1 to 2 sections when
+the omentum is grossly normal. Using the specific framework of this
+study (block groups, block to size ratio, and number of blocks submitted), we did not find that sampling above 1 to 2 sections was associated with a statistically significantly higher rate of microscopic
+positivity. Omenta from patients after neoadjuvant chemotherapy
+may represent a group of cases with distinctive findings that require
+special handling. For grossly normal omenta associated with neoplasia of tubo-ovarian/peritoneal origin, the MPR for cases with 1 to
+2 blocks submitted within the neoadjuvant chemotherapy–positive
+group was statistically significantly higher than the MPR for cases
+in the neoadjuvant chemotherapy–negative group (P = .027). This
+finding raises the possibility that post–neoadjuvant chemotherapy
+
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+5
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+1-2 blocks
+(n = 75)
+
+     | American Journal of Clinical Pathology, 2025, Vol. XX, No. XX
+
+Table 4 Histologic Types, Presence of Omental Abnormality, and MPRs
+
+Cases,
+No.
+
+Cases with gross omental
+abnormality, No. (%)
+
+Microscopically
+positive, No.
+
+MPR for grossly
+abnormal cases, %
+
+MPR for grossly
+normal cases, %
+
+Serous carcinoma
+
+412
+
+312 (75.7)
+
+297
+
+95.2
+
+22.0
+
+Borderline tumor
+
+117
+
+20 (17.1)
+
+7
+
+35.0
+
+3.1
+
+Others
+
+76
+
+28 (36.8)
+
+15
+
+53.6
+
+4.2
+
+Low-grade endometrioid carcinoma
+
+40
+
+3 (7.5)
+
+1
+
+33.3
+
+0
+
+Sex cord stromal tumor
+
+30
+
+7 (23.3)
+
+3
+
+42.9
+
+0
+
+Clear cell carcinoma
+
+19
+
+4 (21.1)
+
+4
+
+100
+
+0
+
+Mixed carcinoma
+
+19
+
+6 (31.6)
+
+3
+
+50.0
+
+23.1
+
+Carcinosarcoma
+
+18
+
+13 (72.2)
+
+12
+
+92.3
+
+0
+
+Undifferentiated/poorly differentiated carcinoma
+
+14
+
+11 (78.6)
+
+10
+
+91.0
+
+0
+
+High-grade endometrioid
+carcinoma
+
+13
+
+5 (38.5)
+
+4
+
+80.0
+
+0
+
+Sarcoma
+
+1
+
+1 (100)
+
+0
+
+0
+
+—
+
+Subtotal
+
+759
+
+410 (54)
+
+356
+
+86.8
+
+8.6
+
+Serous carcinoma
+
+49
+
+13 (26.5)
+
+10
+
+76.9
+
+8.3
+
+Low-grade endometrioid
+carcinoma
+
+45
+
+6 (13.3)
+
+2
+
+33.3
+
+2.6
+
+High-grade endometrioid
+carcinoma
+
+24
+
+6 (25)
+
+3
+
+50.0
+
+5.6
+
+Carcinosarcoma
+
+24
+
+7 (29.2)
+
+7
+
+100
+
+5.9
+
+Mixed carcinoma
+
+17
+
+4 (23.5)
+
+4
+
+100
+
+0
+
+Sarcoma
+
+11
+
+3 (27.3)
+
+2
+
+66.7
+
+0
+
+Others
+
+8
+
+5 (62.5)
+
+3
+
+60.0
+
+0
+
+Clear cell carcinoma
+
+7
+
+1 (14.3)
+
+1
+
+100
+
+16.7
+
+Undifferentiated/poorly differentiated carcinoma
+
+4
+
+1 (25)
+
+1
+
+100
+
+33.3
+
+Subtotal
+
+189
+
+46 (24.3)
+
+33
+
+71.7
+
+5.6
+
+Metastatic
+
+89
+
+60 (67.4)
+
+50
+
+83.3
+
+17.2
+
+Synchronous
+
+18
+
+3 (16.7)
+
+3
+
+100
+
+0
+
+Total
+
+1055
+
+519 (49.2)
+
+442
+
+85.2
+
+8.0
+
+Primary site and histologic type
+Ovary, fallopian tube, and peritoneum
+
+Abbreviation: MPR, microscopic positivity rate.
+
+cases are more likely to appear grossly normal but still harbor microscopic disease.26 Within the neoadjuvant chemotherapy–positive group of the same subset, the MPR for 1 to 2 blocks was not
+statistically significantly different than the MPR for 3 to 4 blocks, 5
+to 6 blocks, or more than 6 blocks. These analyses were limited by
+small cohort sizes, however, and accordingly, more extensive sampling of the omentum may be necessary in the post–neoadjuvant
+chemotherapy setting, at least until the question can be specifically
+evaluated with larger datasets. For cases wherein the omentum
+is grossly abnormal in an unequivocal manner, prior studies appeared to show a broad-based consensus that 1 to 2 sections are
+sufficient.17-23 Our findings largely validate this guideline. When
+our multifocally abnormal and diffusely abnormal groups are combined, the MPR was 95.5% at the 1 to 2 block sampling level and was
+not statistically significantly increased by higher levels of sampling.
+Our study also assessed, for the first time, the significance of “focal”
+abnormality, wherein there is a discrete abnormality in an otherwise unremarkable omentum. This group represented a substantial
+6
+
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+proportion of our cohort: 27% (140/519) of grossly abnormal cases
+and 13% (140/1055) of all cases. The overall MPR for the focally
+abnormal group was 66.4%, indicative of a statistically significant
+false-positive rate. There was no statistically significant difference
+between the MPR for the 1 to 2 block group (70.1%) and that of either
+the 3 to 4 block (73%) or the 5 to 6 block (64.3%) groups. The MPR
+for the more than 6 blocks group (28.6%) was statistically significantly lower than each of the other block groups. This finding may
+reflect the wide variety of gross aberrations that can plausibly be
+described as focally abnormal, large subsets of which are ultimately
+found to be devoid of microscopic abnormality. Similarly, cases
+with extensive sampling (>6 blocks) may overrepresent such cases
+because the prosector may be sampling them as though they are
+grossly normal if the gross abnormality is perceived to be equivocal.
+This group is arguably “intermediate” between the unequivocally
+grossly normal and abnormal cases and as such is most likely to
+show heterogeneity regarding what is considered focal abnormality.
+Future studies are required to further assess the question.
+© American Society for Clinical Pathology
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+Uterus
+
+American Journal of Clinical Pathology, 2025, Vol. XX, No. XX   |
+
+© American Society for Clinical Pathology
+
+been appropriately sectioned, examined, and concluded to be
+grossly normal or multifocally/diffusely abnormal, submitting 1 to
+2 sections results in an MPR that is not significantly lower than the
+MPR for the specific higher levels of sampling that were assessed
+herein, which suggests that any additional information obtained
+from such higher levels of sampling are limited. Future studies
+using data from different practice settings and different patient
+populations are required to further evaluate the question.
+
+Conflicts of interest
+The authors declare no conflict of interest.
+
+Funding
+None declared.
+
+References
+1.
+
+2.
+
+3.
+
+4.
+
+5.
+6.
+
+7.
+
+8.
+
+9.
+
+10.
+
+11.
+
+12.
+
+Berek JS, Renz M, Kehoe S, Kumar L, Friedlander M. Cancer of the ovary,
+fallopian tube, and peritoneum: 2021 update. Int J Gynaecol Obstet.
+2021;155:61-85. doi:10.1002/ijgo.13878
+Berek JS, Matias-Guiu X, Creutzberg C, et al; Endometrial Cancer
+Staging Subcommittee, FIGO Women's Cancer Committee. FIGO
+staging of endometrial cancer: 2023. Int J Gynaecol Obstet. 2023;162:383394. doi:10.1002/ijgo.14923
+Koskas M, Amant F, Mirza MR, Creutzberg CL. Cancer of the corpus
+uteri: 2021 update. Int J Gynaecol Obstet. 2021;155:45-60. doi:10.1002/
+ijgo.13866
+Arie AB, McNally L, Kapp DS, Teng NN. The omentum and
+omentectomy in epithelial ovarian cancer: a reappraisal: part II—the
+role of omentectomy in the staging and treatment of apparent early
+stage epithelial ovarian cancer. Gynecol Oncol. 2013;131:784-790.
+doi:10.1016/j.ygyno.2013.09.013
+van der Burg ME. Advanced ovarian cancer. Curr Treat Options Oncol.
+2001;2:109-118. doi:10.1007/s11864-001-0053-1
+Lee JY, Kim HS, Chung HH, Kim JW, Park NH, Song YS. The role
+of omentectomy and random peritoneal biopsies as part of
+comprehensive surgical staging in apparent early-stage epithelial
+ovarian cancer. Ann Surg Oncol. 2014;21:2762-2766. doi:10.1245/s10434014-3648-z
+Shroff R, Brooks RA, Zighelboim I, et al. The utility of peritoneal biopsy
+and omentectomy in the upstaging of apparent early ovarian cancer. Int
+J Gynecol Cancer. 2011;21:1208-1212. doi:10.1097/IGC.0b013e31822127cd
+Joo WD, Schwartz PE, Rutherford TJ, et al. Microscopic omental
+metastasis in clinical stage I endometrial cancer: a meta-analysis. Ann
+Surg Oncol. 2015;22:3695-3700. doi:10.1245/s10434-015-4443-1
+Bayrak M, Yılmaz A, Yılmaz F, İlhan O, Oz Atalay F, Ozan H. Omental
+micrometastasis in endometrial cancer. Oncol Res Treat. 2019;42:466469. doi:10.1159/000501727
+Gülseren V, Çakır I, Kelten EC, et al. Risk factors for omental metastasis
+and the effect of omentectomy on survival in type 2 endometrial
+cancer patients. Curr Probl Cancer. 2023;47:101018. doi:10.1016/j.
+currproblcancer.2023.101018
+Xu H, Cui SS, Ran L, et al. Incidence of omental metastasis in
+uterine serous carcinoma: a systematic review and meta-analysis.
+J Gynecol Obstet Hum Reprod. 2022;51:102395. doi:10.1016/j.
+jogoh.2022.102395
+Garcia E, Kundu I, Kelly M, Soles R. The American Society for Clinical
+Pathology 2022 vacancy survey of medical laboratories in the United
+States. Am J Clin Pathol. 2024;161:289-304. doi:10.1093/ajcp/aqad149
+
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+7
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+In the present analysis, the gross appearance of the omentum
+compared with its microscopically determined tumor-positive vs
+tumor-negative status was found to have an overall agreement of
+85% (the “any abnormality” standard), representing the accuracy of
+gross assessment. This finding is less than the 97.1% and 97.3% accuracies previously reported in the studies of Doig and Monaghan14
+and Usubutun et al,15 respectively. The discrepancy can be explained
+by a myriad of factors associated with differences in study design.
+For example, only ovarian cases were part of the studied cohort
+in Doig and Monaghan,14 including benign tumors that inherently
+overrepresent the true-negative component of the accuracy analysis. Previous studies also variably excluded cases that were reportedly “fibrosed,” several histotypes of ovarian neoplasia, uterine
+tumors, and metastatic tumors.14-16 Our analysis included all cases,
+regardless of the presence or degree of omentum abnormality, and
+was centered on malignancies and borderline tumors. This approach reflects the practical reality that mass-forming involvement
+of the gynecologic tract, particularly the ovaries, may not have a
+clear histopathologic diagnosis at the time of grossing, but the
+associated omentum specimens are nevertheless grossed and sampled similar to those that do. Most importantly, a standard of “any
+abnormality” includes every level of gross abnormality, from focal
+(lower MPR) to diffuse (higher MPR); the latter standard was used
+in most prior studies and, if applied exclusively in the current study,
+would have resulted in an MPR of close to 97%. More generally, the
+findings in this study highlight the statistical significance of gross
+assessment in omentum sampling but also clearly demonstrates
+that the predictive ability of gross abnormalities for microscopically
+confirmed disease is imperfect.
+There are some potential limitations associated with this study,
+most of which are inherent to its retrospective design, that should
+be considered in any conclusions that are ultimately drawn from
+it. Most notably, study cases were based on a review of pathology
+reports that were generated over a more than 20-year period, and
+as such, necessarily included descriptions from a spectrum of
+prosectors at widely varying levels of professional development,
+ranging from junior residents and pathologist assistant students
+to experienced pathologist assistants. There was likely some heterogeneity and interobserver variability regarding the presence, extensiveness, and descriptions of specific abnormalities. Our analysis
+presumed appropriate sectioning and evaluations by a multitude
+of individuals over a long period. Imbalances associated with the
+number of cases in each block group highlighted the aforementioned variability in practice inherent to the retrospective nature
+of the analysis. Furthermore, a block to size ratio for larger omenta
+may not reflect a perfectly proportionally increased level of sampling compared with smaller omenta. Future studies that mitigate
+these potential limitations would be prospective, submit a fixed
+number of blocks regardless of gross abnormality, and have cases be
+grossed by a single or limited group of prosectors. The strengths of
+this study include its large size, focus of malignancies and borderline tumors, and multifaceted examination of the issue.
+In summary, our study suggests that in the setting of neoplasia involving the female genital tract, when an omentum has
+
+     | American Journal of Clinical Pathology, 2025, Vol. XX, No. XX
+Miskiel S, Khreshi S, Bombonati A, Pagliaro A, Khraishi R. The decline
+of Medicare reimbursement in clinical pathology. Am J Clin Pathol.
+2024;162(suppl 1):S100-S101. doi:10.1093/ajcp/aqae129.223
+
+14.
+
+Doig T, Monaghan H. Sampling the omentum in ovarian neoplasia:
+when one block is enough. Int J Gynecol Cancer. 2006;16:36-40.
+doi:10.1111/j.1525-1438.2006.00273.x
+
+15.
+
+Usubütün A, Ozseker HS, Himmetoglu C, Balci S, Ayhan A.
+Omentectomy for gynecologic cancer: how much sampling is adequate
+for microscopic examination? Arch Pathol Lab Med. 2007;131:1578-1581.
+doi:10.5858/2007-131-1578-OFGCHM
+
+16.
+
+Skala SL, Hagemann IS. Optimal sampling of grossly normal omentum
+in staging of gynecologic malignancies. Int J Gynecol Pathol. 2015;34:281287. doi:10.1097/PGP.0000000000000148
+
+17.
+
+Ganesan R, Singh N, McCluggage WG. Standards and datasets for reporting
+cancers; dataset for histological reporting of endometrial cancer. The Royal
+College of Pathologists. 2017. Accessed August 2, 2025. https://www.rcpath.
+org/static/124ed697-f771-49d0-856958f1a0ae3ed9/30243a46-9850-41dd91001b8e58369b2a/G090-Dataset-for-the-histopathological-reportingof-endometrial-cancer-For-publication.pdf
+
+18.
+
+8
+
+Liebmann R, Varma M. Best practice recommendations: histopathology
+and cytopathology of limited or no clinical value. Royal College of
+Pathologists. 2025. Accessed August 2, 2025. https://www.rcpath.org/
+static/3e19a02e-7ef3-4690-8b7ee4e3cc661888/821eb239-7b70-446cbaed83e12e2547a6/G177-BPR-Histopathology-and-cytopathology-oflimited-or-no-clinical-value.pdf
+
+Am J Clin Pathol 2025;XX:1-8
+https://doi.org/10.1093/ajcp/aqaf082
+
+19.
+
+20.
+
+21.
+
+22.
+23.
+24.
+
+25.
+
+26.
+
+Malpica A, Euscher ED, Hecht JL, et al. Endometrial carcinoma, grossing
+and processing issues: recommendations of the International Society
+of Gynecologic Pathologists. Int J Gynecol Pathol. 2019;38:S9-S24.
+doi:10.1097/PGP.0000000000000552
+Matias-Guiu X, Anderson L, Buza N, et al. Endometrial Cancer
+Histopathology Reporting Guide. 5th ed. International Collaboration on
+Cancer Reporting; 2024.
+Matias-Guiu X, Selinger CI, Anderson L, et al. Data set for the reporting
+of endometrial cancer: recommendations from the International
+Collaboration on Cancer Reporting (ICCR). Int J Gynecol Pathol.
+2022;41:S90-S118. doi:10.1097/PGP.0000000000000901
+Westra WH, Hruban RH, Phelps TH, Isacson C. Surgical Pathology
+Dissection: An Illustrated Guide. 2nd ed. Springer-Verlag; 2003.
+Lester SC. Manual of Surgical Pathology. 4th ed. Elsevier; 2022.
+The University of Chicago Department of Pathology. Gross Pathology
+Manual. Accessed February 16, 2025. https://voices.uchicago.edu/
+grosspathology/gyne/omentum-gyn/
+University of California Los Angeles. Gynecologic Pathology Grossing
+Guidelines. Accessed February 16, 2025. https://www.uclahealth.org/
+sites/default/files/documents/Omentum.pdf
+Hynninen J, Lavonius M, Oksa S, Grénman S, Carpén O, Auranen
+A. Is perioperative visual estimation of intra-abdominal tumor
+spread reliable in ovarian cancer surgery after neoadjuvant
+chemotherapy? Gynecol Oncol. 2013;128:229-232. doi:10.1016/j.
+ygyno.2012.11.007
+
+© American Society for Clinical Pathology
+
+Downloaded from https://academic.oup.com/ajcp/advance-article/doi/10.1093/ajcp/aqaf082/8229614 by hacettepe university user on 02 September 2025
+
+13.
+
+

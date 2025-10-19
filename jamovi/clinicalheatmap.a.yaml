@@ -1,7 +1,7 @@
 ---
 name: clinicalheatmap
 title: Clinical Heatmap
-menuGroup: OncoPathT
+menuGroup: OncoPathT2
 menuSubgroup: Visualization
 menuSubtitle: Tidy Heatmaps for Clinical Data
 version: '0.0.31'

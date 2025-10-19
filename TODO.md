@@ -98,13 +98,31 @@ Key Styling Elements (matching decisionpanel):
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"
 ! Rscript -e "devtools::load_all()"
+
+update DECSRIPTION, NEWS, README, and function Roxygen documentations. 
+
 ! Rscript -e "pkgdown::build_site()"
 ! Rscript -e "pkgdown::build_site(examples = FALSE, lazy = TRUE, preview = FALSE)"
 
+
+
 run jmvtools::prepare() to see if there are any errors
 run devtools::document() to see if there are any errors
+
+
 
 prepare a realistic data to test the features in detail
 move csv files under data folder.
 move data generation files under data-raw folder.
 move documentation files under module specific vignettes folder.
+
+
+read this study, evaluate it. update omentum study results and pathsampling implementation accordingly.
+
+
+
+
+Routinely we have following: BiopsyNumber, Total Number of Blocks, How many of these blocks have tumor, If there is a tumor what is the first block number, if there is a tumor in which blocks is it present. We have these information. We cannot know if there were tumor if we submitted whole omentum.
+We do not know if surgeon has sent correct tissue that is beyond us. In macroscopy we take samples/blocks from submitted tissue. 5-10 blocks per case. there will be theoretical false negative due to gross sampling or false negative due to microscopic sampling (small tumors may be lost with trimming). we cannot be certain for this. we are trying to identify the number of minimum sections taken to get the highest correct answer for the patient. 
+Some tumors (serous) tend to metastasise more than others (endometrioid). So it may be informative to add negative cases to understand the tumor biology, the probability of metastasising in that tumor. 
+To continue this session, run codex resume 0199d3a9-6a19-7f91-8124-a9d493708b4a.

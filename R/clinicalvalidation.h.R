@@ -765,7 +765,7 @@ clinicalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package = "ClinicoPath",
                 name = "clinicalvalidation",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = clinicalvalidationResults$new(options=options),
                 data = data,

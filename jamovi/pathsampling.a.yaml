@@ -1,0 +1,299 @@
+---
+name: pathsampling
+title: Pathology Sampling Adequacy Analysis
+menuGroup: OncoPathT
+menuSubgroup: ClinicoPath Descriptives
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: totalSamples
+      title: Total Samples
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: firstDetection
+      title: First Detection
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: positiveCount
+      title: Positive Samples Count (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: positiveSamplesList
+      title: Positive Samples List (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+
+    - name: sampleType
+      title: Sample Type/Subtype (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+
+    - name: groupBy
+      title: Cohort Groups (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+
+    - name: targetConfidence
+      title: Target Confidence
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+
+    - name: maxSamples
+      title: Maximum Samples
+      type: Integer
+      min: 1
+      max: 50
+      default: 10
+
+    - name: bootstrapIterations
+      title: Bootstrap Iterations
+      type: Integer
+      min: 100
+      max: 100000
+      default: 10000
+
+    - name: showBinomialModel
+      title: Show Binomial Model
+      type: Bool
+      default: true
+
+    - name: showBootstrap
+      title: Show Bootstrap Analysis
+      type: Bool
+      default: true
+
+    - name: showDetectionCurve
+      title: Show Diagnostic Yield Curve
+      type: Bool
+      default: true
+
+    - name: showSensitivityCI
+      title: Show Sensitivity CI
+      type: Bool
+      default: true
+
+    - name: setSeed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seedValue
+      title: Seed Value
+      type: Integer
+      default: 42
+      min: 1
+
+    - name: positiveCassettes
+      title: Positive Cassettes (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: maxPositiveSingle
+      title: Max Foci per Cassette (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: showTumorBurden
+      title: Show Tumor Burden Analysis
+      type: Bool
+      default: false
+
+    - name: showStageMigration
+      title: Show Stage Migration Analysis
+      type: Bool
+      default: true
+
+    - name: showCorrelation
+      title: Show Correlation Plot
+      type: Bool
+      default: false
+
+    - name: showDistributionPattern
+      title: Show Distribution Pattern Analysis
+      type: Bool
+      default: false
+
+    - name: distributionThreshold
+      title: Distribution Threshold
+      type: Integer
+      min: 1
+      max: 20
+      default: 5
+
+    - name: modelType
+      title: Model Type
+      type: List
+      options:
+        - name: binomial
+          title: Binomial (infinite population)
+        - name: hypergeometric
+          title: Hypergeometric (finite population)
+        - name: betabinomial
+          title: Beta-Binomial (finite population with overdispersion)
+      default: binomial
+
+    - name: totalPopulation
+      title: Total Population (Finite Models)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: successStates
+      title: Success States (Finite Models)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: targetDetections
+      title: Target Detections
+      type: Integer
+      min: 1
+      max: 20
+      default: 1
+
+    - name: showHypergeometric
+      title: Show Hypergeometric Model
+      type: Bool
+      default: false
+
+    - name: showBetaBinomial
+      title: Show Beta-Binomial Model
+      type: Bool
+      default: false
+
+    - name: totalLymphNodes
+      title: Total Lymph Nodes
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: positiveLymphNodes
+      title: Positive Lymph Nodes
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: showLNAnalysis
+      title: Show LN Ratio & Staging
+      type: Bool
+      default: false
+
+    - name: lnrThreshold1
+      title: LNR Threshold 1
+      type: Number
+      min: 0.01
+      max: 1.00
+      default: 0.1
+
+    - name: lnrThreshold2
+      title: LNR Threshold 2
+      type: Number
+      min: 0.01
+      max: 1.00
+      default: 0.3
+
+    - name: showEffectSizes
+      title: Show Effect Sizes
+      type: Bool
+      default: false
+
+    - name: showOmentumAnalysis
+      title: Show Omentum Analysis
+      type: Bool
+      default: false
+
+    - name: showClinicalSummary
+      title: Show Clinical Summary
+      type: Bool
+      default: true
+
+    - name: showGuidedChecklist
+      title: Show Guided Checklist
+      type: Bool
+      default: true
+
+    - name: showEmpiricalCumulative
+      title: Show Empirical Cumulative Detection
+      type: Bool
+      default: false
+
+    - name: showSpatialClustering
+      title: Show Spatial Clustering Analysis
+      type: Bool
+      default: false
+
+    - name: showStratifiedAnalysis
+      title: Show Stratified Analysis by Sample Type
+      type: Bool
+      default: false
+
+    - name: showPopulationDetection
+      title: Show Population-Level Detection Rates
+      type: Bool
+      default: false
+
+    - name: showIncrementalYield
+      title: Show Incremental Diagnostic Yield
+      type: Bool
+      default: false
+
+    - name: showMultifocalAnalysis
+      title: Show Multifocal Detection Analysis
+      type: Bool
+      default: false
+
+    - name: estimationMethod
+      title: q Estimation Method
+      type: List
+      options:
+        - name: auto
+          title: Auto (use best available method)
+        - name: geometric
+          title: Geometric MLE (first detection only)
+        - name: empirical
+          title: Empirical Proportion (requires positive count)
+      default: auto

@@ -1,0 +1,26 @@
+"case_id","patient_age","tumor_type","tumor_characteristic","disease_stage","total_samples","first_detection"
+"OMENTUM_0001",65,"Endometrioid","Yes","IA",6,3
+"OMENTUM_0002",85,"Mucinous","Yes","IIA",5,3
+"OMENTUM_0003",63,"Clear cell","Yes","IA",5,6
+"OMENTUM_0004",77,"Serous","Yes","IA",7,4
+"OMENTUM_0005",53,"Clear cell","Yes","IA",7,2
+"OMENTUM_0006",54,"Serous","Yes","IB",5,1
+"OMENTUM_0007",45,"Endometrioid","Yes","IIIC",5,2
+"OMENTUM_0008",82,"Endometrioid","Yes","IC",5,6
+"OMENTUM_0009",45,"Serous","No","IIB",7,2
+"OMENTUM_0010",71,"Serous","Yes","IA",6,2
+"OMENTUM_0011",59,"Serous","No","IC",5,1
+"OMENTUM_0012",53,"Endometrioid","Yes","IIB",7,8
+"OMENTUM_0013",71,"Endometrioid","Yes","IIIC",5,3
+"OMENTUM_0014",82,"Clear cell","Yes","IIIA",5,1
+"OMENTUM_0015",44,"Serous","No","IIIB",6,1
+"OMENTUM_0016",61,"Mucinous","Yes","IIIB",4,3
+"OMENTUM_0017",51,"Serous","Yes","IV",5,5
+"OMENTUM_0018",60,"Serous","Yes","IV",5,1
+"OMENTUM_0019",76,"Endometrioid","Yes","IV",6,1
+"OMENTUM_0020",43,"Serous","Yes","IC",5,2
+"OMENTUM_0021",60,"Endometrioid","Yes","IB",4,3
+"OMENTUM_0022",58,"Serous","Yes","IIB",6,1
+"OMENTUM_0023",45,"Endometrioid","Yes","IV",5,5
+"OMENTUM_0024",52,"Endometrioid","No","IIA",5,3
+"OMENTUM_0025",57,"Serous","Yes","IV",4,1

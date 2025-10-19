@@ -1,0 +1,1082 @@
+Mod Pathol 38 (2025) 100885
+
+Journal homepage: https://modernpathology.org/
+
+Research Article
+
+Lymphovascular Space Invasion in Endometrial Cancer: Does it Matter
+Where and How Much to Sample? A Macroscopic Study of 208
+Hysterectomies
+Deniz Atesa, Sevilay Karahanb, Aleyna Oruça, Alp Usubutuna,*
+a
+
+Department of Medical Pathology, Hacettepe University School of Medicine, Ankara, Turkey; b Department of Biostatistics, Hacettepe University School of Medicine, Ankara,
+Turkey
+
+A R T I C L E I N F O
+Article history:
+Received 17 February 2025
+Revised 13 August 2025
+Accepted 19 August 2025
+Available online 11 September 2025
+Keywords:
+endometrial cancer
+lymphovascular space invasion
+lymphovascular
+macroscopy
+prognosis
+sampling
+
+A B S T R A C T
+Lymphovascular space invasion (LVSI) is a key prognostic factor in endometrial cancer, guiding
+adjuvant treatment decisions. This retrospective study analyzed 208 hysterectomy specimens with
+conﬁrmed  LVSI to determine optimal sampling strategies for detecting substantial LVSI. Samples/
+blocks from tumor inﬁltration  fronts were reviewed microscopically, and LVSI foci were counted
+per slide and summed across all slides. Cutoffs of ≥5, ≥4, and ≥3 LVSI foci were evaluated. Only the
+≥5 threshold signiﬁcantly  correlated with lymph node metastasis (P = .038) compared with <5
+LVSI. Both patients with ≥5 LVSI foci either on a single slide or those reaching this threshold by
+summing across slides were associated with nodal metastasis (P = .023). However, signiﬁcantly 
+worse overall survival was observed only in patients with ≥5 foci on a single slide, not in those
+reaching the threshold by summing across multiple slides (P < .001). Focal LVSI (<5 foci) showed no
+signiﬁcant  overall survival compared with substantial LVSI. Increased sampling from the tumor
+inﬁltration  front improved LVSI detection rates (P < .001), but gains in detecting substantial LVSI
+plateaued after 7 samples/blocks. Higher LVSI levels were associated with deep LVSI and cervical/
+endocervical LVSI (P < .001). Deep LVSI was linked to reduced overall survival compared with
+superﬁcial  LVSI (P < .001), whereas cervical/endocervical LVSI showed no signiﬁcant  association
+with overall survival (P = .273). Tumor grade, deep LVSI, and cervical involvement predicted nodal
+metastasis, whereas the microcystic, elongated, and fragmented pattern did not. These ﬁndings 
+support using a threshold of ≥5 LVSI foci on at least 1 slide―as opposed to summing across
+slides―as a marker of worse overall survival. For optimal evaluation, at least 7 tumor inﬁltration 
+front samples/blocks should be taken, including deep myometrium and cervical/endocervical canal,
+to ensure adequate assessment and identify patients at higher risk of nodal spread.
+© 2025 United States & Canadian Academy of Pathology. Published by Elsevier Inc. All rights are
+reserved, including those for text and data mining, AI training, and similar technologies.
+
+Introduction
+Endometrial cancer is the most common gynecologic malig­
+nancy in developed countries.1 Surgery plays a key role in the
+management of the disease, and surgical specimens are evaluated
+* Corresponding author.
+E-mail address: alpusubutun@yahoo.com (A. Usubutun).
+
+for prognostic indicators. One of the most important prognostic
+factors is lymphovascular space invasion (LVSI). Cases with LVSI are
+associated with higher rates of lymph node metastasis, pelvic
+recurrence, and distant metastasis.2-4 LVSI is deﬁned as the pres­
+ence of tumor cells within endothelium-lined spaces at the tumor
+inﬁltration front―the area where the tumor ends and the inﬁl­
+trating myometrium begins, independent of the main tumor mass.
+
+0893-3952/$ - see front matter © 2025 United States & Canadian Academy of Pathology. Published by Elsevier Inc. All rights are reserved, including those
+for text and data mining, AI training, and similar technologies.
+https://doi.org/10.1016/j.modpat.2025.100885
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+
+• Weight of the hysterectomy
+• Largest tumor diameter
+• Presence and localization of metastatic lymph nodes (isolated
+pelvic, pelvic + paraaortic, isolated paraaortic, others such as
+renal vein, parametrial, omental, etc.)
+• Number of metastatic lymph nodes.
+
+Currently, it has been demonstrated that the presence of
+substantial LVSI, rather than just its presence, is crucial in
+determining prognosis. This information has been incorporated
+into the current guidelines for managing the disease and the
+latest Federation of Gynecology and Obstetrics (FIGO) staging.5
+There are a range of opinions regarding the number of LVSI that
+are considered substantial. The FIGO 2023 staging, 2020 World
+Health Organization Classiﬁcation of Female Genital Tumors, and
+the European Society of Gynecological Oncology/European Soci­
+ety for Radiotherapy and Oncology/European Society of Pathol­
+ogy guidelines deﬁne  substantial LVSI as ≥5, whereas the
+National Comprehensive Cancer Network guideline deﬁnes it as
+≥4, and the International Collaboration on Cancer Reporting and
+IsGyP 2019 Endometrial Cancer Project recommendations deﬁne 
+it as ≥3.6-10 Although substantial LVSI has been included in these
+guidelines, it remains one of the key challenges in the evaluation
+of LVSI in endometrial carcinoma, particularly with semi­
+quantitative use of 2-, 3-, or 4-tier scoring systems.11-13 However,
+due to a lack of data, it is unclear whether these numbers should
+be obtained on a single slide or counted and summed across all
+slides. Additionally, it remains unknown whether the number of
+samples submitted from the tumor has any effect on the
+commonly deﬁned  substantial LVSI number, or whether the
+sampling site of the tumor (uterus or cervix) and the location of
+LVSI itself (uterus or cervix, surface or deep) are signiﬁcant fac­
+tors. This study aimed to assess the relationship between
+macroscopic/sampling parameters and LVSI count and to deter­
+mine the optimal cutoff for distinguishing focal and substantial
+LVSI.
+
+Microscopically assessed parameters included:
+• Sampling site of the tumor (corpus uteri alone or both corpus
+uteri and cervix)
+• Tumor grade (I, II, or III)
+• Tumor histologic type
+• Number of samples having a tumor inﬁltration front
+• Number of LVSI per slide showing a tumor inﬁltration front
+and total number of LVSI
+• Number of samples from the cervix or endocervix
+• Number of samples that included the serosal surface
+• Presence of microcystic, elongated, fragmented (MELF)
+pattern
+• Depth of LVSI (superﬁcial or combined superﬁcial + deep)
+• Localization of LVSI (only the corpus uteri or additionally
+cervix/endocervix)
+• Lymph node metastasis: micrometastatic vs macrometastatic.
+Slides without a tumor inﬁltration front (ie, slides containing
+only tumor tissue or no tumor) were excluded from the study
+conducted to determine the optimal number of sections to be
+sampled. The LVSI, which was located within the tumor stroma
+(observed in a few cases), was not included in the LVSI count
+according to checklist recommendation14 (Supplementary Table).
+Our institution's established standard protocol was utilized
+for tissue submission, which allows for the submission of 2 cer­
+vical and 2 endocervical canal samples, as well as at least 4
+samples containing full-thickness myometrium and tumor from a
+hysterectomy specimen with endometrial carcinoma. However,
+this number may increase as needed. For instance, if endocervical
+stromal invasion is suspected, additional samples can be
+submitted.
+The tumor inﬁltration front was deﬁned as an area at least 1
+mm deep marking the interface between tumor and stroma. If a
+single slide showed >20 LVSI foci poses a spray-like pattern
+(Fig. 1A), the number was recorded as “>20” and assigned the
+value of 30 during statistical analysis. LVSI numbers from all
+relevant slides were summed and grouped as follows: ≥5 and <5,
+≥4 and <4, or ≥3 and <3. The number of LVSI foci was recorded
+separately for each slide with a tumor inﬁltration front.
+LVSI in the cervix/endocervix is deﬁned  as the presence of
+lymphovascular invasion within stromal vessels located beneath
+the endocervical or ectocervical epithelium (Fig. 1B). Deep myo­
+metrial LVSI was deﬁned as LVSI located at least 3 mm beyond the
+invasive tumor front in the outer half of the myometrium. This
+included either (1) cases where no tumor was seen in the
+endometrium but LVSI was detected in the outer myometrium,
+especially in the tumor-free endomyometrial sample adjacent to
+the tumor, or (2) cases with deep myometrial invasion, where
+LVSI was observed >3 mm beyond the deepest point of tumor
+inﬁltration into the outer myometrium (Fig. 1C, D). Tumors with
+deep invasion and a tumor inﬁltration front near the serosa were
+not classiﬁed as having deep LVSI. However, LVSI located near the
+serosa but distant from the tumor front was considered deep
+LVSI.
+The authors noted that in some hysterectomies, most slides
+showed no LVSI, whereas 1 to 2 slides showed a high number of
+
+Materials and Methods
+Case Selection and Inclusion Criteria
+This study was approved by the Institutional Review Board
+under research number GO-23-203. Of the 1278 patients diag­
+nosed with endometrial cancer between 2014 and 2023, 760
+cases reported as LVSI negative in pathology reports were
+excluded. A total of 518 patients were initially included: 269 with
+reported LVSI positivity and 249 with unspeciﬁed  LVSI status.
+Hematoxylin and eosin slides were unavailable for 27 cases. Upon
+re-examination under light microscopy, LVSI was not identiﬁed in
+235 cases―most of which (179 or 76.1%) were consultation cases
+lacking LVSI documentation in the original reports. An additional
+46 cases were excluded due to contamination, autolysis, or other
+artifacts that precluded an objective assessment. In these cases,
+the extent of technical artifacts was such that grading and his­
+totype determination of the tumor were not possible. Two further
+cases were excluded because the endomyometrial junction could
+not be identiﬁed.  Ultimately, 208 hysterectomies that met the
+checklist criteria14 (Supplementary Table) and demonstrated
+unequivocal LVSI positivity were included in the ﬁnal  analysis.
+The checklist criteria are detailed in the Supplementary Material.
+For these 208 cases, each hematoxylin and eosin slide containing
+a tumor inﬁltration front was thoroughly examined under light
+microscopy, and the number of LVSI foci per slide was recorded.
+
+Data Collection and Histopathology Review
+The parameters obtained from pathology reports are as
+follows:
+2
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+
+Figure 1.
+(A) More than 20 foci of LVSI in a spray-like pattern, representing substantial LVSI (H&E, ×40). (B) LVSI in the endocervical canal* (H&E, ×40). (C, D) LVSI in the deep
+myometrium*, located at a distance from the main tumor mass (H&E, ×20). Blue arrows indicate LVSI; red arrows indicate the serosal surface. *Cases with LVSI in the deep
+myometrium and cervix/endocervical canal typically show a higher total LVSI count, are more likely to be classiﬁed as substantial LVSI, and are frequently associated with nodal
+metastases and a greater number of metastatic lymph nodes. H&E, hematoxylin and eosin; LVSI, lymphovascular space invasion.
+
+The survival probabilities were estimated using the KaplanMeier method. The log-rank test was used to compare the sur­
+vival curves of different groups. Cox regression analysis was used
+to determine factors affecting survival probabilities.
+
+foci, usually at the deepest invasive area, indicating substantial
+lymphovascular invasion. To reﬂect  the impact of macroscopic
+sampling and slide count on distribution, a variation score was
+calculated to express deviation between slide-speciﬁc  LVSI
+counts. Patient follow-up data, including overall survival status,
+were retrieved from hospital and national health databases and
+conﬁrmed via patient phone calls when necessary.
+
+Results
+Descriptive Results
+
+Statistical Analysis
+
+Two hundred eight hysterectomies with LVSI (45 consults, 163
+in-house) were included in the study. The mean age of patients
+was 61.37 years (range, 36-85; SD, 9.93). One hundred ﬁfty cases
+(72.1%) had ≥5 LVSI foci. For alternative cutoffs, 167 cases (80.3%)
+had ≥4, and 180 cases (86.5%) had ≥3. Of the 208 hysterectomies,
+13 patients did not undergo lymphadenectomy, metastatic status
+was unknown in 38 patients, 84 patients had no metastatic
+lymph nodes, and 73 patients had lymph node metastases.
+The mean number of slides demonstrating the tumor inﬁl­
+tration front was 6 (range, 0-15; SD, 2.45). Slides showing the
+serosal surface had a mean count of 4.7 (range, 0-15; SD, 2.2). The
+mean number of sections obtained from the cervix and endo­
+cervix was 3.6 (range, 0-8; SD, 1.4). The details of the evaluated
+parameters and study cohort are provided in Table 1.
+
+All analyses were conducted using IBM SPSS, version 23.0.
+Descriptive statistics for histologic diagnosis, hysterectomy
+weight, tumor size, number of samples submitted from the
+tumor inﬁltration  front, tumor localization, number of LVSI
+foci, presence of MELF pattern, and metastatic lymph node
+data (number and site) were summarized using mean ± SD,
+median (25th-75th percentile), or frequency/percentage as
+appropriate.
+Associations with lymph node metastasis were assessed using
+the Mann-Whitney U-test, Spearman correlation, or χ2 test based
+on variable type and parametric assumptions. Receiver operating
+characteristic (ROC) curve analysis was used to determine a cutoff
+value for total LVSI. As data for total LVSI were nonparametric and
+the substitution would not affect results, the value of 30 was used
+for any case where LVSI count exceeded 20.
+The SD of LVSI counts across slides from each patient was
+used to represent variation. The signiﬁcance  threshold was set
+at P < .05.
+
+Results in Correlation With Total Lymphovascular Invasion
+Three literature-based cutoffs for total LVSI (≥5 vs <5, ≥4 vs
+<4, and ≥3 vs <3) were evaluated in 208 hysterectomies.
+3
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+Table 1
+Study cohort and descriptive results
+Parameter (n = 208)
+
+Study cohort
+
+Age of the patients (y)
+
+Mean: 61.37 (min: 36; max: 85; SD: 9.93)
+
+Weight of the histerectomy (g)
+
+Mean: 169 (min, 36; max, 1486; SD, 150.86)
+
+Total no. of LVSI (n = 208)
+
+<5: 58 (27.9%) ≥5: 150 (72.1%)
+<4: 41 (19.7%) ≥4: 167 (80.3%)
+<3: 28 (13.5%) ≥3: 180 (86.5%)
+
+Lymph node status
+
+Reactive: 84
+Metastatic: 73 (26 isolated pelvic, 34 pelvic + paraaortic, 8 isolated paraaortic, 5 other) (64 macromet,
+8 micromet, 1 isolated tumor cells)
+No lymph node dissection: 13
+Lymph node status unknown: 38
+
+No. of metastatic lymph nodes
+
+Mean: 5.76 (min: 1; max: 24 SD: 5.72)
+
+Tumor localization
+
+Localized to corpus uteri: 139
+Cervix/endocervical involvement: 69
+
+Tumor type
+
+Endometrioid: 168
+Serous: 32
+Dedifferentiated: 5
+Clear cell: 2
+Clear + endometrioid: 1
+
+Tumor grade
+
+I: 60
+II: 49
+III: 99 (59 endometrioid, 32 serous, 5 dedifferentiated, 2 clear cell, 1 endometrioid+clear cell)
+
+No. of samples showing the tumor invasion front
+
+Mean: 6 (min: 1; max: 15; SD: 2.45)
+
+No. of samples showing the serosal surface
+
+Mean: 4.7 (min: 0; max: 15; SD: 2.2)
+
+No. of samples from the cervix or endocervix.
+
+Mean: 3.6 (min: 0; max: 8; SD: 1.4).
+
+Microcystic elongated fragmented pattern
+
+Yes: 51 (24%)
+No: 157 (66%)
+
+Depth of LVSI
+
+Superﬁcial: 181
+Superﬁcial+ deep: 27
+
+LVSI in cervix or endocervix
+
+Yes: 39
+No: 151
+Unknown: 18
+
+LVSI, lymphovascular space invasion.
+
+Although lymph node metastasis was signiﬁcantly  associated
+with the ≥5 cutoff (P = .038), there was no significant association
+for the ≥4 and ≥3 thresholds (P = .082 and P = .425, respectively)
+(Table 2). Based on these results, the threshold for substantial
+LVSI was set at ≥5 in this study. Detailed analyses according to
+LVSI counts are presented in Table 3. Total LVSI increased with
+larger tumor diameter, histologic type (serous vs endometrioid),
+tumor grade (1 + 2 vs 3), and the number of tumor inﬁltration
+front samples (P = .04, P < .001, P < .001, P < .001, respectively). In
+contrast, LVSI was not increased in tumors with the MELF pattern
+(P = .757). Moreover, the rate of substantial (≥5) LVSI detection
+rose with a higher number of samples with tumor inﬁltration
+front (P < .001). LVSI was also more common in tumors involving
+the cervix or endocervical canal (P < .001). Lymphovascular in­
+vasion in the cervix/endocervix and deep myometrium distant
+from the tumor was signiﬁcantly associated with increased total
+LVSI (both P < .001). Substantial (≥5) LVSI was also signiﬁcantly 
+more frequent in these subgroups (P = .007 and P = .020,
+respectively).
+There was a positive correlation between the number of
+samples with tumor invasive front and total LVSI (r = 0.212, P <
+.001). This signiﬁcance  held when cases were grouped as ≥5
+versus <5 LVSI (P = .045). An ROC analysis determined the
+number of inﬁltration front samples needed to detect substantial
+LVSI. Detection of ≥5 LVSI increased with up to 7 tumorinﬁltrated samples; beyond 7, detection rates plateaued (sensi­
+tivity, 50.7%; speciﬁcity, 64%; area under the curve, 59.1). To
+examine if this threshold was inﬂuenced  by tumor size, the
+number of inﬁltration front samples per centimeter of tumor was
+
+calculated. However, total LVSI did not increase with a higher
+sample/cm ratio (P = .816).
+
+Correlation of Metastatic Lymph Nodes and the Presence of
+Metastatic Lymph Nodes
+Of the 208 patients, 157 had known lymph node status (84
+benign; 73 with metastasis, including 64 macrometastatic, 8
+micrometastatic, and 1 with isolated tumor cells) (Table 1).
+Table 4 details parameters related to the presence and
+number of metastatic lymph nodes. Both were signiﬁcantly
+associated with increasing tumor diameter and tumor grade
+(P = .032 and P = .025). Serous tumors were associated with a
+higher number of metastatic lymph nodes (P = .008). The
+MELF pattern did not predict lymph node metastasis (P = .971
+and P = .686 for presence and number, respectively). Cervical
+or endocervical involvement correlated with higher presence
+(P = .023) and number (P < .001) of lymph node metastases.
+Moreover, patients with LVSI in the cervix/endocervix or LVSI
+in deep myometrium had more lymph node metastases
+(presence: P = .017 and 0.026; number: P = .003 and <.001,
+respectively).
+To assess whether LVSI should be measured per slide or
+summed, 150 substantial LVSI cases (≥5) were divided as follows:
+• 124 had ≥5 LVSI on at least 1 slide
+• 26 reached ≥5 by summing across slides
+4
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+Table 2
+Results for total lymphovascular space invasion with cutoffs (≥5 and <5, ≥4 and <4, or ≥3 and <3) and correlation with presence of lymph node metastasis in terms of
+patient number
+Parameter
+
+Total LVSI cutoff
+
+Is there lymph node metastasis?
+
+P values for diffuse vs focal LVSI
+<5
+
+≥5
+
+Yes (n = 73)
+
+15 (20.5%)
+
+58 (79.5%)
+
+No (n = 84)
+
+53 (63.1%)
+
+31 (36.9)
+
+.038
+
+Unknown (n= 51)
+<4
+
+≥4
+
+Yes (n = 73)
+
+10 (13.7%)
+
+63 (86.3%)
+
+No (n = 84)
+
+22 (26.2%)
+
+62 (73.8%)
+
+.082
+
+Unknown (n = 51)
+<3
+
+≥3
+
+Yes (n = 73)
+
+8 (11%)
+
+65 (89%)
+
+No (n = 84)
+
+14 (16.7%)
+
+70 (83.3%)
+
+.425
+
+Unknown (n = 51)
+LVSI, lymphovascular space invasion.
+
+investigated the amount of LVSI.12,13,15-17 The prognostic value of
+substantial LVSI is now widely accepted and has been incorpo­
+rated into the World Health Organization 2020 classiﬁcation and
+guidelines.6 The FIGO 2023 staging system deﬁnes  substantial
+LVSI as ≥5 foci,5 although interobserver agreement among pa­
+thologists remains suboptimal,18 and there is still no clear
+consensus on the exact cutoff number. Some studies have pro­
+posed using thresholds of ≥39,10 or ≥4 LVSI foci.8,12,17
+Regarding the commonly used LVSI cutoffs in the literature,
+we observed that a threshold of ≥5 vs <5 was signiﬁcant  in
+predicting lymph node metastasis in our study, both in terms of
+the number of metastatic lymph nodes and lymph node posi­
+tivity. In contrast, cutoffs of 4 vs <4 and ≥3 vs <3 were not sta­
+tistically signiﬁcant.  However, no difference in overall survival
+was observed between focal LVSI and any of the aforementioned
+cutoffs. Although overall survival is not the sole clinical param­
+eter indicative of prognosis, this does not necessarily imply a lack
+of prognostic value. These ﬁndings  suggest that, when deter­
+mining a cutoff for LVSI to predict lymph node metastasis, a
+threshold of ≥5 foci appears to be the most appropriate.
+One of the ongoing controversies in LVSI evaluation is whether
+the number of foci should be assessed on at least a single slide or
+summed across all slides. This study also aimed to address this
+question. Among patients with substantial LVSI (≥5, n = 150),
+there was no signiﬁcant difference in lymph node metastasis or
+the number of metastatic lymph nodes between those with ≥5
+foci on at least 1 slide (n = 124) and those with ≥5 foci only when
+summed across slides (n = 26). The literature on this issue re­
+mains inconclusive. For example, in the study by Peter et al,17
+substantial LVSI was deﬁned as the presence of ≥4 foci on a single
+slide, and pelvic lymph node recurrence was used as a clinical
+endpoint. In contrast, our study divided patients with substantial
+LVSI into 2 groups: 1 with ≥5 foci on at least 1 slide (n = 124), as
+in the study by Peter et al,14 and another with ≥5 foci only when
+summing across multiple slides (n = 26). Although no difference
+in lymph node positivity was observed between these 2 groups at
+diagnosis, overall survival analysis revealed that patients with ≥5
+foci on at least a single slide had a worse clinical prognosis. These
+ﬁndings  highlight the importance of clearly deﬁning  how sub­
+stantial LVSI is determined in pathology reports. Further inves­
+tigation in larger cohorts―including patients with negative LVSI,
+substantial LVSI across multiple slides, and substantial LVSI on a
+single slide―is warranted.
+The International Collaboration on Cancer Reporting guideline
+identiﬁes several artifacts that may mimic LVSI, the most notable
+
+No signiﬁcant difference was found in metastatic lymph node
+count (P = .463) or presence (P = .944) between these groups.
+
+Lymphovascular Space Invasion Distribution Per Slide
+LVSI counts were recorded per slide. In some hysterectomies,
+only 1 to 2 slides showed clustered LVSI, suggesting extensive
+invasion despite many negative slides. To evaluate variability, a
+variation score was calculated for LVSI distribution across slides.
+As variation increased, total LVSI increased (P < .001), but varia­
+tion was not associated with the number of samples (P = .952).
+Cases with substantial (≥5) LVSI had signiﬁcantly  higher varia­
+tion than focal cases (P < .001).
+
+Results of the Overall Survival Analysis
+Of the 208 patients, 134 were alive, 60 had died, and the
+survival status of the remaining 14 was unknown. The mean
+follow-up duration was 44.3 months (range, 1-131; SD, 30).
+No signiﬁcant  difference in overall survival was found be­
+tween focal and substantial LVSI cases. Cutoff-based survival
+analysis using thresholds of ≥5, ≥4, and ≥3 yielded P values of
+.248, .244, and .817, respectively. However, deeper LVSI was
+signiﬁcantly associated with worse overall survival than super­
+ﬁcial  LVSI (P = .001; Fig. 2A). No overall survival difference was
+observed based on cervical/endocervical LVSI (P = .273). Among
+cases with ≥5 total LVSI, those with ≥5 on at least 1 slide had
+signiﬁcantly worse overall survival than those who reached ≥5 by
+summing (P = .023; Fig. 2B). A multivariate Cox regression anal­
+ysis, including tumor grade, histologic type, presence of meta­
+static lymph nodes, tumor location (uterus vs uterus and cervix),
+and having deep LVSI and ≥5 total LVSI (those with ≥5 on at least
+1 slide vs summing), revealed that serous histology (P < .000;
+hazard ratio, 3.770; CI, 1.865-7.621) and having a positive meta­
+static lymph node were associated with poorer overall survival
+(P = .022; hazard ratio, 2.343; CI, 1.131-4.854).
+
+Discussion
+LVSI is currently an important parameter in guiding treatment
+and determining prognosis.5-8 Not only its presence but also its
+extent is clinically signiﬁcant.  Numerous studies have
+5
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+Table 3
+Results for total lymphovascular space invasion―comparison of total LVSI with related parameters
+Parameter
+
+Comparison with total LVSI
+
+No. of samples having the tumor invasion front
+
+Total LVSI increases as the no. of samples increases with correlation
+coefﬁcient (r): 0.212
+P ≤ .001
+
+No. of metastatic lymph node
+
+No. of metastatic lymph nodes increases as total LVSI increases with
+correlation coefﬁcient (r): 0.316
+P ≤ .001
+
+Is there a lymph node metastasis?
+50p (25p-75p)
+
+Yes
+16 (6-60.5)
+
+No
+7 (3-17.75)
+
+Total LVSI is higher in patients with lymph node metastases
+P ≤ .001
+Is there a tumor in the cervix or endocervical canal?
+50p (25p-75p)
+
+Yes
+18 (6.5-74)
+
+No
+9 (3.75-20.25)
+
+Total LVSI is higher in patients with tumors in the cervix/endocervical canal
+P ≤ .001
+Tumor grade
+50p (25p-75p)
+
+1
+7 (3-14)
+
+2
+9 (4-17)
+
+3
+21 (6-61)
+
+Grade III tumors contain more total LVSI than grade I and II tumors
+P ≤ .001 (1 + 2 vs 3)
+Is there a MELF pattern?
+50p (25p-75p)
+
+Yes
+11 (5-25)
+
+No
+11 (4-31)
+
+No signiﬁcant association between having a MELF pattern and total LVSI
+P = .757
+LVSI localization:
+Is there LVSI in the cervix/endocervix?
+50p (25p-75p)
+
+Yes
+40 (9-120)
+
+No
+9 (4-23)
+
+Those with LVSI in the cervix and/or endocervical canal have more total LVSI
+P ≤ .001
+LVSI depth:
+Is there LVSI deep into the myometrium?
+50p (25p-75p)
+
+Superﬁcial 
+9 (4-23)
+
+Superﬁcial + deep
+64 (31-114)
+
+Those containing deeper LVSI contain more total LVSI
+P ≤ .001
+Tumor size (cm)
+
+As tumor size increases, the total no. of LVSIs increases with correlation
+coefﬁcient (r): 0.209
+P = .04
+
+No. of samples per centimeter (no. of samples having the tumor
+inﬁltration front/tumor diameter)
+
+As no. of samples per cm increases, the total no. of LVSIs increases with
+correlation coefﬁcient (r): 0.017
+P = .816
+
+Tumor type
+
+Endometrioid
+9 (4-23)
+
+Serous
+23 (4.5-63.25)
+
+Serous type has more LVSI than endometrioid type
+P ≤ .001
+LVSI, lymphovascular space invasion; MELF, microcystic elongated fragmented.
+
+assessing substantial LVSI through a comparison of focal and
+substantial LVSI. We demonstrated that the number of tumor
+sections submitted is a relevant factor. As the number of sam­
+ples containing the tumor inﬁltration front increased, the
+detection rate of LVSI also rose (P < .001 correlation coefﬁcient, 
+0.212). Moreover, substantial LVSI (≥5 foci) was more frequently
+identiﬁed in cases with a greater number of submitted samples
+(P < .001). ROC curve analysis was used to assess how many
+samples are necessary to meet the ≥5 and <5 cutoffs and to
+determine the threshold beyond which additional sampling
+becomes redundant. It was shown that submitting >7 tumor
+inﬁltration front samples did not further improve the detection
+of substantial LVSI. In practical terms, this suggests that sub­
+mitting up to 7 samples is sufﬁcient for accurate LVSI evaluation,
+and fewer than 7 sections―particularly in large tumors―may
+be inadequate. In the authors’ experience, a few cases of endo­
+metrial cancer initially showed borderline lymphovascular
+invasion―such as 2 or 3 involved spaces―due to a limited
+number of submitted samples. However, upon returning to the
+gross room and submitting additional samples, further foci were
+
+being autolysis-induced interpretive difﬁculty and intravascular
+seeding. In our archive, 46 cases in which evaluation was
+compromised due to such artifacts were excluded from the
+analysis. Unfortunately, endometrial autolysis remains a persis­
+tent issue, particularly in hysterectomy specimens from devel­
+oping countries. It is imperative that medical centers address this
+issue with the utmost seriousness. When necessary, preventive
+measures should be implemented through close collaboration
+between pathologists and clinicians, supported by comprehen­
+sive training programs for technical and ancillary staff. Such an
+approach would not only enhance the quality and consistency of
+tissue processing but also minimize the occurrence of ﬁxation- 
+related problems that may compromise diagnostic accuracy and
+reproducibility.
+The assessment of LVSI in this study was based on evaluation
+at the tumor inﬁltration  front, in accordance with recently
+published practical guidelines and the recommendations out­
+lined in checklist14 (also included as Supplementary Material).
+This study sought to determine the role of an optimal sampling
+strategy and the required sample number in accurately
+6
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+Table 4
+Association of some morphological parameters with lymph node positivity and number of positive lymph nodes
+Parameter
+
+No. of cases with lymph no. of cases without
+node metastasis
+lymph node metastasis
+
+Comparison with the presence of
+lymph node metastases (P)
+
+Comparison with the no. of
+metastatic lymph nodes (P)
+
+Yes (n=57)
+
+34 (59.6%)
+
+23 (40.4%)
+
+.023
+
+<.001
+
+No (n = 99)
+
+39 (39.4%)
+
+60 (60.6%)
+
+.971
+
+.686
+
+.017
+
+.003
+
+.026
+
+.001
+
+Is there a tumor in the cervix or
+endocervical canal? (n = 156)
+
+Is there a microcystic elongated
+fragmented pattern? (n = 157)
+Yes (n = 40)
+
+18 (45%)
+
+22 (55%)
+
+No (n = 117)
+
+55 (47%)
+
+62 (53%)
+
+LVSI localization:
+Is there LVSI in the cervix/
+endocervix? (n = 144)
+Yes (n= 31)
+
+21 (67.7%)
+
+10 (32.3%)
+
+No (n = 113)
+
+47 (41.6%)
+
+66 (58.4%)
+
+Superﬁcial (n = 138)
+
+59 (42.8%)
+
+79 (57.2%)
+
+Superﬁcial + deep (n = 19)
+
+14 (73.7%)
+
+5 (26.3%)
+
+LVSI depth:
+Is there LVSI deep into the
+myometrium? (n = 157)
+
+LVSI, lymphovascular space invasion.
+
+A
+
+B
+
+Figure 2.
+Kaplan-Meier curves illustrating overall survival. (A) Deep LVSI is associated with poorer survival compared with superﬁcial  LVSI. Deep myometrial LVSI is deﬁned  as LVSI
+located ≥3 mm beyond the tumor invasion front within the outer half of the myometrium. (B) Among cases with a total LVSI count ≥5, survival was worse in those with ≥5 foci
+on at least a single slide compared with those with ≥5 foci in the overall count but distributed across multiple slides. LVSI, lymphovascular space invasion.
+
+7
+
+inﬁltration.
+
+signiﬁcance.
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+
+identiﬁed, leading to reclassiﬁcation as substantial lymphovas­
+cular invasion.
+This study is the ﬁrst  in the literature to demonstrate that
+the location of sampling, as well as the location and depth of
+LVSI, are critical factors. It was observed that when LVSI was
+located deep within the myometrium, the total number of
+LVSI foci was signiﬁcantly higher. Among the 27 cases with
+deep LVSI, 25 (92.6%) had substantial LVSI (≥5 foci), whereas
+only 2 (7.4%) had focal LVSI (<5 foci). Deep myometrial LVSI
+was deﬁned  as LVSI located at least 3 mm beyond the inva­
+sive tumor front in the outer half of the myometrium. This
+included either (1) cases where no tumor was seen in the
+endometrium but LVSI was detected in the outer myome­
+trium, especially in the tumor-free endomyometrial sample
+adjacent to the tumor, or (2) cases with deep myometrial
+invasion, where LVSI was observed >3 mm beyond the
+deepest point of tumor inﬁltration  into the outer myome­
+trium (Fig. 1C, D). Tumors with deep invasion and a tumor
+inﬁltration  front near the serosa were not classiﬁed  as having
+deep LVSI. However, LVSI located near the serosa but distant
+from the tumor front was considered deep LVSI.
+Deep LVSI was signiﬁcantly  associated with lymph node
+metastasis―both in terms of the number of metastatic lymph
+nodes (P = .001) and overall lymph node positivity (P = .026).
+Among the 27 patients with deep LVSI, 8 either lacked lympha­
+denectomy or had unknown nodal status. Of the remaining 19
+patients, 14 (73.7%) had positive lymph nodes and 5 (26.3%) were
+negative. Although deep LVSI was also linked to poor overall
+survival, this association did not reach statistical signiﬁcance in
+multivariate analysis. To our knowledge, only Matsuo et al19 have
+previously addressed the prognostic relevance of both deep and
+substantial LVSI in the English-language literature. Although their
+study included 70 patients who were LVSI positive, our study
+evaluated 208 LVSI-positive hysterectomies and demonstrated
+the impact of deep LVSI on lymph node positivity in a larger
+cohort.
+Similar to deep LVSI, the presence of LVSI in the cervix or
+endocervical canal was associated with a higher total number of
+LVSI foci (P < .001). Among the 39 cases with known cervical or
+endocervical LVSI, 35 (89.7%) had substantial LVSI (≥5 foci),
+whereas 4 had focal LVSI (<5 foci). Cervical or endocervical LVSI
+was also signiﬁcantly  associated with lymph node meta­
+stasis―both in terms of the number of metastatic lymph nodes
+(P = .003) and lymph node positivity (P = .017). Of the 31 pa­
+tients with known nodal status or who had undergone lym­
+phadenectomy, 21 (67.7%) had positive lymph nodes, whereas
+10 (32.3%) had negative nodes. Nevertheless, in survival anal­
+ysis, the presence of LVSI in the cervix or endocervical canal did
+not show a statistically signiﬁcant  correlation with overall
+survival.
+This is a retrospective, single-center study in which sampling
+was performed in accordance with institutional guidelines. A key
+limitation of this study is the lack of prospective data. Due to the
+standardized and retrospective nature of the study, which results
+in low variability, it is not possible to deﬁnitively determine the
+minimum number of samples required to predict substantial
+LVSI. It also remains unclear, based on this study alone, how many
+samples are required from the deep myometrium or cervix/
+endocervix to reliably identify substantial LVSI.
+In daily practice, in addition to sampling the tumor inﬁltration
+front during grossing, it is essential to include sections from the
+deep myometrium and cervix/endocervical canal, even if no gross
+tumor is visible. These samples should be carefully examined
+under the microscope, with particular attention to the presence
+
+of LVSI in these regions. If LVSI is identiﬁed in the deep myome­
+trium or cervix/endocervical canal, the tumor is likely to exhibit
+substantial LVSI and a higher risk of lymph node metastasis.
+Furthermore, the presence of deep LVSI may also indicate a
+poorer overall survival.
+The MELF pattern has historically been considered a form of
+myometrial invasion associated with lymph node metastasis and
+aggressive tumor behavior.20,21 However, current literature re­
+22,23
+ﬂects  divergent views on its prognostic
+In this
+study, all slides from the 208 LVSI-positive hysterectomies were
+re-evaluated by experienced gynecologic pathologists for the
+presence of the MELF pattern, based on its recently deﬁned 
+microscopic features and considering potential histologic
+mimics. The MELF pattern was not found to be signiﬁcantly 
+associated with substantial lymphovascular invasion (P = .536) or
+lymph node metastasis, either in terms of the number of meta­
+static lymph nodes (P = .686) or overall lymph node positivity
+(P = .971).
+As previously demonstrated, higher total LVSI counts and
+increased lymph node positivity were more frequently observed
+in tumors with larger diameters, higher histologic grades, and
+serous histology compared with endometrioid type.
+The number of LVSI foci on each slide was recorded individ­
+ually. The authors observed that in some hysterectomy speci­
+mens, several slides showed no LVSI, whereas 1 or 2 slides
+contained numerous foci, ultimately meeting the criteria for
+substantial lymphovascular invasion. To evaluate the effect of
+macroscopic sampling and the total number of slides on this
+distribution, a variation score was calculated to reﬂect interslide
+differences in LVSI counts. This analysis revealed that interslide
+variability was signiﬁcantly higher in cases with greater total LVSI
+(P < .001). Similarly, cases with substantial LVSI (≥5 foci)
+exhibited greater variation (P < .001). Interestingly, this vari­
+ability did not increase with the number of submitted samples
+(P = .952). This suggests that beyond a certain point, increasing
+the number of samples does not proportionally increase vari­
+ability, indicating a limit to the diagnostic value of excessive
+sampling.
+The strengths of this study include its relatively large sample
+size, standardized surgical sampling guided by internal protocols,
+and the involvement of experienced pathologists. It also ad­
+dresses several controversial topics that remain underexplored in
+the literature. However, key limitations include its retrospective
+design and considerable variability in sampling among consul­
+tation cases. Moreover, the study cohort comprises only LVSIpositive cases, with comparisons limited to substantial vs focal
+LVSI, preventing the assessment of prognostic parameters in
+LVSI-negative cases.
+In conclusion, this study evaluated 208 cases of endometrial
+cancer and underscored the importance of macroscopic sampling
+in the assessment of LVSI. A greater number of sections from the
+tumor inﬁltration  front was associated with a higher detection
+rate of substantial LVSI. Although sampling beyond 7 sections did
+not yield signiﬁcant  additional beneﬁt,  submitting fewer than
+7―particularly in large tumors―may be insufﬁcient. A threshold
+of ≥5 vs <5 LVSI foci was signiﬁcantly  associated with lymph
+node metastasis; however, no cutoff was predictive of prognosis.
+Notably, identifying ≥5 foci on a single slide―rather than
+distributed across multiple slides―was linked to poorer overall
+survival. The study also recommends including sections from the
+deep myometrium and cervix/endocervical canal, in addition to
+the tumor inﬁltration front. The presence of LVSI in these loca­
+tions may indicate both extensive lymphovascular invasion and
+adverse overall survival due to deep
+8
+
+Deniz Ates et al. / Mod Pathol 38 (2025) 100885
+
+Acknowledgments
+
+endometrial cancer―a Swedish Gynecologic Cancer Group (SweGCG) study.
+Acta Oncol. 2019;58(11):1628—1633. https://doi.org/10.1080/0284186X.
+2019.1643036
+5. Berek JS, Matias-Guiu X, Creutzberg C, et al. Endometrial Cancer Staging
+Subcommittee, FIGO Women’s Cancer Committee. FIGO staging of endo­
+metrial cancer: 2023. Int J Gynaecol Obstet. 2023;162(2):383—394. Erratum
+in: Int J Gynaecol Obstet. 2024;166(3):1374 https://doi.org/10.1002/ijgo.
+14923
+6. WHO Classiﬁcation  of Tumours Editorial Board. Female Genital Tumours,
+WHO Classification of Tumours. 5th ed. IARC Press; 2020.
+7. Concin N, Matias-Guiu X, Vergote I, et al. ESGO/ESTRO/ESP guidelines for the
+management of patients with endometrial carcinoma. Int J Gynecol Cancer.
+2021;31(1):12—39. https://doi.org/10.1007/s00428-020-03007-z
+8. Abu-Rustum N, Yashar C, et al. Uterine Neoplasms, Version 1.2023, NCCN
+Clinical Practice Guidelines in Oncology. J Natl Compr Canc Netw. 2023;21(2):
+181—209. https://doi.org/10.6004/jnccn.2023.0006
+9. Matias-Guiu X, Selinger CI, Anderson L, et al. Data set for the reporting of
+endometrial cancer: recommendations from the International Collaboration
+on Cancer Reporting (ICCR). Int J Gynecol Pathol. 2022;1;41(Suppl 1):
+S90—S118. https://doi.org/10.1097/PGP.0b013e31825d808b
+10. Soslow RA, Tornos C, Park KJ, et al. Endometrial carcinoma diagnosis: use of
+FIGO grading and genomic subcategories in clinical practice: recommen­
+dations of the International Society of Gynecological Pathologists. Int J
+Gynecol Pathol. 2019;38Suppl 1(Iss 1 Suppl 1):S64—S74. https://doi.org/
+10.1097/PGP.0000000000000518
+11. Fujimoto T, Nanjyo H, Fukuda J, et al. Endometrioid uterine cancer: histo­
+pathological risk factors of local and distant recurrence. Gynecol Oncol.
+2009;112(2):342—347. https://doi.org/10.1016/j.ygyno.2008.10.019
+12. Bosse T, Peters EE, Creutzberg CL, et al. Substantial lymph-vascular space
+invasion (LVSI) is a signiﬁcant  risk factor for recurrence in endometrial
+cancer―a pooled analysis of PORTEC 1 and 2 trials. Eur J Cancer. 2015;51
+(13):1742—1750. https://doi.org/10.1016/j.ejca.2015.05.015
+13. Han L, Chen Y, Zheng A, et al. Prognostic value of three-tiered scoring system
+for lymph-vascular space invasion in endometrial cancer: a systematic re­
+view and meta-analysis. Gynecol Oncol. 2024;184:198—205. https://doi.org/
+10.1016/j.ygyno.2024.01.046
+14. Peters EEM, Nucci MR, Gilks CB, et al. Practical guidance for assessing and
+reporting lymphovascular space invasion (LVSI) in endometrial carcinoma.
+Histopathology. 2025;86(2):173—182. https://doi.org/10.1111/his.15272
+�on-Castillo A, Hogdall E, et al. Substantial lymphovascular
+15. Peters EEM, Le
+space invasion is an adverse prognostic factor in high-risk endometrial
+cancer. Int J Gynecol Pathol. 2022;1;41(3):227—234. https://doi.org/10.1097/
+PGP.0000000000000805
+16. Qian Y, Pollom EL, Nwachukwu C, et al. Extent of lymphovascular space
+invasion may predict lymph node metastasis in uterine serous carcinoma.
+Gynecol Oncol. 2017;147(1):24—29. https://doi.org/10.1016/j.ygyno.2017.
+07.119
+� n-Castillo A, Smit VTHBM, et al. Deﬁning  substantial
+17. Peters EEM, Leo
+lymphovascular space invasion in endometrial cancer. Int J Gynecol
+Pathol. 2022;1;41(3):220—226. https://doi.org/10.1097/PGP.00000000000
+00806
+18. Peters EEM, Bartosch C, McCluggage WG, et al. Reproducibility of lympho­
+vascular space invasion (LVSI) assessment in endometrial cancer. Histopa­
+thology. 2019;75(1):128—136. https://doi.org/10.1111/his.13871
+19. Matsuo K, Garcia-Sayre J, Medeiros F, et al. Impact of depth and extent of
+lymphovascular space invasion on lymph node metastasis and recurrence
+patterns in endometrial cancer. J Surg Oncol. 2015;112(6):669—676. Erratum
+in: J Surg Oncol. 2024;129(3):671 https://doi.org/10.1002/jso.24049
+20. Euscher E, Fox P, Bassett R, et al. The pattern of myometrial invasion as a
+predictor of lymph node metastasis or extrauterine disease in low-grade
+endometrial carcinoma. Am J Surg Pathol. 2013;37(11):1728—1736. https://
+doi.org/10.1097/PAS.0b013e318299f2ab
+21. Pavlakis K, Messini I, Vrekoussis T, et al. MELF invasion in endometrial
+cancer as a risk factor for lymph node metastasis. Histopathology. 2011;58
+(6):966—973. https://doi.org/10.1111/j.1365-2559.2011.03802.x
+22. van den Heerik ASVM, Aiyer KTS, Stelloo E, et al. Microcystic elongated and
+fragmented (MELF) pattern of invasion: Molecular features and prognostic
+signiﬁcance  in the PORTEC-1 and -2 trials. Gynecol Oncol. 2022;166(3):
+530—537. https://doi.org/10.1016/j.ygyno.2022.06.027
+23. Ju B, Wu J, Sun L, et al. Molecular classiﬁcation of endometrial endometrioid
+carcinoma with microcystic elongated and fragmented pattern. Int J Gynecol
+Pathol. 2024;1;43(3):233—241. https://doi.org/10.1097/PGP.0000000000
+000980
+
+The authors are grateful to Dr Ali Can Gunes and Dr Alper
+Kahvecioglu for their support in obtaining survival data for a
+subset of patients.
+Author Contributions
+A.U. and D.A. prepared the ﬁgures and tables, and wrote the
+manuscript and designed the study and obtained the study
+cohort. S.K. analyzed data. A.O. participated in obtaining the
+study cohort. D.A., A.U., and S.Y. participated in the study design,
+edited the manuscript, and prepared for submission. All authors
+read and approved the ﬁnal paper.
+Data Availability
+Original data used in this study can be requested by emailing
+to the corresponding author Alp Usubutun alpusubutun@yahoo.
+com
+Funding
+The authors received no speciﬁc funding for this work.
+Declaration of Competing Interest
+All authors have no conﬂict of interest.
+Ethics Approval and Consent to Participate
+All procedures performed in studies involving human partic­
+ipants were in accordance with the ethical standards of the
+institutional and/or national research committee and with the
+1964 Helsinki declaration and its later amendments or compa­
+rable ethical standards. Also this study is approved by the insti­
+tutional ethical committee (Approval number: GO 23/203).
+Supplementary Material
+The online version contains supplementary material available
+at https://pmc.ncbi.nlm.nih.gov/articles/PMC11649510/ It is
+available as an LVSI checklist.
+References
+1. Siegel RL, Miller KD, Wagle NS, et al. Cancer statistics, 2023. CA Cancer J Clin.
+2023;73(1):17—48. https://doi.org/10.3322/caac.21763
+2. Morrow CP, Bundy BN, Kurman RJ, et al. Relationship between surgicalpathological risk factors and outcome in clinical stage I and II carcinoma
+of the endometrium: a Gynecologic Oncology Group study. Gynecol Oncol.
+1991;40(1):55—65. https://doi.org/10.1016/0090-8258(91)90086-k
+3. Guntupalli SR, Zighelboim I, Kizer NT, et al. Lymphovascular space invasion
+is an independent risk factor for nodal disease and poor outcomes in
+endometrioid endometrial cancer. Gynecol Oncol. 2012;124(1):31—35.
+https://doi.org/10.1016/j.ygyno.2011.09.017
+4. Stålberg K, Bjurberg M, Borgfeldt C, et al. Lymphovascular space invasion as a
+predictive factor for lymph node metastases and survival in endometrioid
+
+9
+
+

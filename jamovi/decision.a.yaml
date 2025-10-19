@@ -1,10 +1,10 @@
 ---
 name:  decision
 title: Medical Decision
-menuGroup: meddecideT
+menuGroup: meddecideT2
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

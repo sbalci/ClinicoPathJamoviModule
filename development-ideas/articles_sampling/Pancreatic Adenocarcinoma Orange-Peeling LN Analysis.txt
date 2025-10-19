@@ -1,0 +1,150 @@
+Pancreatic Adenocarcinoma Orange-Peeling LN
+Analysis
+Legend
+LN ratio = Met LN / Total LN
+Adequacy ≥12 LN
+pN staging - N0 = 0 / N1 = 1-3 / N2 = ≥4
+
+Total Data
+Total LN
+Orange-peeling
+Conventional
+
+median 23 LN (IQR 17–31)
+median 16 LN (IQR 12–21)
+
+Metastatic LN
+Orange-peeling
+Conventional
+
+median 2 LN (IQR 0–5)
+median 1 LN (IQR 0–4)
+
+LN ratio
+
+median in both 0.08-0.09
+
+Adequacy (≥12 LN dissection)
+Orange-peeling
+%91.9 (203/221 case)
+Conventional
+%77.0 (231/300 case)
+Total LN
+Mann–Whitney U test
+U = 19,092.5, p ≈ 1.2 × 10⁻¹⁶ (statistically significant)
+Effect size
+Cliff’s δ = 0.424 (medium-large effect),
+Hodges–Lehmann shift ≈ +6 LN (orange-peeling gives at least 6 LN more
+compared to conventional)
+Metastatic LN
+Mann–Whitney U test
+U = 30,836.0, p = 0.163 (no difference)
+Effect size
+Cliff’s δ = 0.070 (negligible)
+LN ratio
+Mann–Whitney U test
+U = 33,722.0, p = 0.731 (no difference)
+Effect size
+Cliff’s δ = –0.017 (no effect)
+Adequacy
+Chi-square test
+χ² = 19.13, p ≈ 1.2 × 10⁻⁵ (statistically significant)
+
+Adequacy Yes/No Comparison
+OR = 3.37 (95% CI 1.94–5.85) (Orange-peeling gives ≥12 LN 3.4 times
+more than conventional) (göreli olasılık)
+RR = 1.19 (%19 relative increase) (91.9 / 77.0 ≈ 1.19) (göreli risk)
+RD = +14.9% (In every 100 case, orange-peeling gives 15 cases more with
+≥12 LN) (91.9 - 77.0 = +14.9) (mutlak fark)
+φ = 0.192 (small-medium level correlation)
+Stage Migration
+Conventional - N0 %36.7, N1 %32.3, N2 %31.0
+Orange-peeling - N0 %33.0, N1 %31.2, N2 %35.7
+χ² = 1.40, p = 0.497
+There is no statistically significant stage migration in terms of Will Rogers
+phenomenon.
+
+PDAC-only Data
+Total LN
+Orange-peeling
+Conventional
+
+median 24 LN
+median 18 LN
+
+Metastatic LN
+Orange-peeling
+Conventional
+
+median 3 LN
+median 3 LN
+
+Metastatic LN (only-positive)
+Orange-peeling
+median 4 LN
+Conventional
+median 4 LN
+Adequacy (≥12 LN dissection)
+Orange-peeling
+%97.4 (76/78 cases)
+Conventional
+%86.3 (113/131 cases)
+Total LN
+Mann–Whitney U test
+U = 7601, p ≈ 3.7 × 10⁻⁹ (statistically significant)
+Effect size
+Cliff’s δ = 0.49 (medium-large effect)
+Stage Migration
+Conventional - N0 %19.8 (26), N1 %35.9 (47), N2 %44.3 (58)
+Orange-peeling - N0 %15.4 (12), N1 %35.9 (28), N2 %48.7 (38)
+χ² = 0.689, p = 0.75
+There is no statistically significant stage migration in terms of Will Rogers
+phenomenon.
+
+LN (+) Cohort Data
+LN (+) Total
+338 case, 190 conventional & 148 orange-peeling
+Median total LN: conventional 17.5 vs OP 24 → p < 0.0001, Cliff’s δ = -0.41
+(medium effect)
+Median metastatic LN: 3 vs 4 (not significant (p=0.21))
+LN ratio: 0.195 vs 0.157 (statistically borderline (p=0.046))
+Adequacy (≥12 LN): 83% vs 94% (p=0.0045, Cramer’s V = 0.15 (small))
+Stage migration (N1 vs N2): %51/49 vs %47/53 (p=0.48, negligible effect)
+LN (+) PDAC-only
+171 case, 105 conventional & 66 orange-peeling
+Median total LN: 19 vs 24 → p=8.5×10⁻⁷, δ=-0.45 (medium effect)
+Median metastatic Met LN: her ikisi de 4 → (not significant (p=0.53))
+LN ratio: 0.211 vs 0.187 (not significant (p=0.10))
+Adequacy: 90% vs 97% (p=0.136, negligible)
+Stage migration: %45/55 vs %42/58 (p=0.89, negligible effect)
+Hypergeometric Analysis
+≥1 pozitif yakalamak = N1’i atlamamak:
+%90 confidence - conventional ~8 LN, OP ~10 LN
+%95 confidence - conventional ~10 LN, OP ~12 LN
+≥4 pozitif yakalamak = N2’yi atlamamak:
+%90 confidence - conventional ~13–14 LN, OP ~17–18 LN
+%95 confidence - conventional ~14 LN, OP ~18 LN
+PDAC-only LN+ için benzer ama rakamlar biraz daha yüksek (özellikle OP’de).
+%90 confidence - conventional ~8 LN, OP ~9-10 LN
+%95 confidence - conventional ~14 LN, OP ~17-18 LN
+—
+Orange-peeling yöntemi, daha fazla LN çıkarmayı ve ≥12 LN kriterini sağlamayı
+belirgin şekilde kolaylaştırıyor. Ancak, metastatik LN sayısını veya LN ratio’yu
+artırmıyor, yani hastalık yükü üzerinde fark yaratmıyor. Bu durum, orangepeeling’in aslında staging kalitesini artırdığı (özellikle “yetersiz örneklenmiş”
+vakaları azaltarak) anlamına geliyor. Buna rağmen pN evre dağılımında anlamlı
+bir stage migration gözlenmiyor. Yani daha çok LN çıkarılması daha fazla
+metastaz bulmaya yol açmamış. Klinik olarak bu yöntem, özellikle patoloji
+raporlarının güvenilirliğini artırmak için değerli olabilir.
+PDAC datası için de aynı yorumları yapmak mümkün.
+Sadece LN (+) örneklendiğinde, total veya PDAC fark etmeksizin yine aynı
+sonuçlar alınıyor. Katkı stage-migration değil, adequacy.
+
+OP’de daha çok LN olduğu için, “≥1 pozitif yakalamak” için gereken LN sayısı da
+artıyor. Bu OP’nin güvenilirliğini azaltmaz; aksine, daha geniş bir LN evreni
+sunduğu için daha eksiksiz evreleme sağlar. Hipergeometrik yaklaşım bize
+klasik “12 LN kuralı” yerine, istatistiksel temelli minimum LN sayısı önerileri
+verdi. Özellikle N1 vs N2 ayrımı için hangi örneklem büyüklüğünde “kaçırmama”
+ihtimali %90+ oluyor, ki bu düzlemde 17-18 LN hem total Whipple olgularında
+hem de PDAC vakalarında anlamlı sayı olarak gözüküyor.
+
+

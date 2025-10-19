@@ -2,7 +2,7 @@
 % Please edit documentation in R/measurementuncertainty.h.R
 \name{measurementuncertainty}
 \alias{measurementuncertainty}
-\title{Measurement Uncertainty Estimation (ISO 15189)}
+\title{Measurement Uncertainty Estimation}
 \usage{
 measurementuncertainty(
   data,
@@ -104,7 +104,8 @@ laboratories}
 
 \item{clinical_significance}{Evaluate clinical significance of uncertainty}
 
-\item{iso15189_compliance}{Verify compliance with ISO 15189 requirements}
+\item{iso15189_compliance}{Verify compliance with laboratory accreditation
+requirements}
 
 \item{uncertainty_plots}{Generate uncertainty analysis plots}
 
@@ -118,11 +119,11 @@ A results object containing:
 }
 }
 \description{
-Comprehensive measurement uncertainty evaluation following ISO 15189,
-ISO/IEC Guide 98-3 (GUM), and JCGM 100:2008 guidelines. Calculates Type A
-and Type B uncertainties, combined and expanded uncertainty, and
-uncertainty budgets for clinical laboratory measurements. Essential for
-laboratory accreditation and quality assurance.
+Comprehensive measurement uncertainty evaluation following ISO/IEC Guide
+98-3 (GUM), and JCGM 100:2008 guidelines. Calculates Type A and Type B
+uncertainties, combined and expanded uncertainty, and uncertainty budgets
+for clinical laboratory measurements. Essential for laboratory
+accreditation and quality assurance.
 }
 \examples{
 data \\%>\\%

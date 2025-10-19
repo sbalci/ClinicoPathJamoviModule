@@ -1,11 +1,11 @@
 ---
 name: jjpubr
 title: Publication-Ready Plots (ggpubr)
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT2
 menuSubgroup: All-In-One
 menuTitle: ggpubr Plots
 menuSubtitle: Publication-ready visualizations
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

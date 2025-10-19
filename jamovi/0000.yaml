@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.01
+version: 0.0.32.03
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-10-09'
+date: '2025-10-13'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -2415,6 +2415,23 @@ analyses:
     category: analyses
     menuGroup: OncoPathT
     menuTitle: Pathology Agreement Analysis
+  - title: Pathology Sampling Adequacy Analysis
+    name: pathsampling
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuTitle: Pathology Sampling Adequacy Analysis
+    description: >
+      Determines the minimum number of tissue samples (blocks, cassettes,
+      sections, or lymph nodes) required to detect lesions with specified
+      confidence levels. Uses binomial probability models and bootstrap
+      resampling to calculate diagnostic yield curves, sensitivity estimates,
+      and clinical recommendations. Essential for establishing sampling
+      protocols in omentum evaluation, lymph node dissection, and serial
+      sectioning studies. Based on statistical methods from Skala & Hagemann
+      2015, Gönen et al. 2009, and beta-binomial modeling approaches for
+      pathology sampling research.
+    menuSubgroup: ClinicoPath Descriptives
   - title: Spatial Statistics from Coordinates
     name: spatialanalysis
     ns: ClinicoPath
