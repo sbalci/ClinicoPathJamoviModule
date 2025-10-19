@@ -1,0 +1,218 @@
+"case_id","age","sex","site","stage","tumor_size_cm","tumor_size_cat","neoadjuvant","blocks_examined","linear_spiculation","ls_status","vi_positive","vi_status","first_vi_block","emvi_positive","emvi_status","first_emvi_block"
+"CRC001",64,"Male","Right colon","I",2.5,"<5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC002",53,"Male","Left colon","II",1.6,"<5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC003",42,"Male","Rectum","III",4.7,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC004",63,"Female","Right colon","III",6.2,"≥5 cm",0,7,1,"LS+",1,"VI+",5,1,"EMVI+",2
+"CRC005",57,"Female","Right colon","II",11.3,"≥5 cm",1,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC006",78,"Male","Left colon","II",9,"≥5 cm",0,6,0,"LS-",1,"VI+",6,1,"EMVI+",3
+"CRC007",54,"Male","Rectum","II",5.9,"≥5 cm",0,6,1,"LS+",0,"VI-",NA,0,"EMVI-",NA
+"CRC008",77,"Male","Rectum","II",9.1,"≥5 cm",0,6,1,"LS+",1,"VI+",2,1,"EMVI+",1
+"CRC009",60,"Male","Right colon","III",2.5,"<5 cm",0,8,0,"LS-",1,"VI+",2,1,"EMVI+",3
+"CRC010",59,"Male","Right colon","III",1.6,"<5 cm",1,5,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC011",69,"Male","Right colon","II",2.2,"<5 cm",0,6,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC012",60,"Female","Left colon","II",13.1,"≥5 cm",0,6,0,"LS-",1,"VI+",2,1,"EMVI+",5
+"CRC013",72,"Male","Left colon","III",3,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC014",73,"Female","Rectum","III",3.5,"<5 cm",1,6,0,"LS-",1,"VI+",2,0,"EMVI-",NA
+"CRC015",58,"Female","Rectum","II",2.2,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC016",73,"Female","Left colon","I",3.9,"<5 cm",0,7,0,"LS-",1,"VI+",4,0,"EMVI-",NA
+"CRC017",72,"Male","Left colon","II",2.7,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC018",70,"Male","Right colon","III",5.7,"≥5 cm",0,6,1,"LS+",1,"VI+",2,1,"EMVI+",3
+"CRC019",76,"Male","Left colon","III",5.6,"≥5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC020",72,"Female","Left colon","III",4.7,"<5 cm",0,6,0,"LS-",1,"VI+",1,1,"EMVI+",4
+"CRC021",60,"Male","Left colon","II",7.7,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC022",61,"Female","Rectum","III",6.7,"≥5 cm",0,5,0,"LS-",1,"VI+",3,1,"EMVI+",3
+"CRC023",80,"Male","Rectum","III",7.1,"≥5 cm",0,5,0,"LS-",1,"VI+",5,0,"EMVI-",NA
+"CRC024",68,"Male","Left colon","III",3.5,"<5 cm",0,7,0,"LS-",1,"VI+",6,1,"EMVI+",3
+"CRC025",60,"Male","Left colon","II",2.7,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC026",43,"Male","Left colon","II",8,"≥5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC027",57,"Male","Rectum","III",3.5,"<5 cm",0,2,1,"LS+",1,"VI+",2,1,"EMVI+",2
+"CRC028",55,"Female","Rectum","II",2.8,"<5 cm",0,4,1,"LS+",1,"VI+",4,1,"EMVI+",2
+"CRC029",83,"Female","Left colon","III",8,"≥5 cm",0,7,1,"LS+",1,"VI+",1,1,"EMVI+",6
+"CRC030",98,"Female","Rectum","II",5.5,"≥5 cm",1,7,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC031",62,"Male","Rectum","I",2.1,"<5 cm",1,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC032",80,"Male","Rectum","III",1.6,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC033",55,"Female","Left colon","II",0.8,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC034",64,"Male","Right colon","III",7.3,"≥5 cm",0,6,0,"LS-",1,"VI+",6,1,"EMVI+",2
+"CRC035",57,"Male","Left colon","I",3.4,"<5 cm",0,3,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC036",60,"Male","Right colon","I",10.7,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC037",71,"Male","Left colon","II",1,"<5 cm",0,5,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC038",79,"Male","Left colon","I",2.6,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC039",77,"Female","Left colon","III",5.4,"≥5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC040",64,"Female","Left colon","III",2.8,"<5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC041",70,"Female","Rectum","III",2.5,"<5 cm",1,3,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC042",70,"Male","Left colon","III",2.3,"<5 cm",0,3,0,"LS-",1,"VI+",2,0,"EMVI-",NA
+"CRC043",70,"Male","Right colon","III",2.8,"<5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC044",63,"Male","Rectum","III",12.1,"≥5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC045",69,"Female","Rectum","II",2.8,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC046",73,"Male","Left colon","III",6.8,"≥5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC047",93,"Male","Left colon","II",4.8,"<5 cm",1,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC048",78,"Male","Rectum","III",2.5,"<5 cm",0,8,0,"LS-",1,"VI+",2,1,"EMVI+",8
+"CRC049",69,"Male","Rectum","I",7.2,"≥5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC050",74,"Male","Rectum","III",3.8,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC051",73,"Female","Rectum","IV",6.7,"≥5 cm",0,6,1,"LS+",1,"VI+",1,1,"EMVI+",1
+"CRC052",52,"Female","Left colon","III",4.1,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC053",60,"Female","Left colon","III",4.9,"<5 cm",1,6,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC054",79,"Male","Left colon","IV",6.5,"≥5 cm",1,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC055",84,"Female","Rectum","II",5.6,"≥5 cm",0,6,1,"LS+",1,"VI+",3,0,"EMVI-",NA
+"CRC056",92,"Male","Left colon","II",4.3,"<5 cm",0,7,1,"LS+",1,"VI+",2,1,"EMVI+",2
+"CRC057",40,"Male","Rectum","I",8.3,"≥5 cm",1,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC058",60,"Female","Rectum","IV",6.8,"≥5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC059",69,"Male","Left colon","II",5.8,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC060",73,"Male","Rectum","II",0.8,"<5 cm",1,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC061",77,"Female","Left colon","II",2.8,"<5 cm",1,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC062",62,"Male","Left colon","II",5,"≥5 cm",0,6,0,"LS-",1,"VI+",3,1,"EMVI+",3
+"CRC063",42,"Male","Rectum","II",1.1,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC064",51,"Female","Rectum","I",5.4,"≥5 cm",0,6,1,"LS+",1,"VI+",2,0,"EMVI-",NA
+"CRC065",78,"Male","Left colon","III",0.7,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC066",63,"Male","Left colon","II",0.6,"<5 cm",0,5,0,"LS-",1,"VI+",5,1,"EMVI+",3
+"CRC067",75,"Male","Left colon","II",5.3,"≥5 cm",1,6,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC068",61,"Male","Left colon","III",5.5,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC069",78,"Male","Right colon","II",3.3,"<5 cm",0,5,0,"LS-",1,"VI+",1,1,"EMVI+",5
+"CRC070",76,"Female","Left colon","I",5.7,"≥5 cm",1,7,0,"LS-",1,"VI+",4,1,"EMVI+",5
+"CRC071",47,"Female","Right colon","IV",4.4,"<5 cm",0,7,0,"LS-",1,"VI+",6,0,"EMVI-",NA
+"CRC072",54,"Male","Left colon","III",15.1,"≥5 cm",0,8,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC073",64,"Male","Left colon","III",2.4,"<5 cm",0,8,0,"LS-",1,"VI+",2,1,"EMVI+",8
+"CRC074",55,"Female","Right colon","II",3.2,"<5 cm",0,7,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC075",73,"Male","Left colon","III",6.8,"≥5 cm",0,6,0,"LS-",1,"VI+",1,1,"EMVI+",2
+"CRC076",64,"Male","Rectum","II",3.2,"<5 cm",0,3,0,"LS-",1,"VI+",3,1,"EMVI+",2
+"CRC077",63,"Female","Rectum","I",3,"<5 cm",0,6,1,"LS+",1,"VI+",1,1,"EMVI+",1
+"CRC078",60,"Female","Rectum","I",3.9,"<5 cm",1,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC079",65,"Male","Right colon","III",4.7,"<5 cm",0,6,0,"LS-",1,"VI+",2,1,"EMVI+",1
+"CRC080",51,"Female","Right colon","II",5.2,"≥5 cm",0,8,1,"LS+",1,"VI+",2,1,"EMVI+",2
+"CRC081",68,"Male","Left colon","II",2.3,"<5 cm",0,6,0,"LS-",1,"VI+",1,1,"EMVI+",1
+"CRC082",86,"Female","Left colon","II",9.6,"≥5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC083",64,"Male","Rectum","III",4.6,"<5 cm",0,3,0,"LS-",1,"VI+",3,1,"EMVI+",3
+"CRC084",71,"Male","Rectum","III",1.9,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC085",67,"Male","Left colon","II",5.9,"≥5 cm",0,7,0,"LS-",1,"VI+",4,1,"EMVI+",1
+"CRC086",69,"Female","Left colon","II",2,"<5 cm",0,5,0,"LS-",1,"VI+",4,1,"EMVI+",3
+"CRC087",77,"Female","Rectum","III",2.6,"<5 cm",0,7,1,"LS+",1,"VI+",3,1,"EMVI+",3
+"CRC088",59,"Female","Left colon","III",3.8,"<5 cm",0,6,1,"LS+",1,"VI+",2,1,"EMVI+",2
+"CRC089",55,"Female","Left colon","II",3,"<5 cm",0,8,0,"LS-",1,"VI+",4,0,"EMVI-",NA
+"CRC090",42,"Female","Right colon","III",2.6,"<5 cm",1,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC091",48,"Male","Left colon","I",6.2,"≥5 cm",0,7,1,"LS+",1,"VI+",2,1,"EMVI+",2
+"CRC092",70,"Female","Right colon","III",9.6,"≥5 cm",0,7,1,"LS+",0,"VI-",NA,0,"EMVI-",NA
+"CRC093",61,"Male","Left colon","III",2.8,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC094",92,"Male","Rectum","II",2.4,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC095",51,"Female","Left colon","III",4.7,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC096",80,"Female","Left colon","II",1.1,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC097",47,"Male","Right colon","II",3.8,"<5 cm",1,5,0,"LS-",1,"VI+",1,1,"EMVI+",5
+"CRC098",62,"Male","Right colon","III",0.7,"<5 cm",0,5,0,"LS-",1,"VI+",2,1,"EMVI+",5
+"CRC099",55,"Male","Rectum","II",1.2,"<5 cm",0,5,1,"LS+",1,"VI+",5,1,"EMVI+",1
+"CRC100",49,"Male","Rectum","III",2.3,"<5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC101",66,"Male","Left colon","II",9.2,"≥5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC102",64,"Male","Right colon","II",1.8,"<5 cm",1,5,0,"LS-",1,"VI+",1,1,"EMVI+",5
+"CRC103",76,"Female","Rectum","II",11.2,"≥5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC104",77,"Female","Rectum","III",1.7,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC105",76,"Female","Left colon","III",1.4,"<5 cm",0,5,0,"LS-",1,"VI+",1,1,"EMVI+",1
+"CRC106",65,"Female","Rectum","III",3.8,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC107",56,"Female","Rectum","III",1.2,"<5 cm",0,4,0,"LS-",1,"VI+",4,1,"EMVI+",2
+"CRC108",69,"Male","Rectum","III",3.7,"<5 cm",0,7,0,"LS-",1,"VI+",2,1,"EMVI+",2
+"CRC109",54,"Female","Rectum","III",2.7,"<5 cm",0,3,0,"LS-",1,"VI+",2,0,"EMVI-",NA
+"CRC110",82,"Female","Right colon","III",0.7,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC111",73,"Male","Left colon","I",3.6,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC112",65,"Female","Rectum","III",6.7,"≥5 cm",0,7,0,"LS-",1,"VI+",1,1,"EMVI+",5
+"CRC113",68,"Male","Left colon","III",2.5,"<5 cm",0,7,1,"LS+",1,"VI+",7,1,"EMVI+",6
+"CRC114",40,"Female","Rectum","II",9.3,"≥5 cm",1,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC115",74,"Male","Right colon","I",4.3,"<5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC116",65,"Male","Left colon","III",3,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC117",53,"Female","Rectum","II",1.7,"<5 cm",0,5,1,"LS+",1,"VI+",2,1,"EMVI+",1
+"CRC118",96,"Male","Left colon","III",4.2,"<5 cm",1,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC119",73,"Female","Left colon","III",4.4,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC120",88,"Female","Rectum","I",4.4,"<5 cm",0,2,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC121",59,"Female","Rectum","II",2,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC122",69,"Male","Rectum","II",5.8,"≥5 cm",0,5,0,"LS-",1,"VI+",2,0,"EMVI-",NA
+"CRC123",66,"Female","Rectum","III",1.2,"<5 cm",0,5,1,"LS+",0,"VI-",NA,0,"EMVI-",NA
+"CRC124",69,"Male","Rectum","II",4.6,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC125",56,"Female","Left colon","III",2.8,"<5 cm",1,8,0,"LS-",1,"VI+",4,1,"EMVI+",1
+"CRC126",78,"Male","Left colon","III",2.1,"<5 cm",0,7,0,"LS-",1,"VI+",2,1,"EMVI+",2
+"CRC127",57,"Male","Rectum","III",6.6,"≥5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC128",63,"Male","Right colon","III",3.2,"<5 cm",0,5,0,"LS-",1,"VI+",2,1,"EMVI+",3
+"CRC129",61,"Female","Rectum","III",6,"≥5 cm",0,5,0,"LS-",1,"VI+",2,1,"EMVI+",1
+"CRC130",80,"Female","Left colon","III",3.6,"<5 cm",0,3,1,"LS+",1,"VI+",2,1,"EMVI+",3
+"CRC131",64,"Female","Right colon","I",0.5,"<5 cm",0,5,0,"LS-",1,"VI+",5,1,"EMVI+",3
+"CRC132",94,"Male","Rectum","III",6.6,"≥5 cm",1,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC133",69,"Female","Right colon","I",0.8,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC134",76,"Male","Rectum","II",1.5,"<5 cm",0,5,0,"LS-",1,"VI+",2,1,"EMVI+",1
+"CRC135",61,"Female","Left colon","I",2.6,"<5 cm",1,4,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC136",81,"Male","Left colon","III",5.2,"≥5 cm",1,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC137",43,"Male","Right colon","III",1.6,"<5 cm",0,5,1,"LS+",1,"VI+",1,1,"EMVI+",5
+"CRC138",73,"Male","Left colon","I",3,"<5 cm",1,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC139",63,"Male","Rectum","IV",2.5,"<5 cm",0,8,1,"LS+",1,"VI+",6,1,"EMVI+",6
+"CRC140",70,"Female","Left colon","III",5,"≥5 cm",1,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC141",62,"Female","Rectum","IV",12.7,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC142",63,"Female","Left colon","III",5.3,"≥5 cm",0,2,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC143",73,"Female","Left colon","II",7.5,"≥5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC144",44,"Male","Right colon","I",9.5,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC145",65,"Female","Left colon","I",6.9,"≥5 cm",0,7,0,"LS-",1,"VI+",3,1,"EMVI+",4
+"CRC146",72,"Male","Rectum","II",4.3,"<5 cm",0,5,0,"LS-",1,"VI+",4,0,"EMVI-",NA
+"CRC147",69,"Female","Rectum","III",2.9,"<5 cm",0,6,0,"LS-",1,"VI+",3,1,"EMVI+",2
+"CRC148",67,"Female","Rectum","II",6.1,"≥5 cm",0,7,0,"LS-",1,"VI+",2,1,"EMVI+",5
+"CRC149",64,"Female","Right colon","I",2.2,"<5 cm",0,7,0,"LS-",1,"VI+",6,1,"EMVI+",1
+"CRC150",59,"Male","Left colon","III",5.3,"≥5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC151",70,"Male","Rectum","II",1.6,"<5 cm",1,5,0,"LS-",1,"VI+",2,0,"EMVI-",NA
+"CRC152",97,"Male","Rectum","I",1.6,"<5 cm",1,5,0,"LS-",1,"VI+",2,1,"EMVI+",5
+"CRC153",51,"Female","Left colon","III",4.1,"<5 cm",0,7,1,"LS+",0,"VI-",NA,0,"EMVI-",NA
+"CRC154",76,"Male","Left colon","III",6.2,"≥5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC155",58,"Male","Right colon","II",2.4,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC156",76,"Female","Right colon","II",12.3,"≥5 cm",0,4,0,"LS-",1,"VI+",2,1,"EMVI+",1
+"CRC157",70,"Female","Right colon","III",8.9,"≥5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC158",65,"Male","Right colon","III",1.1,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC159",74,"Male","Left colon","III",2.2,"<5 cm",1,7,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC160",84,"Female","Rectum","II",1.2,"<5 cm",0,4,0,"LS-",1,"VI+",4,0,"EMVI-",NA
+"CRC161",86,"Male","Left colon","II",8,"≥5 cm",0,8,1,"LS+",1,"VI+",3,1,"EMVI+",3
+"CRC162",69,"Male","Left colon","I",4.6,"<5 cm",0,3,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC163",71,"Female","Left colon","II",3.4,"<5 cm",0,7,0,"LS-",1,"VI+",1,1,"EMVI+",4
+"CRC164",75,"Male","Left colon","III",5.4,"≥5 cm",0,7,0,"LS-",1,"VI+",2,1,"EMVI+",6
+"CRC165",54,"Male","Rectum","II",6.2,"≥5 cm",0,8,1,"LS+",0,"VI-",NA,0,"EMVI-",NA
+"CRC166",69,"Female","Rectum","II",3.3,"<5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC167",64,"Female","Rectum","I",3.8,"<5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC168",64,"Male","Left colon","III",1.8,"<5 cm",0,5,1,"LS+",1,"VI+",1,1,"EMVI+",5
+"CRC169",68,"Female","Rectum","III",5.3,"≥5 cm",0,3,0,"LS-",1,"VI+",3,1,"EMVI+",2
+"CRC170",65,"Male","Right colon","II",4.9,"<5 cm",1,7,0,"LS-",1,"VI+",3,1,"EMVI+",1
+"CRC171",71,"Male","Left colon","II",2.7,"<5 cm",0,8,1,"LS+",0,"VI-",NA,0,"EMVI-",NA
+"CRC172",69,"Female","Left colon","I",7,"≥5 cm",0,5,0,"LS-",1,"VI+",5,1,"EMVI+",5
+"CRC173",55,"Male","Rectum","II",5.2,"≥5 cm",0,7,1,"LS+",1,"VI+",2,0,"EMVI-",NA
+"CRC174",43,"Male","Left colon","III",9.3,"≥5 cm",0,3,0,"LS-",1,"VI+",1,1,"EMVI+",1
+"CRC175",52,"Female","Rectum","III",7.6,"≥5 cm",1,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC176",59,"Male","Rectum","II",2,"<5 cm",0,8,0,"LS-",1,"VI+",2,0,"EMVI-",NA
+"CRC177",89,"Female","Rectum","III",3.8,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC178",49,"Male","Left colon","II",4.3,"<5 cm",0,6,1,"LS+",1,"VI+",1,1,"EMVI+",1
+"CRC179",59,"Male","Rectum","III",2.9,"<5 cm",0,8,1,"LS+",1,"VI+",2,1,"EMVI+",1
+"CRC180",79,"Female","Right colon","II",5.8,"≥5 cm",0,3,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC181",66,"Male","Rectum","III",3.9,"<5 cm",0,7,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC182",65,"Female","Left colon","II",2.8,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC183",76,"Male","Left colon","III",5.2,"≥5 cm",0,3,0,"LS-",1,"VI+",3,1,"EMVI+",2
+"CRC184",68,"Male","Rectum","II",4.4,"<5 cm",1,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC185",53,"Female","Right colon","III",5.6,"≥5 cm",0,6,1,"LS+",1,"VI+",2,1,"EMVI+",2
+"CRC186",76,"Female","Left colon","I",7.7,"≥5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC187",61,"Male","Rectum","III",2.7,"<5 cm",0,4,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC188",74,"Female","Left colon","II",4.9,"<5 cm",0,6,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC189",67,"Female","Right colon","I",2.4,"<5 cm",0,4,0,"LS-",1,"VI+",1,1,"EMVI+",1
+"CRC190",56,"Male","Rectum","I",5.1,"≥5 cm",0,6,0,"LS-",1,"VI+",4,1,"EMVI+",1
+"CRC191",68,"Male","Right colon","I",10.4,"≥5 cm",0,8,1,"LS+",1,"VI+",2,1,"EMVI+",5
+"CRC192",61,"Male","Left colon","II",8.8,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC193",54,"Male","Rectum","II",13.4,"≥5 cm",0,4,1,"LS+",0,"VI-",NA,0,"EMVI-",NA
+"CRC194",56,"Male","Rectum","I",6.7,"≥5 cm",0,5,0,"LS-",1,"VI+",3,0,"EMVI-",NA
+"CRC195",58,"Male","Right colon","II",6.3,"≥5 cm",0,7,0,"LS-",1,"VI+",4,1,"EMVI+",2
+"CRC196",82,"Female","Left colon","III",1.8,"<5 cm",0,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC197",86,"Male","Left colon","II",4.3,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC198",71,"Female","Rectum","I",3.1,"<5 cm",0,6,0,"LS-",1,"VI+",4,0,"EMVI-",NA
+"CRC199",84,"Female","Left colon","III",3.5,"<5 cm",0,6,1,"LS+",1,"VI+",3,1,"EMVI+",5
+"CRC200",70,"Female","Right colon","III",7.8,"≥5 cm",0,7,1,"LS+",1,"VI+",7,1,"EMVI+",7
+"CRC201",42,"Female","Left colon","I",1.1,"<5 cm",0,5,1,"LS+",1,"VI+",1,1,"EMVI+",1
+"CRC202",83,"Female","Left colon","II",4.1,"<5 cm",1,4,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC203",69,"Female","Left colon","II",3.5,"<5 cm",0,8,0,"LS-",1,"VI+",3,1,"EMVI+",8
+"CRC204",93,"Female","Rectum","III",4,"<5 cm",0,6,0,"LS-",1,"VI+",4,0,"EMVI-",NA
+"CRC205",72,"Male","Right colon","II",1.6,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC206",74,"Male","Left colon","II",2,"<5 cm",1,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC207",72,"Female","Rectum","III",0.7,"<5 cm",0,5,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC208",66,"Female","Rectum","III",1.7,"<5 cm",0,4,0,"LS-",1,"VI+",1,1,"EMVI+",1
+"CRC209",69,"Male","Right colon","III",1.9,"<5 cm",0,4,0,"LS-",1,"VI+",1,1,"EMVI+",2
+"CRC210",57,"Female","Left colon","III",1.6,"<5 cm",0,3,0,"LS-",1,"VI+",1,0,"EMVI-",NA
+"CRC211",45,"Female","Rectum","I",2.3,"<5 cm",0,8,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC212",67,"Male","Left colon","III",4.7,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC213",59,"Female","Rectum","III",2.9,"<5 cm",0,6,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC214",53,"Male","Left colon","II",7.4,"≥5 cm",0,7,0,"LS-",0,"VI-",NA,0,"EMVI-",NA
+"CRC215",66,"Female","Left colon","III",7.7,"≥5 cm",0,7,0,"LS-",1,"VI+",2,1,"EMVI+",3
+"CRC216",58,"Male","Right colon","II",3.2,"<5 cm",0,5,1,"LS+",1,"VI+",2,1,"EMVI+",2
+"CRC217",54,"Male","Left colon","I",4.3,"<5 cm",0,5,1,"LS+",1,"VI+",2,1,"EMVI+",2

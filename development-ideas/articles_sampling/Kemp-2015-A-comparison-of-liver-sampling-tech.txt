@@ -1,0 +1,951 @@
+J Vet Intern Med 2015;29:51–57
+
+A Comparison of Liver Sampling Techniques in Dogs
+S.D. Kemp, K.L. Zimmerman, D.L. Panciera, W.E. Monroe, M.S. Leib, and O.I. Lanz
+Background: The liver sampling technique in dogs that consistently provides samples adequate for accurate
+histopathologic interpretation is not known.
+Hypothesis/Objectives: To compare histopathologic results of liver samples obtained by punch, cup, and 14 gauge
+needle to large wedge samples collected at necropsy.
+Animals: Seventy dogs undergoing necropsy.
+Methods: Prospective study. Liver specimens were obtained from the left lateral liver lobe with an 8 mm punch, a
+5 mm cup, and a 14 gauge needle. After sample acquisition, two larger tissue samples were collected near the center of the
+left lateral lobe to be used as a histologic standard for comparison. Histopathologic features and numbers of portal triads
+in each sample were recorded.
+Results: The mean number of portal triads obtained by each sampling method were 2.9 in needle samples, 3.4 in cup
+samples, 12 in punch samples, and 30.7 in the necropsy samples. The diagnoses in 66% of needle samples, 60% of cup
+samples, and 69% of punch samples were in agreement with the necropsy samples, and these proportions were not signiﬁcantly diﬀerent from each other. The corresponding kappa coeﬃcients were 0.59 for needle biopsies, 0.52 for cup biopsies,
+and 0.62 for punch biopsies.
+Conclusion and Clinical Importance: The histopathologic interpretation of a liver sample in the dog is unlikely to vary
+if the liver biopsy specimen contains at least 3–12 portal triads. However, in comparison large necropsy samples, the accuracy of all tested methods was relatively low.
+Key words: Fibrosis; Hepatitis; Laparoscopy; Needle biopsy.
+
+istopathology of the liver provides information
+about the cause, chronicity, and reversibility of
+disease.1,2 However, reliable histopathologic results are
+dependent upon a liver sample of adequate size and
+quality.3,4 In humans, biopsy specimens containing
+6–113,4 portal triads are recommended to ensure accurate interpretation. Samples with few portal triads or
+those that fracture into multiple pieces are considered
+inadequate.3–5 In dogs the minimum number of portal
+triads necessary for accurate histopathologic interpretation is unknown.
+The World Small Animal Veterinary Association
+(WSAVA) Liver Standardization Group guidelines
+suggest that needle biopsy is adequate and that surgical
+liver biopsy is unnecessarily invasive.6 However, several
+studies in dogs have questioned the accuracy of needle
+biopsies.7–9 When histopathologic diagnoses obtained
+with needle biopsies were compared to those obtained
+in necropsy specimens in dogs, there was only 53%
+agreement between samples.7 However, the size of the
+biopsy instrument was not reported, nor was the quality of the samples. Another study demonstrated only a
+
+H
+
+From the Departments of Small Animal Clinical Sciences,
+(Kemp, Panciera, Monroe, Leib, Lanz); and the Department of
+Biomedical Sciences and Pathobiology, Virginia-Maryland
+Regional College of Veterinary Medicine, Virginia Tech,
+Blacksburg, VA (Zimmerman).
+Data from this study was presented in part as an abstract at the
+2013 ACVIM Forum, Seattle, WA.
+Corresponding author: D.L. Panciera, Department of Small
+Animal Clinical Sciences, Virginia-Maryland Regional College of
+Veterinary Medicine, Virginia Tech, Blacksburg, VA 24061;
+e-mail: panciera@vt.edu.
+
+48% agreement in histopathologic diagnosis between
+18 gauge needle biopsies and surgical samples taken
+from the same animal.8 Finally, other studies have
+demonstrated that punch and cup liver biopsies were
+shown to routinely produce samples with greater than
+6–8 portal triads,9 while 18 gauge and 16 gauge needle
+biopsy specimens produced fewer than 6 portal
+triads.8,9
+Liver biopsy is an invasive procedure that is associated with risk. Hemorrhage from the biopsy site is
+usually minimal but can be a potentially life threatening complication of any type of liver biopsy.9–12
+Because diﬀerent methods of liver biopsy have dissimilar risks, morbidity, and cost, it is important to identify the biopsy technique that results in the most
+accurate diagnosis with the least potential to harm the
+patient.
+Currently, the WSAVA Liver Standardization
+Group recommends 14 gauge needle samples in most
+dogs, with 16 gauge needles reserved for small
+patients.6 The adequacy of samples obtained by this
+method is unknown as previous studies have evaluated
+smaller biopsy needles. Therefore, the primary goal of
+this study was to compare postmortem liver samples
+collected by 8 mm punch, 5 mm cup, and 14 gauge
+needles and to identify the method that most consistently produced samples that represent the histopathology of the liver. We hypothesized that liver samples
+obtained via punch, cup, and 14 gauge needle would
+result in similar histopathologic diagnoses to those
+found with large wedge samples of liver obtained at
+necropsy.
+
+Submitted April 22, 2014; Revised September 22, 2014;
+Accepted October 22, 2014.
+
+Materials and Methods
+
+Copyright © 2014 by the American College of Veterinary Internal
+Medicine
+DOI: 10.1111/jvim.12508
+
+This study was approved by the Institutional Animal Care
+and Use Committee of Virginia Tech. This was a prospective
+study of dogs presented to the necropsy service between May
+
+Kemp et al
+
+2011 and August 2012 at the Virginia-Maryland Regional
+College of Veterinary Medicine, Veterinary Teaching Hospital
+(VTH). All dogs were patients of the VTH that died or were
+euthanized and written consent was obtained from all owners.
+All samples were collected within 3 hours of death and by the
+same investigator (SDK). For sample collection a midline
+abdominal incision was made with a scalpel blade. After the
+liver was visualized and exposed samples were collected from
+the left lateral liver lobe in order to simulate sample collection
+during percutaneous ultrasound-guided needle biopsy.6 All sample specimens were taken from near the center of the lobe,
+within 5 cm of each other. Samples collected from each cadaver
+included an 8 mm punch,a a 5 mm cup,b and a 14 gauge needlec sample. All techniques were performed in a manner that
+simulated collection in living dog undergoing liver biopsy as
+closely as possible. The punch sample was collected by advancing the cutting edge of a biopsy puncha at a 90° angle into the
+surface of the liver parenchyma near the center of the left lateral lobe. The cup sample was collected by advancing the open
+jaws of the cup biopsy forcepsb at a 90° angle into the surface
+of the liver parenchyma near the center of the left lateral lobe.
+The needle sample was collected with a semiautomatic biopsy
+needlec by advancing the needle into the center of the left
+lateral liver lobe at a 90° angle to the surface.
+Test samples using each technique were collected until a nonfractured specimen that completely ﬁlled the sampling channel of
+the instrument was obtained. The number of attempts required
+to ﬁll the sampling channel was not recorded. After test sample
+acquisition, two deep tissue samples of approximately
+2 cm 9 2 cm 9 1 cm were taken from the left lateral lobe. These
+large samples (designated “necropsy” samples in this manuscript)
+were used as the standard for morphologic diagnosis and comparison with each test sample. A histopathologic diagnosis was
+determined using the necropsy samples based on the WSAVA
+Liver Standardization Group’s classiﬁcation of hepatic disorders.
+If a focal liver lesion was noted (eg, mass or discoloration), the
+procedures for obtaining test samples and necropsy samples were
+repeated at the lesion site.
+Tissue samples were placed in separate cassettes in the same
+container and immediately ﬁxed in neutral-buﬀered 10% formalin at room temperature. After ﬁxation, samples were arranged in
+paraﬃn cassettes for embedding and processing. Five micron
+thick sections were prepared and stained with hematoxylin and
+eosin (H&E). Two-hundred eighty-four slides from 71 sample
+sites were randomized and evaluated by a board certiﬁed veterinary pathologist (KZ), who was unaware of their hospital case
+identity, for standardized evaluation as described below.
+Samples were assigned a score for 16 histologic features8:
+hepatocellular atrophy, hepatocellular hypertrophy, biliary hyperplasia, ceroid lipofuscin pigment, hemosiderin pigment, canalicular cholestasis, congestion, extramedullary hematopoiesis,
+vacuolar change, ﬁbrosis, tissue inﬂammation, lobular collapse,
+hepatocellular necrosis, neoplasia, thrombosis, and vascular
+abnormalities. Scores were on a scale of 0–3 with 0 representing
+no change and 3 representing severe change. Neoplasia was
+assessed as present or absent.
+Hepatocellular atrophy was identiﬁed by cords being closer
+together, small hepatocytes, increased numbers of portal triads in
+a given area, and a wrinkled capsule.13 Hepatocellular hypertrophy was deﬁned by the presence of hepatocytes of increased size
+and increased cytoplasmic basophilia.13 Biliary hyperplasia was
+scored on the basis of increased number of small biliary duct
+proﬁles located within the portal triad areas.13 Ceroid lipofuscin
+was deﬁned as a lightly golden-yellow, granular to globular,
+hepatocellular cytoplasmic pigment.13 Hemosiderin was deﬁned
+as a brown crystalline pigment within both hepatocytes and
+Kupﬀer cells.13 Canalicular cholestasis was scored based on the
+
+identiﬁcation of green bile plugs within the bile canaliculi.13
+Congestion was diagnosed based on distention of hepatic sinusoids by erythrocytes.13 Extramedullary hematopoiesis was diagnosed when foci of hematopoietic precursors cells were identiﬁed
+within the biopsy specimen.13 Vacuolar change was identiﬁed
+based on the presence of swollen hepatocytes with cytoplasmic
+vacuoles that were either distinct or indistinct, and, either single
+or multiple, as well as those with ﬁnely reticulated cytosol.13
+Fibrosis was diagnosed by a proliferation of ﬁbroblasts and collagen appreciable by hematoxylin and eosin stain.13 Tissue
+inﬂammation was classiﬁed as acute hepatitis, chronic hepatitis,
+reactive hepatitis, and cholangiohepatitis. Acute hepatitis was
+characterized as a combination of inﬂammatory cells with neutrophils in majority, hepatocellular apoptosis and necrosis, with
+or without regeneration.14 Chronic hepatitis was characterized by
+a combination of hepatocellular apoptosis or necrosis with variable lymphoplasmacytic inﬁltration with or without a neutrophilic component, regeneration and ﬁbrosis.14 Reactive hepatitis was
+characterized by neutrophilic or mixed inﬂammation in portal
+areas and the hepatic parenchyma without necrosis.14 Cholangiohepatitis was characterized by neutrophilic, lymphocytic, or
+mixed inﬂammation involving portal region hepatocytes as well
+as bile ducts.14 Hepatocellular apoptosis was characterized by
+shrunken hepatocytes, with eosinophilic cytoplasm, and condensed nuclei surrounded by an empty halo.14 Lobular collapse
+was diagnosed by loss of normal lobular architecture because of
+loss of hepatocytes.13 Hepatocellular necrosis was diagnosed by
+the presence of shrunken cells, with eosinophilic cytoplasm, and
+fragmented or pyknotic nuclei.14 Neoplasia was diagnosed by
+identiﬁcation of atypical, dysplastic hepatic or metastatic cells in
+the sample specimen.13 Thrombosis was identiﬁed by the presence
+of thrombi within hepatic vasculature.13 Vascular abnormalities
+were scored based on identiﬁcation of small or absent portal
+veins, arteriolar proliferation, with or without hepatocellular
+atrophy.13 Cirrhosis was characterized by bridging ﬁbrosis with
+conversion of normal architecture into structurally abnormal
+regenerative nodules, and the presence of portal-central vascular
+anastomosis as a diﬀuse change.14 Regeneration was identiﬁed
+when hyperplasia was present, particularly in a nodular pattern
+accompanied by ﬁbrosis. The criteria scores of the two necropsy
+samples were averaged and served as the standard to which the
+other samples were compared.
+Based on the histologic criteria scores, a morphological diagnosis was assigned to each of the 4 specimens (three test methods
+and necropsy sample) based on the WSAVA Liver Standardization Group guidelines.15 Only histologic criteria scores ≥2 were
+considered as part of the ﬁnal morphologic diagnosis. The morphologic diagnosis assigned to the necropsy samples was considered the deﬁnitive diagnosis. If the morphologic diagnoses from
+the two necropsy samples from the same liver did not agree, all
+specimens from that dog were censored from further analysis.
+Finally, the number of portal triads present in each sample was
+recorded. The basis for enumerating a portal triad was the identiﬁcation of all three triad structures (hepatic artery, portal vein,
+and bile duct).
+
+Statistical Analysis
+Agreement between deﬁnitive morphologic diagnosis and the
+morphologic diagnosis of the test specimens were assessed by calculating kappa coeﬃcients. The sensitivity and speciﬁcity of each
+sample type as compared to the necropsy samples was calculated.
+In these calculations, the same predominant histopathologic
+abnormality in the test sample and the necropsy sample was considered a true positive. Comparison between the sensitivity and
+speciﬁcity for the 3 sampling methods was tested using the
+Mantel-Haenszel Chi-square test. The proportions of concordant
+
+19391676, 2015, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/jvim.12508 by Turkey National Provision, Wiley Online Library on [14/10/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+52
+
+sample results were compared with logistic generalized estimating
+equations (GEE) analysis. The mean number of portal triads
+between sample types was compared with a mixed model
+ANOVA. The mean score for each of the 16 histologic features
+was calculated for all samples of each test sample type and compared using a linear GEE analysis to detect signiﬁcant diﬀerences
+in the histologic characteristics between test samples and necropsy samples. All analyses were performed using commercial
+software.d Signiﬁcance was determined at P < .05.
+
+Results
+Seventy dogs and 71 total sample sites (one dog had
+a focal lesion) were included in this study. No cases
+were censored because of disagreement between the
+two necropsy samples. Morphologic diagnoses in the
+necropsy samples were: no abnormality (18/71;
+25.4%), vacuolar hepatopathy (18/71; 25.4%), neoplasia (8/71; 11.3%), primary ﬁbrosis (6/71; 8.45%),
+chronic hepatitis (5/71; 7.0%), congestion (5/71;
+7.0%), cirrhosis (5/71; 7.0%), necrosis (3/71; 4.2%),
+cholangiohepatitis (1/71; 1.4%), reactive hepatitis (1/
+71; 1.4%), and cholestasis (1/71; 1.4%).
+There were no signiﬁcant diﬀerences (P = .29) in the
+proportion of test samples that agreed with the necropsy sample between test sample types. Cohen’s
+kappa coeﬃcient for the needle, cup, and punch samples were 0.59, 0.52, and 0.62 respectively.
+The mean number and 95% conﬁdence intervals of
+portal triads in each sampling method was 2.9 (2.6–3.2)
+in needle samples, 3.4 (2.7–4.2) in cup samples, 12.0
+(10.3–13.7) in punch samples, and 30.7 (27.0–34.5) in
+the necropsy samples. Punch samples had signiﬁcantly
+more portal triads than either cup or needle samples
+(P < .001) which were not statistically diﬀerent from
+each other (P = .98). The necropsy samples had signiﬁcantly more portal triads than all the test samples
+(P < .001). The number of portal triads could not be
+determined in 8 needle samples (diagnosis included neoplasia [4], cirrhosis [2], ﬁbrosis [1], necrosis [1]), 11 cup
+samples (diagnosis included neoplasia [5], cirrhosis [3],
+necrosis [2], ﬁbrosis [1]), 12 punch samples (diagnosis
+included neoplasia [5], cirrhosis [4], acute hepatitis [1],
+ﬁbrosis [1], necrosis [1]), and 13 necropsy samples (diagnosis included neoplasia [5], cirrhosis [4], ﬁbrosis [1],
+necrosis [1], chronic hepatitis [1], and congestion [1]),
+because of loss of normal hepatic architecture.
+
+53
+
+The sensitivities and 95% conﬁdence intervals of the
+test methods as compared to the necropsy samples
+were similar, being 60% (46–73%), 55% (41–68%),
+and 66% (52–78%) for needle, cup, and punch sampling, respectively. The speciﬁcities were also similar
+between methods and were higher than the sensitivities, being 83% (58–96%), 78% (52–93%), and 78%
+(52–93%) for needle, cup, and punch sampling respectively. When the sensitivity and speciﬁcity of each test
+method was calculated for each diagnosis, the highest
+sensitivities were found in dogs with vacuolar hepatopathy, normal hepatic histopathology, and neoplasia
+(Table 1). Within each diagnosis category where sensitivity and speciﬁcity were reported, there were no signiﬁcant diﬀerences in the sensitivities or speciﬁcities
+between the test types. Results were not reported for
+necrosis, cholangiohepatitis, reactive hepatitis, or cholestasis because of the small number of cases in each
+category. Diagnoses in the 8 livers with neoplasia
+included histiocytic sarcoma (3), lymphoma (3), undifferentiated round cell sarcoma (1), and spindle cell sarcoma (1). The sensitivity for diagnosis of neoplasia
+was 75% (95% CI: 0.45–1.0) for needle samples; 63%
+(95% CI: 0.29–0.96) for cup samples; and 88% (95%
+CI: 0.65–1.0) for punch samples. The speciﬁcity for
+neoplasia was 100% in all three test types. Overall, the
+sensitivity for the diagnosis of ﬁbrosis was low, ranging from 16 to 50% (Table 1).
+The mean scores for each of the histologic features
+were compared amongst the test sample types and several signiﬁcant diﬀerences from the necropsy samples
+were identiﬁed (Table 2). The needle samples identiﬁed
+signiﬁcantly less hepatocellular atrophy, biliary hyperplasia, hemosiderin, and congestion compared to the
+necropsy samples. The cup samples identiﬁed signiﬁcantly less biliary hyperplasia, hemosiderin, and congestion when compared to the necropsy samples.
+Finally, the punch samples showed signiﬁcantly less
+hepatocellular hypertrophy and hemosiderin than the
+necropsy samples.
+In the 6 cases with a predominant histopathologic
+abnormality of ﬁbrosis, the mean ﬁbrosis score in the
+necropsy samples was 2.5, which was signiﬁcantly
+higher than 1.5 in the punch (P = .014), 1.4 in the cup
+samples (P = .014), and 0.5 in the needle samples
+(P < .001). In the 5 cases of chronic hepatitis the mean
+
+Table 1. Sensitivity, speciﬁcity, and 95% conﬁdence intervals for each biopsy type stratiﬁed by morphologic
+diagnosis in the necropsy samples.
+Needle
+
+Laparoscopic Cup
+
+Punch
+
+Gold Standard
+Diagnosis
+
+Number
+
+Sensitivity
+
+Speciﬁcity
+
+Sensitivity
+
+Speciﬁcity
+
+Sensitivity
+
+Speciﬁcity
+
+Normal
+Vacuolar
+Neoplasia
+Primary ﬁbrosis
+Chronic hepatitis
+Congestion
+Cirrhosis
+
+18
+18
+8
+6
+5
+5
+5
+
+0.83 (0.66–1.0)
+0.72 (0.51–0.92)
+0.75 (0.45–1.0)
+0.16 (0.0–0.64)
+0.6 (0.17–1.0)
+0.4 (0.0–0.83)
+0.6 (0.17–1.0)
+
+0.75 (0.64–0.87)
+0.96 (0.03–0.91)
+1 (1.0–1.0)
+0.98 (0.92–1.0)
+0.98 (0.96–1.0)
+0.98 (0.96–1.0)
+1 (1.0–1.0)
+
+0.78 (0.59–0.97)
+0.61 (0.39–0.84)
+0.63 (0.29–0.96)
+0.5 (0.12–0.87)
+0.4 (0.0–0.83)
+0.2 (0.0–0.55)
+0.8 (0.45–1.0)
+
+0.68 (0.55–0.80)
+1 (1.0–1.0)
+1 (1.0–1.0)
+0.97 (0.89–1.0)
+0.98 (0.96–1.0)
+0.98 (0.96–1.0)
+1 (1.0–1.0)
+
+0.78 (0.59–0.97)
+0.83 (0.66–1.0)
+0.88 (0.65–1.0)
+0.5 (0.12–0.87)
+0.4 (0.0–0.83)
+0.4 (0.0–0.83)
+0.8 (0.45–1.0)
+
+0.81 (0.71–0.92)
+0.96 (0.91–1.0)
+1 (1.0–1.0)
+0.98 (0.92–1.0)
+1 (1.0–1.0)
+0.97 (0.93–1.0)
+1 (1.0–1.0)
+
+Only morphologic diagnoses with ≥5 cases are shown.
+
+19391676, 2015, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/jvim.12508 by Turkey National Provision, Wiley Online Library on [14/10/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Liver Sampling Techniques in Dogs
+
+0.14
+
+SD = 0.46
+
+0.014
+
+SD = 0.12
+SD = 0.66
+SD = 0.45
+
+Signiﬁcant diﬀerences are shaded.
+
+0.41
+
+SD = 0.72
+SD = 0.55
+
+0.24
+0.41
+
+SD = 0.80
+SD = 0.12
+
+0.64
+1.01
+
+SD = 1.1
+SD = 0.57
+
+0.30
+0.48
+
+SD = 0.73
+SD = 0.90
+SD = 0.92
+
+0.57
+
+Discussion
+
+SD = 0.76
+
+0.95
+
+inﬂammation score in the necropsy samples was 2.6,
+which was signiﬁcantly higher than 1.5 in the cup samples (P = .002), and 1.4 in the needle samples
+(P < .001), but not signiﬁcantly diﬀerent from 2.1 in
+the punch samples (P = .15).
+
+SD = 0.97
+
+(P = .024)
+
+0.96
+0.58
+0.29
+
+(P = .039)
+
+0.19
+Necropsy
+
+0.18
+
+SD = 0.57
+
+0.015
+
+SD = 0.12
+SD = 0.61
+
+0.33
+0.21
+
+SD = 0.60
+SD = 0.79
+
+0.39
+0.49
+
+SD = 0.95
+
+0.91
+
+SD = 0.13
+
+0.18
+
+SD = 0.052
+
+0.37
+
+SD = 0.67
+SD = 0.87
+
+0.49
+0.79
+0.92
+
+SD = 0.75
+
+0.45
+
+SD = 0.90
+
+0.17
+
+SD = 0.45
+
+0.19
+Punch
+
+SD = 0.82
+
+(P = .0021)
+(P = .02)
+(P < .001)
+cup
+
+SD = 0.52
+
+0.15
+
+SD = 0.44
+
+0
+SD = 0.62
+
+0.34
+0.15
+
+SD = 0.53
+SD = 0.68
+
+0.37
+0.60
+
+SD = 0.97
+SD = 0.87
+
+0.76
+0.11
+
+SD = 0.31
+SD = 0.54
+
+0.25
+0.43
+
+SD = 0.82
+SD = 0.87
+
+0.75
+1.0
+
+SD = 0.92
+scopic
+
+0.32
+0.34
+
+SD = 0.66
+
+0.16
+
+SD = 0.49
+
+Laparo-
+
+(P < .001)
+(P = .017)
+
+SD=0.73
+
+(P < .001)
+(P = .0033)
+
+0.078
+
+SD = 0.32
+
+0
+0.28 SD = 0.59
+0.13
+
+SD = 0.06
+SD = 0.64
+
+0.32
+0.43
+0.88
+
+SD = 0.95
+
+0.154
+0.19
+
+SD = 0.50
+
+0.37
+0.71
+
+SD = 0.95
+
+0.87
+
+SD = 0.95
+
+0.27
+0.18
+
+SD = 0.45
+
+0.13
+
+SD = 0.43
+
+Needle
+
+SD = 0.67
+
+SD = 0.79
+
+SD = 0.41
+
+SD = 0.80
+
+Vascular
+
+Abnormality
+Thrombosis
+Collapse
+
+Lobular
+Tissue
+
+Inﬂammation
+Fibrosis
+Change
+
+Vacuolar
+Extramedullary
+
+Hematopoiesis
+Congestion
+
+Cholestasis
+
+(Bile)
+Hemosiderin
+
+Ceroid
+
+Lipofuscin
+
+Biliary
+
+Hyperplasia
+Hypertrophy
+
+Hepatocellular
+
+Atrophy
+
+Hepatocellular
+
+(N = 71)
+
+Sample Type
+
+Table 2. Mean scores and standard deviations for histologic features of each sample type.
+
+Necrosis
+
+Kemp et al
+
+Results of this study indicate that 14 gauge needle,
+5 mm cup, and 8 mm punch samples of the liver have
+a similar proportion of samples in agreement to larger
+hepatic samples. However, the level of agreement
+could be considered insuﬃcient when a single sample
+is taken by any tested technique. The disparity
+between the test samples and the necropsy samples
+seemingly occurs as a result of variable distribution of
+morphologic features within a liver lobe which might
+be overcome by obtaining multiple samples, a larger
+single sample, or perhaps biopsies from multiple lobes.
+The paired necropsy samples from each dog had identical histopathologic diagnoses, while the smaller samples obtained using the three test methods had less
+consistent agreement with the large necropsy samples.
+Because all the samples were obtained within 5 cm of
+each other, the size of the specimen obtained by the
+test methods was most likely the primary factor inﬂuencing the histopathologic interpretation.
+Smaller test samples had fewer portal triads. The
+number of portal triads in the needle and cup samples
+were not diﬀerent, and both contained fewer than
+what is recommended in humans, while the punch
+samples exceeded the minimum recommendations.3,4
+Despite this, the accuracy of the punch samples was
+not greater than the other test methods. Therefore,
+recommendations for sampling the human liver do not
+appear to be applicable to dogs.
+The median and mean number of portal triads of 3
+and 2.9, respectively, in needle samples in the present
+study was lower than previous reports where 18 gauge
+needle biopsies had a median of 4 portal triads8 and
+16 gauge needle samples had a mean of 6–7.9 portal
+triads.9 This discrepancy may be attributable to the
+strict criteria used for counting portal triads in this
+study, where all 3 structures comprising the portal
+triad had to be clearly identiﬁed. Other studies that
+did not describe their methodology in detail may have
+included portal areas without all three components of
+the triad visible. Despite the punch samples containing
+signiﬁcantly more triads than the other test methods,
+the overall histopathological agreement with necropsy
+samples was not diﬀerent. Therefore, when the number
+of portal triads in samples ranges from 3 to 12, the
+ﬁnal histopathologic interpretation is unlikely to vary.
+However, because of the relatively poor agreement
+with the necropsy samples, it is reasonable to assume
+that biopsies larger than those obtained in this study
+might enhance the likelihood of a correct diagnosis.
+Because techniques used to obtain larger biopsies
+might result in increased risk for hemorrhage, multiple
+biopsies from diﬀerent locations of a lobe might be the
+best method to safely acquire adequate tissue.
+
+19391676, 2015, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/jvim.12508 by Turkey National Provision, Wiley Online Library on [14/10/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+54
+
+Portal triads could not be reported in 13 (18%) of
+the necropsy samples because of severe distortion in
+the hepatic architecture. This raises concern for the use
+of portal triad numbers as the only measure of biopsy
+specimen quality, as these samples were large but did
+not contain recognizable triad structures. However, the
+diagnoses in the majority of these cases were neoplasia
+or cirrhosis and it is likely that in such severe disease
+large samples with many portal triads may not be necessary for diagnosis.
+In this group, the sensitivity of needle samples were
+similar to a previous report that compared 18 gauge
+needle and surgical biopsies.8 While the sensitivity for
+detection of hepatic neoplasia was similar to that of
+another study (80%) using a smaller needle biopsy, the
+speciﬁcity was 100% in all sample methods tested in
+the present study.8 Because the majority of neoplasms
+in our population were systemic, it is unclear if similar
+results would be found in dogs with focal, metastatic,
+or multifocal neoplasia.16
+In cases where ﬁbrosis was the histopathologic diagnosis, all three sampling methods had a signiﬁcantly
+lower mean ﬁbrosis score than the necropsy samples. In
+these cases the punch and cup samples had a concordant
+diagnosis in 3 samples, and only 1 of the 6 livers with
+ﬁbrosis had it identiﬁed on needle biopsy. These ﬁndings
+suggest that large tissue samples may be necessary to
+accurately describe the degree of ﬁbrosis when severe
+disease is present. This is in contrast with previous studies where needle biopsy specimens showed higher histologic scores for ﬁbrosis.8 However, the results of the
+present study mirror those of several human studies in
+which ﬁbrosis scores declined with smaller biopsy
+size.5,17 The discordance in the ﬁbrosis scoring is likely
+caused by variation in severity of ﬁbrosis throughout or
+between lobes, which has been documented in humans.
+In a report of patients with primary biliary ﬁbrosis,
+whole section scanning of the liver at the time of transplantation revealed that only 20% of these livers had
+ﬁbrosis throughout the entire organ.18
+All test methods were insensitive for diagnosis of
+chronic hepatitis, unlike a previous study that reported
+needle biopsies had higher scores for inﬂammation
+when compared to wedge biopsies obtained at surgery.8 In the present study, there were no signiﬁcant
+diﬀerences in the histologic scores for inﬂammation
+between the sampling methods. However, when the
+ﬁve cases of chronic hepatitis were analyzed separately,
+inﬂammation scores for both the cup and needle samples were signiﬁcantly lower than those of the necropsy
+samples. The punch and cup samples both had concordant diagnoses in 2 cases and the needle samples had
+concordant diagnoses in 3 cases. Although the number
+of cases in the present study was limited, the results
+suggest that histopathology of a single sample may underrepresent the severity of disease when chronic
+inﬂammation is present. This ﬁnding is similar to a
+report in humans which demonstrated that shorter
+needle biopsies produced samples with lower inﬂammatory scores in patients with hepatitis C virus infection.4 However, it is not known if the lower histologic
+
+55
+
+scores for inﬂammation reported in the small test samples in the present study would result in a diﬀerent
+clinical diagnosis in dogs.
+The high number of discordant samples amongst all
+test methods may be attributable to nonuniform
+lesions throughout the liver lobe, even in diﬀuse hepatopathies. For example, marked variation in copper
+concentration was found when needle biopsy specimens were compared to wedge samples in dogs.19 Conclusions of the small number of studies that have
+evaluated the diagnostic accuracy of liver biopsy techniques in dogs have been hampered by limitations in
+our understanding of canine liver disease. Studies evaluating liver biopsy in humans typically focus on
+patients with a speciﬁc disease such as hepatitis C virus
+or nonalcoholic steatohepatitis, and are aimed to
+deﬁne the best biopsy method for that speciﬁc disease,
+whether for diagnostic or prognostic purposes.5,20
+Because of limited knowledge of the etiology and clinical markers of speciﬁc liver diseases in dogs, any
+biopsy technique must be able to identify any of the
+histologic features that might be present.
+One limitation of this study is reliance on a single
+pathologist for interpretation of all of the liver samples.
+However, use of a single pathologist likely resulted in
+more consistent results between cases, compared with
+multiple observers.21 The expertise of the pathologist in
+evaluating the liver is another important consideration
+in humans and likely is important in veterinary medicine as well.22 Dogs enrolled in the study were not
+selected because of known hepatic disease, thus were
+not representative of the population in which liver
+biopsies would be obtained in clinical practice. The
+inﬂuence that a higher prevalence of hepatic disease
+would have had on the results of this study remains
+unclear. It is important to note that in a study of liver
+biopsy in population of patients where biopsy was
+deemed appropriate for clinical reasons, 28% had no
+hepatic disease, similar to the 26% in the present
+study.8 Sample collection was performed using methods
+that mimicked their antemortem use, but diﬀered from
+percutaneous and laparoscopic biopsy as the samples
+were obtained through a large abdominal incision and
+repeated sampling was attempted until a suﬃcient sample was retrieved. The number of attempts required to
+obtain a sample that ﬁlled the biopsy instrument was
+not recorded, but the size of antemortem biopsies varies
+within a given method and fragmented samples complicate histopathologic interpretation.9 In addition, sample acquisition can be aﬀected by the underlying liver
+disease. For example, in the authors’ experience, needle
+or cup sampling of a severely ﬁbrotic liver often results
+in smaller biopsies and frequently multiple attempts are
+necessary to obtain an adequate sample. Biopsies
+obtained in a clinical setting might be of lower quality
+and be limited by the potential for complications of
+repeated sampling. Thus, it is possible that the accuracy
+of nonsurgical biopsies in clinical cases may be lower
+than reported here.
+Because the WSAVA Liver Standardization Group
+recommends two biopsies for histopathologic
+
+19391676, 2015, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/jvim.12508 by Turkey National Provision, Wiley Online Library on [14/10/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Liver Sampling Techniques in Dogs
+
+Kemp et al
+
+evaluation, the present study might have been strengthened by evaluating more than one sample using each
+test method. However, our study was not designed to
+determine the minimum number of samples necessary to
+ensure accurate histopathologic diagnosis, rather it was
+to investigate the ability of commonly used sampling
+methods to accurately reﬂect the histopathologic diagnosis. Sample quality in the present study was controlled by using only samples that fully ﬁlled the
+instrument’s chamber and were not fragmented, resulting in uniform comparisons between sampling methods
+and avoiding the inﬂuence of variation in biopsy size
+which has been shown to aﬀect biopsy interpretation in
+humans with hepatitis.4 Because no sampling method
+had a strong agreement with the gold standard, it seems
+clear that multiple samples should be obtained in the
+hope that it would improve accuracy. It is likely that the
+number of samples necessary for an accurate histopathologic interpretation would vary depending on the disease and biopsy quality. Histochemical staining was
+limited to H&E in the present study, which may have
+led to underestimation of ﬁbrosis, limited assessment of
+architectural changes in some diseases, and prevented
+identiﬁcation of some intracellular contents and pigments. However, the same stains and analytic criteria
+were applied to each sample, so the detrimental eﬀects
+of using a single stain would be limited. Future studies
+should address these important issues.
+Our study design limited the surgical samples to one
+technique that allowed for sampling from the center of
+the lobe. Other methods of surgical liver biopsy have
+been described in the dog,9 and it is possible that an
+alternate method of sampling such as obtaining a larger wedge from the edge of a liver lobe might improve
+accuracy.
+The results of this study demonstrate substantial
+limitations in the accuracy of a single liver sample by
+any of the tested techniques. Obtaining multiple samples from the liver might be of greater importance than
+the method of biopsy.
+
+Footnotes
+a
+
+8 mm Biopsy Punch, Miltex, Inc., Plainsboro, NJ
+Eragon 5 mm biopsy forceps, Richard Wolf Medical Instruments Corporation, Vernon Hills, IL
+c
+SurgiVet VET-Core Biopsy needle 14 ga, 9 cm, Smiths Medical
+PM, Inc. Waukesha, WI
+d
+SAS/STAT software version 9.2. (Cary, NC)
+b
+
+Acknowledgments
+The authors thank Dr Stephen R. Werre for statistical assistance. The study was funded by the Virginia
+Veterinary Memorial Fund.
+Conﬂict of Interest Declaration: The authors disclose
+no conﬂict of interest.
+
+Oﬀ-label Antimicrobial Declaration: The authors
+declare no oﬀ-label use of antimicrobials.
+
+References
+1. Rockey DC, Caldwell SH, Goodman ZD, et al. Liver
+biopsy. Hepatology 2009;49:1017–1044.
+2. Rothuizen J, Twedt DC. Liver biopsy techniques. Vet Clin
+North Am Small Anim Pract 2009;39:469–480.
+3. Bravo AA, Sheth SG, Chopra S. Liver biopsy. N Engl J
+Med 2001;344:495–500.
+4. Colloredo G, Guido M, Sonzogni A, et al. Impact of liver
+biopsy size on histological evaluation of chronic viral hepatitis:
+The smaller the sample, the milder the disease. J Hepatol
+2003;39:239–244.
+5. Bedossa P, Dargere D, Paradis V. Sampling variability of
+liver ﬁbrosis in chronic hepatitis C. Hepatology 2003;38:1449–1457.
+6. Rothuizen J, Desmet VJ, Vanden Ingh TSAGM, et al.
+Sampling and handling of liver tissue. In: Rothuizen J, Bunch
+SE, Charles JA, Cullen JM, Desmet VJ, Szatmari V, Twedt DC,
+van den Ingh TSGAM, Winkle TV, Washabau RJ, eds. WSAVA
+Standards for Clinical and Histological Diagnosis of Canine and
+Feline Liver Diseases. Philadelphia, PA: Saunders Elsevier;
+2006:5–14.
+7. Brobst DF, Schall WD. Needle biopsy of the canine liver
+and correlation of laboratory data with histopathologic observations. J Am Vet Med Assoc 1972;161:382–388.
+8. Cole TL, Center SA, Flood SN, et al. Diagnostic comparison of needle and wedge biopsy specimens of the liver in dogs
+and cats. J Am Vet Med Assoc 2002;220:1483–1490.
+9. Vasanjee SC, Bubenik LJ, Hosgood G, et al. Evaluation of
+hemorrhage, sample size, and collateral damage for ﬁve hepatic
+biopsy methods in dogs. Vet Surg 2006;35:86–93.
+10. Hardy R. Hepatic biopsy. In: Kirk RW, ed. Current Veterinary Therapy VIII. Small Animal Practice. Philadelphia, PA:
+Saunders; 1983:813–817.
+11. Tsochatzis E, Deutsch M, Zaphyropoulou R, et al. Acute
+ischemic injury due to a giant intrahepatic hematoma: A complication of percutaneous liver biopsy. Eur J Intern Med
+2007;18:339–341.
+12. Yu MC, Jeng LB, Lee WC, et al. Giant intrahepatic
+hematoma after liver biopsy in a liver transplant recipient. Transplant Proc 2000;32:2217–2218.
+13. Cullen J. Liver, biliary system and exocrine pancreas. In:
+Zachary JF, McGavin D, eds. Pathologic Basis of Veterinary
+Disease, 4th ed. St. Louis, MO: Elsevier Mosby; 2007:
+393–461.
+14. Van den Ingh TSGAM, Winkle TV, Cullen JM, et al.
+Morphological classiﬁcation of parenchymal disorders of the
+canine and feline liver 2. Hepatocellular death, hepatitis and cirrhosis. In: Rothuizen J, Bunch SE, Charles JA, Cullen JM,
+Desmet VJ, Szatmari V, Twedt DC, van den Ingh TSGAM,
+Winkle TV, Washabau RJ, eds. WSAVA Standards for
+Clinical and Histological Diagnosis of Canine and Feline
+Liver Diseases. Philadelphia, PA: Saunders Elsevier; 2006:
+85–101.
+15. Rothuizen J, Bunch SE, Charles JA, et al. eds. WSAVA
+Standards for Clinical and Histological Diagnosis of Canine
+and Feline Liver Diseases. Philadelphia, PA: Saunders Elsevier;
+2006.
+16. Maharaj B, Maharaj RJ, Leary WP, et al. Sampling variability and its inﬂuence on the diagnostic yield of percutaneous
+needle biopsy of the liver. Lancet 1986;1:523–525.
+17. Poynard T. Prospective analysis of discordant results
+between biochemical markers and biopsy in patients with chronic
+hepatitis C. Clin Chem 2004;50:1344–1355.
+
+19391676, 2015, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/jvim.12508 by Turkey National Provision, Wiley Online Library on [14/10/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+56
+
+18. Garrido MC, Hubscher SG. Accuracy of staging in primary biliary cirrhosis. J Clin Pathol 1996;49:556–559.
+19. Johnston AN, Center SA, McDonough SP, et al. Inﬂuence
+of biopsy specimen size, tissue ﬁxation, and assay variation on
+copper, iron, and zinc concentrations in canine livers. Am J Vet
+Res 2009;70:1502–1511.
+20. Ratziu V, Charlotte F, Heurtier A, et al. Sampling variability of liver biopsy in nonalcoholic fatty liver disease. Gastroenterology 2005;128:1898–1906.
+
+57
+
+21. Theodossi A, Skene AM, Portmann B, et al. Observer variation in assessment of liver biopsies including analysis by kappa
+statistics. Gastroenterology 1980;79:232–241.
+22. Bateman AC. Patterns of histological change in liver disease: My approach to ‘medical’ liver biopsy reporting. Histopathology 2007;51:585–596.
+
+19391676, 2015, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/jvim.12508 by Turkey National Provision, Wiley Online Library on [14/10/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Liver Sampling Techniques in Dogs
+
+

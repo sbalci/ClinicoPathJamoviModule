@@ -15,16 +15,16 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             targetConfidence = 0.95,
             maxSamples = 10,
             bootstrapIterations = 10000,
-            showBinomialModel = TRUE,
-            showBootstrap = TRUE,
-            showDetectionCurve = TRUE,
-            showSensitivityCI = TRUE,
-            setSeed = TRUE,
+            showBinomialModel = FALSE,
+            showBootstrap = FALSE,
+            showDetectionCurve = FALSE,
+            showSensitivityCI = FALSE,
+            setSeed = FALSE,
             seedValue = 42,
             positiveCassettes = NULL,
             maxPositiveSingle = NULL,
             showTumorBurden = FALSE,
-            showStageMigration = TRUE,
+            showStageMigration = FALSE,
             showCorrelation = FALSE,
             showDistributionPattern = FALSE,
             distributionThreshold = 5,
@@ -41,8 +41,8 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             lnrThreshold2 = 0.3,
             showEffectSizes = FALSE,
             showOmentumAnalysis = FALSE,
-            showClinicalSummary = TRUE,
-            showGuidedChecklist = TRUE,
+            showClinicalSummary = FALSE,
+            showGuidedChecklist = FALSE,
             showEmpiricalCumulative = FALSE,
             showSpatialClustering = FALSE,
             showStratifiedAnalysis = FALSE,
@@ -77,7 +77,8 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..positiveSamplesList <- jmvcore::OptionVariable$new(
                 "positiveSamplesList",
                 positiveSamplesList,
@@ -85,7 +86,8 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..sampleType <- jmvcore::OptionVariable$new(
                 "sampleType",
                 sampleType,
@@ -93,7 +95,8 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..groupBy <- jmvcore::OptionVariable$new(
                 "groupBy",
                 groupBy,
@@ -101,7 +104,8 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..targetConfidence <- jmvcore::OptionNumber$new(
                 "targetConfidence",
                 targetConfidence,
@@ -123,23 +127,23 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..showBinomialModel <- jmvcore::OptionBool$new(
                 "showBinomialModel",
                 showBinomialModel,
-                default=TRUE)
+                default=FALSE)
             private$..showBootstrap <- jmvcore::OptionBool$new(
                 "showBootstrap",
                 showBootstrap,
-                default=TRUE)
+                default=FALSE)
             private$..showDetectionCurve <- jmvcore::OptionBool$new(
                 "showDetectionCurve",
                 showDetectionCurve,
-                default=TRUE)
+                default=FALSE)
             private$..showSensitivityCI <- jmvcore::OptionBool$new(
                 "showSensitivityCI",
                 showSensitivityCI,
-                default=TRUE)
+                default=FALSE)
             private$..setSeed <- jmvcore::OptionBool$new(
                 "setSeed",
                 setSeed,
-                default=TRUE)
+                default=FALSE)
             private$..seedValue <- jmvcore::OptionInteger$new(
                 "seedValue",
                 seedValue,
@@ -151,14 +155,16 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..maxPositiveSingle <- jmvcore::OptionVariable$new(
                 "maxPositiveSingle",
                 maxPositiveSingle,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..showTumorBurden <- jmvcore::OptionBool$new(
                 "showTumorBurden",
                 showTumorBurden,
@@ -166,7 +172,7 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..showStageMigration <- jmvcore::OptionBool$new(
                 "showStageMigration",
                 showStageMigration,
-                default=TRUE)
+                default=FALSE)
             private$..showCorrelation <- jmvcore::OptionBool$new(
                 "showCorrelation",
                 showCorrelation,
@@ -195,14 +201,16 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..successStates <- jmvcore::OptionVariable$new(
                 "successStates",
                 successStates,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..targetDetections <- jmvcore::OptionInteger$new(
                 "targetDetections",
                 targetDetections,
@@ -223,14 +231,16 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..positiveLymphNodes <- jmvcore::OptionVariable$new(
                 "positiveLymphNodes",
                 positiveLymphNodes,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..showLNAnalysis <- jmvcore::OptionBool$new(
                 "showLNAnalysis",
                 showLNAnalysis,
@@ -258,11 +268,11 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..showClinicalSummary <- jmvcore::OptionBool$new(
                 "showClinicalSummary",
                 showClinicalSummary,
-                default=TRUE)
+                default=FALSE)
             private$..showGuidedChecklist <- jmvcore::OptionBool$new(
                 "showGuidedChecklist",
                 showGuidedChecklist,
-                default=TRUE)
+                default=FALSE)
             private$..showEmpiricalCumulative <- jmvcore::OptionBool$new(
                 "showEmpiricalCumulative",
                 showEmpiricalCumulative,
@@ -440,6 +450,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         welcome = function() private$.items[["welcome"]],
         instructions = function() private$.items[["instructions"]],
         dataInfo = function() private$.items[["dataInfo"]],
+        probabilityExplanation = function() private$.items[["probabilityExplanation"]],
         binomialText = function() private$.items[["binomialText"]],
         binomialTable = function() private$.items[["binomialTable"]],
         recommendTable = function() private$.items[["recommendTable"]],
@@ -521,6 +532,10 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `name`="value", 
                         `title`="Value", 
                         `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="probabilityExplanation",
+                title="Understanding Detection Probabilities"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="binomialText",
@@ -1350,6 +1365,7 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$probabilityExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$binomialText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$binomialTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$recommendTable} \tab \tab \tab \tab \tab a table \cr
@@ -1413,41 +1429,41 @@ pathsampling <- function(
     data,
     totalSamples,
     firstDetection,
-    positiveCount,
-    positiveSamplesList,
-    sampleType,
-    groupBy,
+    positiveCount = NULL,
+    positiveSamplesList = NULL,
+    sampleType = NULL,
+    groupBy = NULL,
     targetConfidence = 0.95,
     maxSamples = 10,
     bootstrapIterations = 10000,
-    showBinomialModel = TRUE,
-    showBootstrap = TRUE,
-    showDetectionCurve = TRUE,
-    showSensitivityCI = TRUE,
-    setSeed = TRUE,
+    showBinomialModel = FALSE,
+    showBootstrap = FALSE,
+    showDetectionCurve = FALSE,
+    showSensitivityCI = FALSE,
+    setSeed = FALSE,
     seedValue = 42,
-    positiveCassettes,
-    maxPositiveSingle,
+    positiveCassettes = NULL,
+    maxPositiveSingle = NULL,
     showTumorBurden = FALSE,
-    showStageMigration = TRUE,
+    showStageMigration = FALSE,
     showCorrelation = FALSE,
     showDistributionPattern = FALSE,
     distributionThreshold = 5,
     modelType = "binomial",
-    totalPopulation,
-    successStates,
+    totalPopulation = NULL,
+    successStates = NULL,
     targetDetections = 1,
     showHypergeometric = FALSE,
     showBetaBinomial = FALSE,
-    totalLymphNodes,
-    positiveLymphNodes,
+    totalLymphNodes = NULL,
+    positiveLymphNodes = NULL,
     showLNAnalysis = FALSE,
     lnrThreshold1 = 0.1,
     lnrThreshold2 = 0.3,
     showEffectSizes = FALSE,
     showOmentumAnalysis = FALSE,
-    showClinicalSummary = TRUE,
-    showGuidedChecklist = TRUE,
+    showClinicalSummary = FALSE,
+    showGuidedChecklist = FALSE,
     showEmpiricalCumulative = FALSE,
     showSpatialClustering = FALSE,
     showStratifiedAnalysis = FALSE,

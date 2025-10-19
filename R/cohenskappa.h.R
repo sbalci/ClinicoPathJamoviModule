@@ -19,7 +19,12 @@ cohenskappaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             category_analysis = FALSE,
             interpretation_guide = TRUE,
             missing_treatment = "listwise",
-            minimum_categories = 2, ...) {
+            minimum_categories = 2,
+            rater3 = NULL,
+            rater4 = NULL,
+            rater5 = NULL,
+            multi_rater_method = "auto",
+            show_pairwise_kappa = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -111,6 +116,48 @@ cohenskappaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 default=2,
                 min=2,
                 max=10)
+            private$..rater3 <- jmvcore::OptionVariable$new(
+                "rater3",
+                rater3,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                default=NULL)
+            private$..rater4 <- jmvcore::OptionVariable$new(
+                "rater4",
+                rater4,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                default=NULL)
+            private$..rater5 <- jmvcore::OptionVariable$new(
+                "rater5",
+                rater5,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                default=NULL)
+            private$..multi_rater_method <- jmvcore::OptionList$new(
+                "multi_rater_method",
+                multi_rater_method,
+                options=list(
+                    "fleiss",
+                    "light",
+                    "auto"),
+                default="auto")
+            private$..show_pairwise_kappa <- jmvcore::OptionBool$new(
+                "show_pairwise_kappa",
+                show_pairwise_kappa,
+                default=FALSE)
 
             self$.addOption(private$..rater1)
             self$.addOption(private$..rater2)
@@ -126,6 +173,11 @@ cohenskappaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..interpretation_guide)
             self$.addOption(private$..missing_treatment)
             self$.addOption(private$..minimum_categories)
+            self$.addOption(private$..rater3)
+            self$.addOption(private$..rater4)
+            self$.addOption(private$..rater5)
+            self$.addOption(private$..multi_rater_method)
+            self$.addOption(private$..show_pairwise_kappa)
         }),
     active = list(
         rater1 = function() private$..rater1$value,
@@ -141,7 +193,12 @@ cohenskappaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         category_analysis = function() private$..category_analysis$value,
         interpretation_guide = function() private$..interpretation_guide$value,
         missing_treatment = function() private$..missing_treatment$value,
-        minimum_categories = function() private$..minimum_categories$value),
+        minimum_categories = function() private$..minimum_categories$value,
+        rater3 = function() private$..rater3$value,
+        rater4 = function() private$..rater4$value,
+        rater5 = function() private$..rater5$value,
+        multi_rater_method = function() private$..multi_rater_method$value,
+        show_pairwise_kappa = function() private$..show_pairwise_kappa$value),
     private = list(
         ..rater1 = NA,
         ..rater2 = NA,
@@ -156,7 +213,12 @@ cohenskappaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..category_analysis = NA,
         ..interpretation_guide = NA,
         ..missing_treatment = NA,
-        ..minimum_categories = NA)
+        ..minimum_categories = NA,
+        ..rater3 = NA,
+        ..rater4 = NA,
+        ..rater5 = NA,
+        ..multi_rater_method = NA,
+        ..show_pairwise_kappa = NA)
 )
 
 cohenskappaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -174,7 +236,10 @@ cohenskappaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         agreementPlot = function() private$.items[["agreementPlot"]],
         confusionHeatmap = function() private$.items[["confusionHeatmap"]],
         interpretationGuide = function() private$.items[["interpretationGuide"]],
-        technicalNotes = function() private$.items[["technicalNotes"]]),
+        technicalNotes = function() private$.items[["technicalNotes"]],
+        multiRaterKappa = function() private$.items[["multiRaterKappa"]],
+        pairwiseKappaMatrix = function() private$.items[["pairwiseKappaMatrix"]],
+        multiRaterSummary = function() private$.items[["multiRaterSummary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -187,7 +252,8 @@ cohenskappaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "glue",
                     "psych",
                     "DescTools",
-                    "ggrepel"))
+                    "ggrepel",
+                    "irr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -386,7 +452,93 @@ cohenskappaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="technicalNotes",
                 title="Technical Notes and Assumptions",
-                visible=TRUE))}))
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multiRaterKappa",
+                title="Multi-Rater Kappa Statistics",
+                visible="(rater3)",
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="Standard Error", 
+                        `type`="number"),
+                    list(
+                        `name`="z_value", 
+                        `title`="Z-value", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="n_raters", 
+                        `title`="N Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_subjects", 
+                        `title`="N Subjects", 
+                        `type`="integer"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "rater1",
+                    "rater2",
+                    "rater3",
+                    "rater4",
+                    "rater5",
+                    "multi_rater_method")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pairwiseKappaMatrix",
+                title="Pairwise Kappa Matrix",
+                visible="(show_pairwise_kappa)",
+                columns=list(
+                    list(
+                        `name`="rater_pair", 
+                        `title`="Rater Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "rater1",
+                    "rater2",
+                    "rater3",
+                    "rater4",
+                    "rater5")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multiRaterSummary",
+                title="Multi-Rater Analysis Summary",
+                visible="(rater3)",
+                clearWith=list(
+                    "rater1",
+                    "rater2",
+                    "rater3",
+                    "rater4",
+                    "rater5")))}))
 
 cohenskappaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "cohenskappaBase",
@@ -435,6 +587,13 @@ cohenskappaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param missing_treatment How to handle missing data
 #' @param minimum_categories Minimum number of categories required for
 #'   analysis
+#' @param rater3 Third rater for multi-rater agreement (Fleiss kappa)
+#' @param rater4 Fourth rater for multi-rater agreement
+#' @param rater5 Fifth rater for multi-rater agreement
+#' @param multi_rater_method Method for calculating multi-rater agreement (≥3
+#'   raters)
+#' @param show_pairwise_kappa Show all pairwise kappa values between raters
+#'   (multi-rater only)
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -449,6 +608,9 @@ cohenskappaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$confusionHeatmap} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multiRaterKappa} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pairwiseKappaMatrix} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multiRaterSummary} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -473,18 +635,29 @@ cohenskappa <- function(
     category_analysis = FALSE,
     interpretation_guide = TRUE,
     missing_treatment = "listwise",
-    minimum_categories = 2) {
+    minimum_categories = 2,
+    rater3 = NULL,
+    rater4 = NULL,
+    rater5 = NULL,
+    multi_rater_method = "auto",
+    show_pairwise_kappa = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("cohenskappa requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(rater1)) rater1 <- jmvcore::resolveQuo(jmvcore::enquo(rater1))
     if ( ! missing(rater2)) rater2 <- jmvcore::resolveQuo(jmvcore::enquo(rater2))
+    if ( ! missing(rater3)) rater3 <- jmvcore::resolveQuo(jmvcore::enquo(rater3))
+    if ( ! missing(rater4)) rater4 <- jmvcore::resolveQuo(jmvcore::enquo(rater4))
+    if ( ! missing(rater5)) rater5 <- jmvcore::resolveQuo(jmvcore::enquo(rater5))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(rater1), rater1, NULL),
-            `if`( ! missing(rater2), rater2, NULL))
+            `if`( ! missing(rater2), rater2, NULL),
+            `if`( ! missing(rater3), rater3, NULL),
+            `if`( ! missing(rater4), rater4, NULL),
+            `if`( ! missing(rater5), rater5, NULL))
 
 
     options <- cohenskappaOptions$new(
@@ -501,7 +674,12 @@ cohenskappa <- function(
         category_analysis = category_analysis,
         interpretation_guide = interpretation_guide,
         missing_treatment = missing_treatment,
-        minimum_categories = minimum_categories)
+        minimum_categories = minimum_categories,
+        rater3 = rater3,
+        rater4 = rater4,
+        rater5 = rater5,
+        multi_rater_method = multi_rater_method,
+        show_pairwise_kappa = show_pairwise_kappa)
 
     analysis <- cohenskappaClass$new(
         options = options,

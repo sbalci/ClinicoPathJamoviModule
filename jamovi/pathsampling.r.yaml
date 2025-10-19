@@ -26,6 +26,10 @@ items:
           title: Value
           type: text
 
+    - name: probabilityExplanation
+      title: Understanding Detection Probabilities
+      type: Html
+
     - name: binomialText
       title: Binomial Probability Model
       type: Html

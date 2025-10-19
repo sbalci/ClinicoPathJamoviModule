@@ -138,7 +138,7 @@ analyses:
   - title: Clinical Heatmap
     name: clinicalheatmap
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Visualization
     menuTitle: Clinical Heatmap
     menuSubtitle: Tidy Heatmaps for Clinical Data
@@ -600,7 +600,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -622,7 +622,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -944,7 +944,7 @@ analyses:
   - title: Survival Feature Ranking
     name: survivalfeaturerank
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Feature Ranking
     menuSubtitle: Univariate Cox Screening, Biomarker Discovery
@@ -970,7 +970,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -1088,7 +1088,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1220,7 +1220,7 @@ analyses:
   - title: Advanced TNM Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Stage Migration Analysis
     menuTitle: Advanced TNM Stage Migration Analysis
     menuSubtitle: State-of-the-Art Staging System Validation
@@ -1248,7 +1248,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1492,7 +1492,7 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuTitle: Dendrogram
     menuSubgroup: Drafts
     ribbon: analyses
@@ -1517,7 +1517,7 @@ analyses:
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Distribution
     menuTitle: Histogram
     description: |
@@ -1528,7 +1528,7 @@ analyses:
   - title: Scatter Plot
     name: jjscatterstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Continuous vs Continuous
     menuTitle: Scatter Plot
     ribbon: analyses
@@ -1540,7 +1540,7 @@ analyses:
   - title: Syndromic Plot (PCA Loadings)
     name: jjsyndromicplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Multivariate Analysis
     menuTitle: Syndromic Plot (PCA Loadings)
     menuSubtitle: PCA Loading Visualization
@@ -1600,7 +1600,7 @@ analyses:
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples
@@ -1614,7 +1614,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -1628,7 +1628,7 @@ analyses:
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: |
@@ -1640,7 +1640,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -1667,7 +1667,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-
@@ -1822,7 +1822,7 @@ analyses:
   - title: Comprehensive Tidy Plots
     name: tidyplots
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuTitle: Comprehensive Tidy Plots
     ribbon: analyses
     category: analyses
@@ -2138,7 +2138,7 @@ analyses:
     name: tableone2
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT
+    menuGroup: ExplorationT2
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One Draft 2
     description: >
@@ -2200,7 +2200,7 @@ analyses:
     name: patientsimilarity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Patient Similarity Clustering
     menuSubtitle: t-SNE, UMAP, PCA - Discover Patient Subgroups
@@ -2214,7 +2214,7 @@ analyses:
     name: modelperformance
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Multi-Model Performance Comparison
     menuSubtitle: Compare Multiple Models Side-by-Side
@@ -2228,7 +2228,7 @@ analyses:
     name: variablebiplot
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Variable Selection
     menuTitle: Variable Importance Biplot
     menuSubtitle: Visualize Variable Contributions to Group Separation
@@ -2380,7 +2380,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation
@@ -2399,21 +2399,21 @@ analyses:
     name: ihcscoring
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuTitle: IHC Scoring Standardization
     menuSubgroup: IHC Analysis
   - title: Multiplex Immunofluorescence Analysis
     name: multiplexanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuTitle: Multiplex Immunofluorescence Analysis
     menuSubgroup: IHC Analysis
   - title: Pathology Agreement Analysis
     name: pathologyagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuTitle: Pathology Agreement Analysis
   - title: Pathology Sampling Adequacy Analysis
     name: pathsampling
@@ -3680,7 +3680,7 @@ analyses:
     name: precisionrecall
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Diagnostic Test Evaluation
     menuTitle: Precision-Recall Curve
     menuSubtitle: PRC curves for imbalanced datasets
@@ -3695,7 +3695,7 @@ analyses:
     name: ihccluster
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: IHC Clustering Analysis
     menuSubtitle: Cluster cases by IHC expression patterns
@@ -4129,7 +4129,7 @@ analyses:
     name: tumorgrowth
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathT
+    menuGroup: ClinicoPathT2
     menuSubgroup: Survival Analysis
     menuTitle: Tumor Growth Models
   - title: Progression-Free Survival Analysis
@@ -4206,7 +4206,7 @@ analyses:
     name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuSubgroup: Design and Power Analysis
     menuTitle: Power Analysis
     menuSubtitle: Power analysis
@@ -4336,7 +4336,7 @@ analyses:
     name: clinicalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Clinical Decision Support
     menuTitle: Clinical Model Validation Suite
     menuSubtitle: Comprehensive validation for clinical prediction models
@@ -4620,7 +4620,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -4821,7 +4821,7 @@ analyses:
     name: jjoncoplot
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Molecular Pathology Plots
     menuTitle: Genomic Landscape Visualization
     menuSubtitle: Oncoplot, Mutation Landscape, Clinical Annotations
@@ -4832,7 +4832,7 @@ analyses:
     name: studydiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Study Design
     menuTitle: Study Diagram
     description: >-
@@ -4842,7 +4842,7 @@ analyses:
     name: ihcadvanced
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Advanced Analysis
     description: >
@@ -4853,7 +4853,7 @@ analyses:
     name: ihcbasic
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Basic Analysis
     description: >
@@ -4863,7 +4863,7 @@ analyses:
     name: ihcdiagnostic
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Clinical Diagnostics
     description: >
@@ -4874,7 +4874,7 @@ analyses:
     name: ihcimmune
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: TIL & Immune Analysis
     description: >
@@ -4885,7 +4885,7 @@ analyses:
     name: ihcsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: IHC Analysis
     menuTitle: Survival & Prognosis
     description: >
@@ -5001,7 +5001,7 @@ analyses:
     name: pathagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Agreement
     menuTitle: Pathology Interrater Reliability
     description: >
@@ -5046,7 +5046,7 @@ analyses:
     name: stagemigration1
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Stage Migration Analysis
     menuTitle: Advanced TNM Stage Migration Analysis 1
     menuSubtitle: State-of-the-Art Staging System Validation
@@ -5078,7 +5078,7 @@ analyses:
     name: consortdiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Study Design
     menuTitle: CONSORT Diagram
     menuSubtitle: Clinical Trial Flow
@@ -5109,7 +5109,7 @@ analyses:
     name: jjpubr
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: All-In-One
     menuTitle: ggpubr Plots
     menuSubtitle: Publication-ready visualizations
