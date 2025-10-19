@@ -84,6 +84,35 @@ options:
         - title: fisher
           name: fisher
       default: chisq
+
+    # Stratified Analysis Options (non-breaking additions)
+    - name: stratify
+      title: Stratification Variable (Optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description: >
+            Variable for stratified analysis (Mantel-Haenszel test).
+            Controls for confounding when comparing groups across strata.
+
+    - name: mantel_haenszel
+      title: Mantel-Haenszel Test
+      type: Bool
+      default: false
+      description: >
+            Perform Mantel-Haenszel chi-square test for stratified 2x2 tables.
+            Tests association between row and column variables controlling for stratification.
+            Provides common odds ratio estimate across strata.
+
+    - name: breslow_day
+      title: Breslow-Day Homogeneity Test
+      type: Bool
+      default: false
+      description: >
+            Test whether odds ratios are homogeneous across strata.
+            Only applicable when Mantel-Haenszel test is enabled.
+
     # - name: pairwise
     #   title: Pairwise comparisons
     #   type: Bool

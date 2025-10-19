@@ -85,6 +85,17 @@ items:
           - sty
       visible: (sty:gtsummary)
 
+    - name: mantelHaenszelResults
+      title: "Stratified Analysis Results"
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - stratify
+          - mantel_haenszel
+          - breslow_day
+      visible: (mantel_haenszel)
+
     # TEMPORARILY DISABLED - pairwise option not available in .a.yaml
     # - name: pairwiseTable
     #   title: Pairwise Comparisons

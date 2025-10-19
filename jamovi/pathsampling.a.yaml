@@ -10,6 +10,29 @@ options:
     - name: data
       type: Data
 
+    - name: analysisContext
+      title: Analysis Context
+      type: List
+      options:
+        - name: lymphnode
+          title: Lymph Node Dissection
+        - name: omentum
+          title: Omentum Sampling
+        - name: tumor
+          title: Tumor Sampling (VI/EMVI/PNI/Budding)
+        - name: margin
+          title: Margin Assessment
+        - name: general
+          title: General Sampling Adequacy
+      default: general
+      description: >
+        Select the type of pathology sampling analysis:
+        - Lymph Node: Adequacy of lymph node dissection
+        - Omentum: Omentum sampling in ovarian/gastric cancer
+        - Tumor: Tumor block sampling for VI, EMVI, PNI, or budding detection
+        - Margin: Margin sampling adequacy
+        - General: Custom sampling adequacy analysis
+
     - name: totalSamples
       title: Total Samples
       type: Variable
@@ -17,6 +40,9 @@ options:
         - continuous
       permitted:
         - numeric
+      description: >
+        Total number of samples examined per case.
+        Examples: total tumor blocks examined, total lymph nodes dissected, total omentum sections.
 
     - name: firstDetection
       title: First Detection
@@ -25,6 +51,9 @@ options:
         - continuous
       permitted:
         - numeric
+      description: >
+        Sample number where outcome was first detected (e.g., which block first showed VI).
+        Leave as NA for negative cases. For positive cases, enter the sequential sample number (1, 2, 3, etc.).
 
     - name: positiveCount
       title: Positive Samples Count (Optional)
@@ -33,6 +62,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
 
     - name: positiveSamplesList
       title: Positive Samples List (Optional)
@@ -42,24 +72,27 @@ options:
       permitted:
         - factor
         - numeric
+      default: NULL
 
     - name: sampleType
-      title: Sample Type/Subtype (Optional)
+      title: Compare Sample Type/Subtype (Optional)
       type: Variable
       suggested:
         - nominal
         - ordinal
       permitted:
         - factor
+      default: NULL
 
     - name: groupBy
-      title: Cohort Groups (Optional)
+      title: Split Analyses by Cohort (Optional)
       type: Variable
       suggested:
         - nominal
         - ordinal
       permitted:
         - factor
+      default: NULL
 
     - name: targetConfidence
       title: Target Confidence
@@ -85,27 +118,27 @@ options:
     - name: showBinomialModel
       title: Show Binomial Model
       type: Bool
-      default: true
+      default: false
 
     - name: showBootstrap
       title: Show Bootstrap Analysis
       type: Bool
-      default: true
+      default: false
 
     - name: showDetectionCurve
       title: Show Diagnostic Yield Curve
       type: Bool
-      default: true
+      default: false
 
     - name: showSensitivityCI
       title: Show Sensitivity CI
       type: Bool
-      default: true
+      default: false
 
     - name: setSeed
       title: Set Random Seed
       type: Bool
-      default: true
+      default: false
 
     - name: seedValue
       title: Seed Value
@@ -120,6 +153,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
 
     - name: maxPositiveSingle
       title: Max Foci per Cassette (Optional)
@@ -128,6 +162,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
 
     - name: showTumorBurden
       title: Show Tumor Burden Analysis
@@ -137,7 +172,7 @@ options:
     - name: showStageMigration
       title: Show Stage Migration Analysis
       type: Bool
-      default: true
+      default: false
 
     - name: showCorrelation
       title: Show Correlation Plot
@@ -175,6 +210,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
 
     - name: successStates
       title: Success States (Finite Models)
@@ -183,6 +219,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
 
     - name: targetDetections
       title: Target Detections
@@ -208,6 +245,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
 
     - name: positiveLymphNodes
       title: Positive Lymph Nodes
@@ -216,6 +254,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
 
     - name: showLNAnalysis
       title: Show LN Ratio & Staging
@@ -249,12 +288,12 @@ options:
     - name: showClinicalSummary
       title: Show Clinical Summary
       type: Bool
-      default: true
+      default: false
 
     - name: showGuidedChecklist
       title: Show Guided Checklist
       type: Bool
-      default: true
+      default: false
 
     - name: showEmpiricalCumulative
       title: Show Empirical Cumulative Detection

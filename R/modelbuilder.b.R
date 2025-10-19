@@ -2703,12 +2703,6 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "📅 ", "Export Predictions (CSV)", "</button>",
                 "</div>",
                 
-                "<script>",
-                "function exportModelSummary() { alert('Model summary export functionality would be implemented here'); }",
-                "function exportPerformanceMetrics() { alert('Performance metrics export functionality would be implemented here'); }",
-                "function exportROCData() { alert('ROC data export functionality would be implemented here'); }",
-                "function exportPredictions() { alert('Predictions export functionality would be implemented here'); }",
-                "</script>",
                 
                 "<hr style='margin: 15px 0; border: none; border-top: 1px solid #dee2e6;'>",
                 "<h5 style='color: #495057;'>", "Publication-Ready Formats:", "</h5>",

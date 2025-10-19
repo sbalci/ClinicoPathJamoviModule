@@ -1,0 +1,1258 @@
+Histopathology 2023 DOI: 10.1111/his.15030
+
+Impact of tissue sampling on detection of venous invasion
+in colorectal cancer: a prospective analysis
+Kai Duan,1,2,3 Brian Chow,1,3 William Tsui,1,3 Colin Elliot,1 Aysegul Sari,1,4 Sameer Shivji,1
+Richard Kirsch1,3,5 & James R Conner1,3,5
+1
+
+Department of Pathology and Laboratory Medicine, Sinai Health System, 2Department of Pathology, University Health
+Network, 3Department of Pathobiology and Laboratory Medicine, University of Toronto, Toronto, ON, Canada,
+4
+Department of Pathology, Izmir Katip Celebi University Ataturk Training and Research Hospital, Izmir, Turkey and
+5
+Lunenfeld-Tanenbaum Research Institute, Sinai Health System, Toronto, ON, Canada
+Date of submission 21 May 2023
+Accepted for publication 1 August 2023
+
+Duan K, Chow B, Tsui W, Elliot C, Sari A, Shivji S, Kirsch R & Conner J R
+(2023) Histopathology. https://doi.org/10.1111/his.15030
+
+Impact of tissue sampling on detection of venous invasion in colorectal cancer: a prospective analysis
+Aims: Venous invasion (VI) is a powerful yet underreported prognostic factor in colorectal cancer (CRC).
+Efforts to improve its detection have largely focused upon
+histological assessment, with less attention paid to
+tissue-sampling strategies. This study aimed to prospectively determine the number of tumour blocks required
+to optimise VI detection in CRC resections. In addition,
+the relationship between linear spiculation (LS) and
+extramural venous invasion (EMVI) was investigated.
+Methods and results: A standardised tissue sampling
+protocol was developed and applied prospectively to
+217 CRC resections [AJCC 8th edition, stage 1
+(n = 32); stage 2 (n = 84); stage 3 (n = 87); stage 4
+(n = 14); and post-neoadjuvant therapy (n = 46)].
+Elastin stains were performed on all tumour blocks. VI
+was identified in 55% of cases (EMVI = 37%; IMVI
+alone = 18%). The sensitivity of VI detection increased
+
+with increasing numbers of tumour blocks submitted [one block (35%), three blocks (66%), five blocks
+(84%), six blocks (95%) and seven blocks (97%)].
+Similar findings were observed for EMVI [one block
+(35%), three blocks (73%), five blocks (89%), six
+blocks (96%) and seven blocks (96%)]. LS was identified macroscopically in 22% of specimens. In cases
+where no neoadjuvant therapy had been given,
+EMVI was significantly associated with LS (71% in
+LS+ cases versus 29% in LS– cases; P < 0.001). In
+addition, tumour blocks targeting LS were associated with a fivefold higher rate of EMVI compared
+with blocks that did not (P < 0.001).
+Conclusions: Our findings demonstrate the impact of
+tissue sampling and quality of gross examination on
+VI detection and may inform practices in future CRC
+protocols.
+
+Keywords: colorectal cancer, elastin stain, gross, tissue sampling, venous invasion
+
+Introduction
+Venous invasion (VI) is a powerful predictor of haematogenous spread and mortality in colorectal cancer
+(CRC).1–14 This is particularly true for extramural
+
+Address for correspondence: J Conner, Department of Pathology
+and Laboratory Medicine, Mount Sinai Hospital, 600 University
+Avenue, Suite 1225, Toronto, ON, Canada. e-mail: james.conner@
+sinaihealth.ca
+
+venous invasion (EMVI); prognostic significance of
+intramural venous invasion (IMVI) alone has been
+suggested, but is less well-established.2–4,10,12,13,15,16
+The accurate detection of VI is especially relevant in
+stage II CRC, where its presence may influence adjuvant treatment decisions. Despite its prognostic
+importance, the assessment of VI remains one of the
+most poorly performed aspects of CRC pathology.
+Population-based studies suggest that VI is underreported in CRC,17,18 with wide variation in VI
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd.
+This is an open access article under the terms of the Creative Commons Attribution-NonCommercial License, which permits use,
+distribution and reproduction in any medium, provided the original work is properly cited and is not used for commercial purposes.
+
+detection rates among published studies.19 Such variation may be multifactorial and probably reflects differences in case mix, tissue sampling techniques,
+diagnostic thresholds, use of ancillary stains and the
+diligence and skill of the reporting pathologist.19 VI
+can be challenging to assess on a routine haematoxylin and eosin (H&E) stain and is therefore easily overlooked, especially when tumour distorts, effaces or
+obliterates involved vessels. Elastin stains (which
+highlight residual elastic fibres of the vein wall) have
+been shown to be remarkably effective in facilitating
+VI detection in this setting.20 In addition, there is
+growing evidence that elastin stains not only improve
+the detection of VI, but also enhance its ability to
+stratify risk in CRC.11,21–23 Several international CRC
+pathology protocols/guidelines now recognise the utility of elastin stains in facilitating VI detection.24–28
+To date, most efforts to improve VI detection have
+focused upon histological assessment, including the
+recognition of key morphological clues (e.g.
+‘orphaned artery’ and ‘protruding tongue’ signs) and
+the role of elastin stains.11,19,20,29 Less attention has
+been paid to tissue sampling strategies, with the
+result that there are currently no evidence-based
+guidelines specifying the number of tumourcontaining blocks that should be submitted to optimise VI detection. While some retrospective studies
+have reported an association between VI detection
+rates and the number of tumour-containing blocks
+submitted,10,30 prospective studies using standardised
+tissue sampling protocols are lacking. Thus, the number of tumour blocks that should be submitted to
+optimise VI detection remains to be determined. In
+addition to these quantitative considerations, there
+are also qualitative issues relating to tissue sampling
+for VI detection that remain to be resolved. For example, some have proposed the use of tangential sectioning along the radial border of the tumour to enhance
+VI detection by increasing the likelihood of capturing
+veins that pass at right angles across the bowel wall
+and into mesocolic tissues.30–32 It has been suggested
+that this allows for the transverse sectioning of multiple vessels, as opposed to longitudinal sections of individual vessels associated with the conventional
+perpendicular sampling approach.31 However, others
+point out that tangential sectioning may compromise
+the assessment of other key aspects of the pathology
+assessment, such as assessment of tumour depth,
+tumour deposits and tumour budding.33 It has also
+been suggested that a more targeted approach to tissue sampling may enhance VI detection. In particular, areas of linear spiculation (LS), defined as fine
+pale lines emanating from the base of the tumour
+
+generally perpendicular to the infiltrating edge, are
+considered a possible clue to the presence of EMVI.
+For this reason, the Royal College of Pathologists of
+the United Kingdom (RCPathUK) recommends sampling areas of LS at the advancing edge of the
+tumour,26 a practice also favoured by others.19,34
+Despite such guidance, the relationship between LS
+and EMVI remains to be studied prospectively.
+In this prospective study we developed a standardised tissue sampling protocol to evaluate the impact
+of tissue sampling on VI detection. Specifically, we
+aimed to determine the number of tissue blocks
+required to optimise VI detection and to evaluate the
+relationship between LS and EMVI in order to inform
+future sampling practices.
+
+Material and methods
+STUDY COHORT
+
+A search of our laboratory information system identified all consecutive patients who underwent radical
+surgical resection of CRC at Mount Sinai Hospital,
+Toronto, Canada, between 1 November 2016 and
+30 June 2019 (n = 244). Cases were excluded if complete archival material was not available (n = 12), if
+there was no residual tumour in the specimen (either
+post-chemoradiation or post-polypectomy) (n = nine)
+or if the standardised grossing protocol had not been
+applied (n = six). Following these exclusions, a total
+of 217 stage I–IV CRC resections were included in
+this study. This study was approved by our institutional Research Ethics Board.
+STANDARDISED TISSUE SAMPLING PROTOCOL
+
+A standardised tissue sampling protocol was developed and applied prospectively to all CRC resection
+specimens (Figure 1). This included submission of a
+minimum of eight tumour-containing blocks for histological examination (tumour size permitting), with
+smaller tumours submitted in their entirety. Each
+tumour was perpendicularly sectioned and submitted
+in a consistent order starting from the point of deepest invasion and moving proximally and distally in a
+stepwise fashion, with the resulting tumour blocks
+designated 1–8. All specimens were inspected for evidence of LS at the advancing edge of the tumour
+(Figure 2). All foci of LS were incorporated in the
+submitted tumour blocks and the presence or absence
+of LS was documented in the gross description section
+of the pathology report. Elastin trichrome stains were
+performed on all tumour blocks (Figure 3).
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+2 K Duan et al.
+
+3
+
+Figure 1. A standardised tumour mapping and sampling protocol was developed for this study and applied prospectively to CRC resections
+from a single institution. Each tumour was perpendicularly sectioned and submitted starting from the point of deepest invasion and moving
+proximally and distally in a stepwise fashion. A minimum of eight tumour-containing blocks were submitted for histological examination.
+Tumours that could be submitted in fewer than eight blocks were submitted in their entirety.
+
+Figure 2. Careful gross inspection was performed for areas of linear spiculation (LS) (at the advancing edge of the tumour), and such areas
+were targeted when submitting blocks and documented in the gross description. LS, defined macroscopically as fine pale lines emanating
+from the base of the tumour and generally perpendicular to the infiltrating edge, has been suggested to be a marker of EMVI. As such, some
+guidelines recommend targeting areas of LS to optimise VI detection, although the association between LS and VI has not been studied systematically prior to the current study.
+
+CLINICOPATHOLOGICAL DATA
+
+Pathology reports were reviewed to confirm that the
+standardised tissue sampling protocol was followed
+and to document patient demographics, the presence/
+absence of LS and histopathological data elements
+included the College of American Pathologists CRC
+checklist. In addition, all cases underwent a re-review
+for VI using both H&E and corresponding elastin trichrome stains (K.D.). The presence or absence of VI
+was documented for each individual tumour block.
+The location of VI (i.e. EMVI versus IMVI) was
+
+also documented. The number of tumour-containing
+blocks submitted and the number of elastin stains
+performed were recorded for each case.
+DETERMINING THE SENSITIVITY OF VI DETECTION
+
+Based on the assumption that histological examination of eight tumour-containing blocks would identify
+100% of VI-positive cases, we determined the sensitivity of VI detection for each incremental number of
+submitted blocks (1–8). To illustrate, for determining
+the sensitivity of VI detection associated with
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Impact of tissue sampling on venous invasion detection in CRC
+
+Figure 3. After perpendicular sectioning, each tumour is carefully inspected and submitted starting from the point of deepest invasion and
+moving proximally and distally in a stepwise fashion (A). When submitting blocks, areas at the advancing edge of the tumour were targeted
+(B). Histological assessment for VI was performed on both haematoxylin and eosin (H&E) (C) and corresponding elastin stains (D), which
+has been shown to be a more sensitive method of VI detection and a superior predictor of outcome compared to H&E alone. C,D, ‘Orphan
+arteriole’ sign (tumour nodule adjacent to artery without an obvious accompanying vein – arrows indicate involved vein, ‘A’ indicates
+paired artery).
+
+submission of four tumour blocks, the number of VIpositive cases identified by histological examination of
+only blocks 1–4 was divided by the VI detection rate
+obtained by histological examination all the tumour
+blocks.
+
+analyses were performed using the SPSS statistical
+software program (SPSS for Windows release 19.0;
+SPSS Inc., Chicago, IL, USA).
+
+Results
+STATISTICAL ANALYSIS
+
+COHORT CHARACTERISTICS
+
+Continuous variables were reported as mean, median
+and range. Categorical variables were reported as
+absolute numbers and proportions. Comparison testing was performed using the v2 test, t-test or analysis
+of variance (ANOVA) test, as appropriate. Statistical
+significance was defined as P-value < 0.05. Statistical
+
+The cohort included 217 patients (116 male, 101
+female) with a median age of 67 years
+(mean = 65 years). AJCC 8th edition stage was as
+follows: stage 1, n = 32; stage 2, n = 84; stage 3,
+n = 87; and stage 4, n = 14. Forty-six patients
+received neoadjuvant therapy while 171 patients did
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+4 K Duan et al.
+
+not. Forty-eight cases were right-sided, 85 left-sided
+and 84 rectal in location. The mean tumour size was
+4.9 cm (median = 4.3 cm, range = 0.5–13.7 cm).
+An average of 7.3 tumour-containing blocks were
+submitted from each specimen and stained with elastin trichrome (this number falls below the eight
+blocks specified in the tissue sampling protocol, owing
+to a small minority of tumours that were entirely
+submitted in fewer than eight blocks). The cohort
+characteristics and relationship with VI and EMVI
+status are summarised in Table 1. Both VI and
+EMVI were significantly associated with T-stage, Nstage, AJCC stage, tumour deposits, perineural invasion and resection margin status. In addition, EMVI
+(but not VI) was significantly associated with tumour
+size ≥ 5.0 cm, tumour grade and number of tumour
+blocks stained with an elastin stain.
+VI DETECTION AND ASSOCIATION WITH
+SUBMITTED TUMOUR BLOCKS
+
+Overall, VI and EMVI were detected in 55 and 37% of
+cases, respectively. In stage 2 cancers (n = 84), the
+rates of VI and EMVI were 44 and 26%. There was a
+stepwise increase in the sensitivity of VI and EMVI
+detection with the increasing numbers of tumour
+blocks examined histologically (VI = 35% for one
+block, 66% for three blocks, 84% for five blocks, 95%
+for six blocks and 97% for seven blocks; EMVI = 35%
+for one block, 73% for three blocks, 89% for five
+blocks and 96% for six and seven blocks; Figure 4.A,
+B). Similar trends were observed when the
+analysis was restricted to tumours ≥ 5.0 cm in maximum dimension (n = 84) (Figure 5A,B), tumours
+< 5.0 cm in maximum dimension (n = 133)
+(Figure 5C,D), stage 2 CRC (n = 84) (Figure 5E,F) and
+patients not receiving neoadjuvant therapy (n = 171)
+(Figure 5G,H).
+RELATIONSHIP BETWEEN LS AND EMVI
+
+LS was identified macroscopically in 47 CRC resections (22%). In tumours that were not treated with
+neoadjuvant chemoradiation (n = 171), EMVI was
+identified in 71% of tumours with LS compared to
+29% of tumours without (P < 0.001). Moreover,
+tumour blocks targeting LS were five times more
+likely to show EMVI than those without LS
+(P < 0.001). However, among cases with EMVI
+detected histologically, only 39% showed LS, while
+only 31% of blocks targeting LS were found to have
+EMVI on corresponding slides. There was no significant association between LS and EMVI in the post-
+
+5
+
+neoadjuvant group (P > 0.95), although this analysis
+was limited by small sample size (n = 46).
+
+Discussion
+This is the first study, to our knowledge, to evaluate
+the impact of tissue sampling on VI detection using a
+prospectively designed tissue-sampling protocol. We
+found that histological examination of six
+standard-sized tumour-containing blocks in CRC
+resection specimens identified approximately 95% of
+VI- and EMVI-positive cases, while histological examination of fewer than six blocks resulted in significant
+numbers of cases being missed. For example, when
+only five tumour blocks were examined histologically,
+16% of VI-positive and 11% of EMVI-positive cases
+were missed, while when only four tumour
+blocks were examined histologically, 24% of VIpositive and 20% of EMVI-positive cases were missed.
+Based on these findings, we believe that a minimum
+of six tumour-containing blocks should be submitted
+for optimal histological assessment of VI and EMVI.
+Of note, the blocks used in our study were standardsized (3.0 9 2.5 cm). The study design did not permit
+assessment of an optimal number for other sizes,
+including ‘macro’ or ‘mega’ blocks used in some
+centres.
+VI (especially EMVI) is among the most powerful
+prognostic factors in CRC, rivalling lymph node
+status.6,12–14,35 Therefore, strategies to ensure its
+accurate assessment are critical. Such strategies have
+largely focused upon histological aspects of VI assessment, including recognition of morphological clues
+and the use of elastin stains. Tissue sampling strategies are less well studied. Adequate tissue sampling is
+critical, as even the most meticulous histological
+assessment will not identify a VI focus that is missed
+due to undersampling. Limited retrospective data
+point to an association between the number
+of tumour blocks examined histologically and the rate
+of VI detection.10,30 However, prospective studies
+designed to determine the minimum number of
+tumour blocks required to optimise VI detection are
+lacking. In a large retrospective series of rectal cancers, Talbot et al. reported that 3.9% of EMVI-positive
+cases would be missed if five tumour blocks were submitted, 10.6% if four tumour blocks were submitted,
+22.8% if three tumour blocks were submitted and
+41.3% if only two were submitted.30 However, their
+data were calculated retrospectively by a combinatorial analysis of the number of blocks examined in
+each case broken down according to the number of
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Impact of tissue sampling on venous invasion detection in CRC
+
+Table 1. Clinicopathological characteristics of the study cohort and associations with VI and EMVI
+
+Age, years, mean
+(median, range)
+
+Whole cohort
+(n = 217)
+
+VI
+
+(n = 98)
+
+VI+ (n = 119)
+
+P-value
+
+65.1 (67, 22–98)
+
+64.3 (66, 24–90)
+
+65.9 (68. 22–98)
+
+0.428
+
+EMVI
+(n = 137)
+
+EMVI+ (n = 80)
+
+P-value
+
+65.5 (67, 24–96)
+
+64.6 (66, 22–98)
+
+0.689
+
+Sex, n (%)
+Female
+
+101 (47)
+
+46 (47)
+
+55 (46)
+
+Male
+
+116 (53)
+
+52 (53)
+
+64 (54)
+
+Left colon
+
+85 (39)
+
+32 (33)
+
+53 (45)
+
+Right colon
+
+48 (22)
+
+21 (21)
+
+Rectum
+
+84 (39)
+
+No
+Yes
+
+0.916
+
+65 (47)
+
+36 (45)
+
+72 (53)
+
+44 (55)
+
+50 (37)
+
+35 (44)
+
+27 (23)
+
+27 (20)
+
+21 (26)
+
+45 (46)
+
+39 (33)
+
+60 (44)
+
+24 (30)
+
+133 (61)
+
+67 (68)
+
+66 (56)
+
+97 (71)
+
+36 (45)
+
+84 (39)
+
+31 (32)
+
+53 (44)
+
+40 (29)
+
+44 (55)
+
+T1
+
+13 (6)
+
+8 (8)
+
+5 (4)
+
+12 (9)
+
+1 (1)
+
+T2
+
+32 (15)
+
+22 (23)
+
+10 (8)
+
+32 (24)
+
+0 (0)
+
+T3
+
+108 (50)
+
+50 (52)
+
+58 (49)
+
+69 (51)
+
+39 (49)
+
+T4
+
+63 (29)
+
+17 (18)
+
+46 (39)
+
+23 (17)
+
+40 (50)
+
+N0
+
+120 (55)
+
+70 (71)
+
+50 (42)
+
+96 (70)
+
+24 (30)
+
+N1/N2
+
+97 (45)
+
+28 (29)
+
+69 (58)
+
+41 (30)
+
+56 (70)
+
+I
+
+32 (15)
+
+22 (22)
+
+10 (8)
+
+32 (23)
+
+0 (0)
+
+II
+
+84 (39)
+
+47 (48)
+
+37 (31)
+
+62 (45)
+
+22 (27)
+
+III
+
+87 (40)
+
+25 (26)
+
+62 (52)
+
+37 (27)
+
+50 (63)
+
+IV
+
+14 (7)
+
+4 (4)
+
+10 (8)
+
+6 (4)
+
+8 (10)
+
+No
+
+171 (79)
+
+72 (73)
+
+99 (83)
+
+106 (77)
+
+65 (81)
+
+Yes
+
+46 (21)
+
+26 (27)
+
+20 (17)
+
+31 (23)
+
+15 (19)
+
+197 (91)
+
+88 (90)
+
+109 (92)
+
+124 (91)
+
+73 (92)
+
+0.729
+
+Site, n (%)
+0.167
+
+0.058
+
+Tumour size ≥ 5, n
+(%)
+0.052
+
+< 0.001
+
+T-stage, n (%)
+< 0.001
+
+< 0.001
+
+N-stage, n (%)
+< 0.001
+
+< 0.001
+
+AJCC TNM stage, n
+(%)*
+< 0.001
+
+< 0.001
+
+Neoadjuvant
+therapy, n (%)
+0.082
+
+0.502
+
+Histological type, n
+(%)
+Adenocarcinoma,
+NOS
+
+0.632
+
+0.274
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+6 K Duan et al.
+
+7
+
+Table 1. (Continued)
+Whole cohort
+(n = 217)
+
+VI
+
+(n = 98)
+
+VI+ (n = 119)
+
+P-value
+
+EMVI
+(n = 137)
+
+EMVI+ (n = 80)
+
+Mucinous
+adenocarcinoma
+
+13 (6)
+
+9 (9)
+
+4 (3)
+
+12 (9)
+
+1 (1)
+
+Signet ring cell
+adenocarcinoma
+
+4 (2)
+
+1 (1)
+
+3 (3)
+
+1 (1)
+
+3 (4)
+
+Medullary
+carcinoma
+
+1 (1)
+
+0 (0)
+
+1 (1)
+
+0 (0)
+
+1 (1)
+
+Neuroendocrine
+carcinoma
+
+1 (1)
+
+0 (0)
+
+1 (1)
+
+0 (0)
+
+1 (1)
+
+Low
+
+181 (84)
+
+86 (88)
+
+95 (81)
+
+122 (89)
+
+59 (75)
+
+High
+
+35 (16)
+
+12 (12)
+
+23 (20)
+
+15 (11)
+
+20 (25)
+
+Absent
+
+80 (37)
+
+80 (82)
+
+0 (0)
+
+80 (58)
+
+0 (0)
+
+Present
+
+137 (63)
+
+18 (18)
+
+119(100)
+
+57 (42)
+
+80 (100)
+
+Absent
+
+132 (61)
+
+77 (79)
+
+55 (47)
+
+103 (75)
+
+29 (37)
+
+Present
+
+84 (39)
+
+21 (21)
+
+63 (53)
+
+34 (25)
+
+50 (63)
+
+Absent
+
+165 (76)
+
+88 (90)
+
+77 (65)
+
+122 (89)
+
+43 (54)
+
+Present
+
+52 (24)
+
+10 (10)
+
+42 (35)
+
+15 (11)
+
+37 (46)
+
+Uninvolved
+
+195 (90)
+
+95 (97)
+
+100 (85)
+
+133 (97)
+
+62 (79)
+
+Involved
+
+21 (10)
+
+3 (3)
+
+18 (15)
+
+4 (3)
+
+17 (21)
+
+Proficient
+
+180 (83)
+
+80 (83)
+
+100 (84)
+
+110 (80)
+
+70 (88)
+
+Deficient
+
+35 (16)
+
+17 (17)
+
+18 (15)
+
+26 (19)
+
+9 (11)
+
+Unknown
+
+2 (1)
+
+1 (1)
+
+1 (1)
+
+1 (1)
+
+1 (1)
+
+7.3 (8, 2–8)
+
+7.2 (8, 2–8)
+
+7.4 (8, 3–8)
+
+7.2 (8, 2–8)
+
+7.6 (8, 3–8)
+
+P-value
+
+Grade, n (%)
+0.152
+
+0.006
+
+Lymphovascular
+invasion, n (%)
+< 0.001
+
+< 0.001
+
+Perineural invasion,
+n (%)
+< 0.001
+
+< 0.001
+
+Tumour deposits, n
+(%)
+< 0.001
+
+< 0.001
+
+Resection margin, n
+(%)
+0.002
+
+< 0.001
+
+Mismatch repair
+protein status, n
+(%)
+0.655
+
+0.140
+
+Tumour blocks with
+elastin
+Mean (median,
+range)
+
+*All tumours staged according to AJCC 8th edition.
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+0.273
+
+0.035
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Impact of tissue sampling on venous invasion detection in CRC
+
+Figure 4. A, There was an incremental increase in the sensitivity of VI detection with an increasing numbers of tumour blocks examined
+histologically (35% for one block, 66% for three blocks, 84% for five blocks, 95% for six blocks and 97% for seven blocks). B, Similar findings
+were observed for EMVI (35% for one block, 73% for three blocks, 89% for five blocks and 96% for six and seven blocks).
+
+slides harbouring EMVI in each case, rather than on
+direct experimental evidence. In a retrospective study
+of 381 CRC, Betge et al. found a positive association
+between the number of tumour blocks submitted and
+the rate of VI detection.10 The VI detection rate was
+12% in tumours with three or fewer blocks submitted, 24% in tumours with four to six blocks
+submitted and 48% in tumours with seven or more
+blocks submitted. The authors concluded that submission of three to five blocks (which had been recommended in some earlier CRC protocols) was probably
+insufficient for the detection of VI. However, they
+cautioned that their cohort was unsuitable for a
+
+definitive recommendation, given the retrospective
+design of their study, and emphasised the need for
+future prospective studies to define the number of tissue blocks that should be examined for the optimum
+detection of VI.10
+In the absence of prospective data there remain no
+evidence-based guidelines for tumour block submission to optimise VI detection. Current recommendations rely largely upon expert opinion. The data set
+for histological reporting of CRC reporting of
+RCPathUK recommends submission of at least five
+tumour blocks (or more for large tumours), size permitting, to allow for histological assessment of deepest
+
+Figure 5. Subgroup analyses revealed similar trends to the full cohort, including when the analysis was restricted to tumours > 5.0 cm in
+maximum dimension (n = 84) (A,B), tumours < 5.0 in maximum dimension (n = 133) (C,D), stage 2 CRC (n = 84) (E,F) and patients not
+receiving neoadjuvant therapy (n = 171) (G,H).
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+8 K Duan et al.
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+9
+Impact of tissue sampling on venous invasion detection in CRC
+
+K Duan et al.
+
+penetration through the bowel wall, involvement of
+the peritoneal surface and VI and involvement
+of adjacent organs, as well as ancillary immunohistochemical and/or molecular tests.26 The CRC structured reporting protocol of the Royal College of
+Pathologists of Australasia notes that it is not possible
+to provide an absolute number for tumour blocks that
+should be routinely examined in CRC resections.
+Rather, it is recommended that sufficient blocks (generally at least four) should be taken to enable the
+pathologist to fully assess all the necessary parameters for staging and prognosis.28 Neither the College
+of American Pathologists CRC protocol nor the International Collaboration on Cancer Reporting CRC data
+set refer to minimum number of blocks that
+should be routinely examined in CRC resection
+specimens.24,25
+In addition to providing important prognostic information, the finding of VI (and particularly EMVI)
+may prompt oncologists to consider adjuvant chemotherapy in patients with stage 2 CRC. Therefore,
+missing VI (whether at the tissue sampling or histological assessment stage) may have significant clinical
+implications. We and others have shown that VI/
+EMVI-positive cases missed at the time of original
+pathology assessment but detected on subsequent
+review have similar adverse outcomes to VI/EMVIpositive cases that were originally detected.23,36 In
+addition, Betge et al. found that VI assessed by expert
+review had a much stronger association with oncological outcomes than VI assessed in the routine setting due, at least in part, to missed VI-positive
+cases.10 While such misses occurred at the histological level, there is no reason to believe that VI missed
+due to insufficient sampling carries any less prognostic significance. As such, adequate tissue sampling
+merits the same attention as accurate histological
+assessment towards the goal of optimising VI
+detection.
+Our study is the first, to our knowledge, to evaluate
+the relationship between the macroscopic finding of
+LS and the histological finding of EMVI. The
+RCPathUK CRC data set suggests that LS may be a
+macroscopic marker of EMVI and recommends targeted sampling of such areas,26 a view shared by
+others.19,34 This recommendation appears to be
+largely based upon expert opinion and experience
+because, to our knowledge, the relationship between
+LS and EMVI has not been formally studied. We
+found a positive association between LS and EMVI in
+patients in the non-neoadjuvant-treated group, with
+LS-positive specimens showing significantly higher
+rates of EMVI than LS-negative counterparts
+
+(71 versus 29%, respectively). No such association
+was observed in the neoadjuvant-treated group, possibly due to treatment-associated changes that might
+obscure or mimic LS, although small sample size
+probably also contributed. While the rate of EMVI
+was higher in targeted (LS-positive) than in nontargeted (LS-negative) tumour blocks, most LSpositive blocks did not show EMVI histologically. In
+addition, the sensitivity of LS for EMVI was only
+39%, indicating that its absence does not exclude
+EMVI. Taken together, our findings provide support
+for the sampling of LS. On the whole, sampling areas
+with LS provides a higher yield for EMVI detection
+than sections without LS, although this effect is modest and LS is neither sensitive nor specific for EMVI
+detection.
+The main strength of our study is that the impact
+of specimen-handling has been demonstrated prospectively in a ‘real world’ pathology practice setting.
+Indeed, the prospective nature of our study allowed
+us to carefully design and apply a standardised protocol for both macroscopic and microscopic assessment
+of VI in a cohort of consecutive CRC resections. This
+permitted us to adjust for confounding variables, particularly those during specimen-handling and tissue
+sampling, that would not have been possible in a retrospective study. Data were also collected consecutively, limiting the potential for selection bias.
+Elastin trichrome stains were used together with
+H&E to facilitate the assessment of VI in this study.
+This allowed us to determine with a high level of confidence whether VI was present or absent in each individual tissue block. Numerous studies have shown that
+VI is frequently missed when evaluated on H&E stains
+alone, with VI detection rates increasing by at least
+twofold when an elastin stain is used.11,19–23,29,37–40
+More importantly, several studies have shown that VI
+assessed with an elastin stain is associated with superior risk stratification in CRC compared to VI assessed
+on H&E alone.11,21–23 This is probably due to the large
+number of VI-positive cases that are missed on H&E
+and consequently categorised as ‘VI-negative’, with
+the effect that overall outcomes appear worse in that
+group. Although our study does not provide data on
+the minimum number of tumour blocks required to
+‘optimise’ VI detection based on H&E alone, we believe
+that the number would probably be higher than the
+minimum number of six blocks proposed in this study.
+This is because the sensitivity of VI detection by H&E is
+lower than with an elastin stain, so that more blocks
+would probably need to be examined to identify a VIpositive case. Irrespective of the stain used, our data
+suggest that submission of four to five tumour blocks is
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+10
+
+probably insufficient for the sensitive detection of VI
+and that, at a minimum, six tumour blocks should be
+submitted (tumour size permitting). The benefit of elastin stains to optimise VI is well documented and
+acknowledged in leading CRC protocols, although
+time restraints and resource limitations may affect
+individual decisions as to whether these stains are used
+routinely. Where cost considerations are an issue, the
+use of an elastin trichrome as an alternative to H&E
+might be feasible. In a recent study, elastin trichrome
+performed similarly to H&E in the assessment of College of American Pathologists mandated histological
+features, while outperforming H&E with respect to VI
+detection.41
+In summary, we believe that is the first study to
+evaluate the impact of specimen-handling techniques
+on the detection of VI in a prospective manner. Our
+findings suggest that a minimum of six tumour containing blocks should be submitted to optimise VI
+detection and that targeted sampling of areas of LS
+may be of value. Our findings may inform sampling
+practices in future CRC protocols.
+
+Conflicts of interest
+None of the authors declare any conflicts of interest.
+
+Data availability statement
+The data that support the findings of this study are
+available from the corresponding author upon reasonable request.
+
+References
+1. Chapuis PH, Dent OF, Fisher R et al. A multivariate analysis of
+clinical and pathological variables in prognosis after resection
+of large bowel cancer. Br. J. Surg. 1985; 72; 698–702.
+2. Freedman L, Macaskill P, Smith A. Multivariate analysis of prognostic factors for operable rectal cancer. Lancet 1984; 2; 733–736.
+3. Harrison JC, Dean PJ, El-zeky F, Vander ZR. From Dukes
+through Jass: pathological prognostic indicators in rectal cancer. Hum. Pathol. 1994; 25; 498–505.
+4. Heys SD, Sherif A, Bagley JS, Brittenden J, Smart C, Eremin O.
+Prognostic factors and survival of patients aged less than 45 years
+with colorectal cancer. Br. J. Surg. 1994; 81; 685–688.
+5. Horn A, Dahl O, Morild I. Venous and neural invasion as predictors of recurrence in rectal adenocarcinoma. Dis. Colon Rectum 1991; 34; 798–804.
+6. Seefeld PH, Bargen JA. The spread of carcinoma of the rectum:
+invasio of lymphatics, veins and nerves. Ann. Surg. 1942; 118;
+76–90.
+7. Sato T, Ueno H, Mochizuki H et al. Objective criteria for the
+grading of venous invasion in colorectal cancer. Am. J. Surg.
+Pathol. 2010; 34; 454–462.
+
+11
+
+8. Chan YM, MacKay C, Ritchie DT et al. Screen detection is a
+survival predictor independent of pathological grade in colorectal cancer. A prospective cohort study. Surgeon 2021; 19; 20–
+26.
+9. Shin YM, Pyo JS, Park MJ. The impact of extramural venous
+invasion in colorectal cancer: a detailed analysis based on
+tumor location and evaluation methods. Int. J. Surg. Pathol.
+2020; 28; 120–127.
+10. Betge J, Pollheimer MJ, Lindtner RA et al. Intramural and
+extramural vascular invasion in colorectal cancer: prognostic
+significance and quality of pathology reporting. Cancer 2012;
+118; 628–638.
+11. Roxburgh CSD, McMillan DC, Anderson JH, McKee RF, Horgan
+PG, Foulis AK. Elastica staining for venous invasion results in
+superior prediction of cancer-specific survival in colorectal cancer. Ann. Surg. 2010; 252; 989–997.
+12. Roxburgh CSD, Mcmillan DC, Richards CH et al. The clinical
+utility of the combination of T stage and venous invasion to
+predict survival in patients undergoing surgery for colorectal
+cancer. Ann. Surg. 2014; 259; 1156–1165.
+13. Leijssen LGJ, Dinaux AM, Amri R et al. Impact of intramural
+and extramural vascular invasion on stage II-III colon cancer
+outcomes. J. Surg. Oncol. 2019; 119; 749–757.
+14. Kim HJ, Choi GS, Seo AN et al. Prognostic value of venous
+invasion detected by elastin stain may surpass lymph node status in colon cancer. Dis. Colon Rectum 2021; 64; 955–963.
+15. Shepherd NA, Baxter KJ, Love SB. Influence of local peritoneal
+involvement on pelvic recurrence and prognosis in rectal cancer. J. Clin. Pathol. 1995; 48; 849–855.
+16. Talbot IC, Ritchie S, Leighton MH, Hughes AO, Bussey HJ, Morson BC. Spread of rectal cancer within veins. Histologic features
+and clinical significance. Am. J. Surg. 1981; 141; 15–17.
+17. Maughan NJ, Morris E, Forman D, Quirke P. The validity of
+the Royal College of Pathologists’ colorectal cancer minimum
+dataset within a population. Br. J. Cancer 2007; 97; 1393–
+1398.
+18. Messenger DE, Driman DK, McLeod RS, Riddell RH, Kirsch R.
+Current practice patterns among pathologists in the the assessment of venous invasion in colorectal cancer. J. Clin. Pathol.
+2011; 64; 983–989.
+19. Messenger DE, Driman DK, Kirsch R. Developments in the
+assessment of venous invasion in colorectal cancer: implications for future practice and patient outcome. Hum. Pathol.
+2012; 43; 965–973.
+20. Kirsch R, Messeng DE, Riddell RH et al. Venous invasion in
+colorectal cancer: impact of an elastin stain on detection and
+interobserver agreement among gastrointestinal and nongastrointestinal pathologists. Am. J. Pathol. 2013; 37; 200–210.
+21. Sejben I, Bori R, Cserni G. Venous invasion demonstrated by
+orcein staining of colorectal carcinoma specimens is associated
+with the development of distant metastasis. J. Clin. Pathol.
+2010; 63; 575–578.
+22. Suzuki A, Togashi K, Nokubi M et al. Evaluation of venous
+invasion by Elastica van Gieson stain and tumor budding predicts local and distant metastases in patients with T1 stage
+colorectal cancer. Am. J. Pathol. 2009; 33; 1601–1607.
+23. Sari A, Cyr DP, Brar A et al. Routine elastin staining in surgically resected colorectal cancer: impact on venous invasion
+detection and its association with oncologic outcomes. Am. J.
+Surg. Pathol. Pathol. 2022; 46; 200–212.
+24. Burgart LJ, Kakar S, Shi C et al. Protocol for the Examination
+of Resection Specimens From Patients With Primary Carcinoma of the Colon and Rectum. Version 4.1.0.0. 2020. [cited
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Impact of tissue sampling on venous invasion detection in CRC
+
+K Duan et al.
+
+2021 Mar 10]. Available at: https://documents.cap.org/
+protocols/cp-gilower-colonrectum-resection-20-4100.pdf.
+25. Loughrey M, Arends M, Brown I et al. Colorectal cancer histopathology reporting guide. Sydney, Australia: International Collaboration on Cancer Reporting, 2020.
+26. Loughrey M, Quirke P, Shepherd NA, The Royal College of
+Pathologists. Dataset for histopathological reporting of colorectal cancer. Standards and datasets for reporting cancers. 2018.
+[cited 2021 Mar 10]. Available at: https://www.rcpath.org/
+uploads/assets/c8b61ba0-ae3f-43f1-85ffd3ab9f17cfe6/G049Dataset-for-histopathological-reporting-of-colorectal-cancer.pdf.
+27. Watanabe T, Muro K, Ajioka Y et al. Japanese Society for Cancer
+of the Colon and Rectum (JSCCR) guidelines 2016 for the treatment of colorectal cancer. Int. J. Clin. Oncol. 2018; 23; 1–34.
+28. The Royal College of Pathologists of Australasia. Colorectal
+cancer structured reporting protocol (version 4.0). 4th ed. 2020;
+1–77. [cited 2021 Mar 10]. Available at: https://www.rcpa.edu.
+au/Library/Practising-Pathology/Structured-Pathology-Reportingof-Cancer/Cancer-Protocols/Gastrointestinal/Protocol-colorectalcancer.
+29. Howlett CJ, Tweedie EJ, Driman DK. Use of an elastic stain to
+show venous invasion in colorectal carcinoma: a simple technique for detection of an important prognostic factor. J. Clin.
+Pathol. 2009; 62; 1021–1025.
+30. Talbot IC, Ritchie S, Leighton M, Hughes AO, Bussey HJ, Morson BC. Invasion of veins by carcinoma of the rectum: method
+of detection, histologic features and significance. Histopathology
+1981; 5; 141–163.
+31. Dirschmid K, Lang A, Mathis G, Haid A, Hansen M. Incidence
+of extramural venous invasion in colorectal carcinoma: findings with a new technique. Hum. Pathol. 1996; 27; 1227–
+1230.
+32. Sternberg A, Mizrahi A, Amar M, Groisman G. Detection of
+venous invasion in surgical specimens of colorectal carcinoma:
+
+the efficacy of various types of tissue blocks. J. Clin. Pathol.
+2006; 59; 207–210.
+33. Puppa G, Arnoux G, Sari A, Kirsch R. Venous invasion detection in colorectal cancer specimens: risk assessment of modifying the dissection method using a tangential approach. J. Clin.
+Pathol. 2018; 71; 186–188.
+34. Odze RD, Goldblum JR. Odze and goldblum surgical pathology of
+the GI tract, liver, biliary tract, and pancreas. 4th ed. Philadelphia, PA: Elsevier Saunders, 2015; 901.
+35. Stewart CJR, Morris M, de Boer B, Iacopetta B. Identification of
+serosal invasion and extramural venous invasion on review
+of Duke’s stage B colonic carcinomas and correlation with survival. Histopathology 2007; 51; 372–378.
+36. Cyr D, Akder A, Shivji S et al. Extramural venous invasion
+detected with an elastin stain is a powerful predictor of cancerspecific mortality in stage I-IIIB resected colorectal cancer
+(CRC). Ann. Oncol. 2020; 31(suppl_15); S133.
+37. Vass DG, Ainsworth R, Anderson JH, Murray D, Foulis AK.
+The value of an elastic tissue stain in detecting venous invasion in colorectal cancer. J. Clin. Pathol. 2004; 57; 769–772.
+38. Kingston EF, Goulding H, Bateman AC. Vascular invasion is
+underrecognized in colorectal cancer using conventional
+hematoxylin and eosin staining. Dis. Colon Rectum 2007; 50;
+1867–1872.
+39. Inoue T, Mori M, Shimono R, Kuwano H, Sugimachi K. Vascular invasion of colorectal carcinoma readily visible with certain
+stains. Dis. Colon Rectum 1992; 35; 34–39.
+40. Shirouzo K, Isomoto H, Kakegawa T et al. A prospective clinicopathologic study of venous invasion in colorectal cancer.
+Am. J. Surg. 1991; 162; 216–222.
+41. Shivji S, Kak I, Reid SL et al. Feasibility and performance of
+elastin trichrome as a primary stain in colorectal cancer resection specimens: Results of an Interobserver variability study.
+Am. J. Surg. Pathol. 2021; 45; 1419–1427.
+
+Ó 2023 The Authors. Histopathology published by John Wiley & Sons Ltd., Histopathology
+
+13652559, 0, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/his.15030 by Turkey Cochrane Evidence Aid, Wiley Online Library on [19/08/2023]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+12
+
+

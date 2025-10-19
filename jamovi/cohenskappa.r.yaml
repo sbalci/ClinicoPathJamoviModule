@@ -172,6 +172,81 @@ items:
       type: Html
       visible: true
 
+    # Multi-Rater Agreement Results
+    - name: multiRaterKappa
+      title: Multi-Rater Kappa Statistics
+      type: Table
+      visible: (rater3)
+      columns:
+          - name: method
+            title: Method
+            type: text
+          - name: kappa
+            title: Kappa
+            type: number
+          - name: se
+            title: Standard Error
+            type: number
+          - name: z_value
+            title: Z-value
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: n_raters
+            title: N Raters
+            type: integer
+          - name: n_subjects
+            title: N Subjects
+            type: integer
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - rater1
+          - rater2
+          - rater3
+          - rater4
+          - rater5
+          - multi_rater_method
+
+    - name: pairwiseKappaMatrix
+      title: Pairwise Kappa Matrix
+      type: Table
+      visible: (show_pairwise_kappa)
+      columns:
+          - name: rater_pair
+            title: Rater Pair
+            type: text
+          - name: kappa
+            title: Kappa
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+      clearWith:
+          - rater1
+          - rater2
+          - rater3
+          - rater4
+          - rater5
+
+    - name: multiRaterSummary
+      title: Multi-Rater Analysis Summary
+      type: Html
+      visible: (rater3)
+      clearWith:
+          - rater1
+          - rater2
+          - rater3
+          - rater4
+          - rater5
+
 refs:
     - ClinicoPathJamoviModule
 
@@ -179,4 +254,5 @@ refs:
     - psych
     - DescTools
     - ggrepel
+    - irr
 ...

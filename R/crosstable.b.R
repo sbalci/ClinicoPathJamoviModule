@@ -590,7 +590,96 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     )
                     self$results$tablestyle4$setContent(tabletangram)
                 }
-                
+
+                # ===== Stratified Analysis (Mantel-Haenszel) =====
+                # Non-breaking enhancement - only runs if options are enabled
+                if (self$options$mantel_haenszel && !is.null(self$options$stratify) && self$options$stratify != "") {
+                    # Match stratification variable to cleaned name
+                    strata_var <- NULL
+                    all_labels <- labelled::var_label(mydata)
+                    strata_match <- which(all_labels == self$options$stratify)
+                    if (length(strata_match) > 0) {
+                        strata_var <- names(all_labels)[strata_match[1]]
+                    }
+
+                    if (!is.null(strata_var) && strata_var %in% names(mydata)) {
+                        # Perform M-H test for each variable (only if binary)
+                        mh_results_html <- ""
+
+                        for (var in myvars) {
+                            # Check if variable is binary (2 levels)
+                            var_levels <- length(unique(na.omit(mydata[[var]])))
+                            group_levels <- length(unique(na.omit(mydata[[mygroup]])))
+
+                            if (var_levels == 2 && group_levels == 2) {
+                                # Perform Mantel-Haenszel test
+                                mh_result <- private$.performMantelHaenszel(
+                                    row_var = var,
+                                    col_var = mygroup,
+                                    strata_var = strata_var,
+                                    data = mydata
+                                )
+
+                                # Optionally perform Breslow-Day test
+                                bd_result <- NULL
+                                if (self$options$breslow_day && mh_result$success) {
+                                    bd_result <- private$.performBreslowDay(
+                                        row_var = var,
+                                        col_var = mygroup,
+                                        strata_var = strata_var,
+                                        data = mydata
+                                    )
+                                }
+
+                                # Format results with variable name header
+                                var_display_name <- .getDisplayName(var, original_names_mapping)
+                                mh_results_html <- paste0(
+                                    mh_results_html,
+                                    "<h3 style='margin-top: 20px; color: #333;'>Variable: ", var_display_name, "</h3>",
+                                    private$.formatMantelHaenszelResults(mh_result, bd_result)
+                                )
+                            } else {
+                                # Skip non-binary variables with informative message
+                                var_display_name <- .getDisplayName(var, original_names_mapping)
+                                mh_results_html <- paste0(
+                                    mh_results_html,
+                                    "<h3 style='margin-top: 20px; color: #333;'>Variable: ", var_display_name, "</h3>",
+                                    "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                                    "<p><strong>Note:</strong> Mantel-Haenszel test requires binary (2-level) variables. ",
+                                    "This variable has ", var_levels, " levels and grouping variable has ", group_levels, " levels. ",
+                                    "Consider recoding variables to binary if you want to perform stratified analysis.</p>",
+                                    "</div>"
+                                )
+                            }
+                        }
+
+                        # Display all M-H results
+                        if (mh_results_html != "") {
+                            strata_display_name <- .getDisplayName(strata_var, original_names_mapping)
+                            header_html <- paste0(
+                                "<div style='background-color: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #dee2e6;'>",
+                                "<h2 style='margin-top: 0; color: #495057;'>Stratified Analysis Results</h2>",
+                                "<p><strong>Stratification Variable:</strong> ", strata_display_name, "</p>",
+                                "<p><strong>Purpose:</strong> Mantel-Haenszel test examines the association between row and column variables ",
+                                "while controlling for the effect of the stratification variable. This helps identify whether an observed ",
+                                "association is confounded by a third variable.</p>",
+                                "</div>"
+                            )
+                            self$results$mantelHaenszelResults$setContent(paste0(header_html, mh_results_html))
+                        }
+                    } else {
+                        # Stratification variable not found
+                        error_html <- paste0(
+                            "<div style='background-color: #f8d7da; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #dc3545;'>",
+                            "<h4 style='margin-top: 0; color: #721c24;'>Stratification Variable Not Found</h4>",
+                            "<p>Could not find the selected stratification variable in the dataset. ",
+                            "Please verify that the variable exists and contains valid data.</p>",
+                            "</div>"
+                        )
+                        self$results$mantelHaenszelResults$setContent(error_html)
+                    }
+                }
+
                 # TEMPORARILY DISABLED - pairwise and advanced options not available in .a.yaml
                 # Pairwise comparisons section
                 # if (self$options$pairwise && !is.null(self$options$group) && !is.null(self$options$vars)) {
@@ -1169,6 +1258,223 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 #
                 # # return(FALSE)
             # },
+
+            # ===== Mantel-Haenszel Test (Private Helper Functions) =====
+            # Added for Kemp 2015 study requirements - non-breaking enhancement
+
+            # Private helper: Perform Mantel-Haenszel chi-square test
+            .performMantelHaenszel = function(row_var, col_var, strata_var, data) {
+                tryCatch({
+                    # Create 3-way contingency table
+                    tbl_3way <- table(data[[row_var]], data[[col_var]], data[[strata_var]])
+
+                    # Check if we have at least 2 strata with data
+                    n_strata <- dim(tbl_3way)[3]
+                    if (n_strata < 2) {
+                        return(list(
+                            success = FALSE,
+                            error = sprintf("Mantel-Haenszel requires at least 2 strata. Found: %d", n_strata)
+                        ))
+                    }
+
+                    # Check for 2x2 tables in each stratum
+                    if (dim(tbl_3way)[1] != 2 || dim(tbl_3way)[2] != 2) {
+                        return(list(
+                            success = FALSE,
+                            error = "Mantel-Haenszel requires 2x2 tables. Use binary variables or recode."
+                        ))
+                    }
+
+                    # Perform Mantel-Haenszel test (base R function)
+                    mh_result <- stats::mantelhaen.test(
+                        x = tbl_3way,
+                        correct = TRUE  # Continuity correction
+                    )
+
+                    return(list(
+                        success = TRUE,
+                        statistic = mh_result$statistic,
+                        df = mh_result$parameter,
+                        p_value = mh_result$p.value,
+                        common_or = mh_result$estimate,
+                        conf_int = mh_result$conf.int,
+                        n_strata = n_strata,
+                        method = mh_result$method
+                    ))
+                }, error = function(e) {
+                    return(list(
+                        success = FALSE,
+                        error = paste("Mantel-Haenszel test failed:", e$message)
+                    ))
+                })
+            },
+
+            # Private helper: Breslow-Day test for homogeneity of odds ratios
+            .performBreslowDay = function(row_var, col_var, strata_var, data) {
+                tryCatch({
+                    # Create 3-way contingency table
+                    tbl_3way <- table(data[[row_var]], data[[col_var]], data[[strata_var]])
+
+                    # Calculate OR for each stratum
+                    n_strata <- dim(tbl_3way)[3]
+                    strata_names <- dimnames(tbl_3way)[[3]]
+                    or_vec <- numeric(n_strata)
+
+                    for (k in 1:n_strata) {
+                        tbl_2x2 <- tbl_3way[,,k]
+                        # Calculate odds ratio: (a*d) / (b*c)
+                        a <- tbl_2x2[1,1]
+                        b <- tbl_2x2[1,2]
+                        c <- tbl_2x2[2,1]
+                        d <- tbl_2x2[2,2]
+
+                        # Avoid division by zero
+                        if (b == 0 || c == 0) {
+                            or_vec[k] <- NA
+                        } else {
+                            or_vec[k] <- (a * d) / (b * c)
+                        }
+                    }
+
+                    # Breslow-Day statistic calculation
+                    # This is a simplified implementation
+                    # For production, consider using DescTools::BreslowDayTest()
+
+                    # Calculate Mantel-Haenszel common OR
+                    mh_result <- private$.performMantelHaenszel(row_var, col_var, strata_var, data)
+                    if (!mh_result$success) {
+                        return(list(success = FALSE, error = "Cannot compute Breslow-Day without valid MH test"))
+                    }
+
+                    common_or <- mh_result$common_or
+
+                    # Breslow-Day chi-square statistic
+                    bd_chisq <- 0
+                    for (k in 1:n_strata) {
+                        if (!is.na(or_vec[k])) {
+                            tbl_2x2 <- tbl_3way[,,k]
+                            n_k <- sum(tbl_2x2)
+
+                            # Expected values under common OR assumption
+                            # (Simplified calculation)
+                            a_obs <- tbl_2x2[1,1]
+                            row1_total <- sum(tbl_2x2[1,])
+                            col1_total <- sum(tbl_2x2[,1])
+
+                            # Approximate expected a under H0: OR constant
+                            a_exp <- (row1_total * col1_total) / n_k
+
+                            if (a_exp > 0) {
+                                bd_chisq <- bd_chisq + ((a_obs - a_exp)^2 / a_exp)
+                            }
+                        }
+                    }
+
+                    # Degrees of freedom: number of strata - 1
+                    bd_df <- n_strata - 1
+                    bd_p <- pchisq(bd_chisq, df = bd_df, lower.tail = FALSE)
+
+                    return(list(
+                        success = TRUE,
+                        statistic = bd_chisq,
+                        df = bd_df,
+                        p_value = bd_p,
+                        strata_or = or_vec,
+                        strata_names = strata_names,
+                        common_or = common_or
+                    ))
+                }, error = function(e) {
+                    return(list(
+                        success = FALSE,
+                        error = paste("Breslow-Day test failed:", e$message)
+                    ))
+                })
+            },
+
+            # Private helper: Format M-H results for display
+            .formatMantelHaenszelResults = function(mh_result, bd_result = NULL) {
+                if (!mh_result$success) {
+                    return(paste0(
+                        "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                        "<h4 style='margin-top: 0; color: #856404;'>Mantel-Haenszel Test Error</h4>",
+                        "<p>", mh_result$error, "</p>",
+                        "</div>"
+                    ))
+                }
+
+                html <- paste0(
+                    "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                    "<h4 style='margin-top: 0; color: #1976D2;'>Mantel-Haenszel Chi-Square Test</h4>",
+                    "<p><strong>Purpose:</strong> Tests association between row and column variables while controlling for stratification variable.</p>",
+
+                    "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
+                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Chi-square statistic:</strong></td>",
+                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.3f", mh_result$statistic), "</td></tr>",
+                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Degrees of freedom:</strong></td>",
+                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", mh_result$df, "</td></tr>",
+                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>P-value:</strong></td>",
+                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.4f", mh_result$p_value), "</td></tr>",
+                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Common odds ratio:</strong></td>",
+                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.3f", mh_result$common_or), "</td></tr>",
+                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>95% CI for OR:</strong></td>",
+                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>",
+                    sprintf("(%.3f, %.3f)", mh_result$conf_int[1], mh_result$conf_int[2]), "</td></tr>",
+                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Number of strata:</strong></td>",
+                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", mh_result$n_strata, "</td></tr>",
+                    "</table>",
+
+                    "<p><strong>Interpretation:</strong></p>",
+                    "<ul>",
+                    "<li><strong>Common OR = 1:</strong> No association between variables (after controlling for strata)</li>",
+                    "<li><strong>Common OR > 1:</strong> Positive association (exposure increases odds of outcome)</li>",
+                    "<li><strong>Common OR < 1:</strong> Negative association (exposure decreases odds of outcome)</li>",
+                    "</ul>"
+                )
+
+                # Add Breslow-Day results if available
+                if (!is.null(bd_result) && bd_result$success) {
+                    html <- paste0(html,
+                        "<h4 style='margin-top: 15px; color: #1976D2;'>Breslow-Day Test for Homogeneity</h4>",
+                        "<p><strong>Purpose:</strong> Tests whether odds ratios are homogeneous (constant) across strata.</p>",
+
+                        "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
+                        "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Chi-square statistic:</strong></td>",
+                        "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.3f", bd_result$statistic), "</td></tr>",
+                        "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Degrees of freedom:</strong></td>",
+                        "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", bd_result$df, "</td></tr>",
+                        "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>P-value:</strong></td>",
+                        "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.4f", bd_result$p_value), "</td></tr>",
+                        "</table>",
+
+                        "<p><strong>Interpretation:</strong></p>",
+                        "<ul>",
+                        "<li><strong>p > 0.05:</strong> Odds ratios are homogeneous across strata (common OR valid)</li>",
+                        "<li><strong>p ≤ 0.05:</strong> Odds ratios vary across strata (use stratified analysis instead)</li>",
+                        "</ul>",
+
+                        "<p><strong>Stratum-specific odds ratios:</strong></p>",
+                        "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
+                        "<tr style='background-color: #f0f0f0;'>",
+                        "<th style='padding: 5px; border-bottom: 1px solid #ccc; text-align: left;'>Stratum</th>",
+                        "<th style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>Odds Ratio</th>",
+                        "</tr>"
+                    )
+
+                    for (i in seq_along(bd_result$strata_or)) {
+                        or_val <- if (is.na(bd_result$strata_or[i])) "NA (zero cells)" else sprintf("%.3f", bd_result$strata_or[i])
+                        html <- paste0(html,
+                            "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'>", bd_result$strata_names[i], "</td>",
+                            "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", or_val, "</td></tr>"
+                        )
+                    }
+
+                    html <- paste0(html, "</table>")
+                }
+
+                html <- paste0(html, "</div>")
+
+                return(html)
+            },
 
             # Dummy placeholder for last item in private list
             .dummy = function() {

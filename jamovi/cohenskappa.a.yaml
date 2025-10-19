@@ -139,3 +139,59 @@ options:
       max: 10
       description: 'Minimum number of categories required for analysis'
 
+    # Multi-Rater Agreement Options (Fleiss' Kappa)
+    - name: rater3
+      title: 'Third Rater (Optional)'
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      default: NULL
+      description: 'Third rater for multi-rater agreement (Fleiss kappa)'
+
+    - name: rater4
+      title: 'Fourth Rater (Optional)'
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      default: NULL
+      description: 'Fourth rater for multi-rater agreement'
+
+    - name: rater5
+      title: 'Fifth Rater (Optional)'
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      default: NULL
+      description: 'Fifth rater for multi-rater agreement'
+
+    - name: multi_rater_method
+      title: 'Multi-Rater Method'
+      type: List
+      options:
+          - title: 'Fleiss Kappa (All raters complete)'
+            name: fleiss
+          - title: 'Light Kappa (Average pairwise)'
+            name: light
+          - title: 'Auto (Select based on data)'
+            name: auto
+      default: auto
+      description: 'Method for calculating multi-rater agreement (≥3 raters)'
+
+    - name: show_pairwise_kappa
+      title: 'Show Pairwise Kappa Matrix'
+      type: Bool
+      default: false
+      description: 'Show all pairwise kappa values between raters (multi-rater only)'
+

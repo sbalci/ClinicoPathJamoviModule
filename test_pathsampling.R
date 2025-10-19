@@ -72,36 +72,53 @@ tryCatch({
     )
     cat("Analysis object created successfully\n")
 
-    cat("\n===== Running Analysis =====\n")
-    analysis$run()
-    cat("Analysis completed successfully\n")
+    # pathsampling() returns the results object after running analysis
+    if (inherits(analysis, "pathsamplingResults")) {
+        results <- analysis
+    } else if (!is.null(analysis$results)) {
+        results <- analysis$results
+    } else {
+        stop("Unexpected return type from pathsampling()")
+    }
 
     cat("\n===== Checking Results =====\n")
     # Check if keyResults exists
-    if ("keyResults" %in% names(analysis$results)) {
+    if ("keyResults" %in% names(results)) {
         cat("✓ keyResults element exists\n")
     } else {
         cat("✗ keyResults element NOT FOUND\n")
         cat("Available results:\n")
-        print(names(analysis$results))
+        print(names(results))
     }
 
     # Check dataInfo
-    if (!is.null(analysis$results$dataInfo$asDF())) {
-        cat("✓ dataInfo populated\n")
-        print(head(analysis$results$dataInfo$asDF()))
+    data_info_fn <- results$dataInfo$asDF
+    if (is.function(data_info_fn)) {
+        data_info_df <- data_info_fn()
+        if (!is.null(data_info_df)) {
+            cat("✓ dataInfo populated\n")
+            print(head(data_info_df))
+        }
     }
 
     # Check binomialTable
-    if (!is.null(analysis$results$binomialTable$asDF())) {
-        cat("✓ binomialTable populated\n")
-        print(head(analysis$results$binomialTable$asDF()))
+    binom_fn <- results$binomialTable$asDF
+    if (is.function(binom_fn)) {
+        binom_df <- binom_fn()
+        if (!is.null(binom_df)) {
+            cat("✓ binomialTable populated\n")
+            print(head(binom_df))
+        }
     }
 
     # Check empiricalCumulativeTable
-    if (!is.null(analysis$results$empiricalCumulativeTable$asDF())) {
-        cat("✓ empiricalCumulativeTable populated\n")
-        print(head(analysis$results$empiricalCumulativeTable$asDF()))
+    empirical_fn <- results$empiricalCumulativeTable$asDF
+    if (is.function(empirical_fn)) {
+        empirical_df <- empirical_fn()
+        if (!is.null(empirical_df)) {
+            cat("✓ empiricalCumulativeTable populated\n")
+            print(head(empirical_df))
+        }
     }
 
     cat("\n===== Test PASSED =====\n")

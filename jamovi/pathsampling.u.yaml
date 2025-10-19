@@ -7,9 +7,13 @@ children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
+    permitted:
+      - numeric
+      - factor
+      - id
     children:
       - type: TargetLayoutBox
-        label: Total Samples
+        label: Total Samples (Required)
         children:
           - type: VariablesListBox
             name: totalSamples
@@ -17,7 +21,7 @@ children:
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
-        label: First Detection
+        label: First Detection (Required)
         children:
           - type: VariablesListBox
             name: firstDetection
@@ -56,6 +60,7 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
+
   - type: CollapseBox
     label: Analysis Parameters
     collapsed: false
@@ -63,17 +68,24 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: TextBox
-            name: targetConfidence
-            format: number
-          - type: TextBox
-            name: maxSamples
-            format: number
-          - type: TextBox
-            name: bootstrapIterations
-            format: number
-          - type: ComboBox
-            name: estimationMethod
+          - type: Label
+            label: Sampling Protocol Settings
+            children:
+              - type: TextBox
+                name: targetConfidence
+                format: number
+              - type: TextBox
+                name: maxSamples
+                format: number
+          - type: Label
+            label: Statistical Methods
+            children:
+              - type: ComboBox
+                name: estimationMethod
+              - type: TextBox
+                name: bootstrapIterations
+                format: number
+
   - type: CollapseBox
     label: Core Analyses
     collapsed: false
@@ -84,17 +96,18 @@ children:
           - type: CheckBox
             name: showClinicalSummary
           - type: CheckBox
-            name: showBinomialModel
-          - type: CheckBox
             name: showGuidedChecklist
+          - type: CheckBox
+            name: showBinomialModel
           - type: CheckBox
             name: showBootstrap
           - type: CheckBox
             name: showDetectionCurve
           - type: CheckBox
             name: showSensitivityCI
+
   - type: CollapseBox
-    label: Enhanced Analyses (Requires Positive Count)
+    label: Enhanced Detection (Requires Positive Count)
     collapsed: true
     children:
       - type: LayoutBox
@@ -104,8 +117,11 @@ children:
             name: showEmpiricalCumulative
           - type: CheckBox
             name: showIncrementalYield
+          - type: CheckBox
+            name: showPopulationDetection
+
   - type: CollapseBox
-    label: Advanced Analyses (Requires Sample List)
+    label: Spatial & Multifocal Analyses (Requires Sample List)
     collapsed: true
     children:
       - type: LayoutBox
@@ -115,6 +131,7 @@ children:
             name: showSpatialClustering
           - type: CheckBox
             name: showMultifocalAnalysis
+
   - type: CollapseBox
     label: Stratified Analyses (Requires Sample Type)
     collapsed: true
@@ -124,10 +141,9 @@ children:
         children:
           - type: CheckBox
             name: showStratifiedAnalysis
-          - type: CheckBox
-            name: showPopulationDetection
+
   - type: CollapseBox
-    label: Legacy Tumor Burden Inputs
+    label: Tumor Burden & Stage Migration
     collapsed: true
     children:
       - type: VariableSupplier
@@ -135,7 +151,7 @@ children:
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: Positive Cassettes (Legacy)
+            label: Positive Samples (for burden)
             children:
               - type: VariablesListBox
                 name: positiveCassettes
@@ -143,7 +159,7 @@ children:
                 isTarget: true
                 itemDropBehaviour: overwrite
           - type: TargetLayoutBox
-            label: Max Foci per Cassette (Legacy)
+            label: Max Foci per Sample (optional)
             children:
               - type: VariablesListBox
                 name: maxPositiveSingle
@@ -165,73 +181,94 @@ children:
             name: distributionThreshold
             format: number
             enable: (showDistributionPattern)
+
   - type: CollapseBox
     label: Specialized Models
     collapsed: true
     children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
+      - type: Label
+        label: Finite Population Models
         children:
-          - type: TargetLayoutBox
-            label: Total Population (Finite Models)
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
             children:
-              - type: VariablesListBox
-                name: totalPopulation
-                maxItemCount: 1
-                isTarget: true
-                itemDropBehaviour: overwrite
-          - type: TargetLayoutBox
-            label: Success States (Finite Models)
+              - type: TargetLayoutBox
+                label: Total Population
+                children:
+                  - type: VariablesListBox
+                    name: totalPopulation
+                    maxItemCount: 1
+                    isTarget: true
+                    itemDropBehaviour: overwrite
+              - type: TargetLayoutBox
+                label: Success States
+                children:
+                  - type: VariablesListBox
+                    name: successStates
+                    maxItemCount: 1
+                    isTarget: true
+                    itemDropBehaviour: overwrite
+          - type: LayoutBox
+            margin: large
             children:
-              - type: VariablesListBox
-                name: successStates
-                maxItemCount: 1
-                isTarget: true
-                itemDropBehaviour: overwrite
-          - type: TargetLayoutBox
-            label: Total Lymph Nodes
-            children:
-              - type: VariablesListBox
-                name: totalLymphNodes
-                maxItemCount: 1
-                isTarget: true
-                itemDropBehaviour: overwrite
-          - type: TargetLayoutBox
-            label: Positive Lymph Nodes
-            children:
-              - type: VariablesListBox
-                name: positiveLymphNodes
-                maxItemCount: 1
-                isTarget: true
-                itemDropBehaviour: overwrite
-      - type: LayoutBox
-        margin: large
+              - type: ComboBox
+                name: modelType
+              - type: CheckBox
+                name: showHypergeometric
+              - type: CheckBox
+                name: showBetaBinomial
+              - type: TextBox
+                name: targetDetections
+                format: number
+                enable: (showHypergeometric)
+      - type: Label
+        label: Lymph Node Analyses
         children:
-          - type: CheckBox
-            name: showHypergeometric
-          - type: CheckBox
-            name: showBetaBinomial
-          - type: ComboBox
-            name: modelType
-          - type: TextBox
-            name: targetDetections
-            format: number
-            enable: (showHypergeometric)
-          - type: CheckBox
-            name: showLNAnalysis
-          - type: TextBox
-            name: lnrThreshold1
-            format: number
-            enable: (showLNAnalysis)
-          - type: TextBox
-            name: lnrThreshold2
-            format: number
-            enable: (showLNAnalysis)
-          - type: CheckBox
-            name: showEffectSizes
-          - type: CheckBox
-            name: showOmentumAnalysis
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: Total Lymph Nodes
+                children:
+                  - type: VariablesListBox
+                    name: totalLymphNodes
+                    maxItemCount: 1
+                    isTarget: true
+                    itemDropBehaviour: overwrite
+              - type: TargetLayoutBox
+                label: Positive Lymph Nodes
+                children:
+                  - type: VariablesListBox
+                    name: positiveLymphNodes
+                    maxItemCount: 1
+                    isTarget: true
+                    itemDropBehaviour: overwrite
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showLNAnalysis
+              - type: TextBox
+                name: lnrThreshold1
+                format: number
+                enable: (showLNAnalysis)
+              - type: TextBox
+                name: lnrThreshold2
+                format: number
+                enable: (showLNAnalysis)
+              - type: CheckBox
+                name: showEffectSizes
+      - type: Label
+        label: Literature-Based Analyses
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showOmentumAnalysis
+
   - type: CollapseBox
     label: Advanced Options
     collapsed: true

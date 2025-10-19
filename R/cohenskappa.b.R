@@ -519,12 +519,248 @@ cohenskappaClass <- R6::R6Class(
                 "
                 
                 self$results$technicalNotes$setContent(technical_text)
-                
+
+                # Multi-rater analysis (if 3+ raters selected)
+                if (!is.null(self$options$rater3)) {
+                    private$.performMultiRaterAnalysis()
+                }
+
             }, error = function(e) {
                 error_msg <- glue::glue("<h3>Error in Analysis</h3><p>An error occurred during analysis: {e$message}</p><p>Please check your data and parameter settings.</p>")
                 self$results$summary$setContent(error_msg)
                 return()
             })
+        },
+
+        # ===== Multi-Rater Agreement (Fleiss' Kappa) =====
+        # Private helper functions for multi-rater analysis
+
+        .performMultiRaterAnalysis = function() {
+            # Get all rater variables
+            raters <- c(self$options$rater1, self$options$rater2)
+            if (!is.null(self$options$rater3)) raters <- c(raters, self$options$rater3)
+            if (!is.null(self$options$rater4)) raters <- c(raters, self$options$rater4)
+            if (!is.null(self$options$rater5)) raters <- c(raters, self$options$rater5)
+
+            n_raters <- length(raters)
+
+            # Only proceed if we have 3+ raters
+            if (n_raters < 3) {
+                return(NULL)
+            }
+
+            # Check for irr package
+            if (!requireNamespace("irr", quietly = TRUE)) {
+                error_msg <- glue::glue("
+                <h3>Error: Package Required</h3>
+                <p>The 'irr' package is required for multi-rater analysis but is not installed.</p>
+                <p>Please install it using:</p>
+                <code>install.packages('irr')</code>
+                ")
+                self$results$multiRaterSummary$setContent(error_msg)
+                return(NULL)
+            }
+
+            # Get data
+            data <- self$data
+
+            # Extract rater data
+            rater_data_list <- list()
+            for (i in 1:n_raters) {
+                rater_var <- raters[i]
+                rater_col <- data[[rater_var]]
+
+                # Convert to factor if numeric
+                if (is.numeric(rater_col)) {
+                    rater_col <- as.factor(rater_col)
+                }
+
+                rater_data_list[[i]] <- rater_col
+            }
+
+            # Combine into matrix (subjects as rows, raters as columns)
+            rater_matrix <- do.call(cbind, rater_data_list)
+            colnames(rater_matrix) <- paste0("Rater", 1:n_raters)
+
+            # Handle missing data
+            if (self$options$missing_treatment == "listwise") {
+                complete_cases <- complete.cases(rater_matrix)
+                rater_matrix <- rater_matrix[complete_cases, , drop = FALSE]
+            }
+
+            n_subjects <- nrow(rater_matrix)
+
+            # Check if we have enough data
+            if (n_subjects < 3) {
+                error_msg <- "<h3>Error: Insufficient Data</h3><p>Multi-rater analysis requires at least 3 complete observations.</p>"
+                self$results$multiRaterSummary$setContent(error_msg)
+                return(NULL)
+            }
+
+            # Determine method
+            method <- self$options$multi_rater_method
+
+            # Auto-select method based on missingness
+            if (method == "auto") {
+                has_missing <- any(is.na(rater_matrix))
+                method <- if (has_missing) "light" else "fleiss"
+            }
+
+            # Calculate multi-rater kappa
+            result <- private$.calculateMultiRaterKappa(rater_matrix, method, n_raters, n_subjects)
+
+            # Store for pairwise analysis if requested
+            if (self$options$show_pairwise_kappa) {
+                private$.calculatePairwiseKappa(rater_data_list, raters)
+            }
+
+            return(result)
+        },
+
+        .calculateMultiRaterKappa = function(rater_matrix, method, n_raters, n_subjects) {
+            tryCatch({
+                if (method == "fleiss") {
+                    # Fleiss' Kappa - all raters evaluate all subjects
+                    fleiss_result <- irr::kappam.fleiss(rater_matrix)
+
+                    kappa_value <- fleiss_result$value
+                    p_value <- fleiss_result$p.value
+
+                    # Approximate SE (Fleiss method)
+                    # SE calculation for Fleiss kappa is complex; using approximation
+                    se_kappa <- sqrt((1 - kappa_value)^2 / (n_subjects * (n_raters - 1)))
+                    z_value <- kappa_value / se_kappa
+
+                    method_name <- "Fleiss' Kappa"
+
+                } else if (method == "light") {
+                    # Light's Kappa - average of pairwise kappas
+                    light_result <- irr::kappam.light(rater_matrix)
+
+                    kappa_value <- light_result$value
+                    p_value <- light_result$p.value
+
+                    # Approximate SE
+                    se_kappa <- sqrt((1 - kappa_value)^2 / (n_subjects * (n_raters - 1)))
+                    z_value <- kappa_value / se_kappa
+
+                    method_name <- "Light's Kappa (Average Pairwise)"
+                }
+
+                # Interpret kappa
+                interpretation <- private$.interpretKappa(kappa_value)
+
+                # Populate multi-rater table
+                self$results$multiRaterKappa$addRow(rowKey = 1, values = list(
+                    method = method_name,
+                    kappa = kappa_value,
+                    se = se_kappa,
+                    z_value = z_value,
+                    p_value = p_value,
+                    n_raters = n_raters,
+                    n_subjects = n_subjects,
+                    interpretation = interpretation
+                ))
+
+                # Create summary
+                summary_html <- glue::glue("
+                <h3>Multi-Rater Agreement Analysis</h3>
+                <p><b>Method:</b> {method_name}</p>
+                <p><b>Number of Raters:</b> {n_raters}</p>
+                <p><b>Number of Subjects:</b> {n_subjects}</p>
+                <p><b>Kappa Value:</b> {round(kappa_value, 3)} ({interpretation})</p>
+
+                <h4>Interpretation:</h4>
+                <ul>
+                <li><b>Fleiss' Kappa:</b> Generalization of Cohen's kappa for multiple raters. Measures overall agreement among all raters simultaneously.</li>
+                <li><b>Light's Kappa:</b> Average of all pairwise Cohen's kappas. More robust to missing data and different rating patterns.</li>
+                </ul>
+
+                <h4>When to Use:</h4>
+                <ul>
+                <li><b>Fleiss' Kappa:</b> When all raters rate all subjects; no missing data; raters are interchangeable</li>
+                <li><b>Light's Kappa:</b> When missing data present; when raters may have different rating patterns; provides conservative estimate</li>
+                </ul>
+
+                <p><b>Statistical Significance:</b> p = {sprintf('%.4f', p_value)}</p>
+                <p>{ifelse(p_value < 0.05, '✓ Agreement is significantly better than chance', '✗ Agreement not significantly different from chance')}</p>
+                ")
+
+                self$results$multiRaterSummary$setContent(summary_html)
+
+                return(list(success = TRUE, kappa = kappa_value, method = method_name))
+
+            }, error = function(e) {
+                error_msg <- glue::glue("
+                <h3>Error in Multi-Rater Analysis</h3>
+                <p>An error occurred: {e$message}</p>
+                <p>Please check that:</p>
+                <ul>
+                <li>All raters use the same categories</li>
+                <li>Data format is correct (factors or numeric)</li>
+                <li>Sufficient complete observations (n ≥ 3)</li>
+                </ul>
+                ")
+                self$results$multiRaterSummary$setContent(error_msg)
+                return(list(success = FALSE))
+            })
+        },
+
+        .calculatePairwiseKappa = function(rater_data_list, rater_names) {
+            n_raters <- length(rater_data_list)
+
+            # Generate all pairs
+            pairs <- combn(n_raters, 2)
+
+            for (i in 1:ncol(pairs)) {
+                rater_i <- pairs[1, i]
+                rater_j <- pairs[2, i]
+
+                # Get data for this pair
+                rater_i_data <- rater_data_list[[rater_i]]
+                rater_j_data <- rater_data_list[[rater_j]]
+
+                # Remove missing for this pair
+                complete_idx <- complete.cases(rater_i_data, rater_j_data)
+                r_i <- rater_i_data[complete_idx]
+                r_j <- rater_j_data[complete_idx]
+
+                if (length(r_i) < 3) {
+                    next  # Skip if insufficient data
+                }
+
+                # Calculate Cohen's kappa for this pair
+                tryCatch({
+                    confusion_table <- table(r_i, r_j)
+                    cohen_result <- psych::cohen.kappa(confusion_table)
+
+                    kappa_val <- cohen_result$kappa
+                    se_val <- sqrt(cohen_result$var.kappa)
+                    z_val <- kappa_val / se_val
+                    p_val <- 2 * (1 - pnorm(abs(z_val)))
+
+                    pair_name <- paste(rater_names[rater_i], "vs", rater_names[rater_j])
+
+                    self$results$pairwiseKappaMatrix$addRow(rowKey = i, values = list(
+                        rater_pair = pair_name,
+                        kappa = kappa_val,
+                        se = se_val,
+                        p_value = p_val
+                    ))
+                }, error = function(e) {
+                    # Skip pairs with errors
+                })
+            }
+        },
+
+        .interpretKappa = function(kappa) {
+            if (is.na(kappa)) return("Cannot be determined")
+            if (kappa < 0.00) return("Poor agreement")
+            if (kappa <= 0.20) return("Slight agreement")
+            if (kappa <= 0.40) return("Fair agreement")
+            if (kappa <= 0.60) return("Moderate agreement")
+            if (kappa <= 0.80) return("Substantial agreement")
+            return("Almost perfect agreement")
         },
 
         # Plotting functions
