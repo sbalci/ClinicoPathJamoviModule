@@ -327,6 +327,88 @@ test_that("agreement frequency tables work correctly", {
   }, NA)
 })
 
+test_that("agreement weighted kappa produces results for ordered data", {
+  skip_if_not_installed("jmvcore")
+
+  ordered_data <- data.frame(
+    RaterA = ordered(c("G1", "G1", "G2", "G3"), levels = c("G1", "G2", "G3")),
+    RaterB = ordered(c("G1", "G2", "G2", "G3"), levels = c("G1", "G2", "G3"))
+  )
+
+  expect_error({
+    agreement(
+      data = ordered_data,
+      vars = c("RaterA", "RaterB"),
+      wght = "squared"
+    )
+  }, NA)
+})
+
+test_that("agreement LoA handles missing ratings", {
+  skip_if_not_installed("jmvcore")
+
+  loa_data <- data.frame(
+    R1 = factor(c("low", "low", "high", "high"), levels = c("low", "high")),
+    R2 = factor(c("low", "high", "high", NA), levels = c("low", "high")),
+    R3 = factor(c("low", "low", "high", "high"), levels = c("low", "high"))
+  )
+
+  expect_error({
+    agreement(
+      data = loa_data,
+      vars = c("R1", "R2", "R3"),
+      loaVariable = TRUE
+    )
+  }, NA)
+})
+
+test_that("agreement pairwise reference runs without error", {
+  skip_if_not_installed("jmvcore")
+
+  pair_data <- data.frame(
+    Ref = factor(c("low", "low", "high", "high"), levels = c("low", "high")),
+    RaterX = factor(c("low", "high", "high", "low"), levels = c("low", "high")),
+    RaterY = factor(c("low", "low", "high", "high"), levels = c("low", "high"))
+  )
+
+  expect_error({
+    agreement(
+      data = pair_data,
+      vars = c("Ref", "RaterX", "RaterY"),
+      referenceRater = "Ref"
+    )
+  }, NA)
+})
+
+test_that("agreement handles numeric-coded categorical ratings", {
+  skip_if_not_installed("jmvcore")
+
+  numeric_data <- data.frame(
+    R1 = c(1, 1, 2, 3, 3),
+    R2 = c(1, 2, 2, 3, 3)
+  )
+
+  expect_error({
+    agreement(
+      data = numeric_data,
+      vars = c("R1", "R2"),
+      wght = "equal"
+    )
+  }, NA)
+})
+
+test_that("continuous agreement options require numeric inputs", {
+  skip_if_not_installed("jmvcore")
+
+  expect_error({
+    agreement(
+      data = histopathology,
+      vars = c("Rater 1", "Rater 2"),
+      ccc = TRUE
+    )
+  })
+})
+
 test_that("agreement interpretation guidelines work", {
   # Test interpretation guidelines display
   expect_error({

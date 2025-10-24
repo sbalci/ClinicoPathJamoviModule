@@ -1,7 +1,7 @@
 ---
 name: aivalidation
 title: AI Model Validation with Cross-Validation
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: AI & Machine Learning
 menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
 version: '0.0.32'
@@ -14,7 +14,7 @@ description:
         including comparison of AI vs human performance with statistical significance testing.
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('medical_ai_data', package='ClinicoPath')
             

@@ -17,22 +17,7 @@ children:
             # maxItemCount: 5
 
   - type: Label
-    label: Display Options
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: sft
-          - type: CheckBox
-            name: showText
-            enable: (sft)
-          - type: CheckBox
-            name: showSummary
-          - type: CheckBox
-            name: showAbout
-  - type: Label
-    label: "Weighted Kappa (Ordinal Data)"
+    label: "Basic Agreement Measures"
     children:
       - type: LayoutBox
         margin: large
@@ -42,8 +27,9 @@ children:
           - type: CheckBox
             name: exct
 
-  - type: Label
+  - type: CollapseBox
     label: "Krippendorff's Alpha"
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -57,8 +43,9 @@ children:
             name: bootstrap
             enable: (kripp)
 
-  - type: Label
+  - type: CollapseBox
     label: "Gwet's AC1/AC2"
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -69,8 +56,9 @@ children:
             name: gwetWeights
             enable: (gwet)
 
-  - type: Label
+  - type: CollapseBox
     label: "Concordance Correlation Coefficient (CCC)"
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -78,8 +66,9 @@ children:
           - type: CheckBox
             name: ccc
 
-  - type: Label
+  - type: CollapseBox
     label: "Bland-Altman Analysis"
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -97,27 +86,9 @@ children:
             format: number
             enable: (blandAltman)
 
-  - type: Label
-    label: "Consensus Score Derivation"
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: consensusVar
-          - type: ComboBox
-            name: consensusRule
-            enable: (consensusVar)
-          - type: ComboBox
-            name: tieBreaker
-            enable: (consensusVar)
-          - type: TextBox
-            name: consensusName
-            format: string
-            enable: (consensusVar)
-
-  - type: Label
+  - type: CollapseBox
     label: "Pairwise Kappa Analysis"
+    collapsed: true
     children:
       - type: VariableSupplier
         persistentItems: false
@@ -137,8 +108,29 @@ children:
             name: rankRaters
             enable: (referenceRater)
 
-  - type: Label
+  - type: CollapseBox
+    label: "Consensus Score Derivation"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: consensusVar
+          - type: ComboBox
+            name: consensusRule
+            enable: (consensusVar)
+          - type: ComboBox
+            name: tieBreaker
+            enable: (consensusVar)
+          - type: TextBox
+            name: consensusName
+            format: string
+            enable: (consensusVar)
+
+  - type: CollapseBox
     label: "Level of Agreement (LoA)"
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -181,7 +173,7 @@ children:
                     name: clusterVariable
                     isTarget: true
                     maxItemCount: 1
-                    enable: (hierarchicalKappa)            
+                    enable: (hierarchicalKappa)
       - type: LayoutBox
         margin: large
         children:
@@ -224,3 +216,20 @@ children:
           - type: CheckBox
             name: clusterRankings
             enable: (hierarchicalKappa)
+
+  - type: CollapseBox
+    label: "Display Options"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sft
+          - type: CheckBox
+            name: showText
+            enable: (sft)
+          - type: CheckBox
+            name: showSummary
+          - type: CheckBox
+            name: showAbout

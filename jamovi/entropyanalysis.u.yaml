@@ -9,20 +9,20 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome Variable (True Class)
+        label: Outcome Variable
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Probability Variables (one per class)
+        label: Probability Variables
         children:
           - type: VariablesListBox
             name: probability_vars
             isTarget: true
       - type: TargetLayoutBox
-        label: Single Predictor for MI (optional)
+        label: Single Predictor (optional)
         children:
           - type: VariablesListBox
             name: predictor_var
@@ -31,67 +31,52 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Calculations
-        children:
-          - type: CheckBox
-            name: calculate_entropy
-          - type: CheckBox
-            name: calculate_conditional_entropy
-          - type: CheckBox
-            name: calculate_mutual_information
-          - type: CheckBox
-            name: calculate_kl_divergence
+      - type: CheckBox
+        name: calculate_entropy
+      - type: CheckBox
+        name: calculate_conditional_entropy
+      - type: CheckBox
+        name: calculate_mutual_information
+      - type: CheckBox
+        name: calculate_kl_divergence
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Entropy Options
-        children:
-          - type: TextBox
-            name: uncertainty_threshold
-            format: number
-          - type: CheckBox
-            name: normalize_entropy
+      - type: TextBox
+        name: uncertainty_threshold
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Binning for MI
-        children:
-          - type: ComboBox
-            name: binning_method
-          - type: TextBox
-            name: n_bins
-            format: number
+      - type: CheckBox
+        name: normalize_entropy
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Output Options
-        children:
-          - type: CheckBox
-            name: show_case_level
-          - type: CheckBox
-            name: flag_uncertain
+      - type: ComboBox
+        name: binning_method
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Plots
-        children:
-          - type: CheckBox
-            name: plot_entropy_distribution
-          - type: CheckBox
-            name: plot_uncertainty_by_class
-          - type: CheckBox
-            name: plot_mi_heatmap
+      - type: TextBox
+        name: n_bins
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Random Seed
-        children:
-          - type: TextBox
-            name: random_seed
-            format: number
+      - type: CheckBox
+        name: show_case_level
+      - type: CheckBox
+        name: flag_uncertain
+      - type: CheckBox
+        name: plot_entropy_distribution
+      - type: CheckBox
+        name: plot_uncertainty_by_class
+      - type: CheckBox
+        name: plot_mi_heatmap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: random_seed
+        format: number

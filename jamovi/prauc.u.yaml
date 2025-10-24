@@ -9,14 +9,14 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome Variable (Binary)
+        label: Outcome Variable
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Predictor Variable (Continuous)
+        label: Predictor Variable
         children:
           - type: VariablesListBox
             name: predictor
@@ -28,6 +28,12 @@ children:
       - type: TextBox
         name: positive_level
         format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prevalence
+        format: number
   - type: LayoutBox
     margin: large
     children:
@@ -90,6 +96,9 @@ children:
       - type: TextBox
         name: min_threshold
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: max_threshold
         format: number
